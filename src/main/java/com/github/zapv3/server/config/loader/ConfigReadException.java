@@ -2,6 +2,9 @@ package com.github.zapv3.server.config.loader;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Indicates that reading config has failed
+ */
 public class ConfigReadException extends Exception {
 
     public ConfigReadException(@NotNull String message) {

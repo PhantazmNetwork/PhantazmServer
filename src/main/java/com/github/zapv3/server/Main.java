@@ -12,8 +12,11 @@ import com.github.zapv3.server.config.loader.ConfigWriteException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.audience.Audiences;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.IChunkLoader;
@@ -27,8 +30,15 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.function.Supplier;
 
+/**
+ * Launches the server
+ */
 public class Main {
 
+    /**
+     * Starting point for the server
+     * @param args Do you even know java?
+     */
     public static void main(String[] args) {
         MinecraftServer minecraftServer = MinecraftServer.init();
 
@@ -36,9 +46,13 @@ public class Main {
         if (serverConfig.serverInfoConfig().optifineEnabled()) {
             OptifineSupport.enable();
         }
+        if (serverConfig.serverInfoConfig().mojangAuthEnabled()) {
+            MojangAuth.init();
+        }
 
         MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event -> {
             event.getResponseData().setDescription(serverConfig.pingListConfig().description());
+            event.getResponseData().setOnline(MinecraftServer.getConnectionManager().getOnlinePlayers().size());
         });
 
         WorldsConfig worldsConfig = getWorldsConfig();
@@ -51,15 +65,20 @@ public class Main {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
            event.setSpawningInstance(lobby);
            event.getPlayer().setRespawnPoint(worldsConfig.worlds().get(worldsConfig.defaultWorldName()).spawnPoint());
+           event.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
 
         minecraftServer.start(serverConfig.serverInfoConfig().serverIP(), serverConfig.serverInfoConfig().port());
     }
 
+    /**
+     * Loads server-specific config
+     * @return Server-specific config
+     */
     private static @NotNull ServerConfig getServerConfig() {
         Supplier<ServerConfig> defaultConfig = () -> {
             return new ServerConfig(
-                    new ServerInfoConfig("0.0.0.0", 25565, true),
+                    new ServerInfoConfig("0.0.0.0", 25565, true, true),
                     new PingListConfig(Component.empty())
             );
         };
@@ -79,6 +98,10 @@ public class Main {
         }
     }
 
+    /**
+     * Loads world-specific config
+     * @return World-specific config
+     */
     private static @NotNull WorldsConfig getWorldsConfig() {
         Supplier<WorldsConfig> defaultConfig = () -> {
             return new WorldsConfig("lobby", "./worlds/", "./maps/",

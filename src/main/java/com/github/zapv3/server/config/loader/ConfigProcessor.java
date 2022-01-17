@@ -22,10 +22,20 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Processes configuration from a {@link Path}
+ * @param <T> The type of configuration to process
+ */
 public interface ConfigProcessor<T> {
 
+    /**
+     * Creates a processor for server configuration
+     * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
+     * @param codec The codec to use for the parser
+     * @return A new server config processor
+     */
     static @NotNull ConfigProcessor<ServerConfig> serverConfigProcessor(@NotNull MiniMessage miniMessage,
-                                                          @NotNull ConfigCodec codec) {
+                                                                        @NotNull ConfigCodec codec) {
         return new ConfigProcessor<>() {
             @Override
             public @NotNull ServerConfig readConfig(@NotNull Path path) throws ConfigReadException {
@@ -35,8 +45,10 @@ public interface ConfigProcessor<T> {
                     ConfigNode serverInfo = configNode.get("serverInfo").asNode();
                     String serverIP = serverInfo.get("serverIP").asString();
                     int port = serverInfo.get("port").asNumber().intValue();
+                    boolean mojangAuthEnabled = serverInfo.get("mojangAuthEnabled").asBoolean();
                     boolean optifineEnabled = serverInfo.get("optifineEnabled").asBoolean();
-                    ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, optifineEnabled);
+                    ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, mojangAuthEnabled,
+                            optifineEnabled);
 
                     ConfigNode pingList = configNode.get("pingList").asNode();
                     Component description = miniMessage.parse(pingList.get("description").asString());
@@ -57,6 +69,7 @@ public interface ConfigProcessor<T> {
                     ServerInfoConfig serverInfoConfig = config.serverInfoConfig();
                     serverInfo.put("serverIP", new ConfigPrimitive(serverInfoConfig.serverIP()));
                     serverInfo.put("port", new ConfigPrimitive(serverInfoConfig.port()));
+                    serverInfo.put("mojangAuthEnabled", new ConfigPrimitive(serverInfoConfig.mojangAuthEnabled()));
                     serverInfo.put("optifineEnabled", new ConfigPrimitive(serverInfoConfig.optifineEnabled()));
 
                     ConfigNode pingList = new LinkedConfigNode();
@@ -77,6 +90,11 @@ public interface ConfigProcessor<T> {
         };
     }
 
+    /**
+     * Creates a processor for worlds configuration
+     * @param codec The codec to use for the parser
+     * @return A new worlds config processor
+     */
     static @NotNull ConfigProcessor<WorldsConfig> worldsConfigProcessor(@NotNull ConfigCodec codec) {
         return new ConfigProcessor<>() {
             @Override
@@ -118,6 +136,25 @@ public interface ConfigProcessor<T> {
                     configNode.put("worldsPath", new ConfigPrimitive(config.worldsPath()));
                     configNode.put("mapsPath", new ConfigPrimitive(config.mapsPath()));
 
+                    ConfigNode worldsNode = new LinkedConfigNode();
+                    for (Map.Entry<String, WorldConfig> worldConfigEntry : config.worlds().entrySet()) {
+                        WorldConfig worldConfig = worldConfigEntry.getValue();
+
+                        ConfigNode spawnPointNode = new LinkedConfigNode();
+                        Pos spawnPoint = worldConfig.spawnPoint();
+                        spawnPointNode.put("x", new ConfigPrimitive(spawnPoint.x()));
+                        spawnPointNode.put("y", new ConfigPrimitive(spawnPoint.y()));
+                        spawnPointNode.put("z", new ConfigPrimitive(spawnPoint.z()));
+                        spawnPointNode.put("yaw", new ConfigPrimitive(spawnPoint.yaw()));
+                        spawnPointNode.put("pitch", new ConfigPrimitive(spawnPoint.pitch()));
+
+                        ConfigNode worldNode = new LinkedConfigNode();
+                        worldNode.put("spawnPoint", spawnPointNode);
+
+                        worldsNode.put(worldConfigEntry.getKey(), worldNode);
+                    }
+                    configNode.put("worlds", worldsNode);
+
                     ConfigBridges.write(Files.newOutputStream(path), codec, configNode);
                 }
                 catch (IllegalStateException | IOException e) {
@@ -127,8 +164,20 @@ public interface ConfigProcessor<T> {
         };
     }
 
+    /**
+     * Reads the config
+     * @param path The {@link Path} to read config from
+     * @return The config
+     * @throws ConfigReadException If reading from the path failed
+     */
     @NotNull T readConfig(@NotNull Path path) throws ConfigReadException;
 
+    /**
+     * Writes config
+     * @param path The {@link Path} to read config from
+     * @param config The config to write
+     * @throws ConfigWriteException If writing to the {@link Path} failed
+     */
     void writeConfig(@NotNull Path path, @NotNull T config) throws ConfigWriteException;
 
 }
