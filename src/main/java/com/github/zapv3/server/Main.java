@@ -84,7 +84,8 @@ public class Main {
         };
         ConfigLoader<ServerConfig> configLoader = ConfigLoader.defaultLoader(
                 Paths.get("./server-config.toml"),
-                ConfigProcessor.serverConfigProcessor(MiniMessage.get(), new TomlCodec()),
+                new TomlCodec(),
+                ConfigProcessor.serverConfigProcessor(MiniMessage.get()),
                 defaultConfig
         );
 
@@ -109,7 +110,8 @@ public class Main {
         };
         ConfigLoader<WorldsConfig> configLoader = ConfigLoader.defaultLoader(
                 Paths.get("./worlds-config.toml"),
-                ConfigProcessor.worldsConfigProcessor(new TomlCodec()),
+                new TomlCodec(),
+                ConfigProcessor.worldsConfigProcessor(),
                 defaultConfig
         );
 

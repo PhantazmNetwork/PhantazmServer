@@ -2,7 +2,6 @@ package com.github.zapv3.server.config.loader;
 
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -16,8 +15,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,17 +28,14 @@ public interface ConfigProcessor<T> {
     /**
      * Creates a processor for server configuration
      * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
-     * @param codec The codec to use for the parser
      * @return A new server config processor
      */
-    static @NotNull ConfigProcessor<ServerConfig> serverConfigProcessor(@NotNull MiniMessage miniMessage,
-                                                                        @NotNull ConfigCodec codec) {
+    static @NotNull ConfigProcessor<ServerConfig> serverConfigProcessor(@NotNull MiniMessage miniMessage) {
         return new ConfigProcessor<>() {
             @Override
-            public @NotNull ServerConfig readConfig(@NotNull Path path) throws ConfigReadException {
+            public @NotNull ServerConfig createConfigFromNode(@NotNull ConfigNode configNode)
+                    throws ConfigReadException {
                 try {
-                    ConfigNode configNode = ConfigBridges.read(Files.newInputStream(path), codec).asNode();
-
                     ConfigNode serverInfo = configNode.get("serverInfo").asNode();
                     String serverIP = serverInfo.get("serverIP").asString();
                     int port = serverInfo.get("port").asNumber().intValue();
@@ -56,14 +50,13 @@ public interface ConfigProcessor<T> {
 
                     return new ServerConfig(serverInfoConfig, pingListConfig);
                 }
-                catch (IllegalStateException | IOException e) {
+                catch (IllegalStateException e) {
                     throw new ConfigReadException(e);
                 }
             }
 
             @Override
-            public void writeConfig(@NotNull Path path, @NotNull ServerConfig config)
-                    throws ConfigWriteException {
+            public @NotNull ConfigNode createNodeFromConfig(@NotNull ServerConfig config) throws ConfigWriteException {
                 try {
                     ConfigNode serverInfo = new LinkedConfigNode();
                     ServerInfoConfig serverInfoConfig = config.serverInfoConfig();
@@ -81,9 +74,9 @@ public interface ConfigProcessor<T> {
                     configNode.put("serverInfo", serverInfo);
                     configNode.put("pingList", pingList);
 
-                    ConfigBridges.write(Files.newOutputStream(path), codec, configNode);
+                    return configNode;
                 }
-                catch (IllegalStateException | IOException e) {
+                catch (IllegalStateException e) {
                     throw new ConfigWriteException(e);
                 }
             }
@@ -92,16 +85,13 @@ public interface ConfigProcessor<T> {
 
     /**
      * Creates a processor for worlds configuration
-     * @param codec The codec to use for the parser
      * @return A new worlds config processor
      */
-    static @NotNull ConfigProcessor<WorldsConfig> worldsConfigProcessor(@NotNull ConfigCodec codec) {
+    static @NotNull ConfigProcessor<WorldsConfig> worldsConfigProcessor() {
         return new ConfigProcessor<>() {
             @Override
-            public @NotNull WorldsConfig readConfig(@NotNull Path path) throws ConfigReadException {
+            public @NotNull WorldsConfig createConfigFromNode(@NotNull ConfigNode configNode) throws ConfigReadException {
                 try {
-                    ConfigNode configNode = ConfigBridges.read(Files.newInputStream(path), codec).asNode();
-
                     String defaultWorldName = configNode.get("defaultWorldName").asString();
                     String worldsPath = configNode.get("worldsPath").asString();
                     String mapsPath = configNode.get("mapsPath").asString();
@@ -123,13 +113,14 @@ public interface ConfigProcessor<T> {
 
                     return new WorldsConfig(defaultWorldName, worldsPath, mapsPath, worlds);
                 }
-                catch (IllegalStateException | IOException e) {
+                catch (IllegalStateException e) {
                     throw new ConfigReadException(e);
                 }
             }
 
             @Override
-            public void writeConfig(@NotNull Path path, @NotNull WorldsConfig config) throws ConfigWriteException {
+            public @NotNull ConfigNode createNodeFromConfig(@NotNull WorldsConfig config)
+                    throws ConfigWriteException {
                 try {
                     ConfigNode configNode = new LinkedConfigNode();
                     configNode.put("defaultWorldName", new ConfigPrimitive(config.defaultWorldName()));
@@ -155,9 +146,9 @@ public interface ConfigProcessor<T> {
                     }
                     configNode.put("worlds", worldsNode);
 
-                    ConfigBridges.write(Files.newOutputStream(path), codec, configNode);
+                    return configNode;
                 }
-                catch (IllegalStateException | IOException e) {
+                catch (IllegalStateException e) {
                     throw new ConfigWriteException(e);
                 }
             }
@@ -165,19 +156,18 @@ public interface ConfigProcessor<T> {
     }
 
     /**
-     * Reads the config
-     * @param path The {@link Path} to read config from
+     * Converts a {@link  ConfigNode} to config
+     * @param configNode The {@link ConfigNode} to convert from
      * @return The config
-     * @throws ConfigReadException If reading from the path failed
+     * @throws ConfigReadException If creating a config failed
      */
-    @NotNull T readConfig(@NotNull Path path) throws ConfigReadException;
+    @NotNull T createConfigFromNode(@NotNull ConfigNode configNode) throws ConfigReadException;
 
     /**
-     * Writes config
-     * @param path The {@link Path} to read config from
+     * Converts config to a {@link ConfigNode}
      * @param config The config to write
-     * @throws ConfigWriteException If writing to the {@link Path} failed
+     * @throws ConfigWriteException If creating a {@link ConfigNode} failed
      */
-    void writeConfig(@NotNull Path path, @NotNull T config) throws ConfigWriteException;
+    @NotNull ConfigNode createNodeFromConfig(@NotNull T config) throws ConfigWriteException;
 
 }
