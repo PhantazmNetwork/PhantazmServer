@@ -1,4 +1,4 @@
-package com.github.zapv3.feature.chat.channel;
+package com.github.phantazmnetwork.phantazmserver.feature.chat.channel;
 
 import org.jetbrains.annotations.NotNull;
 

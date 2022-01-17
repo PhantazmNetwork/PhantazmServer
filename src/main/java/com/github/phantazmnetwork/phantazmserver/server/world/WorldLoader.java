@@ -1,4 +1,4 @@
-package com.github.zapv3.server.world;
+package com.github.phantazmnetwork.phantazmserver.server.world;
 
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;

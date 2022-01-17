@@ -1,4 +1,4 @@
-package com.github.zapv3.server.config.loader;
+package com.github.phantazmnetwork.phantazmserver.server.config.loader;
 
 import org.jetbrains.annotations.NotNull;
 

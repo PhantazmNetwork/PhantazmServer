@@ -1,4 +1,4 @@
-package com.github.zapv3.server.config.server;
+package com.github.phantazmnetwork.phantazmserver.server.config.server;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;

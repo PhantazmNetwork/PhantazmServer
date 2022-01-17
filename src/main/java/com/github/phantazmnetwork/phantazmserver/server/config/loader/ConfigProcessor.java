@@ -1,14 +1,14 @@
-package com.github.zapv3.server.config.loader;
+package com.github.phantazmnetwork.phantazmserver.server.config.loader;
 
+import com.github.phantazmnetwork.phantazmserver.server.config.server.PingListConfig;
+import com.github.phantazmnetwork.phantazmserver.server.config.server.ServerConfig;
+import com.github.phantazmnetwork.phantazmserver.server.config.server.ServerInfoConfig;
+import com.github.phantazmnetwork.phantazmserver.server.config.world.WorldConfig;
+import com.github.phantazmnetwork.phantazmserver.server.config.world.WorldsConfig;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.zapv3.server.config.server.PingListConfig;
-import com.github.zapv3.server.config.server.ServerConfig;
-import com.github.zapv3.server.config.server.ServerInfoConfig;
-import com.github.zapv3.server.config.world.WorldConfig;
-import com.github.zapv3.server.config.world.WorldsConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.coordinate.Pos;

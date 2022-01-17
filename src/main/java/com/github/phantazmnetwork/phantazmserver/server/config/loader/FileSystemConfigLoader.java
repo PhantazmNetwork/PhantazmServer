@@ -1,4 +1,4 @@
-package com.github.zapv3.server.config.loader;
+package com.github.phantazmnetwork.phantazmserver.server.config.loader;
 
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;

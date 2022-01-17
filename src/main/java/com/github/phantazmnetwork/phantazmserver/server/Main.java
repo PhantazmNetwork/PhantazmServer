@@ -1,15 +1,15 @@
-package com.github.zapv3.server;
+package com.github.phantazmnetwork.phantazmserver.server;
 
+import com.github.phantazmnetwork.phantazmserver.server.config.loader.FileSystemConfigLoader;
+import com.github.phantazmnetwork.phantazmserver.server.config.server.ServerConfig;
+import com.github.phantazmnetwork.phantazmserver.server.world.FileSystemWorldLoader;
+import com.github.phantazmnetwork.phantazmserver.server.world.WorldLoader;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
-import com.github.zapv3.server.config.loader.FileSystemConfigLoader;
-import com.github.zapv3.server.config.server.ServerConfig;
-import com.github.zapv3.server.config.world.WorldsConfig;
-import com.github.zapv3.server.config.loader.ConfigLoader;
-import com.github.zapv3.server.config.loader.ConfigProcessor;
-import com.github.zapv3.server.config.loader.ConfigReadException;
-import com.github.zapv3.server.config.loader.ConfigWriteException;
-import com.github.zapv3.server.world.FileSystemWorldLoader;
-import com.github.zapv3.server.world.WorldLoader;
+import com.github.phantazmnetwork.phantazmserver.server.config.world.WorldsConfig;
+import com.github.phantazmnetwork.phantazmserver.server.config.loader.ConfigLoader;
+import com.github.phantazmnetwork.phantazmserver.server.config.loader.ConfigProcessor;
+import com.github.phantazmnetwork.phantazmserver.server.config.loader.ConfigReadException;
+import com.github.phantazmnetwork.phantazmserver.server.config.loader.ConfigWriteException;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
@@ -76,6 +76,7 @@ public class Main {
      * Called after loading the {@link ServerConfig}
      * @param serverConfig The loaded {@link ServerConfig}
      */
+    @SuppressWarnings("CodeBlock2Expr")
     private static void postServerConfigLoad(@NotNull ServerConfig serverConfig) {
         if (serverConfig.serverInfoConfig().optifineEnabled()) {
             OptifineSupport.enable();
@@ -97,7 +98,7 @@ public class Main {
      */
     private static @NotNull ServerConfig getServerConfig() throws ConfigReadException, ConfigWriteException {
         ConfigLoader<ServerConfig> configLoader = new FileSystemConfigLoader<>(Paths.get("./server-config.toml"),
-                new TomlCodec(), ConfigProcessor.serverConfigProcessor(MiniMessage.get()));
+                new TomlCodec(), ConfigProcessor.serverConfigProcessor(MiniMessage.miniMessage()));
 
         return configLoader.load();
     }

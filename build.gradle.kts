@@ -3,7 +3,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
-group = "com.github.zapv3"
+group = "com.github.phantazmnetwork.phantazmserver"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -16,7 +16,7 @@ repositories {
 dependencies {
     implementation("com.github.Minestom:Minestom:0163dd6f42")
     implementation("com.github.steanky:ethylene-toml:0.3.0")
-    implementation("net.kyori:adventure-text-minimessage:4.1.0-SNAPSHOT")
+    implementation("net.kyori:adventure-text-minimessage:4.2.0-SNAPSHOT")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -29,7 +29,7 @@ tasks.getByName<Test>("test") {
 tasks.shadowJar {
     manifest {
         attributes(
-            "Main-Class" to "com.github.zapv3.server.Main",
+            "Main-Class" to "com.github.phantazmnetwork.phantazmserver.server.Main",
             "Multi-Release" to true
         )
     }
