@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.server.config.loader;
 
+import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.PingListConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
@@ -38,11 +39,13 @@ public interface ConfigProcessor<T> {
                     ConfigNode serverInfo = configNode.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
                     String serverIP = serverInfo.getStringOrDefault("0.0.0.0", "serverIP");
                     int port = serverInfo.getNumberOrDefault(25565, "port").intValue();
-                    boolean mojangAuthEnabled = serverInfo
-                            .getBooleanOrDefault(true, "mojangAuthEnabled");
                     boolean optifineEnabled = serverInfo.getBooleanOrDefault(true, "optifineEnabled");
-                    ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, mojangAuthEnabled,
-                            optifineEnabled);
+                    AuthType authType = AuthType
+                            .getByName(serverInfo.getStringOrDefault(AuthType.MOJANG.name(), "authType"))
+                            .orElse(AuthType.MOJANG);
+                    String velocitySecret = serverInfo.getStringOrDefault("", "velocitySecret");
+                    ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port,
+                            optifineEnabled, authType, velocitySecret);
 
                     ConfigNode pingList = configNode.getNodeOrDefault(LinkedConfigNode::new, "pingList");
                     Component description = miniMessage.parse(pingList.getStringOrDefault("",
@@ -62,8 +65,9 @@ public interface ConfigProcessor<T> {
                 ServerInfoConfig serverInfoConfig = config.serverInfoConfig();
                 serverInfo.put("serverIP", new ConfigPrimitive(serverInfoConfig.serverIP()));
                 serverInfo.put("port", new ConfigPrimitive(serverInfoConfig.port()));
-                serverInfo.put("mojangAuthEnabled", new ConfigPrimitive(serverInfoConfig.mojangAuthEnabled()));
                 serverInfo.put("optifineEnabled", new ConfigPrimitive(serverInfoConfig.optifineEnabled()));
+                serverInfo.put("authType", new ConfigPrimitive(serverInfoConfig.authType().name()));
+                serverInfo.put("velocitySecret", new ConfigPrimitive(serverInfoConfig.velocitySecret()));
 
                 ConfigNode pingList = new LinkedConfigNode();
                 PingListConfig pingListConfig = config.pingListConfig();

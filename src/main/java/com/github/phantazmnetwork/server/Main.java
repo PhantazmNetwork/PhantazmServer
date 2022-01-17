@@ -16,7 +16,9 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
+import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
+import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -81,8 +83,11 @@ public class Main {
         if (serverConfig.serverInfoConfig().optifineEnabled()) {
             OptifineSupport.enable();
         }
-        if (serverConfig.serverInfoConfig().mojangAuthEnabled()) {
-            MojangAuth.init();
+
+        switch (serverConfig.serverInfoConfig().authType()) {
+            case MOJANG -> MojangAuth.init();
+            case BUNGEE -> BungeeCordProxy.enable();
+            case VELOCITY ->  VelocityProxy.enable(serverConfig.serverInfoConfig().velocitySecret());
         }
 
         MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event -> {
