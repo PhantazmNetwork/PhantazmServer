@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     implementation("com.github.Minestom:Minestom:0163dd6f42")
-    implementation("com.github.steanky:ethylene-toml:0.2.0")
+    implementation("com.github.steanky:ethylene-toml:0.3.0")
     implementation("net.kyori:adventure-text-minimessage:4.1.0-SNAPSHOT")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")

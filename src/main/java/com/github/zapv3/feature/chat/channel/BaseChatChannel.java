@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Basic implementation of a {@link ChatChannel}
+ */
 public class BaseChatChannel implements ChatChannel {
 
     private final Set<Audience> audiences = new HashSet<>();
