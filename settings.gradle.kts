@@ -1,2 +1,2 @@
-rootProject.name = "ZAPv3"
+rootProject.name = "PhantazmServer"
 

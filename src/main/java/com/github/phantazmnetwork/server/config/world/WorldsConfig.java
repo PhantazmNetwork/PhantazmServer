@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.phantazmserver.server.config.world;
+package com.github.phantazmnetwork.server.config.world;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.phantazmserver.feature.chat.channel;
+package com.github.phantazmnetwork.feature.chat.channel;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;

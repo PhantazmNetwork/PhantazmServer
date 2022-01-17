@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.phantazmserver.server.world;
+package com.github.phantazmnetwork.server.world;
 
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;

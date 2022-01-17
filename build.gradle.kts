@@ -3,7 +3,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
-group = "com.github.phantazmnetwork.phantazmserver"
+group = "com.github.phantazmnetwork"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -29,7 +29,7 @@ tasks.getByName<Test>("test") {
 tasks.shadowJar {
     manifest {
         attributes(
-            "Main-Class" to "com.github.phantazmnetwork.phantazmserver.server.Main",
+            "Main-Class" to "com.github.phantazmnetwork.server.Main",
             "Multi-Release" to true
         )
     }

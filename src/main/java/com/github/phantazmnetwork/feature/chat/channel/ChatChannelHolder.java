@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.phantazmserver.feature.chat.channel;
+package com.github.phantazmnetwork.feature.chat.channel;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;

@@ -1,10 +1,10 @@
-package com.github.phantazmnetwork.phantazmserver.server.config.loader;
+package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.phantazmserver.server.config.server.PingListConfig;
-import com.github.phantazmnetwork.phantazmserver.server.config.server.ServerConfig;
-import com.github.phantazmnetwork.phantazmserver.server.config.server.ServerInfoConfig;
-import com.github.phantazmnetwork.phantazmserver.server.config.world.WorldConfig;
-import com.github.phantazmnetwork.phantazmserver.server.config.world.WorldsConfig;
+import com.github.phantazmnetwork.server.config.server.PingListConfig;
+import com.github.phantazmnetwork.server.config.server.ServerConfig;
+import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
+import com.github.phantazmnetwork.server.config.world.WorldConfig;
+import com.github.phantazmnetwork.server.config.world.WorldsConfig;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;

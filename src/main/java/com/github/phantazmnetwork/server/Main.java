@@ -1,15 +1,15 @@
-package com.github.phantazmnetwork.phantazmserver.server;
+package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.phantazmserver.server.config.loader.FileSystemConfigLoader;
-import com.github.phantazmnetwork.phantazmserver.server.config.server.ServerConfig;
-import com.github.phantazmnetwork.phantazmserver.server.world.FileSystemWorldLoader;
-import com.github.phantazmnetwork.phantazmserver.server.world.WorldLoader;
+import com.github.phantazmnetwork.server.config.loader.FileSystemConfigLoader;
+import com.github.phantazmnetwork.server.config.server.ServerConfig;
+import com.github.phantazmnetwork.server.world.FileSystemWorldLoader;
+import com.github.phantazmnetwork.server.world.WorldLoader;
+import com.github.phantazmnetwork.server.config.loader.ConfigWriteException;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
-import com.github.phantazmnetwork.phantazmserver.server.config.world.WorldsConfig;
-import com.github.phantazmnetwork.phantazmserver.server.config.loader.ConfigLoader;
-import com.github.phantazmnetwork.phantazmserver.server.config.loader.ConfigProcessor;
-import com.github.phantazmnetwork.phantazmserver.server.config.loader.ConfigReadException;
-import com.github.phantazmnetwork.phantazmserver.server.config.loader.ConfigWriteException;
+import com.github.phantazmnetwork.server.config.world.WorldsConfig;
+import com.github.phantazmnetwork.server.config.loader.ConfigLoader;
+import com.github.phantazmnetwork.server.config.loader.ConfigProcessor;
+import com.github.phantazmnetwork.server.config.loader.ConfigReadException;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
