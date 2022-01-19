@@ -2,6 +2,8 @@ package com.github.phantazmnetwork.server.config.server;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * Config for server info.
  * @param serverIP The IP to run the server on
@@ -15,5 +17,11 @@ public record ServerInfoConfig(@NotNull String serverIP,
                                boolean optifineEnabled,
                                @NotNull AuthType authType,
                                @NotNull String velocitySecret) {
+
+    public ServerInfoConfig {
+        Objects.requireNonNull(serverIP, "serverIP");
+        Objects.requireNonNull(authType, "authType");
+        Objects.requireNonNull(velocitySecret, "velocitySecret");
+    }
 
 }
