@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -41,8 +42,8 @@ public interface ConfigProcessor<T> {
                     int port = serverInfo.getNumberOrDefault(25565, "port").intValue();
                     boolean optifineEnabled = serverInfo.getBooleanOrDefault(true, "optifineEnabled");
                     AuthType authType = AuthType
-                            .getByName(serverInfo.getStringOrDefault(AuthType.MOJANG.name(), "authType"))
-                            .orElse(AuthType.MOJANG);
+                            .getByName(serverInfo.getStringOrDefault(AuthType.MOJANG.name(), "authType")
+                                    .toUpperCase(Locale.ENGLISH)).orElse(AuthType.MOJANG);
                     String velocitySecret = serverInfo.getStringOrDefault("", "velocitySecret");
                     ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port,
                             optifineEnabled, authType, velocitySecret);
