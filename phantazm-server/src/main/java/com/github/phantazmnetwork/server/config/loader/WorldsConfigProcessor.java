@@ -29,14 +29,14 @@ public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
             String mapsPath = configElement.getStringOrDefault("./maps/", "mapsPath");
 
             Map<String, WorldConfig> worlds = new HashMap<>();
-            ConfigNode worldsNode = configElement.getNodeOrDefault(LinkedConfigNode::new, "worlds");
-            for (Map.Entry<String, ConfigElement> world : worldsNode.entrySet()) {
-                ConfigNode worldNode = world.getValue().asNode();
-                ConfigNode spawnPoint = worldNode.get("spawnPoint").asNode();
+            Map<String, ConfigElement> worldsMap = configElement.getNodeOrDefault(LinkedConfigNode::new, "worlds");
+            for (Map.Entry<String, ConfigElement> world : worldsMap.entrySet()) {
+                ConfigElement worldElement = world.getValue();
+                ConfigElement spawnPoint = worldElement.getElement("spawnPoint");
 
-                double x = spawnPoint.get("x").asNumber().doubleValue();
-                double y = spawnPoint.get("y").asNumber().doubleValue();
-                double z = spawnPoint.get("z").asNumber().doubleValue();
+                double x = spawnPoint.getElement("x").asNumber().doubleValue();
+                double y = spawnPoint.getElement("y").asNumber().doubleValue();
+                double z = spawnPoint.getElement("z").asNumber().doubleValue();
                 float yaw = spawnPoint.getNumberOrDefault(0.0F, "yaw").floatValue();
                 float pitch = spawnPoint.getNumberOrDefault(0.0F, "pitch").floatValue();
 
@@ -51,7 +51,7 @@ public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
     }
 
     @Override
-    public @NotNull ConfigElement createNodeFromConfig(@NotNull WorldsConfig config) {
+    public @NotNull ConfigElement createElementFromConfig(@NotNull WorldsConfig config) {
         ConfigNode configNode = new LinkedConfigNode();
         configNode.put("defaultWorldName", new ConfigPrimitive(config.defaultWorldName()));
         configNode.put("worldsPath", new ConfigPrimitive(config.worldsPath()));

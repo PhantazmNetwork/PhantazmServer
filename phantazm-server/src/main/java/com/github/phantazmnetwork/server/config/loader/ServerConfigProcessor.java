@@ -34,7 +34,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
     @Override
     public @NotNull ServerConfig createConfigFromElement(@NotNull ConfigElement configElement) {
-        ConfigNode serverInfo = configElement.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
+        ConfigElement serverInfo = configElement.getElementOrDefault(LinkedConfigNode::new, "serverInfo");
         String serverIP = serverInfo.getStringOrDefault("0.0.0.0", "serverIP");
         int port = serverInfo.getNumberOrDefault(25565, "port").intValue();
         boolean optifineEnabled = serverInfo.getBooleanOrDefault(true, "optifineEnabled");
@@ -44,7 +44,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, optifineEnabled, authType,
                 velocitySecret);
 
-        ConfigNode pingList = configElement.getNodeOrDefault(LinkedConfigNode::new, "pingList");
+        ConfigElement pingList = configElement.getElementOrDefault(LinkedConfigNode::new, "pingList");
         Component description = miniMessage.parse(pingList.getStringOrDefault("", "description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
@@ -52,7 +52,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     }
 
     @Override
-    public @NotNull ConfigElement createNodeFromConfig(@NotNull ServerConfig config) {
+    public @NotNull ConfigElement createElementFromConfig(@NotNull ServerConfig config) {
         ConfigNode serverInfo = new LinkedConfigNode();
         ServerInfoConfig serverInfoConfig = config.serverInfoConfig();
         serverInfo.put("serverIP", new ConfigPrimitive(serverInfoConfig.serverIP()));

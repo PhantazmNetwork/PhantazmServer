@@ -36,7 +36,7 @@ public class FileSystemConfigLoader<TConfig> implements ConfigLoader<TConfig> {
     public @NotNull TConfig load() throws ConfigReadException, ConfigWriteException {
         if (!Files.exists(path)) {
             TConfig config = processor.createConfigFromElement(new LinkedConfigNode());
-            ConfigElement configElement = processor.createNodeFromConfig(config);
+            ConfigElement configElement = processor.createElementFromConfig(config);
 
             try {
                 ConfigBridges.write(Files.newOutputStream(path), codec, configElement);
