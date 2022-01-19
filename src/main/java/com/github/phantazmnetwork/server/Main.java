@@ -21,6 +21,9 @@ import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.world.biomes.Biome;
+import net.minestom.server.world.biomes.BiomeManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +85,10 @@ public class Main {
     private static void postServerConfigLoad(@NotNull ServerConfig serverConfig) {
         if (serverConfig.serverInfoConfig().optifineEnabled()) {
             OptifineSupport.enable();
+            // ViaVersion workaround
+            BiomeManager biomeManager = MinecraftServer.getBiomeManager();
+            biomeManager.addBiome(Biome.builder().name(NamespaceID.from("minecraft:mesa")).build());
+            biomeManager.addBiome(Biome.builder().name(NamespaceID.from("minecraft:mega_taiga_hills")).build());
         }
 
         switch (serverConfig.serverInfoConfig().authType()) {
