@@ -24,8 +24,7 @@ public interface ChatChannelHolder {
             @Override
             public void registerChannel(@NotNull Key key, @NotNull ChatChannel chatChannel) {
                 if (getChannel(key).isPresent()) {
-                    throw new IllegalStateException("A chat channel is already registered for key " + key.asString() +
-                            "!");
+                    throw new IllegalStateException("A chat channel is already registered for key " + key.asString());
                 }
 
                 channels.put(key, chatChannel);
@@ -34,7 +33,7 @@ public interface ChatChannelHolder {
             @Override
             public void unregisterChannel(@NotNull Key key) {
                 if (getChannel(key).isEmpty()) {
-                    throw new IllegalStateException("No chat channel is registered for key " + key.asString() + "!");
+                    throw new IllegalStateException("No chat channel is registered for key " + key.asString());
                 }
 
                 channels.remove(key);
