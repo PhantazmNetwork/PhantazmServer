@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -34,6 +35,7 @@ public enum AuthType {
      * @return An {@link Optional} of the {@link AuthType} associated with the name
      */
     public static @NotNull Optional<AuthType> getByName(@NotNull String name) {
+        Objects.requireNonNull(name, "name");
         return Optional.ofNullable(BY_NAME.get(name));
     }
 

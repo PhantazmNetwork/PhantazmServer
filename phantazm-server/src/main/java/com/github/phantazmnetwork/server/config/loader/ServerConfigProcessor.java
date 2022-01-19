@@ -33,7 +33,8 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     }
 
     @Override
-    public @NotNull ServerConfig createConfigFromElement(@NotNull ConfigElement configElement) throws ConfigReadException {
+    public @NotNull ServerConfig createConfigFromElement(@NotNull ConfigElement configElement)
+            throws ConfigReadException {
         try {
             ConfigNode serverInfo = configElement.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
             String serverIP = serverInfo.getStringOrDefault("0.0.0.0", "serverIP");

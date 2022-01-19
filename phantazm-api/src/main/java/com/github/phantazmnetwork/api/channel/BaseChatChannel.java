@@ -4,6 +4,7 @@ import net.kyori.adventure.audience.Audience;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -15,16 +16,19 @@ public class BaseChatChannel implements ChatChannel {
 
     @Override
     public boolean addToChannel(@NotNull Audience audience) {
+        Objects.requireNonNull(audience, "audience");
         return audiences.add(audience);
     }
 
     @Override
     public boolean removeFromChannel(@NotNull Audience audience) {
+        Objects.requireNonNull(audience, "audience");
         return audiences.remove(audience);
     }
 
     @Override
     public boolean isInChannel(@NotNull Audience audience) {
+        Objects.requireNonNull(audience, "audience");
         return audiences.contains(audience);
     }
 

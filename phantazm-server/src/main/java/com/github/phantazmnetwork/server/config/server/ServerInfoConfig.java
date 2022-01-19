@@ -10,12 +10,9 @@ import org.jetbrains.annotations.NotNull;
  * @param authType The type of authentication the server will use
  * @param velocitySecret The secret used for authentication
  */
-public record ServerInfoConfig(
-        @NotNull String serverIP,
-        int port,
-        boolean optifineEnabled,
-        @NotNull AuthType authType,
-        @NotNull String velocitySecret
-) {
+public record ServerInfoConfig(@NotNull String serverIP,
+                               int port, boolean optifineEnabled,
+                               @NotNull AuthType authType,
+                               @NotNull String velocitySecret) {
 
 }

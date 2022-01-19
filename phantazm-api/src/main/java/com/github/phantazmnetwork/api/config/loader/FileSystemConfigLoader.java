@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Loads config using the file system.
@@ -23,19 +24,16 @@ public class FileSystemConfigLoader<TConfig> implements ConfigLoader<TConfig> {
 
     private final ConfigProcessor<TConfig> processor;
 
-    public FileSystemConfigLoader(
-            @NotNull Path path,
-            @NotNull ConfigCodec codec,
-            @NotNull ConfigProcessor<TConfig> processor
-    ) {
-        this.path = path;
-        this.codec = codec;
-        this.processor = processor;
+    public FileSystemConfigLoader(@NotNull Path path,
+                                  @NotNull ConfigCodec codec,
+                                  @NotNull ConfigProcessor<TConfig> processor) {
+        this.path = Objects.requireNonNull(path, "path");
+        this.codec = Objects.requireNonNull(codec, "codec");
+        this.processor = Objects.requireNonNull(processor, "processor");
     }
 
-    @NotNull
     @Override
-    public TConfig load() throws ConfigReadException, ConfigWriteException {
+    public @NotNull TConfig load() throws ConfigReadException, ConfigWriteException {
         if (!Files.exists(path)) {
             TConfig config = processor.createConfigFromElement(new LinkedConfigNode());
             ConfigElement configElement = processor.createNodeFromConfig(config);

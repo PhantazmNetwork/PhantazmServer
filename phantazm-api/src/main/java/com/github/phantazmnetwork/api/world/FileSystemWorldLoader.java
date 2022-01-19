@@ -6,6 +6,7 @@ import net.minestom.server.instance.InstanceManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -19,8 +20,8 @@ public class FileSystemWorldLoader implements WorldLoader {
     private final Function<Path, IChunkLoader> loaderCreator;
 
     public FileSystemWorldLoader(@NotNull Path rootPath, @NotNull Function<Path, IChunkLoader> loaderCreator) {
-        this.rootPath = rootPath;
-        this.loaderCreator = loaderCreator;
+        this.rootPath = Objects.requireNonNull(rootPath, "rootPath");
+        this.loaderCreator = Objects.requireNonNull(loaderCreator, "loaderCreator");
     }
 
     @SuppressWarnings("UnstableApiUsage")

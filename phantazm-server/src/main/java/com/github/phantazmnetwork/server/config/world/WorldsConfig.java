@@ -11,7 +11,9 @@ import java.util.Map;
  * @param mapsPath The path to all maps
  * @param worlds A map of world configuration
  */
-public record WorldsConfig(@NotNull String defaultWorldName, @NotNull String worldsPath, @NotNull String mapsPath,
+public record WorldsConfig(@NotNull String defaultWorldName,
+                           @NotNull String worldsPath,
+                           @NotNull String mapsPath,
                            @NotNull Map<String, WorldConfig> worlds) {
 
 }
