@@ -16,21 +16,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Config processor used for {@link ServerConfig}s
+ * Config processor used for {@link ServerConfig}s.
  */
 public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
 
     @Override
-    public @NotNull WorldsConfig createConfigFromNode(@NotNull ConfigNode configNode)
+    public @NotNull WorldsConfig createConfigFromElement(@NotNull ConfigElement configElement)
             throws ConfigReadException {
         try {
-            String defaultWorldName = configNode
-                    .getStringOrDefault("lobby", "defaultWorldName");
-            String worldsPath = configNode.getStringOrDefault("./worlds/", "worldsPath");
-            String mapsPath = configNode.getStringOrDefault("./maps/", "mapsPath");
+            String defaultWorldName = configElement.getStringOrDefault("lobby", "defaultWorldName");
+            String worldsPath = configElement.getStringOrDefault("./worlds/", "worldsPath");
+            String mapsPath = configElement.getStringOrDefault("./maps/", "mapsPath");
 
             Map<String, WorldConfig> worlds = new HashMap<>();
-            ConfigNode worldsNode = configNode.getNodeOrDefault(LinkedConfigNode::new, "worlds");
+            ConfigNode worldsNode = configElement.getNodeOrDefault(LinkedConfigNode::new, "worlds");
             for (Map.Entry<String, ConfigElement> world : worldsNode.entrySet()) {
                 ConfigNode worldNode = world.getValue().asNode();
                 ConfigNode spawnPoint = worldNode.get("spawnPoint").asNode();
@@ -52,7 +51,7 @@ public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
     }
 
     @Override
-    public @NotNull ConfigNode createNodeFromConfig(@NotNull WorldsConfig config) {
+    public @NotNull ConfigElement createNodeFromConfig(@NotNull WorldsConfig config) {
         ConfigNode configNode = new LinkedConfigNode();
         configNode.put("defaultWorldName", new ConfigPrimitive(config.defaultWorldName()));
         configNode.put("worldsPath", new ConfigPrimitive(config.worldsPath()));

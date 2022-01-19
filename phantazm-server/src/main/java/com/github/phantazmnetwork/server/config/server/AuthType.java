@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Authentication type to verify players
+ * Authentication type to verify players.
  */
 public enum AuthType {
 

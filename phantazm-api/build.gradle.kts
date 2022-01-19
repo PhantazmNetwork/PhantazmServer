@@ -1,6 +1,5 @@
 plugins {
     id("com.github.phantazmnetwork.gradle.plugin.phantazm-minestom-library-conventions")
-    `java-library`
 }
 
 repositories {
@@ -10,3 +9,9 @@ repositories {
 dependencies {
     api("com.github.steanky:ethylene-core:0.3.0")
 }
+
+tasks.jar {
+    dependsOn(copyLibs)
+}
+
+val copyLibs = tasks.getByName<Copy>("copyLibs")

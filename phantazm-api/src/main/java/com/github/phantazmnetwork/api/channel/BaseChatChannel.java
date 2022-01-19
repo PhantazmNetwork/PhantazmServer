@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Basic implementation of a {@link ChatChannel}
+ * Basic implementation of a {@link ChatChannel}.
  */
 public class BaseChatChannel implements ChatChannel {
 

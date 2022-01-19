@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.api.config.loader;
 
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,22 +11,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Loads config using the file system
- * @param <ConfigType> The type of configuration to load
+ * Loads config using the file system.
+ * @param <TConfig> The type of configuration to load
  */
 @SuppressWarnings("ClassCanBeRecord")
-public class FileSystemConfigLoader<ConfigType> implements ConfigLoader<ConfigType> {
+public class FileSystemConfigLoader<TConfig> implements ConfigLoader<TConfig> {
 
     private final Path path;
 
     private final ConfigCodec codec;
 
-    private final ConfigProcessor<ConfigType> processor;
+    private final ConfigProcessor<TConfig> processor;
 
     public FileSystemConfigLoader(
             @NotNull Path path,
             @NotNull ConfigCodec codec,
-            @NotNull ConfigProcessor<ConfigType> processor
+            @NotNull ConfigProcessor<TConfig> processor
     ) {
         this.path = path;
         this.codec = codec;
@@ -35,13 +35,13 @@ public class FileSystemConfigLoader<ConfigType> implements ConfigLoader<ConfigTy
 
     @NotNull
     @Override
-    public ConfigType load() throws ConfigReadException, ConfigWriteException {
+    public TConfig load() throws ConfigReadException, ConfigWriteException {
         if (!Files.exists(path)) {
-            ConfigType config = processor.createConfigFromNode(new LinkedConfigNode());
-            ConfigNode configNode = processor.createNodeFromConfig(config);
+            TConfig config = processor.createConfigFromElement(new LinkedConfigNode());
+            ConfigElement configElement = processor.createNodeFromConfig(config);
 
             try {
-                ConfigBridges.write(Files.newOutputStream(path), codec, configNode);
+                ConfigBridges.write(Files.newOutputStream(path), codec, configElement);
             }
             catch (IOException e) {
                 throw new ConfigWriteException(e);
@@ -51,13 +51,13 @@ public class FileSystemConfigLoader<ConfigType> implements ConfigLoader<ConfigTy
         }
 
         if (!Files.isRegularFile(path)) {
-            throw new ConfigReadException("Path " + path + " is not a file!");
+            throw new ConfigReadException("Path " + path + " is not a file");
         }
 
         try {
-            ConfigNode configNode = ConfigBridges.read(Files.newInputStream(path), codec).asNode();
+            ConfigElement configNode = ConfigBridges.read(Files.newInputStream(path), codec);
 
-            return processor.createConfigFromNode(configNode);
+            return processor.createConfigFromElement(configNode);
         }
         catch (IOException e) {
             throw new ConfigReadException(e);

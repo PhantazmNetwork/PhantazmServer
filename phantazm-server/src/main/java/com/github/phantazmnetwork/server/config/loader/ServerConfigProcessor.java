@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.PingListConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Locale;
 
 /**
- * Config processor used for {@link ServerConfig}s
+ * Config processor used for {@link ServerConfig}s.
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
@@ -24,7 +25,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     private final MiniMessage miniMessage;
 
     /**
-     * Creates a processor for {@link ServerConfig}
+     * Creates a processor for {@link ServerConfig}.
      * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
      */
     public ServerConfigProcessor(@NotNull MiniMessage miniMessage) {
@@ -32,10 +33,9 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     }
 
     @Override
-    public @NotNull ServerConfig createConfigFromNode(@NotNull ConfigNode configNode)
-            throws ConfigReadException {
+    public @NotNull ServerConfig createConfigFromElement(@NotNull ConfigElement configElement) throws ConfigReadException {
         try {
-            ConfigNode serverInfo = configNode.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
+            ConfigNode serverInfo = configElement.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
             String serverIP = serverInfo.getStringOrDefault("0.0.0.0", "serverIP");
             int port = serverInfo.getNumberOrDefault(25565, "port").intValue();
             boolean optifineEnabled = serverInfo.getBooleanOrDefault(true, "optifineEnabled");
@@ -43,12 +43,11 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                     .getByName(serverInfo.getStringOrDefault(AuthType.MOJANG.name(), "authType")
                             .toUpperCase(Locale.ENGLISH)).orElse(AuthType.MOJANG);
             String velocitySecret = serverInfo.getStringOrDefault("", "velocitySecret");
-            ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port,
-                    optifineEnabled, authType, velocitySecret);
+            ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, optifineEnabled, authType,
+                    velocitySecret);
 
-            ConfigNode pingList = configNode.getNodeOrDefault(LinkedConfigNode::new, "pingList");
-            Component description = miniMessage.parse(pingList.getStringOrDefault("",
-                    "description"));
+            ConfigNode pingList = configElement.getNodeOrDefault(LinkedConfigNode::new, "pingList");
+            Component description = miniMessage.parse(pingList.getStringOrDefault("", "description"));
             PingListConfig pingListConfig = new PingListConfig(description);
 
             return new ServerConfig(serverInfoConfig, pingListConfig);
@@ -59,7 +58,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     }
 
     @Override
-    public @NotNull ConfigNode createNodeFromConfig(@NotNull ServerConfig config) {
+    public @NotNull ConfigElement createNodeFromConfig(@NotNull ServerConfig config) {
         ConfigNode serverInfo = new LinkedConfigNode();
         ServerInfoConfig serverInfoConfig = config.serverInfoConfig();
         serverInfo.put("serverIP", new ConfigPrimitive(serverInfoConfig.serverIP()));

@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Container for {@link ChatChannel}s
+ * Container for {@link ChatChannel}s.
  */
 public interface ChatChannelHolder {
 
     /**
-     * Creates a default {@link ChatChannelHolder}
+     * Creates a default {@link ChatChannelHolder}.
      * @return A new {@link ChatChannelHolder}
      */
     static @NotNull ChatChannelHolder defaultChatChannelHolder() {
@@ -49,7 +49,7 @@ public interface ChatChannelHolder {
     }
 
     /**
-     * Registers a {@link ChatChannel}
+     * Registers a {@link ChatChannel}.
      * @param key The {@link Key} to register the {@link ChatChannel} with
      * @param chatChannel The {@link ChatChannel} to add
      * @throws IllegalStateException If a {@link ChatChannel} is already registered with the associated {@link Key}
@@ -57,14 +57,14 @@ public interface ChatChannelHolder {
     void registerChannel(@NotNull Key key, @NotNull ChatChannel chatChannel);
 
     /**
-     * Unregisters a {@link ChatChannel}
+     * Unregisters a {@link ChatChannel}.
      * @param key The {@link Key} to unregister the {@link ChatChannel} with
      * @throws IllegalStateException If no {@link ChatChannel} is registered with the associated {@link Key}
      */
     void unregisterChannel(@NotNull Key key);
 
     /**
-     * Gets a {@link ChatChannel}
+     * Gets a {@link ChatChannel}.
      * @param key The {@link Key} of the {@link ChatChannel}
      * @return An {@link Optional} containing the {@link ChatChannel}
      */

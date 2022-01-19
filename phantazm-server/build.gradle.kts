@@ -1,6 +1,5 @@
 plugins {
     id("com.github.phantazmnetwork.gradle.plugin.phantazm-java-conventions")
-    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 repositories {
@@ -17,9 +16,12 @@ dependencies {
     implementation("com.github.steanky:ethylene-toml:0.3.0")
 }
 
-tasks.shadowJar {
+tasks.jar {
+    dependsOn(copyLibs)
+
     manifest {
         attributes(
+            "Class-Path" to configurations.runtimeClasspath.get().files.joinToString(" ") { "libs/${it.name}" },
             "Main-Class" to "com.github.phantazmnetwork.server.Main",
             "Multi-Release" to true
         )
@@ -29,12 +31,12 @@ tasks.shadowJar {
     archiveVersion.set("")
     archiveClassifier.set("")
 
-    finalizedBy(copyShadowJar)
+    finalizedBy(copyJar)
 }
 
-val copyShadowJar = tasks.register<Copy>("copyShadowJar") {
-    from(tasks.shadowJar)
+val copyLibs = tasks.getByName<Copy>("copyLibs")
+
+val copyJar = tasks.register<Copy>("copyJar") {
+    from(tasks.jar)
     into("$rootDir/run/server-1/")
 }
-
-tasks.jar.get().enabled = false

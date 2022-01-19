@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.server.config.server;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Config for server info
+ * Config for server info.
  * @param serverIP The IP to run the server on
  * @param port The port to run the server on
  * @param optifineEnabled Whether optifine support is enabled

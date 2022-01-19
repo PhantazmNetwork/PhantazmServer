@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.function.Function;
 
 /**
- * Implements a {@link WorldLoader} using the file system
+ * Implements a {@link WorldLoader} using the file system.
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class FileSystemWorldLoader implements WorldLoader {

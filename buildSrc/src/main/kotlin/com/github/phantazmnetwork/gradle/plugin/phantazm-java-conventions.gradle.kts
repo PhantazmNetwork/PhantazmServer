@@ -19,3 +19,8 @@ dependencies {
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
+
+tasks.register<Copy>("copyLibs") {
+    from(configurations.runtimeClasspath)
+    into("$rootDir/run/server-1/libs")
+}

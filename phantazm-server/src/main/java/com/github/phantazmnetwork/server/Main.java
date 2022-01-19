@@ -1,16 +1,16 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.world.FileSystemWorldLoader;
-import com.github.phantazmnetwork.api.world.WorldLoader;
 import com.github.phantazmnetwork.api.config.loader.ConfigLoader;
 import com.github.phantazmnetwork.api.config.loader.ConfigReadException;
 import com.github.phantazmnetwork.api.config.loader.ConfigWriteException;
 import com.github.phantazmnetwork.api.config.loader.FileSystemConfigLoader;
+import com.github.phantazmnetwork.api.world.FileSystemWorldLoader;
+import com.github.phantazmnetwork.api.world.WorldLoader;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.WorldsConfigProcessor;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
-import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.phantazmnetwork.server.config.world.WorldsConfig;
+import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
@@ -35,7 +35,7 @@ import java.nio.file.Paths;
 public class Main {
 
     /**
-     * Starting point for the server
+     * Starting point for the server.
      * @param args Do you even know java?
      */
     public static void main(String[] args) {
@@ -76,7 +76,7 @@ public class Main {
     }
 
     /**
-     * Called after loading the {@link ServerConfig}
+     * Called after loading the {@link ServerConfig}.
      * @param serverConfig The loaded {@link ServerConfig}
      */
     @SuppressWarnings("CodeBlock2Expr")
@@ -97,7 +97,7 @@ public class Main {
     }
 
     /**
-     * Loads server-specific config
+     * Loads server-specific config.
      * @return Server-specific config
      * @throws ConfigReadException If reading from config failed
      * @throws ConfigWriteException If writing from config failed
@@ -110,7 +110,7 @@ public class Main {
     }
 
     /**
-     * Loads world-specific config
+     * Loads world-specific config.
      * @return World-specific config
      * @throws ConfigReadException If reading from config failed
      * @throws ConfigWriteException If writing from config failed

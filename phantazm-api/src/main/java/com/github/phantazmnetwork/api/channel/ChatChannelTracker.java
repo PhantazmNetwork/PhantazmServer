@@ -39,7 +39,7 @@ public interface ChatChannelTracker {
 
             @Override
             public void messageFrom(@NotNull Audience audience, @NotNull Component message) {
-                connectedChannelSettingsMap.get(audience).messageChannel().sendMessage(message);
+                connectedChannelSettingsMap.get(audience).getMessageChannel().sendMessage(message);
             }
         };
     }

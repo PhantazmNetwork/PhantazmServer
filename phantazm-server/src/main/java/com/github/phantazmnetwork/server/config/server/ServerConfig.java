@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.server.config.server;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * General config for the server
+ * General config for the server.
  * @param serverInfoConfig Config for the server's setup
  * @param pingListConfig Config for the server's ping list
  */
