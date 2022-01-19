@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Minestom:Minestom:0163dd6f42")
+    implementation("com.github.Minestom:Minestom:9165a4d2b3")
     implementation("com.github.steanky:ethylene-toml:0.3.0")
     implementation("net.kyori:adventure-text-minimessage:4.2.0-SNAPSHOT")
 

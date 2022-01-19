@@ -85,10 +85,6 @@ public class Main {
     private static void postServerConfigLoad(@NotNull ServerConfig serverConfig) {
         if (serverConfig.serverInfoConfig().optifineEnabled()) {
             OptifineSupport.enable();
-            // ViaVersion workaround
-            BiomeManager biomeManager = MinecraftServer.getBiomeManager();
-            biomeManager.addBiome(Biome.builder().name(NamespaceID.from("minecraft:mesa")).build());
-            biomeManager.addBiome(Biome.builder().name(NamespaceID.from("minecraft:mega_taiga_hills")).build());
         }
 
         switch (serverConfig.serverInfoConfig().authType()) {
