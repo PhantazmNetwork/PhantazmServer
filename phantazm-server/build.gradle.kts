@@ -4,6 +4,7 @@ plugins {
 }
 
 repositories {
+    maven("https://jitpack.io")
     maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
 }
@@ -13,6 +14,7 @@ dependencies {
     implementation(project(":phantazm-zombies"))
 
     implementation("net.kyori:adventure-text-minimessage:4.2.0-SNAPSHOT")
+    implementation("com.github.steanky:ethylene-toml:0.3.0")
 }
 
 tasks.shadowJar {

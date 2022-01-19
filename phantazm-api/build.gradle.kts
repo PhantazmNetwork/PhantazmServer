@@ -1,5 +1,5 @@
 plugins {
-    id("com.github.phantazmnetwork.gradle.plugin.phantazm-java-conventions")
+    id("com.github.phantazmnetwork.gradle.plugin.phantazm-minestom-library-conventions")
     `java-library`
 }
 
@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    api("com.github.steanky:ethylene-toml:0.3.0")
+    api("com.github.steanky:ethylene-core:0.3.0")
 }

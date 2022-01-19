@@ -1,3 +1,3 @@
 plugins {
-    id("com.github.phantazmnetwork.gradle.plugin.phantazm-java-conventions")
+    id("com.github.phantazmnetwork.gradle.plugin.phantazm-minestom-library-conventions")
 }
