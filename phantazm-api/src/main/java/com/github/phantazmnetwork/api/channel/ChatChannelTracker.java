@@ -19,6 +19,7 @@ public interface ChatChannelTracker {
     static @NotNull ChatChannelTracker defaultTracker() {
         return new ChatChannelTracker() {
 
+            //TODO audience shouldn't be used as key for map, non-guaranteed equals/hashCode impl
             private final Map<Audience, ConnectedChannelSettings> connectedChannelSettingsMap = new HashMap<>();
 
             @Override

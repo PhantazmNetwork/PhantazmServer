@@ -12,8 +12,8 @@ import java.util.Objects;
 public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig, @NotNull PingListConfig pingListConfig) {
 
     public ServerConfig {
-        Objects.requireNonNull(serverInfoConfig);
-        Objects.requireNonNull(pingListConfig);
+        Objects.requireNonNull(serverInfoConfig, "serverInfoConfig");
+        Objects.requireNonNull(pingListConfig, "pingListConfig");
     }
 
 }
