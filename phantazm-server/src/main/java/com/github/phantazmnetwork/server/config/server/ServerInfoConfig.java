@@ -11,7 +11,8 @@ import org.jetbrains.annotations.NotNull;
  * @param velocitySecret The secret used for authentication
  */
 public record ServerInfoConfig(@NotNull String serverIP,
-                               int port, boolean optifineEnabled,
+                               int port,
+                               boolean optifineEnabled,
                                @NotNull AuthType authType,
                                @NotNull String velocitySecret) {
 

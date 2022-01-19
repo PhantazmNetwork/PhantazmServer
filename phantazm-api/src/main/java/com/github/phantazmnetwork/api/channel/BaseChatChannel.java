@@ -12,6 +12,7 @@ import java.util.Set;
  */
 public class BaseChatChannel implements ChatChannel {
 
+    //TODO Audience shouldn't be stored in a set like this, no guaranteed proper impl of equals/hashcode
     private final Set<Audience> audiences = new HashSet<>();
 
     @Override

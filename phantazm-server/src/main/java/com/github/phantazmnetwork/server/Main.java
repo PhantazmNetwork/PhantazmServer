@@ -9,6 +9,7 @@ import com.github.phantazmnetwork.api.world.WorldLoader;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.WorldsConfigProcessor;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
+import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
 import com.github.phantazmnetwork.server.config.world.WorldsConfig;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -47,7 +48,7 @@ public class Main {
         try {
             serverConfig = getServerConfig();
         } catch (ConfigReadException | ConfigWriteException e) {
-            logger.error("Failed to read server configuration: ", e);
+            logger.error("Failed to read server configuration", e);
             return;
         }
         postServerConfigLoad(serverConfig);
@@ -57,7 +58,7 @@ public class Main {
             worldsConfig = getWorldsConfig();
         }
         catch (ConfigReadException | ConfigWriteException e) {
-            logger.error("Failed to read worlds configuration: ", e);
+            logger.error("Failed to read worlds configuration", e);
             return;
         }
 
@@ -66,13 +67,15 @@ public class Main {
 
         Instance lobby = worldLoader.loadWorld(MinecraftServer.getInstanceManager(), worldsConfig.defaultWorldName());
 
+        //TODO this is a bit of a hack, should be handled by the lobby not the main initialization
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
            event.setSpawningInstance(lobby);
            event.getPlayer().setRespawnPoint(worldsConfig.worlds().get(worldsConfig.defaultWorldName()).spawnPoint());
            event.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
 
-        minecraftServer.start(serverConfig.serverInfoConfig().serverIP(), serverConfig.serverInfoConfig().port());
+        ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
+        minecraftServer.start(infoConfig.serverIP(), infoConfig.port());
     }
 
     /**
@@ -81,14 +84,16 @@ public class Main {
      */
     @SuppressWarnings("CodeBlock2Expr")
     private static void postServerConfigLoad(@NotNull ServerConfig serverConfig) {
-        if (serverConfig.serverInfoConfig().optifineEnabled()) {
+        ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
+
+        if (infoConfig.optifineEnabled()) {
             OptifineSupport.enable();
         }
 
-        switch (serverConfig.serverInfoConfig().authType()) {
+        switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
             case BUNGEE -> BungeeCordProxy.enable();
-            case VELOCITY ->  VelocityProxy.enable(serverConfig.serverInfoConfig().velocitySecret());
+            case VELOCITY -> VelocityProxy.enable(infoConfig.velocitySecret());
         }
 
         MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event -> {
