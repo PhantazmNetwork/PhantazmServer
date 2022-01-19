@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.server.config.loader;
 
 import com.github.phantazmnetwork.api.config.loader.ConfigProcessor;
-import com.github.phantazmnetwork.api.config.loader.ConfigReadException;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.PingListConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
@@ -15,6 +14,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Config processor used for {@link ServerConfig}s.
@@ -29,33 +29,26 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
      * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
      */
     public ServerConfigProcessor(@NotNull MiniMessage miniMessage) {
-        this.miniMessage = miniMessage;
+        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
     }
 
     @Override
-    public @NotNull ServerConfig createConfigFromElement(@NotNull ConfigElement configElement)
-            throws ConfigReadException {
-        try {
-            ConfigNode serverInfo = configElement.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
-            String serverIP = serverInfo.getStringOrDefault("0.0.0.0", "serverIP");
-            int port = serverInfo.getNumberOrDefault(25565, "port").intValue();
-            boolean optifineEnabled = serverInfo.getBooleanOrDefault(true, "optifineEnabled");
-            AuthType authType = AuthType
-                    .getByName(serverInfo.getStringOrDefault(AuthType.MOJANG.name(), "authType")
-                            .toUpperCase(Locale.ENGLISH)).orElse(AuthType.MOJANG);
-            String velocitySecret = serverInfo.getStringOrDefault("", "velocitySecret");
-            ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, optifineEnabled, authType,
-                    velocitySecret);
+    public @NotNull ServerConfig createConfigFromElement(@NotNull ConfigElement configElement) {
+        ConfigNode serverInfo = configElement.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
+        String serverIP = serverInfo.getStringOrDefault("0.0.0.0", "serverIP");
+        int port = serverInfo.getNumberOrDefault(25565, "port").intValue();
+        boolean optifineEnabled = serverInfo.getBooleanOrDefault(true, "optifineEnabled");
+        AuthType authType = AuthType.getByName(serverInfo.getStringOrDefault(AuthType.MOJANG.name(), "authType")
+                .toUpperCase(Locale.ENGLISH)).orElse(AuthType.MOJANG);
+        String velocitySecret = serverInfo.getStringOrDefault("", "velocitySecret");
+        ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, optifineEnabled, authType,
+                velocitySecret);
 
-            ConfigNode pingList = configElement.getNodeOrDefault(LinkedConfigNode::new, "pingList");
-            Component description = miniMessage.parse(pingList.getStringOrDefault("", "description"));
-            PingListConfig pingListConfig = new PingListConfig(description);
+        ConfigNode pingList = configElement.getNodeOrDefault(LinkedConfigNode::new, "pingList");
+        Component description = miniMessage.parse(pingList.getStringOrDefault("", "description"));
+        PingListConfig pingListConfig = new PingListConfig(description);
 
-            return new ServerConfig(serverInfoConfig, pingListConfig);
-        }
-        catch (IllegalStateException e) {
-            throw new ConfigReadException(e);
-        }
+        return new ServerConfig(serverInfoConfig, pingListConfig);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.server.config.world;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Config for the server's worlds.
@@ -15,5 +16,12 @@ public record WorldsConfig(@NotNull String defaultWorldName,
                            @NotNull String worldsPath,
                            @NotNull String mapsPath,
                            @NotNull Map<String, WorldConfig> worlds) {
+
+    public WorldsConfig {
+        Objects.requireNonNull(defaultWorldName, "defaultWorldName");
+        Objects.requireNonNull(worldsPath, "worldsPath");
+        Objects.requireNonNull(mapsPath, "mapsPath");
+        Objects.requireNonNull(worlds, "worlds");
+    }
 
 }
