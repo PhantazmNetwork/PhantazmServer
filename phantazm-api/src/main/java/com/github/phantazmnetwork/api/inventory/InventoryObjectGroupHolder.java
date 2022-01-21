@@ -17,6 +17,7 @@ public interface InventoryObjectGroupHolder {
      * @param profile The {@link InventoryProfile} to register the {@link InventoryObjectGroup} to
      * @param uuid    The {@link UUID} to register the {@link InventoryObjectGroup} with
      * @param group   The {@link InventoryObjectGroup} to register
+     * @throws IllegalArgumentException If an {@link InventoryObjectGroup} is already registered with the given {@link UUID}
      */
     void registerGroup(@NotNull InventoryProfile profile, @NotNull UUID uuid, @NotNull InventoryObjectGroup group);
 
@@ -25,6 +26,8 @@ public interface InventoryObjectGroupHolder {
      *
      * @param profile The {@link InventoryProfile} to unregister the {@link InventoryObjectGroup} from
      * @param uuid    The {@link UUID} of the {@link InventoryObjectGroup} to unregister
+     * @throws IllegalArgumentException If no {@link InventoryObjectGroup}s are registered with the given {@link InventoryProfile}
+     * @throws IllegalArgumentException If no {@link InventoryObjectGroup}s are registered with the given {@link UUID}
      */
     void unregisterGroup(@NotNull InventoryProfile profile, @NotNull UUID uuid);
 
