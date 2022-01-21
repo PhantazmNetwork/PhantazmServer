@@ -11,6 +11,10 @@ import java.util.Objects;
  */
 public record PingListConfig(@NotNull Component description) {
 
+    /**
+     * Creates config for the server's ping list.
+     * @param description The MOTD set in the server list
+     */
     public PingListConfig {
         Objects.requireNonNull(description, "description");
     }
