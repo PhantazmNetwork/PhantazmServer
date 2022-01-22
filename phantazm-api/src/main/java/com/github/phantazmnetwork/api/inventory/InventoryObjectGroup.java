@@ -2,6 +2,8 @@ package com.github.phantazmnetwork.api.inventory;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 /**
  * Represents a group of {@link InventoryObject}s.
@@ -10,7 +12,6 @@ public interface InventoryObjectGroup {
 
     /**
      * Adds a slot to the group.
-     *
      * @param slot The slot to add
      * @throws IllegalArgumentException If the group already contains the slot
      */
@@ -18,7 +19,6 @@ public interface InventoryObjectGroup {
 
     /**
      * Removes a slot from the group.
-     *
      * @param slot The slot to remove
      * @throws IllegalArgumentException If the group does not contain the slot
      */
@@ -26,15 +26,13 @@ public interface InventoryObjectGroup {
 
     /**
      * Gets an unmodifiable view of the group's slots.
-     *
      * @return An unmodifiable view of the group's slots
      */
-    @NotNull IntSet getSlots();
+    @NotNull @UnmodifiableView IntSet getSlots();
 
     /**
      * Checks whether the group within a profile is considered full.
      * This means that no {@link InventoryObject}s may be pushed to the group.
-     *
      * @param profile The {@link InventoryProfile} to check against
      * @return Whether the group is considered full
      */
@@ -43,7 +41,6 @@ public interface InventoryObjectGroup {
     /**
      * Checks whether the group within a profile is considered empty.
      * This means that no {@link InventoryObject}s may be popped from the group.
-     *
      * @param profile The {@link InventoryProfile} to check against
      * @return Whether the group is considered empty
      */
@@ -51,7 +48,6 @@ public interface InventoryObjectGroup {
 
     /**
      * Computes the next slot that an {@link InventoryObject} should be placed in.
-     *
      * @param profile The profile to compute the slot with
      * @return The slot to push the next {@link InventoryObject} to
      * @throws IllegalArgumentException If the group's representation in the profile is full (check this against {@link #isFull(InventoryProfile)})
@@ -60,7 +56,6 @@ public interface InventoryObjectGroup {
 
     /**
      * Computes the next slot that an {@link InventoryObject} should be popped from.
-     *
      * @param profile The profile to compute the slot with
      * @return The slot to pop the next {@link InventoryObject} from
      * @throws IllegalArgumentException If the group's representation in the profile is empty (check this against {@link #isEmpty(InventoryProfile)})

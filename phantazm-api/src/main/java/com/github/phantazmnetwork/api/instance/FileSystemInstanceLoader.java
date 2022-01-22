@@ -31,10 +31,10 @@ public class FileSystemInstanceLoader implements InstanceLoader {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @NotNull Instance loadWorld(@NotNull InstanceManager instanceManager, @NotNull Object... subPaths) {
+    public @NotNull Instance loadWorld(@NotNull InstanceManager instanceManager, @NotNull String... subPaths) {
         Path path = rootPath;
-        for (Object subPath : subPaths) {
-            path = path.resolve(subPath.toString());
+        for (String subPath : subPaths) {
+            path = path.resolve(subPath);
         }
 
         return instanceManager.createInstanceContainer(loaderCreator.apply(path));

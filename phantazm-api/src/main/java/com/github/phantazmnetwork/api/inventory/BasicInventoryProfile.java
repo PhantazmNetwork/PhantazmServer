@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.api.inventory;
 
-import net.minestom.server.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,12 +10,20 @@ import java.util.Objects;
  */
 public class BasicInventoryProfile implements InventoryProfile {
 
-    private final InventoryObject[] objects = new InventoryObject[PlayerInventory.INVENTORY_SIZE];
+    private final InventoryObject[] objects;
 
     private boolean visible = false;
 
+    /**
+     * Creates a basic inventory profile.
+     * @param slotCount The number of slots held by the profile (indexed by 0)
+     */
+    public BasicInventoryProfile(int slotCount) {
+        this.objects = new InventoryObject[slotCount];
+    }
+
     @Override
-    public @Nullable InventoryObject getInventoryObject(int slot) {
+    public InventoryObject getInventoryObject(int slot) {
         return objects[slot];
     }
 
@@ -38,8 +45,12 @@ public class BasicInventoryProfile implements InventoryProfile {
             throw new IllegalArgumentException("Can't remove inventory object from unoccupied slot");
         }
 
-        inventoryObject.onRemove();
         objects[slot] = null;
+    }
+
+    @Override
+    public int getSlotCount() {
+        return objects.length;
     }
 
     @Override
@@ -52,9 +63,10 @@ public class BasicInventoryProfile implements InventoryProfile {
         if (this.visible != visible) {
             this.visible = visible;
 
-            for (InventoryObject inventoryObject : objects) {
-                if (inventoryObject != null) {
-                    inventoryObject.setVisible(visible);
+            for (int i = 0; i < objects.length; i++) {
+                InventoryObject object = objects[i];
+                if (object != null) {
+                    object.updateInInventory(i, visible);
                 }
             }
         }

@@ -11,10 +11,18 @@ import java.util.UUID;
 public interface InventoryProfileSwitcher {
 
     /**
-     * Gets the current profile set by the view, or null if one is not set.
+     * Checks whether the profile switcher has a current {@link InventoryProfile}.
+     * @return Whether the profile switcher has a current {@link InventoryProfile}
+     */
+    default boolean hasCurrentProfile() {
+        return getCurrentProfile() != null;
+    }
+
+    /**
+     * Gets the current {@link InventoryProfile} set by the view, or null if one is not set.
      * @return The current view
      */
-    @Nullable InventoryProfile getCurrentProfile();
+    InventoryProfile getCurrentProfile();
 
     /**
      * Switches the inventory's view to another view based on a {@link UUID}.

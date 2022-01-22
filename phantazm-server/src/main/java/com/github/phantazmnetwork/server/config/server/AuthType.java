@@ -14,22 +14,22 @@ import java.util.Optional;
 public enum AuthType {
 
     /**
-     * No authentication should be used
+     * No authentication should be used.
      */
     NONE,
 
     /**
-     * Mojang's default authentication
+     * Mojang's default authentication.
      */
     MOJANG,
 
     /**
-     * Bungeecord or velocity with bungeeguard authentication
+     * BungeeCord or Velocity with BungeeGuard authentication.
      */
     BUNGEE,
 
     /**
-     * Velocity modern authentication
+     * Velocity modern authentication.
      */
     VELOCITY;
 

@@ -15,6 +15,6 @@ public interface InstanceLoader {
      * @param subPaths Paths used to identify the {@link Instance}
      * @return A new {@link Instance}
      */
-    @NotNull Instance loadWorld(@NotNull InstanceManager instanceManager, @NotNull Object... subPaths);
+    @NotNull Instance loadWorld(@NotNull InstanceManager instanceManager, @NotNull String... subPaths);
 
 }

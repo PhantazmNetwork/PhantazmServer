@@ -1,13 +1,13 @@
 package com.github.phantazmnetwork.api.inventory;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -61,8 +61,23 @@ public class BasicInventoryObjectGroupHolder implements InventoryObjectGroupHold
     }
 
     @Override
-    public @NotNull Optional<Map<UUID, InventoryObjectGroup>> getGroups(@NotNull InventoryProfile profile) {
-        return Optional.ofNullable(groups.get(profile)).map(Collections::unmodifiableMap);
+    public boolean hasGroup(@NotNull InventoryProfile profile) {
+        return groups.containsKey(profile);
+    }
+
+    @Override
+    public @NotNull @UnmodifiableView Map<UUID, InventoryObjectGroup> getGroups(@NotNull InventoryProfile profile) {
+        Objects.requireNonNull(profile, "profile");
+
+        if (hasGroup(profile)) {
+            Map<UUID, InventoryObjectGroup> profileGroups = groups.get(profile);
+
+            if (profileGroups != null) {
+                return Collections.unmodifiableMap(profileGroups);
+            }
+        }
+
+        throw new IllegalArgumentException("No groups registered for profile");
     }
 
 }

@@ -18,7 +18,7 @@ public class BasicInventoryProfileSwitcher implements InventoryProfileSwitcher {
     private InventoryProfile currentProfile = null;
 
     @Override
-    public @Nullable InventoryProfile getCurrentProfile() {
+    public InventoryProfile getCurrentProfile() {
         return currentProfile;
     }
 

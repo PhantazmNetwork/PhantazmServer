@@ -1,21 +1,27 @@
 package com.github.phantazmnetwork.api.inventory;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.UUID;
 
 /**
- * A profile of a {@link net.minestom.server.entity.Player}'s inventory.
+ * A profile of an inventory.
  */
 public interface InventoryProfile {
+
+    /**
+     * Checks whether the profile has an {@link InventoryObject} in a slot
+     * @param slot The slot to check
+     * @return Whether the profile has an {@link InventoryObject}
+     */
+    default boolean hasInventoryObject(int slot) {
+        return getInventoryObject(slot) != null;
+    }
 
     /**
      * Gets the {@link InventoryObject} within a certain slot.
      * @param slot The slot to get the {@link InventoryObject} from
      * @return The {@link InventoryObject}, or null if none was in the slot
      */
-    @Nullable InventoryObject getInventoryObject(int slot);
+    InventoryObject getInventoryObject(int slot);
 
     /**
      * Sets the {@link InventoryObject} within a certain slot.
@@ -30,6 +36,12 @@ public interface InventoryProfile {
      * @param slot The slot to remove an {@link InventoryObject} from
      */
     void removeInventoryObject(int slot);
+
+    /**
+     * Gets the number of slots this profile holds.
+     * @return The number of slots this profile holds
+     */
+    int getSlotCount();
 
     /**
      * Checks whether the profile is currently visible.
