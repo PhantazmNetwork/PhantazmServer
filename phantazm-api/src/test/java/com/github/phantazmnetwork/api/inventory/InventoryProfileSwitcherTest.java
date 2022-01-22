@@ -58,9 +58,8 @@ public class InventoryProfileSwitcherTest {
 
         inventoryProfileSwitcher.switchProfile(firstUUID);
 
-        Assertions.assertThrowsExactly(IllegalArgumentException.class, () -> {
-           inventoryProfileSwitcher.switchProfile(secondUUID);
-        });
+        Assertions.assertThrowsExactly(IllegalArgumentException.class, () ->
+                inventoryProfileSwitcher.switchProfile(secondUUID));
         Assertions.assertSame(inventoryProfile, inventoryProfileSwitcher.getCurrentProfile());
         Assertions.assertTrue(inventoryProfile.isVisible());
     }

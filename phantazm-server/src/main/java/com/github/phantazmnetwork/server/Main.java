@@ -82,7 +82,6 @@ public class Main {
      * Called after loading the {@link ServerConfig}.
      * @param serverConfig The loaded {@link ServerConfig}
      */
-    @SuppressWarnings("CodeBlock2Expr")
     private static void postServerConfigLoad(@NotNull ServerConfig serverConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
 
@@ -96,9 +95,8 @@ public class Main {
             case VELOCITY -> VelocityProxy.enable(infoConfig.velocitySecret());
         }
 
-        MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event -> {
-            event.getResponseData().setDescription(serverConfig.pingListConfig().description());
-        });
+        MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event ->
+                event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
     }
 
     /**
