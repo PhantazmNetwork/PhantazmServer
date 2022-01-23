@@ -11,6 +11,10 @@ import java.util.Objects;
  */
 public record WorldConfig(@NotNull Pos spawnPoint) {
 
+    /**
+     * Creates config regarding a single world.
+     * @param spawnPoint The spawn point for the world
+     */
     public WorldConfig {
         Objects.requireNonNull(spawnPoint, "spawnPoint");
     }

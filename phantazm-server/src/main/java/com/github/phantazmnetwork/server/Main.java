@@ -4,8 +4,8 @@ import com.github.phantazmnetwork.api.config.loader.ConfigLoader;
 import com.github.phantazmnetwork.api.config.loader.ConfigReadException;
 import com.github.phantazmnetwork.api.config.loader.ConfigWriteException;
 import com.github.phantazmnetwork.api.config.loader.FileSystemConfigLoader;
-import com.github.phantazmnetwork.api.world.FileSystemWorldLoader;
-import com.github.phantazmnetwork.api.world.WorldLoader;
+import com.github.phantazmnetwork.api.instance.FileSystemInstanceLoader;
+import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.WorldsConfigProcessor;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Launches the server
+ * Launches the server.
  */
 public class Main {
 
@@ -63,9 +63,9 @@ public class Main {
         }
 
         Path worldsPath = Paths.get(worldsConfig.worldsPath());
-        WorldLoader worldLoader = new FileSystemWorldLoader(worldsPath, AnvilLoader::new);
+        InstanceLoader instanceLoader = new FileSystemInstanceLoader(worldsPath, AnvilLoader::new);
 
-        Instance lobby = worldLoader.loadWorld(MinecraftServer.getInstanceManager(), worldsConfig.defaultWorldName());
+        Instance lobby = instanceLoader.loadWorld(MinecraftServer.getInstanceManager(), worldsConfig.defaultWorldName());
 
         //TODO this is a bit of a hack, should be handled by the lobby not the main initialization
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
@@ -82,7 +82,6 @@ public class Main {
      * Called after loading the {@link ServerConfig}.
      * @param serverConfig The loaded {@link ServerConfig}
      */
-    @SuppressWarnings("CodeBlock2Expr")
     private static void postServerConfigLoad(@NotNull ServerConfig serverConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
 
@@ -96,9 +95,8 @@ public class Main {
             case VELOCITY -> VelocityProxy.enable(infoConfig.velocitySecret());
         }
 
-        MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event -> {
-            event.getResponseData().setDescription(serverConfig.pingListConfig().description());
-        });
+        MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event ->
+                event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
     }
 
     /**

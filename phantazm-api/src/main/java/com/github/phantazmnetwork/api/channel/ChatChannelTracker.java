@@ -14,7 +14,8 @@ import java.util.Optional;
 public interface ChatChannelTracker {
 
     /**
-     * Default implementation of a {@link ChatChannelTracker}
+     * Default implementation of a {@link ChatChannelTracker}.
+     * @return A new default implementation
      */
     static @NotNull ChatChannelTracker defaultTracker() {
         return new ChatChannelTracker() {

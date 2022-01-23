@@ -24,6 +24,12 @@ public class FileSystemConfigLoader<TConfig> implements ConfigLoader<TConfig> {
 
     private final ConfigProcessor<TConfig> processor;
 
+    /**
+     * Creates a config loader using the file system.
+     * @param path The {@link Path} of the config
+     * @param codec The {@link ConfigCodec} to use for reading and writing
+     * @param processor A {@link ConfigProcessor} to read and write config
+     */
     public FileSystemConfigLoader(@NotNull Path path,
                                   @NotNull ConfigCodec codec,
                                   @NotNull ConfigProcessor<TConfig> processor) {
