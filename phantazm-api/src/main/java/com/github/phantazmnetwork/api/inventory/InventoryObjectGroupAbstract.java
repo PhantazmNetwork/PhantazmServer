@@ -13,27 +13,33 @@ import java.util.function.Function;
  */
 public abstract class InventoryObjectGroupAbstract implements InventoryObjectGroup {
 
+    private final InventoryProfile profile;
+
     private final IntSet slots;
 
     private final IntSet unmodifiableSlots;
 
     /**
      * Creates an {@link InventoryObjectGroupAbstract}.
+     * @param profile The {@link InventoryProfile} the group interacts with
      * @param slots The slots to use for the group
      * @param unmodifiableMapper A mapper to make the provided slots as an unmodifiable view. The return type of the mapper will be the same as the object returned in {@link #getSlots()}
      */
-    public InventoryObjectGroupAbstract(@NotNull IntSet slots,
-                                        @NotNull Function<? super IntSet, ? extends @UnmodifiableView IntSet> unmodifiableMapper) {
+    public InventoryObjectGroupAbstract(@NotNull InventoryProfile profile,
+                                        @NotNull IntSet slots,
+                                        @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
+        this.profile = profile;
         this.slots = Objects.requireNonNull(slots, "slots");
         this.unmodifiableSlots = unmodifiableMapper.apply(slots);
     }
 
     /**
      * Creates an {@link InventoryObjectGroupAbstract} which uses an unmodifiable view of an {@link IntSet}.
+     * @param profile The {@link InventoryProfile} the group interacts with
      * @param slots The slots to use for the group
      */
-    public InventoryObjectGroupAbstract(@NotNull IntSet slots) {
-        this(slots, IntSets::unmodifiable);
+    public InventoryObjectGroupAbstract(@NotNull InventoryProfile profile, @NotNull IntSet slots) {
+        this(profile, slots, IntSets::unmodifiable);
     }
 
     @Override
@@ -56,9 +62,9 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
     }
 
     @Override
-    public boolean isFull(@NotNull InventoryProfile profile) {
+    public boolean isFull() {
         for (int slot : slots) {
-            if (profile.getInventoryObject(slot) == null) {
+            if (!profile.hasInventoryObject(slot)) {
                 return false;
             }
         }
@@ -67,9 +73,9 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
     }
 
     @Override
-    public boolean isEmpty(@NotNull InventoryProfile profile) {
+    public boolean isEmpty() {
         for (int slot : slots) {
-            if (profile.getInventoryObject(slot) != null) {
+            if (profile.hasInventoryObject(slot)) {
                 return false;
             }
         }

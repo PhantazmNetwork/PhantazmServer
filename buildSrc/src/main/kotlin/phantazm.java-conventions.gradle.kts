@@ -1,5 +1,3 @@
-package com.github.phantazmnetwork.gradle.plugin
-
 plugins {
     java
 }

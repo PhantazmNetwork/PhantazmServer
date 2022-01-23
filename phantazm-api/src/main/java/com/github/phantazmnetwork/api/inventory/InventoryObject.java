@@ -9,13 +9,6 @@ import org.jetbrains.annotations.NotNull;
 public interface InventoryObject {
 
     /**
-     * Updates the {@link ItemStack}'s representation in the associated {@link net.minestom.server.inventory.AbstractInventory}.
-     * @param slot The slot in which the {@link ItemStack} should be updated in
-     * @param hidden Whether the object will be considered hidden
-     */
-    void updateInInventory(int slot, boolean hidden);
-
-    /**
      * Gets the currently associated {@link ItemStack}.
      * @return The currently associated {@link ItemStack}
      */

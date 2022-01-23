@@ -1,76 +1,72 @@
 package com.github.phantazmnetwork.api.inventory;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Basic implementation of an {@link InventoryProfileSwitcher}.
  */
 public class BasicInventoryProfileSwitcher implements InventoryProfileSwitcher {
 
-    private final Map<UUID, InventoryProfile> profileMap = new HashMap<>();
+    private final Map<Key, InventoryProfile> profileMap = new HashMap<>();
 
     private InventoryProfile currentProfile = null;
 
     @Override
-    public InventoryProfile getCurrentProfile() {
+    public boolean hasCurrentProfile() {
+        return currentProfile != null;
+    }
+
+    @Override
+    public @NotNull InventoryProfile getCurrentProfile() {
+        if (!hasCurrentProfile()) {
+            throw new IllegalStateException("No inventory profile set");
+        }
+
         return currentProfile;
     }
 
     @Override
-    public void switchProfile(@Nullable UUID uuid) {
-        if (uuid == null) {
-            hideCurrentProfile();
+    public void switchProfile(@Nullable Key key) {
+        if (key == null) {
             currentProfile = null;
         }
         else {
-            InventoryProfile profile = profileMap.get(uuid);
+            InventoryProfile profile = profileMap.get(key);
             if (profile == null) {
                 throw new IllegalArgumentException("No matching inventory profile found");
             }
 
-            hideCurrentProfile();
-
-            currentProfile = profileMap.get(uuid);
-            currentProfile.setVisible(true);
-        }
-    }
-
-    /**
-     * Hides the current profile if one is set.
-     */
-    private void hideCurrentProfile() {
-        if (currentProfile != null) {
-            currentProfile.setVisible(false);
+            currentProfile = profileMap.get(key);
         }
     }
 
     @Override
-    public void registerProfile(@NotNull UUID uuid, @NotNull InventoryProfile profile) {
-        Objects.requireNonNull(uuid, "uuid");
+    public void registerProfile(@NotNull Key key, @NotNull InventoryProfile profile) {
+        Objects.requireNonNull(key, "key");
         Objects.requireNonNull(profile, "profile");
 
-        if (profileMap.containsKey(uuid)) {
+        if (profileMap.containsKey(key)) {
             throw new IllegalArgumentException("Inventory profile already registered");
         }
 
-        profileMap.put(uuid, profile);
+        profileMap.put(key, profile);
     }
 
     @Override
-    public void unregisterProfile(@NotNull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
+    public void unregisterProfile(@NotNull Key key) {
+        Objects.requireNonNull(key, "uuid");
 
-        if (!profileMap.containsKey(uuid)) {
+        if (!profileMap.containsKey(key)) {
             throw new IllegalArgumentException("Inventory profile not yet registered");
         }
 
-        profileMap.remove(uuid);
+        profileMap.remove(key);
     }
 
 }

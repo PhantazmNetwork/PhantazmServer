@@ -12,16 +12,15 @@ public interface InventoryProfile {
      * @param slot The slot to check
      * @return Whether the profile has an {@link InventoryObject}
      */
-    default boolean hasInventoryObject(int slot) {
-        return getInventoryObject(slot) != null;
-    }
+    boolean hasInventoryObject(int slot);
 
     /**
-     * Gets the {@link InventoryObject} within a certain slot.
+     * Gets the {@link InventoryObject} within a certain slot. This should be checked first with {@link #hasInventoryObject(int)}.
      * @param slot The slot to get the {@link InventoryObject} from
-     * @return The {@link InventoryObject}, or null if none was in the slot
+     * @return The {@link InventoryObject}
+     * @throws IllegalArgumentException If no {@link InventoryObject} exists in the slot
      */
-    InventoryObject getInventoryObject(int slot);
+    @NotNull InventoryObject getInventoryObject(int slot);
 
     /**
      * Sets the {@link InventoryObject} within a certain slot.
@@ -42,17 +41,5 @@ public interface InventoryProfile {
      * @return The number of slots this profile holds
      */
     int getSlotCount();
-
-    /**
-     * Checks whether the profile is currently visible.
-     * @return Whether the profile is currently visible
-     */
-    boolean isVisible();
-
-    /**
-     * Sets the profile's visibility.
-     * @param visible The profile's visibility
-     */
-    void setVisible(boolean visible);
 
 }

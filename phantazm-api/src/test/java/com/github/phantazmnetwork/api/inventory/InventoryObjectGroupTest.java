@@ -1,56 +1,53 @@
 package com.github.phantazmnetwork.api.inventory;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minestom.server.inventory.AbstractInventory;
-import net.minestom.server.inventory.Inventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class InventoryObjectGroupTest {
 
-    private @NotNull InventoryObjectGroup createGroup(@NotNull IntSet slots) {
+    private @NotNull InventoryObjectGroup createGroup(@NotNull InventoryProfile profile, @NotNull IntSet slots) {
         Objects.requireNonNull(slots, "slots");
 
-        return new InventoryObjectGroupAbstract(slots) {
+        return new InventoryObjectGroupAbstract(profile, slots) {
+
             @Override
-            public int computeNextPushSlot(@NotNull InventoryProfile profile) {
+            public void pushInventoryObject(@NotNull InventoryObject toPush) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public int computeNextPopSlot(@NotNull InventoryProfile profile) {
+            public @NotNull InventoryObject popInventoryObject() {
                 throw new UnsupportedOperationException();
             }
+
         };
     }
 
     @Test
     public void testEmptyWhenEmpty() {
         IntSet slots = IntSet.of(0, 1, 2, 3, 4, 5, 6, 7, 8);
-        InventoryObjectGroup group = createGroup(slots);
         InventoryProfile profile = new BasicInventoryProfile(slots.size());
+        InventoryObjectGroup group = createGroup(profile, slots);
 
-        Assertions.assertTrue(group.isEmpty(profile));
+        Assertions.assertTrue(group.isEmpty());
     }
 
     @Test
     public void testEmptyWhenNotEmpty() {
         IntSet slots = IntSet.of(0, 1, 2, 3, 4, 5, 6, 7, 8);
-        InventoryObjectGroup group = createGroup(slots);
         InventoryProfile profile = new BasicInventoryProfile(slots.size());
-        AbstractInventory inventory = Mockito.mock(Inventory.class);
+        InventoryObjectGroup group = createGroup(profile, slots);
         ItemStack stack = ItemStack.of(Material.STICK);
 
-        profile.setInventoryObject(0, new BasicInventoryObject(() -> Optional.of(inventory), stack));
+        profile.setInventoryObject(0, new BasicInventoryObject(stack));
 
-        Assertions.assertFalse(group.isEmpty(profile));
+        Assertions.assertFalse(group.isEmpty());
     }
 
 }

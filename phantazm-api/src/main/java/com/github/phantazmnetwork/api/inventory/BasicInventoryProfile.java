@@ -12,8 +12,6 @@ public class BasicInventoryProfile implements InventoryProfile {
 
     private final InventoryObject[] objects;
 
-    private boolean visible = false;
-
     /**
      * Creates a basic inventory profile.
      * @param slotCount The number of slots held by the profile (indexed by 0)
@@ -23,7 +21,16 @@ public class BasicInventoryProfile implements InventoryProfile {
     }
 
     @Override
-    public InventoryObject getInventoryObject(int slot) {
+    public boolean hasInventoryObject(int slot) {
+        return objects[slot] != null;
+    }
+
+    @Override
+    public @NotNull InventoryObject getInventoryObject(int slot) {
+        if (!hasInventoryObject(slot)) {
+            throw new IllegalArgumentException("No inventory object in slot");
+        }
+
         return objects[slot];
     }
 
@@ -51,25 +58,6 @@ public class BasicInventoryProfile implements InventoryProfile {
     @Override
     public int getSlotCount() {
         return objects.length;
-    }
-
-    @Override
-    public boolean isVisible() {
-        return visible;
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        if (this.visible != visible) {
-            this.visible = visible;
-
-            for (int i = 0; i < objects.length; i++) {
-                InventoryObject object = objects[i];
-                if (object != null) {
-                    object.updateInInventory(i, visible);
-                }
-            }
-        }
     }
 
 }
