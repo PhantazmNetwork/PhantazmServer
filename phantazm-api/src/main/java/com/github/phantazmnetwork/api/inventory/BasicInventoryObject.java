@@ -8,9 +8,10 @@ import java.util.Objects;
 /**
  * Basic implementation of an {@link InventoryObject}.
  */
+@SuppressWarnings("ClassCanBeRecord")
 public class BasicInventoryObject implements InventoryObject {
 
-    private ItemStack itemStack;
+    private final ItemStack itemStack;
 
     /**
      * Creates a basic {@link InventoryObject}.
@@ -26,9 +27,7 @@ public class BasicInventoryObject implements InventoryObject {
     }
 
     @Override
-    public void setItemStack(@NotNull ItemStack itemStack) {
-        Objects.requireNonNull(itemStack, "itemStack");
-        this.itemStack = itemStack;
+    public boolean shouldRedraw() {
+        return false;
     }
-
 }

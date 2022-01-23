@@ -15,9 +15,9 @@ public interface InventoryObject {
     @NotNull ItemStack getItemStack();
 
     /**
-     * Sets the {@link ItemStack} used by this inventory object.
-     * @param itemStack The {@link ItemStack} to use
+     * Checks whether this inventory object should be redrawn.
+     * @return Whether this inventory object should be redrawn
      */
-    void setItemStack(@NotNull ItemStack itemStack);
+    boolean shouldRedraw();
 
 }
