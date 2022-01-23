@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.api.config.loader.ConfigProcessor;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.PingListConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
@@ -9,6 +8,9 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.google.common.net.InetAddresses;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
@@ -33,28 +35,40 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     }
 
     @Override
-    public @NotNull ServerConfig createConfigFromElement(@NotNull ConfigElement configElement) {
-        ConfigElement serverInfo = configElement.getElementOrDefault(LinkedConfigNode::new, "serverInfo");
-        String serverIP = serverInfo.getStringOrDefault("0.0.0.0", "serverIP");
-        int port = serverInfo.getNumberOrDefault(25565, "port").intValue();
-        boolean optifineEnabled = serverInfo.getBooleanOrDefault(true, "optifineEnabled");
-        AuthType authType = AuthType.getByName(serverInfo.getStringOrDefault(AuthType.MOJANG.name(), "authType")
-                .toUpperCase(Locale.ENGLISH)).orElse(AuthType.MOJANG);
-        String velocitySecret = serverInfo.getStringOrDefault("", "velocitySecret");
-        ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, optifineEnabled, authType,
+    public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+        ConfigNode serverInfo = element.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
+
+        String serverAddress = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_SERVER_ADDRESS, "serverIP");
+
+        //noinspection UnstableApiUsage
+        if(!InetAddresses.isInetAddress(serverAddress)) {
+            throw new ConfigProcessException(serverAddress + " is not a valid InetAddress");
+        }
+
+        int port = serverInfo.getNumberOrDefault(ServerInfoConfig.DEFAULT_PORT, "port").intValue();
+        boolean optifineEnabled = serverInfo.getBooleanOrDefault(ServerInfoConfig.DEFAULT_OPTIFINE_ENABLED,
+                "optifineEnabled");
+
+        AuthType authType = AuthType.getByName(serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_AUTH_TYPE.name(),
+                "authType").toUpperCase(Locale.ENGLISH)).orElse(ServerInfoConfig.DEFAULT_AUTH_TYPE);
+        String velocitySecret = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_VELOCITY_SECRET,
+                "velocitySecret");
+
+        ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverAddress, port, optifineEnabled, authType,
                 velocitySecret);
 
-        ConfigElement pingList = configElement.getElementOrDefault(LinkedConfigNode::new, "pingList");
-        Component description = miniMessage.parse(pingList.getStringOrDefault("", "description"));
+        ConfigNode pingList = element.getNodeOrDefault(LinkedConfigNode::new, "pingList");
+        Component description = miniMessage.parse(pingList.getStringOrDefault(PingListConfig.DEFAULT_DESCRIPTION_STRING,
+                "description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
         return new ServerConfig(serverInfoConfig, pingListConfig);
     }
 
     @Override
-    public @NotNull ConfigElement createElementFromConfig(@NotNull ServerConfig config) {
+    public @NotNull ConfigElement elementFromData(@NotNull ServerConfig serverConfig) {
         ConfigNode serverInfo = new LinkedConfigNode();
-        ServerInfoConfig serverInfoConfig = config.serverInfoConfig();
+        ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
         serverInfo.put("serverIP", new ConfigPrimitive(serverInfoConfig.serverIP()));
         serverInfo.put("port", new ConfigPrimitive(serverInfoConfig.port()));
         serverInfo.put("optifineEnabled", new ConfigPrimitive(serverInfoConfig.optifineEnabled()));
@@ -62,7 +76,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         serverInfo.put("velocitySecret", new ConfigPrimitive(serverInfoConfig.velocitySecret()));
 
         ConfigNode pingList = new LinkedConfigNode();
-        PingListConfig pingListConfig = config.pingListConfig();
+        PingListConfig pingListConfig = serverConfig.pingListConfig();
         String description = miniMessage.serialize(pingListConfig.description());
         pingList.put("description", new ConfigPrimitive(description));
 
@@ -72,5 +86,4 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
         return configNode;
     }
-
 }

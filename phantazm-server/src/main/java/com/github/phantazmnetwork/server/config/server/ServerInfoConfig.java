@@ -17,6 +17,36 @@ public record ServerInfoConfig(@NotNull String serverIP,
                                boolean optifineEnabled,
                                @NotNull AuthType authType,
                                @NotNull String velocitySecret) {
+    /**
+     * The default server address string.
+     */
+    public static final String DEFAULT_SERVER_ADDRESS = "0.0.0.0";
+
+    /**
+     * The default port to bind to.
+     */
+    public static final int DEFAULT_PORT = 25565;
+
+    /**
+     * The default Optifine patch status.
+     */
+    public static final boolean DEFAULT_OPTIFINE_ENABLED = true;
+
+    /**
+     * The default authentication type.
+     */
+    public static final AuthType DEFAULT_AUTH_TYPE = AuthType.MOJANG;
+
+    /**
+     * The default Velocity secret.
+     */
+    public static final String DEFAULT_VELOCITY_SECRET = "";
+
+    /**
+     * The default ServerInfoConfig instance.
+     */
+    public static final ServerInfoConfig DEFAULT = new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT,
+            DEFAULT_OPTIFINE_ENABLED, DEFAULT_AUTH_TYPE, DEFAULT_VELOCITY_SECRET);
 
     /**
      * Creates config regarding server info.
