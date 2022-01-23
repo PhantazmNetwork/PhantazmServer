@@ -10,6 +10,7 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.google.common.net.InetAddresses;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
@@ -34,20 +35,31 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     }
 
     @Override
-    public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) {
+    public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         ConfigNode serverInfo = element.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
-        String serverIP = serverInfo.getStringOrDefault("0.0.0.0", "serverIP");
-        int port = serverInfo.getNumberOrDefault(25565, "port").intValue();
-        boolean optifineEnabled = serverInfo.getBooleanOrDefault(true, "optifineEnabled");
-        AuthType authType = AuthType.getByName(serverInfo.getStringOrDefault(AuthType.MOJANG.name(), "authType")
-                .toUpperCase(Locale.ENGLISH)).orElse(AuthType.MOJANG);
-        String velocitySecret = serverInfo.getStringOrDefault("", "velocitySecret");
 
-        ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverIP, port, optifineEnabled, authType,
+        String serverAddress = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_SERVER_ADDRESS, "serverIP");
+
+        //noinspection UnstableApiUsage
+        if(!InetAddresses.isInetAddress(serverAddress)) {
+            throw new ConfigProcessException(serverAddress + " is not a valid InetAddress");
+        }
+
+        int port = serverInfo.getNumberOrDefault(ServerInfoConfig.DEFAULT_PORT, "port").intValue();
+        boolean optifineEnabled = serverInfo.getBooleanOrDefault(ServerInfoConfig.DEFAULT_OPTIFINE_ENABLED,
+                "optifineEnabled");
+
+        AuthType authType = AuthType.getByName(serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_AUTH_TYPE.name(),
+                "authType").toUpperCase(Locale.ENGLISH)).orElse(ServerInfoConfig.DEFAULT_AUTH_TYPE);
+        String velocitySecret = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_VELOCITY_SECRET,
+                "velocitySecret");
+
+        ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverAddress, port, optifineEnabled, authType,
                 velocitySecret);
 
         ConfigNode pingList = element.getNodeOrDefault(LinkedConfigNode::new, "pingList");
-        Component description = miniMessage.parse(pingList.getStringOrDefault("", "description"));
+        Component description = miniMessage.parse(pingList.getStringOrDefault(PingListConfig.DEFAULT_DESCRIPTION_STRING,
+                "description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
         return new ServerConfig(serverInfoConfig, pingListConfig);

@@ -10,6 +10,10 @@ import java.util.Objects;
  * @param spawnPoint The spawn point for the world
  */
 public record WorldConfig(@NotNull Pos spawnPoint) {
+    /**
+     * The default spawn point {@link Pos}.
+     */
+    public static final Pos DEFAULT_POS = Pos.ZERO;
 
     /**
      * Creates config regarding a single world.

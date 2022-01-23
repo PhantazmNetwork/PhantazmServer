@@ -25,10 +25,13 @@ public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
     @Override
     public @NotNull WorldsConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         try {
-            String defaultWorldName = element.getStringOrDefault("lobby", "defaultWorldName");
+            String defaultWorldName = element.getStringOrDefault(WorldsConfig.DEFAULT_DEFAULT_WORLD_NAME,
+                    "defaultWorldName");
 
-            Path worldsPath = Paths.get(element.getStringOrDefault("./worlds/", "worldsPath"));
-            Path mapsPath = Paths.get(element.getStringOrDefault("./maps/", "mapsPath"));
+            Path worldsPath = Paths.get(element.getStringOrDefault(WorldsConfig.DEFAULT_WORLDS_PATH_STRING,
+                    "worldsPath"));
+            Path mapsPath = Paths.get(element.getStringOrDefault(WorldsConfig.DEFAULT_MAPS_PATH_STRING,
+                    "mapsPath"));
 
             Map<String, WorldConfig> worlds = new HashMap<>();
             ConfigNode worldsNode = element.getNodeOrDefault(LinkedConfigNode::new, "worlds");
@@ -36,17 +39,17 @@ public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
                 ConfigNode worldNode = world.getValue().asNode();
                 ConfigNode spawnPoint = worldNode.get("spawnPoint").asNode();
 
-                double x = spawnPoint.get("x").asNumber().doubleValue();
-                double y = spawnPoint.get("y").asNumber().doubleValue();
-                double z = spawnPoint.get("z").asNumber().doubleValue();
+                double x = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.x(), "x").doubleValue();
+                double y = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.y(), "y").doubleValue();
+                double z = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.z(), "z").doubleValue();
 
-                float yaw = spawnPoint.getNumberOrDefault(0.0F, "yaw").floatValue();
-                float pitch = spawnPoint.getNumberOrDefault(0.0F, "pitch").floatValue();
+                float yaw = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.yaw(), "yaw").floatValue();
+                float pitch = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.pitch(), "pitch").floatValue();
 
                 worlds.put(world.getKey(), new WorldConfig(new Pos(x, y, z, yaw, pitch)));
             }
 
-            return new WorldsConfig(defaultWorldName, worldsPath, mapsPath, worlds);
+            return new WorldsConfig(defaultWorldName, worldsPath, mapsPath, Map.copyOf(worlds));
         }
         catch (IllegalStateException | InvalidPathException e) {
             throw new ConfigProcessException(e);

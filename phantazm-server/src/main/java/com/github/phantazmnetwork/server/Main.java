@@ -4,17 +4,15 @@ import com.github.phantazmnetwork.api.instance.FileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.WorldsConfigProcessor;
-import com.github.phantazmnetwork.server.config.server.AuthType;
-import com.github.phantazmnetwork.server.config.server.PingListConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
 import com.github.phantazmnetwork.server.config.world.WorldsConfig;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
 import com.github.steanky.ethylene.core.ConfigHandler;
+import com.github.steanky.ethylene.core.processor.ConfigLoader;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
@@ -25,31 +23,17 @@ import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.AnvilLoader;
-import com.github.steanky.ethylene.core.processor.ConfigLoader;
 import net.minestom.server.instance.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 
 /**
  * Launches the server.
  */
 public class Main {
-    /**
-     * Default {@link ServerConfig} instance.
-     */
-    public static final ServerConfig DEFAULT_SERVER_CONFIG = new ServerConfig(new ServerInfoConfig("0.0.0.0",
-            25565, true, AuthType.MOJANG, ""), new PingListConfig(Component.empty()));
-
-    /**
-     * Default {@link WorldsConfig} instance.
-     */
-    public static final WorldsConfig DEFAULT_WORLDS_CONFIG = new WorldsConfig("world",
-            Paths.get("./worlds/"), Paths.get("./maps/"), new HashMap<>());
-
     /**
      * The location of the server configuration file.
      */
@@ -86,10 +70,11 @@ public class Main {
         Logger logger = LoggerFactory.getLogger(Main.class);
 
         TomlCodec tomlCodec = new TomlCodec();
-        CONFIG_HANDLER.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(
-                MiniMessage.miniMessage()), DEFAULT_SERVER_CONFIG, SERVER_CONFIG_PATH, tomlCodec));
+        CONFIG_HANDLER.registerLoader(SERVER_CONFIG_KEY,
+                new SyncFileConfigLoader<>(new ServerConfigProcessor(MiniMessage.miniMessage()), ServerConfig.DEFAULT,
+                        SERVER_CONFIG_PATH, tomlCodec));
         CONFIG_HANDLER.registerLoader(WORLDS_CONFIG_KEY, new SyncFileConfigLoader<>(new WorldsConfigProcessor(),
-                DEFAULT_WORLDS_CONFIG, WORLDS_CONFIG_PATH, tomlCodec));
+                WorldsConfig.DEFAULT, WORLDS_CONFIG_PATH, tomlCodec));
 
         try {
             CONFIG_HANDLER.writeDefaultsAndGet();
