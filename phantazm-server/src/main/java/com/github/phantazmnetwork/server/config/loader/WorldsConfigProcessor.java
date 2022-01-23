@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Config processor used for {@link ServerConfig}s.
+ * Config processor used for {@link WorldsConfig}s.
  */
 public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
     @Override
@@ -44,7 +44,8 @@ public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
                 double z = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.z(), "z").doubleValue();
 
                 float yaw = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.yaw(), "yaw").floatValue();
-                float pitch = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.pitch(), "pitch").floatValue();
+                float pitch = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.pitch(), "pitch")
+                        .floatValue();
 
                 worlds.put(world.getKey(), new WorldConfig(new Pos(x, y, z, yaw, pitch)));
             }

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,7 +38,7 @@ public record WorldsConfig(@NotNull String defaultWorldName,
      * The default WorldsConfig instance.
      */
     public static final WorldsConfig DEFAULT = new WorldsConfig(DEFAULT_DEFAULT_WORLD_NAME,
-            Paths.get(DEFAULT_WORLDS_PATH_STRING), Paths.get(DEFAULT_MAPS_PATH_STRING), Map.of());
+            Paths.get(DEFAULT_WORLDS_PATH_STRING), Paths.get(DEFAULT_MAPS_PATH_STRING), Collections.emptyMap());
 
     /**
      * Creates config for the server's worlds.

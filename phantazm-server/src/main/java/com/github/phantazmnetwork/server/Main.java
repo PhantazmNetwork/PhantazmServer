@@ -10,6 +10,7 @@ import com.github.phantazmnetwork.server.config.world.WorldsConfig;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
 import com.github.steanky.ethylene.core.ConfigHandler;
+import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigLoader;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
@@ -69,12 +70,12 @@ public class Main {
         MinecraftServer minecraftServer = MinecraftServer.init();
         Logger logger = LoggerFactory.getLogger(Main.class);
 
-        TomlCodec tomlCodec = new TomlCodec();
+        ConfigCodec codec = new TomlCodec();
         CONFIG_HANDLER.registerLoader(SERVER_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new ServerConfigProcessor(MiniMessage.miniMessage()), ServerConfig.DEFAULT,
-                        SERVER_CONFIG_PATH, tomlCodec));
+                        SERVER_CONFIG_PATH, codec));
         CONFIG_HANDLER.registerLoader(WORLDS_CONFIG_KEY, new SyncFileConfigLoader<>(new WorldsConfigProcessor(),
-                WorldsConfig.DEFAULT, WORLDS_CONFIG_PATH, tomlCodec));
+                WorldsConfig.DEFAULT, WORLDS_CONFIG_PATH, codec));
 
         try {
             CONFIG_HANDLER.writeDefaultsAndGet();
