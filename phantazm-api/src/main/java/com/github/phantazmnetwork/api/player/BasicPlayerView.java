@@ -4,6 +4,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,8 +24,8 @@ public class BasicPlayerView implements PlayerView {
      * @param playerUUID The {@link UUID} of the {@link Player} to store
      */
     public BasicPlayerView(@NotNull ConnectionManager connectionManager, @NotNull UUID playerUUID) {
-        this.connectionManager = connectionManager;
-        this.playerUUID = playerUUID;
+        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
+        this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
     }
 
     @Override

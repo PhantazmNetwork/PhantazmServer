@@ -20,4 +20,9 @@ public interface InventoryObject {
      */
     boolean shouldRedraw();
 
+    /**
+     * Ticks the inventory object.
+     */
+    void tick();
+
 }

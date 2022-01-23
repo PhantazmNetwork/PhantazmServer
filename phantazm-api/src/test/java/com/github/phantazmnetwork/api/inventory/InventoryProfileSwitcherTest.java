@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 
 public class InventoryProfileSwitcherTest {
 
-    private final Key firstKey = Key.key("phantazm", "ade229bf-d062-46e8-99d8-97b667d5a127");
+    private final Key firstKey = Key.key("phantazm", "ade229bf");
 
-    private final Key secondKey = Key.key("phantazm", "31ee3877-dbd8-423a-95e4-9181b8acfe74");
+    private final Key secondKey = Key.key("phantazm", "s1lly_w33d_m4n");
 
     @Test
     public void testDuplicateRegistration() {

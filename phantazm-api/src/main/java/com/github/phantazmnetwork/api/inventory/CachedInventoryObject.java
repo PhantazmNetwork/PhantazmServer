@@ -43,18 +43,15 @@ public abstract class CachedInventoryObject implements InventoryObject {
     }
 
     /**
-     * Sets the dirty flag. The next future call to {@link #getItemStack()} will invoke {@link #computeStack()}.
+     * Sets the dirty flag. The next call to {@link #getItemStack()} will invoke {@link #computeStack()}.
      */
     protected void setDirty() {
         dirty = true;
     }
 
     private void refreshCache() {
-        ItemStack stack = computeStack();
-        Objects.requireNonNull(stack, "Computed stack is null");
-
+        cache = Objects.requireNonNull(computeStack(), "Computed stack is null");
         dirty = false;
-        cache = stack;
     }
 
     /**

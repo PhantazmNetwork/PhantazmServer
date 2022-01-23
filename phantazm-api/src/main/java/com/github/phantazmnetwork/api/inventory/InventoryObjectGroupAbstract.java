@@ -28,9 +28,9 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
     public InventoryObjectGroupAbstract(@NotNull InventoryProfile profile,
                                         @NotNull IntSet slots,
                                         @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
-        this.profile = profile;
+        this.profile = Objects.requireNonNull(profile, "profile");
         this.slots = Objects.requireNonNull(slots, "slots");
-        this.unmodifiableSlots = unmodifiableMapper.apply(slots);
+        this.unmodifiableSlots = Objects.requireNonNull(unmodifiableMapper.apply(slots), "mapped slots");
     }
 
     /**

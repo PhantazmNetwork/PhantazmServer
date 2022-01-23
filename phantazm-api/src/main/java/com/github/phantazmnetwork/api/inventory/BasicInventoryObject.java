@@ -30,4 +30,10 @@ public class BasicInventoryObject implements InventoryObject {
     public boolean shouldRedraw() {
         return false;
     }
+
+    @Override
+    public void tick() {
+        // Computes the maximum amount of information possible using all of silly weed man's brain cells
+    }
+
 }

@@ -60,7 +60,7 @@ public class BasicInventoryProfileSwitcher implements InventoryProfileSwitcher {
 
     @Override
     public void unregisterProfile(@NotNull Key key) {
-        Objects.requireNonNull(key, "uuid");
+        Objects.requireNonNull(key, "key");
 
         if (!profileMap.containsKey(key)) {
             throw new IllegalArgumentException("Inventory profile not yet registered");
