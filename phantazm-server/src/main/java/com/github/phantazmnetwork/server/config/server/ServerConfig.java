@@ -10,6 +10,10 @@ import java.util.Objects;
  * @param pingListConfig Config for the server's ping list
  */
 public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig, @NotNull PingListConfig pingListConfig) {
+    /**
+     * The default ServerConfig instance.
+     */
+    public static final ServerConfig DEFAULT = new ServerConfig(ServerInfoConfig.DEFAULT, PingListConfig.DEFAULT);
 
     /**
      * Creates config for the server.

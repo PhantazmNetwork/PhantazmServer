@@ -2,11 +2,7 @@ package com.github.phantazmnetwork.server.config.server;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Authentication type to verify players.

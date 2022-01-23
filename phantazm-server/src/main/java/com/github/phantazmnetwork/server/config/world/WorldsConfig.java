@@ -2,6 +2,9 @@ package com.github.phantazmnetwork.server.config.world;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -13,9 +16,29 @@ import java.util.Objects;
  * @param worlds A map of world configuration
  */
 public record WorldsConfig(@NotNull String defaultWorldName,
-                           @NotNull String worldsPath,
-                           @NotNull String mapsPath,
+                           @NotNull Path worldsPath,
+                           @NotNull Path mapsPath,
                            @NotNull Map<String, WorldConfig> worlds) {
+    /**
+     * The default world name.
+     */
+    public static final String DEFAULT_DEFAULT_WORLD_NAME = "world";
+
+    /**
+     * The default location used to store worlds.
+     */
+    public static final String DEFAULT_WORLDS_PATH_STRING = "./worlds/";
+
+    /**
+     * The default location used to store maps.
+     */
+    public static final String DEFAULT_MAPS_PATH_STRING = "./maps/";
+
+    /**
+     * The default WorldsConfig instance.
+     */
+    public static final WorldsConfig DEFAULT = new WorldsConfig(DEFAULT_DEFAULT_WORLD_NAME,
+            Paths.get(DEFAULT_WORLDS_PATH_STRING), Paths.get(DEFAULT_MAPS_PATH_STRING), Collections.emptyMap());
 
     /**
      * Creates config for the server's worlds.
