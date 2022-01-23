@@ -22,6 +22,7 @@ public interface ConfigProcessor<T> {
     /**
      * Converts config to a {@link ConfigElement}.
      * @param config The config to write
+     * @return A new {@link ConfigElement} from the provided config
      */
     @NotNull ConfigElement createNodeFromConfig(@NotNull T config);
 

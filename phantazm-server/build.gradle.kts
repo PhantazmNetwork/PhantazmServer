@@ -1,5 +1,5 @@
 plugins {
-    id("com.github.phantazmnetwork.gradle.plugin.phantazm-java-conventions")
+    id("phantazm.java-conventions")
 }
 
 repositories {

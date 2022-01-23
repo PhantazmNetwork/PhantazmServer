@@ -13,9 +13,24 @@ import java.util.Optional;
  */
 public enum AuthType {
 
+    /**
+     * No authentication should be used.
+     */
     NONE,
+
+    /**
+     * Mojang's default authentication.
+     */
     MOJANG,
+
+    /**
+     * BungeeCord or Velocity with BungeeGuard authentication.
+     */
     BUNGEE,
+
+    /**
+     * Velocity modern authentication.
+     */
     VELOCITY;
 
     private static final Map<String, AuthType> BY_NAME;
