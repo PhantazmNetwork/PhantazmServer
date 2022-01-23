@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    api("com.github.steanky:ethylene-core:0.3.0")
+    api("com.github.steanky:ethylene-core:0.4.1")
 }
 
 tasks.jar {

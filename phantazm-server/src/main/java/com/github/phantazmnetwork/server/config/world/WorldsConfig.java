@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.server.config.world;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 
@@ -13,8 +14,8 @@ import java.util.Objects;
  * @param worlds A map of world configuration
  */
 public record WorldsConfig(@NotNull String defaultWorldName,
-                           @NotNull String worldsPath,
-                           @NotNull String mapsPath,
+                           @NotNull Path worldsPath,
+                           @NotNull Path mapsPath,
                            @NotNull Map<String, WorldConfig> worlds) {
 
     /**
