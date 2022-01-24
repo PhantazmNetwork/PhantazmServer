@@ -14,6 +14,7 @@ import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigLoader;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
+import com.moandjiezana.toml.TomlWriter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
@@ -70,7 +71,7 @@ public class Main {
         MinecraftServer minecraftServer = MinecraftServer.init();
         Logger logger = LoggerFactory.getLogger(Main.class);
 
-        ConfigCodec codec = new TomlCodec();
+        ConfigCodec codec = new TomlCodec(new TomlWriter.Builder().padArrayDelimitersBy(1).indentValuesBy(4).build());
         CONFIG_HANDLER.registerLoader(SERVER_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new ServerConfigProcessor(MiniMessage.miniMessage()), ServerConfig.DEFAULT,
                         SERVER_CONFIG_PATH, codec));
