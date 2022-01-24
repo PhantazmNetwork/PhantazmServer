@@ -13,7 +13,7 @@ dependencies {
     implementation(project(":phantazm-zombies"))
 
     implementation("net.kyori:adventure-text-minimessage:4.2.0-SNAPSHOT")
-    implementation("com.github.steanky:ethylene-toml:0.4.1")
+    implementation("com.github.steanky:ethylene-toml:0.4.2")
 }
 
 tasks.jar {
