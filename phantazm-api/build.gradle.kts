@@ -9,9 +9,3 @@ repositories {
 dependencies {
     api("com.github.steanky:ethylene-core:0.4.2")
 }
-
-tasks.jar {
-    dependsOn(copyLibs)
-}
-
-val copyLibs = tasks.getByName<Copy>("copyLibs")
