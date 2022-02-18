@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -48,7 +49,8 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                 "optifineEnabled");
 
         AuthType authType = AuthType.getByName(serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_AUTH_TYPE.name(),
-                "authType").toUpperCase(Locale.ENGLISH)).orElse(ServerInfoConfig.DEFAULT_AUTH_TYPE);
+                "authType").toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid " +
+                "AuthType, must be one of the following: " + Arrays.toString(AuthType.values())));
         String velocitySecret = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_VELOCITY_SECRET,
                 "velocitySecret");
 
