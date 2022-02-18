@@ -13,13 +13,17 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testImplementation("org.mockito:mockito-junit-jupiter:4.2.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+val catalogs = extensions.getByType<VersionCatalogsExtension>()
+pluginManager.withPlugin("java") {
+    val libs = catalogs.named("libs")
 
-    compileOnly("org.jetbrains:annotations:22.0.0")
-    testCompileOnly("org.jetbrains:annotations:22.0.0")
+    dependencies.addProvider("compileOnly", libs.findLibrary("jetbrains.annotations").get())
+    dependencies.addProvider("testCompileOnly", libs.findLibrary("jetbrains.annotations").get())
+
+    dependencies.addProvider("testImplementation", libs.findLibrary("junit.jupiter.api").get())
+    dependencies.addProvider("testImplementation", libs.findLibrary("mockito.junit.jupiter").get())
+
+    dependencies.addProvider("testRuntimeOnly", libs.findLibrary("junit.jupiter.engine").get())
 }
 
 tasks.getByName<Test>("test") {

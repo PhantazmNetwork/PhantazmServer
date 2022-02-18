@@ -7,5 +7,5 @@ repositories {
 }
 
 dependencies {
-    api("com.github.steanky:ethylene-core:0.4.2")
+    api(libs.ethylene.core)
 }
