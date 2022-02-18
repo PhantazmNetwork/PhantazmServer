@@ -49,7 +49,7 @@ tasks.register("copyLibs") {
             val dirs = artifact.moduleVersion.id.group.split('.')
 
             var target = libs
-            for(dir: String in dirs) {
+            for(dir in dirs) {
                 target = target.resolve(dir)
             }
             target.mkdirs()
