@@ -26,7 +26,7 @@ tasks.register("copyLibs") {
     val libs = File("/run/server-1/libs")
 
     doFirst {
-        val outputFiles = ArrayList<File>()
+        val outputFiles = mutableListOf<File>()
         for(artifact: ResolvedArtifact in configurations.runtimeClasspath.get().resolvedConfiguration
             .resolvedArtifacts) {
             val dirs = artifact.moduleVersion.id.group.split('.')
@@ -66,8 +66,8 @@ tasks.register("copyLibs") {
             }
 
             if(!absolute.exists()) {
+                println("Creating $absolute")
                 artifact.file.copyTo(absolute, false)
-                println("Created $absolute")
             }
 
             outputFiles.add(target)

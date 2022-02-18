@@ -49,6 +49,8 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         this.arrayStart = 0;
         this.gapStart = 0;
         this.gapLength = DEFAULT_INITIAL_CAPACITY;
+
+        Arrays.fill(array, null);
     }
 
     private static int checkCapacity(int capacity) {
@@ -63,14 +65,13 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         if(gapStart == 0) {
             return logical + gapLength;
         }
-        else {
-            int physical = arrayStart + logical;
-            if(physical >= gapStart) {
-                return physical + gapLength;
-            }
 
-            return physical;
+        int physical = arrayStart + logical;
+        if(physical >= gapStart) {
+            return physical + gapLength;
         }
+
+        return physical;
     }
 
     private static void checkIndexAdd(int index, int size) {
@@ -171,12 +172,11 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
                 return newEnd;
             }
         }
-        else {
-            int gapEnd = moveGap(logicalIndex - gapStart, gapStart + gapLength);
-            gapLength -= elements;
 
-            return gapEnd - elements;
-        }
+        int gapEnd = moveGap(logicalIndex - gapStart, gapStart + gapLength);
+        gapLength -= elements;
+
+        return gapEnd - elements;
     }
 
     //handles the logic of element removal, may move the gap if necessary
@@ -194,24 +194,23 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
 
             return logicalIndex;
         }
+
+        int beforeStart = gapStart - 1;
+        if(logicalIndex == beforeStart) {
+            //handle the simple case where we shift the gap back and increase its size
+            gapStart = beforeStart;
+            gapLength++;
+
+            if(gapStart == 0) {
+                arrayStart = gapStart + gapLength;
+            }
+
+            return gapStart;
+        }
         else {
-            int beforeStart = gapStart - 1;
-            if(logicalIndex == beforeStart) {
-                //handle the simple case where we shift the gap back and increase its size
-                gapStart = beforeStart;
-                gapLength++;
-
-                if(gapStart == 0) {
-                    arrayStart = gapStart + gapLength;
-                }
-
-                return gapStart;
-            }
-            else {
-                int gapEnd = moveGap(logicalIndex - gapStart, gapStart + gapLength);
-                gapLength++;
-                return gapEnd;
-            }
+            int gapEnd = moveGap(logicalIndex - gapStart, gapStart + gapLength);
+            gapLength++;
+            return gapEnd;
         }
     }
 

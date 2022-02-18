@@ -32,8 +32,7 @@ tasks.jar {
             val outputFiles = copyLibsTask.extensions["outputFiles"] as List<File>
 
             attributes(
-                "Class-Path" to outputFiles.joinToString(" ")
-                {
+                "Class-Path" to outputFiles.joinToString(" ") {
                     "libs/${it.relativeTo(libsFolder).path.replace('\\', '/')}"
                 },
                 "Main-Class" to "com.github.phantazmnetwork.server.Main",
