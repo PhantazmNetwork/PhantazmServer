@@ -27,6 +27,10 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
     private int gapStart;
     private int gapLength;
 
+    /**
+     * Creates a new GapList with the specified initial capacity (gap size).
+     * @param initialCapacity the initial gap size
+     */
     public GapList(int initialCapacity) {
         this.array = initialCapacity == 0 ? EMPTY_OBJECT_ARRAY : new Object[checkCapacity(initialCapacity)];
         this.size = 0;
@@ -35,6 +39,10 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         this.gapLength = initialCapacity;
     }
 
+    /**
+     * Creates a new GapList containing the same elements as the given collection.
+     * @param collection the collection whose elements will be used
+     */
     public GapList(@NotNull Collection<? extends TValue> collection) {
         this.array = collection.toArray();
         this.size = array.length;
@@ -43,6 +51,9 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         this.gapLength = 0;
     }
 
+    /**
+     * Constructs a new GapList with the default initial capacity (gap size).
+     */
     public GapList() {
         this.array = new Object[DEFAULT_INITIAL_CAPACITY];
         this.size = 0;
@@ -116,9 +127,11 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         array = newArray;
     }
 
-    //shifts the gap by a certain number of indices
-    //negative numbers shift the gap closer to index 0, positive numbers further from index 0
-    //also ensures that all elements in range [gapStart, gapStart + gapLength) are null
+    /*
+    Shifts the gap by a certain number of indices. Negative numbers shift the gap closer to index 0, positive numbers
+    further from index 0. This function also ensures that all elements in range [gapStart, gapStart + gapLength) are
+    null after the shift occurs.
+     */
     private int moveGap(int by, int afterGap) {
         if(by < 0) {
             //gap being moved down
