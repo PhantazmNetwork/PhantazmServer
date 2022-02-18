@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 plugins {
     id("phantazm.java-conventions")
 }
@@ -42,9 +44,43 @@ tasks.jar {
     }
 }
 
-tasks.register<Copy>("setupServer") {
+tasks.register("setupServer") {
     dependsOn(tasks.jar)
 
-    from(tasks.jar)
-    into("$rootDir/run/server-1/")
+    fun sha1(file: File) : String {
+        val md = MessageDigest.getInstance("SHA-1")
+        file.forEachBlock(4096) { bytes, size ->
+            md.update(bytes, 0, size)
+        }
+
+        return md.digest().joinToString("") {
+            "%02x".format(it)
+        }
+    }
+
+    doFirst {
+        val newFile = tasks.jar.get().archiveFile.get().asFile
+        val oldFile = File("$rootDir/run/server-1/server.jar")
+
+        if(oldFile.exists()) {
+            val oldHash = sha1(oldFile)
+            val newHash = sha1(newFile)
+
+            if(oldHash != newHash) {
+                println("Contents of server file have changed; overwriting the old file.")
+                println("Old hash: $oldHash")
+                println("New hash: $newHash")
+
+                oldFile.delete()
+                newFile.copyTo(oldFile, true)
+            }
+            else {
+                println("No changes detected in server file.")
+            }
+        }
+        else {
+            println("Copying the server file.")
+            newFile.copyTo(oldFile)
+        }
+    }
 }
