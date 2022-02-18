@@ -6,6 +6,8 @@ repositories {
     maven("https://jitpack.io")
 }
 
-dependencies {
-    api("com.github.Minestom:Minestom:688ab31d79")
+val catalogs = extensions.getByType<VersionCatalogsExtension>()
+pluginManager.withPlugin("java") {
+    val libs = catalogs.named("libs")
+    dependencies.addProvider("api", libs.findLibrary("minestom").get())
 }

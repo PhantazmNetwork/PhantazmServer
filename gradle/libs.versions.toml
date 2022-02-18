@@ -1,0 +1,29 @@
+metadata.format.version = "1.1"
+
+[versions]
+ethylene = "0.4.2"
+
+jetbrains-annotations = "23.0.0"
+
+junit-jupiter = "5.8.2"
+
+minestom = "688ab31d79"
+
+miniMessage = "4.2.0-SNAPSHOT"
+
+mockito = "4.3.1"
+
+[libraries]
+ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
+ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
+
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
+
+minestom = { module = "com.github.Minestom:Minestom", version.ref = "minestom" }
+
+miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "miniMessage" }
+
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
