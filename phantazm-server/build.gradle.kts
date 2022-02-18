@@ -21,6 +21,16 @@ dependencies {
 tasks.jar {
     dependsOn("copyLibs")
 
+    outputs.upToDateWhen {
+        for(project : Project in rootProject.subprojects) {
+            if(project.tasks.compileJava.get().state.didWork) {
+                return@upToDateWhen false
+            }
+        }
+
+        true
+    }
+
     archiveBaseName.set("server")
     archiveVersion.set("")
     archiveClassifier.set("")
