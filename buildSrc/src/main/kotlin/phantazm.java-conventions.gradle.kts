@@ -33,10 +33,19 @@ tasks.getByName<Test>("test") {
 tasks.register("copyLibs") {
     val libs = File("/run/server-1/libs")
 
+    outputs.upToDateWhen {
+        for(project in rootProject.subprojects) {
+            if(project.tasks.compileJava.get().didWork) {
+                return@upToDateWhen false
+            }
+        }
+
+        true
+    }
+
     doFirst {
         val outputFiles = mutableListOf<File>()
-        for(artifact: ResolvedArtifact in configurations.runtimeClasspath.get().resolvedConfiguration
-            .resolvedArtifacts) {
+        for(artifact in configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts) {
             val dirs = artifact.moduleVersion.id.group.split('.')
 
             var target = libs
@@ -84,19 +93,4 @@ tasks.register("copyLibs") {
         extensions.add("outputFiles", outputFiles)
         extensions.add("libsFolder", libs)
     }
-
-    val upToDateSpec = object : Spec<Task> {
-        override fun isSatisfiedBy(element: Task?): Boolean {
-            for(project : Project in rootProject.subprojects) {
-                if(project.tasks.compileJava.get().state.didWork) {
-                    return false
-                }
-            }
-
-            return true
-        }
-    }
-
-    outputs.upToDateWhen(upToDateSpec)
-    extensions.add("upToDateSpec", upToDateSpec)
 }

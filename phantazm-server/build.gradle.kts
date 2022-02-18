@@ -21,8 +21,9 @@ dependencies {
 tasks.jar {
     dependsOn("copyLibs")
 
-    @Suppress("UNCHECKED_CAST")
-    outputs.upToDateWhen(tasks.getByName("copyLibs").extensions["upToDateSpec"] as Spec<Task>)
+    outputs.upToDateWhen {
+        !tasks.getByName("copyLibs").didWork
+    }
 
     archiveBaseName.set("server")
     archiveVersion.set("")
@@ -47,43 +48,13 @@ tasks.jar {
     }
 }
 
-tasks.register("setupServer") {
+tasks.register<Copy>("setupServer") {
     dependsOn(tasks.jar)
 
-    fun sha1(file: File) : String {
-        val md = MessageDigest.getInstance("SHA-1")
-        file.forEachBlock(4096) { bytes, size ->
-            md.update(bytes, 0, size)
-        }
-
-        return md.digest().joinToString("") {
-            "%02x".format(it)
-        }
+    outputs.upToDateWhen {
+        !tasks.jar.get().didWork
     }
 
-    doFirst {
-        val newFile = tasks.jar.get().archiveFile.get().asFile
-        val oldFile = File("$rootDir/run/server-1/server.jar")
-
-        if(oldFile.exists()) {
-            val oldHash = sha1(oldFile)
-            val newHash = sha1(newFile)
-
-            if(oldHash != newHash) {
-                println("Contents of server.jar have changed; overwriting the old file.")
-                println("Old hash: $oldHash")
-                println("New hash: $newHash")
-
-                oldFile.delete()
-                newFile.copyTo(oldFile, true)
-            }
-            else {
-                println("No changes detected in server.jar.")
-            }
-        }
-        else {
-            println("Copying server.jar.")
-            newFile.copyTo(oldFile)
-        }
-    }
+    from(tasks.jar)
+    into("$rootDir/run/server-1/")
 }
