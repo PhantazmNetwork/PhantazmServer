@@ -162,15 +162,14 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
                 gapStart += elements;
                 return oldGapStart;
             }
-            else {
-                int newEnd = gapStart + gapLength;
 
-                if(gapStart == 0) {
-                    arrayStart = newEnd;
-                }
+            int newEnd = gapStart + gapLength;
 
-                return newEnd;
+            if(gapStart == 0) {
+                arrayStart = newEnd;
             }
+
+            return newEnd;
         }
 
         int gapEnd = moveGap(logicalIndex - gapStart, gapStart + gapLength);
@@ -207,11 +206,10 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
 
             return gapStart;
         }
-        else {
-            int gapEnd = moveGap(logicalIndex - gapStart, gapStart + gapLength);
-            gapLength++;
-            return gapEnd;
-        }
+
+        int gapEnd = moveGap(logicalIndex - gapStart, gapStart + gapLength);
+        gapLength++;
+        return gapEnd;
     }
 
     private void addInternal(int index, TValue element) {
