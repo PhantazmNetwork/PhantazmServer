@@ -38,7 +38,7 @@ public record WorldsConfig(@NotNull String defaultWorldName,
      * The default WorldsConfig instance.
      */
     public static final WorldsConfig DEFAULT = new WorldsConfig(DEFAULT_DEFAULT_WORLD_NAME,
-            Paths.get(DEFAULT_WORLDS_PATH_STRING), Paths.get(DEFAULT_MAPS_PATH_STRING), Collections.emptyMap());
+            Path.of(DEFAULT_WORLDS_PATH_STRING), Path.of(DEFAULT_MAPS_PATH_STRING), Collections.emptyMap());
 
     /**
      * Creates config for the server's worlds.

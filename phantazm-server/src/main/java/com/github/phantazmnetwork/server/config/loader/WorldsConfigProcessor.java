@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.world.WorldConfig;
 import com.github.phantazmnetwork.server.config.world.WorldsConfig;
 import com.github.steanky.ethylene.core.ConfigElement;

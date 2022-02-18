@@ -10,11 +10,11 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import com.google.common.net.InetAddresses;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -40,17 +40,17 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
         String serverAddress = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_SERVER_ADDRESS, "serverIP");
 
-        //noinspection UnstableApiUsage
-        if(!InetAddresses.isInetAddress(serverAddress)) {
-            throw new ConfigProcessException(serverAddress + " is not a valid InetAddress");
+        int port = serverInfo.getNumberOrDefault(ServerInfoConfig.DEFAULT_PORT, "port").intValue();
+        if(port < 0  || port > 65535) {
+            throw new ConfigProcessException("Invalid port: " + port + ", must be in range [0, 65535]");
         }
 
-        int port = serverInfo.getNumberOrDefault(ServerInfoConfig.DEFAULT_PORT, "port").intValue();
         boolean optifineEnabled = serverInfo.getBooleanOrDefault(ServerInfoConfig.DEFAULT_OPTIFINE_ENABLED,
                 "optifineEnabled");
 
         AuthType authType = AuthType.getByName(serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_AUTH_TYPE.name(),
-                "authType").toUpperCase(Locale.ENGLISH)).orElse(ServerInfoConfig.DEFAULT_AUTH_TYPE);
+                "authType").toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid " +
+                "AuthType, must be one of the following: " + Arrays.toString(AuthType.values())));
         String velocitySecret = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_VELOCITY_SECRET,
                 "velocitySecret");
 
