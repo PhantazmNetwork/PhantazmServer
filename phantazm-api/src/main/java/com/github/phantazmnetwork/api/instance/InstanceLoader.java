@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.api.instance;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import org.jetbrains.annotations.NotNull;
-
 /**
  * Loads usable {@link Instance}s.
  */
