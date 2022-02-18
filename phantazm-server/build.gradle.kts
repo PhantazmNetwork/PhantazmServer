@@ -43,8 +43,9 @@ tasks.jar {
     }
 }
 
-tasks.register<Copy>("copyJar") {
+tasks.register<Copy>("setupServer") {
+    dependsOn(tasks.jar)
+
     from(tasks.jar)
     into("$rootDir/run/server-1/")
 }
-

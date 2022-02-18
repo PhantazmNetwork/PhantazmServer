@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build and Run Server" type="JarApplication">
+  <configuration default="false" name="Set up and run server" type="JarApplication">
     <option name="JAR_PATH" value="$PROJECT_DIR$/run/server-1/server.jar" />
     <option name="WORKING_DIRECTORY" value="$ProjectFileDir$\run\server-1" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
-      <option name="Gradle.BeforeRunTask" enabled="false" tasks="build" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="false" tasks="setupServer" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>
