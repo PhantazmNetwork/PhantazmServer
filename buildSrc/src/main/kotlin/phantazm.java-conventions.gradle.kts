@@ -84,4 +84,19 @@ tasks.register("copyLibs") {
         extensions.add("outputFiles", outputFiles)
         extensions.add("libsFolder", libs)
     }
+
+    val upToDateSpec = object : Spec<Task> {
+        override fun isSatisfiedBy(element: Task?): Boolean {
+            for(project : Project in rootProject.subprojects) {
+                if(project.tasks.compileJava.get().state.didWork) {
+                    return false
+                }
+            }
+
+            return true
+        }
+    }
+
+    outputs.upToDateWhen(upToDateSpec)
+    extensions.add("upToDateSpec", upToDateSpec)
 }

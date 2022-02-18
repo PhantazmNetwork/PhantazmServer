@@ -21,15 +21,8 @@ dependencies {
 tasks.jar {
     dependsOn("copyLibs")
 
-    outputs.upToDateWhen {
-        for(project : Project in rootProject.subprojects) {
-            if(project.tasks.compileJava.get().state.didWork) {
-                return@upToDateWhen false
-            }
-        }
-
-        true
-    }
+    @Suppress("UNCHECKED_CAST")
+    outputs.upToDateWhen(tasks.getByName("copyLibs").extensions["upToDateSpec"] as Spec<Task>)
 
     archiveBaseName.set("server")
     archiveVersion.set("")
