@@ -67,7 +67,7 @@ tasks.register("setupServer") {
             val newHash = sha1(newFile)
 
             if(oldHash != newHash) {
-                println("Contents of server file have changed; overwriting the old file.")
+                println("Contents of server.jar have changed; overwriting the old file.")
                 println("Old hash: $oldHash")
                 println("New hash: $newHash")
 
@@ -75,11 +75,11 @@ tasks.register("setupServer") {
                 newFile.copyTo(oldFile, true)
             }
             else {
-                println("No changes detected in server file.")
+                println("No changes detected in server.jar.")
             }
         }
         else {
-            println("Copying the server file.")
+            println("Copying server.jar.")
             newFile.copyTo(oldFile)
         }
     }
