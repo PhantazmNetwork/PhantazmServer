@@ -7,5 +7,5 @@ repositories {
 }
 
 dependencies {
-    api("com.github.Minestom:Minestom:5efa6d7980")
+    api("com.github.Minestom:Minestom:688ab31d79")
 }
