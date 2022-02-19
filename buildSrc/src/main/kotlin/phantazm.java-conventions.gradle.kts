@@ -79,22 +79,19 @@ tasks.register("copyLibs") {
 
             var matchingArtifact : ResolvedArtifact? = null
             for(artifact in resolvedArtifacts) {
-                if(artifact.moduleVersion.id.group == groupName) {
-                    val artifactName = artifact.moduleVersion.id.name
+                if(artifact.moduleVersion.id.group == groupName && artifactFileName
+                        .startsWith("${artifact.moduleVersion.id.name}-")) {
+                    val artifactVersion = artifact.moduleVersion.id.version
 
-                    if(artifactFileName.startsWith("$artifactName-")) {
-                        val artifactVersion = artifact.moduleVersion.id.version
-
-                        if(artifactFileName.endsWith("-$artifactVersion")) {
-                            matchingArtifact = artifact
-                        }
-                        else {
-                            println("Detected version change for ${artifact.moduleVersion.id.module}, is now " +
-                                    "$artifactVersion. The old version will be deleted.")
-                        }
-
-                        break
+                    if(artifactFileName.endsWith("-$artifactVersion")) {
+                        matchingArtifact = artifact
                     }
+                    else {
+                        println("Detected version change for ${artifact.moduleVersion.id.module}, is now " +
+                                "$artifactVersion. The old version will be deleted.")
+                    }
+
+                    break
                 }
             }
 
