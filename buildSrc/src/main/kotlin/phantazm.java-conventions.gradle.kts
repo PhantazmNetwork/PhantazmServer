@@ -44,20 +44,20 @@ tasks.register("copyLibs") {
         val libsFolder = extensions["libsFolder"] as File
 
         val resolvedArtifacts = configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts
-        resolvedArtifacts.forEach { artifact ->
-            val dirs = artifact.moduleVersion.id.group.split('.')
+        resolvedArtifacts.forEach {
+            val dirs = it.moduleVersion.id.group.split('.')
 
             var target = libsFolder
             for(dir in dirs) {
                 target = target.resolve(dir)
             }
             target.mkdirs()
-            target = target.resolve(artifact.file.name)
+            target = target.resolve(it.file.name)
 
             val absolute = File(rootDir, target.path)
             if(!absolute.exists()) {
                 logger.info("Creating $absolute")
-                artifact.file.copyTo(absolute, false)
+                it.file.copyTo(absolute, false)
             }
 
             outputFiles.add(target.relativeTo(libsFolder))
