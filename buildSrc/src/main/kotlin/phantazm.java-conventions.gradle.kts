@@ -56,7 +56,7 @@ tasks.register("copyLibs") {
 
             val absolute = File(rootDir, target.path)
             if(!absolute.exists()) {
-                println("Creating $absolute")
+                logger.info("Creating $absolute")
                 artifact.file.copyTo(absolute, false)
             }
 
@@ -83,7 +83,7 @@ tasks.register("copyLibs") {
                         matchingArtifact = artifact
                     }
                     else {
-                        println("Detected version change for ${artifact.moduleVersion.id.module}, is now " +
+                        logger.info("Detected version change for ${artifact.moduleVersion.id.module}, is now " +
                                 "$artifactVersion. The old version will be deleted.")
                     }
 
@@ -92,7 +92,7 @@ tasks.register("copyLibs") {
             }
 
             if(matchingArtifact == null) {
-                println("Deleting $it.")
+                logger.info("Deleting $it.")
                 it.delete()
             }
         }
