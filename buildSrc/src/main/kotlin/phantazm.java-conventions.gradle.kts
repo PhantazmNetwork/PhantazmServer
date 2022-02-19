@@ -36,11 +36,7 @@ tasks.register("copyLibs") {
 
     outputs.upToDateWhen {
         rootProject.subprojects.none {
-            val compileTask = it.tasks.compileJava.get()
-            val didWork = compileTask.didWork
-
-            logger.info("$compileTask did work: $didWork")
-            didWork
+            it.tasks.compileJava.get().didWork
         }
     }
 

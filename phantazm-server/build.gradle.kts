@@ -1,5 +1,3 @@
-import java.security.MessageDigest
-
 plugins {
     id("phantazm.java-conventions")
 }
@@ -16,17 +14,18 @@ dependencies {
 
     implementation(libs.miniMessage)
     implementation(libs.ethylene.toml)
+
+    implementation("commons-io:commons-io:2.11.0")
 }
 
 tasks.jar {
     val copyLibs = tasks.getByName("copyLibs")
     val libsFolder = File("/run/server-1/libs")
-
     copyLibs.extensions.add("libsFolder", libsFolder)
     dependsOn(copyLibs)
 
-    outputs.upToDateWhen {
-        !copyLibs.didWork
+    onlyIf {
+        copyLibs.didWork
     }
 
     archiveBaseName.set("server")
@@ -52,12 +51,13 @@ tasks.jar {
 }
 
 tasks.register<Copy>("setupServer") {
-    dependsOn(tasks.jar)
+    val jar = tasks.getByName("jar")
+    dependsOn(jar)
 
-    outputs.upToDateWhen {
-        !tasks.jar.get().didWork
+    onlyIf {
+        jar.didWork
     }
 
-    from(tasks.jar)
+    from(jar)
     into("$rootDir/run/server-1/")
 }
