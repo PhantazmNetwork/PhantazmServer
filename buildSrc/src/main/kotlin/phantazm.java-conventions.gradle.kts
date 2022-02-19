@@ -35,13 +35,9 @@ tasks.register("copyLibs") {
     extensions.add("outputFiles", outputFiles)
 
     outputs.upToDateWhen {
-        for(project in rootProject.subprojects) {
-            if(project.tasks.classes.get().didWork) {
-                return@upToDateWhen false
-            }
+        rootProject.subprojects.none {
+            it.tasks.classes.get().didWork
         }
-
-        true
     }
 
     doFirst {
