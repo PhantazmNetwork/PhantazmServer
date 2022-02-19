@@ -31,7 +31,8 @@ tasks.getByName<Test>("test") {
 }
 
 tasks.register("copyLibs") {
-    val libs = File("/run/server-1/libs")
+    val outputFiles = mutableListOf<File>()
+    extensions.add("outputFiles", outputFiles)
 
     outputs.upToDateWhen {
         for(project in rootProject.subprojects) {
@@ -44,11 +45,13 @@ tasks.register("copyLibs") {
     }
 
     doFirst {
-        val outputFiles = mutableListOf<File>()
-        for(artifact in configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts) {
+        val libsFolder = extensions["libsFolder"] as File
+
+        val resolvedArtifacts = configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts
+        resolvedArtifacts.forEach { artifact ->
             val dirs = artifact.moduleVersion.id.group.split('.')
 
-            var target = libs
+            var target = libsFolder
             for(dir in dirs) {
                 target = target.resolve(dir)
             }
@@ -56,41 +59,49 @@ tasks.register("copyLibs") {
             target = target.resolve(artifact.file.name)
 
             val absolute = File(rootDir, target.path)
-
-            val artifactName = artifact.moduleVersion.id.name
-            val artifactVersion = artifact.moduleVersion.id.version
-
-            //delete different versions of the same artifact
-            absolute.parentFile.listFiles { file ->
-                val extensionlessName = file.nameWithoutExtension
-                !extensionlessName.endsWith("-$artifactVersion") &&
-                        extensionlessName.startsWith("$artifactName-") &&
-                        file.extension == artifact.file.extension
-            }?.forEach {
-                val extensionlessName = it.nameWithoutExtension
-                val split = extensionlessName.split(artifactName)
-
-                if(split.size >= 2) {
-                    val group = artifact.moduleVersion.id.group
-                    val oldArtifactVersion = split[1].removePrefix("-")
-
-                    println("Version mismatch: found $group:$artifactName:$oldArtifactVersion, replacing with " +
-                            "$group:$artifactName:$artifactVersion")
-                }
-
-                println("Deleting $it")
-                it.delete()
-            }
-
             if(!absolute.exists()) {
                 println("Creating $absolute")
                 artifact.file.copyTo(absolute, false)
             }
 
-            outputFiles.add(target)
+            outputFiles.add(target.relativeTo(libsFolder))
         }
 
-        extensions.add("outputFiles", outputFiles)
-        extensions.add("libsFolder", libs)
+        val absolute = File(rootDir, libsFolder.path)
+        absolute.walkTopDown().filter {
+            it.isFile
+        }.forEach {
+            val relative = it.relativeTo(absolute)
+            val parent = relative.parentFile
+
+            val groupName = parent.toPath().joinToString(".")
+            val artifactFileName = relative.nameWithoutExtension
+
+            var matchingArtifact : ResolvedArtifact? = null
+            for(artifact in resolvedArtifacts) {
+                if(artifact.moduleVersion.id.group == groupName) {
+                    val artifactName = artifact.moduleVersion.id.name
+
+                    if(artifactFileName.startsWith("$artifactName-")) {
+                        val artifactVersion = artifact.moduleVersion.id.version
+
+                        if(artifactFileName.endsWith("-$artifactVersion")) {
+                            matchingArtifact = artifact
+                        }
+                        else {
+                            println("Detected version change for ${artifact.moduleVersion.id.module}, is now " +
+                                    "$artifactVersion. The old version will be deleted.")
+                        }
+
+                        break
+                    }
+                }
+            }
+
+            if(matchingArtifact == null) {
+                println("Deleting $it.")
+                it.delete()
+            }
+        }
     }
 }

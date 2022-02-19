@@ -19,10 +19,14 @@ dependencies {
 }
 
 tasks.jar {
-    dependsOn("copyLibs")
+    val copyLibs = tasks.getByName("copyLibs")
+    val libsFolder = File("/run/server-1/libs")
+
+    copyLibs.extensions.add("libsFolder", libsFolder)
+    dependsOn(copyLibs)
 
     outputs.upToDateWhen {
-        !tasks.getByName("copyLibs").didWork
+        !copyLibs.didWork
     }
 
     archiveBaseName.set("server")
@@ -32,14 +36,13 @@ tasks.jar {
     doFirst {
         manifest {
             val copyLibsTask = tasks.getByName("copyLibs")
-            val libsFolder = copyLibsTask.extensions["libsFolder"] as File
 
             @Suppress("UNCHECKED_CAST")
             val outputFiles = copyLibsTask.extensions["outputFiles"] as List<File>
 
             attributes(
                 "Class-Path" to outputFiles.joinToString(" ") {
-                    "libs/${it.relativeTo(libsFolder).path.replace('\\', '/')}"
+                    "libs/${it.path.replace('\\', '/')}"
                 },
                 "Main-Class" to "com.github.phantazmnetwork.server.Main",
                 "Multi-Release" to true
