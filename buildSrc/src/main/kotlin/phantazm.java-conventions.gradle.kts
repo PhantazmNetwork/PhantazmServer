@@ -36,7 +36,7 @@ tasks.register("copyLibs") {
 
     outputs.upToDateWhen {
         for(project in rootProject.subprojects) {
-            if(project.tasks.compileJava.get().didWork) {
+            if(project.tasks.classes.get().didWork) {
                 return@upToDateWhen false
             }
         }
