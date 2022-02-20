@@ -18,6 +18,8 @@ dependencies {
     implementation(libs.ethylene.toml)
 }
 
+val copyLibsTask = tasks.getByName<CopyLibs>("copyLibs")
+
 tasks.getByName<CopyLibs>("copyLibs") {
     libraryDirectory = File("/run/server-1/libs")
 }
@@ -25,8 +27,6 @@ tasks.getByName<CopyLibs>("copyLibs") {
 tasks.jar {
     val copyLibsTask = tasks.getByName<CopyLibs>("copyLibs")
     dependsOn(copyLibsTask)
-
-    inputs.files(copyLibsTask.outputs.files)
 
     archiveBaseName.set("server")
     archiveVersion.set("")
