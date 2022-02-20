@@ -62,25 +62,10 @@ abstract class CopyLibs : DefaultTask() {
             val artifactFileGroup = relativeParent.toPath().joinToString(".")
             val artifactFileName = relative.nameWithoutExtension
 
-            var foundArtifact = false
-            for(artifact in resolvedArtifacts) {
-                if(artifact.moduleVersion.id.group == artifactFileGroup && artifactFileName
-                        .startsWith("${artifact.moduleVersion.id.name}-")) {
-                    val artifactVersion = artifact.moduleVersion.id.version
-
-                    if(artifactFileName.endsWith("-$artifactVersion")) {
-                        foundArtifact = true
-                    }
-                    else {
-                        logger.info("Detected version change for ${artifact.moduleVersion.id.module}, is now " +
-                                "$artifactVersion. The old version will be deleted.")
-                    }
-
-                    break
-                }
-            }
-
-            if(!foundArtifact) {
+            if(resolvedArtifacts.none { artifact ->
+                    artifact.moduleVersion.id.group == artifactFileGroup &&
+                            artifactFileName == artifact.file.nameWithoutExtension
+                }) {
                 logger.info("Deleting $it.")
                 it.delete()
             }
