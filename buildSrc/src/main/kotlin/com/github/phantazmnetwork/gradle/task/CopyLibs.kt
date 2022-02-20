@@ -53,11 +53,10 @@ abstract class CopyLibs : DefaultTask() {
             }
         }
 
-        val absolute = File(project.rootDir, libraryDirectory.path)
-        absolute.walkTopDown().filter {
+        libraryDirectory.walkTopDown().filter {
             it.isFile
         }.forEach {
-            val relative = it.relativeTo(absolute)
+            val relative = it.relativeTo(libraryDirectory)
             val parent = relative.parentFile
 
             val groupName = parent.toPath().joinToString(".")
