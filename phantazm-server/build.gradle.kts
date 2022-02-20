@@ -20,11 +20,8 @@ dependencies {
     implementation("commons-io:commons-io:2.11.0")
 }
 
-val libsFolder = File("./run/server-1/libs")
-val absoluteLibsFolder = File(project.rootDir, libsFolder.path)
-
 tasks.getByName<CopyLibs>("copyLibs") {
-    libraryDirectory = libsFolder
+    libraryDirectory = File("/run/server-1/libs")
 }
 
 tasks.jar {
@@ -40,7 +37,7 @@ tasks.jar {
     manifest {
         attributes(
             "Class-Path" to copyLibsTask.outputs.files.files.joinToString(" ") {
-                "libs/${it.relativeTo(absoluteLibsFolder).path.replace('\\', '/')}"
+                "libs/${it.relativeTo(copyLibsTask.libraryDirectory).path.replace('\\', '/')}"
             },
             "Main-Class" to "com.github.phantazmnetwork.server.Main",
             "Multi-Release" to true

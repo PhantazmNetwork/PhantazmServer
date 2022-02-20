@@ -14,6 +14,9 @@ abstract class CopyLibs : DefaultTask() {
     //@Internal prevents Gradle from treating this property as an input and tracking its changes
     var libraryDirectory : File = project.rootDir
         @Internal get
+        set(value) {
+            field = if(value.isAbsolute) value else File(project.rootDir, value.path)
+        }
 
     //use @Input on String property instead of @DirectoryInput on DirectoryProperty so Gradle doesn't re-run the task
     //every time a file inside our folder changes
