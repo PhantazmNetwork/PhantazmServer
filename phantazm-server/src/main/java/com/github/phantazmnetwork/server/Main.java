@@ -29,6 +29,7 @@ import net.minestom.server.instance.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -39,12 +40,12 @@ public class Main {
     /**
      * The location of the server configuration file.
      */
-    public static final Path SERVER_CONFIG_PATH = Paths.get("./server-config.toml");
+    public static final Path SERVER_CONFIG_PATH = Path.of("./server-config.toml");
 
     /**
      * The location of the world configuration file.
      */
-    public static final Path WORLDS_CONFIG_PATH = Paths.get("./worlds-config.toml");
+    public static final Path WORLDS_CONFIG_PATH = Path.of("./worlds-config.toml");
 
     /**
      * The {@link ConfigHandler} instance used to manage {@link ConfigLoader}s.

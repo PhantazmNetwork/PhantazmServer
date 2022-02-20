@@ -1,4 +1,4 @@
-import java.security.MessageDigest
+import com.github.phantazmnetwork.gradle.task.CopyLibs
 
 plugins {
     id("phantazm.java-conventions")
@@ -18,43 +18,31 @@ dependencies {
     implementation(libs.ethylene.toml)
 }
 
-tasks.jar {
-    dependsOn("copyLibs")
+tasks.getByName<CopyLibs>("copyLibs") {
+    libraryDirectory = File("/run/server-1/libs")
+}
 
-    outputs.upToDateWhen {
-        !tasks.getByName("copyLibs").didWork
-    }
+tasks.jar {
+    val copyLibsTask = tasks.getByName<CopyLibs>("copyLibs")
+    dependsOn(copyLibsTask)
 
     archiveBaseName.set("server")
     archiveVersion.set("")
     archiveClassifier.set("")
 
-    doFirst {
-        manifest {
-            val copyLibsTask = tasks.getByName("copyLibs")
-            val libsFolder = copyLibsTask.extensions["libsFolder"] as File
-
-            @Suppress("UNCHECKED_CAST")
-            val outputFiles = copyLibsTask.extensions["outputFiles"] as List<File>
-
-            attributes(
-                "Class-Path" to outputFiles.joinToString(" ") {
-                    "libs/${it.relativeTo(libsFolder).path.replace('\\', '/')}"
-                },
-                "Main-Class" to "com.github.phantazmnetwork.server.Main",
-                "Multi-Release" to true
-            )
-        }
+    manifest {
+        attributes(
+            "Class-Path" to copyLibsTask.outputs.files.joinToString(" ") {
+                "libs/${it.relativeTo(copyLibsTask.libraryDirectory).toPath().joinToString("/")}"
+            },
+            "Main-Class" to "com.github.phantazmnetwork.server.Main",
+            "Multi-Release" to true
+        )
     }
 }
 
 tasks.register<Copy>("setupServer") {
     dependsOn(tasks.jar)
-
-    outputs.upToDateWhen {
-        !tasks.jar.get().didWork
-    }
-
     from(tasks.jar)
     into("$rootDir/run/server-1/")
 }
