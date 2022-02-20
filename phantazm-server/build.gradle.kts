@@ -32,7 +32,7 @@ tasks.jar {
 
     manifest {
         attributes(
-            "Class-Path" to copyLibsTask.outputs.files.files.joinToString(" ") {
+            "Class-Path" to copyLibsTask.outputs.files.joinToString(" ") {
                 "libs/${it.relativeTo(copyLibsTask.libraryDirectory).path.replace('\\', '/')}"
             },
             "Main-Class" to "com.github.phantazmnetwork.server.Main",
