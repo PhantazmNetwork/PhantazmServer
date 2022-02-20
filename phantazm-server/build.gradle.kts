@@ -1,3 +1,5 @@
+import com.github.phantazmnetwork.gradle.task.CopyLibs
+
 plugins {
     id("phantazm.java-conventions")
 }
@@ -18,46 +20,36 @@ dependencies {
     implementation("commons-io:commons-io:2.11.0")
 }
 
-tasks.jar {
-    val copyLibs = tasks.getByName("copyLibs")
-    val libsFolder = File("/run/server-1/libs")
-    copyLibs.extensions.add("libsFolder", libsFolder)
-    dependsOn(copyLibs)
+val libsFolder = File("./run/server-1/libs")
+val absoluteLibsFolder = File(project.rootDir, libsFolder.path)
 
-    onlyIf {
-        copyLibs.didWork
-    }
+tasks.getByName<CopyLibs>("copyLibs") {
+    libraryDirectory = libsFolder
+}
+
+tasks.jar {
+    val copyLibsTask = tasks.getByName<CopyLibs>("copyLibs")
+    dependsOn(copyLibsTask)
+
+    inputs.files(copyLibsTask.outputs.files)
 
     archiveBaseName.set("server")
     archiveVersion.set("")
     archiveClassifier.set("")
 
-    doFirst {
-        manifest {
-            val copyLibsTask = tasks.getByName("copyLibs")
-
-            @Suppress("UNCHECKED_CAST")
-            val outputFiles = copyLibsTask.extensions["outputFiles"] as List<File>
-
-            attributes(
-                "Class-Path" to outputFiles.joinToString(" ") {
-                    "libs/${it.path.replace('\\', '/')}"
-                },
-                "Main-Class" to "com.github.phantazmnetwork.server.Main",
-                "Multi-Release" to true
-            )
-        }
+    manifest {
+        attributes(
+            "Class-Path" to copyLibsTask.outputs.files.files.joinToString(" ") {
+                "libs/${it.relativeTo(absoluteLibsFolder).path.replace('\\', '/')}"
+            },
+            "Main-Class" to "com.github.phantazmnetwork.server.Main",
+            "Multi-Release" to true
+        )
     }
 }
 
 tasks.register<Copy>("setupServer") {
-    val jar = tasks.getByName("jar")
-    dependsOn(jar)
-
-    onlyIf {
-        jar.didWork
-    }
-
-    from(jar)
+    dependsOn(tasks.jar)
+    from(tasks.jar)
     into("$rootDir/run/server-1/")
 }

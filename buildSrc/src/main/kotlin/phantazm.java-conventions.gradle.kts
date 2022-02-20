@@ -1,3 +1,5 @@
+import com.github.phantazmnetwork.gradle.task.CopyLibs
+
 plugins {
     java
 }
@@ -30,71 +32,4 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
-tasks.register("copyLibs") {
-    val outputFiles = mutableListOf<File>()
-    extensions.add("outputFiles", outputFiles)
-
-    outputs.upToDateWhen {
-        rootProject.subprojects.none {
-            it.tasks.compileJava.get().didWork
-        }
-    }
-
-    doFirst {
-        val libsFolder = extensions["libsFolder"] as File
-
-        val resolvedArtifacts = configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts
-        resolvedArtifacts.forEach {
-            val dirs = it.moduleVersion.id.group.split('.')
-
-            var target = libsFolder
-            for(dir in dirs) {
-                target = target.resolve(dir)
-            }
-            target.mkdirs()
-            target = target.resolve(it.file.name)
-
-            val absolute = File(rootDir, target.path)
-            if(!absolute.exists()) {
-                logger.info("Creating $absolute")
-                it.file.copyTo(absolute, false)
-            }
-
-            outputFiles.add(target.relativeTo(libsFolder))
-        }
-
-        val absolute = File(rootDir, libsFolder.path)
-        absolute.walkTopDown().filter {
-            it.isFile
-        }.forEach {
-            val relative = it.relativeTo(absolute)
-            val parent = relative.parentFile
-
-            val groupName = parent.toPath().joinToString(".")
-            val artifactFileName = relative.nameWithoutExtension
-
-            var matchingArtifact : ResolvedArtifact? = null
-            for(artifact in resolvedArtifacts) {
-                if(artifact.moduleVersion.id.group == groupName && artifactFileName
-                        .startsWith("${artifact.moduleVersion.id.name}-")) {
-                    val artifactVersion = artifact.moduleVersion.id.version
-
-                    if(artifactFileName.endsWith("-$artifactVersion")) {
-                        matchingArtifact = artifact
-                    }
-                    else {
-                        logger.info("Detected version change for ${artifact.moduleVersion.id.module}, is now " +
-                                "$artifactVersion. The old version will be deleted.")
-                    }
-
-                    break
-                }
-            }
-
-            if(matchingArtifact == null) {
-                logger.info("Deleting $it.")
-                it.delete()
-            }
-        }
-    }
-}
+tasks.register<CopyLibs>("copyLibs")
