@@ -3,8 +3,6 @@ package com.github.phantazmnetwork.gradle.task
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.artifacts.transform.InputArtifactDependencies
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.get
@@ -39,7 +37,7 @@ abstract class CopyLibs : DefaultTask() {
             for(dir in it.moduleVersion.id.group.split('.')) {
                 target = target.resolve(dir)
             }
-            target.mkdirs()
+
             it to target.resolve(it.file.name)
         }
     }
