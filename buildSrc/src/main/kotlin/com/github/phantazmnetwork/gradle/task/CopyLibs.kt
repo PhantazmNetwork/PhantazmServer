@@ -57,14 +57,14 @@ abstract class CopyLibs : DefaultTask() {
             it.isFile
         }.forEach {
             val relative = it.relativeTo(libraryDirectory)
-            val parent = relative.parentFile
+            val relativeParent = relative.parentFile
 
-            val groupName = parent.toPath().joinToString(".")
+            val artifactFileGroup = relativeParent.toPath().joinToString(".")
             val artifactFileName = relative.nameWithoutExtension
 
             var foundArtifact = false
             for(artifact in resolvedArtifacts) {
-                if(artifact.moduleVersion.id.group == groupName && artifactFileName
+                if(artifact.moduleVersion.id.group == artifactFileGroup && artifactFileName
                         .startsWith("${artifact.moduleVersion.id.name}-")) {
                     val artifactVersion = artifact.moduleVersion.id.version
 
