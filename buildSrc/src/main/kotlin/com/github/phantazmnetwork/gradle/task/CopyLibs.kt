@@ -62,14 +62,14 @@ abstract class CopyLibs : DefaultTask() {
             val groupName = parent.toPath().joinToString(".")
             val artifactFileName = relative.nameWithoutExtension
 
-            var matchingArtifact : ResolvedArtifact? = null
+            var foundArtifact = false
             for(artifact in resolvedArtifacts) {
                 if(artifact.moduleVersion.id.group == groupName && artifactFileName
                         .startsWith("${artifact.moduleVersion.id.name}-")) {
                     val artifactVersion = artifact.moduleVersion.id.version
 
                     if(artifactFileName.endsWith("-$artifactVersion")) {
-                        matchingArtifact = artifact
+                        foundArtifact = true
                     }
                     else {
                         logger.info("Detected version change for ${artifact.moduleVersion.id.module}, is now " +
@@ -80,7 +80,7 @@ abstract class CopyLibs : DefaultTask() {
                 }
             }
 
-            if(matchingArtifact == null) {
+            if(!foundArtifact) {
                 logger.info("Deleting $it.")
                 it.delete()
             }

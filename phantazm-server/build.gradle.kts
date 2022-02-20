@@ -16,8 +16,6 @@ dependencies {
 
     implementation(libs.miniMessage)
     implementation(libs.ethylene.toml)
-
-    //implementation("commons-io:commons-io:2.11.0")
 }
 
 tasks.getByName<CopyLibs>("copyLibs") {
