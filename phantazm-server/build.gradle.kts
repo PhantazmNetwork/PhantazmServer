@@ -18,8 +18,6 @@ dependencies {
     implementation(libs.ethylene.toml)
 }
 
-val copyLibsTask = tasks.getByName<CopyLibs>("copyLibs")
-
 tasks.getByName<CopyLibs>("copyLibs") {
     libraryDirectory = File("/run/server-1/libs")
 }
