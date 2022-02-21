@@ -1,0 +1,3 @@
+defaultWorldName = "world"
+worldsPath = ".\\worlds"
+mapsPath = ".\\maps"
