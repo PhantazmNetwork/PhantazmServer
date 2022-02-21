@@ -3,6 +3,9 @@
     <option name="JAR_PATH" value="$PROJECT_DIR$/run/server-1/server.jar" />
     <option name="WORKING_DIRECTORY" value="$ProjectFileDir$\run\server-1" />
     <option name="ALTERNATIVE_JRE_PATH" />
-    <method v="2" />
+    <method v="2">
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="setupServer" externalProjectPath="$PROJECT_DIR$/phantazm-server" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="copyJar" externalProjectPath="$PROJECT_DIR$/phantazm-server" vmOptions="" scriptParameters="" />
+    </method>
   </configuration>
 </component>
