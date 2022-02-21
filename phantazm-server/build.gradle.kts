@@ -59,14 +59,14 @@ tasks.register("setupServer") {
 
         if(runFolder.exists() && runFolder.listFiles()?.size == 0) {
             if(!forceSetup) {
-                logger.lifecycle("No action was taken because the run folder already exists. To force the setup task to " +
-                        "run, use -PforceSetup.")
+                logger.lifecycle("No action was taken because the run folder already exists. To force the setup task " +
+                        "to run, use -PforceSetup.")
                 return@doFirst
             }
 
-            logger.lifecycle("You are forcing server setup. This will delete EVERYTHING in the run folder. Type \"Y\" " +
-                    "without quotation marks (case-sensitive) and hit enter if you wish to proceed; otherwise, type any " +
-                    "other character to cancel.")
+            logger.lifecycle("You are forcing server setup. This will delete EVERYTHING in the run folder. Type \"Y\"" +
+                    " without quotation marks (case-sensitive) and hit enter if you wish to proceed; otherwise, type " +
+                    "any other character to cancel.")
             if(readLine() != "Y") {
                 logger.lifecycle("Cancelled server setup; no files have been changed.")
                 return@doFirst
