@@ -2,7 +2,7 @@
     serverIP = "0.0.0.0"
     port = 25567
     optifineEnabled = true
-    authType = "MOJANG"
-    velocitySecret = ""
+    authType = "BUNGEE"
+    velocitySecret = "TkZaQWDQlQUa"
 [pingList]
     description = "A Minecraft Server"

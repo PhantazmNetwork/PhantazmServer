@@ -38,7 +38,7 @@ abstract class SetupServer : DefaultTask() {
 
         runFolder.mkdir()
         if(dataFolder.exists()) {
-            logger.lifecycle("Copying server files to $dataFolder")
+            logger.lifecycle("Copying server files to $runFolder")
             dataFolder.copyRecursively(runFolder, true)
         }
 
