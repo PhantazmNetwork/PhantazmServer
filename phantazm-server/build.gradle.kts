@@ -51,5 +51,5 @@ tasks.register<Copy>("copyJar") {
 }
 
 tasks.getByName<SetupServer>("setupServer") {
-    dataFolder = rootProject.rootDir.resolve("runData")
+    dataFolder = rootProject.rootDir.resolve("defaultRunData")
 }
