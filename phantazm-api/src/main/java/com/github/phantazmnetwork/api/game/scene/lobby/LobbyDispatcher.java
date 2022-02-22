@@ -12,7 +12,7 @@ public class LobbyDispatcher implements SceneDispatcher<LobbyDispatchRequest> {
 
     private final Map<String, LobbyGroup> lobbyGroups;
 
-    private boolean joinable;
+    private boolean joinable = true;
 
     public LobbyDispatcher(@NotNull Map<String, LobbyGroup> lobbyGroups) {
         this.lobbyGroups = lobbyGroups;

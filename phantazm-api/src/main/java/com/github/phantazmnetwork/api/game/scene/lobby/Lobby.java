@@ -55,6 +55,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
         for (LobbyJoiner joiner : joinRequest.players()) {
             joiner.player().getPlayer().ifPresent(player -> player.setInstance(instance, instanceConfig.spawnPoint()));
+            players.put(joiner.player().getUUID(), joiner.player());
         }
 
         return new JoinResult(true, Optional.empty());
