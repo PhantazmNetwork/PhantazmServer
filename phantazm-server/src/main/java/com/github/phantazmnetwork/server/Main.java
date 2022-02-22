@@ -6,7 +6,7 @@ import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.WorldsConfigProcessor;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
-import com.github.phantazmnetwork.server.config.world.WorldsConfig;
+import com.github.phantazmnetwork.server.config.instance.InstancesConfig;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
 import com.github.steanky.ethylene.core.ConfigHandler;
@@ -29,9 +29,7 @@ import net.minestom.server.instance.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Launches the server.
@@ -43,9 +41,9 @@ public class Main {
     public static final Path SERVER_CONFIG_PATH = Path.of("./server-config.toml");
 
     /**
-     * The location of the world configuration file.
+     * The location of the {@link Instance} configuration file.
      */
-    public static final Path WORLDS_CONFIG_PATH = Path.of("./worlds-config.toml");
+    public static final Path WORLDS_CONFIG_PATH = Path.of("./instances-config.toml");
 
     /**
      * The {@link ConfigHandler} instance used to manage {@link ConfigLoader}s.
@@ -59,10 +57,10 @@ public class Main {
             ServerConfig.class, "server_config");
 
     /**
-     * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link WorldsConfig} loader.
+     * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link InstancesConfig} loader.
      */
-    public static final ConfigHandler.ConfigKey<WorldsConfig> WORLDS_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
-            WorldsConfig.class, "worlds_config");
+    public static final ConfigHandler.ConfigKey<InstancesConfig> WORLDS_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
+            InstancesConfig.class, "instances_config");
 
     /**
      * Starting point for the server.
@@ -77,32 +75,32 @@ public class Main {
                 new SyncFileConfigLoader<>(new ServerConfigProcessor(MiniMessage.miniMessage()), ServerConfig.DEFAULT,
                         SERVER_CONFIG_PATH, codec));
         CONFIG_HANDLER.registerLoader(WORLDS_CONFIG_KEY, new SyncFileConfigLoader<>(new WorldsConfigProcessor(),
-                WorldsConfig.DEFAULT, WORLDS_CONFIG_PATH, codec));
+                InstancesConfig.DEFAULT, WORLDS_CONFIG_PATH, codec));
 
         try {
             CONFIG_HANDLER.writeDefaultsAndGet();
 
             ServerConfig serverConfig = CONFIG_HANDLER.getData(SERVER_CONFIG_KEY);
-            WorldsConfig worldsConfig = CONFIG_HANDLER.getData(WORLDS_CONFIG_KEY);
+            InstancesConfig instancesConfig = CONFIG_HANDLER.getData(WORLDS_CONFIG_KEY);
 
-            initializeWorlds(worldsConfig);
+            initializeWorlds(instancesConfig);
             startServer(minecraftServer, serverConfig);
         } catch (ConfigProcessException e) {
             logger.error("Fatal error when loading configuration data", e);
         }
     }
 
-    private static void initializeWorlds(WorldsConfig worldsConfig) {
-        Path worldsPath = worldsConfig.worldsPath();
-        InstanceLoader instanceLoader = new FileSystemInstanceLoader(worldsPath, AnvilLoader::new);
+    private static void initializeWorlds(InstancesConfig instancesConfig) {
+        Path instancesPath = instancesConfig.instancesPath();
+        InstanceLoader instanceLoader = new FileSystemInstanceLoader(instancesPath, AnvilLoader::new);
 
-        Instance lobby = instanceLoader.loadWorld(MinecraftServer.getInstanceManager(), worldsConfig
-                .defaultWorldName());
+        Instance lobby = instanceLoader.loadInstance(MinecraftServer.getInstanceManager(), instancesConfig
+                .defaultInstanceName());
 
         //TODO make this handled by lobby framework, not in main class
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
             event.setSpawningInstance(lobby);
-            event.getPlayer().setRespawnPoint(worldsConfig.worlds().get(worldsConfig.defaultWorldName()).spawnPoint());
+            event.getPlayer().setRespawnPoint(instancesConfig.instances().get(instancesConfig.defaultInstanceName()).spawnPoint());
             event.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
     }

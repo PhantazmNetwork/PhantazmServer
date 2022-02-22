@@ -21,7 +21,7 @@ public class FileSystemInstanceLoader implements InstanceLoader {
 
     /**
      * Creates an {@link InstanceLoader} based on a file system.
-     * @param rootPath The {@link Path} of the world directory
+     * @param rootPath The {@link Path} of the {@link Instance} directory
      * @param loaderCreator A creator for {@link Instance}s
      */
     public FileSystemInstanceLoader(@NotNull Path rootPath, @NotNull Function<Path, IChunkLoader> loaderCreator) {
@@ -31,7 +31,7 @@ public class FileSystemInstanceLoader implements InstanceLoader {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @NotNull Instance loadWorld(@NotNull InstanceManager instanceManager, @NotNull String... subPaths) {
+    public @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager, @NotNull String... subPaths) {
         Path path = rootPath;
         for (String subPath : subPaths) {
             path = path.resolve(subPath);

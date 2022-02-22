@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.server.config.world.WorldConfig;
-import com.github.phantazmnetwork.server.config.world.WorldsConfig;
+import com.github.phantazmnetwork.api.config.InstanceConfig;
+import com.github.phantazmnetwork.server.config.instance.InstancesConfig;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -18,38 +18,37 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Config processor used for {@link WorldsConfig}s.
+ * Config processor used for {@link InstancesConfig}s.
  */
-public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
+public class WorldsConfigProcessor implements ConfigProcessor<InstancesConfig> {
     @Override
-    public @NotNull WorldsConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+    public @NotNull InstancesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         try {
-            String defaultWorldName = element.getStringOrDefault(WorldsConfig.DEFAULT_DEFAULT_WORLD_NAME,
-                    "defaultWorldName");
+            String defaultInstanceName = element.getStringOrDefault(InstancesConfig.DEFAULT_INSTANCE_NAME,
+                    "defaultInstanceName");
 
-            Path worldsPath = Paths.get(element.getStringOrDefault(WorldsConfig.DEFAULT_WORLDS_PATH_STRING,
-                    "worldsPath"));
-            Path mapsPath = Paths.get(element.getStringOrDefault(WorldsConfig.DEFAULT_MAPS_PATH_STRING,
+            Path instancesPath = Paths.get(element.getStringOrDefault(InstancesConfig.DEFAULT_INSTANCES_PATH_STRING,
+                    "instancesPath"));
+            Path mapsPath = Paths.get(element.getStringOrDefault(InstancesConfig.DEFAULT_MAPS_PATH_STRING,
                     "mapsPath"));
 
-            Map<String, WorldConfig> worlds = new HashMap<>();
-            ConfigNode worldsNode = element.getNodeOrDefault(LinkedConfigNode::new, "worlds");
-            for (Map.Entry<String, ConfigElement> world : worldsNode.entrySet()) {
-                ConfigNode worldNode = world.getValue().asNode();
-                ConfigNode spawnPoint = worldNode.get("spawnPoint").asNode();
+            Map<String, InstanceConfig> instances = new HashMap<>();
+            ConfigNode instancesNode = element.getNodeOrDefault(LinkedConfigNode::new, "instances");
+            for (Map.Entry<String, ConfigElement> instance : instancesNode.entrySet()) {
+                ConfigNode instanceNode = instance.getValue().asNode();
+                ConfigNode spawnPoint = instanceNode.get("spawnPoint").asNode();
 
-                double x = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.x(), "x").doubleValue();
-                double y = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.y(), "y").doubleValue();
-                double z = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.z(), "z").doubleValue();
-
-                float yaw = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.yaw(), "yaw").floatValue();
-                float pitch = spawnPoint.getNumberOrDefault(WorldConfig.DEFAULT_POS.pitch(), "pitch")
+                double x = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.x(), "x").doubleValue();
+                double y = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.y(), "y").doubleValue();
+                double z = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.z(), "z").doubleValue();
+                float yaw = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.yaw(), "yaw").floatValue();
+                float pitch = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.pitch(), "pitch")
                         .floatValue();
 
-                worlds.put(world.getKey(), new WorldConfig(new Pos(x, y, z, yaw, pitch)));
+                instances.put(instance.getKey(), new InstanceConfig(new Pos(x, y, z, yaw, pitch)));
             }
 
-            return new WorldsConfig(defaultWorldName, worldsPath, mapsPath, Map.copyOf(worlds));
+            return new InstancesConfig(defaultInstanceName, instancesPath, mapsPath, Map.copyOf(instances));
         }
         catch (IllegalStateException | InvalidPathException e) {
             throw new ConfigProcessException(e);
@@ -57,30 +56,30 @@ public class WorldsConfigProcessor implements ConfigProcessor<WorldsConfig> {
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull WorldsConfig worldsConfig) {
+    public @NotNull ConfigElement elementFromData(@NotNull InstancesConfig instancesConfig) {
         ConfigNode configNode = new LinkedConfigNode();
-        configNode.put("defaultWorldName", new ConfigPrimitive(worldsConfig.defaultWorldName()));
-        configNode.put("worldsPath", new ConfigPrimitive(worldsConfig.worldsPath().toString()));
-        configNode.put("mapsPath", new ConfigPrimitive(worldsConfig.mapsPath().toString()));
+        configNode.put("defaultInstanceName", new ConfigPrimitive(instancesConfig.defaultInstanceName()));
+        configNode.put("instancesPath", new ConfigPrimitive(instancesConfig.instancesPath().toString()));
+        configNode.put("mapsPath", new ConfigPrimitive(instancesConfig.mapsPath().toString()));
 
-        ConfigNode worldsNode = new LinkedConfigNode();
-        for (Map.Entry<String, WorldConfig> worldConfigEntry : worldsConfig.worlds().entrySet()) {
-            WorldConfig worldConfig = worldConfigEntry.getValue();
+        ConfigNode instancesNode = new LinkedConfigNode();
+        for (Map.Entry<String, InstanceConfig> instanceConfigEntry : instancesConfig.instances().entrySet()) {
+            InstanceConfig instanceConfig = instanceConfigEntry.getValue();
 
             ConfigNode spawnPointNode = new LinkedConfigNode();
-            Pos spawnPoint = worldConfig.spawnPoint();
+            Pos spawnPoint = instanceConfig.spawnPoint();
             spawnPointNode.put("x", new ConfigPrimitive(spawnPoint.x()));
             spawnPointNode.put("y", new ConfigPrimitive(spawnPoint.y()));
             spawnPointNode.put("z", new ConfigPrimitive(spawnPoint.z()));
             spawnPointNode.put("yaw", new ConfigPrimitive(spawnPoint.yaw()));
             spawnPointNode.put("pitch", new ConfigPrimitive(spawnPoint.pitch()));
 
-            ConfigNode worldNode = new LinkedConfigNode();
-            worldNode.put("spawnPoint", spawnPointNode);
+            ConfigNode instanceNode = new LinkedConfigNode();
+            instanceNode.put("spawnPoint", spawnPointNode);
 
-            worldsNode.put(worldConfigEntry.getKey(), worldNode);
+            instancesNode.put(instanceConfigEntry.getKey(), instanceNode);
         }
-        configNode.put("worlds", worldsNode);
+        configNode.put("instances", instancesNode);
 
         return configNode;
     }

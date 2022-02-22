@@ -1,12 +1,13 @@
 package com.github.phantazmnetwork.api.inventory;
 
+import com.github.phantazmnetwork.api.util.Tickable;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents an item in an {@link net.minestom.server.inventory.AbstractInventory}.
  */
-public interface InventoryObject {
+public interface InventoryObject extends Tickable {
 
     /**
      * Gets the currently associated {@link ItemStack}.
@@ -19,10 +20,5 @@ public interface InventoryObject {
      * @return Whether this inventory object should be redrawn
      */
     boolean shouldRedraw();
-
-    /**
-     * Ticks the inventory object.
-     */
-    void tick();
 
 }
