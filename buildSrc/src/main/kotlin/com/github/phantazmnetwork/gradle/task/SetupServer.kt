@@ -6,8 +6,6 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 
 abstract class SetupServer : DefaultTask() {
-    private val files: MutableMap<String, File> = mutableMapOf()
-
     var dataFolder: File = project.rootDir.resolve("runData")
         @Internal get
 

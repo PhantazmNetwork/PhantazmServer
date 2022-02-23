@@ -9,8 +9,6 @@ repositories {
     maven("https://jitpack.io")
     maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
-    maven("https://repo.viaversion.com")
-    maven("https://nexus.velocitypowered.com/repository/maven-public/")
 }
 
 dependencies {
