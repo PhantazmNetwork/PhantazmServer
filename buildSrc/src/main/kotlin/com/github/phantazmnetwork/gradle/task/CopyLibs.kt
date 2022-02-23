@@ -34,7 +34,6 @@ abstract class CopyLibs : DefaultTask() {
             Iterable<Pair<ResolvedArtifact, File>> {
         return artifacts.map {
             var target = base
-            it.file.lastModified()
             for(dir in it.moduleVersion.id.group.split('.')) {
                 target = target.resolve(dir)
             }
