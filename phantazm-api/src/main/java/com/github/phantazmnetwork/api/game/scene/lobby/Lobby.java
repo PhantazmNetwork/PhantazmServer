@@ -8,7 +8,6 @@ import com.github.phantazmnetwork.api.player.PlayerView;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.server;
 import com.github.phantazmnetwork.api.instance.FileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
-import com.github.phantazmnetwork.server.config.loader.WorldsConfigProcessor;
+import com.github.phantazmnetwork.server.config.loader.InstancesConfigProcessor;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
 import com.github.phantazmnetwork.server.config.instance.InstancesConfig;
@@ -74,7 +74,7 @@ public class Main {
         CONFIG_HANDLER.registerLoader(SERVER_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new ServerConfigProcessor(MiniMessage.miniMessage()), ServerConfig.DEFAULT,
                         SERVER_CONFIG_PATH, codec));
-        CONFIG_HANDLER.registerLoader(WORLDS_CONFIG_KEY, new SyncFileConfigLoader<>(new WorldsConfigProcessor(),
+        CONFIG_HANDLER.registerLoader(WORLDS_CONFIG_KEY, new SyncFileConfigLoader<>(new InstancesConfigProcessor(),
                 InstancesConfig.DEFAULT, WORLDS_CONFIG_PATH, codec));
 
         try {

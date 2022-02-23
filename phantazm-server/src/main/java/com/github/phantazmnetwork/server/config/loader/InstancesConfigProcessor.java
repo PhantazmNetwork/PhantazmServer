@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Config processor used for {@link InstancesConfig}s.
  */
-public class WorldsConfigProcessor implements ConfigProcessor<InstancesConfig> {
+public class InstancesConfigProcessor implements ConfigProcessor<InstancesConfig> {
     @Override
     public @NotNull InstancesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         try {
