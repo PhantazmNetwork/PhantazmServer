@@ -1,4 +1,5 @@
 import com.github.phantazmnetwork.gradle.task.CopyLibs
+import com.github.phantazmnetwork.gradle.task.SetupServer
 
 plugins {
     java
@@ -33,3 +34,4 @@ tasks.getByName<Test>("test") {
 }
 
 tasks.register<CopyLibs>("copyLibs")
+tasks.register<SetupServer>("setupServer")
