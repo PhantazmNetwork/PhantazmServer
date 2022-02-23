@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class LobbyGroupAbstract implements LobbyGroup {
+public abstract class LobbyGroupAbstract implements SceneProvider<Lobby> {
 
     private final List<Lobby> lobbies = new ArrayList<>();
 
@@ -16,7 +16,7 @@ public abstract class LobbyGroupAbstract implements LobbyGroup {
     }
 
     @Override
-    public @NotNull Lobby getLobby() {
+    public @NotNull Lobby provideScene() {
         Lobby minimumLobby = null;
         int minimumOnline = Integer.MAX_VALUE;
 
@@ -37,6 +37,15 @@ public abstract class LobbyGroupAbstract implements LobbyGroup {
         }
 
         return minimumLobby;
+    }
+
+    @Override
+    public void forceShutdown() {
+        for (Lobby lobby : lobbies) {
+            lobby.forceShutdown();
+        }
+
+        lobbies.clear();
     }
 
     @Override

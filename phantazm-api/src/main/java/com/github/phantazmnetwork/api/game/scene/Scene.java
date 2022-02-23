@@ -5,10 +5,23 @@ import com.github.phantazmnetwork.api.util.Tickable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-public interface Scene<T> extends Tickable {
+/**
+ * Represents a scene which accepts join requests.
+ * @param <TRequest> The type of request used for joins.
+ */
+public interface Scene<TRequest> extends Tickable {
 
-    @NotNull JoinResult join(@NotNull T joinRequest);
+    /**
+     * Joins the scene.
+     * @param joinRequest The request for the join
+     * @return The result of the join
+     */
+    @NotNull JoinResult join(@NotNull TRequest joinRequest);
 
+    /**
+     * Gets the {@link PlayerView}s that are currently part of the scene.
+     * @return
+     */
     @UnmodifiableView @NotNull Iterable<PlayerView> getPlayers();
 
     int getOnlinePlayerCount();

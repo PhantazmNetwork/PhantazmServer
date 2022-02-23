@@ -10,12 +10,12 @@ import java.util.Optional;
 
 public class LobbyDispatcher implements SceneDispatcher<LobbyDispatchRequest> {
 
-    private final Map<String, LobbyGroup> lobbyGroups;
+    private final Map<String, SceneProvider<Lobby>> sceneProviders;
 
     private boolean joinable = true;
 
-    public LobbyDispatcher(@NotNull Map<String, LobbyGroup> lobbyGroups) {
-        this.lobbyGroups = lobbyGroups;
+    public LobbyDispatcher(@NotNull Map<String, SceneProvider<Lobby>> sceneProviders) {
+        this.sceneProviders = sceneProviders;
     }
 
     @Override
@@ -24,13 +24,13 @@ public class LobbyDispatcher implements SceneDispatcher<LobbyDispatchRequest> {
             return new DispatchResult(false, Optional.of("The dispatcher is not joinable."));
         }
 
-        LobbyGroup lobbyGroup = lobbyGroups.get(dispatchRequest.targetLobbyName());
-        if (lobbyGroup == null) {
+        SceneProvider<Lobby> sceneProvider = sceneProviders.get(dispatchRequest.targetLobbyName());
+        if (sceneProvider == null) {
             return new DispatchResult(false,
                     Optional.of("No lobbies exist under the name " + dispatchRequest.targetLobbyName() + "."));
         }
 
-        JoinResult result = lobbyGroup.getLobby().join(new LobbyJoinRequest(dispatchRequest.players()));
+        JoinResult result = sceneProvider.provideScene().join(new LobbyJoinRequest(dispatchRequest.players()));
 
         return new DispatchResult(result.success(), result.message());
     }
@@ -41,8 +41,15 @@ public class LobbyDispatcher implements SceneDispatcher<LobbyDispatchRequest> {
     }
 
     @Override
+    public void forceShutdown() {
+        for (SceneProvider<Lobby> sceneProvider : sceneProviders.values()) {
+            sceneProvider.forceShutdown();
+        }
+    }
+
+    @Override
     public void tick() {
-        for (LobbyGroup group : lobbyGroups.values()) {
+        for (SceneProvider<Lobby> group : sceneProviders.values()) {
             group.tick();
         }
     }
