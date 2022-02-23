@@ -7,9 +7,8 @@ import com.github.phantazmnetwork.api.player.PlayerView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,6 +17,8 @@ import java.util.UUID;
 public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
     private final Map<String, SceneProvider<Lobby>> lobbyProviders;
+
+    private final Map<UUID, Lobby> lobbyMap = new HashMap<>();
 
     private boolean shutdown = false;
 
@@ -39,16 +40,36 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
                     Optional.of("No lobbies exist under the name " + routeRequest.targetLobbyName() + "."));
         }
 
-        return lobbyProvider.provideScene().join(new LobbyJoinRequest(routeRequest.players()));
+        Lobby lobby = lobbyProvider.provideScene();
+        RouteResult result = lobby.join(new LobbyJoinRequest(routeRequest.players()));
+        if (result.success()) {
+            for (PlayerView playerView : routeRequest.players()) {
+                lobbyMap.put(playerView.getUUID(), lobby);
+            }
+        }
+
+        return result;
     }
 
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
-        return null;
+        for (UUID uuid : leavers) {
+            if (!lobbyMap.containsKey(uuid)) {
+                return new RouteResult(false,
+                        Optional.of(uuid + " is not part of a scene in the lobby router."));
+            }
+        }
+
+        for (UUID uuid : leavers) {
+            lobbyMap.get(uuid).leave(Collections.singletonList(uuid));
+        }
+
+        return new RouteResult(true, Optional.empty());
     }
 
     @Override
     public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
+        // TODO: use UUID-based connection-manager
         Map<UUID, PlayerView> players = new HashMap<>();
 
         for (SceneProvider<Lobby> lobbyProvider : lobbyProviders.values()) {

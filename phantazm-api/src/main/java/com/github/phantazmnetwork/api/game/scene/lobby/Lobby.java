@@ -42,14 +42,14 @@ public class Lobby implements Scene<LobbyJoinRequest> {
             return new RouteResult(false, Optional.of("Lobby is shutdown."));
         }
 
-        for (LobbyJoiner joiner : joinRequest.players()) {
-            joiner.player().getPlayer().ifPresent(player -> {
+        for (PlayerView playerView : joinRequest.players()) {
+            playerView.getPlayer().ifPresent(player -> {
                 if (player.getInstance() != instance) {
                     player.setInstance(instance, instanceConfig.spawnPoint());
                 }
             });
 
-            players.put(joiner.player().getUUID(), joiner.player());
+            players.put(playerView.getUUID(), playerView);
         }
 
         return new RouteResult(true, Optional.empty());
