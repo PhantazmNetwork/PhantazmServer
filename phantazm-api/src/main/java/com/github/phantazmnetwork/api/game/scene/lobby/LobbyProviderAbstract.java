@@ -1,17 +1,18 @@
 package com.github.phantazmnetwork.api.game.scene.lobby;
 
+import com.github.phantazmnetwork.api.game.scene.SceneProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class LobbyGroupAbstract implements SceneProvider<Lobby> {
+public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
 
     private final List<Lobby> lobbies = new ArrayList<>();
 
     private final int newLobbyThreshold;
 
-    public LobbyGroupAbstract(int newLobbyThreshold) {
+    public LobbyProviderAbstract(int newLobbyThreshold) {
         this.newLobbyThreshold = newLobbyThreshold;
     }
 

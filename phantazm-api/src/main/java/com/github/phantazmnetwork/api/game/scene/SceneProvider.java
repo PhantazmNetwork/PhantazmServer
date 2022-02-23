@@ -1,6 +1,5 @@
-package com.github.phantazmnetwork.api.game.scene.lobby;
+package com.github.phantazmnetwork.api.game.scene;
 
-import com.github.phantazmnetwork.api.game.scene.Scene;
 import com.github.phantazmnetwork.api.util.Tickable;
 import org.jetbrains.annotations.NotNull;
 
