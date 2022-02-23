@@ -47,9 +47,13 @@ abstract class CopyLibs : DefaultTask() {
         val resolvedArtifacts = targetConfiguration.resolvedConfiguration.resolvedArtifacts
 
         getArtifacts(libraryDirectory, resolvedArtifacts).forEach {
-            if(!it.second.exists()) {
-                logger.info("Creating $it")
-                it.first.file.copyTo(it.second, false)
+            val artifactLastModified = it.first.file.lastModified()
+            val targetLastModified = if(it.second.exists()) it.second.lastModified() else -1
+
+            if(artifactLastModified != targetLastModified) {
+                logger.info("Copying artifact ${it.first.file} to ${it.second}.")
+                it.first.file.copyTo(it.second, true)
+                it.second.setLastModified(artifactLastModified)
             }
         }
 
