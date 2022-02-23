@@ -67,18 +67,18 @@ abstract class CopyLibs : DefaultTask() {
             if(relativeParent == null) {
                 logger.info("Deleting $it because its artifact group cannot be determined.")
                 it.delete()
-                return@copyLibs
             }
+            else {
+                val artifactFileGroup = relativeParent.toPath().joinToString(".")
+                val artifactFileName = relative.nameWithoutExtension
 
-            val artifactFileGroup = relativeParent.toPath().joinToString(".")
-            val artifactFileName = relative.nameWithoutExtension
-
-            if(resolvedArtifacts.none { artifact ->
-                    artifact.moduleVersion.id.group == artifactFileGroup &&
-                            artifactFileName == artifact.file.nameWithoutExtension
-                }) {
-                logger.info("Deleting $it because it does not match any known artifacts.")
-                it.delete()
+                if(resolvedArtifacts.none { artifact ->
+                        artifact.moduleVersion.id.group == artifactFileGroup &&
+                                artifactFileName == artifact.file.nameWithoutExtension
+                    }) {
+                    logger.info("Deleting $it because it does not match any known artifacts.")
+                    it.delete()
+                }
             }
         }
     }
