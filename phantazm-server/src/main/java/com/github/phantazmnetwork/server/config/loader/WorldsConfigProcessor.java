@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,9 +26,9 @@ public class WorldsConfigProcessor implements ConfigProcessor<InstancesConfig> {
             String defaultInstanceName = element.getStringOrDefault(InstancesConfig.DEFAULT_INSTANCE_NAME,
                     "defaultInstanceName");
 
-            Path instancesPath = Paths.get(element.getStringOrDefault(InstancesConfig.DEFAULT_INSTANCES_PATH_STRING,
+            Path instancesPath = Path.of(element.getStringOrDefault(InstancesConfig.DEFAULT_INSTANCES_PATH_STRING,
                     "instancesPath"));
-            Path mapsPath = Paths.get(element.getStringOrDefault(InstancesConfig.DEFAULT_MAPS_PATH_STRING,
+            Path mapsPath = Path.of(element.getStringOrDefault(InstancesConfig.DEFAULT_MAPS_PATH_STRING,
                     "mapsPath"));
 
             Map<String, InstanceConfig> instances = new HashMap<>();

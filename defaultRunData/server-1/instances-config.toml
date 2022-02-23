@@ -1,3 +1,3 @@
 defaultWorldName = "world"
-worldsPath = ".\\worlds"
+instancesPath = ".\\worlds"
 mapsPath = ".\\maps"
