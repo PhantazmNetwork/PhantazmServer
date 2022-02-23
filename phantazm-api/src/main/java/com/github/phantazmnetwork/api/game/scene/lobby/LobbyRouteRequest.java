@@ -4,9 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record LobbyDispatchRequest(@NotNull Iterable<LobbyJoiner> players, @NotNull String targetLobbyName) {
+public record LobbyRouteRequest(@NotNull Iterable<LobbyJoiner> players, @NotNull String targetLobbyName) {
 
-    public LobbyDispatchRequest {
+    public LobbyRouteRequest {
         Objects.requireNonNull(players, "players");
         Objects.requireNonNull(targetLobbyName, "targetLobbyName");
     }

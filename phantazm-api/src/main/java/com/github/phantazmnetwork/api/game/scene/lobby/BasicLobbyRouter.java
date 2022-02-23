@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class BasicLobbyProvider extends LobbyProviderAbstract {
+public class BasicLobbyRouter extends LobbyProviderAbstract {
 
     private final InstanceManager instanceManager;
 
@@ -21,9 +21,9 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
     private final InstanceConfig instanceConfig;
 
-    public BasicLobbyProvider(int newLobbyThreshold, @NotNull InstanceManager instanceManager,
-                              @NotNull InstanceLoader instanceLoader, @NotNull String[] lobbyPaths,
-                              @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig) {
+    public BasicLobbyRouter(int newLobbyThreshold, @NotNull InstanceManager instanceManager,
+                            @NotNull InstanceLoader instanceLoader, @NotNull String[] lobbyPaths,
+                            @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig) {
         super(newLobbyThreshold);
 
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");

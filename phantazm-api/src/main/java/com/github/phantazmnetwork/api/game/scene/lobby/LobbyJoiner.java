@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record LobbyJoiner(@NotNull PlayerView player, boolean returning) {
+public record LobbyJoiner(@NotNull PlayerView player) {
 
     public LobbyJoiner {
         Objects.requireNonNull(player, "player");

@@ -2,13 +2,18 @@ package com.github.phantazmnetwork.api.game.scene.lobby;
 
 import com.github.phantazmnetwork.api.game.scene.SceneProvider;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
 
     private final List<Lobby> lobbies = new ArrayList<>();
+
+    private final List<Lobby> unmodifiableLobbies = Collections.unmodifiableList(lobbies);
 
     private final int newLobbyThreshold;
 
@@ -22,7 +27,7 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
         int minimumOnline = Integer.MAX_VALUE;
 
         for (Lobby lobby : lobbies) {
-            int playerCount = lobby.getOnlinePlayerCount();
+            int playerCount = lobby.getIngamePlayerCount();
 
             if (playerCount < minimumOnline) {
                 minimumLobby = lobby;
@@ -41,6 +46,11 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
     }
 
     @Override
+    public @UnmodifiableView @NotNull Iterable<Lobby> listScenes() {
+        return unmodifiableLobbies;
+    }
+
+    @Override
     public void forceShutdown() {
         for (Lobby lobby : lobbies) {
             lobby.forceShutdown();
@@ -51,7 +61,18 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
 
     @Override
     public void tick() {
-        lobbies.removeIf(Lobby::isShutdown);
+        Iterator<Lobby> iterator = lobbies.iterator();
+
+        while (iterator.hasNext()) {
+            Lobby lobby = iterator.next();
+
+            if (lobby.isShutdown()) {
+                iterator.remove();
+            }
+            else {
+                lobby.tick();
+            }
+        }
     }
 
     protected abstract @NotNull Lobby createLobby();

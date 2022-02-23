@@ -60,7 +60,7 @@ abstract class CopyLibs : DefaultTask() {
         libraryDirectory.walkTopDown().filter {
             it.isFile
         }.forEach {
-            val relative = it.relativeTo(libraryDirectory)
+            val relative = it.relativeTo(libraryDirectory).absoluteFile
             val relativeParent = relative.parentFile
 
             val artifactFileGroup = relativeParent.toPath().joinToString(".")

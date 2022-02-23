@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.api.game.scene.lobby;
 
 import com.github.phantazmnetwork.api.config.InstanceConfig;
-import com.github.phantazmnetwork.api.game.scene.JoinResult;
+import com.github.phantazmnetwork.api.game.scene.RouteResult;
 import com.github.phantazmnetwork.api.game.scene.Scene;
 import com.github.phantazmnetwork.api.game.scene.SceneFallback;
 import com.github.phantazmnetwork.api.player.PlayerView;
@@ -26,7 +26,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     private final Map<UUID, PlayerView> players = new HashMap<>();
 
-    private final Collection<PlayerView> unmodifiablePlayers = Collections.unmodifiableCollection(players.values());
+    private final Map<UUID, PlayerView> unmodifiablePlayers = Collections.unmodifiableMap(players);
 
     private boolean shutdown = false;
 
@@ -37,39 +37,48 @@ public class Lobby implements Scene<LobbyJoinRequest> {
     }
 
     @Override
-    public @NotNull JoinResult join(@NotNull LobbyJoinRequest joinRequest) {
+    public @NotNull RouteResult join(@NotNull LobbyJoinRequest joinRequest) {
         if (shutdown) {
-            return new JoinResult(false, Optional.of("Lobby is not shutdown."));
+            return new RouteResult(false, Optional.of("Lobby is shutdown."));
         }
 
         for (LobbyJoiner joiner : joinRequest.players()) {
-            if (joiner.returning() && !players.containsKey(joiner.player().getUUID())) {
-                return new JoinResult(false,
-                        Optional.of(joiner.player().getUUID() + " is not a previous player."));
-            }
-            if (!joiner.returning() && players.containsKey(joiner.player().getUUID())) {
-                return new JoinResult(false,
-                        Optional.of(joiner.player().getPlayer() + " is a not a new player."));
-            }
-        }
+            joiner.player().getPlayer().ifPresent(player -> {
+                if (player.getInstance() != instance) {
+                    player.setInstance(instance, instanceConfig.spawnPoint());
+                }
+            });
 
-        for (LobbyJoiner joiner : joinRequest.players()) {
-            joiner.player().getPlayer().ifPresent(player -> player.setInstance(instance, instanceConfig.spawnPoint()));
             players.put(joiner.player().getUUID(), joiner.player());
         }
 
-        return new JoinResult(true, Optional.empty());
+        return new RouteResult(true, Optional.empty());
     }
 
     @Override
-    public @NotNull Collection<PlayerView> getPlayers() {
+    public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+        for (UUID uuid : leavers) {
+            if (!players.containsKey(uuid)) {
+                return new RouteResult(false, Optional.of(uuid + " is not in the lobby."));
+            }
+        }
+
+        for (UUID uuid : leavers) {
+            players.remove(uuid);
+        }
+
+        return new RouteResult(true, Optional.empty());
+    }
+
+    @Override
+    public @NotNull Map<UUID, PlayerView> getPlayers() {
         return unmodifiablePlayers;
     }
 
     @Override
-    public int getOnlinePlayerCount() {
+    public int getIngamePlayerCount() {
         int[] count = new int[1];
-        for (PlayerView playerView : getPlayers()) {
+        for (PlayerView playerView : getPlayers().values()) {
             playerView.getPlayer().ifPresent(player -> {
                 if (player.getInstance() == instance) {
                     count[0]++;
@@ -90,7 +99,6 @@ public class Lobby implements Scene<LobbyJoinRequest> {
         for (PlayerView player : players.values()) {
             player.getPlayer().ifPresent(unused -> fallback.fallback(player));
         }
-
         players.clear();
 
         shutdown = true;
