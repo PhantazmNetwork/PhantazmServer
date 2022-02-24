@@ -10,7 +10,8 @@ import java.io.File
 
 abstract class CopyLibs : DefaultTask() {
     //@Internal prevents Gradle from treating this property as an input and tracking its changes
-    var libraryDirectory : File = project.buildDir
+    //this should always be an absolute path
+    var libraryDirectory : File = File(project.buildDir, "libs")
         @Internal get
         set(value) {
             field = if(value.isAbsolute) value else File(project.rootDir, value.path)
@@ -48,7 +49,7 @@ abstract class CopyLibs : DefaultTask() {
 
         getArtifacts(libraryDirectory, resolvedArtifacts).forEach {
             val artifactLastModified = it.first.file.lastModified()
-            val targetLastModified = if(it.second.exists()) it.second.lastModified() else -1
+            val targetLastModified = it.second.lastModified()
 
             if(artifactLastModified != targetLastModified) {
                 logger.info("Copying artifact ${it.first.file} to ${it.second}.")
@@ -63,15 +64,21 @@ abstract class CopyLibs : DefaultTask() {
             val relative = it.relativeTo(libraryDirectory)
             val relativeParent = relative.parentFile
 
-            val artifactFileGroup = relativeParent.toPath().joinToString(".")
-            val artifactFileName = relative.nameWithoutExtension
-
-            if(resolvedArtifacts.none { artifact ->
-                    artifact.moduleVersion.id.group == artifactFileGroup &&
-                            artifactFileName == artifact.file.nameWithoutExtension
-                }) {
-                logger.info("Deleting $it.")
+            if(relativeParent == null) {
+                logger.info("Deleting $it because its artifact group cannot be determined.")
                 it.delete()
+            }
+            else {
+                val artifactFileGroup = relativeParent.toPath().joinToString(".")
+                val artifactFileName = relative.nameWithoutExtension
+
+                if(resolvedArtifacts.none { artifact ->
+                        artifact.moduleVersion.id.group == artifactFileGroup &&
+                                artifactFileName == artifact.file.nameWithoutExtension
+                    }) {
+                    logger.info("Deleting $it because it does not match any known artifacts.")
+                    it.delete()
+                }
             }
         }
     }
