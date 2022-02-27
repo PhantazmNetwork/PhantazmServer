@@ -15,21 +15,21 @@ import java.util.Collection;
  */
 public class SafeGapList<TValue> extends GapListAbstract<TValue> {
     /**
-     * {@inheritDoc}
+     * @see GapListAbstract#GapListAbstract(int)
      */
     public SafeGapList(int initialCapacity) {
         super(initialCapacity);
     }
 
     /**
-     * {@inheritDoc}
+     * @see GapListAbstract#GapListAbstract(Collection)
      */
     public SafeGapList(@NotNull Collection<? extends TValue> collection) {
         super(collection);
     }
 
     /**
-     * {@inheritDoc}
+     * @see GapListAbstract#GapListAbstract()
      */
     public SafeGapList() {
         super();

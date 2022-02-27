@@ -424,6 +424,63 @@ class GapListTest {
                 assertEquals(list.get(i), gapList.getUnsafe(i));
             }
         }
+
+        @Test
+        void set() {
+            int values = 10;
+            GapList<String> gapList = populateWithAppend(values, UnsafeGapList::new);
+
+            for(int i = 0; i < values; i++) {
+                String newStr = Integer.valueOf(i - 1).toString();
+                gapList.setUnsafe(i, newStr);
+
+                assertEquals(newStr, gapList.get(i));
+            }
+        }
+
+        @Test
+        void add() {
+            int values = 10;
+            GapList<String> gapList = new UnsafeGapList<>();
+            List<String> arrayList = new ArrayList<>();
+
+            for(int i = 0; i < values; i++) {
+                String str = Integer.valueOf(i).toString();
+                gapList.addUnsafe(0, str);
+                arrayList.add(0, str);
+            }
+
+            assertEquals(arrayList, gapList);
+        }
+
+        @Test
+        void remove() {
+            int size = 20;
+
+            List<Integer> indices = List.of(0, 0, 1, 0, 3, 0, 1, 2, 0, 0, 0, 3, 5, 2, 2, 2, 1, 0, 1);
+            GapList<String> gapList = populateWithAppend(size, UnsafeGapList::new);
+            List<String> arrayList = populateWithAppend(size, ArrayList::new);
+
+            for(int index : indices) {
+                gapList.removeUnsafe(index);
+                arrayList.remove(index);
+            }
+
+            assertEquals(arrayList, gapList);
+        }
+
+        @Test
+        void isUnsafe() {
+            assertTrue(new UnsafeGapList<>().isUnsafe());
+        }
+
+        @Test
+        void safeThrows() {
+            assertThrows(UnsupportedOperationException.class, () -> new SafeGapList<>().addUnsafe(0, null));
+            assertThrows(UnsupportedOperationException.class, () -> new SafeGapList<>().setUnsafe(0, null));
+            assertThrows(UnsupportedOperationException.class, () -> new SafeGapList<>().removeUnsafe(0));
+            assertThrows(UnsupportedOperationException.class, () -> new SafeGapList<>().getUnsafe(0));
+        }
     }
 
     @Nested
