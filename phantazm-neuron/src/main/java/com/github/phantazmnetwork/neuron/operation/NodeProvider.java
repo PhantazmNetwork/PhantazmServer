@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.neuron.operation;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface NodeProvider {
-    Node[] getNodes(int x, int y, int z);
+    Node @NotNull[] getNodes(@NotNull PathContext context, int x, int y, int z);
 }

@@ -3,7 +3,25 @@ package com.github.phantazmnetwork.neuron.operation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Node implements Comparable<Node> {
+import java.util.Iterator;
+
+public class Node implements Comparable<Node>, Iterable<Node> {
+    private class NodeIterator implements Iterator<Node> {
+        private Node current = Node.this;
+
+        @Override
+        public boolean hasNext() {
+            return current != null;
+        }
+
+        @Override
+        public Node next() {
+            Node current = this.current;
+            this.current = current.parent;
+            return current;
+        }
+    }
+
     private final int x;
     private final int y;
     private final int z;
@@ -11,7 +29,7 @@ public class Node implements Comparable<Node> {
     private double g;
     private double h;
 
-    private final Node parent;
+    private Node parent;
 
     public Node(int x, int y, int z, int g, int h, Node parent) {
         this.x = x;
@@ -46,7 +64,7 @@ public class Node implements Comparable<Node> {
 
     @Override
     public int compareTo(@NotNull Node o) {
-        return Double.compare(g + h, o.g + o.h);
+        return Double.compare(getF(), o.getF());
     }
 
     public int getX() {
@@ -69,6 +87,10 @@ public class Node implements Comparable<Node> {
         return h;
     }
 
+    public double getF() {
+        return g + h;
+    }
+
     public void setG(double g) {
         this.g = g;
     }
@@ -79,5 +101,15 @@ public class Node implements Comparable<Node> {
 
     public @Nullable Node getParent() {
         return parent;
+    }
+
+    public void setParent(@Nullable Node parent) {
+        this.parent = parent;
+    }
+
+    @NotNull
+    @Override
+    public Iterator<Node> iterator() {
+        return new NodeIterator();
     }
 }

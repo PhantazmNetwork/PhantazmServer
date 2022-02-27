@@ -1,37 +1,30 @@
-package com.github.phantazmnetwork.commons.collection;
+package com.github.phantazmnetwork.commons.collection.list;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 /**
- * <p>A specialized array-backed {@link List} implementation whose structurally modifying operations (i.e.
- * {@link GapList#add(Object)}, {@link GapList#remove(int)}, ...) are optimized for situations in which there is a
- * strong locality of index (a situation in which most structural modifications occur at indices that are near to each
- * other).</p>
- *
- * <p>Many consecutive inserts at the same index run <i>much</i> faster (on the order of 1000%) than {@link ArrayList}.
- * Consecutive appends run roughly as fast as ArrayList. Consecutive inserts at the beginning run somewhat (5-10%)
- * slower than {@link ArrayDeque}.</p>
- * @param <TValue> the type of object held in this list
+ * Class containing functionality common to both {@link UnsafeGapList} and {@link SafeGapList}.
+ * @param <TValue> the type of value contained in the list
  */
-public class GapList<TValue> extends AbstractList<TValue> implements RandomAccess {
+abstract class GapListAbstract<TValue> extends AbstractList<TValue> implements GapList<TValue>, RandomAccess {
     private static final int DEFAULT_INITIAL_CAPACITY = 8;
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
-    private Object[] array;
+    protected Object[] array;
 
-    private int size;
+    protected int size;
 
-    private int arrayStart;
-    private int gapStart;
-    private int gapLength;
+    protected int arrayStart;
+    protected int gapStart;
+    protected int gapLength;
 
     /**
-     * Creates a new GapList with the specified initial capacity (gap size).
+     * Creates a new {@link GapList} with the specified initial capacity (gap size).
      * @param initialCapacity the initial gap size
      */
-    public GapList(int initialCapacity) {
+    public GapListAbstract(int initialCapacity) {
         this.array = initialCapacity == 0 ? EMPTY_OBJECT_ARRAY : new Object[checkCapacity(initialCapacity)];
         this.size = 0;
         this.arrayStart = 0;
@@ -40,10 +33,10 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
     }
 
     /**
-     * Creates a new GapList containing the same elements as the given collection.
+     * Creates a new {@link GapList} containing the same elements as the given collection.
      * @param collection the collection whose elements will be used
      */
-    public GapList(@NotNull Collection<? extends TValue> collection) {
+    public GapListAbstract(@NotNull Collection<? extends TValue> collection) {
         this.array = collection.toArray();
         this.size = array.length;
         this.arrayStart = 0;
@@ -52,16 +45,14 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
     }
 
     /**
-     * Constructs a new GapList with the default initial capacity (gap size).
+     * Constructs a new {@link GapList} with the default initial capacity (gap size).
      */
-    public GapList() {
+    public GapListAbstract() {
         this.array = new Object[DEFAULT_INITIAL_CAPACITY];
         this.size = 0;
         this.arrayStart = 0;
         this.gapStart = 0;
         this.gapLength = DEFAULT_INITIAL_CAPACITY;
-
-        Arrays.fill(array, null);
     }
 
     private static int checkCapacity(int capacity) {
@@ -72,7 +63,16 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         return capacity;
     }
 
-    private static int computePhysical(int logical, int arrayStart, int gapStart, int gapLength) {
+    /**
+     * Utility method used to compute the physical index (which accounts for the gap) from a logical one (which does
+     * not).
+     * @param logical the logical (input) index
+     * @param arrayStart the start of the array; is either 0 (if gapStart > 0) or gapLength (when gapStart == 0)
+     * @param gapStart the starting index of the gap
+     * @param gapLength the length of the gap
+     * @return the physical (output) index
+     */
+    protected static int computePhysical(int logical, int arrayStart, int gapStart, int gapLength) {
         if(gapStart == 0) {
             return logical + gapLength;
         }
@@ -85,30 +85,50 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         return physical;
     }
 
-    private static void checkIndexAdd(int index, int size) {
+    /**
+     * Performs a bounds check on the index, given the size, for an add operation.
+     * @param index the index to check
+     * @param size the size to check against
+     * @throws IndexOutOfBoundsException if index is outside the range [0, size]
+     */
+    protected static void checkIndexAdd(int index, int size) {
         if(index < 0 || index > size) {
             throw new IndexOutOfBoundsException("Out of bounds for add: index " + index + ", size " + size);
         }
     }
 
-    private static void checkIndex(int index, int size) {
+    /**
+     * Performs a bounds check on the index, given the size.
+     * @param index the index to check
+     * @param size the size to check against
+     * @throws IndexOutOfBoundsException if index is outside the range [0, size)
+     */
+    protected static void checkIndex(int index, int size) {
         if(index < 0 || index >= size) {
             throw new IndexOutOfBoundsException("Out of bounds: index " + index + ", size " + size);
         }
     }
 
-    private static void fillWithNull(Object[] array, int start, int end) {
+    /**
+     * Utility method similar to {@link Arrays#fill(Object[], int, int, Object)}, but does not perform a check on the
+     * starting and ending indices, and only fills with null.
+     * @param array the array to fill
+     * @param start the starting index of the range (inclusive)
+     * @param end the ending index of the range (exclusive)
+     */
+    protected static void fillWithNull(Object[] array, int start, int end) {
         for(int i = start; i < end; i++) {
             array[i] = null;
         }
     }
 
-    /*
-    Grows the gap, given a certain minimum value. The actual size of the gap will be equal to twice the array length if
-    the array is small (less than 64 elements) plus the minimum value; otherwise, the new gap size will be half the
-    current length plus the minimum value.
+    /**
+     * Grows the gap, given a certain minimum value. The actual size of the gap will be equal to twice the array length
+     * if the array is small (less than 64 elements) plus the minimum value; otherwise, the new gap size will be half
+     * the current length plus the minimum value.
+     * @param by the amount to grow the gap by; must be > 0
      */
-    private void growGap(int by) {
+    protected void growGap(int by) {
         //double array when small, grow by 50% otherwise
         int newGapLength = (array.length < 64 ? array.length : (array.length >> 1)) + by;
 
@@ -127,12 +147,15 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         array = newArray;
     }
 
-    /*
-    Shifts the gap by a certain number of indices. Negative numbers shift the gap closer to index 0, positive numbers
-    further from index 0. This function also ensures that all elements in range [gapStart, gapStart + gapLength) are
-    null after the shift occurs.
+    /**
+     * Shifts the gap by a certain number of indices. Negative numbers shift the gap closer to index 0, positive numbers
+     * further from index 0. This function also ensures that all elements in range [gapStart, gapStart + gapLength) are
+     * null after the shift occurs.
+     * @param by the amount to shift the gap, negative moving to the left, positive moving to the right
+     * @param afterGap gapStart + gapEnd, precomputed
+     * @return the index directly after the (moved) gap
      */
-    private int moveGap(int by, int afterGap) {
+    protected int moveGap(int by, int afterGap) {
         if(by < 0) {
             //gap being moved down
             int start = gapStart + by;
@@ -161,7 +184,15 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         return afterGap;
     }
 
-    private int ensureGap(int logicalIndex, int elements) {
+    /**
+     * Ensures that the gap is sized and positioned appropriately to contain the given number of expected elements. The
+     * gap will only be moved/expanded if it is necessary to do so.
+     * @param logicalIndex the logical index of the element which will be positioned directly before the gap after this
+     *                     method returns
+     * @param elements the number of elements we need the gap to contain
+     * @return the starting location to which elements should be inserted into the gap
+     */
+    protected int ensureGap(int logicalIndex, int elements) {
         if(elements > gapLength) {
             //gap is too small to contain everything, scale it up
             growGap(elements);
@@ -191,10 +222,12 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         return gapEnd - elements;
     }
 
-    //handles the logic of element removal, may move the gap if necessary
-    //index returned is the index of the element that should be set to null
-    private int removeIndex(int logicalIndex) {
-        checkIndex(logicalIndex, size);
+    /**
+     * Handles the logic of element removal, may move the gap if necessary.
+     * @param logicalIndex the index which is to be removed
+     * @return the index of the element that should be set to null
+     */
+    protected int removeIndex(int logicalIndex) {
         modCount++;
 
         if(logicalIndex == gapStart) {
@@ -225,12 +258,19 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         return gapEnd;
     }
 
-    private void addInternal(int index, TValue element) {
+    /**
+     * Common logic for adding elements.
+     * @param index the index to add at
+     * @param element the element to add
+     */
+    protected void addInternal(int index, TValue element) {
         modCount++;
         int target = ensureGap(index, 1);
         array[target] = element;
         size++;
     }
+
+    /* public methods */
 
     @Override
     public TValue set(int index, TValue element) {
@@ -242,18 +282,6 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
 
         //noinspection unchecked
         return (TValue) oldElement;
-    }
-
-    /**
-     * Alternative to {@link GapList#set(int, Object)} that does not perform an additional array access to retrieve the
-     * item previously located at the given index.
-     * @param index the index to set at
-     * @param element the element to set
-     * @throws IndexOutOfBoundsException if index is outside the range [0, size)
-     */
-    public void setOnly(int index, TValue element) {
-        checkIndex(index, size);
-        array[computePhysical(index, arrayStart, gapStart, gapLength)] = element;
     }
 
     @Override
@@ -287,6 +315,7 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
 
     @Override
     public TValue remove(int index) {
+        checkIndex(index, size);
         int target = removeIndex(index);
 
         Object oldValue = array[target];
@@ -296,18 +325,6 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
 
         //noinspection unchecked
         return (TValue) oldValue;
-    }
-
-    /**
-     * Alternative to {@link GapList#remove(int)} that does not perform an additional array access to retrieve the item
-     * previously located at the given index.
-     * @param index the index to remove at
-     * @throws IndexOutOfBoundsException if index is outside the range [0, size)
-     */
-    public void removeOnly(int index) {
-        int target = removeIndex(index);
-        array[target] = null;
-        size--;
     }
 
     @Override
@@ -332,5 +349,21 @@ public class GapList<TValue> extends AbstractList<TValue> implements RandomAcces
         arrayStart = 0;
         gapStart = 0;
         gapLength = array.length;
+    }
+
+    /* "only" methods */
+
+    @Override
+    public void setOnly(int index, TValue element) {
+        checkIndex(index, size);
+        array[computePhysical(index, arrayStart, gapStart, gapLength)] = element;
+    }
+
+    @Override
+    public void removeOnly(int index) {
+        checkIndex(index, size);
+        int target = removeIndex(index);
+        array[target] = null;
+        size--;
     }
 }

@@ -29,9 +29,7 @@ import net.minestom.server.instance.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Launches the server.

@@ -1,11 +1,11 @@
-package com.github.phantazmnetwork.commons.collection;
+package com.github.phantazmnetwork.commons.collection.list;
 
+import com.github.phantazmnetwork.commons.test.TestUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +23,7 @@ class GapListTest {
     @Nested
     class Append {
         private static void assertAppendOrder(int capacity) {
-            GapList<String> gapList = new GapList<>(capacity);
+            GapList<String> gapList = new SafeGapList<>(capacity);
             List<String> arrayList = new ArrayList<>(capacity);
 
             for(int i = 0; i < 100; i++) {
@@ -41,7 +41,7 @@ class GapListTest {
         void appendSize() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             assertSame(size, list.size());
         }
 
@@ -49,7 +49,7 @@ class GapListTest {
         void appendSizeZeroCapacity() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, () -> new GapList<>(3));
+            List<String> list = populateWithAppend(size, () -> new SafeGapList<>(3));
             assertSame(size, list.size());
         }
 
@@ -57,7 +57,7 @@ class GapListTest {
         void appendSizeLarge() {
             int size = 1000;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             assertEquals(size, list.size());
         }
 
@@ -75,7 +75,7 @@ class GapListTest {
         void addAtLengthSize() {
             int size = 10;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             list.add(size, Integer.valueOf(size).toString());
 
             assertEquals(size + 1, list.size());
@@ -89,7 +89,7 @@ class GapListTest {
             int size = 10;
             int insertIndex = 0;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             list.add(insertIndex, "element");
             assertSame(size + 1, list.size());
         }
@@ -99,7 +99,7 @@ class GapListTest {
             List<Integer> indices = List.of(0, 0, 1, 0, 3, 0, 1, 2, 0, 0, 0, 3, 5, 2, 2, 2);
 
             List<Integer> arrayList = new ArrayList<>();
-            List<Integer> gapList = new GapList<>();
+            List<Integer> gapList = new SafeGapList<>();
 
             int store = 0;
             for(int index : indices) {
@@ -116,7 +116,7 @@ class GapListTest {
         void insertMany() {
             int size = 1000;
 
-            List<String> gapList = new GapList<>();
+            List<String> gapList = new SafeGapList<>();
             List<String> arrayList = new ArrayList<>();
 
             for(int i = size; i >= 0; i--) {
@@ -135,7 +135,7 @@ class GapListTest {
         void forLoopIteration() {
             int size = 10;
 
-            List<String> gapList = populateWithAppend(size, GapList::new);
+            List<String> gapList = populateWithAppend(size, SafeGapList::new);
             List<String> compare = populateWithAppend(size, ArrayList::new);
 
             for(int i = 0; i < size; i++) {
@@ -150,7 +150,7 @@ class GapListTest {
             String value = "element";
             String value2 = "element2";
 
-            GapList<String> gapList = populateWithAppend(size, GapList::new);
+            GapListAbstract<String> gapList = populateWithAppend(size, SafeGapList::new);
             gapList.set(index, value);
 
             assertEquals(value, gapList.get(index));
@@ -167,7 +167,7 @@ class GapListTest {
         void removeSize() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
 
             list.remove(0);
             assertSame(size - 1, list.size());
@@ -177,7 +177,7 @@ class GapListTest {
         void removeOnlySize() {
             int size = 3;
 
-            GapList<String> list = populateWithAppend(size, GapList::new);
+            GapList<String> list = populateWithAppend(size, SafeGapList::new);
             list.removeOnly(0);
             assertSame(size - 1, list.size());
         }
@@ -186,7 +186,7 @@ class GapListTest {
         void removeAll() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
 
             for(int i  = 0; i < size; i++) {
                 list.remove(0);
@@ -200,7 +200,7 @@ class GapListTest {
             int size = 20;
 
             List<Integer> indices = List.of(0, 0, 1, 0, 3, 0, 1, 2, 0, 0, 0, 3, 5, 2, 2, 2, 1, 0, 1);
-            List<String> gapList = populateWithAppend(size, GapList::new);
+            List<String> gapList = populateWithAppend(size, SafeGapList::new);
             List<String> arrayList = populateWithAppend(size, ArrayList::new);
 
             for(int index : indices) {
@@ -215,7 +215,7 @@ class GapListTest {
         void clearSize() {
             int size = 10;
 
-            List<String> gapList = populateWithAppend(size, GapList::new);
+            List<String> gapList = populateWithAppend(size, SafeGapList::new);
             gapList.clear();
             assertEquals(0, gapList.size());
         }
@@ -224,7 +224,7 @@ class GapListTest {
         void clearThenBuild() {
             int size = 10;
 
-            List<String> gapList = populateWithAppend(size, GapList::new);
+            List<String> gapList = populateWithAppend(size, SafeGapList::new);
             List<String> arrayList = populateWithAppend(size, ArrayList::new);
             gapList.clear();
 
@@ -246,30 +246,30 @@ class GapListTest {
 
         @Test
         void negativeCapacity() {
-            assertThrows(IllegalArgumentException.class, () -> new GapList<>(-1));
+            assertThrows(IllegalArgumentException.class, () -> new SafeGapList<>(-1));
         }
 
         @Test
         void nullCollection() {
-            assertThrows(NullPointerException.class, () -> new GapList<>(null));
+            assertThrows(NullPointerException.class, () -> new SafeGapList<>(null));
         }
 
         @Test
         void negativeAddIndex() {
-            List<String> list = populateWithAppend(10, GapList::new);
+            List<String> list = populateWithAppend(10, SafeGapList::new);
             assertThrows(IndexOutOfBoundsException.class, () -> list.add(-1, "-1"));
         }
 
         @Test
         void negativeAddAllIndex() {
-            List<String> list = populateWithAppend(10, GapList::new);
+            List<String> list = populateWithAppend(10, SafeGapList::new);
             List<String> addList = populateWithAppend(10, ArrayList::new);
             assertThrows(IndexOutOfBoundsException.class, () -> list.addAll(-1, addList));
         }
 
         @Test
         void negativeGetIndex() {
-            List<String> list = populateWithAppend(3, GapList::new);
+            List<String> list = populateWithAppend(3, SafeGapList::new);
             assertThrows(IndexOutOfBoundsException.class, () -> list.get(-1));
         }
 
@@ -277,7 +277,7 @@ class GapListTest {
         void getIndexAtLength() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             assertThrows(IndexOutOfBoundsException.class, () -> list.get(size));
         }
 
@@ -285,7 +285,7 @@ class GapListTest {
         void concurrentModificationRemove() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             assertThrowsConcurrentModificationException(list, () -> list.remove(0));
         }
 
@@ -293,7 +293,7 @@ class GapListTest {
         void concurrentModificationAdd() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             assertThrowsConcurrentModificationException(list, () -> list.add("element"));
         }
 
@@ -301,7 +301,7 @@ class GapListTest {
         void concurrentModificationAddAll() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             List<String> insertList = populateWithAppend(size, ArrayList::new);
             assertThrowsConcurrentModificationException(list, () -> list.addAll(insertList));
         }
@@ -310,7 +310,7 @@ class GapListTest {
         void concurrentModificationClear() {
             int size = 3;
 
-            List<String> list = populateWithAppend(size, GapList::new);
+            List<String> list = populateWithAppend(size, SafeGapList::new);
             assertThrowsConcurrentModificationException(list, list::clear);
         }
     }
@@ -337,7 +337,7 @@ class GapListTest {
         void iteratorOrder() {
             int size = 10;
 
-            List<String> gapList = populateWithAppend(size, GapList::new);
+            List<String> gapList = populateWithAppend(size, SafeGapList::new);
             List<String> arrayList = populateWithAppend(size, ArrayList::new);
 
             assertIteratorSameOrder(arrayList.iterator(), gapList.iterator());
@@ -347,7 +347,7 @@ class GapListTest {
     @Nested
     class Bulk {
         private static void assertInsert(int size, int insertLocation) {
-            List<String> gapList = populateWithAppend(size, GapList::new);
+            List<String> gapList = populateWithAppend(size, SafeGapList::new);
             List<String> arrayList = populateWithAppend(size, ArrayList::new);
             List<String> insertList = populateWithAppend(size, ArrayList::new);
 
@@ -360,7 +360,7 @@ class GapListTest {
         @Test
         void collectionConstructor() {
             List<String> arrayList = populateWithAppend(10, ArrayList::new);
-            List<String> gapList = new GapList<>(arrayList);
+            List<String> gapList = new SafeGapList<>(arrayList);
 
             assertEquals(arrayList, gapList);
         }
@@ -370,7 +370,7 @@ class GapListTest {
             int size = 10;
 
             List<String> arrayList = populateWithAppend(size, ArrayList::new);
-            List<String> gapList = new GapList<>(arrayList);
+            List<String> gapList = new SafeGapList<>(arrayList);
 
             gapList.add("element");
 
@@ -395,7 +395,7 @@ class GapListTest {
             int insertIndex = 2;
             String value = "element";
 
-            List<String> gapList = populateWithAppend(size, GapList::new);
+            List<String> gapList = populateWithAppend(size, SafeGapList::new);
             List<String> arrayList = populateWithAppend(size, ArrayList::new);
             List<String> insertList = populateWithAppend(size, ArrayList::new);
 
@@ -413,60 +413,33 @@ class GapListTest {
     }
 
     @Nested
+    class Unsafe {
+        @Test
+        void get() {
+            int values = 10;
+            GapList<String> gapList = populateWithAppend(values, UnsafeGapList::new);
+            List<String> list = populateWithAppend(values, ArrayList::new);
+
+            for(int i = 0; i < values; i++) {
+                assertEquals(list.get(i), gapList.getUnsafe(i));
+            }
+        }
+    }
+
+    @Nested
     @Disabled("To improve test run time")
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     class Benchmark {
-        private static void comparativeBenchmark(Supplier<Consumer<String>> first, Supplier<Consumer<String>> second,
-                                                 String firstName, String secondName, String operationName, int reps,
-                                                 int iters) {
-            long[] secondTimes = new long[reps];
-            long[] firstTimes = new long[reps];
-
-            String val = "test";
-
-            for(int r = 0; r < reps; r++) {
-                Consumer<String> firstConsumer = first.get();
-                Consumer<String> secondConsumer = second.get();
-
-                long firstStart = System.nanoTime();
-                for(int i = 0; i < iters; i++) {
-                    firstConsumer.accept(val);
-                }
-                firstTimes[r] = System.nanoTime() - firstStart;
-
-                long secondStart = System.nanoTime();
-                for(int i = 0; i < iters; i++) {
-                    secondConsumer.accept(val);
-                }
-                secondTimes[r] = System.nanoTime() - secondStart;
-            }
-
-            long secondSum = 0;
-            long firstSum = 0;
-            for(int i = 0; i < reps; i++) {
-                firstSum += firstTimes[i];
-                secondSum += secondTimes[i];
-            }
-
-            double secondAvg = ((double)secondSum / (double)reps);
-            double firstAvg = ((double)firstSum / (double)reps);
-
-            System.out.println(firstName + " average: " + firstAvg + "ns for " + iters + " " + operationName);
-            System.out.println(secondName + " average: " + secondAvg + "ns for " + iters + " " + operationName);
-            System.out.println(firstName + " is " + secondAvg / firstAvg + "x faster than " + secondName + " over " + reps
-                    + " repetitions");
-        }
-
         @Test
         void appendVsArrayList() {
-            comparativeBenchmark(() -> new GapList<>()::add, () -> new ArrayList<>()::add, "GapList",
+            TestUtils.comparativeBenchmark(() -> new SafeGapList<>()::add, () -> new ArrayList<>()::add, "GapList",
                     "ArrayList", "appends", 10000, 32768);
         }
 
         @Test
         void insertVsArrayDeque() {
-            comparativeBenchmark(() -> {
-                List<String> gapList = new GapList<>();
+            TestUtils.comparativeBenchmark(() -> {
+                List<String> gapList = new SafeGapList<>();
                 return (string) -> gapList.add(0, string);
             }, () -> {
                 Deque<String> arrayDeque = new ArrayDeque<>();
@@ -476,8 +449,8 @@ class GapListTest {
 
         @Test
         void insertVsArrayList() {
-            comparativeBenchmark(() -> {
-                List<String> gapList = new GapList<>();
+            TestUtils.comparativeBenchmark(() -> {
+                List<String> gapList = new SafeGapList<>();
                 return (string) -> gapList.add(0, string);
             }, () -> {
                 List<String> arrayList = new ArrayList<>();
