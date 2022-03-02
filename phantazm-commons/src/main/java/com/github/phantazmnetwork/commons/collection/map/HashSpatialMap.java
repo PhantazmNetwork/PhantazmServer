@@ -1,6 +1,9 @@
 package com.github.phantazmnetwork.commons.collection.map;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -27,7 +30,6 @@ public class HashSpatialMap<TValue> implements SpatialMap<TValue> {
             hash = 31 * hash + x;
             hash = 31 * hash + y;
             hash = 31 * hash + z;
-
             return hash;
         }
     }
@@ -47,5 +49,20 @@ public class HashSpatialMap<TValue> implements SpatialMap<TValue> {
     @Override
     public boolean containsKey(int x, int y, int z) {
         return mappings.containsKey(new Point(x, y, z));
+    }
+
+    @Override
+    public void remove(int x, int y, int z) {
+        mappings.remove(new Point(x, y, z));
+    }
+
+    @Override
+    public int size() {
+        return mappings.size();
+    }
+
+    @Override
+    public @NotNull Iterator<TValue> iterator() {
+        return mappings.values().iterator();
     }
 }

@@ -489,8 +489,9 @@ class GapListTest {
     class Benchmark {
         @Test
         void appendVsArrayList() {
-            TestUtils.comparativeBenchmark(() -> new SafeGapList<>()::add, () -> new ArrayList<>()::add, "GapList",
-                    "ArrayList", "appends", 10000, 32768);
+            TestUtils.comparativeBenchmark(() -> new SafeGapList<>()::add, () -> new ArrayList<>()::add, (num) ->
+                            "value", "GapList", "ArrayList", "appends", 10000,
+                    32768);
         }
 
         @Test
@@ -501,7 +502,8 @@ class GapListTest {
             }, () -> {
                 Deque<String> arrayDeque = new ArrayDeque<>();
                 return arrayDeque::addFirst;
-            }, "GapList", "ArrayDeque", "inserts at index 0", 10000, 32768);
+            }, (num) -> "value","GapList", "ArrayDeque", "inserts at index 0", 10000,
+                    32768);
         }
 
         @Test
@@ -512,7 +514,8 @@ class GapListTest {
             }, () -> {
                 List<String> arrayList = new ArrayList<>();
                 return (string) -> arrayList.add(0, string);
-            }, "GapList", "ArrayList", "inserts at index 0", 1000, 16384);
+            }, (num) -> "value", "GapList", "ArrayList", "inserts at index 0", 1000,
+                    16384);
         }
     }
 }

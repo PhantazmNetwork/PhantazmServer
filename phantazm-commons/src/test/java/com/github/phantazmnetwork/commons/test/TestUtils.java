@@ -1,20 +1,20 @@
 package com.github.phantazmnetwork.commons.test;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class TestUtils {
     public static void comparativeBenchmark(Supplier<Consumer<String>> first, Supplier<Consumer<String>> second,
-                                            String firstName, String secondName, String operationName, int reps,
-                                            int iters) {
+                                            Function<Integer, String> stringFunction, String firstName,
+                                            String secondName, String operationName, int reps, int iters) {
         long[] secondTimes = new long[reps];
         long[] firstTimes = new long[reps];
 
         for(int r = 0; r < reps; r++) {
             Consumer<String> firstConsumer = first.get();
             Consumer<String> secondConsumer = second.get();
-
-            String val = Integer.valueOf(r).toString();
+            String val = stringFunction.apply(r);
 
             long firstStart = System.nanoTime();
             for(int i = 0; i < iters; i++) {
