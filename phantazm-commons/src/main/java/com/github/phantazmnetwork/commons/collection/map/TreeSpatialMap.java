@@ -19,6 +19,12 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
             this.startLo = startLo;
             this.length = length;
         }
+
+        private boolean endEquals(int hi, long lo) {
+            long endLo = startLo + length;
+            int endHi = computeHi(startHi, startLo, 0, length, endLo);
+            return endLo == lo && endHi == hi;
+        }
     }
 
     private static final long INDEX_MASK = 0x0000_0000_FFFF_FFFFL;
@@ -47,9 +53,8 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
         return hiCompare;
     }
 
-    private static int computeHi(int hiFirst, long loFirst, int hiSecond, long loSecond) {
-        long sum = loFirst + loSecond;
-        return (int) (hiFirst + hiSecond + ((loFirst ^ sum) & (loSecond ^ sum)));
+    private static int computeHi(int hiFirst, long loFirst, int hiSecond, long loSecond, long loSum) {
+        return (int) (hiFirst + hiSecond + ((loFirst ^ loSum) & (loSecond ^ loSum)));
     }
 
     private static int unpackIndex(long data) {
@@ -78,7 +83,7 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
                 long endLo = midVal.startLo + midVal.length;
 
                 //handles integer overflow, treats values as unsigned
-                int endHi = computeHi(midVal.startHi, midVal.startLo, 0, midVal.length);
+                int endHi = computeHi(midVal.startHi, midVal.startLo, 0, midVal.length, endLo);
 
                 //we found a block, we can stop searching
                 //note that this code also returns if we're directly after a block, with no gap
@@ -93,7 +98,7 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
                 //blocks will never be directly adjacent, there will always be a gap of at least 1 element
                 //add midVal.start and -lo
                 long offsetLo = midVal.startLo - lo;
-                int offsetHi = computeHi(midVal.startHi, midVal.startLo, 0, -lo);
+                int offsetHi = computeHi(midVal.startHi, midVal.startLo, 0, -lo, offsetLo);
 
                 //we're directly below a block
                 if(offsetHi == midVal.startHi && offsetLo == 1) {
@@ -129,9 +134,6 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
         int blockIndex = unpackIndex(data);
 
         if(blockIndex < 0) { //we have to create a block rather than extending an existing block
-            //when nearestIndex is negative, the entire result is interpreted as the index of the nearest block; there
-            //is no additional data to unpack
-
             blockIndex = (-blockIndex) + 1;
             int compressedIndex = blocks.size() == 0 ? 0 : blocks.getUnsafe(blockIndex).compressedIndex;
 
@@ -143,21 +145,45 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
         else { //we found a block
             int offset = unpackOffset(data);
             Block block = blocks.getUnsafe(blockIndex);
-            if(offset == -1) { //directly-before case
 
+            list.addUnsafe(block.compressedIndex + offset, value);
+
+            //check if we need to merge blocks now
+            if(offset == -1) { //directly before block
+                long newStartLo = block.startLo - 1;
+                int newStartHi = computeHi(block.startHi, block.startLo, -1, -1, newStartLo);
+
+                block.startLo = newStartLo;
+                block.startHi = newStartHi;
+
+                int previousBlockIndex = blockIndex - 1;
+                if(previousBlockIndex > 0) {
+                    Block previousBlock = blocks.getUnsafe(previousBlockIndex);
+
+                    if(previousBlock.endEquals(newStartHi, newStartLo)) {
+                        block.startHi = previousBlock.startHi;
+                        block.startLo = previousBlock.startLo;
+
+                        block.length = previousBlock.length + 1;
+                        blocks.removeUnsafe(previousBlockIndex);
+                    }
+                }
             }
-            else { //in the middle of the block
-                list.addUnsafe(block.compressedIndex + offset, value);
-                incrementIndices(blocks, blockIndex + 1);
+            else { //some point inside or directly after block
                 block.length++;
 
-                //check if we need to merge blocks now
                 int nextBlockIndex = blockIndex + 1;
                 if(nextBlockIndex < blocks.size()) {
                     Block nextBlock = blocks.getUnsafe(nextBlockIndex);
 
+                    if(block.endEquals(nextBlock.startHi, nextBlock.startLo)) {
+                        block.length += nextBlock.length;
+                        blocks.removeUnsafe(nextBlockIndex);
+                    }
                 }
             }
+
+            incrementIndices(blocks, blockIndex + 1);
         }
     }
 
