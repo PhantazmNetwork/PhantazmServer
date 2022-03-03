@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.commons.collection.list.UnsafeGapList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
-import java.util.List;
 
 public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
     private static class Block {
@@ -65,7 +64,7 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
         return (int) ((data & OFFSET_MASK) >>> 32);
     }
 
-    //modified binary search algorithm to search through blocks keyed by 96-bit integers
+    //specialized binary search algorithm to find blocks keyed by 96-bit integers
     private static long nearest(GapList<Block> blocks, int hi, long lo) {
         int lowIndex = 0;
         int highIndex = blocks.size() - 1;
@@ -97,11 +96,14 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
                 //check if we're right before a block as well
                 //blocks will never be directly adjacent, there will always be a gap of at least 1 element
                 //add midVal.start and -lo
-                long offsetLo = midVal.startLo - lo;
-                int offsetHi = computeHi(midVal.startHi, midVal.startLo, 0, -lo, offsetLo);
+                int offsetHi = midVal.startHi;
+                long offsetLo = midVal.startLo - 1;
+                if(offsetLo == 0) {
+                    offsetHi--;
+                }
 
                 //we're directly below a block
-                if(offsetHi == midVal.startHi && offsetLo == 1) {
+                if(hi == offsetHi && lo == offsetLo) {
                     return OFFSET_NEGATIVE_1 | mid;
                 }
 
@@ -134,22 +136,21 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
         int blockIndex = unpackIndex(data);
 
         if(blockIndex < 0) { //we have to create a block rather than extending an existing block
-            blockIndex = (-blockIndex) + 1;
+            blockIndex = (-blockIndex) - 1;
             int compressedIndex = blocks.size() == 0 ? 0 : blocks.getUnsafe(blockIndex).compressedIndex;
 
             list.addUnsafe(compressedIndex, value);
             blocks.addUnsafe(blockIndex, new Block(x, lo, 1, compressedIndex));
-
-            incrementIndices(blocks, blockIndex + 1);
         }
         else { //we found a block
             int offset = unpackOffset(data);
             Block block = blocks.getUnsafe(blockIndex);
 
-            list.addUnsafe(block.compressedIndex + offset, value);
-
             //check if we need to merge blocks now
             if(offset == -1) { //directly before block
+                list.addUnsafe(block.compressedIndex, value);
+                block.length++;
+
                 long newStartLo = block.startLo - 1;
                 int newStartHi = computeHi(block.startHi, block.startLo, -1, -1, newStartLo);
 
@@ -170,6 +171,7 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
                 }
             }
             else { //some point inside or directly after block
+                list.addUnsafe(block.compressedIndex + offset, value);
                 block.length++;
 
                 int nextBlockIndex = blockIndex + 1;
@@ -182,9 +184,9 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
                     }
                 }
             }
-
-            incrementIndices(blocks, blockIndex + 1);
         }
+
+        incrementIndices(blocks, blockIndex + 1);
     }
 
     @Override

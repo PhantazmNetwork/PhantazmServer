@@ -9,8 +9,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TreeSpatialMapTest {
     @Test
-    void get() {
+    void put() {
+        SpatialMap<String> map = new TreeSpatialMap<>();
+        map.put(0, 0, 3, "3");
+        map.put(0, 0, 2, "2");
+        map.put(0, 0, 0, "0");
+        map.put(0, 0, 1, "1");
+    }
 
+    @Test
+    void benchmark() {
         TestUtils.comparativeBenchmark(() -> {
                     SpatialMap<String> map = new TreeSpatialMap<>();
                     return s -> {
