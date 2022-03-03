@@ -48,19 +48,13 @@ public class AStarPathOperation implements PathOperation {
         openSet.clear();
         graph.clear();
 
-        Node last = this.current;
         Node prev = null;
-        for(Node node : last) {
-            Node parent = node.getParent();
-            if(parent != null) {
-                parent.setParent(node);
-            }
-
+        for(Node node : this.current) {
             node.setParent(prev);
             prev = node;
         }
 
-        this.current = last;
+        this.current = prev;
         result = new Result();
     }
 
