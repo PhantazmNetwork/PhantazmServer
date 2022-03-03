@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.neuron.vector.Vec3I;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +39,7 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
 
     private Node parent;
 
-    public Node(int x, int y, int z, float g, float h, Node parent) {
+    public Node(int x, int y, int z, float g, float h, @Nullable Node parent) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -74,7 +74,7 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
             if(x == 0) {
                 int y = Integer.compare(this.y, o.y);
                 if(y == 0) {
-                    return Integer.compare(z, o.z);
+                    return Integer.compare(this.z, o.z);
                 }
 
                 return y;

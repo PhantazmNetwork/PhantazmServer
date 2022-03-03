@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.neuron.vector;
+package com.github.phantazmnetwork.commons.vector;
 
 public interface Vec3D {
     double getX();

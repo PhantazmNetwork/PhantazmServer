@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.neuron.operation;
 import com.github.phantazmnetwork.commons.collection.map.HashSpatialMap;
 import com.github.phantazmnetwork.commons.collection.map.SpatialMap;
 import com.github.phantazmnetwork.neuron.agent.Agent;
-import com.github.phantazmnetwork.neuron.vector.Vec3I;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -32,6 +32,7 @@ public class AStarPathOperation implements PathOperation {
 
     public AStarPathOperation(@NotNull PathContext context) {
         this.context = Objects.requireNonNull(context, "context");
+
         this.agent = context.getAgent();
         this.openSet = new TreeSet<>();
         this.graph = new HashSpatialMap<>();
@@ -73,7 +74,8 @@ public class AStarPathOperation implements PathOperation {
                 return;
             }
 
-            for(Vec3I walkVector : context.getAgent().getWalker().walkVectors()) {
+            for(Vec3I walkVector : context.getAgent().getWalker().walkVectors(current.getX(), current.getY(),
+                    current.getZ())) {
                 int x = current.getX() + walkVector.getX();
                 int y = current.getY() + walkVector.getY();
                 int z = current.getZ() + walkVector.getZ();
