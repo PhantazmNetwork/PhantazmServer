@@ -60,6 +60,11 @@ public class HashSpatialMap<TValue> implements SpatialMap<TValue> {
     }
 
     @Override
+    public void clear() {
+        mappings.clear();
+    }
+
+    @Override
     public @NotNull Iterator<TValue> iterator() {
         return mappings.values().iterator();
     }

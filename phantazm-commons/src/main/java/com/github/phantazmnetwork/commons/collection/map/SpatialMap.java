@@ -47,4 +47,9 @@ public interface SpatialMap<TValue> extends Iterable<TValue> {
      * @return the size of this map
      */
     int size();
+
+    /**
+     * Removes all keys and values from the map.
+     */
+    void clear();
 }

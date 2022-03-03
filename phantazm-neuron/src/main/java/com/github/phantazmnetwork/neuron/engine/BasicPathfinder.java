@@ -1,12 +1,9 @@
 package com.github.phantazmnetwork.neuron.engine;
 
 import com.github.phantazmnetwork.neuron.agent.Agent;
-import com.github.phantazmnetwork.neuron.operation.BasicPathOperation;
 import com.github.phantazmnetwork.neuron.operation.PathContext;
 import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import com.github.phantazmnetwork.neuron.operation.PathResult;
-import com.github.phantazmnetwork.neuron.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.world.Space;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

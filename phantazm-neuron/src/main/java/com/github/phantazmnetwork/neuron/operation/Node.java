@@ -8,12 +8,14 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
+    private static final int PRIME = 31;
+
     private class NodeIterator implements Iterator<Node> {
         private Node current = Node.this;
 
         @Override
         public boolean hasNext() {
-            return current != null;
+            return this.current != null;
         }
 
         @Override
@@ -57,24 +59,31 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
 
     @Override
     public int hashCode() {
-        int result = 31 + x;
-        result = 31 * result + y;
-        result = 31 * result + z;
-        result = 31 * result + Float.hashCode(g);
-        return 31 * result + Float.hashCode(h);
-    }
-
-    public boolean positionEquals(@Nullable Node other) {
-        if(other != null) {
-            return other.x == x && other.y == y && other.z == z;
-        }
-
-        return false;
+        int result = PRIME + x;
+        result = PRIME * result + y;
+        result = PRIME * result + z;
+        result = PRIME * result + Float.hashCode(g);
+        return PRIME * result + Float.hashCode(h);
     }
 
     @Override
     public int compareTo(@NotNull Node o) {
-        return Float.compare(getF(), o.getF());
+        int f = Float.compare(getF(), o.getF());
+        if(f == 0) {
+            int x = Integer.compare(this.x, o.x);
+            if(x == 0) {
+                int y = Integer.compare(this.y, o.y);
+                if(y == 0) {
+                    return Integer.compare(z, o.z);
+                }
+
+                return y;
+            }
+
+            return x;
+        }
+
+        return f;
     }
 
     @Override
@@ -118,6 +127,10 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
 
     public void setParent(@Nullable Node parent) {
         this.parent = parent;
+    }
+
+    public float distanceSquared(@NotNull Node other) {
+        return x * other.x + y * other.y + z * other.z;
     }
 
     @Override

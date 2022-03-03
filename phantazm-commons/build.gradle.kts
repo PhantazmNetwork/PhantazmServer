@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.fastutil)
+    api(libs.fastutil)
 }
