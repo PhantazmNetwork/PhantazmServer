@@ -13,6 +13,8 @@ miniMessage = "4.2.0-SNAPSHOT"
 
 mockito = "4.3.1"
 
+fastutil = "8.5.6"
+
 [libraries]
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
@@ -27,3 +29,4 @@ minestom = { module = "com.github.Minestom:Minestom", version.ref = "minestom" }
 miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "miniMessage" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }

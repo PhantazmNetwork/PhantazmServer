@@ -1,4 +1,7 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-public interface PathResult {
+import org.jetbrains.annotations.NotNull;
+
+public interface PathResult extends Iterable<Node> {
+    @NotNull PathOperation getOperation();
 }

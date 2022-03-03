@@ -1,11 +1,13 @@
 package com.github.phantazmnetwork.neuron.operation;
 
+import com.github.phantazmnetwork.neuron.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-public class Node implements Comparable<Node>, Iterable<Node> {
+public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
     private class NodeIterator implements Iterator<Node> {
         private Node current = Node.this;
 
@@ -17,6 +19,10 @@ public class Node implements Comparable<Node>, Iterable<Node> {
         @Override
         public Node next() {
             Node current = this.current;
+            if(current == null) {
+                throw new NoSuchElementException();
+            }
+
             this.current = current.parent;
             return current;
         }
@@ -26,12 +32,12 @@ public class Node implements Comparable<Node>, Iterable<Node> {
     private final int y;
     private final int z;
 
-    private double g;
-    private double h;
+    private float g;
+    private float h;
 
     private Node parent;
 
-    public Node(int x, int y, int z, int g, int h, Node parent) {
+    public Node(int x, int y, int z, float g, float h, Node parent) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -51,51 +57,58 @@ public class Node implements Comparable<Node>, Iterable<Node> {
 
     @Override
     public int hashCode() {
-        int result = 1;
-
-        result = 31 * result + x;
+        int result = 31 + x;
         result = 31 * result + y;
         result = 31 * result + z;
-        result = (int) (31 * result + g);
-        result = (int) (31 * result + h);
+        result = 31 * result + Float.hashCode(g);
+        return 31 * result + Float.hashCode(h);
+    }
 
-        return result;
+    public boolean positionEquals(@Nullable Node other) {
+        if(other != null) {
+            return other.x == x && other.y == y && other.z == z;
+        }
+
+        return false;
     }
 
     @Override
     public int compareTo(@NotNull Node o) {
-        return Double.compare(getF(), o.getF());
+        return Float.compare(getF(), o.getF());
     }
 
+    @Override
     public int getX() {
         return x;
     }
 
+    @Override
     public int getY() {
         return y;
     }
 
+    @Override
     public int getZ() {
         return z;
     }
 
-    public double getG() {
+    public float getG() {
         return g;
     }
 
-    public double getH() {
+    public float getH() {
         return h;
     }
 
-    public double getF() {
+    public float getF() {
         return g + h;
     }
 
-    public void setG(double g) {
+    public void setG(float g) {
         this.g = g;
     }
 
-    public void setH(double h) {
+    public void setH(float h) {
         this.h = h;
     }
 
@@ -107,9 +120,8 @@ public class Node implements Comparable<Node>, Iterable<Node> {
         this.parent = parent;
     }
 
-    @NotNull
     @Override
-    public Iterator<Node> iterator() {
+    public @NotNull Iterator<Node> iterator() {
         return new NodeIterator();
     }
 }

@@ -9,5 +9,15 @@ public interface PathOperation {
         FAILED
     }
 
-    void step(@NotNull PathContext context);
+    void step();
+
+    @NotNull State getState();
+
+    @NotNull PathContext getContext();
+
+    @NotNull PathResult getResult();
+
+    default boolean isComplete() {
+        return getState() != State.IN_PROGRESS;
+    }
 }

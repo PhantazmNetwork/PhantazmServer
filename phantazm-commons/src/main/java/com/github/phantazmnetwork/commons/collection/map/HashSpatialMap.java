@@ -1,19 +1,20 @@
 package com.github.phantazmnetwork.commons.collection.map;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Naive implementation of {@link SpatialMap}. Values are stored in a simple {@link HashMap}, whose key is an object
- * encapsulating a 3D integer vector. This is not a particularly time or space-efficient method of storage, but it is
- * useful as a comparison against more refined techniques.
+ * Naive implementation of {@link SpatialMap}. Values are stored in a {@link Object2ObjectRBTreeMap}, whose key is an
+ * object encapsulating a 3D integer vector.
  * @param <TValue> the value stored in this map
  */
 public class HashSpatialMap<TValue> implements SpatialMap<TValue> {
     private static record Point(int x, int y, int z) {
+        private static final int PRIME = 31;
+
         @Override
         public boolean equals(Object obj) {
             if(obj instanceof Point point) {
@@ -25,16 +26,13 @@ public class HashSpatialMap<TValue> implements SpatialMap<TValue> {
 
         @Override
         public int hashCode() {
-            int hash = 1;
-
-            hash = 31 * hash + x;
-            hash = 31 * hash + y;
-            hash = 31 * hash + z;
-            return hash;
+            int hash = PRIME + x;
+            hash = PRIME * hash + y;
+            return PRIME * hash + z;
         }
     }
 
-    private final Map<Point, TValue> mappings = new HashMap<>();
+    private final Map<Point, TValue> mappings = new Object2ObjectRBTreeMap<>();
 
     @Override
     public TValue get(int x, int y, int z) {
