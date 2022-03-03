@@ -125,6 +125,17 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
 
     @Override
     public TValue get(int x, int y, int z) {
+        long lo = computeLow(y, z);
+        long data = nearest(blocks, x, lo);
+        int blockIndex = unpackIndex(data);
+        if(blockIndex > 0) {
+            Block block = blocks.getUnsafe(blockIndex);
+            int offset = unpackOffset(data);
+            if(offset >= 0 && offset < block.length) {
+                return list.getUnsafe(block.compressedIndex + offset);
+            }
+        }
+
         return null;
     }
 
@@ -152,7 +163,10 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
                 block.length++;
 
                 long newStartLo = block.startLo - 1;
-                int newStartHi = computeHi(block.startHi, block.startLo, -1, -1, newStartLo);
+                int newStartHi = block.startHi;
+                if(newStartLo == 0) {
+                    newStartHi--;
+                }
 
                 block.startLo = newStartLo;
                 block.startHi = newStartHi;
@@ -207,6 +221,6 @@ public class TreeSpatialMap<TValue> implements SpatialMap<TValue> {
     @NotNull
     @Override
     public Iterator<TValue> iterator() {
-        return null;
+        return list.listIterator();
     }
 }
