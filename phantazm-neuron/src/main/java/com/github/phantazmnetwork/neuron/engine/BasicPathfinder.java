@@ -16,19 +16,12 @@ import java.util.function.Function;
 
 public class BasicPathfinder implements Pathfinder {
     private class Context implements PathContext {
-        private final Space space;
         private final Agent agent;
         private final Destination destination;
 
-        private Context(@NotNull Space space, @NotNull Agent agent, @NotNull Destination destination) {
-            this.space = space;
+        private Context(@NotNull Agent agent, @NotNull Destination destination) {
             this.agent = agent;
             this.destination = destination;
-        }
-
-        @Override
-        public @NotNull Space getSpace() {
-            return space;
         }
 
         @Override
@@ -47,17 +40,15 @@ public class BasicPathfinder implements Pathfinder {
         }
     }
 
-    private final Space space;
     private final Function<PathContext, PathOperation> operationFunction;
 
-    public BasicPathfinder(@NotNull Space space, @NotNull Function<PathContext, PathOperation> operationFunction) {
-        this.space = Objects.requireNonNull(space, "space");
+    public BasicPathfinder(@NotNull Function<PathContext, PathOperation> operationFunction) {
         this.operationFunction = Objects.requireNonNull(operationFunction, "operationFunction");
     }
 
     @Override
     public @NotNull Future<PathResult> pathfind(@NotNull Agent agent, @NotNull Destination destination) {
-        PathContext context = new Context(space, agent, destination);
+        PathContext context = new Context(agent, destination);
         PathOperation operation = operationFunction.apply(context);
         while(!operation.isComplete()) {
             operation.step();

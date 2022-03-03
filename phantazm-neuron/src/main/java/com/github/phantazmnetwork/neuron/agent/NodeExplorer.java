@@ -5,5 +5,5 @@ import com.github.phantazmnetwork.neuron.world.Space;
 import org.jetbrains.annotations.NotNull;
 
 public interface NodeExplorer {
-    Node @NotNull[] expandNode(@NotNull Space space, @NotNull Node from);
+    Node @NotNull[] expandNode(@NotNull Node from);
 }

@@ -31,7 +31,7 @@ public class BasicPathOperation implements PathOperation {
 
         Agent agent = context.getAgent();
         openHeap.add(new Node(agent.getX(), agent.getY(), agent.getZ(), 0, agent.getHeuristicCalculator()
-                .compute(context.getSpace(), agent, context.getDestination()), null));
+                .compute(agent, context.getDestination()), null));
     }
 
     private void complete(boolean success) {
@@ -46,7 +46,7 @@ public class BasicPathOperation implements PathOperation {
 
         if(!openHeap.isEmpty()) {
             currentNode = openHeap.remove();
-            Node[] nodes = context.getAgent().getNodeExplorer().expandNode(context.getSpace(), currentNode);
+            Node[] nodes = context.getAgent().getNodeExplorer().expandNode(currentNode);
             for(Node node : nodes) {
                 if(node == null) {
                     break;
@@ -65,13 +65,11 @@ public class BasicPathOperation implements PathOperation {
                 }
 
                 if(existing == null) {
-                    node.setH(context.getAgent().getHeuristicCalculator().compute(context.getSpace(), node,
-                            context.getDestination()));
+                    node.setH(context.getAgent().getHeuristicCalculator().compute(node, context.getDestination()));
                     openHeap.add(node);
                 }
                 else if(node.getG() < existing.getG()) {
                     openHeap.remove(existing);
-
                 }
             }
         }
