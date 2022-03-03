@@ -84,7 +84,7 @@ public class AStarPathOperation implements PathOperation {
                     graph.put(x, y, z, neighbor);
                 }
 
-                float g = current.getG() + neighbor.distanceSquared(neighbor);
+                float g = current.getG() + current.distanceSquared(neighbor);
                 if(g < neighbor.getG()) {
                     openSet.remove(neighbor);
                     neighbor.setParent(current);

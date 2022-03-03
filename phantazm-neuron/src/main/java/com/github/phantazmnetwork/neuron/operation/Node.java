@@ -130,7 +130,10 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
     }
 
     public float distanceSquared(@NotNull Node other) {
-        return x * other.x + y * other.y + z * other.z;
+        int x = this.x - other.x;
+        int y = this.y - other.y;
+        int z = this.z - other.z;
+        return x * x + y * y + z * z;
     }
 
     @Override

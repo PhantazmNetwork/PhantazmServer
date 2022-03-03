@@ -47,6 +47,7 @@ public class BasicPathfinder implements Pathfinder {
     public @NotNull Future<PathResult> pathfind(@NotNull Agent agent, @NotNull Destination destination) {
         PathContext context = new Context(agent, destination);
         PathOperation operation = operationFunction.apply(context);
+
         while(!operation.isComplete()) {
             operation.step();
         }
