@@ -6,5 +6,5 @@ import org.jetbrains.annotations.NotNull;
 public interface PathResult {
     @NotNull PathOperation getOperation();
 
-    @NotNull Iterable<Node> getPath();
+    @NotNull Node getPath();
 }

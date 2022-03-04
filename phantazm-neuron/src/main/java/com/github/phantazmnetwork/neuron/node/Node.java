@@ -83,11 +83,6 @@ public class Node extends ImmutableVec3I implements Comparable<Node>, Iterable<N
         this.parent = parent;
     }
 
-    @Override
-    public int compareTo(@NotNull Node o) {
-        return Float.compare(getF(), o.getF());
-    }
-
     /**
      * Returns the {@code g}-score for this node.
      * @return this node's {@code g}-score
@@ -199,12 +194,17 @@ public class Node extends ImmutableVec3I implements Comparable<Node>, Iterable<N
     }
 
     @Override
-    public @NotNull Iterator<Node> iterator() {
-        return new NodeIterator();
+    public int compareTo(@NotNull Node o) {
+        return Float.compare(getF(), o.getF());
     }
 
     @Override
     public String toString() {
         return "Node{x=" + x + ", y=" + y + ", z=" + z + "}";
+    }
+
+    @Override
+    public @NotNull Iterator<Node> iterator() {
+        return new NodeIterator();
     }
 }

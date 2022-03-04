@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class AStarPathOperation implements PathOperation {
+public class BasicPathOperation implements PathOperation {
     private class Result implements PathResult {
         private final Node node;
 
@@ -20,11 +20,11 @@ public class AStarPathOperation implements PathOperation {
 
         @Override
         public @NotNull PathOperation getOperation() {
-            return AStarPathOperation.this;
+            return BasicPathOperation.this;
         }
 
         @Override
-        public @NotNull Iterable<Node> getPath() {
+        public @NotNull Node getPath() {
             return node;
         }
     }
@@ -38,7 +38,7 @@ public class AStarPathOperation implements PathOperation {
     private Node best;
     private PathResult result;
 
-    public AStarPathOperation(@NotNull PathContext context) {
+    public BasicPathOperation(@NotNull PathContext context) {
         this.context = Objects.requireNonNull(context, "context");
 
         this.openSet = new NodeQueue();
@@ -114,9 +114,9 @@ public class AStarPathOperation implements PathOperation {
                 float g = current.getG() + calculator.distance(current.getX(), current.getY(), current.getZ(),
                         neighbor.getX(), neighbor.getY(), neighbor.getZ());
 
-                //for brand-new nodes, g is equal to Float.INFINITY, so this will run for sure
+                //for brand-new nodes, g is equal to Float.POSITIVE_INFINITY, so this will run for sure
                 if(g < neighbor.getG()) {
-                    //our path is indeed better, update the neighbor node
+                    //our path to this node is indeed better, update stuff
                     neighbor.setParent(current);
                     neighbor.setG(g);
 

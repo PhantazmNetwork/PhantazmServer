@@ -20,4 +20,12 @@ public interface PathOperation {
     default boolean isComplete() {
         return getState() != State.IN_PROGRESS;
     }
+
+    default @NotNull PathResult runToCompletion() {
+        while(!isComplete()) {
+            step();
+        }
+
+        return getResult();
+    }
 }
