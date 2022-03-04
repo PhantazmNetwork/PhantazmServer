@@ -1,11 +1,22 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.neuron.NodeUtils;
+import com.github.phantazmnetwork.neuron.node.Node;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class NodeTest {
+    private static Node[] makeLinkedArray(int size) {
+        Node[] array = new Node[size];
+
+        Node prev = null;
+        for(int i = size - 1; i >= 0; i--) {
+            array[i] = prev = new Node(i, i, i, i, i, prev);
+        }
+
+        return array;
+    }
+
     @Test
     void compare() {
         Node smaller = new Node(0, 0, 0, 0, 0, null);
@@ -19,7 +30,7 @@ class NodeTest {
 
     @Test
     void iterate() {
-        Node[] nodes = NodeUtils.makeLinkedArray(10);
+        Node[] nodes = makeLinkedArray(10);
 
         int i = 0;
         for(Node node : nodes[0]) {
@@ -31,15 +42,15 @@ class NodeTest {
 
     @Test
     void invertSingle() {
-        Node node = new Node(0, 0, 0);
-        assertSame(node, node.invert());
+        Node node = new Node(0, 0, 0, 0, 0, null);
+        assertSame(node, node.reverse());
     }
 
     @Test
     void invertMany() {
-        Node[] nodes = NodeUtils.makeLinkedArray(10);
+        Node[] nodes = makeLinkedArray(10);
 
-        Node inverted = nodes[0].invert();
+        Node inverted = nodes[0].reverse();
         int i = 0;
         for(Node node : inverted) {
             assertEquals(nodes[nodes.length - (i++ + 1)], node);

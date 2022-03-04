@@ -1,6 +1,4 @@
-package com.github.phantazmnetwork.neuron.collection;
-
-import com.github.phantazmnetwork.neuron.operation.Node;
+package com.github.phantazmnetwork.neuron.node;
 
 import java.util.Comparator;
 

@@ -1,6 +1,5 @@
-package com.github.phantazmnetwork.neuron.collection;
+package com.github.phantazmnetwork.neuron.node;
 
-import com.github.phantazmnetwork.neuron.operation.Node;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -37,17 +36,33 @@ class NodeQueueTest {
     @Test
     void update() {
         NodeQueue queue = new NodeQueue();
-        Node node = new Node(0, 0, 0, 0, 0, null);
+        Node first = new Node(0, 0, 0, 0, 0, null);
         Node last = new Node(1, 1, 1, 1, 1, null);
-        queue.enqueue(node);
+        queue.enqueue(first);
         queue.enqueue(last);
 
-        assertSame(node, queue.first());
-        node.setH(69);
-        queue.changed(node);
+        assertTrue(first.isOnHeap());
+        assertTrue(last.isOnHeap());
+
+        assertSame(first, queue.first());
+        first.setH(69);
+        queue.changed(first);
         assertSame(last, queue.first());
         last.setH(420);
         queue.changed(last);
-        assertSame(node, queue.first());
+        assertSame(first, queue.first());
+    }
+
+    @Test
+    void clear() {
+        NodeQueue queue = new NodeQueue();
+        Node node = new Node(0, 0, 0, 0, 0, null);
+        queue.enqueue(node);
+        assertTrue(node.isOnHeap());
+        assertEquals(1, queue.size());
+
+        queue.clear();
+        assertFalse(node.isOnHeap());
+        assertEquals(0, queue.size());
     }
 }

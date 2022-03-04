@@ -1,6 +1,5 @@
-package com.github.phantazmnetwork.neuron.collection;
+package com.github.phantazmnetwork.neuron.node;
 
-import com.github.phantazmnetwork.neuron.operation.Node;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrays;
 
