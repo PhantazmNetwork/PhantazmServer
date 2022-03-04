@@ -195,7 +195,22 @@ public class Node extends ImmutableVec3I implements Comparable<Node>, Iterable<N
 
     @Override
     public int compareTo(@NotNull Node o) {
-        return Float.compare(getF(), o.getF());
+        int fCompare = Float.compare(getF(), o.getF());
+        if(fCompare == 0) {
+            int xCompare = Integer.compare(x, o.x);
+            if(xCompare == 0) {
+                int yCompare = Integer.compare(y, o.y);
+                if(yCompare == 0) {
+                    return Integer.compare(z, o.z);
+                }
+
+                return yCompare;
+            }
+
+            return xCompare;
+        }
+
+        return fCompare;
     }
 
     @Override
