@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.operation;
 
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.agent.HeuristicCalculator;
 import com.github.phantazmnetwork.neuron.collection.NodeQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
@@ -39,23 +40,20 @@ public class AStarPathOperation implements PathOperation {
 
         this.state = State.IN_PROGRESS;
 
-        Agent agent = context.getAgent();
-        openSet.enqueue(new Node(agent.getX(), agent.getY(), agent.getZ(), 0, agent.getHeuristicCalculator()
-                .calculate(agent, context.getDestination()), null));
+        HeuristicCalculator heuristicCalculator = context.getAgent().getHeuristicCalculator();
+        Vec3I start = context.getStartPosition();
+        Vec3I destination = context.getDestination();
+
+        openSet.enqueue(new Node(start.getX(), start.getY(), start.getZ(), 0, heuristicCalculator.calculate(start
+                        .getX(), start.getY(), start.getZ(), destination.getX(), destination.getY(),
+                destination.getZ()), null));
     }
 
     private void complete(State state) {
         this.state = state;
         openSet.clear();
         graph.clear();
-
-        Node prev = null;
-        for(Node node : this.current) {
-            node.setParent(prev);
-            prev = node;
-        }
-
-        this.current = prev;
+        current = current.invert();
         result = new Result();
     }
 
@@ -68,7 +66,9 @@ public class AStarPathOperation implements PathOperation {
         if(!openSet.isEmpty()) {
             current = openSet.dequeue();
 
-            if(agent.reachedDestination(current, context.getDestination())) {
+            Vec3I destination = context.getDestination();
+            if(agent.reachedDestination(current.getX(), current.getY(), current.getZ(), destination.getX(), destination
+                    .getY(), destination.getZ())) {
                 complete(State.SUCCEEDED);
                 return;
             }
@@ -96,7 +96,8 @@ public class AStarPathOperation implements PathOperation {
                 if(g < neighbor.getG()) {
                     neighbor.setParent(current);
                     neighbor.setG(g);
-                    neighbor.setH(agent.getHeuristicCalculator().calculate(neighbor, context.getDestination()));
+                    neighbor.setH(agent.getHeuristicCalculator().calculate(neighbor.getX(), neighbor.getY(),
+                            neighbor.getZ(), destination.getX(), destination.getY(), destination.getZ()));
                     if(neighbor.isOnHeap()) {
                         openSet.changed(neighbor);
                     }

@@ -139,8 +139,23 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
         return x * x + y * y + z * z;
     }
 
+    public @NotNull Node invert() {
+        Node prev = null;
+        for(Node node : this) {
+            node.setParent(prev);
+            prev = node;
+        }
+
+        return prev == null ? this : prev;
+    }
+
     @Override
     public @NotNull Iterator<Node> iterator() {
         return new NodeIterator();
+    }
+
+    @Override
+    public String toString() {
+        return "Node{x=" + x + ", y=" + y + ", z=" + z + "}";
     }
 }

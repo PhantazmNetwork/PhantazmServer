@@ -7,5 +7,5 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.Future;
 
 public interface Pathfinder {
-    @NotNull Future<PathResult> pathfind(@NotNull Agent agent, @NotNull Destination destination);
+    @NotNull Future<PathResult> pathfind(@NotNull Agent agent, int toX, int toY, int toZ);
 }

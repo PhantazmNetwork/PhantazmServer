@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.neuron.engine;
 
+import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.operation.PathContext;
 import com.github.phantazmnetwork.neuron.operation.PathOperation;
@@ -14,16 +16,13 @@ import java.util.function.Function;
 public class BasicPathfinder implements Pathfinder {
     private class Context implements PathContext {
         private final Agent agent;
-        private final Destination destination;
+        private final Vec3I start;
+        private final Vec3I destination;
 
-        private Context(@NotNull Agent agent, @NotNull Destination destination) {
+        private Context(Agent agent, Vec3I start, int toX, int toY, int toZ) {
             this.agent = agent;
-            this.destination = destination;
-        }
-
-        @Override
-        public @NotNull Agent getAgent() {
-            return agent;
+            this.start = start;
+            this.destination = new ImmutableVec3I(toX, toY, toZ);
         }
 
         @Override
@@ -32,7 +31,17 @@ public class BasicPathfinder implements Pathfinder {
         }
 
         @Override
-        public @NotNull Destination getDestination() {
+        public @NotNull Agent getAgent() {
+            return agent;
+        }
+
+        @Override
+        public @NotNull Vec3I getStartPosition() {
+            return start;
+        }
+
+        @Override
+        public @NotNull Vec3I getDestination() {
             return destination;
         }
     }
@@ -44,8 +53,9 @@ public class BasicPathfinder implements Pathfinder {
     }
 
     @Override
-    public @NotNull Future<PathResult> pathfind(@NotNull Agent agent, @NotNull Destination destination) {
-        PathContext context = new Context(agent, destination);
+    public @NotNull Future<PathResult> pathfind(@NotNull Agent agent, int destX, int destY, int destZ) {
+        PathContext context = new Context(Objects.requireNonNull(agent, "agent"), Objects.requireNonNull(agent
+                .computeStartPosition(), "computed start position"), destX, destY, destZ);
         PathOperation operation = operationFunction.apply(context);
 
         while(!operation.isComplete()) {
