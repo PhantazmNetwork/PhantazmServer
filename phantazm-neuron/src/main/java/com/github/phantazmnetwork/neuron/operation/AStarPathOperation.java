@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.commons.collection.map.HashSpatialMap;
-import com.github.phantazmnetwork.commons.collection.map.SpatialMap;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.collection.NodeQueue;
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -23,8 +23,8 @@ public class AStarPathOperation implements PathOperation {
 
     private final PathContext context;
     private final Agent agent;
-    private final TreeSet<Node> openSet;
-    private final SpatialMap<Node> graph;
+    private final NodeQueue openSet;
+    private final Map<Node, Node> graph;
 
     private State state;
     private Node current;
@@ -34,18 +34,18 @@ public class AStarPathOperation implements PathOperation {
         this.context = Objects.requireNonNull(context, "context");
 
         this.agent = context.getAgent();
-        this.openSet = new TreeSet<>();
-        this.graph = new HashSpatialMap<>();
+        this.openSet = new NodeQueue();
+        this.graph = new Object2ObjectRBTreeMap<>();
 
         this.state = State.IN_PROGRESS;
 
         Agent agent = context.getAgent();
-        openSet.add(new Node(agent.getX(), agent.getY(), agent.getZ(), 0, agent.getHeuristicCalculator()
-                .compute(agent, context.getDestination()), null));
+        openSet.enqueue(new Node(agent.getX(), agent.getY(), agent.getZ(), 0, agent.getHeuristicCalculator()
+                .calculate(agent, context.getDestination()), null));
     }
 
-    private void complete(boolean success) {
-        state = success ? State.SUCCEEDED : State.FAILED;
+    private void complete(State state) {
+        this.state = state;
         openSet.clear();
         graph.clear();
 
@@ -66,11 +66,10 @@ public class AStarPathOperation implements PathOperation {
         }
 
         if(!openSet.isEmpty()) {
-            current = openSet.pollFirst();
+            current = openSet.dequeue();
 
-            //noinspection ConstantConditions
             if(agent.reachedDestination(current, context.getDestination())) {
-                complete(true);
+                complete(State.SUCCEEDED);
                 return;
             }
 
@@ -80,24 +79,32 @@ public class AStarPathOperation implements PathOperation {
                 int y = current.getY() + walkVector.getY();
                 int z = current.getZ() + walkVector.getZ();
 
-                Node neighbor = graph.get(x, y, z);
+                //node objects only take into account position for hashCode/equals, so use a temporary node as a key
+                Node neighbor = graph.get(new Node(x, y, z));
                 if(neighbor == null) {
                     neighbor = new Node(x, y, z, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, current);
-                    graph.put(x, y, z, neighbor);
+
+                    /*
+                    this may seem strange, but it allows us to avoid needing to create and store persistent nodes whose
+                    only purpose is to act as a key. done like this, the same object is used as both key and value,
+                    which halves the memory footprint of the graph
+                     */
+                    graph.put(neighbor, neighbor);
                 }
 
                 float g = current.getG() + current.distanceSquared(neighbor);
                 if(g < neighbor.getG()) {
-                    openSet.remove(neighbor);
                     neighbor.setParent(current);
                     neighbor.setG(g);
-                    neighbor.setH(agent.getHeuristicCalculator().compute(neighbor, context.getDestination()));
-                    openSet.add(neighbor);
+                    neighbor.setH(agent.getHeuristicCalculator().calculate(neighbor, context.getDestination()));
+                    if(neighbor.isOnHeap()) {
+                        openSet.changed(neighbor);
+                    }
                 }
             }
         }
         else {
-            complete(false);
+            complete(State.FAILED);
         }
     }
 

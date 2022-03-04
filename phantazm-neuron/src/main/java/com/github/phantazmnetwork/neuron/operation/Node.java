@@ -36,6 +36,7 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
 
     private float g;
     private float h;
+    private int heapIndex;
 
     private Node parent;
 
@@ -45,13 +46,20 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
         this.z = z;
         this.g = g;
         this.h = h;
+        this.heapIndex = -1;
         this.parent = parent;
+    }
+
+    public Node(int x, int y, int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof Node node) {
-            return node.x == x && node.y == y && node.z == z && node.g == g && node.h == h;
+            return node.x == x && node.y == y && node.z == z;
         }
 
         return false;
@@ -61,29 +69,12 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
     public int hashCode() {
         int result = PRIME + x;
         result = PRIME * result + y;
-        result = PRIME * result + z;
-        result = PRIME * result + Float.hashCode(g);
-        return PRIME * result + Float.hashCode(h);
+        return PRIME * result + z;
     }
 
     @Override
     public int compareTo(@NotNull Node o) {
-        int f = Float.compare(getF(), o.getF());
-        if(f == 0) {
-            int x = Integer.compare(this.x, o.x);
-            if(x == 0) {
-                int y = Integer.compare(this.y, o.y);
-                if(y == 0) {
-                    return Integer.compare(this.z, o.z);
-                }
-
-                return y;
-            }
-
-            return x;
-        }
-
-        return f;
+        return Float.compare(getF(), o.getF());
     }
 
     @Override
@@ -119,6 +110,18 @@ public class Node implements Comparable<Node>, Iterable<Node>, Vec3I {
 
     public void setH(float h) {
         this.h = h;
+    }
+
+    public boolean isOnHeap() {
+        return heapIndex > -1;
+    }
+
+    public void setHeapIndex(int heapIndex) {
+        this.heapIndex = heapIndex;
+    }
+
+    public int getHeapIndex() {
+        return heapIndex;
     }
 
     public @Nullable Node getParent() {
