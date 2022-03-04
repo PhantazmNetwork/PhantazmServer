@@ -8,7 +8,7 @@ public interface Agent {
 
     @NotNull Walker getWalker();
 
-    @NotNull HeuristicCalculator getHeuristicCalculator();
+    @NotNull Calculator getCalculator();
 
     boolean reachedDestination(int x, int y, int z, int destX, int destY, int destZ);
 }
