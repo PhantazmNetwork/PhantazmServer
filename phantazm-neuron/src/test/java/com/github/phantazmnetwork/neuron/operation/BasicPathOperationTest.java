@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.operation;
 
 import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.MazeReader;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Calculator;
 import com.github.phantazmnetwork.neuron.agent.Walker;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -152,6 +154,34 @@ class BasicPathOperationTest {
                                     POSITIVE_X_MISSING_SOLIDS));
                 }
             }
+        }
+    }
+
+    @Nested
+    class Maze {
+        private static final Collection<Vec3I> FLAT_CARDINAL_MOVEMENT = List.of(
+                new ImmutableVec3I(1, 0, 0), new ImmutableVec3I(-1, 0, 0),
+                new ImmutableVec3I(0, 0, 1), new ImmutableVec3I(0, 0, -1));
+
+        @Test
+        void first() throws IOException {
+            MazeReader.Data data = MazeReader.readMaze("maze_1");
+            assertPathMatches(data.correctPath(), PathOperation.State.SUCCEEDED, makeOperation(data.end(), data.start(),
+                    FLAT_CARDINAL_MOVEMENT, Calculator.UNBIASED, data.solids()));
+        }
+
+        @Test
+        void second() throws IOException {
+            MazeReader.Data data = MazeReader.readMaze("maze_2");
+            assertPathMatches(data.correctPath(), PathOperation.State.SUCCEEDED, makeOperation(data.end(), data.start(),
+                    FLAT_CARDINAL_MOVEMENT, Calculator.UNBIASED, data.solids()));
+        }
+
+        @Test
+        void third() throws IOException {
+            MazeReader.Data data = MazeReader.readMaze("maze_3");
+            assertPathMatches(data.correctPath(), PathOperation.State.FAILED, makeOperation(data.end(), data.start(),
+                    FLAT_CARDINAL_MOVEMENT, Calculator.UNBIASED, data.solids()));
         }
     }
 }

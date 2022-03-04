@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Calculator;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeQueue;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +43,7 @@ public class BasicPathOperation implements PathOperation {
         this.context = Objects.requireNonNull(context, "context");
 
         this.openSet = new NodeQueue();
-        this.graph = new Object2ObjectRBTreeMap<>();
+        this.graph = new Object2ObjectOpenHashMap<>();
 
         this.state = State.IN_PROGRESS;
 
@@ -50,10 +51,14 @@ public class BasicPathOperation implements PathOperation {
         Vec3I start = context.getStartPosition();
         Vec3I destination = context.getDestination();
 
+
+        Node initial = new Node(start.getX(), start.getY(), start.getZ(), 0, heuristicCalculator.heuristic(start
+                .getX(), start.getY(), start.getZ(), destination.getX(), destination.getY(), destination.getZ()),
+                null);
+
         //add the first node
-        openSet.enqueue(new Node(start.getX(), start.getY(), start.getZ(), 0, heuristicCalculator.heuristic(start
-                        .getX(), start.getY(), start.getZ(), destination.getX(), destination.getY(), destination
-                .getZ()), null));
+        openSet.enqueue(initial);
+        graph.put(initial, initial);
     }
 
     private void complete(State state) {
@@ -73,6 +78,7 @@ public class BasicPathOperation implements PathOperation {
         if(!openSet.isEmpty()) {
             //remove and return the smallest (most promising) node
             current = openSet.dequeue();
+            System.out.println(current);
 
             Agent agent = context.getAgent();
             Calculator calculator = agent.getCalculator();
