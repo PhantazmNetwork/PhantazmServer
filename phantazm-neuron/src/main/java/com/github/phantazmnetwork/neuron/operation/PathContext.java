@@ -10,7 +10,7 @@ public interface PathContext {
 
     @NotNull Agent getAgent();
 
-    @NotNull Vec3I getStartPosition();
+    @NotNull Vec3I getStart();
 
-    @NotNull Vec3I getDestination();
+    @NotNull Vec3I getEnd();
 }

@@ -47,8 +47,8 @@ public class BasicPathOperation implements PathOperation {
         this.state = State.IN_PROGRESS;
 
         Calculator heuristicCalculator = context.getAgent().getCalculator();
-        Vec3I start = context.getStartPosition();
-        Vec3I destination = context.getDestination();
+        Vec3I start = context.getStart();
+        Vec3I destination = context.getEnd();
 
         Node initial = new Node(start.getX(), start.getY(), start.getZ(), 0, heuristicCalculator.heuristic(start
                 .getX(), start.getY(), start.getZ(), destination.getX(), destination.getY(), destination.getZ()),
@@ -79,7 +79,7 @@ public class BasicPathOperation implements PathOperation {
 
             Agent agent = context.getAgent();
             Calculator calculator = agent.getCalculator();
-            Vec3I destination = context.getDestination();
+            Vec3I destination = context.getEnd();
 
             //check if we reached our destination yet
             if(agent.reachedDestination(current.getX(), current.getY(), current.getZ(), destination.getX(), destination

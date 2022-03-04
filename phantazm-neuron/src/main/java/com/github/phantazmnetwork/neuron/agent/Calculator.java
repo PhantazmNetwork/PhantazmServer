@@ -59,8 +59,8 @@ public interface Calculator {
      */
     Calculator UNBIASED = new Calculator() {
         @Override
-        public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return Vec3I.distanceSquared(fromX, fromY, fromZ, toX, toY, toZ);
+        public float heuristic(int x, int y, int z, int endX, int endY, int endZ) {
+            return Vec3I.distanceSquared(x, y, z, endX, endY, endZ);
         }
 
         @Override

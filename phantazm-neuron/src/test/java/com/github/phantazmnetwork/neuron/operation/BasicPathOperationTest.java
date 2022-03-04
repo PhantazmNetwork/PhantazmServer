@@ -45,8 +45,8 @@ class BasicPathOperationTest {
         Mockito.when(mockAgent.getWalker()).thenReturn(mockWalker);
 
         PathContext mockContext = Mockito.mock(PathContext.class);
-        Mockito.when(mockContext.getDestination()).thenReturn(destination);
-        Mockito.when(mockContext.getStartPosition()).thenReturn(startPosition);
+        Mockito.when(mockContext.getEnd()).thenReturn(destination);
+        Mockito.when(mockContext.getStart()).thenReturn(startPosition);
         Mockito.when(mockContext.getAgent()).thenReturn(mockAgent);
 
         return new BasicPathOperation(mockContext);

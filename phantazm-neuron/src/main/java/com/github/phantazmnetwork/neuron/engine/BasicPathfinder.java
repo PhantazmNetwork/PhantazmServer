@@ -17,12 +17,12 @@ public class BasicPathfinder implements Pathfinder {
     private class Context implements PathContext {
         private final Agent agent;
         private final Vec3I start;
-        private final Vec3I destination;
+        private final Vec3I end;
 
-        private Context(Agent agent, Vec3I start, int toX, int toY, int toZ) {
+        private Context(Agent agent, int startX, int startY, int startZ, int endX, int endY, int endZ) {
             this.agent = agent;
-            this.start = start;
-            this.destination = new ImmutableVec3I(toX, toY, toZ);
+            this.start = new ImmutableVec3I(startX, startY, startZ);
+            this.end = new ImmutableVec3I(endX, endY, endZ);
         }
 
         @Override
@@ -36,13 +36,13 @@ public class BasicPathfinder implements Pathfinder {
         }
 
         @Override
-        public @NotNull Vec3I getStartPosition() {
+        public @NotNull Vec3I getStart() {
             return start;
         }
 
         @Override
-        public @NotNull Vec3I getDestination() {
-            return destination;
+        public @NotNull Vec3I getEnd() {
+            return end;
         }
     }
 
@@ -53,9 +53,10 @@ public class BasicPathfinder implements Pathfinder {
     }
 
     @Override
-    public @NotNull Future<PathResult> pathfind(@NotNull Agent agent, int destX, int destY, int destZ) {
-        PathContext context = new Context(Objects.requireNonNull(agent, "agent"), Objects.requireNonNull(agent
-                .computeStartPosition(), "computed start position"), destX, destY, destZ);
+    public @NotNull Future<PathResult> pathfind(@NotNull Agent agent, int startX, int startY, int startZ, int endX,
+                                                int endY, int endZ) {
+        PathContext context = new Context(Objects.requireNonNull(agent, "agent"), startX, startY, startZ, endX,
+                endY, endZ);
         PathOperation operation = operationFunction.apply(context);
 
         while(!operation.isComplete()) {
