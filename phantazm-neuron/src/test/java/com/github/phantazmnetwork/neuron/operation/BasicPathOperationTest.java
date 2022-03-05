@@ -12,10 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -57,15 +54,14 @@ class BasicPathOperationTest {
         PathResult result = operationToRun.runToCompletion();
         assertSame(expectedCompletionState, operationToRun.getState());
 
-        int i = 0;
+        List<Node> nodes = new ArrayList<>();
         for(Node node : result.getPath()) {
-            Vec3I expectedVector = expectedPath[i++];
-            assertTrue(Vec3I.equals(node.getX(), node.getY(), node.getZ(), expectedVector.getX(), expectedVector.getY(),
-                    expectedVector.getZ()), "difference between expected and actual node vector: expected " +
-                    expectedVector + ", actual was " + node + " (at path index " + i + ")");
+            nodes.add(node);
         }
 
-        assertSame(expectedPath.length, i);
+        assertEquals(Arrays.asList(expectedPath), nodes.stream().map(node -> new ImmutableVec3I(node.getX(),
+                node.getY(), node.getZ())).collect(Collectors.toList()));
+        assertSame(expectedPath.length, nodes.size());
     }
 
     @Nested
@@ -98,13 +94,13 @@ class BasicPathOperationTest {
             @Test
             void upwardMovement() {
                 assertPathMatches(OPTIMAL_PATH, PathOperation.State.SUCCEEDED, makeOperation(UPWARD_DESTINATION,
-                        Vec3I.ORIGIN, UPWARD_MOVEMENT, Calculator.UNBIASED, NO_SOLIDS));
+                        Vec3I.ORIGIN, UPWARD_MOVEMENT, Calculator.SQUARED_DISTANCE, NO_SOLIDS));
             }
 
             @Test
             void cardinalMovement() {
                 assertPathMatches(OPTIMAL_PATH, PathOperation.State.SUCCEEDED, makeOperation(UPWARD_DESTINATION,
-                        Vec3I.ORIGIN, CARDINAL_MOVEMENT, Calculator.UNBIASED, NO_SOLIDS));
+                        Vec3I.ORIGIN, CARDINAL_MOVEMENT, Calculator.SQUARED_DISTANCE, NO_SOLIDS));
             }
         }
 
@@ -120,7 +116,7 @@ class BasicPathOperationTest {
                 @Test
                 void cardinalMovement() {
                     assertPathMatches(FULLY_BLOCKED_PATH, PathOperation.State.FAILED, makeOperation(UPWARD_DESTINATION,
-                            Vec3I.ORIGIN, CARDINAL_MOVEMENT, Calculator.UNBIASED, SURROUNDED_BY_SOLIDS));
+                            Vec3I.ORIGIN, CARDINAL_MOVEMENT, Calculator.SQUARED_DISTANCE, SURROUNDED_BY_SOLIDS));
                 }
             }
 
@@ -150,7 +146,7 @@ class BasicPathOperationTest {
                 @Test
                 void cardinalMovement() {
                     assertPathMatches(OPTIMAL_PATH_X_MISSING, PathOperation.State.SUCCEEDED,
-                            makeOperation(DESTINATION_X_MISSING, Vec3I.ORIGIN, CARDINAL_MOVEMENT, Calculator.UNBIASED,
+                            makeOperation(DESTINATION_X_MISSING, Vec3I.ORIGIN, CARDINAL_MOVEMENT, Calculator.SQUARED_DISTANCE,
                                     POSITIVE_X_MISSING_SOLIDS));
                 }
             }
@@ -162,26 +158,34 @@ class BasicPathOperationTest {
         private static final Collection<Vec3I> FLAT_CARDINAL_MOVEMENT = List.of(
                 new ImmutableVec3I(1, 0, 0), new ImmutableVec3I(-1, 0, 0),
                 new ImmutableVec3I(0, 0, 1), new ImmutableVec3I(0, 0, -1));
+        private static final Calculator CALCULATOR = Calculator.SQUARED_DISTANCE;
 
         @Test
         void first() throws IOException {
             MazeReader.Data data = MazeReader.readMaze("maze_1");
             assertPathMatches(data.correctPath(), PathOperation.State.SUCCEEDED, makeOperation(data.end(), data.start(),
-                    FLAT_CARDINAL_MOVEMENT, Calculator.UNBIASED, data.solids()));
+                    FLAT_CARDINAL_MOVEMENT, CALCULATOR, data.solids()));
         }
 
         @Test
         void second() throws IOException {
             MazeReader.Data data = MazeReader.readMaze("maze_2");
             assertPathMatches(data.correctPath(), PathOperation.State.SUCCEEDED, makeOperation(data.end(), data.start(),
-                    FLAT_CARDINAL_MOVEMENT, Calculator.UNBIASED, data.solids()));
+                    FLAT_CARDINAL_MOVEMENT, CALCULATOR, data.solids()));
         }
 
         @Test
         void third() throws IOException {
             MazeReader.Data data = MazeReader.readMaze("maze_3");
             assertPathMatches(data.correctPath(), PathOperation.State.FAILED, makeOperation(data.end(), data.start(),
-                    FLAT_CARDINAL_MOVEMENT, Calculator.UNBIASED, data.solids()));
+                    FLAT_CARDINAL_MOVEMENT, CALCULATOR, data.solids()));
+        }
+
+        @Test
+        void fourth() throws IOException {
+            MazeReader.Data data = MazeReader.readMaze("maze_4");
+            assertPathMatches(data.correctPath(), PathOperation.State.SUCCEEDED, makeOperation(data.end(), data.start(),
+                    FLAT_CARDINAL_MOVEMENT, CALCULATOR, data.solids()));
         }
     }
 }

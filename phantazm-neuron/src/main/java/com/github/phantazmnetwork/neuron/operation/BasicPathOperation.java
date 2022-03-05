@@ -5,7 +5,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Calculator;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeQueue;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -42,7 +42,7 @@ public class BasicPathOperation implements PathOperation {
         this.context = Objects.requireNonNull(context, "context");
 
         this.openSet = new NodeQueue();
-        this.graph = new Object2ObjectOpenHashMap<>();
+        this.graph = new Object2ObjectRBTreeMap<>();
 
         this.state = State.IN_PROGRESS;
 
@@ -95,23 +95,19 @@ public class BasicPathOperation implements PathOperation {
                 int y = current.getY() + walkVector.getY();
                 int z = current.getZ() + walkVector.getZ();
 
+                /*
+                access is either used as a key to retrieve the "actual" node, or it's added to the graph (only after its
+                heuristic is calculated). if it's just used as a key, no references to it will remain. this works
+                because nodes are considered equal if and only if their positions are the same (equals/hashCode are
+                inconsistent with node's natural ordering); therefore, graph must be a hash-based map and not a
+                comparison-based one
+                 */
                 Node access = new Node(x, y, z, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, current);
-                Node neighbor = graph.get(access);
-                if(neighbor == null) {
-                    neighbor = access;
-
-                    //compute the heuristic once, on node creation, and never again because its inputs won't change
-                    //we're going to compute our g-score a bit later
-                    neighbor.setH(calculator.heuristic(neighbor.getX(), neighbor.getY(), neighbor.getZ(),
-                            destination.getX(), destination.getY(), destination.getZ()));
-
-                    /*
-                    this may seem strange, but it allows us to avoid needing to create and store persistent nodes whose
-                    only purpose is to act as a key. done like this, the same object is used as both key and value,
-                    which reduces the memory footprint of a large graph significantly
-                     */
-                    graph.put(neighbor, neighbor);
-                }
+                Node neighbor = graph.computeIfAbsent(access, key -> {
+                    key.setH(calculator.heuristic(key.getX(), key.getY(), key.getZ(), destination.getX(),
+                            destination.getY(), destination.getZ()));
+                    return key;
+                });
 
                 //tentative g-score, we have to check if we've actually got a better score than our previous path
                 float g = current.getG() + calculator.distance(current.getX(), current.getY(), current.getZ(),
@@ -135,7 +131,7 @@ public class BasicPathOperation implements PathOperation {
             }
 
             //keep track of the nearest node to the goal, in case it's unreachable
-            if(best == null || current.compareTo(best) < 0) {
+            if(best == null || current.getH() < best.getH()) {
                 best = current;
             }
         }

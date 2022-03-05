@@ -22,14 +22,14 @@ import java.util.NoSuchElementException;
  * such situations never occur, as keeping a record of visited nodes would add an unacceptable amount of overhead to
  * node iteration.</p>
  *
- * <p>Node extends {@link ImmutableVec3I}. It also implements {@link Comparable}. Only the node's {@code f}-score is
- * used to compare nodes, which is defined as the sum of its {@code g} and {@code h} scores. Nodes with a smaller
- * {@code f} value are smaller than nodes with a greater {@code f} value.</p>
+ * <p>Node extends {@link ImmutableVec3I}. It also implements {@link Comparable}, with a natural ordering that is
+ * consistent with equals. Nodes are compared first by x value, then y, then z. This allows nodes to be used as a key in
+ * comparison-based maps, and doing so is "safe" in that nodes are only compared by their immutable attributes.</p>
  *
  * <p>Although the position of the node cannot change throughout its lifespan, its parent, along with {@code g} and
  * {@code h} values, can and indeed are expected to be changed many times throughout path calculation.</p>
  *
- * <p>Node objects are designed to work efficiently with {@link NodeQueue}. To this end, each node stores an index —
+ * <p>Node objects are designed to work efficiently with NodeQueue. To this end, each node stores an index —
  * called {@code heapIndex} — which corresponds to the node's position within the queue's backing array. This index
  * will be negative if the node is not currently in a queue. It will be set to an appropriate value by the queue when it
  * is added and set to -1 when it is no longer present in the queue.</p>
@@ -42,9 +42,6 @@ import java.util.NoSuchElementException;
  * queue may attempt to update a different node. Therefore, care must be taken to ensure that nodes are <i>never</i>
  * present in two queues at any given time.</p>
  *
- * <p>Node's natural ordering is inconsistent with equals. While {@link Node#compareTo(Node)} considers nodes equal if
- * and only if their {@code f}-scores are the same, {@link Node#equals(Object)} considers two nodes equal only if they
- * have the same position (in other words, if their {@code x}, {@code y}, and {@code z} values are all equal).</p>
  * @see NodeQueue
  * @see Vec3I
  */
@@ -195,27 +192,22 @@ public class Node extends ImmutableVec3I implements Comparable<Node>, Iterable<N
 
     @Override
     public int compareTo(@NotNull Node o) {
-        int fCompare = Float.compare(getF(), o.getF());
-        if(fCompare == 0) {
-            int xCompare = Integer.compare(x, o.x);
-            if(xCompare == 0) {
-                int yCompare = Integer.compare(y, o.y);
-                if(yCompare == 0) {
-                    return Integer.compare(z, o.z);
-                }
-
-                return yCompare;
+        int xCompare = Integer.compare(x, o.x);
+        if(xCompare == 0) {
+            int yCompare = Integer.compare(y, o.y);
+            if(yCompare == 0) {
+                return Integer.compare(z, o.z);
             }
 
-            return xCompare;
+            return yCompare;
         }
 
-        return fCompare;
+        return xCompare;
     }
 
     @Override
     public String toString() {
-        return "Node{x=" + x + ", y=" + y + ", z=" + z + "}";
+        return "Node{x=" + x + ", y=" + y + ", z=" + z + ", g=" + g + ", h=" + h + "}";
     }
 
     @Override

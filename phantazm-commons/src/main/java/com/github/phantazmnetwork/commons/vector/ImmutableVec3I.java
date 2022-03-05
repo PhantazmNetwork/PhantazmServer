@@ -46,6 +46,6 @@ public class ImmutableVec3I implements Vec3I {
 
     @Override
     public String toString() {
-        return "ImmutableVec3I{x=" + x + ", y=" + y + ", z=" + z + "}";
+        return "Vec3I{x=" + x + ", y=" + y + ", z=" + z + "}";
     }
 }

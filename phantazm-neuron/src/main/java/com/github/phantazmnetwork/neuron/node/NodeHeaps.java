@@ -8,6 +8,26 @@ import java.util.Comparator;
  * @see NodeQueue
  */
 public final class NodeHeaps {
+    private static class NodeComparator implements Comparator<Node> {
+        @Override
+        public int compare(Node first, Node second) {
+            int fCompare = Float.compare(first.getF(), second.getF());
+            if(fCompare == 0) {
+                return first.compareTo(second);
+            }
+
+            return fCompare;
+        }
+    }
+
+    /**
+     * The comparator used to order the heap in {@link NodeHeaps#downHeap(Node[], int, int)} and
+     * {@link NodeHeaps#upHeap(Node[], int)}. Nodes are compared first by {@code f}-score, and then by their natural
+     * ordering. This comparator imposes an ordering that is inconsistent with equals.
+     * @see Node
+     */
+    public static final Comparator<Node> NODE_COMPARATOR = new NodeComparator();
+
     /**
      * Method based on {@link it.unimi.dsi.fastutil.objects.ObjectHeaps#downHeap(Object[], int, int, Comparator)}, but
      * specialized for {@link Node} objects. This will ensure that the heap index of all moved nodes is updated to match
@@ -22,11 +42,11 @@ public final class NodeHeaps {
         while ((child = (i << 1) + 1) < size) {
             Node t = heap[child];
             int right = child + 1;
-            if (right < size && ((heap[right]).compareTo(t) < 0)) {
+            if (right < size && (NODE_COMPARATOR.compare(heap[right], t) < 0)) {
                 t = heap[child = right];
             }
 
-            if ((e.compareTo(t) <= 0)) {
+            if (NODE_COMPARATOR.compare(e, t) <= 0) {
                 break;
             }
 
@@ -51,7 +71,7 @@ public final class NodeHeaps {
         while (i != 0) {
             int parent = (i - 1) >>> 1;
             Node t = heap[parent];
-            if (t.compareTo(e) <= 0) {
+            if (NODE_COMPARATOR.compare(t, e) <= 0) {
                 break;
             }
 

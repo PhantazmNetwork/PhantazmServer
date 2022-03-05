@@ -53,19 +53,27 @@ public interface Calculator {
      */
     float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ);
 
-    /**
-     * The unbiased Calculator. Both the heuristic and distance functions are simply the squared distance between the
-     * given points.
-     */
-    Calculator UNBIASED = new Calculator() {
+    Calculator SQUARED_DISTANCE = new Calculator() {
         @Override
-        public float heuristic(int x, int y, int z, int endX, int endY, int endZ) {
-            return Vec3I.distanceSquared(x, y, z, endX, endY, endZ);
+        public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
+            return Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
         }
 
         @Override
         public float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return Vec3I.distanceSquared(fromX, fromY, fromZ, toX, toY, toZ);
+            return Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
+        }
+    };
+
+    Calculator MANHATTAN_DISTANCE = new Calculator() {
+        @Override
+        public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
+            return Vec3I.manhattanDistance(fromX, fromY, fromZ, toX, toY, toZ);
+        }
+
+        @Override
+        public float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
+            return Vec3I.manhattanDistance(fromX, fromY, fromZ, toX, toY, toZ);
         }
     };
 }
