@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.neuron.agent;
+package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 
@@ -53,6 +53,10 @@ public interface Calculator {
      */
     float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ);
 
+    /**
+     * A simple Calculator implementation whose heuristic and distance functions just return the squared distance
+     * between the two points they are given. For typical grid-based navigation, this produces suitably natural paths.
+     */
     Calculator SQUARED_DISTANCE = new Calculator() {
         @Override
         public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
@@ -65,6 +69,17 @@ public interface Calculator {
         }
     };
 
+    /**
+     * <p>A Calculator implementation that returns the Manhattan distance between two points for both the heuristic and
+     * distance. The Manhattan distance is defined as follows, given two vectors {@code a} and {@code b}:</p>
+     *
+     * <code>
+     *     m = Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z)
+     * </code>
+     *
+     * <p>Note that if agents are capable of moving diagonally, the heuristic will not be admissible and can produce
+     * sub-optimal paths.</p>
+     */
     Calculator MANHATTAN_DISTANCE = new Calculator() {
         @Override
         public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {

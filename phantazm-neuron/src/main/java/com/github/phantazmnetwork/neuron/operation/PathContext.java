@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.engine.Pathfinder;
+import com.github.phantazmnetwork.neuron.node.Destination;
 import org.jetbrains.annotations.NotNull;
 
 public interface PathContext {
@@ -10,7 +10,5 @@ public interface PathContext {
 
     @NotNull Agent getAgent();
 
-    @NotNull Vec3I getStart();
-
-    @NotNull Vec3I getEnd();
+    @NotNull Destination getDestination();
 }

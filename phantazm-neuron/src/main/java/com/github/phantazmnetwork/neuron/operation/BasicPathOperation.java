@@ -2,7 +2,8 @@ package com.github.phantazmnetwork.neuron.operation;
 
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.agent.Calculator;
+import com.github.phantazmnetwork.neuron.node.Calculator;
+import com.github.phantazmnetwork.neuron.node.Destination;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
@@ -47,8 +48,8 @@ public class BasicPathOperation implements PathOperation {
         this.state = State.IN_PROGRESS;
 
         Calculator heuristicCalculator = context.getAgent().getCalculator();
-        Vec3I start = context.getStart();
-        Vec3I destination = context.getEnd();
+        Vec3I start = context.getAgent().getStartPosition();
+        Vec3I destination = context.getDestination();
 
         Node initial = new Node(start.getX(), start.getY(), start.getZ(), 0, heuristicCalculator.heuristic(start
                 .getX(), start.getY(), start.getZ(), destination.getX(), destination.getY(), destination.getZ()),
@@ -79,11 +80,10 @@ public class BasicPathOperation implements PathOperation {
 
             Agent agent = context.getAgent();
             Calculator calculator = agent.getCalculator();
-            Vec3I destination = context.getEnd();
+            Destination destination = context.getDestination();
 
             //check if we reached our destination yet
-            if(agent.reachedDestination(current.getX(), current.getY(), current.getZ(), destination.getX(), destination
-                    .getY(), destination.getZ())) {
+            if(agent.reachedDestination(current.getX(), current.getY(), current.getZ(), destination)) {
                 //success state, path was found
                 complete(State.SUCCEEDED);
                 return;
@@ -114,6 +114,7 @@ public class BasicPathOperation implements PathOperation {
                         neighbor.getX(), neighbor.getY(), neighbor.getZ());
 
                 //for brand-new nodes, g is equal to Float.POSITIVE_INFINITY, so this will run for sure
+                //if however g is less optimal, we will not explore the node — for example if we're backtracking
                 if(g < neighbor.getG()) {
                     //our path to this node is indeed better, update stuff
                     neighbor.setParent(current);

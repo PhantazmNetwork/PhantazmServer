@@ -4,8 +4,9 @@ import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.MazeReader;
 import com.github.phantazmnetwork.neuron.agent.Agent;
-import com.github.phantazmnetwork.neuron.agent.Calculator;
+import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.agent.Walker;
+import com.github.phantazmnetwork.neuron.node.Destination;
 import com.github.phantazmnetwork.neuron.node.Node;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,15 +37,20 @@ class BasicPathOperationTest {
         });
 
         Agent mockAgent = Mockito.mock(Agent.class);
+        Mockito.when(mockAgent.getStartPosition()).thenReturn(startPosition);
         Mockito.when(mockAgent.getCalculator()).thenReturn(calculator);
         Mockito.when(mockAgent.reachedDestination(eq(destination.getX()), eq(destination.getY()),
-                eq(destination.getZ()), anyInt(), anyInt(), anyInt())).thenReturn(true);
+                eq(destination.getZ()), any())).thenReturn(true);
         Mockito.when(mockAgent.getWalker()).thenReturn(mockWalker);
 
+        Destination mockDestination = Mockito.mock(Destination.class);
+        Mockito.when(mockDestination.getX()).thenReturn(destination.getX());
+        Mockito.when(mockDestination.getY()).thenReturn(destination.getY());
+        Mockito.when(mockDestination.getZ()).thenReturn(destination.getZ());
+
         PathContext mockContext = Mockito.mock(PathContext.class);
-        Mockito.when(mockContext.getEnd()).thenReturn(destination);
-        Mockito.when(mockContext.getStart()).thenReturn(startPosition);
         Mockito.when(mockContext.getAgent()).thenReturn(mockAgent);
+        Mockito.when(mockContext.getDestination()).thenReturn(mockDestination);
 
         return new BasicPathOperation(mockContext);
     }
