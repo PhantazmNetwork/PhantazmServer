@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.agent;
 
-import com.github.phantazmnetwork.neuron.world.Collider;
+import com.github.phantazmnetwork.neuron.world.TerrainCollider;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -9,5 +9,5 @@ import org.jetbrains.annotations.NotNull;
  * @see GroundAgent
  */
 public interface PhysicalAgent extends Agent {
-    @NotNull Collider getCollider();
+    @NotNull TerrainCollider getTerrainCollider();
 }

@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.world.Collider;
+import com.github.phantazmnetwork.neuron.world.TerrainCollider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -19,10 +19,9 @@ public class GroundWalker implements Walker {
             new ImmutableVec3I(1, 0, 1),
             new ImmutableVec3I(1, 0, -1),
             new ImmutableVec3I(-1, 0, 1),
-            new ImmutableVec3I(-1, 0, -1)
+            new ImmutableVec3I(-1, 0, -1),
+            new ImmutableVec3I(0, 1, 0)
     );
-
-    private static final Vec3I JUMP_VECTOR = new ImmutableVec3I(0, 1, 0);
 
     private final GroundAgent agent;
 
@@ -37,34 +36,13 @@ public class GroundWalker implements Walker {
             private Vec3I next;
 
             private boolean advance() {
-                Collider collider = agent.getCollider();
+                TerrainCollider terrainCollider = agent.getTerrainCollider();
                 while (walkIterator.hasNext()) {
                     Vec3I walkVector = walkIterator.next();
-
-                    int nX = x + walkVector.getX();
-                    int nY = y + walkVector.getY();
-                    int nZ = z + walkVector.getZ();
-
-                    float finalY = collider.collidesMovingAlong(x, y, z, walkVector.getX(), walkVector.getY(),
-                            walkVector.getZ()) ? collider.findHighest(nX, nY, nZ, agent.getJumpHeight()) : collider
-                            .findLowest(nX, nY, nZ, agent.getFallTolerance());
-
-                    //infinite values indicate the collision check short-circuited because the limit was exceeded
-                    if(!Float.isInfinite(finalY)) {
-                        next = new ImmutableVec3I(nX, (int)finalY, nZ);
+                    Vec3I next = terrainCollider.snap(x, y, z, walkVector.getX(), walkVector.getY(), walkVector.getZ());
+                    if(next != null) {
+                        this.next = next;
                         return true;
-                    }
-                }
-
-                //potentially jump to escape things we're stuck in
-                if(!collider.collidesMovingAlong(x, y, z, JUMP_VECTOR.getX(), JUMP_VECTOR.getY(), JUMP_VECTOR.getZ())) {
-                    float finalY = collider.findHighest(x, y, z, agent.getJumpHeight());
-                    if(!Float.isInfinite(finalY)) {
-                        int finalNodeY = (int)finalY;
-                        if(finalNodeY > y && !collider.collidesAt(x, finalNodeY, z)) {
-                            next = new ImmutableVec3I(x, finalNodeY, z);
-                            return true;
-                        }
                     }
                 }
 
