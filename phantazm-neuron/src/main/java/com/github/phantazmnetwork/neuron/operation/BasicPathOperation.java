@@ -12,26 +12,29 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * An A* based {@link PathOperation} implementation. It will only be completed when the destination is found or all
+ * nodes are exhausted.
+ */
 public class BasicPathOperation implements PathOperation {
-    private record Result(Node node, State state) implements PathResult {
-        private Result(@Nullable Node node, State state) {
-            this.node = node;
-            this.state = state;
+    @SuppressWarnings("ClassCanBeRecord")
+    private static class Result implements PathResult {
+        private final Node path;
+        private final boolean successful;
+
+        private Result(@Nullable Node path, boolean successful) {
+            this.path = path;
+            this.successful = successful;
         }
 
         @Override
-        public @NotNull State getState() {
-            return state;
+        public boolean isSuccessful() {
+            return successful;
         }
 
         @Override
-        public @NotNull Node getPath() {
-            if (node == null) {
-                throw new IllegalStateException("The PathOperation producing this result completed in a failed state " +
-                        "and no path was found");
-            }
-
-            return node;
+        public Node getPath() {
+            return path;
         }
     }
 
@@ -44,6 +47,11 @@ public class BasicPathOperation implements PathOperation {
     private Node best;
     private PathResult result;
 
+    /**
+     * Creates a new BasicPathOperation from the given {@link PathContext}. BasicPathOperation instances may be
+     * constructed in a completed state, depending on if the associated {@link Agent} has a valid starting node.
+     * @param context the PathContext used to instantiate the operation
+     */
     public BasicPathOperation(@NotNull PathContext context) {
         this.context = Objects.requireNonNull(context, "context");
 
@@ -76,8 +84,9 @@ public class BasicPathOperation implements PathOperation {
         this.state = state;
         openSet.clear();
         graph.clear();
-        result = new Result(state == State.SUCCEEDED ? current.reverse() : (best == null ? null : best.reverse()),
-                state);
+
+        boolean success = state == State.SUCCEEDED;
+        result = new Result(success ? current.reverse() : (best == null ? null : best.reverse()), success);
     }
 
     @Override
@@ -157,11 +166,6 @@ public class BasicPathOperation implements PathOperation {
     @Override
     public @NotNull State getState() {
         return state;
-    }
-
-    @Override
-    public @NotNull PathContext getContext() {
-        return context;
     }
 
     @Override

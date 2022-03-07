@@ -13,6 +13,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+/**
+ * A simple, synchronous {@link Pathfinder} implementation.
+ */
 public class BasicPathfinder implements Pathfinder {
     private class Context implements PathContext {
         private final Agent agent;
@@ -41,10 +44,18 @@ public class BasicPathfinder implements Pathfinder {
 
     private final Function<PathContext, PathOperation> operationFunction;
 
+    /**
+     * Creates a BasicPathfinder instance that uses the provided {@link Function} to create {@link PathOperation}
+     * instances for pathfinding.
+     * @param operationFunction the function used to create PathOperation instances
+     */
     public BasicPathfinder(@NotNull Function<PathContext, PathOperation> operationFunction) {
         this.operationFunction = Objects.requireNonNull(operationFunction, "operationFunction");
     }
 
+    /**
+     * Creates a BasicPathfinder instance that will use {@link BasicPathOperation} instances for pathfinding.
+     */
     public BasicPathfinder() {
         this.operationFunction = BasicPathOperation::new;
     }

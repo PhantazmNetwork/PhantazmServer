@@ -72,6 +72,15 @@ public class Node extends ImmutableVec3I implements Comparable<Node>, Iterable<N
 
     private Node parent;
 
+    /**
+     * Creates a new Node object with the specified parameters.
+     * @param x the x coordinate of the Node's position
+     * @param y the y coordinate
+     * @param z the z coordinate
+     * @param g the {@code g}-score (path distance to this node)
+     * @param h the {@code f}-score (heuristic)
+     * @param parent the parent node; may be null
+     */
     public Node(int x, int y, int z, float g, float h, @Nullable Node parent) {
         super(x, y, z);
         this.g = g;

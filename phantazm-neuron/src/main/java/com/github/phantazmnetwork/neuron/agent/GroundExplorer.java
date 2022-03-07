@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * An {@link Explorer} implementation designed for ground-based movement. Agents can walk in any cardinal direction as
+ * well as diagonally, and can perform jumps in certain circumstances.
+ */
 @SuppressWarnings("ClassCanBeRecord")
 public class GroundExplorer implements Explorer {
     private static final Iterable<Vec3I> WALK_VECTORS = List.of(
@@ -26,6 +30,10 @@ public class GroundExplorer implements Explorer {
 
     private final WalkingAgent agent;
 
+    /**
+     * Creates a new GroundExplorer for the given {@link WalkingAgent}.
+     * @param agent the agent this explorer will explore nodes for
+     */
     public GroundExplorer(@NotNull WalkingAgent agent) {
         this.agent = Objects.requireNonNull(agent, "agent");
     }
@@ -54,7 +62,7 @@ public class GroundExplorer implements Explorer {
                     Vec3I walkVector = walkIterator.next();
                     Vec3I next = agent.getCollider().snap(x, y, z, walkVector.getX(), walkVector.getY(),
                             walkVector.getZ(), agent.getJumpHeight(), agent.getFallTolerance());
-                    if(next != null) {
+                    if(next != null && !next.equals(Vec3I.ORIGIN)) {
                         this.next = next;
                         return true;
                     }
