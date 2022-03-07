@@ -1,7 +1,5 @@
 package com.github.phantazmnetwork.neuron.engine;
 
-import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.node.Destination;
 import com.github.phantazmnetwork.neuron.operation.BasicPathOperation;

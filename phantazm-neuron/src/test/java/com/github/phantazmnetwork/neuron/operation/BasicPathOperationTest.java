@@ -5,7 +5,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.MazeReader;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.node.Calculator;
-import com.github.phantazmnetwork.neuron.agent.Walker;
+import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.node.Destination;
 import com.github.phantazmnetwork.neuron.node.Node;
 import org.junit.jupiter.api.Nested;
@@ -24,11 +24,13 @@ class BasicPathOperationTest {
     @SuppressWarnings("SameParameterValue")
     private static PathOperation makeOperation(Vec3I destination, Vec3I startPosition, Iterable<Vec3I> walkDirections,
                                                Calculator calculator, Collection<Vec3I> solids) {
-        Walker mockWalker = Mockito.mock(Walker.class);
-        Mockito.when(mockWalker.walkVectors(anyInt(), anyInt(), anyInt())).thenAnswer(invocation -> {
-            int x = invocation.getArgument(0);
-            int y = invocation.getArgument(1);
-            int z = invocation.getArgument(2);
+        Explorer mockExplorer = Mockito.mock(Explorer.class);
+        Mockito.when(mockExplorer.walkVectors(any())).thenAnswer(invocation -> {
+            Node node = invocation.getArgument(0);
+
+            int x = node.getX();
+            int y = node.getY();
+            int z = node.getZ();
 
             //rudimentary simulation of collision checking: filter all directions that would collide with a "solid"
             return StreamSupport.stream(walkDirections.spliterator(), false).filter(direction -> solids.stream()
@@ -41,7 +43,7 @@ class BasicPathOperationTest {
         Mockito.when(mockAgent.getCalculator()).thenReturn(calculator);
         Mockito.when(mockAgent.reachedDestination(eq(destination.getX()), eq(destination.getY()),
                 eq(destination.getZ()), any())).thenReturn(true);
-        Mockito.when(mockAgent.getWalker()).thenReturn(mockWalker);
+        Mockito.when(mockAgent.getWalker()).thenReturn(mockExplorer);
 
         Destination mockDestination = Mockito.mock(Destination.class);
         Mockito.when(mockDestination.getX()).thenReturn(destination.getX());

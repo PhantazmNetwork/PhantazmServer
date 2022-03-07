@@ -2,9 +2,11 @@ package com.github.phantazmnetwork.neuron.node;
 
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrays;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * A specialized implementation of {@link PriorityQueue} designed with {@link Node} objects in mind. Structurally
@@ -46,7 +48,8 @@ public class NodeQueue implements PriorityQueue<Node> {
     }
 
     @Override
-    public void enqueue(Node x) {
+    public void enqueue(@NotNull Node x) {
+        Objects.requireNonNull(x, "x");
         if (size == heap.length) {
             heap = ObjectArrays.grow(heap, size + 1);
         }
@@ -55,7 +58,7 @@ public class NodeQueue implements PriorityQueue<Node> {
         NodeHeaps.upHeap(heap, size - 1);
     }
     @Override
-    public Node dequeue() {
+    public @NotNull Node dequeue() {
         if (size == 0) {
             throw new NoSuchElementException();
         }
@@ -90,7 +93,7 @@ public class NodeQueue implements PriorityQueue<Node> {
      * maintained, if it is necessary to do so.
      * @param node the node that was changed
      */
-    public void changed(Node node) {
+    public void changed(@NotNull Node node) {
         int pos = node.getHeapIndex();
         if (pos < 0 || pos > size) {
             throw new IllegalArgumentException("Node " + node + " does not belong to the queue");

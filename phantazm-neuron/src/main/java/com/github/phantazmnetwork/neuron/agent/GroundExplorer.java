@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.world.TerrainCollider;
+import com.github.phantazmnetwork.neuron.node.Node;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public class GroundWalker implements Walker {
+@SuppressWarnings("ClassCanBeRecord")
+public class GroundExplorer implements Explorer {
     private static final Iterable<Vec3I> WALK_VECTORS = List.of(
             new ImmutableVec3I(1, 0, 0),
             new ImmutableVec3I(-1, 0, 0),
@@ -23,23 +24,36 @@ public class GroundWalker implements Walker {
             new ImmutableVec3I(0, 1, 0)
     );
 
-    private final GroundAgent agent;
+    private final WalkingAgent agent;
 
-    public GroundWalker(@NotNull GroundAgent agent) {
+    public GroundExplorer(@NotNull WalkingAgent agent) {
         this.agent = Objects.requireNonNull(agent, "agent");
     }
 
     @Override
-    public @NotNull Iterable<? extends Vec3I> walkVectors(int x, int y, int z) {
+    public @NotNull Iterable<? extends Vec3I> walkVectors(@NotNull Node current) {
+        int x = current.getX();
+        int y = current.getY();
+        int z = current.getZ();
+
+        //use a plain Iterator to reduce memory footprint; we don't need to actually store nodes in a collection
         return () -> new Iterator<>() {
             private final Iterator<Vec3I> walkIterator = WALK_VECTORS.iterator();
             private Vec3I next;
 
+            /*
+            used to ensure that the iterator shows expected behavior without sacrificing performance. this computes the
+            value returned by a call to next() and stores it in a field. if the value could not be computed because the
+            iterator has no more elements, this method returns false. otherwise, it returns true
+
+            this is necessary because in order to determine if a next element exists, one must perform the exact same
+            calculations used to actually compute the next value.
+             */
             private boolean advance() {
-                TerrainCollider terrainCollider = agent.getTerrainCollider();
                 while (walkIterator.hasNext()) {
                     Vec3I walkVector = walkIterator.next();
-                    Vec3I next = terrainCollider.snap(x, y, z, walkVector.getX(), walkVector.getY(), walkVector.getZ());
+                    Vec3I next = agent.getCollider().snap(x, y, z, walkVector.getX(), walkVector.getY(),
+                            walkVector.getZ(), agent.getJumpHeight(), agent.getFallTolerance());
                     if(next != null) {
                         this.next = next;
                         return true;

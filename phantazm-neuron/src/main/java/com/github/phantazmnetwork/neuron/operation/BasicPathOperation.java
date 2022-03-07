@@ -8,24 +8,29 @@ import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class BasicPathOperation implements PathOperation {
-    private class Result implements PathResult {
-        private final Node node;
-
-        private Result(Node node) {
+    private record Result(Node node, State state) implements PathResult {
+        private Result(@Nullable Node node, State state) {
             this.node = node;
+            this.state = state;
         }
 
         @Override
-        public @NotNull PathOperation getOperation() {
-            return BasicPathOperation.this;
+        public @NotNull State getState() {
+            return state;
         }
 
         @Override
         public @NotNull Node getPath() {
+            if (node == null) {
+                throw new IllegalStateException("The PathOperation producing this result completed in a failed state " +
+                        "and no path was found");
+            }
+
             return node;
         }
     }
@@ -47,24 +52,32 @@ public class BasicPathOperation implements PathOperation {
 
         this.state = State.IN_PROGRESS;
 
-        Calculator heuristicCalculator = context.getAgent().getCalculator();
-        Vec3I start = context.getAgent().getStartPosition();
-        Vec3I destination = context.getDestination();
+        Agent agent = context.getAgent();
+        if(agent.hasStartPosition()) {
+            Calculator heuristicCalculator = agent.getCalculator();
+            Vec3I start = agent.getStartPosition();
+            Vec3I destination = context.getDestination();
 
-        Node initial = new Node(start.getX(), start.getY(), start.getZ(), 0, heuristicCalculator.heuristic(start
-                .getX(), start.getY(), start.getZ(), destination.getX(), destination.getY(), destination.getZ()),
-                null);
+            Node initial = new Node(start.getX(), start.getY(), start.getZ(), 0, heuristicCalculator.heuristic(start
+                    .getX(), start.getY(), start.getZ(), destination.getX(), destination.getY(), destination.getZ()),
+                    null);
 
-        //add the first node
-        openSet.enqueue(initial);
-        graph.put(initial, initial);
+            //add the first node
+            openSet.enqueue(initial);
+            graph.put(initial, initial);
+        }
+        else {
+            //immediately terminate if the agent has no starting position, the result will have a null node
+            complete(State.FAILED);
+        }
     }
 
     private void complete(State state) {
         this.state = state;
         openSet.clear();
         graph.clear();
-        result = new Result(state == State.SUCCEEDED ? current.reverse() : best.reverse());
+        result = new Result(state == State.SUCCEEDED ? current.reverse() : (best == null ? null : best.reverse()),
+                state);
     }
 
     @Override
@@ -89,21 +102,19 @@ public class BasicPathOperation implements PathOperation {
                 return;
             }
 
-            for(Vec3I walkVector : agent.getWalker().walkVectors(current.getX(), current.getY(), current.getZ())) {
+            for(Vec3I walkVector : agent.getWalker().walkVectors(current)) {
                 //x, y, and z are the coordinates of the "neighbor" node we're trying to explore
                 int x = current.getX() + walkVector.getX();
                 int y = current.getY() + walkVector.getY();
                 int z = current.getZ() + walkVector.getZ();
 
                 /*
-                access is either used as a key to retrieve the "actual" node, or it's added to the graph (only after its
-                heuristic is calculated). if it's just used as a key, no references to it will remain. this works
-                because nodes are considered equal if and only if their positions are the same (equals/hashCode are
-                inconsistent with node's natural ordering); therefore, graph must be a hash-based map and not a
-                comparison-based one
+                the node used as a key here may be stored as a value too, or it may just be used to access a
+                previously-existing value. for the purposes of all maps (even comparator-based ones using Node's natural
+                ordering), node objects are safe for use as keys because comparison-changing values are final
                  */
-                Node access = new Node(x, y, z, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, current);
-                Node neighbor = graph.computeIfAbsent(access, key -> {
+                Node neighbor = graph.computeIfAbsent(new Node(x, y, z, Float.POSITIVE_INFINITY,
+                        Float.POSITIVE_INFINITY, current), key -> {
                     key.setH(calculator.heuristic(key.getX(), key.getY(), key.getZ(), destination.getX(),
                             destination.getY(), destination.getZ()));
                     return key;
