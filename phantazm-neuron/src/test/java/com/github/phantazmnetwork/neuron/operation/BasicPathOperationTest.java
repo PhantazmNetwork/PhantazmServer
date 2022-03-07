@@ -39,6 +39,7 @@ class BasicPathOperationTest {
         });
 
         Agent mockAgent = Mockito.mock(Agent.class);
+        Mockito.when(mockAgent.hasStartPosition()).thenReturn(true);
         Mockito.when(mockAgent.getStartPosition()).thenReturn(startPosition);
         Mockito.when(mockAgent.getCalculator()).thenReturn(calculator);
         Mockito.when(mockAgent.reachedDestination(eq(destination.getX()), eq(destination.getY()),

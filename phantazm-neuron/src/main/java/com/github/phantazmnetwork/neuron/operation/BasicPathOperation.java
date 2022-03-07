@@ -133,8 +133,8 @@ public class BasicPathOperation implements PathOperation {
                 float g = current.getG() + calculator.distance(current.getX(), current.getY(), current.getZ(),
                         neighbor.getX(), neighbor.getY(), neighbor.getZ());
 
-                //for brand-new nodes, g is equal to Float.POSITIVE_INFINITY, so this will run for sure
-                //if however g is less optimal, we will not explore the node — for example if we're backtracking
+                //for brand-new nodes, neighbor.getG() is equal to Float.POSITIVE_INFINITY, so this will run for sure
+                //if however neighbor.getG() is less optimal, we will not explore the node
                 if(g < neighbor.getG()) {
                     //our path to this node is indeed better, update stuff
                     neighbor.setParent(current);
@@ -151,7 +151,7 @@ public class BasicPathOperation implements PathOperation {
                 }
             }
 
-            //keep track of the nearest node to the goal, in case it's unreachable
+            //keep track of the nearest node to the goal (smallest heuristic), in case it's unreachable
             if(best == null || current.getH() < best.getH()) {
                 best = current;
             }

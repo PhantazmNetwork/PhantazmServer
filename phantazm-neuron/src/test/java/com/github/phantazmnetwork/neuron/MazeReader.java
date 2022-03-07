@@ -17,11 +17,30 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Static utility class for reading data from mazes, used for testing pathfinding.
+ */
 public final class MazeReader {
+    /**
+     * Represents maze data. Contains a collection of vectors where solid (walls) are located, the starting vector, the
+     * ending (destination) vector, and an ordered array of vectors representing the correct path.
+     */
     public record Data(Collection<Vec3I> solids, Vec3I start, Vec3I end, Vec3I[] correctPath) {}
 
+    /**
+     * Represents a 2D integer vector. Likely temporary, will implement in phantazm-commons eventually.
+     */
     public record Vec2I(int getX, int getY) {}
 
+    /**
+     * Reads some maze data from the given name. Will load maze data from a file {@code mazeName}.png in the same
+     * package as this class, and optimal path data from a file named {@code mazeName}.toml in the same package as this
+     * class.
+     * @param mazeName the name of the maze
+     * @return the data representing the maze (walls, start, and end position)
+     * @throws IOException if the appropriate resources cannot be found
+     * @throws IllegalArgumentException if some necessary data is missing
+     */
     public static Data readMaze(String mazeName) throws IOException {
         InputStream imageInput = MazeReader.class.getResourceAsStream(mazeName + ".png");
 

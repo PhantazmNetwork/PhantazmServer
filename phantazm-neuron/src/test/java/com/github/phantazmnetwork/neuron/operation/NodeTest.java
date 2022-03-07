@@ -19,13 +19,20 @@ class NodeTest {
 
     @Test
     void compare() {
-        Node smaller = new Node(0, 0, 0, 0, 0, null);
-        Node larger = new Node(1, 1, 1, 1, 0, null);
-        Node eq = new Node(2, 2, 2, 0, 0, null);
+        Node x = new Node(1, 0, 0, 0, 0, null);
+        Node y = new Node(0, 1, 0, 0, 0, null);
+        Node z = new Node(0, 0, 1, 0, 0, null);
 
-        assertTrue(smaller.compareTo(larger) < 0);
-        assertTrue(larger.compareTo(smaller) > 0);
-        assertEquals(0, smaller.compareTo(eq));
+        assertTrue(x.compareTo(y) > 0);
+        assertTrue(y.compareTo(x) < 0);
+
+        assertTrue(y.compareTo(z) > 0);
+        assertTrue(z.compareTo(y) < 0);
+
+        assertTrue(x.compareTo(z) > 0);
+        assertTrue(z.compareTo(x) < 0);
+
+        assertEquals(new Node(1, 0, 0, 69, 69, z), x);
     }
 
     @Test
