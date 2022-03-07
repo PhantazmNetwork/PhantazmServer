@@ -60,12 +60,12 @@ public interface Calculator {
     Calculator SQUARED_DISTANCE = new Calculator() {
         @Override
         public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
+            return (float) Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
         }
 
         @Override
         public float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
+            return (float) Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
         }
     };
 
@@ -83,12 +83,12 @@ public interface Calculator {
     Calculator MANHATTAN_DISTANCE = new Calculator() {
         @Override
         public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return Vec3I.manhattanDistance(fromX, fromY, fromZ, toX, toY, toZ);
+            return (float) Vec3I.manhattanDistance(fromX, fromY, fromZ, toX, toY, toZ);
         }
 
         @Override
         public float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return Vec3I.manhattanDistance(fromX, fromY, fromZ, toX, toY, toZ);
+            return (float) Vec3I.manhattanDistance(fromX, fromY, fromZ, toX, toY, toZ);
         }
     };
 }
