@@ -44,59 +44,63 @@ public final class MazeReader {
     public static Data readMaze(String mazeName) throws IOException {
         InputStream imageInput = MazeReader.class.getResourceAsStream(mazeName + ".png");
 
-        Collection<Vec3I> solids = new ArrayList<>();
+        Collection<Vec3I> solids = new ArrayList<>(); //list of wall nodes
         if(imageInput != null) {
-            BufferedImage image = ImageIO.read(imageInput);
-            int width = image.getWidth();
-            int height = image.getHeight();
+            try(imageInput) {
+                BufferedImage image = ImageIO.read(imageInput);
+                int width = image.getWidth();
+                int height = image.getHeight();
 
-            int[][] pixelData = loadGridFromRaster(image.getData());
-            Vec2I start = null;
-            Vec2I end = null;
+                int[][] pixelData = loadGridFromRaster(image.getData());
+                Vec2I start = null;
+                Vec2I end = null;
 
-            for(int x = 0; x < width; x++) {
-                for(int y = 0; y < height; y++) {
-                    int pixel = pixelData[x][y];
-                    Color color = new Color(pixel);
+                for(int x = 0; x < width; x++) {
+                    for(int y = 0; y < height; y++) {
+                        int pixel = pixelData[x][y];
+                        Color color = new Color(pixel);
 
-                    //starting node
-                    if(color.equals(Color.RED) && start == null) {
-                        start = new Vec2I(x, y);
-                    }
-                    else if(color.equals(Color.GREEN) && end == null) {
-                        end = new Vec2I(x, y);
-                    }
-                    else if(color.equals(Color.BLACK)) {
-                        solids.add(new ImmutableVec3I(x, 0, y));
+                        if(color.equals(Color.RED) && start == null) {
+                            start = new Vec2I(x, y); //starting node is red
+                        }
+                        else if(color.equals(Color.GREEN) && end == null) {
+                            end = new Vec2I(x, y); //starting node is green
+                        }
+                        else if(color.equals(Color.BLACK)) {
+                            solids.add(new ImmutableVec3I(x, 0, y)); //wall nodes are black
+                        }
                     }
                 }
+
+                if(start == null) {
+                    throw new IllegalArgumentException("Start position not found");
+                }
+
+                if(end == null) {
+                    throw new IllegalArgumentException("End position not found");
+                }
+
+                InputStream correctPath = MazeReader.class.getResourceAsStream(mazeName + ".toml");
+
+                if(correctPath != null) {
+                    try(correctPath) {
+                        ConfigCodec configCodec = new TomlCodec();
+                        ConfigElement root = ConfigBridges.read(correctPath, configCodec);
+
+                        //converts list of points to Vec3I array
+                        Vec3I[] correctPathElements = root.getElement("points").asList().stream().map(element -> {
+                            List<ConfigElement> vectors = element.asList();
+                            return new ImmutableVec3I(vectors.get(0).asNumber().intValue(), 0, vectors.get(1)
+                                    .asNumber().intValue());
+                        }).toArray(Vec3I[]::new);
+
+                        return new Data(solids, new ImmutableVec3I(start.getX, 0, start.getY),
+                                new ImmutableVec3I(end.getX, 0, end.getY), correctPathElements);
+                    }
+                }
+
+                throw new IllegalArgumentException("Failed to load the correct path for " + mazeName);
             }
-
-            if(start == null) {
-                throw new IllegalArgumentException("Start position not found");
-            }
-
-            if(end == null) {
-                throw new IllegalArgumentException("End position not found");
-            }
-
-            InputStream correctPath = MazeReader.class.getResourceAsStream(mazeName + ".toml");
-
-            if(correctPath != null) {
-                ConfigCodec configCodec = new TomlCodec();
-                ConfigElement root = ConfigBridges.read(correctPath, configCodec);
-
-                Vec3I[] correctPathElements = root.getElement("points").asList().stream().map(element -> {
-                    List<ConfigElement> vectors = element.asList();
-                    return new ImmutableVec3I(vectors.get(0).asNumber().intValue(), 0, vectors.get(1).asNumber()
-                            .intValue());
-                }).toArray(Vec3I[]::new);
-
-                return new Data(solids, new ImmutableVec3I(start.getX, 0, start.getY),
-                        new ImmutableVec3I(end.getX, 0, end.getY), correctPathElements);
-            }
-
-            throw new IllegalArgumentException("Failed to load the correct path for " + mazeName);
         }
 
         throw new IllegalArgumentException("Could not load maze resource " + mazeName);

@@ -10,7 +10,6 @@ import com.github.phantazmnetwork.neuron.node.Destination;
 import com.github.phantazmnetwork.neuron.node.Node;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,13 +18,14 @@ import java.util.stream.StreamSupport;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class BasicPathOperationTest {
     @SuppressWarnings("SameParameterValue")
     private static PathOperation makeOperation(Vec3I destination, Vec3I startPosition, Iterable<Vec3I> walkDirections,
                                                Calculator calculator, Collection<Vec3I> solids) {
-        Explorer mockExplorer = Mockito.mock(Explorer.class);
-        Mockito.when(mockExplorer.walkVectors(any())).thenAnswer(invocation -> {
+        Explorer mockExplorer = mock(Explorer.class);
+        when(mockExplorer.walkVectors(any())).thenAnswer(invocation -> {
             Node node = invocation.getArgument(0);
 
             int x = node.getX();
@@ -38,22 +38,22 @@ class BasicPathOperationTest {
                             y + direction.getY(), z + direction.getZ()))).collect(Collectors.toList());
         });
 
-        Agent mockAgent = Mockito.mock(Agent.class);
-        Mockito.when(mockAgent.hasStartPosition()).thenReturn(true);
-        Mockito.when(mockAgent.getStartPosition()).thenReturn(startPosition);
-        Mockito.when(mockAgent.getCalculator()).thenReturn(calculator);
-        Mockito.when(mockAgent.reachedDestination(eq(destination.getX()), eq(destination.getY()),
+        Agent mockAgent = mock(Agent.class);
+        when(mockAgent.hasStartPosition()).thenReturn(true);
+        when(mockAgent.getStartPosition()).thenReturn(startPosition);
+        when(mockAgent.getCalculator()).thenReturn(calculator);
+        when(mockAgent.reachedDestination(eq(destination.getX()), eq(destination.getY()),
                 eq(destination.getZ()), any())).thenReturn(true);
-        Mockito.when(mockAgent.getWalker()).thenReturn(mockExplorer);
+        when(mockAgent.getWalker()).thenReturn(mockExplorer);
 
-        Destination mockDestination = Mockito.mock(Destination.class);
-        Mockito.when(mockDestination.getX()).thenReturn(destination.getX());
-        Mockito.when(mockDestination.getY()).thenReturn(destination.getY());
-        Mockito.when(mockDestination.getZ()).thenReturn(destination.getZ());
+        Destination mockDestination = mock(Destination.class);
+        when(mockDestination.getX()).thenReturn(destination.getX());
+        when(mockDestination.getY()).thenReturn(destination.getY());
+        when(mockDestination.getZ()).thenReturn(destination.getZ());
 
-        PathContext mockContext = Mockito.mock(PathContext.class);
-        Mockito.when(mockContext.getAgent()).thenReturn(mockAgent);
-        Mockito.when(mockContext.getDestination()).thenReturn(mockDestination);
+        PathContext mockContext = mock(PathContext.class);
+        when(mockContext.getAgent()).thenReturn(mockAgent);
+        when(mockContext.getDestination()).thenReturn(mockDestination);
 
         return new BasicPathOperation(mockContext);
     }

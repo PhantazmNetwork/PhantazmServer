@@ -58,7 +58,6 @@ class NodeQueueTest {
         NodeQueue queue = new NodeQueue();
         Node node = new Node(0, 0, 0, 0, 0, null);
         queue.enqueue(node);
-        assertTrue(node.isOnHeap());
         assertEquals(1, queue.size());
 
         queue.clear();

@@ -43,6 +43,7 @@ public class GroundExplorer implements Explorer {
         int x = current.getX();
         int y = current.getY();
         int z = current.getZ();
+        Node parent = current.getParent();
 
         //use a plain Iterator to reduce memory footprint; we don't need to actually store nodes in a collection
         return () -> new Iterator<>() {
@@ -60,11 +61,15 @@ public class GroundExplorer implements Explorer {
             private boolean advance() {
                 while (walkIterator.hasNext()) {
                     Vec3I walkVector = walkIterator.next();
-                    Vec3I next = agent.getCollider().snap(x, y, z, walkVector.getX(), walkVector.getY(),
-                            walkVector.getZ(), agent.getJumpHeight(), agent.getFallTolerance());
-                    if(next != null && !next.equals(Vec3I.ORIGIN)) {
-                        this.next = next;
-                        return true;
+
+                    /*
+                    avoid obvious cases of backtracking with a simple check. although pathfinding algorithms like A*
+                    will give the correct path even if we allow backtracking, we should still try to avoid performing
+                    collision checks if we don't have to
+                     */
+                    if(parent == null || !Vec3I.equals(parent.getX(), parent.getY(), parent.getZ(), x +
+                            walkVector.getX(), y + walkVector.getY(), z + walkVector.getZ())) {
+
                     }
                 }
 

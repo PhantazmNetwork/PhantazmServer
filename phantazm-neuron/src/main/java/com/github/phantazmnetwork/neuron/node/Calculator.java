@@ -74,7 +74,7 @@ public interface Calculator {
      * distance. The Manhattan distance is defined as follows, given two vectors {@code a} and {@code b}:</p>
      *
      * <code>
-     *     m = Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z)
+     *     Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z)
      * </code>
      *
      * <p>Note that if agents are capable of moving diagonally, the heuristic will not be admissible and can produce
