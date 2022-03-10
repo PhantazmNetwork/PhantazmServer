@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
  * its "parent"), meaning that it may be treated as a singly-linked list.</p>
  *
  * <p>This class implements {@link Iterable}. Its iterator will return each node in order, starting with the node being
- * iterated, and ending with the first node in the chair to have a null parent. This means that every node's iterator is
+ * iterated, and ending with the first node in the chain to have a null parent. This means that every node's iterator is
  * guaranteed to iterate <i>at least</i> once.</p>
  *
  * <p>Since nodes can be linked in arbitrary ways, it is possible to have a structure in which a node's parent is
@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
  * <p>Although the position of the node cannot change throughout its lifespan, its parent, along with {@code g} and
  * {@code h} values, can and indeed are expected to be changed many times throughout path calculation.</p>
  *
- * <p>Node objects are designed to work efficiently with NodeQueue. To this end, each node stores an index —
+ * <p>Node objects are designed to work efficiently with {@link NodeQueue}. To this end, each node stores an index —
  * called {@code heapIndex} — which corresponds to the node's position within the queue's backing array. This index
  * will be negative if the node is not currently in a queue. It will be set to an appropriate value by the queue when it
  * is added and set to -1 when it is no longer present in the queue.</p>

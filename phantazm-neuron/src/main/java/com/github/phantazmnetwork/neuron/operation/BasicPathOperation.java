@@ -151,7 +151,7 @@ public class BasicPathOperation implements PathOperation {
                 }
             }
 
-            //keep track of the nearest node to the goal (smallest heuristic), in case it's unreachable
+            //keep track of the nearest node to the goal (the smallest heuristic), in case it's unreachable
             if(best == null || current.getH() < best.getH()) {
                 best = current;
             }

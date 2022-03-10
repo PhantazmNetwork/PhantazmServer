@@ -60,7 +60,9 @@ class NodeTest {
         Node inverted = nodes[0].reverse();
         int i = 0;
         for(Node node : inverted) {
-            assertEquals(nodes[nodes.length - (i++ + 1)], node);
+            assertEquals(nodes[nodes.length - (++i)], node);
         }
+
+        assertEquals(nodes.length, i);
     }
 }

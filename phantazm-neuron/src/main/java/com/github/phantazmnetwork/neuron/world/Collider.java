@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * Performs collision checks. WIP, will likely undergo significant changes, and so is lacking much javadoc.
- */
 public interface Collider {
-    @Nullable Vec3I snap(int x, int y, int z, int moveX, int moveY, int moveZ, float jump, float fall);
+    boolean collidesAt(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
+
+    @NotNull Iterable<? extends Solid> solidsAt(double minX, double minY, double minZ, double maxX, double maxY,
+                                                double maxZ);
 }

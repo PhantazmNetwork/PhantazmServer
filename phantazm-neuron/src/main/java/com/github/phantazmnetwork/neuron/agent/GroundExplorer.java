@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.neuron.agent;
 import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.node.Node;
+import com.github.phantazmnetwork.neuron.world.NodeTranslator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -28,14 +29,14 @@ public class GroundExplorer implements Explorer {
             new ImmutableVec3I(0, 1, 0)
     );
 
-    private final WalkingAgent agent;
+    private final NodeTranslator translator;
 
     /**
-     * Creates a new GroundExplorer for the given {@link WalkingAgent}.
-     * @param agent the agent this explorer will explore nodes for
+     * Creates a new GroundExplorer which will use the given {@link NodeTranslator}.
+     * @param translator the translator used by this explorer
      */
-    public GroundExplorer(@NotNull WalkingAgent agent) {
-        this.agent = Objects.requireNonNull(agent, "agent");
+    public GroundExplorer(@NotNull NodeTranslator translator) {
+        this.translator = Objects.requireNonNull(translator, "agent");
     }
 
     @Override
@@ -60,7 +61,7 @@ public class GroundExplorer implements Explorer {
              */
             private boolean advance() {
                 while (walkIterator.hasNext()) {
-                    Vec3I walkVector = walkIterator.next();
+                    Vec3I delta = walkIterator.next();
 
                     /*
                     avoid obvious cases of backtracking with a simple check. although pathfinding algorithms like A*
@@ -68,8 +69,20 @@ public class GroundExplorer implements Explorer {
                     collision checks if we don't have to
                      */
                     if(parent == null || !Vec3I.equals(parent.getX(), parent.getY(), parent.getZ(), x +
-                            walkVector.getX(), y + walkVector.getY(), z + walkVector.getZ())) {
+                            delta.getX(), y + delta.getY(), z + delta.getZ())) {
+                        //this might be null, which indicates our walk delta is not traversable
+                        Vec3I newDelta = translator.translate(x, y, z, delta.getX(), delta.getY(), delta.getZ());
 
+                        /*
+                        only explore the next node if our delta is non-zero (in other words, if we're going to get a
+                        new node). while PathOperation implementations should handle this case gracefully, this can
+                        prevent redundancy
+                         */
+                        if(newDelta != null && !Vec3I.equals(newDelta.getX(), newDelta.getY(), newDelta.getZ(), 0,
+                                0, 0)) {
+                            this.next = newDelta;
+                            return true;
+                        }
                     }
                 }
 

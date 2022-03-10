@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
  * and generally all that is required to be used by a pathfinding algorithm such as A*. More specific sub-interfaces
  * exist to expose more complex functionality.
  * @see PhysicalAgent
- * @see WalkingAgent
  */
 public interface Agent {
     /**

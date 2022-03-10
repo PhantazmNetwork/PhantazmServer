@@ -42,8 +42,8 @@ class BasicPathOperationTest {
         when(mockAgent.hasStartPosition()).thenReturn(true);
         when(mockAgent.getStartPosition()).thenReturn(startPosition);
         when(mockAgent.getCalculator()).thenReturn(calculator);
-        when(mockAgent.reachedDestination(eq(destination.getX()), eq(destination.getY()),
-                eq(destination.getZ()), any())).thenReturn(true);
+        when(mockAgent.reachedDestination(eq(destination.getX()), eq(destination.getY()), eq(destination.getZ()),
+                any())).thenReturn(true);
         when(mockAgent.getWalker()).thenReturn(mockExplorer);
 
         Destination mockDestination = mock(Destination.class);
@@ -70,7 +70,6 @@ class BasicPathOperationTest {
 
         assertEquals(Arrays.asList(expectedPath), nodes.stream().map(node -> new ImmutableVec3I(node.getX(),
                 node.getY(), node.getZ())).collect(Collectors.toList()));
-        assertSame(expectedPath.length, nodes.size());
     }
 
     @Nested

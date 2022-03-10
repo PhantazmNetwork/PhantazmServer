@@ -1,18 +1,22 @@
 package com.github.phantazmnetwork.neuron.agent;
 
-import com.github.phantazmnetwork.neuron.world.Collider;
+import com.github.phantazmnetwork.neuron.world.NodeTranslator;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents an {@link Agent} which exists in physical space (and therefore has collision).
  * @see Agent
- * @see WalkingAgent
+ * @see NodeTranslator
  */
 public interface PhysicalAgent extends Agent {
     /**
-     * Retrieves the {@link Collider} instance used to perform collision checks for this agent. This is often used for
-     * navigation, to determine if the agent may walk to certain areas without running into something.
+     * Retrieves the {@link NodeTranslator} instance which calculates the translation vector resulting from an attempt
+     * to move this agent in a specific direction.
      * @return a Collider instance used to perform collision checking
      */
-    @NotNull Collider getCollider();
+    @NotNull NodeTranslator getNodeTranslator();
+
+    float getWidth();
+
+    float getHeight();
 }
