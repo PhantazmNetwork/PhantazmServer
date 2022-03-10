@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.neuron.world;
 
+import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
+import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundAgent;
 import org.jetbrains.annotations.NotNull;
@@ -16,51 +18,80 @@ public class WalkTranslator implements NodeTranslator {
         this.agent = Objects.requireNonNull(agent, "agent");
     }
 
-    //unnecessary local values aid readability here
-    @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
     public @Nullable Vec3I translate(int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
-        double cX = x + 0.5;
-        double cY = y;
-        double cZ = z + 0.5;
-
         float width = agent.getWidth();
         float height = agent.getHeight();
-        float halfWidth = width / 2;
 
-        //agent bounds centered at (x, y, z)
-        double minX = cX - halfWidth;
-        double minY = y;
-        double minZ = cZ - halfWidth;
-
-        double maxX = cX + halfWidth;
-        double maxY = y + height;
-        double maxZ = cZ + halfWidth;
-
-        //expand in the direction of (deltaX, deltaY, deltaZ)
+        double minX, minY, minZ, maxX, maxY, maxZ;
         if(deltaX < 0) {
-            minX += deltaX;
+            minX = x + deltaX;
+            maxX = x;
+        }
+        else if(deltaX > 0) {
+            minX = x + width;
+            maxX = x + deltaX;
         }
         else {
-            maxX += deltaX;
+            minX = x;
+            maxX = x + width;
         }
 
         if(deltaY < 0) {
-            minY += deltaY;
+            minY = y + deltaY;
+            maxY = y;
+        }
+        else if(deltaY > 0) {
+            minY = y + height;
+            maxY = y + deltaY;
         }
         else {
-            maxY += deltaY;
+            minY = y;
+            maxY = y + height;
         }
 
         if(deltaZ < 0) {
-            minZ += deltaZ;
+            minZ = z + deltaZ;
+            maxZ = z;
+        }
+        else if(deltaZ > 0) {
+            minZ = z + width;
+            maxZ = z + deltaZ;
         }
         else {
-            maxZ += deltaZ;
+            minZ = z;
+            maxZ = z + width;
         }
 
-        for(Solid solid : collider.solidsAt(minX, minY, minZ, maxX, maxY, maxZ)) {
+        Solid highest = collider.findHighest(minX, minY, minZ, maxX, maxY, maxZ);
+        if(highest != null) {
+            float jumpHeight = agent.getJumpHeight();
 
+            Solid finalSolid = null;
+            while(highest != null && (highest.getY() + highest.maxY() - y) < jumpHeight) {
+                finalSolid = highest;
+
+                minY += height;
+                maxY += height;
+                highest = collider.findHighest(minX, minY, minZ, maxX, maxY, maxZ);
+            }
+
+            if(highest == null && !collider.collidesAt(x, y + height, z, x + width, maxY, z + width)) {
+                return finalSolid;
+            }
+        }
+        else {
+            float fallTolerance = agent.getFallTolerance();
+
+            while(highest == null && y - minY < fallTolerance) {
+                minY -= height;
+                maxY -= height;
+                highest = collider.findHighest(minX, minY, minZ, maxX, maxY, maxZ);
+            }
+
+            if(highest != null) {
+
+            }
         }
 
         return null;
