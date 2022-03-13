@@ -1,15 +1,24 @@
 package com.github.phantazmnetwork.neuron.world;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface Collider {
-    boolean collidesAt(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
+    enum Order {
+        XYZ,
+        YXZ,
+        YZX,
+        ZYX,
+        ZXY,
+        XZY
+    }
 
-    @NotNull Iterable<? extends Solid> solidsOverlapping(double minX, double minY, double minZ, double maxX,
-                                                         double maxY, double maxZ);
+    boolean collidesAt(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
+                       @NotNull Order order);
 
-    @Nullable Solid findHighest(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
+    @NotNull Iterable<? extends Solid> collisionsMovingAlong(double minX, double minY, double minZ, double maxX,
+                                                             double maxY, double maxZ, int deltaX, int deltaY,
+                                                             int deltaZ, @NotNull Order order);
 
-    @Nullable Solid findLowest(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
+    boolean collidesMovingAlong(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
+                                int deltaX, int deltaY, int deltaZ, @NotNull Order order);
 }

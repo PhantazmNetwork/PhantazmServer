@@ -154,8 +154,8 @@ class BasicPathOperationTest {
                 @Test
                 void cardinalMovement() {
                     assertPathMatches(OPTIMAL_PATH_X_MISSING, PathOperation.State.SUCCEEDED,
-                            makeOperation(DESTINATION_X_MISSING, Vec3I.ORIGIN, CARDINAL_MOVEMENT, Calculator.SQUARED_DISTANCE,
-                                    POSITIVE_X_MISSING_SOLIDS));
+                            makeOperation(DESTINATION_X_MISSING, Vec3I.ORIGIN, CARDINAL_MOVEMENT,
+                                    Calculator.SQUARED_DISTANCE, POSITIVE_X_MISSING_SOLIDS));
                 }
             }
         }

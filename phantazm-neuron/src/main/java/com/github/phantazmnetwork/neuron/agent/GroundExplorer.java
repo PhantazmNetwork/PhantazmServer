@@ -75,8 +75,8 @@ public class GroundExplorer implements Explorer {
 
                         /*
                         only explore the next node if our delta is non-zero (in other words, if we're going to get a
-                        new node). while PathOperation implementations should handle this case gracefully, this can
-                        prevent redundancy
+                        new node). PathOperation implementations should handle this case gracefully, but if they don't
+                        this may prevent odd behavior
                          */
                         if(newDelta != null && !Vec3I.equals(newDelta.getX(), newDelta.getY(), newDelta.getZ(), 0,
                                 0, 0)) {

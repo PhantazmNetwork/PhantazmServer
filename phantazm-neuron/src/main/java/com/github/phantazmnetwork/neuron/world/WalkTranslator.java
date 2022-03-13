@@ -1,12 +1,11 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundAgent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 public class WalkTranslator implements NodeTranslator {
@@ -18,82 +17,49 @@ public class WalkTranslator implements NodeTranslator {
         this.agent = Objects.requireNonNull(agent, "agent");
     }
 
+    //suppressed because some unnecessary local variables improve readability
+    @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
     public @Nullable Vec3I translate(int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
+        //center of block at (x, y, z)
+        double cX = x + 0.5;
+        double cY = y;
+        double cZ = z + 0.5;
+
+        //agent variables we'll need
         float width = agent.getWidth();
+        float halfWidth = width / 2;
         float height = agent.getHeight();
+        float jumpHeight = agent.getJumpHeight();
+        float fallTolerance = agent.getFallTolerance();
 
-        double minX, minY, minZ, maxX, maxY, maxZ;
-        if(deltaX < 0) {
-            minX = x + deltaX;
-            maxX = x;
-        }
-        else if(deltaX > 0) {
-            minX = x + width;
-            maxX = x + deltaX;
-        }
-        else {
-            minX = x;
-            maxX = x + width;
-        }
+        //minX, minY, minZ, maxX, maxY, maxZ represent the bounds of the agent
+        double minX = cX - halfWidth;
+        double minY = cY;
+        double minZ = cZ - halfWidth;
 
-        if(deltaY < 0) {
-            minY = y + deltaY;
-            maxY = y;
-        }
-        else if(deltaY > 0) {
-            minY = y + height;
-            maxY = y + deltaY;
-        }
-        else {
-            minY = y;
-            maxY = y + height;
-        }
+        double maxX = cX + halfWidth;
+        double maxY = cY + height;
+        double maxZ = cZ + halfWidth;
 
-        if(deltaZ < 0) {
-            minZ = z + deltaZ;
-            maxZ = z;
-        }
-        else if(deltaZ > 0) {
-            minZ = z + width;
-            maxZ = z + deltaZ;
-        }
-        else {
-            minZ = z;
-            maxZ = z + width;
-        }
+        Iterator<? extends Solid> collisions = collider.collisionsMovingAlong(minX, minY, minZ, maxX, maxY +
+                        jumpHeight, maxZ, deltaX, deltaY, deltaZ, Collider.Order.YXZ).iterator();
 
-        Solid highest = collider.findHighest(minX, minY, minZ, maxX, maxY, maxZ);
-        if(highest != null) {
-            float jumpHeight = agent.getJumpHeight();
-
-            Solid finalSolid = null;
-            while(highest != null && (highest.getY() + highest.maxY() - y) < jumpHeight) {
-                finalSolid = highest;
-
-                minY += height;
-                maxY += height;
-                highest = collider.findHighest(minX, minY, minZ, maxX, maxY, maxZ);
+        if(collisions.hasNext()) {
+            do {
+                Solid hit = collisions.next();
             }
-
-            if(highest == null && !collider.collidesAt(x, y + height, z, x + width, maxY, z + width)) {
-                return finalSolid;
-            }
-        }
-        else {
-            float fallTolerance = agent.getFallTolerance();
-
-            while(highest == null && y - minY < fallTolerance) {
-                minY -= height;
-                maxY -= height;
-                highest = collider.findHighest(minX, minY, minZ, maxX, maxY, maxZ);
-            }
-
-            if(highest != null) {
-
-            }
+            while (collisions.hasNext());
         }
 
         return null;
     }
+
+    /* shamelessly copying spigot's code for reference
+    private boolean overlaps(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        return this.minX < maxX && this.maxX > minX
+                && this.minY < maxY && this.maxY > minY
+                && this.minZ < maxZ && this.maxZ > minZ;
+    }
+     */
 }
