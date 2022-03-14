@@ -38,25 +38,25 @@ public final class NodeHeaps {
      * @param i the index of the node to potentially move down
      */
     public static void downHeap(Node[] heap, int size, int i) {
-        Node e = heap[i];
+        Node first = heap[i];
         int child;
         while ((child = (i << 1) + 1) < size) {
-            Node t = heap[child];
+            Node childNode = heap[child];
             int right = child + 1;
-            if (right < size && (NODE_SCORE_COMPARATOR.compare(heap[right], t) < 0)) {
-                t = heap[child = right];
+            if (right < size && (NODE_SCORE_COMPARATOR.compare(heap[right], childNode) < 0)) {
+                childNode = heap[child = right];
             }
 
-            if (NODE_SCORE_COMPARATOR.compare(e, t) <= 0) {
+            if (NODE_SCORE_COMPARATOR.compare(first, childNode) <= 0) {
                 break;
             }
 
-            heap[i] = t;
-            t.setHeapIndex(i);
+            heap[i] = childNode;
+            childNode.setHeapIndex(i);
             i = child;
         }
-        heap[i] = e;
-        e.setHeapIndex(i);
+        heap[i] = first;
+        first.setHeapIndex(i);
     }
 
     /**

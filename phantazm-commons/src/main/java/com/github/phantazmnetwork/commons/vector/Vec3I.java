@@ -1,8 +1,11 @@
 package com.github.phantazmnetwork.commons.vector;
 
 /**
- * Represents a 3D integer vector (point). Implementations may be immutable or mutable, but mutating methods are not
- * included as part of this interface. Contains some utility methods for working with vectors/points.
+ * <p>Represents a 3D integer vector (point). Implementations may be immutable or mutable, but mutating methods are not
+ * included as part of this interface. Contains some utility methods for working with vectors/points.</p>
+ *
+ * <p>Implementations should provide suitable overrides for {@link Object#equals(Object)} and {@link Object#hashCode()},
+ * based of the values </p>
  */
 public interface Vec3I {
     /**

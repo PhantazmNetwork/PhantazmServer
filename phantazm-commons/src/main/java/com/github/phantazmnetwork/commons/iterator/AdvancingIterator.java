@@ -7,21 +7,23 @@ import java.util.NoSuchElementException;
  * <p>An implementation of {@link Iterator} that uses an alternate mechanism for iteration called <i>advancing</i>.
  * Instead of separating the logic for determining if an element exists and actually computing it into two methods
  * ({@link Iterator#hasNext()} and {@link Iterator#next()}, respectively), AdvancingIterator uses a single method
- * {@code advance()} that tries to compute the next value as well as reports if said computation was successful.</p>
+ * {@code advance()} that tries to compute the next value as well as reporting if said computation was successful.</p>
  *
  * <p>This class does not serve as a general replacement or improvement upon the design pattern typically used for
- * iterators. Notably, it violates the generally-accepted "rule" that iterators should be <i>stateless</i>;
- * {@code hasNext} is not idempotent, and is thread-unsafe. However, it can be very useful in instances which the logic
- * for determining <i>if</i> an element exists and the logic for actually <i>retrieving</i> that element are both
- * similar and equally expensive (for example, if return values are being calculated on the fly).</p>
+ * iterators. Notably, it violates the generally-accepted "rule" that {@code hasNext} should be idempotent. However, it
+ * can be very useful in instances which the logic for determining <i>if</i> an element exists and the logic for
+ * actually <i>retrieving</i> that element are both similar and equally expensive (for example, if return values are
+ * being calculated on the fly, and there is no efficient way to determine beforehand that said calculation will or will
+ * not succeed).</p>
  *
  * <p>As an Iterator, AdvancingIterator acts as expected. Calls to {@code hasNext()} should never fail; calls to
  * {@code next()} may fail with a {@link NoSuchElementException} if there is no cached value and a call to
  * {@code advance()} fails. AdvancingIterator does not itself implement {@link Iterator#remove()}, as its typical use
- * case (sequential computation of elements not associated with a collection) </p>
- * @param <TValue>
+ * case (sequential computation of elements not associated with a collection) does not call for it.</p>
+ * @param <TValue> the type of value returned by {@link Iterator#next()}
  */
 public abstract class AdvancingIterator<TValue> implements Iterator<TValue> {
+    //use boolean flag to indicate presence of a value: null values are allowed
     private boolean hasValue;
 
     /**
@@ -31,7 +33,7 @@ public abstract class AdvancingIterator<TValue> implements Iterator<TValue> {
     protected TValue value;
 
     @Override
-    public final boolean hasNext() {
+    public boolean hasNext() {
         //handle redundant calls to hasNext if the next value exists and has not been consumed by returning true
         if(hasValue) {
             return true;
@@ -41,7 +43,7 @@ public abstract class AdvancingIterator<TValue> implements Iterator<TValue> {
     }
 
     @Override
-    public final TValue next() {
+    public TValue next() {
         //we don't currently have a value
         if(!hasValue) {
             //so try to advance; if we fail to advance in next() then throw an exception because we're out of elements
@@ -50,12 +52,12 @@ public abstract class AdvancingIterator<TValue> implements Iterator<TValue> {
             }
         }
 
+        //reset hasValue so we try to re-compute
+        hasValue = false;
+
         //copy value and set field to null to avoid maintaining a persistent reference
         TValue valueCopy = value;
         value = null;
-
-        //reset hasValue as we just consumed it
-        hasValue = false;
         return valueCopy;
     }
 

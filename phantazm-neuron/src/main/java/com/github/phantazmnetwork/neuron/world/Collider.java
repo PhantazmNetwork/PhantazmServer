@@ -1,24 +1,13 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import org.jetbrains.annotations.NotNull;
-
 public interface Collider {
-    enum Order {
-        XYZ,
-        YXZ,
-        YZX,
-        ZYX,
-        ZXY,
-        XZY
-    }
+    double highestCollisionAlong(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
+                                 double deltaX, double deltaY, double deltaZ);
 
-    boolean collidesAt(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
-                       @NotNull Order order);
+    double smallestCollisionAlong(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
+                                  double deltaX, double deltaY, double deltaZ);
 
-    @NotNull Iterable<? extends Solid> collisionsMovingAlong(double minX, double minY, double minZ, double maxX,
-                                                             double maxY, double maxZ, int deltaX, int deltaY,
-                                                             int deltaZ, @NotNull Order order);
+    double highestCollisionAt(double minX, double minY, double minZ, double maxX, double maxY, double maxZ);
 
-    boolean collidesMovingAlong(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
-                                int deltaX, int deltaY, int deltaZ, @NotNull Order order);
+    double heightAt(int x, int y, int z);
 }

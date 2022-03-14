@@ -48,13 +48,13 @@ public class NodeQueue implements PriorityQueue<Node> {
     }
 
     @Override
-    public void enqueue(@NotNull Node x) {
-        Objects.requireNonNull(x, "x");
+    public void enqueue(@NotNull Node node) {
+        Objects.requireNonNull(node, "node");
         if (size == heap.length) {
             heap = ObjectArrays.grow(heap, size + 1);
         }
 
-        heap[size++] = x;
+        heap[size++] = node;
         NodeHeaps.upHeap(heap, size - 1);
     }
     @Override
@@ -81,6 +81,7 @@ public class NodeQueue implements PriorityQueue<Node> {
 
         return heap[0];
     }
+
     @Override
     public void changed() {
         NodeHeaps.downHeap(heap, size, 0);
