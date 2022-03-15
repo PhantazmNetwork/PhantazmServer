@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface Explorer {
     /**
-     * An immutable list of vectors representing the standard movement options available to walking agents (
+     * An immutable list of vectors representing the standard movement options available to walking agents.
      */
     Iterable<Vec3I> WALK_VECTORS = List.of(
             Vec3I.of(1, 0, 0),
