@@ -68,32 +68,31 @@ class BasicPathOperationTest {
             nodes.add(node);
         }
 
-        assertEquals(Arrays.asList(expectedPath), nodes.stream().map(node -> new ImmutableVec3I(node.getX(),
+        assertEquals(Arrays.asList(expectedPath), nodes.stream().map(node -> Vec3I.of(node.getX(),
                 node.getY(), node.getZ())).collect(Collectors.toList()));
     }
 
     @Nested
     class UpwardDestination {
         private static final Vec3I[] OPTIMAL_PATH = new Vec3I[] {
-                new ImmutableVec3I(0, 0, 0),
-                new ImmutableVec3I(0, 1, 0),
-                new ImmutableVec3I(0, 2, 0),
-                new ImmutableVec3I(0, 3, 0),
-                new ImmutableVec3I(0, 4, 0),
-                new ImmutableVec3I(0, 5, 0),
-                new ImmutableVec3I(0, 6, 0),
-                new ImmutableVec3I(0, 7, 0),
-                new ImmutableVec3I(0, 8, 0),
-                new ImmutableVec3I(0, 9, 0),
-                new ImmutableVec3I(0, 10, 0)
+                Vec3I.of(0, 0, 0),
+                Vec3I.of(0, 1, 0),
+                Vec3I.of(0, 2, 0),
+                Vec3I.of(0, 3, 0),
+                Vec3I.of(0, 4, 0),
+                Vec3I.of(0, 5, 0),
+                Vec3I.of(0, 6, 0),
+                Vec3I.of(0, 7, 0),
+                Vec3I.of(0, 8, 0),
+                Vec3I.of(0, 9, 0),
+                Vec3I.of(0, 10, 0)
         };
 
-        private static final Vec3I UPWARD_DESTINATION = new ImmutableVec3I(0, 10, 0);
-        private static final Collection<Vec3I> UPWARD_MOVEMENT = List.of(new ImmutableVec3I(0, 1, 0));
-        private static final Collection<Vec3I> CARDINAL_MOVEMENT = List.of(new ImmutableVec3I(0, 1, 0),
-                new ImmutableVec3I(0, -1, 0), new ImmutableVec3I(1, 0, 0),
-                new ImmutableVec3I(-1, 0, 0), new ImmutableVec3I(0, 0, 1),
-                new ImmutableVec3I(0, 0, -1));
+        private static final Vec3I UPWARD_DESTINATION = Vec3I.of(0, 10, 0);
+        private static final Collection<Vec3I> UPWARD_MOVEMENT = List.of(Vec3I.of(0, 1, 0));
+        private static final Collection<Vec3I> CARDINAL_MOVEMENT = List.of(Vec3I.of(0, 1, 0),
+                Vec3I.of(0, -1, 0), Vec3I.of(1, 0, 0), Vec3I.of(-1, 0, 0), Vec3I.of(0, 0, 1),
+                Vec3I.of(0, 0, -1));
 
         @Nested
         class Unblocked {
@@ -118,7 +117,7 @@ class BasicPathOperationTest {
             class Fully {
                 private static final Collection<Vec3I> SURROUNDED_BY_SOLIDS = CARDINAL_MOVEMENT;
                 private static final Vec3I[] FULLY_BLOCKED_PATH = new Vec3I[] {
-                        new ImmutableVec3I(0, 0, 0)
+                        Vec3I.of(0, 0, 0)
                 };
 
                 @Test
@@ -131,24 +130,24 @@ class BasicPathOperationTest {
             @Nested
             class Partially {
                 private static final Collection<Vec3I> POSITIVE_X_MISSING_SOLIDS = new ArrayList<>(CARDINAL_MOVEMENT);
-                private static final Vec3I DESTINATION_X_MISSING = new ImmutableVec3I(1, 10, 0);
+                private static final Vec3I DESTINATION_X_MISSING = Vec3I.of(1, 10, 0);
                 private static final Vec3I[] OPTIMAL_PATH_X_MISSING = new Vec3I[] {
-                        new ImmutableVec3I(0, 0, 0),
-                        new ImmutableVec3I(1, 0, 0),
-                        new ImmutableVec3I(1, 1, 0),
-                        new ImmutableVec3I(1, 2, 0),
-                        new ImmutableVec3I(1, 3, 0),
-                        new ImmutableVec3I(1, 4, 0),
-                        new ImmutableVec3I(1, 5, 0),
-                        new ImmutableVec3I(1, 6, 0),
-                        new ImmutableVec3I(1, 7, 0),
-                        new ImmutableVec3I(1, 8, 0),
-                        new ImmutableVec3I(1, 9, 0),
-                        new ImmutableVec3I(1, 10, 0),
+                        Vec3I.of(0, 0, 0),
+                        Vec3I.of(1, 0, 0),
+                        Vec3I.of(1, 1, 0),
+                        Vec3I.of(1, 2, 0),
+                        Vec3I.of(1, 3, 0),
+                        Vec3I.of(1, 4, 0),
+                        Vec3I.of(1, 5, 0),
+                        Vec3I.of(1, 6, 0),
+                        Vec3I.of(1, 7, 0),
+                        Vec3I.of(1, 8, 0),
+                        Vec3I.of(1, 9, 0),
+                        Vec3I.of(1, 10, 0),
                 };
 
                 static {
-                    POSITIVE_X_MISSING_SOLIDS.remove(new ImmutableVec3I(1, 0, 0));
+                    POSITIVE_X_MISSING_SOLIDS.remove(Vec3I.of(1, 0, 0));
                 }
 
                 @Test
@@ -163,9 +162,8 @@ class BasicPathOperationTest {
 
     @Nested
     class Maze {
-        private static final Collection<Vec3I> FLAT_CARDINAL_MOVEMENT = List.of(
-                new ImmutableVec3I(1, 0, 0), new ImmutableVec3I(-1, 0, 0),
-                new ImmutableVec3I(0, 0, 1), new ImmutableVec3I(0, 0, -1));
+        private static final Collection<Vec3I> FLAT_CARDINAL_MOVEMENT = List.of(Vec3I.of(1, 0, 0),
+                Vec3I.of(-1, 0, 0), Vec3I.of(0, 0, 1), Vec3I.of(0, 0, -1));
         private static final Calculator CALCULATOR = Calculator.SQUARED_DISTANCE;
 
         @Test

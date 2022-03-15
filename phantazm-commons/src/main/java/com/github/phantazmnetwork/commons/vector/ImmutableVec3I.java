@@ -12,7 +12,8 @@ public class ImmutableVec3I implements Vec3I {
     protected final int z;
 
     /**
-     * Creates a new ImmutableVec3I from the provided integers.
+     * Creates a new ImmutableVec3I from the provided integers. This constructor is public, but it's generally
+     * preferable to use {@link Vec3I#of(int, int, int)} to create instances of this class.
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
@@ -40,8 +41,8 @@ public class ImmutableVec3I implements Vec3I {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof ImmutableVec3I other) {
-            return other.x == x && other.y == y && other.z == z;
+        if(obj instanceof Vec3I other) {
+            return other.getX() == x && other.getY() == y && other.getZ() == z;
         }
 
         return false;

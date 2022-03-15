@@ -67,7 +67,7 @@ public final class MazeReader {
                             end = new Vec2I(x, y); //starting node is green
                         }
                         else if(color.equals(Color.BLACK)) {
-                            solids.add(new ImmutableVec3I(x, 0, y)); //wall nodes are black
+                            solids.add(Vec3I.of(x, 0, y)); //wall nodes are black
                         }
                     }
                 }
@@ -90,12 +90,12 @@ public final class MazeReader {
                         //converts list of points to Vec3I array
                         Vec3I[] correctPathElements = root.getElement("points").asList().stream().map(element -> {
                             List<ConfigElement> vectors = element.asList();
-                            return new ImmutableVec3I(vectors.get(0).asNumber().intValue(), 0, vectors.get(1)
-                                    .asNumber().intValue());
+                            return Vec3I.of(vectors.get(0).asNumber().intValue(), 0, vectors.get(1).asNumber()
+                                    .intValue());
                         }).toArray(Vec3I[]::new);
 
-                        return new Data(solids, new ImmutableVec3I(start.getX, 0, start.getY),
-                                new ImmutableVec3I(end.getX, 0, end.getY), correctPathElements);
+                        return new Data(solids, Vec3I.of(start.getX, 0, start.getY),
+                                Vec3I.of(end.getX, 0, end.getY), correctPathElements);
                     }
                 }
 

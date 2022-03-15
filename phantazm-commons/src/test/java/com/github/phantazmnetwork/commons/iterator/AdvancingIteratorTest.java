@@ -16,6 +16,7 @@ class AdvancingIteratorTest {
             }
         };
 
+        assertFalse(iterator.hasNext());
         assertThrows(NoSuchElementException.class, iterator::next);
     }
 

@@ -1,11 +1,14 @@
 package com.github.phantazmnetwork.commons.vector;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * <p>Represents a 3D integer vector (point). Implementations may be immutable or mutable, but mutating methods are not
  * included as part of this interface. Contains some utility methods for working with vectors/points.</p>
  *
- * <p>Implementations should provide suitable overrides for {@link Object#equals(Object)} and {@link Object#hashCode()},
- * based of the values </p>
+ * <p>Implementations must provide suitable overrides for {@link Object#equals(Object)} and {@link Object#hashCode()},
+ * based only off of the vector's component values. Any two Vec3I instances must be considered equal if and only if each
+ * of their components is equal.</p>
  */
 public interface Vec3I {
     /**
@@ -44,7 +47,39 @@ public interface Vec3I {
         public int getZ() {
             return 0;
         }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(obj instanceof Vec3I other) {
+                return other.getX() == 0 && other.getY() == 0 && other.getZ() == 0;
+            }
+
+            return false;
+        }
     };
+
+    /**
+     * Creates a new, immutable Vec3I implementation. This may not always create a new vector; common values may be
+     * returned from cache.
+     * @param x the x-component
+     * @param y the y-component
+     * @param z the z-component
+     * @return a new, immutable Vec3I instance with the given components
+     * @see ImmutableVec3I
+     */
+    static @NotNull Vec3I of(int x, int y, int z) {
+        if(x == 0 && y == 0 && z == 0) {
+            //0, 0, 0 is a very common vector so don't create a new object
+            return ORIGIN;
+        }
+
+        return new ImmutableVec3I(x, y, z);
+    }
 
     /**
      * <p>Computes the <i>squared distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This uses the standard

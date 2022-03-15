@@ -1,14 +1,12 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
-import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.world.NodeTranslator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -17,25 +15,17 @@ import java.util.Objects;
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class GroundExplorer implements Explorer {
-    private static final Iterable<Vec3I> WALK_VECTORS = List.of(
-            new ImmutableVec3I(1, 0, 0),
-            new ImmutableVec3I(-1, 0, 0),
-            new ImmutableVec3I(0, 0, 1),
-            new ImmutableVec3I(0, 0, -1),
-            new ImmutableVec3I(1, 0, 1),
-            new ImmutableVec3I(1, 0, -1),
-            new ImmutableVec3I(-1, 0, 1),
-            new ImmutableVec3I(-1, 0, -1)
-    );
-
     private final NodeTranslator translator;
+    private final Iterable<? extends Vec3I> vectors;
 
     /**
      * Creates a new GroundExplorer which will use the given {@link NodeTranslator}.
      * @param translator the translator used by this explorer
+     * @param vectors the movements steps that will be explored
      */
-    public GroundExplorer(@NotNull NodeTranslator translator) {
+    public GroundExplorer(@NotNull NodeTranslator translator, @NotNull Iterable<? extends Vec3I> vectors) {
         this.translator = Objects.requireNonNull(translator, "agent");
+        this.vectors = Objects.requireNonNull(vectors, "vectors");
     }
 
     @Override
@@ -47,7 +37,7 @@ public class GroundExplorer implements Explorer {
 
         //use AdvancingIterator to reduce memory footprint; we don't need to actually store nodes in a collection
         return () -> new AdvancingIterator<>() {
-            private final Iterator<Vec3I> walkIterator = WALK_VECTORS.iterator();
+            private final Iterator<? extends Vec3I> walkIterator = vectors.iterator();
 
             @Override
             public boolean advance() {

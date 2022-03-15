@@ -16,5 +16,17 @@ import com.github.phantazmnetwork.neuron.agent.Agent;
  */
 @FunctionalInterface
 public interface NodeTranslator {
+    /**
+     * Determines (adjusts) the given delta vector (deltaX, deltaY, deltaZ), typically according to environmental
+     * factors. A typical use case would be "snapping" the vector pointing to the location of a new node such that it is
+     * on top of a solid. If this movement attempt is not valid, this method will return null.
+     * @param x the x-component of the current node's position
+     * @param y the y-component of the current node's position
+     * @param z the z-component of the current node's position
+     * @param deltaX the x-component of the attempted movement vector
+     * @param deltaY the y-component of the attempted movement vector
+     * @param deltaZ the z-component of the attempted movement vector
+     * @return the adjusted delta vector, or null if it's not possible to move this direction
+     */
     @Nullable Vec3I translate(int x, int y, int z, int deltaX, int deltaY, int deltaZ);
 }
