@@ -43,7 +43,7 @@ public class Main {
     /**
      * The location of the {@link Instance} configuration file.
      */
-    public static final Path WORLDS_CONFIG_PATH = Path.of("./instances-config.toml");
+    public static final Path INSTANCES_CONFIG_PATH = Path.of("./instances-config.toml");
 
     /**
      * The {@link ConfigHandler} instance used to manage {@link ConfigLoader}s.
@@ -59,7 +59,7 @@ public class Main {
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link InstancesConfig} loader.
      */
-    public static final ConfigHandler.ConfigKey<InstancesConfig> WORLDS_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
+    public static final ConfigHandler.ConfigKey<InstancesConfig> INSTANCES_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
             InstancesConfig.class, "instances_config");
 
     /**
@@ -74,23 +74,23 @@ public class Main {
         CONFIG_HANDLER.registerLoader(SERVER_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new ServerConfigProcessor(MiniMessage.miniMessage()), ServerConfig.DEFAULT,
                         SERVER_CONFIG_PATH, codec));
-        CONFIG_HANDLER.registerLoader(WORLDS_CONFIG_KEY, new SyncFileConfigLoader<>(new InstancesConfigProcessor(),
-                InstancesConfig.DEFAULT, WORLDS_CONFIG_PATH, codec));
+        CONFIG_HANDLER.registerLoader(INSTANCES_CONFIG_KEY, new SyncFileConfigLoader<>(new InstancesConfigProcessor(),
+                InstancesConfig.DEFAULT, INSTANCES_CONFIG_PATH, codec));
 
         try {
             CONFIG_HANDLER.writeDefaultsAndGet();
 
             ServerConfig serverConfig = CONFIG_HANDLER.getData(SERVER_CONFIG_KEY);
-            InstancesConfig instancesConfig = CONFIG_HANDLER.getData(WORLDS_CONFIG_KEY);
+            InstancesConfig instancesConfig = CONFIG_HANDLER.getData(INSTANCES_CONFIG_KEY);
 
-            initializeWorlds(instancesConfig);
+            initializeInstances(instancesConfig);
             startServer(minecraftServer, serverConfig);
         } catch (ConfigProcessException e) {
             logger.error("Fatal error when loading configuration data", e);
         }
     }
 
-    private static void initializeWorlds(InstancesConfig instancesConfig) {
+    private static void initializeInstances(InstancesConfig instancesConfig) {
         Path instancesPath = instancesConfig.instancesPath();
         InstanceLoader instanceLoader = new FileSystemInstanceLoader(instancesPath, AnvilLoader::new);
 

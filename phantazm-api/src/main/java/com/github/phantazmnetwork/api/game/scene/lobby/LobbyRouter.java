@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.api.game.scene.RouteResult;
 import com.github.phantazmnetwork.api.game.scene.router.SceneRouter;
 import com.github.phantazmnetwork.api.game.scene.SceneProvider;
 import com.github.phantazmnetwork.api.player.PlayerView;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -31,24 +32,30 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
     @Override
     public @NotNull RouteResult join(@NotNull LobbyRouteRequest routeRequest) {
         if (!joinable) {
-            return new RouteResult(false, Optional.of("The router is not joinable."));
+            return new RouteResult(false, Optional.of(Component.text("The router is not joinable.")));
         }
 
         SceneProvider<Lobby> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
         if (lobbyProvider == null) {
             return new RouteResult(false,
-                    Optional.of("No lobbies exist under the name " + routeRequest.targetLobbyName() + "."));
+                    Optional.of(Component.text("No lobbies exist under the name "
+                            + routeRequest.targetLobbyName() + ".")));
         }
 
-        Lobby lobby = lobbyProvider.provideScene();
-        RouteResult result = lobby.join(new LobbyJoinRequest(routeRequest.players()));
-        if (result.success()) {
-            for (PlayerView playerView : routeRequest.players()) {
-                lobbyMap.put(playerView.getUUID(), lobby);
+        Optional<Lobby> lobbyOptional = lobbyProvider.provideScene();
+        if (lobbyOptional.isPresent()) {
+            Lobby lobby = lobbyOptional.get();
+            RouteResult result = lobby.join(new LobbyJoinRequest(routeRequest.players()));
+            if (result.success()) {
+                for (PlayerView playerView : routeRequest.players()) {
+                    lobbyMap.put(playerView.getUUID(), lobby);
+                }
             }
+
+            return result;
         }
 
-        return result;
+        return new RouteResult(false, Optional.of(Component.text("No lobbies are joinable.")));
     }
 
     @Override
@@ -56,7 +63,7 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
         for (UUID uuid : leavers) {
             if (!lobbyMap.containsKey(uuid)) {
                 return new RouteResult(false,
-                        Optional.of(uuid + " is not part of a scene in the lobby router."));
+                        Optional.of(Component.text(uuid + " is not part of a scene in the lobby router.")));
             }
         }
 
@@ -87,13 +94,16 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
         for (SceneProvider<Lobby> lobbyProvider : lobbyProviders.values()) {
             for (Lobby lobby : lobbyProvider.listScenes()) {
-                for (PlayerView ignored : lobby.getPlayers().values()) {
-                    playerCount++;
-                }
+                playerCount += lobby.getPlayers().size();
             }
         }
 
         return playerCount;
+    }
+
+    @Override
+    public int getJoinWeight() {
+        return getIngamePlayerCount();
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.api.game.scene.RouteResult;
 import com.github.phantazmnetwork.api.game.scene.Scene;
 import com.github.phantazmnetwork.api.game.scene.SceneFallback;
 import com.github.phantazmnetwork.api.player.PlayerView;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
     @Override
     public @NotNull RouteResult join(@NotNull LobbyJoinRequest joinRequest) {
         if (shutdown) {
-            return new RouteResult(false, Optional.of("Lobby is shutdown."));
+            return new RouteResult(false, Optional.of(Component.text("Lobby is shutdown.")));
         }
 
         for (PlayerView playerView : joinRequest.players()) {
@@ -58,7 +59,8 @@ public class Lobby implements Scene<LobbyJoinRequest> {
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID uuid : leavers) {
             if (!players.containsKey(uuid)) {
-                return new RouteResult(false, Optional.of(uuid + " is not in the lobby."));
+                return new RouteResult(false,
+                        Optional.of(Component.text(uuid + " is not in the lobby.")));
             }
         }
 
@@ -86,6 +88,11 @@ public class Lobby implements Scene<LobbyJoinRequest> {
         }
 
         return count[0];
+    }
+
+    @Override
+    public int getJoinWeight() {
+        return getIngamePlayerCount();
     }
 
     @Override

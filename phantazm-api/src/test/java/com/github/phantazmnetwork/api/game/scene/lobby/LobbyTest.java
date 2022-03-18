@@ -16,32 +16,38 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 public class LobbyTest {
 
     private static final UUID playerUUID = UUID.fromString("ade229bf-d062-46e8-99d8-97b667d5a127");
 
     @Test
     public void testShutdown() {
-        Instance instance = Mockito.mock(Instance.class);
+        Instance instance = mock(Instance.class);
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS);
         SceneFallback sceneFallback = (ignored) -> {};
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
-        PlayerView playerView = Mockito.mock(PlayerView.class);
+        PlayerView playerView = mock(PlayerView.class);
 
         lobby.forceShutdown();
-        Assertions.assertTrue(lobby.isShutdown());
+        assertTrue(lobby.isShutdown());
 
         RouteResult result = lobby.join(new LobbyJoinRequest(Collections.singletonList(playerView)));
-        Assertions.assertFalse(result.success());
+        assertFalse(result.success());
     }
 
     @Test
     public void testJoin() {
-        Instance instance = Mockito.mock(Instance.class);
+        Instance instance = mock(Instance.class);
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS);
         SceneFallback sceneFallback = (ignored) -> {};
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
-        Player player = Mockito.mock(Player.class);
+        Player player = mock(Player.class);
         PlayerView playerView = new PlayerView() {
             @Override
             public @NotNull UUID getUUID() {
@@ -56,9 +62,8 @@ public class LobbyTest {
 
         RouteResult result = lobby.join(new LobbyJoinRequest(Collections.singletonList(playerView)));
 
-        Assertions.assertTrue(result.success());
-        Mockito.verify(player).setInstance(ArgumentMatchers.eq(instance),
-                ArgumentMatchers.eq(instanceConfig.spawnPoint()));
+        assertTrue(result.success());
+        verify(player).setInstance(eq(instance), eq(instanceConfig.spawnPoint()));
     }
 
 }

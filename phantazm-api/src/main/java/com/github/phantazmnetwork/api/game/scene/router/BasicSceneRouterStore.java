@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class BasicSceneRouterStore implements SceneRouterStore {
-    
+
     private final Map<SceneRouterKey<?>, SceneRouter<?>> sceneRouters = new HashMap<>();
 
     @SuppressWarnings("unchecked")

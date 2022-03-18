@@ -22,12 +22,12 @@ public record InstancesConfig(@NotNull String defaultInstanceName,
     /**
      * The default {@link net.minestom.server.instance.Instance} name.
      */
-    public static final String DEFAULT_INSTANCE_NAME = "world";
+    public static final String DEFAULT_INSTANCE_NAME = "instance";
 
     /**
      * The default location used to store {@link net.minestom.server.instance.Instance}.
      */
-    public static final String DEFAULT_INSTANCES_PATH_STRING = "./worlds/";
+    public static final String DEFAULT_INSTANCES_PATH_STRING = "./instances/";
 
     /**
      * The default location used to store maps.

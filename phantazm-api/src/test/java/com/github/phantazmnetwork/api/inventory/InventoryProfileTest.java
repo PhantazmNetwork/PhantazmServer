@@ -5,6 +5,8 @@ import net.minestom.server.item.Material;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class InventoryProfileTest {
 
@@ -17,7 +19,7 @@ public class InventoryProfileTest {
 
         inventoryProfile.setInventoryObject(slot, inventoryObject);
 
-        Assertions.assertThrowsExactly(IllegalArgumentException.class, () ->
+        assertThrowsExactly(IllegalArgumentException.class, () ->
                 inventoryProfile.setInventoryObject(slot, inventoryObject));
     }
 
@@ -30,7 +32,7 @@ public class InventoryProfileTest {
 
         inventoryProfile.setInventoryObject(slot, inventoryObject);
 
-        Assertions.assertSame(inventoryObject, inventoryProfile.getInventoryObject(slot));
+        assertSame(inventoryObject, inventoryProfile.getInventoryObject(slot));
     }
 
     @Test
@@ -43,14 +45,14 @@ public class InventoryProfileTest {
         inventoryProfile.setInventoryObject(slot, inventoryObject);
         inventoryProfile.removeInventoryObject(slot);
 
-        Assertions.assertFalse(inventoryProfile.hasInventoryObject(slot));
+        assertFalse(inventoryProfile.hasInventoryObject(slot));
     }
 
     @Test
     public void testRemoveObjectInUnoccupiedSlot() {
         InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
 
-        Assertions.assertThrowsExactly(IllegalArgumentException.class, () ->
+        assertThrowsExactly(IllegalArgumentException.class, () ->
                 inventoryProfile.removeInventoryObject(0));
     }
 

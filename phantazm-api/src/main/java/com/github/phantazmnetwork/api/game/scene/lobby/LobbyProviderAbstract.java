@@ -4,10 +4,7 @@ import com.github.phantazmnetwork.api.game.scene.SceneProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
 
@@ -17,32 +14,39 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
 
     private final int newLobbyThreshold;
 
-    public LobbyProviderAbstract(int newLobbyThreshold) {
+    private final int maximumLobbies;
+
+    public LobbyProviderAbstract(int newLobbyThreshold, int maximumLobbies) {
         this.newLobbyThreshold = newLobbyThreshold;
+        this.maximumLobbies = maximumLobbies;
     }
 
     @Override
-    public @NotNull Lobby provideScene() {
+    public @NotNull Optional<Lobby> provideScene() {
+        if (lobbies.size() >= maximumLobbies) {
+            return Optional.empty();
+        }
+
         Lobby minimumLobby = null;
-        int minimumOnline = Integer.MAX_VALUE;
+        int minimumWeighting = Integer.MAX_VALUE;
 
         for (Lobby lobby : lobbies) {
             int playerCount = lobby.getIngamePlayerCount();
 
-            if (playerCount < minimumOnline) {
+            if (playerCount < minimumWeighting) {
                 minimumLobby = lobby;
-                minimumOnline = playerCount;
+                minimumWeighting = playerCount;
             }
         }
 
-        if (minimumLobby == null || minimumOnline >= newLobbyThreshold) {
+        if (minimumLobby == null || minimumWeighting >= newLobbyThreshold) {
             Lobby lobby = createLobby();
             lobbies.add(lobby);
 
-            return lobby;
+            return Optional.of(lobby);
         }
 
-        return minimumLobby;
+        return Optional.of(minimumLobby);
     }
 
     @Override

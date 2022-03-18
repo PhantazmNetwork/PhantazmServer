@@ -31,6 +31,8 @@ public interface Scene<TRequest> extends Tickable {
 
     int getIngamePlayerCount();
 
+    int getJoinWeight();
+
     boolean isShutdown();
 
     void forceShutdown();

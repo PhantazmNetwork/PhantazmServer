@@ -21,10 +21,10 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
     private final InstanceConfig instanceConfig;
 
-    public BasicLobbyProvider(int newLobbyThreshold, @NotNull InstanceManager instanceManager,
+    public BasicLobbyProvider(int newLobbyThreshold, int maximumLobbies, @NotNull InstanceManager instanceManager,
                               @NotNull InstanceLoader instanceLoader, @NotNull String[] lobbyPaths,
                               @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig) {
-        super(newLobbyThreshold);
+        super(newLobbyThreshold, maximumLobbies);
 
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
