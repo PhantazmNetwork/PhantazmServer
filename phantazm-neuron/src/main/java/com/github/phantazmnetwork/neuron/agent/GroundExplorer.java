@@ -33,7 +33,10 @@ public class GroundExplorer implements Explorer {
         int x = current.getX();
         int y = current.getY();
         int z = current.getZ();
-        Node parent = current.getParent();
+        Node parentNode = current.getParent();
+
+        //capture ref to simple vec3I rather than parent (which as it is a Node object, may have a big ref chain)
+        Vec3I parent = parentNode == null ? null : Vec3I.of(parentNode.getX(), parentNode.getY(), parentNode.getZ());
 
         //use AdvancingIterator to reduce memory footprint; we don't need to actually store nodes in a collection
         return () -> new AdvancingIterator<>() {
