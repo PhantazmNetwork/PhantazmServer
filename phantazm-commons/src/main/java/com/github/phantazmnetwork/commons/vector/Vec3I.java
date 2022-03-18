@@ -3,8 +3,8 @@ package com.github.phantazmnetwork.commons.vector;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * <p>Represents a 3D integer vector (point). Implementations may be immutable or mutable, but mutating methods are not
- * included as part of this interface. Contains some utility methods for working with vectors/points.</p>
+ * <p>Represents an <i>immutable</i> 3D integer vector (point). Contains some utility methods for working with
+ * vectors/points.</p>
  *
  * <p>Implementations must provide suitable overrides for {@link Object#equals(Object)} and {@link Object#hashCode()},
  * based only off of the vector's component values. Any two Vec3I instances must be considered equal if and only if each
@@ -41,15 +41,15 @@ public interface Vec3I {
      * @param y the y-component
      * @param z the z-component
      * @return a new, immutable Vec3I instance with the given components
-     * @see ImmutableVec3I
+     * @see BasicVec3I
      */
     static @NotNull Vec3I of(int x, int y, int z) {
-        Vec3I cached = Vec3IPool.retrieve(x, y, z);
+        Vec3I cached = Vec3IPools.GLOBAL.fromCache(x, y, z);
         if(cached != null) {
             return cached;
         }
 
-        return new ImmutableVec3I(x, y, z);
+        return new BasicVec3I(x, y, z);
     }
 
     /**

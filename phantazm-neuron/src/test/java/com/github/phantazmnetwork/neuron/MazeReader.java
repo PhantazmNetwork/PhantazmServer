@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.neuron;
 
-import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.core.ConfigElement;

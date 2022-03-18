@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.node;
 
-import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
+import com.github.phantazmnetwork.commons.vector.BasicVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
  * such situations never occur, as keeping a record of visited nodes would add an unacceptable amount of overhead to
  * node iteration.</p>
  *
- * <p>Node extends {@link ImmutableVec3I}. It also implements {@link Comparable}, with a natural ordering that is
+ * <p>Node extends {@link BasicVec3I}. It also implements {@link Comparable}, with a natural ordering that is
  * consistent with equals. Nodes are compared first by x value, then y, then z. This allows nodes to be used as a key in
  * comparison-based maps, and doing so is "safe" in that nodes are only compared by their immutable attributes.</p>
  *
@@ -45,7 +45,7 @@ import java.util.NoSuchElementException;
  * @see NodeQueue
  * @see Vec3I
  */
-public class Node extends ImmutableVec3I implements Comparable<Node>, Iterable<Node> {
+public class Node extends BasicVec3I implements Comparable<Node>, Iterable<Node> {
     private class NodeIterator implements Iterator<Node> {
         private Node current = Node.this;
 
