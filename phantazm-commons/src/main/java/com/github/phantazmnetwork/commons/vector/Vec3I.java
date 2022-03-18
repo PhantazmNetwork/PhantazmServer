@@ -36,8 +36,8 @@ public interface Vec3I {
     Vec3I ORIGIN = of(0, 0, 0);
 
     /**
-     * Creates a new, immutable Vec3I implementation. This may not always create a new vector; common values may (but
-     * are not guaranteed to be) returned from a persistent cache.
+     * Returns an immutable Vec3I implementation. This may not always create a new vector; common values may (but are
+     * not guaranteed to be) returned from a persistent cache.
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component

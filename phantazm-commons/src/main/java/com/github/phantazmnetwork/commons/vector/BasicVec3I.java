@@ -15,8 +15,8 @@ public class BasicVec3I implements Vec3I {
 
     /**
      * Creates a new BasicVec3I from the provided integers. This constructor is public, but it's generally
-     * preferable to use {@link Vec3I#of(int, int, int)} to create instances of this class, because it may take
-     * advantage of interning (constant pooling).
+     * preferable to use {@link Vec3I#of(int, int, int)} to create Vec3I instances because the latter may make use of
+     * a constant pool.
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component

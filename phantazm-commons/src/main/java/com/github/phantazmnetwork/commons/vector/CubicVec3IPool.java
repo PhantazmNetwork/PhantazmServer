@@ -3,8 +3,11 @@ package com.github.phantazmnetwork.commons.vector;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A "cubical" cache of immutable Vec3I instances. Cached values are stored in an array. Values are lazily initialized.
- * Initialized vectors are instances of {@link BasicVec3I}.
+ * <p>A "cubical" cache of immutable Vec3I instances. Cached values are stored in an array. Values are lazily
+ * initialized. Initialized vectors are instances of {@link BasicVec3I}.</p>
+ *
+ * <p>Since an array is initialized with capacity sufficient to hold all possible values for any given width, it is
+ * important to avoid allocating a very large pool, as there will be a significant portion of wasted memory.</p>
  * @see BasicVec3I
  */
 final class CubicVec3IPool implements Vec3IPool {
@@ -46,6 +49,7 @@ final class CubicVec3IPool implements Vec3IPool {
         return value >= -halfCacheWidth && value < halfCacheWidth;
     }
 
+    @SuppressWarnings("ReplaceNullCheck")
     @Override
     public @Nullable Vec3I fromCache(int x, int y, int z) {
         if(inRange(x) && inRange(y) && inRange(z)) {
@@ -53,7 +57,7 @@ final class CubicVec3IPool implements Vec3IPool {
             Vec3I cached = cache[i];
             if(cached == null) {
                 //lazy initialization of cached vectors
-                cache[i] = cached = new BasicVec3I(x, y, z);
+                return cache[i] = new BasicVec3I(x, y, z);
             }
 
             return cached;

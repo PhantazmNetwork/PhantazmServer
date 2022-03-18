@@ -50,6 +50,8 @@ public class BasicPathOperation implements PathOperation {
 
     private void complete(State state) {
         this.state = state;
+
+        //clear the graph, we completed this operation
         openSet.clear();
         graph.clear();
 

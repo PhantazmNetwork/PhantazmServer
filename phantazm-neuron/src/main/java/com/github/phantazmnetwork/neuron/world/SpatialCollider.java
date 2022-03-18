@@ -50,7 +50,7 @@ public class SpatialCollider implements Collider {
         double evY = vY;
         double evZ = vZ;
 
-        //perform an expansion in direction (dX, dY, dZ)
+        //perform a directional expansion in direction (dX, dY, dZ)
         if(dX < 0) {
             eoX += dX;
             evX -= dX;
@@ -75,7 +75,8 @@ public class SpatialCollider implements Collider {
             evZ += dZ;
         }
 
-        Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ).iterator();
+        Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, dX, dY, dZ)
+                .iterator();
         double best = initialValue;
         if(overlapping.hasNext()) {
             double adjustedYZ = (Math.max(vY, vZ) * (Math.abs(dY) + Math.abs(dZ))) / 2;
@@ -123,6 +124,11 @@ public class SpatialCollider implements Collider {
         return best;
     }
 
+    /*
+    checks for collisions when travelling along a certain axis. as checkPlanes expects the min and max vectors to be
+    ordered in a certain way, performs a simple check on the 'slope' of the inequalities used for representing the
+    moving bounding box (see checkPlanes)
+    */
     private static boolean checkAxis(double size, double dA, double dB, double minA, double minB, double maxA,
                                      double maxB) {
         if(dA == 0 && dB == 0) {
@@ -133,6 +139,37 @@ public class SpatialCollider implements Collider {
                 minA, maxB);
     }
 
+    /*
+    this simple algorithm determines if a given bounds, denoted by a pair of 2d points, intersects the path traced by
+    a bounding box moving in the direction denoted by the vector <dirX, dirZ>. the width of the bounding box is given
+    by adjustedWidth, whose value must be precalculated as follows:
+
+    (width * (Math.abs(dirX) + Math.abs(dirZ))) / 2
+
+    the function works by testing points (min, max) against a pair of inequalities:
+
+    First: (z * dirX) - (x * dirZ) < w
+    Second: (z * dirX) - (x * dirZ) > -w
+
+    the function follows the truth table shown below. a question mark denotes "don't cares"
+
+    minInFirst   |   minInSecond   |   maxInFirst   |   maxInSecond   |   collides
+    0                1                 0                ?                 0
+    0                1                 1                ?                 1
+    1                0                 ?                0                 0
+    1                0                 ?                1                 1  //same as #2 but inverted
+    1                1                 ?                ?                 1
+
+    some combinations of values are not possible given valid inputs, and thus they are not present in the truth table
+    and are not tested for either. for example, a point that satisfies neither of the inequalities is not possible for
+    a valid adjustedWidth parameter.
+
+    more specifically, regarding invalid input, all double parameters must be finite, and adjustedWidth must be greater
+    than 0. dirX and dirZ may be any pair of integers, including negative numbers, but they cannot both be zero (one
+    may be zero if the other is non-zero). minX, minZ, maxX, and maxZ must be finite and have an additional special
+    consideration that a vector drawn between them must NOT belong to the same or opposite quadrant as the direction
+    vector
+    */
     private static boolean checkPlanes(double size, double dA, double dB, double minA, double minB, double maxA,
                                        double maxB) {
         double bMinusAMin = (minB * dA) - (minA * dB);
