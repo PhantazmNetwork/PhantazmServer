@@ -1,8 +1,10 @@
 package com.github.phantazmnetwork.commons.vector;
 
 /**
- * Standard implementation of Vec3I. Provides a suitable implementation of {@link Object#equals(Object)} and
- * {@link Object#hashCode()}, so these may be safely used as keys for maps and stored in sets.
+ * <p>Standard implementation of Vec3I. Provides a suitable implementation of {@link Object#equals(Object)} and
+ * {@link Object#hashCode()}, so these may be safely used as keys for maps and stored in sets.</p>
+ *
+ * <p>Classes that need to maintain a single, immutable integer 3D vector should extend this one.</p>
  */
 public class BasicVec3I implements Vec3I {
     private static final int PRIME = 31;

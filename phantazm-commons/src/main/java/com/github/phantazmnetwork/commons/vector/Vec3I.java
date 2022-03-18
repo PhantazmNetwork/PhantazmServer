@@ -8,7 +8,8 @@ import org.jetbrains.annotations.NotNull;
  *
  * <p>Implementations must provide suitable overrides for {@link Object#equals(Object)} and {@link Object#hashCode()},
  * based only off of the vector's component values. Any two Vec3I instances must be considered equal if and only if each
- * of their components is equal.</p>
+ * of their components is equal. This allows for different Vec3I implementations to be compared against each other, and
+ * ensures consistency with static methods like {@link Vec3I#equals(int, int, int, int, int, int)}.</p>
  */
 public interface Vec3I {
     /**

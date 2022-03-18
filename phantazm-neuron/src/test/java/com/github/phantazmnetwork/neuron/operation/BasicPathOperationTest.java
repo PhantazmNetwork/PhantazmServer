@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.neuron.MazeReader;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
-import com.github.phantazmnetwork.neuron.node.Destination;
 import com.github.phantazmnetwork.neuron.node.Node;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -41,20 +40,10 @@ class BasicPathOperationTest {
         when(mockAgent.hasStartPosition()).thenReturn(true);
         when(mockAgent.getStartPosition()).thenReturn(startPosition);
         when(mockAgent.getCalculator()).thenReturn(calculator);
-        when(mockAgent.reachedDestination(eq(destination.getX()), eq(destination.getY()), eq(destination.getZ()),
-                any())).thenReturn(true);
         when(mockAgent.getWalker()).thenReturn(mockExplorer);
 
-        Destination mockDestination = mock(Destination.class);
-        when(mockDestination.getX()).thenReturn(destination.getX());
-        when(mockDestination.getY()).thenReturn(destination.getY());
-        when(mockDestination.getZ()).thenReturn(destination.getZ());
-
-        PathContext mockContext = mock(PathContext.class);
-        when(mockContext.getAgent()).thenReturn(mockAgent);
-        when(mockContext.getDestination()).thenReturn(mockDestination);
-
-        return new BasicPathOperation(mockContext);
+        return new BasicPathOperation(startPosition, destination, (x, y, z) -> Vec3I.equals(x, y, z, destination.getX(),
+                destination.getY(), destination.getZ()), calculator, mockExplorer);
     }
 
     private static void assertPathMatches(Vec3I[] expectedPath, PathOperation.State expectedCompletionState,

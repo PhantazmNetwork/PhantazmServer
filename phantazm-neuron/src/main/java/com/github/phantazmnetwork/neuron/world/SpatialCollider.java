@@ -129,12 +129,12 @@ public class SpatialCollider implements Collider {
             return true;
         }
 
-        return dA * dB <= 0 ? checkPlane(size, dA, dB, minA, minB, maxA, maxB) : checkPlane(size, dA, dB, maxA, minB,
+        return dA * dB <= 0 ? checkPlanes(size, dA, dB, minA, minB, maxA, maxB) : checkPlanes(size, dA, dB, maxA, minB,
                 minA, maxB);
     }
 
-    private static boolean checkPlane(double size, double dA, double dB, double minA, double minB, double maxA,
-                                      double maxB) {
+    private static boolean checkPlanes(double size, double dA, double dB, double minA, double minB, double maxA,
+                                       double maxB) {
         double bMinusAMin = (minB * dA) - (minA * dB);
         if(bMinusAMin >= size) { //!minInFirst
             return (maxB * dA) - (maxA * dB) < size;  //... && maxInFirst

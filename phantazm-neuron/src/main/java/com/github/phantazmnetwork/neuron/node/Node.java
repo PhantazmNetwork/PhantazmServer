@@ -200,12 +200,12 @@ public class Node extends BasicVec3I implements Comparable<Node>, Iterable<Node>
     }
 
     @Override
-    public int compareTo(@NotNull Node o) {
-        int xCompare = Integer.compare(x, o.x);
+    public int compareTo(@NotNull Node other) {
+        int xCompare = Integer.compare(x, other.x);
         if(xCompare == 0) {
-            int yCompare = Integer.compare(y, o.y);
+            int yCompare = Integer.compare(y, other.y);
             if(yCompare == 0) {
-                return Integer.compare(z, o.z);
+                return Integer.compare(z, other.z);
             }
 
             return yCompare;

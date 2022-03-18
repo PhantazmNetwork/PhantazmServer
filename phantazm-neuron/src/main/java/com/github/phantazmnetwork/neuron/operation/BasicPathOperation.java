@@ -1,14 +1,13 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.neuron.agent.Agent;
+import com.github.phantazmnetwork.commons.vector.Vec3IPredicate;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.node.Calculator;
-import com.github.phantazmnetwork.neuron.node.Destination;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -17,28 +16,10 @@ import java.util.*;
  * nodes are exhausted.
  */
 public class BasicPathOperation implements PathOperation {
-    @SuppressWarnings("ClassCanBeRecord")
-    private static class Result implements PathResult {
-        private final Node path;
-        private final boolean successful;
-
-        private Result(@Nullable Node path, boolean successful) {
-            this.path = path;
-            this.successful = successful;
-        }
-
-        @Override
-        public boolean isSuccessful() {
-            return successful;
-        }
-
-        @Override
-        public Node getPath() {
-            return path;
-        }
-    }
-
-    private final PathContext context;
+    private final Vec3I destination;
+    private final Vec3IPredicate successPredicate;
+    private final Calculator calculator;
+    private final Explorer explorer;
     private final NodeQueue openSet;
     private final Map<Node, Node> graph;
 
@@ -47,37 +28,24 @@ public class BasicPathOperation implements PathOperation {
     private Node best;
     private PathResult result;
 
-    /**
-     * Creates a new BasicPathOperation from the given {@link PathContext}. BasicPathOperation instances may be
-     * constructed in a completed state, depending on if the associated {@link Agent} has a valid starting node.
-     * @param context the PathContext used to instantiate the operation
-     */
-    public BasicPathOperation(@NotNull PathContext context) {
-        this.context = Objects.requireNonNull(context, "context");
+    public BasicPathOperation(@NotNull Vec3I start, @NotNull Vec3I destination,
+                              @NotNull Vec3IPredicate successPredicate, @NotNull Calculator calculator,
+                              @NotNull Explorer explorer) {
+        this.destination = Objects.requireNonNull(destination, "destination");
+        this.successPredicate = Objects.requireNonNull(successPredicate, "successPredicate");
+        this.calculator = Objects.requireNonNull(calculator, "calculator");
+        this.explorer = Objects.requireNonNull(explorer, "explorer");
 
         this.openSet = new NodeQueue();
         this.graph = new Object2ObjectRBTreeMap<>();
-
         this.state = State.IN_PROGRESS;
 
-        Agent agent = context.getAgent();
-        if(agent.hasStartPosition()) {
-            Calculator heuristicCalculator = agent.getCalculator();
-            Vec3I start = agent.getStartPosition();
-            Vec3I destination = context.getDestination();
+        Node initial = new Node(start.getX(), start.getY(), start.getZ(), 0, calculator.heuristic(start.getX(), start
+                .getY(), start.getZ(), destination.getX(), destination.getY(), destination.getZ()), null);
 
-            Node initial = new Node(start.getX(), start.getY(), start.getZ(), 0, heuristicCalculator.heuristic(start
-                    .getX(), start.getY(), start.getZ(), destination.getX(), destination.getY(), destination.getZ()),
-                    null);
-
-            //add the first node
-            openSet.enqueue(initial);
-            graph.put(initial, initial);
-        }
-        else {
-            //immediately terminate if the agent has no starting position, the result will have a null node
-            complete(State.FAILED);
-        }
+        //add the first node
+        openSet.enqueue(initial);
+        graph.put(initial, initial);
     }
 
     private void complete(State state) {
@@ -86,7 +54,7 @@ public class BasicPathOperation implements PathOperation {
         graph.clear();
 
         boolean success = state == State.SUCCEEDED;
-        result = new Result(success ? current.reverse() : (best == null ? null : best.reverse()), success);
+        result = new BasicResult(success ? current.reverse() : (best == null ? null : best.reverse()), success);
     }
 
     @Override
@@ -100,18 +68,14 @@ public class BasicPathOperation implements PathOperation {
             //remove and return the smallest (most promising) node
             current = openSet.dequeue();
 
-            Agent agent = context.getAgent();
-            Calculator calculator = agent.getCalculator();
-            Destination destination = context.getDestination();
-
             //check if we reached our destination yet
-            if(agent.reachedDestination(current.getX(), current.getY(), current.getZ(), destination)) {
+            if(successPredicate.test(current.getX(), current.getY(), current.getZ())) {
                 //success state, path was found
                 complete(State.SUCCEEDED);
                 return;
             }
 
-            for(Vec3I walkVector : agent.getWalker().walkVectors(current)) {
+            for(Vec3I walkVector : explorer.walkVectors(current)) {
                 //x, y, and z are the coordinates of the "neighbor" node we're trying to explore
                 int x = current.getX() + walkVector.getX();
                 int y = current.getY() + walkVector.getY();

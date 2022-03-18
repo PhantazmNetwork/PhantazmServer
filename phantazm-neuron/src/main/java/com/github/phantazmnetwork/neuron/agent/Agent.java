@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.node.Calculator;
-import com.github.phantazmnetwork.neuron.node.Destination;
 import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,20 +56,4 @@ public interface Agent {
      * @return a {@link Calculator} instance
      */
     @NotNull Calculator getCalculator();
-
-    /**
-     * <p>Determines if this agent has reached its destination, given its current position as a 3D integer, usually
-     * corresponding to the position of a particular node along the path as it's being found by a
-     * {@link PathOperation}.</p>
-     *
-     * <p>If the agent does not have a valid starting position, this may or may not throw an
-     * {@link IllegalStateException}, depending on the implementation.</p>
-     * @param x the x coordinate to check
-     * @param y the y coordinate
-     * @param z the z coordinate
-     * @param destination the destination this agent is walking to
-     * @return true if the destination has been successfully reached (successful completion of the path), false if the
-     * PathOperation should keep checking (or fail if no new nodes exist)
-     */
-    boolean reachedDestination(int x, int y, int z, @NotNull Destination destination);
 }

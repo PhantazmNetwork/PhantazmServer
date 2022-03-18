@@ -5,8 +5,8 @@ package com.github.phantazmnetwork.commons.vector;
  */
 final class Vec3IPools {
     /**
-     * The shared Vec3IPool instance.
-     * @apiNote Capable of storing 512 values initially. Once initialized, vectors will persist until
+     * The shared Vec3IPool instance used by {@link Vec3I#of(int, int, int)}.
+     * @apiNote Capable of storing 512 values initially. Once (lazily) initialized, vector objects will persist until
      * program termination. This is expected, and desirable so long as the cache width is small enough that the
      * "unrecoverable" memory is negligible.
      */
