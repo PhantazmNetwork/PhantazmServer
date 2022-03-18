@@ -29,6 +29,7 @@ final class CubicVec3IPool implements Vec3IPool {
             throw new IllegalArgumentException("cacheWidth must not be larger than 256");
         }
 
+        //assume we'll need the whole cache, but don't allocate any values yet
         this.cache = new Vec3I[cacheWidth * cacheWidth * cacheWidth];
         this.halfCacheWidth = cacheWidth >> 1;
 
@@ -51,6 +52,7 @@ final class CubicVec3IPool implements Vec3IPool {
             int i = ((x + halfCacheWidth) << shiftZ) | ((y + halfCacheWidth) << shiftY) | (z + halfCacheWidth);
             Vec3I cached = cache[i];
             if(cached == null) {
+                //lazy initialization of cached vectors
                 cache[i] = cached = new BasicVec3I(x, y, z);
             }
 

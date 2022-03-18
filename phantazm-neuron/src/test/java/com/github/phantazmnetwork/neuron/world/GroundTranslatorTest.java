@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.world;
 
+import com.github.phantazmnetwork.commons.vector.BasicVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundAgent;
 import org.junit.jupiter.api.Nested;
@@ -38,27 +39,17 @@ class GroundTranslatorTest {
 
         OngoingStubbing<Double> highest = when(mockCollider.highestCollisionAlong(anyDouble(), anyDouble(), anyDouble(),
                 anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble()));
-        boolean highestIterated = false;
         for(Double collision : highestCollisions) {
             highest = highest.thenReturn(collision);
-            highestIterated = true;
         }
-
-        if(!highestIterated) {
-            highest.thenReturn(Double.NEGATIVE_INFINITY);
-        }
+        highest.thenReturn(Double.NEGATIVE_INFINITY);
 
         OngoingStubbing<Double> lowest = when(mockCollider.lowestCollisionAlong(anyDouble(), anyDouble(), anyDouble(),
                 anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble()));
-        boolean lowestIterated = false;
         for(Double collision : lowestCollisions) {
             lowest = lowest.thenReturn(collision);
-            lowestIterated = true;
         }
-
-        if(!lowestIterated) {
-            lowest.thenReturn(Double.POSITIVE_INFINITY);
-        }
+        lowest.thenReturn(Double.POSITIVE_INFINITY);
 
         return new GroundTranslator(mockCollider, mockAgent);
     }
@@ -66,9 +57,9 @@ class GroundTranslatorTest {
     @Nested
     class CubicAgent {
         @Nested
-        class NoJumpOrFall {
+        class Walk {
             @Test
-            void walk() {
+            void walkNoCollision() {
                 GroundTranslator translator = mockTranslator(1, 1, 0, 0,
                         Collections.emptyMap(), List.of(Double.NEGATIVE_INFINITY, 0D), Collections.emptyList());
                 assertEquals(Vec3I.of(1, 0, 0), translator.translate(0, 0, 0, 1, 0, 0));
@@ -82,10 +73,48 @@ class GroundTranslatorTest {
             }
         }
 
-        @Test
-        void jump() {
-            GroundTranslator translator = mockTranslator(1, 1, 0, 0,
-                    Collections.emptyMap(), List.of(1D), Collections.emptyList());
+        @Nested
+        class Jump {
+            @Test
+            void jumpNoCollision() {
+                GroundTranslator translator = mockTranslator(1, 1, 1, 0,
+                        Collections.emptyMap(), List.of(1D), Collections.emptyList());
+                Vec3I translate = translator.translate(0, 0, 0, 1, 0, 0);
+                assertEquals(new BasicVec3I(1, 1, 0), translate);
+            }
+
+            @Test
+            void jumpCollision() {
+                GroundTranslator translator = mockTranslator(1, 1, 1, 0,
+                        Collections.emptyMap(), List.of(2D),
+                        Collections.emptyList());
+                assertNull(translator.translate(0, 0, 0, 1, 0, 0));
+            }
+
+            @Test
+            void jumpHigh() {
+                GroundTranslator translator = mockTranslator(1, 1, 2, 0,
+                        Collections.emptyMap(), List.of(2D),
+                        Collections.emptyList());
+                Vec3I translate = translator.translate(0, 0, 0, 1, 0, 0);
+                assertEquals(new BasicVec3I(1, 2, 0), translate);
+            }
+
+            @Test
+            void jumpHitHead() {
+                GroundTranslator translator = mockTranslator(1, 1, 2, 0,
+                        Collections.emptyMap(), List.of(1D), List.of(1D));
+                Vec3I translate = translator.translate(0, 0, 0, 1, 0, 0);
+                assertNull(translate);
+            }
+
+            @Test
+            void jumpVeryHigh() {
+                GroundTranslator translator = mockTranslator(1, 1, 69, 0,
+                        Collections.emptyMap(), List.of(1D, 2D, 3D, 4D, 5D), Collections.emptyList());
+                Vec3I translate = translator.translate(0, 0, 0, 1, 0, 0);
+                assertEquals(new BasicVec3I(1, 5, 0), translate);
+            }
         }
     }
 }
