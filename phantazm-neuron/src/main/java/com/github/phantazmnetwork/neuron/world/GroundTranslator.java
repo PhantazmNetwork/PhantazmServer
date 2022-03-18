@@ -51,7 +51,7 @@ public class GroundTranslator implements NodeTranslator {
                     return Vec3I.of(dX, (int)Math.floor(highestY), dZ);
                 }
             }
-            else { //we should try to perform a jump
+            else if(jump > 0F) { //we should try to perform a jump, assuming we even can
                 double ceiling = Math.min(collider.lowestCollisionAlong(oX, oY, oZ, width, height, width, 0, jump,
                         0) - height, highestJumpY);
 

@@ -2,9 +2,11 @@ package com.github.phantazmnetwork.neuron.world;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.ToDoubleFunction;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class SpatialCollider implements Collider {
     @FunctionalInterface
     private interface DoubleBiPredicate {
@@ -34,7 +36,7 @@ public class SpatialCollider implements Collider {
     @Override
     public double heightAt(int x, int y, int z) {
         Solid solid = space.solidAt(x, y, z);
-        return solid == null ? y : y + solid.vectorY();
+        return solid == null ? y : solid.originY() + solid.vectorY();
     }
 
     private double collidesMovingAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
@@ -73,50 +75,55 @@ public class SpatialCollider implements Collider {
             evZ += dZ;
         }
 
-        double adjustedXZ = (Math.max(vX, vZ) * (Math.abs(dX) + Math.abs(dZ))) / 2;
-        double adjustedXY = (vY * (Math.abs(dX) + Math.abs(dY))) / 2;
-        double adjustedZY = (vY * (Math.abs(dZ) + Math.abs(dY))) / 2;
-
-        double centerX = oX + (vX / 2);
-        double centerY = oY + (vY / 2);
-        double centerZ = oZ + (vZ / 2);
-
+        Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ).iterator();
         double best = initialValue;
-        for(Solid candidate : space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ)) {
-            double coX = candidate.getX() + candidate.originX();
-            double coY = candidate.getY() + candidate.originY();
-            double coZ = candidate.getZ() + candidate.originZ();
+        if(overlapping.hasNext()) {
+            double adjustedYZ = (Math.max(vY, vZ) * (Math.abs(dY) + Math.abs(dZ))) / 2;
+            double adjustedXZ = (Math.max(vX, vZ) * (Math.abs(dX) + Math.abs(dZ))) / 2;
+            double adjustedXY = (Math.max(vX, vY) * (Math.abs(dX) + Math.abs(dY))) / 2;
 
-            float cvX = candidate.vectorX();
-            float cvY = candidate.vectorY();
-            float cvZ = candidate.vectorZ();
+            double centerX = oX + (vX / 2);
+            double centerY = oY + (vY / 2);
+            double centerZ = oZ + (vZ / 2);
 
-            //only check solids not overlapping with the original bounds
-            if(!Solid.overlaps(coX, coY, coZ, cvX, cvY, cvZ, oX, oY, oZ, vX, vY, vZ)) {
-                double minX = coX - centerX;
-                double minY = coY - centerY;
-                double minZ = coZ - centerZ;
+            do {
+                Solid candidate = overlapping.next();
 
-                double maxX = minX + cvX;
-                double maxY = minY + cvY;
-                double maxZ = minZ + cvZ;
+                double coX = candidate.getX() + candidate.originX();
+                double coY = candidate.getY() + candidate.originY();
+                double coZ = candidate.getZ() + candidate.originZ();
 
-                if(checkPair(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) &&
-                        checkPair(adjustedXY, dX, dY, minX, minY, maxX, maxY) &&
-                        checkPair(adjustedZY, dZ, dY, minZ, minY, maxZ, maxY)) {
-                    //collision found
-                    double value = valueFunction.applyAsDouble(candidate);
-                    if(valuePredicate.test(value, best)) {
-                        best = value;
+                float cvX = candidate.vectorX();
+                float cvY = candidate.vectorY();
+                float cvZ = candidate.vectorZ();
+
+                //only check solids not overlapping with the original bounds
+                if(!Solid.overlaps(coX, coY, coZ, cvX, cvY, cvZ, oX, oY, oZ, vX, vY, vZ)) {
+                    double minX = coX - centerX;
+                    double minY = coY - centerY;
+                    double minZ = coZ - centerZ;
+
+                    double maxX = minX + cvX;
+                    double maxY = minY + cvY;
+                    double maxZ = minZ + cvZ;
+
+                    if(checkAxis(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) && checkAxis(adjustedXY, dX, dY, minX,
+                            minY, maxX, maxY) && checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY)) {
+                        //collision found
+                        double value = valueFunction.applyAsDouble(candidate);
+                        if(valuePredicate.test(value, best)) {
+                            best = value;
+                        }
                     }
                 }
             }
+            while (overlapping.hasNext());
         }
 
         return best;
     }
 
-    private static boolean checkPair(double size, double dA, double dB, double minA, double minB, double maxA,
+    private static boolean checkAxis(double size, double dA, double dB, double minA, double minB, double maxA,
                                      double maxB) {
         if(dA == 0 && dB == 0) {
             return true;

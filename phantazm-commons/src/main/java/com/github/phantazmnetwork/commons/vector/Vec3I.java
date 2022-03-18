@@ -32,36 +32,7 @@ public interface Vec3I {
     /**
      * A static, immutable vector representing the origin (0, 0, 0).
      */
-    Vec3I ORIGIN = new Vec3I() {
-        @Override
-        public int getX() {
-            return 0;
-        }
-
-        @Override
-        public int getY() {
-            return 0;
-        }
-
-        @Override
-        public int getZ() {
-            return 0;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if(obj instanceof Vec3I other) {
-                return other.getX() == 0 && other.getY() == 0 && other.getZ() == 0;
-            }
-
-            return false;
-        }
-    };
+    Vec3I ORIGIN = of(0, 0, 0);
 
     /**
      * Creates a new, immutable Vec3I implementation. This may not always create a new vector; common values may be
@@ -73,9 +44,9 @@ public interface Vec3I {
      * @see ImmutableVec3I
      */
     static @NotNull Vec3I of(int x, int y, int z) {
-        if(x == 0 && y == 0 && z == 0) {
-            //0, 0, 0 is a very common vector so don't create a new object
-            return ORIGIN;
+        Vec3I cached = Vec3IPool.retrieve(x, y, z);
+        if(cached != null) {
+            return cached;
         }
 
         return new ImmutableVec3I(x, y, z);

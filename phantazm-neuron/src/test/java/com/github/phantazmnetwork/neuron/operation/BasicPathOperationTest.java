@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.commons.vector.ImmutableVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.MazeReader;
 import com.github.phantazmnetwork.neuron.agent.Agent;
