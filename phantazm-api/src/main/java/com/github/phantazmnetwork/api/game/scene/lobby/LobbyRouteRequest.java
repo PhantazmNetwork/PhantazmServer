@@ -5,6 +5,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A request to be routed to a {@link Lobby}.
+ * @param players The players that are being routed
+ * @param targetLobbyName The name of the lobby to join
+ */
 public record LobbyRouteRequest(@NotNull Iterable<PlayerView> players, @NotNull String targetLobbyName) {
 
     public LobbyRouteRequest {

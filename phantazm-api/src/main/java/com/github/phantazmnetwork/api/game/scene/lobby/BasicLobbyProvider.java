@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.api.game.scene.lobby;
 
 import com.github.phantazmnetwork.api.config.InstanceConfig;
-import com.github.phantazmnetwork.api.game.scene.SceneFallback;
+import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
@@ -9,6 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Basic implementation of a {@link LobbyProviderAbstract}.
+ */
 public class BasicLobbyProvider extends LobbyProviderAbstract {
 
     private final InstanceManager instanceManager;
@@ -21,6 +24,17 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
     private final InstanceConfig instanceConfig;
 
+    /**
+     * Creates a basic implementation of a {@link LobbyProviderAbstract}.
+     * @param newLobbyThreshold The weighting threshold for lobbies. If no lobbies are above this threshold, a new lobby
+     *                          will be created.
+     * @param maximumLobbies The maximum {@link Lobby}s in the provider.
+     * @param instanceManager An {@link InstanceManager} used to create {@link Instance}.
+     * @param instanceLoader A {@link InstanceLoader} used to load {@link Instance}s.
+     * @param lobbyPaths The paths that identify the {@link Lobby} for the {@link InstanceLoader}.
+     * @param fallback A {@link SceneFallback} for the created {@link Lobby}s.
+     * @param instanceConfig The {@link InstanceConfig} for the {@link Lobby}s.
+     */
     public BasicLobbyProvider(int newLobbyThreshold, int maximumLobbies, @NotNull InstanceManager instanceManager,
                               @NotNull InstanceLoader instanceLoader, @NotNull String[] lobbyPaths,
                               @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig) {

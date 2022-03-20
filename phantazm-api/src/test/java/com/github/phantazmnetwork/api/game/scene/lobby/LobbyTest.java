@@ -2,15 +2,12 @@ package com.github.phantazmnetwork.api.game.scene.lobby;
 
 import com.github.phantazmnetwork.api.config.InstanceConfig;
 import com.github.phantazmnetwork.api.game.scene.RouteResult;
-import com.github.phantazmnetwork.api.game.scene.SceneFallback;
+import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -30,7 +27,7 @@ public class LobbyTest {
     public void testShutdown() {
         Instance instance = mock(Instance.class);
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS);
-        SceneFallback sceneFallback = (ignored) -> {};
+        SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
         PlayerView playerView = mock(PlayerView.class);
 
@@ -45,7 +42,7 @@ public class LobbyTest {
     public void testJoin() {
         Instance instance = mock(Instance.class);
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS);
-        SceneFallback sceneFallback = (ignored) -> {};
+        SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
         Player player = mock(Player.class);
         PlayerView playerView = new PlayerView() {

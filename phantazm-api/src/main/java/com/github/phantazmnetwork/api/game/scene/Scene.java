@@ -21,20 +21,44 @@ public interface Scene<TRequest> extends Tickable {
      */
     @NotNull RouteResult join(@NotNull TRequest joinRequest);
 
+    /**
+     * Removes players from the scene.
+     * @param leavers The {@link UUID}s of the players to remove
+     * @return The result of the leave
+     */
     @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers);
 
     /**
-     * Gets the {@link PlayerView}s that are currently part of the scene.
-     * @return
+     * Gets the {@link PlayerView}s that are associated with the scene.
+     * Some players might not be in game.
+     * @return A view of the {@link PlayerView}s associated the scene.
      */
     @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers();
 
+    /**
+     * Gets the number of players that are considered "ingame" in the scene.
+     * This count may differ from the number of entries in
+     * @return The number of players ingame
+     */
     int getIngamePlayerCount();
 
+    /**
+     * Gets a reported value as a weight for join requests.
+     * Greater values indicate that this scene should be preferred for joins.
+     * @return The reported weight value
+     */
     int getJoinWeight();
 
+    /**
+     * Whether the scene is currently shutdown.
+     * Shutdown scenes should not allow more players.
+     * @return Whether the scene is shutdown
+     */
     boolean isShutdown();
 
+    /**
+     * Shuts down the scene and breaks its current lifecycle.
+     */
     void forceShutdown();
 
 }

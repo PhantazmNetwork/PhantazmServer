@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.api.game.scene.lobby;
 import com.github.phantazmnetwork.api.config.InstanceConfig;
 import com.github.phantazmnetwork.api.game.scene.RouteResult;
 import com.github.phantazmnetwork.api.game.scene.Scene;
-import com.github.phantazmnetwork.api.game.scene.SceneFallback;
+import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.Instance;
@@ -16,6 +16,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Represents a lobby. Most basic scene which contains {@link net.minestom.server.entity.Player}s.
+ */
 public class Lobby implements Scene<LobbyJoinRequest> {
 
     private final Instance instance;
@@ -30,6 +33,12 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     private boolean shutdown = false;
 
+    /**
+     * Creates a lobby.
+     * @param instance The {@link Instance} that the lobby's players are sent to
+     * @param instanceConfig The {@link InstanceConfig} used for the lobby's {@link Instance}
+     * @param fallback A fallback for the lobby
+     */
     public Lobby(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig, @NotNull SceneFallback fallback) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
@@ -92,7 +101,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     @Override
     public int getJoinWeight() {
-        return getIngamePlayerCount();
+        return -getIngamePlayerCount();
     }
 
     @Override

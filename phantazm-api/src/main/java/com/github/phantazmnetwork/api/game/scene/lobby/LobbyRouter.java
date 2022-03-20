@@ -15,6 +15,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * {@link SceneRouter} for lobbies.
+ */
 public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
     private final Map<String, SceneProvider<Lobby>> lobbyProviders;
@@ -25,6 +28,10 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
     private boolean joinable = true;
 
+    /**
+     * Creates a lobby {@link SceneRouter}.
+     * @param lobbyProviders The {@link SceneProvider}s for lobbies mapped based on lobby name.
+     */
     public LobbyRouter(@NotNull Map<String, SceneProvider<Lobby>> lobbyProviders) {
         this.lobbyProviders = Objects.requireNonNull(lobbyProviders, "lobbyProviders");
     }
@@ -80,7 +87,7 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
         Map<UUID, PlayerView> players = new HashMap<>();
 
         for (SceneProvider<Lobby> lobbyProvider : lobbyProviders.values()) {
-            for (Lobby lobby : lobbyProvider.listScenes()) {
+            for (Lobby lobby : lobbyProvider.getScenes()) {
                 players.putAll(lobby.getPlayers());
             }
         }
@@ -93,7 +100,7 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
         int playerCount = 0;
 
         for (SceneProvider<Lobby> lobbyProvider : lobbyProviders.values()) {
-            for (Lobby lobby : lobbyProvider.listScenes()) {
+            for (Lobby lobby : lobbyProvider.getScenes()) {
                 playerCount += lobby.getPlayers().size();
             }
         }
@@ -103,7 +110,7 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
     @Override
     public int getJoinWeight() {
-        return getIngamePlayerCount();
+        return -getIngamePlayerCount();
     }
 
     @Override

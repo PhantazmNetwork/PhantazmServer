@@ -5,6 +5,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A join request for lobbies.
+ * @param players The players that are joining
+ */
 public record LobbyJoinRequest(@NotNull Iterable<PlayerView> players) {
 
     public LobbyJoinRequest {

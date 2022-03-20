@@ -6,12 +6,27 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Optional;
 
-public interface SceneProvider<T extends Scene<?>> extends Tickable {
+/**
+ * A provider to create new {@link Scene}s.
+ * @param <TScene> The {@link Scene} that the provider creates
+ */
+public interface SceneProvider<TScene extends Scene<?>> extends Tickable {
 
-    @NotNull Optional<T> provideScene();
+    /**
+     * Provides a {@link Scene}.
+     * @return An {@link Optional} of a new {@link Scene}.
+     */
+    @NotNull Optional<TScene> provideScene();
 
-    @UnmodifiableView @NotNull Iterable<T> listScenes();
+    /**
+     * Gets the {@link Scene}s currently stored by the {@link Scene} provider.
+     * @return A view of the {@link Scene}s
+     */
+    @UnmodifiableView @NotNull Iterable<TScene> getScenes();
 
+    /**
+     * Shuts down the scene provider.
+     */
     void forceShutdown();
 
 }

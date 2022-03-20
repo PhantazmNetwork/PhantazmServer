@@ -4,7 +4,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record SceneRouterKey<TDispatcher extends SceneRouter<?>>(@NotNull String key) {
+/**
+ * A key for {@link SceneRouter}s.
+ * @param key The String representation of the key
+ * @param <TRouter> The type of the associated {@link SceneRouter}
+ */
+@SuppressWarnings("unused")
+public record SceneRouterKey<TRouter extends SceneRouter<?>>(@NotNull String key) {
 
     public SceneRouterKey {
         Objects.requireNonNull(key, "key");

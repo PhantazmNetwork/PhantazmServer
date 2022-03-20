@@ -6,6 +6,9 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
 
+/**
+ * An abstract base for {@link Lobby} {@link SceneProvider}s.
+ */
 public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
 
     private final List<Lobby> lobbies = new ArrayList<>();
@@ -16,6 +19,12 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
 
     private final int maximumLobbies;
 
+    /**
+     * Creates an abstract lobby provider.
+     * @param newLobbyThreshold The weighting threshold for lobbies. If no lobbies are above this threshold, a new lobby
+     *                          will be created.
+     * @param maximumLobbies The maximum lobbies in the provider.
+     */
     public LobbyProviderAbstract(int newLobbyThreshold, int maximumLobbies) {
         this.newLobbyThreshold = newLobbyThreshold;
         this.maximumLobbies = maximumLobbies;
@@ -27,30 +36,30 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
             return Optional.empty();
         }
 
-        Lobby minimumLobby = null;
-        int minimumWeighting = Integer.MAX_VALUE;
+        Lobby maximumLobby = null;
+        int maximumWeighting = Integer.MIN_VALUE;
 
         for (Lobby lobby : lobbies) {
-            int playerCount = lobby.getIngamePlayerCount();
+            int joinWeight = lobby.getJoinWeight();
 
-            if (playerCount < minimumWeighting) {
-                minimumLobby = lobby;
-                minimumWeighting = playerCount;
+            if (joinWeight > maximumWeighting) {
+                maximumLobby = lobby;
+                maximumWeighting = joinWeight;
             }
         }
 
-        if (minimumLobby == null || minimumWeighting >= newLobbyThreshold) {
+        if (maximumLobby == null || maximumWeighting <= newLobbyThreshold) {
             Lobby lobby = createLobby();
             lobbies.add(lobby);
 
             return Optional.of(lobby);
         }
 
-        return Optional.of(minimumLobby);
+        return Optional.of(maximumLobby);
     }
 
     @Override
-    public @UnmodifiableView @NotNull Iterable<Lobby> listScenes() {
+    public @UnmodifiableView @NotNull Iterable<Lobby> getScenes() {
         return unmodifiableLobbies;
     }
 
@@ -79,6 +88,10 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
         }
     }
 
+    /**
+     * Creates a {@link Lobby}.
+     * @return The new {@link Lobby}
+     */
     protected abstract @NotNull Lobby createLobby();
 
 }
