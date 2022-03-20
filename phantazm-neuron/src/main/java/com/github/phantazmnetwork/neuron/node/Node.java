@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * <p>Represents a particular point along a path. Each node may be connected to at most one other node (referred to as
@@ -22,17 +23,17 @@ import java.util.NoSuchElementException;
  * such situations never occur, as keeping a record of visited nodes would add an unacceptable amount of overhead to
  * node iteration.</p>
  *
- * <p>Node extends {@link BasicVec3I}. It also implements {@link Comparable}, with a natural ordering that is
- * consistent with equals. Nodes are compared first by x value, then y, then z. This allows nodes to be used as a key in
- * comparison-based maps, and doing so is "safe" in that nodes are only compared by their immutable attributes.</p>
+ * <p>Node implements {@link Comparable}, with a natural ordering that is consistent with equals. Nodes are compared
+ * first by x value, then y, then z. This allows nodes to be used as a key in comparison-based maps, and doing so is
+ * "safe" in that nodes are only compared by their immutable attributes.</p>
  *
  * <p>Although the position of the node cannot change throughout its lifespan, its parent, along with {@code g} and
  * {@code h} values, can and indeed are expected to be changed many times throughout path calculation.</p>
  *
  * <p>Node objects are designed to work efficiently with {@link NodeQueue}. To this end, each node stores an index —
- * called {@code heapIndex} — which corresponds to the node's position within the queue's backing array. This index
- * will be negative if the node is not currently in a queue. It will be set to an appropriate value by the queue when it
- * is added and set to -1 when it is no longer present in the queue.</p>
+ * called {@code heapIndex} — which corresponds to the node's position within the queue's backing array. This index will
+ * be negative if the node is not currently in a queue. It will be set to an appropriate value by the queue when it is
+ * added and set to -1 when it is no longer present in the queue.</p>
  *
  * <p>Although this form of index caching is very convenient — after all it gives us O(1) {@code contains} — it can
  * lead to problems if an attempt is made to store a node in more than one queue at a time. This is because when the
@@ -45,7 +46,7 @@ import java.util.NoSuchElementException;
  * @see NodeQueue
  * @see Vec3I
  */
-public class Node extends BasicVec3I implements Comparable<Node>, Iterable<Node> {
+public class Node implements Comparable<Node>, Iterable<Node> {
     private class NodeIterator implements Iterator<Node> {
         private Node current = Node.this;
 
@@ -66,6 +67,8 @@ public class Node extends BasicVec3I implements Comparable<Node>, Iterable<Node>
         }
     }
 
+    private final Vec3I position;
+
     private float g;
     private float h;
     private int heapIndex;
@@ -74,15 +77,13 @@ public class Node extends BasicVec3I implements Comparable<Node>, Iterable<Node>
 
     /**
      * Creates a new Node object with the specified parameters.
-     * @param x the x coordinate of the Node's position
-     * @param y the y coordinate
-     * @param z the z coordinate
+     * @param position the position of the node
      * @param g the {@code g}-score (path distance to this node)
      * @param h the {@code h}-score (heuristic)
      * @param parent the parent node; may be null
      */
-    public Node(int x, int y, int z, float g, float h, @Nullable Node parent) {
-        super(x, y, z);
+    public Node(@NotNull Vec3I position, float g, float h, @Nullable Node parent) {
+        this.position = Objects.requireNonNull(position, "position");
         this.g = g;
         this.h = h;
         this.heapIndex = -1;
@@ -196,16 +197,25 @@ public class Node extends BasicVec3I implements Comparable<Node>, Iterable<Node>
             prev = node;
         }
 
-        return prev == null ? this : prev;
+        //prev will never be null
+        return Objects.requireNonNull(prev);
+    }
+
+    /**
+     * Gets the position of this node.
+     * @return a {@link Vec3I} instance representing the position of this node
+     */
+    public @NotNull Vec3I getPosition() {
+        return position;
     }
 
     @Override
     public int compareTo(@NotNull Node other) {
-        int xCompare = Integer.compare(x, other.x);
+        int xCompare = Integer.compare(position.getX(), other.position.getX());
         if(xCompare == 0) {
-            int yCompare = Integer.compare(y, other.y);
+            int yCompare = Integer.compare(position.getY(), other.position.getY());
             if(yCompare == 0) {
-                return Integer.compare(z, other.z);
+                return Integer.compare(position.getZ(), other.position.getZ());
             }
 
             return yCompare;
@@ -215,8 +225,22 @@ public class Node extends BasicVec3I implements Comparable<Node>, Iterable<Node>
     }
 
     @Override
+    public int hashCode() {
+        return position.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Node other) {
+            return position.equals(other.position);
+        }
+
+        return false;
+    }
+
+    @Override
     public String toString() {
-        return "Node{x=" + x + ", y=" + y + ", z=" + z + ", g=" + g + ", h=" + h + "}";
+        return "Node{position=" + position + ", g=" + g + ", h=" + h + "}";
     }
 
     @Override

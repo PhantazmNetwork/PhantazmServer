@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import com.github.phantazmnetwork.commons.vector.BasicVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundAgent;
+import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.OngoingStubbing;
@@ -80,7 +80,7 @@ class GroundTranslatorTest {
                 GroundTranslator translator = mockTranslator(1, 1, 1, 0,
                         Collections.emptyMap(), List.of(1D), Collections.emptyList());
                 Vec3I translate = translator.translate(0, 0, 0, 1, 0, 0);
-                assertEquals(new BasicVec3I(1, 1, 0), translate);
+                assertEquals(Vec3I.of(1, 1, 0), translate);
             }
 
             @Test
@@ -94,10 +94,9 @@ class GroundTranslatorTest {
             @Test
             void jumpHigh() {
                 GroundTranslator translator = mockTranslator(1, 1, 2, 0,
-                        Collections.emptyMap(), List.of(2D),
-                        Collections.emptyList());
+                        Collections.emptyMap(), List.of(2D), Collections.emptyList());
                 Vec3I translate = translator.translate(0, 0, 0, 1, 0, 0);
-                assertEquals(new BasicVec3I(1, 2, 0), translate);
+                assertEquals(Vec3I.of(1, 2, 0), translate);
             }
 
             @Test
@@ -113,7 +112,17 @@ class GroundTranslatorTest {
                 GroundTranslator translator = mockTranslator(1, 1, 69, 0,
                         Collections.emptyMap(), List.of(1D, 2D, 3D, 4D, 5D), Collections.emptyList());
                 Vec3I translate = translator.translate(0, 0, 0, 1, 0, 0);
-                assertEquals(new BasicVec3I(1, 5, 0), translate);
+                assertEquals(Vec3I.of(1, 5, 0), translate);
+            }
+        }
+
+        @Nested
+        class Fall {
+            @Test
+            void singleBlock() {
+                GroundTranslator translator = mockTranslator(1, 1, 0, 1,
+                        Collections.emptyMap(), List.of(Double.NEGATIVE_INFINITY, -1D), Collections.emptyList());
+                assertEquals(Vec3I.of(1, -1, 0), translator.translate(0, 0, 0, 1, 0, 0));
             }
         }
     }

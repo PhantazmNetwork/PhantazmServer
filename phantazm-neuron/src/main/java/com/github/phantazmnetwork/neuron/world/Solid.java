@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.neuron.world;
 
+import com.github.phantazmnetwork.commons.vector.Vec3I;
+import org.jetbrains.annotations.NotNull;
+
 public interface Solid {
-    int getX();
-
-    int getY();
-
-    int getZ();
+    @NotNull Vec3I getPosition();
 
     float originX();
 

@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.node;
 
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -10,7 +11,7 @@ class NodeQueueTest {
     private static Node[] ordered(int amount) {
         Node[] nodes = new Node[amount];
         for(int i = 0; i < amount; i++) {
-            nodes[i] = new Node(i, i, i, i, i, null);
+            nodes[i] = new Node(Vec3I.of(i, i, i), i, i, null);
         }
 
         return nodes;
@@ -36,8 +37,8 @@ class NodeQueueTest {
     @Test
     void update() {
         NodeQueue queue = new NodeQueue();
-        Node first = new Node(0, 0, 0, 0, 0, null);
-        Node last = new Node(1, 1, 1, 1, 1, null);
+        Node first = new Node(Vec3I.ORIGIN, 0, 0, null);
+        Node last = new Node(Vec3I.of(1, 1, 1), 1, 1, null);
         queue.enqueue(first);
         queue.enqueue(last);
 
@@ -56,7 +57,7 @@ class NodeQueueTest {
     @Test
     void clear() {
         NodeQueue queue = new NodeQueue();
-        Node node = new Node(0, 0, 0, 0, 0, null);
+        Node node = new Node(Vec3I.ORIGIN, 0, 0, null);
         queue.enqueue(node);
         assertEquals(1, queue.size());
 

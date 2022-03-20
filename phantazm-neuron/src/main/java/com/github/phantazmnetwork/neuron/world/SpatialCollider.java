@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.world;
 
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -22,77 +23,87 @@ public class SpatialCollider implements Collider {
     @Override
     public double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                         double dY, double dZ) {
-        return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getY() + solid.originY() + solid
-                .vectorY(), (a, b) -> a > b, Double.NEGATIVE_INFINITY);
+        return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getPosition().getY() + solid
+                .originY() + solid.vectorY(), (a, b) -> a > b, Double.NEGATIVE_INFINITY);
     }
 
     @Override
     public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                        double dY, double dZ) {
-        return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getY() + solid.originY(),
-                (a, b) -> a < b, Double.POSITIVE_INFINITY);
+        return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getPosition().getY() + solid
+                .originY(), (a, b) -> a < b, Double.POSITIVE_INFINITY);
     }
 
     @Override
     public double heightAt(int x, int y, int z) {
         Solid solid = space.solidAt(x, y, z);
-        return solid == null ? y : solid.originY() + solid.vectorY();
+        return solid == null ? y : y + solid.originY() + solid.vectorY();
     }
 
     private double collidesMovingAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                        double dY, double dZ, ToDoubleFunction<Solid> valueFunction,
                                        DoubleBiPredicate valuePredicate, double initialValue) {
+        //bounding box of collision which will be directionally expanded
+        //this is necessary to obtain an iterable of candidate solids to collision check
         double eoX = oX;
         double eoY = oY;
         double eoZ = oZ;
 
-        double evX = vX;
-        double evY = vY;
-        double evZ = vZ;
+        /*
+        perform the actual directional expansion. to do this, first we orient the directional (expansion) vector d
+        <dX, dY, dZ> such that it is in the same quadrant as the original vector <vX, vY, vZ> v by ensuring it has the
+        same sign as d
 
-        //perform a directional expansion in direction (dX, dY, dZ)
-        if(dX < 0) {
-            eoX += dX;
-            evX -= dX;
-        }
-        else {
-            evX += dX;
-        }
+        we do this because it preserves the directional information of d in the final expanded bounding box. this
+        information is critical to ensure performant iteration of
+         */
+        double svX = Math.copySign(vX, dX);
+        double svY = Math.copySign(vY, dY);
+        double svZ = Math.copySign(vZ, dZ);
 
-        if(dY < 0) {
-            eoY += dY;
-            evY -= dY;
-        }
-        else {
-            evY += dY;
-        }
+        //now that v and d have the same components, add them together to compute the final expansion vector
+        double evX = svX + dX;
+        double evY = svY + dY;
+        double evZ = svZ + dZ;
 
-        if(dZ < 0) {
-            eoZ += dZ;
-            evZ -= dZ;
-        }
-        else {
-            evZ += dZ;
+        //if we actually changed any components of v, we'll need to move the origin to compensate for the "shift" that
+        //this would cause; thus making for a proper directional expansion
+        if(svX != vX) {
+            eoX -= svX;
         }
 
-        Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, dX, dY, dZ)
-                .iterator();
+        if(svY != vY) {
+            eoY -= svY;
+        }
+
+        if(svZ != vZ) {
+            eoZ -= svZ;
+        }
+
+        Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ).iterator();
         double best = initialValue;
         if(overlapping.hasNext()) {
-            double adjustedYZ = (Math.max(vY, vZ) * (Math.abs(dY) + Math.abs(dZ))) / 2;
-            double adjustedXZ = (Math.max(vX, vZ) * (Math.abs(dX) + Math.abs(dZ))) / 2;
-            double adjustedXY = (Math.max(vX, vY) * (Math.abs(dX) + Math.abs(dY))) / 2;
+            //make sure widths are positive
+            //TODO: this may not be necessary? testing needed
+            double xW = Math.abs(vX);
+            double yW = Math.abs(vY);
+            double zW = Math.abs(vZ);
 
-            double centerX = oX + (vX / 2);
-            double centerY = oY + (vY / 2);
-            double centerZ = oZ + (vZ / 2);
+            double adjustedYZ = (Math.max(yW, zW) * (Math.abs(dY) + Math.abs(dZ))) / 2;
+            double adjustedXZ = (Math.max(xW, zW) * (Math.abs(dX) + Math.abs(dZ))) / 2;
+            double adjustedXY = (Math.max(xW, yW) * (Math.abs(dX) + Math.abs(dY))) / 2;
+
+            double centerX = oX + (xW / 2);
+            double centerY = oY + (yW / 2);
+            double centerZ = oZ + (zW / 2);
 
             do {
                 Solid candidate = overlapping.next();
+                Vec3I candidatePos = candidate.getPosition();
 
-                double coX = candidate.getX() + candidate.originX();
-                double coY = candidate.getY() + candidate.originY();
-                double coZ = candidate.getZ() + candidate.originZ();
+                double coX = candidatePos.getX() + candidate.originX();
+                double coY = candidatePos.getY() + candidate.originY();
+                double coZ = candidatePos.getZ() + candidate.originZ();
 
                 float cvX = candidate.vectorX();
                 float cvY = candidate.vectorY();

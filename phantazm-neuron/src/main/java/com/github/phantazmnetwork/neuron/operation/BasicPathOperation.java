@@ -40,8 +40,8 @@ public class BasicPathOperation implements PathOperation {
         this.graph = new Object2ObjectRBTreeMap<>();
         this.state = State.IN_PROGRESS;
 
-        Node initial = new Node(start.getX(), start.getY(), start.getZ(), 0, calculator.heuristic(start.getX(), start
-                .getY(), start.getZ(), destination.getX(), destination.getY(), destination.getZ()), null);
+        Node initial = new Node(start, 0, calculator.heuristic(start.getX(), start.getY(), start.getZ(), destination
+                .getX(), destination.getY(), destination.getZ()), null);
 
         //add the first node
         openSet.enqueue(initial);
@@ -57,6 +57,8 @@ public class BasicPathOperation implements PathOperation {
 
         boolean success = state == State.SUCCEEDED;
         result = new BasicResult(success ? current.reverse() : (best == null ? null : best.reverse()), success);
+        best = null;
+        current = null;
     }
 
     @Override
@@ -71,7 +73,8 @@ public class BasicPathOperation implements PathOperation {
             current = openSet.dequeue();
 
             //check if we reached our destination yet
-            if(successPredicate.test(current.getX(), current.getY(), current.getZ())) {
+            Vec3I currentPos = current.getPosition();
+            if(successPredicate.test(currentPos.getX(), currentPos.getY(), currentPos.getZ())) {
                 //success state, path was found
                 complete(State.SUCCEEDED);
                 return;
@@ -79,25 +82,27 @@ public class BasicPathOperation implements PathOperation {
 
             for(Vec3I walkVector : explorer.walkVectors(current)) {
                 //x, y, and z are the coordinates of the "neighbor" node we're trying to explore
-                int x = current.getX() + walkVector.getX();
-                int y = current.getY() + walkVector.getY();
-                int z = current.getZ() + walkVector.getZ();
+                int x = currentPos.getX() + walkVector.getX();
+                int y = currentPos.getY() + walkVector.getY();
+                int z = currentPos.getZ() + walkVector.getZ();
 
                 /*
                 the node used as a key here may be stored as a value too, or it may just be used to access a
                 previously-existing value. for the purposes of all maps (even comparator-based ones using Node's natural
                 ordering), node objects are safe for use as keys because comparison-changing values are final
                  */
-                Node neighbor = graph.computeIfAbsent(new Node(x, y, z, Float.POSITIVE_INFINITY,
+                Node neighbor = graph.computeIfAbsent(new Node(Vec3I.of(x, y, z), Float.POSITIVE_INFINITY,
                         Float.POSITIVE_INFINITY, current), key -> {
-                    key.setH(calculator.heuristic(key.getX(), key.getY(), key.getZ(), destination.getX(),
+                    Vec3I keyPos = key.getPosition();
+                    key.setH(calculator.heuristic(keyPos.getX(), keyPos.getY(), keyPos.getZ(), destination.getX(),
                             destination.getY(), destination.getZ()));
                     return key;
                 });
 
+                Vec3I neighborPos = neighbor.getPosition();
                 //tentative g-score, we have to check if we've actually got a better score than our previous path
-                float g = current.getG() + calculator.distance(current.getX(), current.getY(), current.getZ(),
-                        neighbor.getX(), neighbor.getY(), neighbor.getZ());
+                float g = current.getG() + calculator.distance(currentPos.getX(), currentPos.getY(), currentPos.getZ(),
+                        neighborPos.getX(), neighborPos.getY(), neighborPos.getZ());
 
                 //for brand-new nodes, neighbor.getG() is equal to Float.POSITIVE_INFINITY, so this will run for sure
                 //if however neighbor.getG() is less optimal, we will not explore the node

@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.neuron.agent;
 import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.node.Node;
-import com.github.phantazmnetwork.neuron.world.NodeTranslator;
+import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -30,13 +30,15 @@ public class GroundExplorer implements Explorer {
 
     @Override
     public @NotNull Iterable<? extends Vec3I> walkVectors(@NotNull Node current) {
-        int x = current.getX();
-        int y = current.getY();
-        int z = current.getZ();
+        Vec3I currentPos = current.getPosition();
+        int x = currentPos.getX();
+        int y = currentPos.getY();
+        int z = currentPos.getZ();
+
         Node parentNode = current.getParent();
 
         //capture ref to simple vec3I rather than parent (which as it is a Node object, may have a big ref chain)
-        Vec3I parent = parentNode == null ? null : Vec3I.of(parentNode.getX(), parentNode.getY(), parentNode.getZ());
+        Vec3I parentPos = parentNode == null ? null : parentNode.getPosition();
 
         //use AdvancingIterator to reduce memory footprint; we don't need to actually store nodes in a collection
         return () -> new AdvancingIterator<>() {
@@ -52,8 +54,8 @@ public class GroundExplorer implements Explorer {
                     algorithms will give the correct path even if we allow backtracking, we should still try to avoid
                     performing collision checks if we don't have to
                      */
-                    if(parent == null || !Vec3I.equals(parent.getX(), parent.getY(), parent.getZ(), x + delta.getX(),
-                            y + delta.getY(), z + delta.getZ())) {
+                    if(parentPos == null || !Vec3I.equals(parentPos.getX(), parentPos.getY(), parentPos.getZ(), x +
+                                    delta.getX(), y + delta.getY(), z + delta.getZ())) {
                         //this might be null, which indicates our walk delta is not traversable
                         Vec3I newDelta = translator.translate(x, y, z, delta.getX(), delta.getY(), delta.getZ());
 

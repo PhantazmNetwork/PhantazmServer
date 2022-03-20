@@ -10,5 +10,5 @@ public interface Space {
     @Nullable Solid solidAt(int x, int y, int z);
 
     @NotNull Iterable<? extends Solid> solidsOverlapping(double oX, double oY, double oZ, double vX, double vY,
-                                                         double vZ, double dX, double dY, double dZ);
+                                                         double vZ);
 }

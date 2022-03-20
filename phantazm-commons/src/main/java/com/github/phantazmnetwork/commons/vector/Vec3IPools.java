@@ -4,6 +4,8 @@ package com.github.phantazmnetwork.commons.vector;
  * Contains shared Vec3IPool instances. Not part of the public API.
  */
 final class Vec3IPools {
+    private Vec3IPools() { throw new UnsupportedOperationException(); }
+
     /**
      * The shared Vec3IPool instance used by {@link Vec3I#of(int, int, int)}.
      * @apiNote Capable of storing 512 values initially. Once (lazily) initialized, vector objects will persist until

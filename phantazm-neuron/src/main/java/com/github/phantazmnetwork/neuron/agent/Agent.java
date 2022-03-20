@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,17 +42,4 @@ public interface Agent {
      * returns false
      */
     @NotNull Vec3I getStartPosition();
-
-    /**
-     * Retrieves the {@link Explorer} instance used by this agent to expand new nodes as part of pathfinding.
-     * @return the {@link Explorer} instance used by this agent
-     */
-    @NotNull Explorer getWalker();
-
-    /**
-     * Retrieves the {@link Calculator} instance this agent uses to compute the effective distance between nodes as
-     * well as the heuristic.
-     * @return a {@link Calculator} instance
-     */
-    @NotNull Calculator getCalculator();
 }

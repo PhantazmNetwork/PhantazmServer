@@ -10,11 +10,6 @@ package com.github.phantazmnetwork.neuron.world;
  * first vector (the "origin") represents one corner of the bounding box, and the second vector represents an offset —
  * a vector added to the origin to obtain the opposite corner from the first corner. Therefore, the lengths of each edge
  * of the AABB are represented by the absolute value of the corresponding components of the second vector.</p>
- *
- * <p>This representation is preferred because it has several advantages over Bukkit's method. Changing the position of
- * an origin-vector AABB only requires changing the first vector. Normalizing point-vector AABBs is as easy as checking
- * for negative components in the second vector, taking its absolute value, and shifting the corresponding component of
- * the first vector. A point-vector AABB is normalized if and only if its offset vector has no negative components.</p>
  */
 public interface Collider {
     /**

@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.neuron.world;
+package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.Nullable;

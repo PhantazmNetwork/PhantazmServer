@@ -58,6 +58,7 @@ public abstract class AdvancingIterator<TValue> implements Iterator<TValue> {
         //copy value and set field to null to avoid maintaining a persistent reference
         TValue valueCopy = value;
         value = null;
+
         return valueCopy;
     }
 

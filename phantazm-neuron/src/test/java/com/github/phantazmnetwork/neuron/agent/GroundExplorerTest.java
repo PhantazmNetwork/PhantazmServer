@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.node.Node;
-import com.github.phantazmnetwork.neuron.world.NodeTranslator;
+import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -54,7 +54,7 @@ class GroundExplorerTest {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0));
         GroundExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> vec3I);
 
-        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(0, 0, 0, 0, 0, null));
+        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), walks.iterator());
     }
 
@@ -62,7 +62,7 @@ class GroundExplorerTest {
     void emptyWhenNull() {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0));
         GroundExplorer explorer = makeExplorer(walks, vec3I -> true, vec3I -> vec3I);
-        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(0, 0, 0, 0, 0, null));
+        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), Collections.emptyIterator());
     }
 
@@ -71,7 +71,7 @@ class GroundExplorerTest {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0), Vec3I.of(2, 0, 0), Vec3I.of(3, 0, 0));
         List<Vec3I> transformed = List.of(Vec3I.of(2, 0, 0), Vec3I.of(3, 0, 0), Vec3I.of(4, 0, 0));
         GroundExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> Vec3I.of(vec3I.getX() + 1, 0, 0));
-        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(0, 0, 0, 0, 0, null));
+        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), transformed.iterator());
     }
 }

@@ -25,10 +25,11 @@ class BasicPathOperationTest {
         Explorer mockExplorer = mock(Explorer.class);
         when(mockExplorer.walkVectors(any())).thenAnswer(invocation -> {
             Node node = invocation.getArgument(0);
+            Vec3I nodePos = node.getPosition();
 
-            int x = node.getX();
-            int y = node.getY();
-            int z = node.getZ();
+            int x = nodePos.getX();
+            int y = nodePos.getY();
+            int z = nodePos.getZ();
 
             //rudimentary simulation of collision checking: filter all directions that would collide with a "solid"
             return StreamSupport.stream(walkDirections.spliterator(), false).filter(direction -> solids.stream()
@@ -39,8 +40,6 @@ class BasicPathOperationTest {
         Agent mockAgent = mock(Agent.class);
         when(mockAgent.hasStartPosition()).thenReturn(true);
         when(mockAgent.getStartPosition()).thenReturn(startPosition);
-        when(mockAgent.getCalculator()).thenReturn(calculator);
-        when(mockAgent.getWalker()).thenReturn(mockExplorer);
 
         return new BasicPathOperation(startPosition, destination, (x, y, z) -> Vec3I.equals(x, y, z, destination.getX(),
                 destination.getY(), destination.getZ()), calculator, mockExplorer);
@@ -56,14 +55,13 @@ class BasicPathOperationTest {
             nodes.add(node);
         }
 
-        assertEquals(Arrays.asList(expectedPath), nodes.stream().map(node -> Vec3I.of(node.getX(),
-                node.getY(), node.getZ())).collect(Collectors.toList()));
+        assertEquals(Arrays.asList(expectedPath), nodes.stream().map(Node::getPosition).collect(Collectors.toList()));
     }
 
     @Nested
     class UpwardDestination {
         private static final Vec3I[] OPTIMAL_PATH = new Vec3I[] {
-                Vec3I.of(0, 0, 0),
+                Vec3I.ORIGIN,
                 Vec3I.of(0, 1, 0),
                 Vec3I.of(0, 2, 0),
                 Vec3I.of(0, 3, 0),
@@ -105,7 +103,7 @@ class BasicPathOperationTest {
             class Fully {
                 private static final Collection<Vec3I> SURROUNDED_BY_SOLIDS = CARDINAL_MOVEMENT;
                 private static final Vec3I[] FULLY_BLOCKED_PATH = new Vec3I[] {
-                        Vec3I.of(0, 0, 0)
+                        Vec3I.ORIGIN
                 };
 
                 @Test
@@ -120,7 +118,7 @@ class BasicPathOperationTest {
                 private static final Collection<Vec3I> POSITIVE_X_MISSING_SOLIDS = new ArrayList<>(CARDINAL_MOVEMENT);
                 private static final Vec3I DESTINATION_X_MISSING = Vec3I.of(1, 10, 0);
                 private static final Vec3I[] OPTIMAL_PATH_X_MISSING = new Vec3I[] {
-                        Vec3I.of(0, 0, 0),
+                        Vec3I.ORIGIN,
                         Vec3I.of(1, 0, 0),
                         Vec3I.of(1, 1, 0),
                         Vec3I.of(1, 2, 0),
