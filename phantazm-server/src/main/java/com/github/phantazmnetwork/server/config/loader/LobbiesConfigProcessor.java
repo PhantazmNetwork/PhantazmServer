@@ -31,6 +31,10 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
     private final MiniMessage miniMessage;
 
+    /**
+     * Creates a processor for {@link LobbiesConfig}s.
+     * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
+     */
     public LobbiesConfigProcessor(@NotNull MiniMessage miniMessage) {
         this.miniMessage = miniMessage;
     }
