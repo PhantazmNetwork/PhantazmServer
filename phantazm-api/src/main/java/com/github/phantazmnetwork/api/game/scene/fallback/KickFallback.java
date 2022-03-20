@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -20,7 +21,7 @@ public class KickFallback implements SceneFallback {
      * @param kickMessage The message used for kicks
      */
     public KickFallback(@NotNull Component kickMessage) {
-        this.kickMessage = kickMessage;
+        this.kickMessage = Objects.requireNonNull(kickMessage, "kickMessage");
     }
 
     @Override

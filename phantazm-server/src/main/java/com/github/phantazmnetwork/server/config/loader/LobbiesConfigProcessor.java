@@ -18,10 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * {@link ConfigProcessor} used for {@link LobbiesConfig}s.
@@ -36,7 +33,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
      * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
      */
     public LobbiesConfigProcessor(@NotNull MiniMessage miniMessage) {
-        this.miniMessage = miniMessage;
+        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
     }
 
     @Override
