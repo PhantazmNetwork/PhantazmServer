@@ -7,7 +7,6 @@ import java.util.Objects;
 
 /**
  * Config for a single {@link net.minestom.server.instance.Instance}.
- * @param spawnPoint The spawn {@link Pos} for the {@link net.minestom.server.instance.Instance}
  */
 public record InstanceConfig(@NotNull Pos spawnPoint) {
     /**

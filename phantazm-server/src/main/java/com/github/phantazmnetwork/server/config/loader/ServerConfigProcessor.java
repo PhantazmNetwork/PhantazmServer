@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * Config processor used for {@link ServerConfig}s.
+ * {@link ConfigProcessor} used for {@link ServerConfig}s.
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
@@ -58,8 +58,17 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                 velocitySecret);
 
         ConfigNode pingList = element.getNodeOrDefault(LinkedConfigNode::new, "pingList");
-        Component description = miniMessage.parse(pingList.getStringOrDefault(PingListConfig.DEFAULT_DESCRIPTION_STRING,
-                "description"));
+        ConfigElement descriptionElement = pingList.getElement("description");
+        Component description;
+        if (descriptionElement == null) {
+            description = PingListConfig.DEFAULT_DESCRIPTION;
+        }
+        else if (descriptionElement.isString()) {
+            description = miniMessage.parse(descriptionElement.asString());
+        }
+        else {
+            throw new ConfigProcessException("description is not a string");
+        }
         PingListConfig pingListConfig = new PingListConfig(description);
 
         return new ServerConfig(serverInfoConfig, pingListConfig);

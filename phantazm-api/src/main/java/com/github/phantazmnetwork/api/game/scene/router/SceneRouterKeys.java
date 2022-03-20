@@ -10,7 +10,7 @@ public class SceneRouterKeys {
     /**
      * Lobbies
      */
-    public static final SceneRouterKey<LobbyRouter> LOBBY_DISPATCHER = new SceneRouterKey<>("lobby_dispatcher");
+    public static final SceneRouterKey<LobbyRouter> LOBBY_ROUTER = new SceneRouterKey<>("lobby_dispatcher");
 
     private SceneRouterKeys() {
 

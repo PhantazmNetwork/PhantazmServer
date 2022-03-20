@@ -6,12 +6,15 @@ import java.util.Objects;
 
 /**
  * A key for {@link SceneRouter}s.
- * @param key The String representation of the key
  * @param <TRouter> The type of the associated {@link SceneRouter}
  */
 @SuppressWarnings("unused")
 public record SceneRouterKey<TRouter extends SceneRouter<?>>(@NotNull String key) {
 
+    /**
+     * Creates a {@link SceneRouter} key.
+     * @param key The {@link String} representation of the key
+     */
     public SceneRouterKey {
         Objects.requireNonNull(key, "key");
     }

@@ -14,7 +14,7 @@ public interface SceneProvider<TScene extends Scene<?>> extends Tickable {
 
     /**
      * Provides a {@link Scene}.
-     * @return An {@link Optional} of a new {@link Scene}.
+     * @return An {@link Optional} of a {@link Scene}. The scene may be newly created or from the provider's store.
      */
     @NotNull Optional<TScene> provideScene();
 
