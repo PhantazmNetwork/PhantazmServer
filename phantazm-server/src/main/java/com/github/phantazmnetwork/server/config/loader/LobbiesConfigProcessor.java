@@ -39,62 +39,31 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
     @Override
     public @NotNull LobbiesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         try {
-            ConfigElement instancesPathElement = element.getElement("instancesPath");
-            Path instancesPath;
-            if (instancesPathElement == null) {
-                instancesPath = LobbiesConfig.DEFAULT_INSTANCES_PATH;
-            }
-            else if (instancesPathElement.isString()) {
-                instancesPath = Path.of(instancesPathElement.asString());
-            }
-            else {
-                throw new ConfigProcessException("instancesPath is not a string");
-            }
+            Path instancesPath = Path.of(element.getStringOrThrow("instancesPath"));
+            Component kickMessage = miniMessage.parse(element.getStringOrThrow("kickMessage"));
+            String mainLobbyName = element.getStringOrThrow("mainLobbyName");
 
-            Component kickMessage;
-            ConfigElement kickMessageElement = element.getElement("kickMessage");
-            if (kickMessageElement == null) {
-                kickMessage = LobbiesConfig.DEFAULT_KICK_MESSAGE;
-            }
-            else if (kickMessageElement.isString()) {
-                kickMessage = miniMessage.parse(kickMessageElement.asString());
-            }
-            else {
-                throw new ConfigProcessException("kickMessage is not a string");
-            }
-
-            String mainLobbyName = element.getStringOrDefault(LobbiesConfig.DEFAULT_MAIN_LOBBY_NAME,
-                    "mainLobbyName");
-
-            ConfigNode lobbiesNode = element.getNodeOrDefault(LinkedConfigNode::new, "lobbies");
+            ConfigNode lobbiesNode = element.getNodeOrThrow("lobbies");
             Map<String, LobbyConfig> lobbies = new HashMap<>(lobbiesNode.size());
             for (Map.Entry<String, ConfigElement> lobby : lobbiesNode.entrySet()) {
-                ConfigNode instanceConfigNode = lobby.getValue().getNodeOrDefault(LinkedConfigNode::new,
-                        "instanceConfig");
-                ConfigNode spawnPoint = instanceConfigNode.get("spawnPoint").asNode();
-                double x = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.x(), "x").doubleValue();
-                double y = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.y(), "y").doubleValue();
-                double z = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.z(), "z").doubleValue();
-                float yaw = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.yaw(), "yaw").floatValue();
-                float pitch = spawnPoint.getNumberOrDefault(InstanceConfig.DEFAULT_POS.pitch(), "pitch")
-                        .floatValue();
+                ConfigNode instanceConfigNode = lobby.getValue().getNodeOrThrow("instanceConfig");
+
+                ConfigNode spawnPoint = instanceConfigNode.getNodeOrThrow("spawnPoint");
+                double x = spawnPoint.getNumberOrThrow("x").doubleValue();
+                double y = spawnPoint.getNumberOrThrow("y").doubleValue();
+                double z = spawnPoint.getNumberOrThrow("z").doubleValue();
+                float yaw = spawnPoint.getNumberOrThrow("yaw").floatValue();
+                float pitch = spawnPoint.getNumberOrThrow("pitch").floatValue();
                 InstanceConfig instanceConfig = new InstanceConfig(new Pos(x, y, z, yaw, pitch));
 
-                ConfigList lobbyPathsList = lobby.getValue().getListOrDefault(ArrayConfigList::new, "lobbyPaths");
+                ConfigList lobbyPathsList = lobby.getValue().getListOrThrow( "lobbyPaths");
                 String[] lobbyPaths = new String[lobbyPathsList.size()];
                 for (int i = 0; i < lobbyPathsList.size(); i++) {
-                    ConfigElement subPath = lobbyPathsList.get(i);
-                    if (!subPath.isString()) {
-                        throw new ConfigProcessException("lobby path sub-path is not a string");
-                    }
-
-                    lobbyPaths[i] = subPath.asString();
+                    lobbyPaths[i] = lobbyPathsList.getStringOrThrow(i);
                 }
 
-                int maxPlayers = lobby.getValue().getNumberOrDefault(LobbyConfig.DEFAULT_MAX_PLAYERS,
-                        "maxPlayers").intValue();
-                int maxLobbies = lobby.getValue().getNumberOrDefault(LobbyConfig.DEFAULT_MAX_LOBBIES,
-                        "maxLobbies").intValue();
+                int maxPlayers = lobby.getValue().getNumberOrThrow("maxPlayers").intValue();
+                int maxLobbies = lobby.getValue().getNumberOrThrow("maxLobbies").intValue();
 
                 lobbies.put(lobby.getKey(), new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies));
             }

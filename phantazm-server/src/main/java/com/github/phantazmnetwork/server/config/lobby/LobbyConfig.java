@@ -1,12 +1,14 @@
 package com.github.phantazmnetwork.server.config.lobby;
 
 import com.github.phantazmnetwork.api.config.InstanceConfig;
+import com.github.phantazmnetwork.api.game.scene.lobby.Lobby;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 /**
- * Config for a single {@link com.github.phantazmnetwork.api.game.scene.lobby.Lobby}.
+ * Config for a single {@link Lobby}.
  */
 public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
                           @NotNull String[] lobbyPaths,
@@ -25,11 +27,10 @@ public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
 
     /**
      * Creates a lobby config.
-     * @param instanceConfig The {@link InstanceConfig} for the {@link com.github.phantazmnetwork.api.game.scene.lobby.Lobby}
-     * @param lobbyPaths The lobby paths used to load the {@link net.minestom.server.instance.Instance} for the lobby
-     * @param maxPlayers The maximum players possible for the {@link com.github.phantazmnetwork.api.game.scene.lobby.Lobby}
-     * @param maxLobbies The maximum number of {@link com.github.phantazmnetwork.api.game.scene.lobby.Lobby}s for this
-     *                   {@link com.github.phantazmnetwork.api.game.scene.lobby.Lobby} type
+     * @param instanceConfig The {@link InstanceConfig} for the {@link Lobby}
+     * @param lobbyPaths The lobby paths used to load the {@link Instance} for the lobby
+     * @param maxPlayers The maximum players possible for the {@link Lobby}
+     * @param maxLobbies The maximum number of {@link Lobby}s for this {@link Lobby} type
      */
     public LobbyConfig {
         Objects.requireNonNull(instanceConfig, "instanceConfig");

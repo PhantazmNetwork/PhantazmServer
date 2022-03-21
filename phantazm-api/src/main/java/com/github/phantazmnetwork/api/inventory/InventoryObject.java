@@ -1,11 +1,12 @@
 package com.github.phantazmnetwork.api.inventory;
 
 import com.github.phantazmnetwork.api.util.Tickable;
+import net.minestom.server.inventory.AbstractInventory;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents an item in an {@link net.minestom.server.inventory.AbstractInventory}.
+ * Represents an item in an {@link AbstractInventory}.
  */
 public interface InventoryObject extends Tickable {
 

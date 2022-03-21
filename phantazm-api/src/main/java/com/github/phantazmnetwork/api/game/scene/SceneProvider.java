@@ -8,15 +8,16 @@ import java.util.Optional;
 
 /**
  * A provider to create new {@link Scene}s.
- * @param <TScene> The {@link Scene} that the provider creates
+ * @param <TRequest>> The requests used for the {@link Scene}s that the provider creates
  */
-public interface SceneProvider<TScene extends Scene<?>> extends Tickable {
+public interface SceneProvider<TScene extends Scene<TRequest>, TRequest> extends Tickable {
 
     /**
      * Provides a {@link Scene}.
+     * @param request The request used to provide an appropriate scene
      * @return An {@link Optional} of a {@link Scene}. The scene may be newly created or from the provider's store.
      */
-    @NotNull Optional<TScene> provideScene();
+    @NotNull Optional<TScene> provideScene(@NotNull TRequest request);
 
     /**
      * Gets the {@link Scene}s currently stored by the {@link Scene} provider.

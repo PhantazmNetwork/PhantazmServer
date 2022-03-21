@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * An abstract base for {@link Lobby} {@link SceneProvider}s.
  */
-public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
+public abstract class LobbyProviderAbstract implements SceneProvider<Lobby, LobbyJoinRequest> {
 
     private final List<Lobby> lobbies = new ArrayList<>();
 
@@ -31,7 +31,7 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
     }
 
     @Override
-    public @NotNull Optional<Lobby> provideScene() {
+    public @NotNull Optional<Lobby> provideScene(@NotNull LobbyJoinRequest request) {
         if (lobbies.size() >= maximumLobbies) {
             return Optional.empty();
         }
@@ -40,7 +40,7 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby> {
         int maximumWeighting = Integer.MIN_VALUE;
 
         for (Lobby lobby : lobbies) {
-            int joinWeight = lobby.getJoinWeight();
+            int joinWeight = lobby.getJoinWeight(request);
 
             if (joinWeight > maximumWeighting) {
                 maximumLobby = lobby;

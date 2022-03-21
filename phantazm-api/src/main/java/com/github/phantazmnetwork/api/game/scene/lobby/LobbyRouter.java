@@ -20,9 +20,13 @@ import java.util.UUID;
  */
 public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
-    private final Map<String, SceneProvider<Lobby>> lobbyProviders;
+    private final Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders;
 
     private final Map<UUID, Lobby> lobbyMap = new HashMap<>();
+
+    private final Map<UUID, PlayerView> players = new HashMap<>();
+
+    private final Map<UUID, PlayerView> unmodifiablePlayers = Collections.unmodifiableMap(players);
 
     private boolean shutdown = false;
 
@@ -32,7 +36,7 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
      * Creates a lobby {@link SceneRouter}.
      * @param lobbyProviders The {@link SceneProvider}s for lobbies mapped based on lobby name.
      */
-    public LobbyRouter(@NotNull Map<String, SceneProvider<Lobby>> lobbyProviders) {
+    public LobbyRouter(@NotNull Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders) {
         this.lobbyProviders = Objects.requireNonNull(lobbyProviders, "lobbyProviders");
     }
 
@@ -42,20 +46,22 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
             return new RouteResult(false, Optional.of(Component.text("The router is not joinable.")));
         }
 
-        SceneProvider<Lobby> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
+        SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
         if (lobbyProvider == null) {
             return new RouteResult(false,
                     Optional.of(Component.text("No lobbies exist under the name "
                             + routeRequest.targetLobbyName() + ".")));
         }
 
-        Optional<Lobby> lobbyOptional = lobbyProvider.provideScene();
+        LobbyJoinRequest joinRequest = new LobbyJoinRequest(routeRequest.players());
+        Optional<Lobby> lobbyOptional = lobbyProvider.provideScene(joinRequest);
         if (lobbyOptional.isPresent()) {
             Lobby lobby = lobbyOptional.get();
-            RouteResult result = lobby.join(new LobbyJoinRequest(routeRequest.players()));
+            RouteResult result = lobby.join(joinRequest);
             if (result.success()) {
                 for (PlayerView playerView : routeRequest.players()) {
                     lobbyMap.put(playerView.getUUID(), lobby);
+                    players.put(playerView.getUUID(), playerView);
                 }
             }
 
@@ -76,6 +82,7 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
         for (UUID uuid : leavers) {
             lobbyMap.get(uuid).leave(Collections.singletonList(uuid));
+            players.remove(uuid);
         }
 
         return new RouteResult(true, Optional.empty());
@@ -83,23 +90,14 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
     @Override
     public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
-        // TODO: use UUID-based connection-manager
-        Map<UUID, PlayerView> players = new HashMap<>();
-
-        for (SceneProvider<Lobby> lobbyProvider : lobbyProviders.values()) {
-            for (Lobby lobby : lobbyProvider.getScenes()) {
-                players.putAll(lobby.getPlayers());
-            }
-        }
-
-        return players;
+        return unmodifiablePlayers;
     }
 
     @Override
     public int getIngamePlayerCount() {
         int playerCount = 0;
 
-        for (SceneProvider<Lobby> lobbyProvider : lobbyProviders.values()) {
+        for (SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider : lobbyProviders.values()) {
             for (Lobby lobby : lobbyProvider.getScenes()) {
                 playerCount += lobby.getPlayers().size();
             }
@@ -109,8 +107,12 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
     }
 
     @Override
-    public int getJoinWeight() {
-        return -getIngamePlayerCount();
+    public int getJoinWeight(@NotNull LobbyRouteRequest request) {
+        int count = 0;
+        for (PlayerView ignored : request.players()) {
+            count++;
+        }
+        return -(getIngamePlayerCount() + count);
     }
 
     @Override
@@ -125,16 +127,18 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
     @Override
     public void forceShutdown() {
-        for (SceneProvider<Lobby> lobbyProvider : lobbyProviders.values()) {
+        for (SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider : lobbyProviders.values()) {
             lobbyProvider.forceShutdown();
         }
+        lobbyMap.clear();
+        players.clear();
 
         shutdown = true;
     }
 
     @Override
     public void tick() {
-        for (SceneProvider<Lobby> sceneProvider : lobbyProviders.values()) {
+        for (SceneProvider<Lobby, LobbyJoinRequest> sceneProvider : lobbyProviders.values()) {
             sceneProvider.tick();
         }
     }

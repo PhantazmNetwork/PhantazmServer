@@ -1,12 +1,13 @@
 package com.github.phantazmnetwork.api.config;
 
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 /**
- * Config for a single {@link net.minestom.server.instance.Instance}.
+ * Config for a single {@link Instance}.
  */
 public record InstanceConfig(@NotNull Pos spawnPoint) {
     /**
@@ -15,8 +16,8 @@ public record InstanceConfig(@NotNull Pos spawnPoint) {
     public static final Pos DEFAULT_POS = Pos.ZERO;
 
     /**
-     * Creates config regarding a single {@link net.minestom.server.instance.Instance}.
-     * @param spawnPoint The spawn point for the {@link net.minestom.server.instance.Instance}
+     * Creates config regarding a single {@link Instance}.
+     * @param spawnPoint The spawn point for the {@link Instance}
      */
     public InstanceConfig {
         Objects.requireNonNull(spawnPoint, "spawnPoint");

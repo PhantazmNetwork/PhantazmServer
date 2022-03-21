@@ -45,9 +45,10 @@ public interface Scene<TRequest> extends Tickable {
     /**
      * Gets a reported value as a weight for join requests.
      * Greater values indicate that this scene should be preferred for joins.
+     * @param request The join request used to determine the scene's weight
      * @return The reported weight value
      */
-    int getJoinWeight();
+    int getJoinWeight(@NotNull TRequest request);
 
     /**
      * Whether the scene is currently shutdown.

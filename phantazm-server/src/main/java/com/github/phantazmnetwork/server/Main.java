@@ -119,7 +119,8 @@ public class Main {
         InstanceLoader instanceLoader = new FileSystemInstanceLoader(lobbiesConfig.instancesPath(), AnvilLoader::new);
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
-        Map<String, SceneProvider<Lobby>> lobbyProviders = new HashMap<>(lobbiesConfig.lobbies().size());
+        Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders
+                = new HashMap<>(lobbiesConfig.lobbies().size());
         LobbyRouter lobbyRouter = new LobbyRouter(lobbyProviders);
         routerStore.addSceneRouter(SceneRouterKeys.LOBBY_ROUTER, lobbyRouter);
 
@@ -134,7 +135,7 @@ public class Main {
             event.getPlayer().setRespawnPoint(mainLobbyConfig.instanceConfig().spawnPoint());
         });
 
-        SceneProvider<Lobby> mainLobbyProvider = new BasicLobbyProvider(
+        SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider = new BasicLobbyProvider(
                 mainLobbyConfig.maxPlayers(),
                 mainLobbyConfig.maxLobbies(),
                 instanceManager,
