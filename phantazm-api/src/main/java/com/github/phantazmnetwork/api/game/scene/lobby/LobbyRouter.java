@@ -49,10 +49,6 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
             return new RouteResult(false, Optional.of(Component.text("The router is not joinable.")));
         }
 
-        if (!joinable) {
-            return new RouteResult(false, Optional.of(Component.text("The router is not joinable.")));
-        }
-
         SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
         if (lobbyProvider == null) {
             return new RouteResult(false,

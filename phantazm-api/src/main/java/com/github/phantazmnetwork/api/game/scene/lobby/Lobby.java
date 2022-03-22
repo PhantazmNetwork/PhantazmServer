@@ -138,7 +138,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     @Override
     public void setJoinable(boolean joinable) {
-
+        this.joinable = joinable;
     }
 
     @Override
