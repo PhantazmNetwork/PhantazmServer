@@ -1,18 +1,19 @@
 package com.github.phantazmnetwork.api.game.scene.router;
 
+import com.github.phantazmnetwork.api.game.scene.Scene;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 /**
- * A key for {@link SceneRouter}s.
- * @param <TRouter> The type of the associated {@link SceneRouter}
+ * A key for {@link Scene} routers.
+ * @param <TRouter> The type of the associated {@link Scene} router
  */
 @SuppressWarnings("unused")
-public record SceneRouterKey<TRouter extends SceneRouter<?>>(@NotNull String key) {
+public record SceneRouterKey<TRouter extends Scene<?>>(@NotNull String key) {
 
     /**
-     * Creates a {@link SceneRouter} key.
+     * Creates a {@link Scene} router key.
      * @param key The {@link String} representation of the key
      */
     public SceneRouterKey {

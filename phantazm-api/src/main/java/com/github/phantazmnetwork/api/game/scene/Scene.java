@@ -62,4 +62,17 @@ public interface Scene<TRequest> extends Tickable {
      */
     void forceShutdown();
 
+    /**
+     * Checks whether the scene is considered joinable.
+     * @return Whether the scene is considered joinable
+     */
+    boolean isJoinable();
+
+    /**
+     * Sets whether the scene should be considered joinable.
+     * Joinable is defined on an implementation basis.
+     * @param joinable Whether the scene should be joinable
+     */
+    void setJoinable(boolean joinable);
+
 }

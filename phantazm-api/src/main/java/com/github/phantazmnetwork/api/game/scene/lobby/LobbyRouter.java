@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.api.game.scene.lobby;
 
 import com.github.phantazmnetwork.api.game.scene.RouteResult;
-import com.github.phantazmnetwork.api.game.scene.router.SceneRouter;
+import com.github.phantazmnetwork.api.game.scene.Scene;
 import com.github.phantazmnetwork.api.game.scene.SceneProvider;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import net.kyori.adventure.text.Component;
@@ -16,9 +16,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * {@link SceneRouter} for lobbies.
+ * {@link Scene} router for {@link Lobby}s.
  */
-public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
+public class LobbyRouter implements Scene<LobbyRouteRequest> {
 
     private final Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders;
 
@@ -33,7 +33,7 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
     private boolean joinable = true;
 
     /**
-     * Creates a lobby {@link SceneRouter}.
+     * Creates a {@link Lobby} router.
      * @param lobbyProviders The {@link SceneProvider}s for lobbies mapped based on lobby name.
      */
     public LobbyRouter(@NotNull Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders) {
@@ -42,6 +42,13 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
 
     @Override
     public @NotNull RouteResult join(@NotNull LobbyRouteRequest routeRequest) {
+        if (isShutdown()) {
+            return new RouteResult(false, Optional.of(Component.text("The router is shutdown.")));
+        }
+        if (!isJoinable()) {
+            return new RouteResult(false, Optional.of(Component.text("The router is not joinable.")));
+        }
+
         if (!joinable) {
             return new RouteResult(false, Optional.of(Component.text("The router is not joinable.")));
         }
@@ -121,11 +128,6 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
     }
 
     @Override
-    public void setJoinable(boolean joinable) {
-        this.joinable = joinable;
-    }
-
-    @Override
     public void forceShutdown() {
         for (SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider : lobbyProviders.values()) {
             lobbyProvider.forceShutdown();
@@ -134,6 +136,16 @@ public class LobbyRouter implements SceneRouter<LobbyRouteRequest> {
         players.clear();
 
         shutdown = true;
+    }
+
+    @Override
+    public boolean isJoinable() {
+        return joinable;
+    }
+
+    @Override
+    public void setJoinable(boolean joinable) {
+        this.joinable = joinable;
     }
 
     @Override

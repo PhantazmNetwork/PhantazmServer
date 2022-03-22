@@ -1,45 +1,37 @@
 package com.github.phantazmnetwork.api.game.scene.lobby;
 
 import com.github.phantazmnetwork.api.game.scene.SceneProvider;
+import com.github.phantazmnetwork.api.game.scene.SceneProviderAbstract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.Optional;
 
 /**
- * An abstract base for {@link Lobby} {@link SceneProvider}s.
+ * An abstract {@link Lobby} {@link SceneProvider}.
  */
-public abstract class LobbyProviderAbstract implements SceneProvider<Lobby, LobbyJoinRequest> {
-
-    private final List<Lobby> lobbies = new ArrayList<>();
-
-    private final List<Lobby> unmodifiableLobbies = Collections.unmodifiableList(lobbies);
+public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby, LobbyJoinRequest> {
 
     private final int newLobbyThreshold;
 
-    private final int maximumLobbies;
-
     /**
-     * Creates an abstract lobby provider.
-     * @param newLobbyThreshold The weighting threshold for lobbies. If no lobbies are above this threshold, a new lobby
-     *                          will be created.
-     * @param maximumLobbies The maximum lobbies in the provider.
+     * Creates an abstract {@link Lobby} {@link SceneProvider}.
+     *
+     * @param maximumScenes The maximum number {@link Lobby}s in the provider.
+     * @param newLobbyThreshold The weighting threshold for lobbies. If no lobbies are above this threshold,
+     * a new {@link Lobby} will be created.
      */
-    public LobbyProviderAbstract(int newLobbyThreshold, int maximumLobbies) {
+    public LobbyProviderAbstract(int maximumScenes, int newLobbyThreshold) {
+        super(maximumScenes);
+
         this.newLobbyThreshold = newLobbyThreshold;
-        this.maximumLobbies = maximumLobbies;
     }
 
     @Override
-    public @NotNull Optional<Lobby> provideScene(@NotNull LobbyJoinRequest request) {
-        if (lobbies.size() >= maximumLobbies) {
-            return Optional.empty();
-        }
-
+    protected @NotNull Optional<Lobby> chooseScene(@NotNull LobbyJoinRequest request) {
         Lobby maximumLobby = null;
         int maximumWeighting = Integer.MIN_VALUE;
 
-        for (Lobby lobby : lobbies) {
+        for (Lobby lobby : getScenes()) {
             int joinWeight = lobby.getJoinWeight(request);
 
             if (joinWeight > maximumWeighting) {
@@ -48,50 +40,11 @@ public abstract class LobbyProviderAbstract implements SceneProvider<Lobby, Lobb
             }
         }
 
-        if (maximumLobby == null || maximumWeighting <= newLobbyThreshold) {
-            Lobby lobby = createLobby();
-            lobbies.add(lobby);
-
-            return Optional.of(lobby);
+        if (maximumWeighting < newLobbyThreshold) {
+            return Optional.empty();
         }
 
-        return Optional.of(maximumLobby);
+        return Optional.ofNullable(maximumLobby);
     }
-
-    @Override
-    public @UnmodifiableView @NotNull Iterable<Lobby> getScenes() {
-        return unmodifiableLobbies;
-    }
-
-    @Override
-    public void forceShutdown() {
-        for (Lobby lobby : lobbies) {
-            lobby.forceShutdown();
-        }
-
-        lobbies.clear();
-    }
-
-    @Override
-    public void tick() {
-        Iterator<Lobby> iterator = lobbies.iterator();
-
-        while (iterator.hasNext()) {
-            Lobby lobby = iterator.next();
-
-            if (lobby.isShutdown()) {
-                iterator.remove();
-            }
-            else {
-                lobby.tick();
-            }
-        }
-    }
-
-    /**
-     * Creates a {@link Lobby}.
-     * @return The new {@link Lobby}
-     */
-    protected abstract @NotNull Lobby createLobby();
 
 }

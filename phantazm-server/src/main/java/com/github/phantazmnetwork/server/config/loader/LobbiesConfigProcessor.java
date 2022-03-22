@@ -92,7 +92,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             ConfigNode instanceConfigNode = new LinkedConfigNode();
             instanceConfigNode.put("spawnPoint", spawnPointNode);
 
-            List<ConfigElement> lobbyPathsList = new ArrayList<>(lobby.getValue().lobbyPaths().length);
+            Collection<ConfigElement> lobbyPathsList = new ArrayList<>(lobby.getValue().lobbyPaths().length);
             for (String subPath : lobby.getValue().lobbyPaths()) {
                 lobbyPathsList.add(new ConfigPrimitive(subPath));
             }

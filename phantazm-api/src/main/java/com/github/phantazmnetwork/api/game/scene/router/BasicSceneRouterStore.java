@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.api.game.scene.router;
 
+import com.github.phantazmnetwork.api.game.scene.Scene;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -12,16 +13,16 @@ import java.util.Optional;
  */
 public class BasicSceneRouterStore implements SceneRouterStore {
 
-    private final Map<SceneRouterKey<?>, SceneRouter<?>> sceneRouters = new HashMap<>();
+    private final Map<SceneRouterKey<?>, Scene<?>> sceneRouters = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     @Override
-    public <TRouter extends SceneRouter<?>> @NotNull Optional<TRouter> getSceneRouter(@NotNull SceneRouterKey<TRouter> key) {
+    public <TRouter extends Scene<?>> @NotNull Optional<TRouter> getSceneRouter(@NotNull SceneRouterKey<TRouter> key) {
         return Optional.ofNullable((TRouter) sceneRouters.get(key));
     }
 
     @Override
-    public <TRouter extends SceneRouter<?>> void addSceneRouter(@NotNull SceneRouterKey<TRouter> key, @NotNull TRouter router) {
+    public <TRouter extends Scene<?>> void addSceneRouter(@NotNull SceneRouterKey<TRouter> key, @NotNull TRouter router) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(router, "router");
 

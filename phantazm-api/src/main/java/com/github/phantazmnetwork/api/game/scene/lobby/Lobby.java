@@ -35,6 +35,8 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     private boolean shutdown = false;
 
+    private boolean joinable = true;
+
     /**
      * Creates a lobby.
      * @param instance The {@link Instance} that the lobby's players are sent to
@@ -49,8 +51,11 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     @Override
     public @NotNull RouteResult join(@NotNull LobbyJoinRequest joinRequest) {
-        if (shutdown) {
+        if (isShutdown()) {
             return new RouteResult(false, Optional.of(Component.text("Lobby is shutdown.")));
+        }
+        if (!isJoinable()) {
+            return new RouteResult(false, Optional.of(Component.text("Lobby is not joinable.")));
         }
 
         for (PlayerView playerView : joinRequest.players()) {
@@ -124,6 +129,16 @@ public class Lobby implements Scene<LobbyJoinRequest> {
         players.clear();
 
         shutdown = true;
+    }
+
+    @Override
+    public boolean isJoinable() {
+        return joinable;
+    }
+
+    @Override
+    public void setJoinable(boolean joinable) {
+
     }
 
     @Override
