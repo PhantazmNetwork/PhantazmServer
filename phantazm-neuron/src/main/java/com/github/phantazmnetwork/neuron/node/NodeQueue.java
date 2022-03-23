@@ -73,6 +73,7 @@ public class NodeQueue implements PriorityQueue<Node> {
         result.setHeapIndex(-1);
         return result;
     }
+
     @Override
     public Node first() {
         if (size == 0) {

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
  * important to avoid allocating a very large pool, as there will be a significant portion of wasted memory.</p>
  * @see BasicVec3I
  */
-final class CubicVec3IPool implements Vec3IPool {
+class CubicVec3IPool implements Vec3IPool {
     private final Vec3I[] cache;
     private final int halfCacheWidth;
     private final int shiftY;

@@ -1,10 +1,13 @@
 package com.github.phantazmnetwork.neuron.world;
 
+import com.github.phantazmnetwork.commons.vector.Vec3D;
+import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.function.DoubleFunction;
 import java.util.function.ToDoubleFunction;
 
 @SuppressWarnings("ClassCanBeRecord")
@@ -20,9 +23,9 @@ public class SpatialCollider implements Collider {
         this.space = Objects.requireNonNull(space, "space");
     }
 
-    @Override
-    public double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
-                                        double dY, double dZ) {
+    private double collisionCheck(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
+                                  double dY, double dZ, double initialBest, double bestPossible,
+                                  ToDoubleFunction<Solid> valueFunction, DoubleBiPredicate betterThan) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
         double eoX = oX;
@@ -61,7 +64,8 @@ public class SpatialCollider implements Collider {
         }
 
         Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ).iterator();
-        double best = Double.NEGATIVE_INFINITY;
+        double best = initialBest;
+
         if(overlapping.hasNext()) {
             //make sure widths are positive
             double xW = Math.abs(vX);
@@ -79,31 +83,39 @@ public class SpatialCollider implements Collider {
             do {
                 Solid candidate = overlapping.next();
                 Vec3I candidatePos = candidate.getPosition();
+                Vec3F candidateMin = candidate.getMin();
+                Vec3F candidateMax = candidate.getMax();
 
-                double coX = candidatePos.getX() + candidate.originX();
-                double coY = candidatePos.getY() + candidate.originY();
-                double coZ = candidatePos.getZ() + candidate.originZ();
+                double cMinX = candidatePos.getX() + candidateMin.getX();
+                double cMinY = candidatePos.getY() + candidateMin.getY();
+                double cMinZ = candidatePos.getZ() + candidateMin.getZ();
 
-                float cvX = candidate.vectorX();
-                float cvY = candidate.vectorY();
-                float cvZ = candidate.vectorZ();
+                double cMaxX = candidatePos.getX() + candidateMax.getX();
+                double cMaxY = candidatePos.getY() + candidateMax.getY();
+                double cMaxZ = candidatePos.getZ() + candidateMax.getZ();
 
                 //only check solids not overlapping with the original bounds
-                if(!Solid.overlaps(coX, coY, coZ, cvX, cvY, cvZ, oX, oY, oZ, vX, vY, vZ)) {
-                    double minX = coX - centerX;
-                    double minY = coY - centerY;
-                    double minZ = coZ - centerZ;
+                if(!overlaps(oX, oY, oZ, vX, vY, vZ, cMinX, cMinY, cMinZ, cMaxX, cMaxY, cMaxZ)) {
+                    double minX = cMinX - centerX;
+                    double minY = cMinY - centerY;
+                    double minZ = cMinZ - centerZ;
 
-                    double maxX = minX + cvX;
-                    double maxY = minY + cvY;
-                    double maxZ = minZ + cvZ;
+                    double maxX = cMaxX - centerX;
+                    double maxY = cMaxX - centerX;
+                    double maxZ = cMaxX - centerX;
 
                     if(checkAxis(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) && checkAxis(adjustedXY, dX, dY, minX,
                             minY, maxX, maxY) && checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY)) {
+                        double value = valueFunction.applyAsDouble(candidate);
+
                         //collision found
-                        double collisionY = coY + cvY;
-                        if(collisionY > best) {
-                            best = collisionY;
+                        if(betterThan.test(value, best)) {
+                            //shortcut: we cannot possibly find a better collision
+                            if(betterThan.test(value, bestPossible)) {
+                                return value;
+                            }
+
+                            best = value;
                         }
                     }
                 }
@@ -112,23 +124,25 @@ public class SpatialCollider implements Collider {
         }
 
         return best;
+    }
 
-        //return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getPosition().getY() + solid
-        //        .originY() + solid.vectorY(), (a, b) -> a > b, Double.NEGATIVE_INFINITY);
+    @Override
+    public double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
+                                        double dY, double dZ) {
+        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.NEGATIVE_INFINITY, Math.max(oY, oY + vY),
+                solid -> solid.getPosition().getY() + solid.getMax().getY(), (value, best) -> value > best);
     }
 
     @Override
     public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                        double dY, double dZ) {
         return 0;
-        //return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getPosition().getY() + solid
-        //        .originY(), (a, b) -> a < b, Double.POSITIVE_INFINITY);
     }
 
     @Override
     public double heightAt(int x, int y, int z) {
         Solid solid = space.solidAt(x, y, z);
-        return solid == null ? y : y + solid.originY() + solid.vectorY();
+        return solid == null ? y : y + solid.getMax().getY();
     }
 
     /*
@@ -190,5 +204,15 @@ public class SpatialCollider implements Collider {
         }
 
         return (maxB * dA) - (maxA * dB) > -size; // ... && !minInSecond
+    }
+
+    private static boolean overlaps(double oX1, double oY1, double oZ1, double vX1, double vY1, double vZ1, double minX,
+                                    double minY, double minZ, double maxX, double maxY, double maxZ) {
+        return Math.min(oX1, oX1 + vX1) < maxX &&
+                Math.min(oY1, oY1 + vY1) < maxY &&
+                Math.min(oZ1, oZ1 + vZ1) < maxZ &&
+                Math.max(oX1, oX1 + vX1) >= minX &&
+                Math.max(oY1, oY1 + vY1) >= minY &&
+                Math.max(oZ1, oZ1 + vZ1) >= minZ;
     }
 }

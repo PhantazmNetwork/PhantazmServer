@@ -7,12 +7,10 @@ package com.github.phantazmnetwork.commons.vector;
  * <p>Classes that need to maintain a single, immutable integer 3D vector should extend this one.</p>
  */
 @SuppressWarnings("ClassCanBeRecord")
-public class BasicVec3I implements Vec3I {
-    private static final int PRIME = 31;
-
-    protected final int x;
-    protected final int y;
-    protected final int z;
+public final class BasicVec3I implements Vec3I {
+    private final int x;
+    private final int y;
+    private final int z;
 
     /**
      * Creates a new BasicVec3I from the provided integers. This constructor is public, but it's generally
@@ -45,6 +43,14 @@ public class BasicVec3I implements Vec3I {
 
     @Override
     public boolean equals(Object obj) {
+        if(this == obj) {
+            return true;
+        }
+
+        if(obj == null) {
+            return false;
+        }
+
         if(obj instanceof Vec3I other) {
             return Vec3I.equals(x, y, z, other.getX(), other.getY(), other.getZ());
         }
@@ -54,9 +60,9 @@ public class BasicVec3I implements Vec3I {
 
     @Override
     public int hashCode() {
-        int result = PRIME + x;
-        result = PRIME * result + y;
-        return PRIME * result + z;
+        int result = 31 + x;
+        result = 31 * result + y;
+        return 31 * result + z;
     }
 
     @Override
