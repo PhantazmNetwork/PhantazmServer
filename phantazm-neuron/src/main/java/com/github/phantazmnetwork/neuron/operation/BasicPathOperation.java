@@ -74,7 +74,7 @@ public class BasicPathOperation implements PathOperation {
 
             //check if we reached our destination yet
             Vec3I currentPos = current.getPosition();
-            if(successPredicate.test(currentPos.getX(), currentPos.getY(), currentPos.getZ())) {
+            if(successPredicate.testVector(currentPos.getX(), currentPos.getY(), currentPos.getZ())) {
                 //success state, path was found
                 complete(State.SUCCEEDED);
                 return;

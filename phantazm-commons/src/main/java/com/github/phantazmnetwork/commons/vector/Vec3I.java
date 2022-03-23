@@ -64,10 +64,10 @@ public interface Vec3I {
      * @param z2 second z-component
      * @return the squared distance between the point {@code first} and the point {@code second}
      */
-    static double squaredDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
-        double dX = x1 - x2;
-        double dY = y1 - y2;
-        double dZ = z1 - z2;
+    static int squaredDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
+        int dX = x1 - x2;
+        int dY = y1 - y2;
+        int dZ = z1 - z2;
         return dX * dX + dY * dY + dZ * dZ;
     }
 
@@ -82,7 +82,7 @@ public interface Vec3I {
      * @param z2 second z-component
      * @return the Manhattan distance between the point {@code first} and the point {@code second}
      */
-    static double manhattanDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
+    static int manhattanDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
         return Math.abs(x1 - x2) + Math.abs(y1 - y2) + Math.abs(z1 - z2);
     }
 
