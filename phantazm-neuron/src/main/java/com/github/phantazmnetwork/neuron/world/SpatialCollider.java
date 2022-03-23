@@ -23,26 +23,6 @@ public class SpatialCollider implements Collider {
     @Override
     public double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                         double dY, double dZ) {
-        return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getPosition().getY() + solid
-                .originY() + solid.vectorY(), (a, b) -> a > b, Double.NEGATIVE_INFINITY);
-    }
-
-    @Override
-    public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
-                                       double dY, double dZ) {
-        return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getPosition().getY() + solid
-                .originY(), (a, b) -> a < b, Double.POSITIVE_INFINITY);
-    }
-
-    @Override
-    public double heightAt(int x, int y, int z) {
-        Solid solid = space.solidAt(x, y, z);
-        return solid == null ? y : y + solid.originY() + solid.vectorY();
-    }
-
-    private double collidesMovingAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
-                                       double dY, double dZ, ToDoubleFunction<Solid> valueFunction,
-                                       DoubleBiPredicate valuePredicate, double initialValue) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
         double eoX = oX;
@@ -55,7 +35,7 @@ public class SpatialCollider implements Collider {
         same sign as d
 
         we do this because it preserves the directional information of d in the final expanded bounding box. this
-        information is critical to ensure performant iteration of
+        information is critical to ensure performant iteration of solidsOverlapping
          */
         double svX = Math.copySign(vX, dX);
         double svY = Math.copySign(vY, dY);
@@ -81,10 +61,9 @@ public class SpatialCollider implements Collider {
         }
 
         Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ).iterator();
-        double best = initialValue;
+        double best = Double.NEGATIVE_INFINITY;
         if(overlapping.hasNext()) {
             //make sure widths are positive
-            //TODO: this may not be necessary? testing needed
             double xW = Math.abs(vX);
             double yW = Math.abs(vY);
             double zW = Math.abs(vZ);
@@ -122,9 +101,9 @@ public class SpatialCollider implements Collider {
                     if(checkAxis(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) && checkAxis(adjustedXY, dX, dY, minX,
                             minY, maxX, maxY) && checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY)) {
                         //collision found
-                        double value = valueFunction.applyAsDouble(candidate);
-                        if(valuePredicate.test(value, best)) {
-                            best = value;
+                        double collisionY = coY + cvY;
+                        if(collisionY > best) {
+                            best = collisionY;
                         }
                     }
                 }
@@ -133,6 +112,23 @@ public class SpatialCollider implements Collider {
         }
 
         return best;
+
+        //return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getPosition().getY() + solid
+        //        .originY() + solid.vectorY(), (a, b) -> a > b, Double.NEGATIVE_INFINITY);
+    }
+
+    @Override
+    public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
+                                       double dY, double dZ) {
+        return 0;
+        //return collidesMovingAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, solid -> solid.getPosition().getY() + solid
+        //        .originY(), (a, b) -> a < b, Double.POSITIVE_INFINITY);
+    }
+
+    @Override
+    public double heightAt(int x, int y, int z) {
+        Solid solid = space.solidAt(x, y, z);
+        return solid == null ? y : y + solid.originY() + solid.vectorY();
     }
 
     /*
