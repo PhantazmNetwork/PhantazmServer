@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.api.game.scene.RouteResult;
 import com.github.phantazmnetwork.api.game.scene.Scene;
 import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.player.PlayerView;
+import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -53,11 +54,11 @@ public class Lobby implements Scene<LobbyJoinRequest> {
             return new RouteResult(false, Optional.of(Component.text("Lobby is not joinable.")));
         }
 
-        Collection<PlayerView> joiners = new ArrayList<>();
+        Collection<Pair<PlayerView, Player>> joiners = new ArrayList<>();
         for (PlayerView playerView : joinRequest.players()) {
             playerView.getPlayer().ifPresent(player -> {
                 if (player.getInstance() != instance) {
-                    joiners.add(playerView);
+                    joiners.add(Pair.of(playerView, player));
                 }
             });
         }
@@ -67,13 +68,11 @@ public class Lobby implements Scene<LobbyJoinRequest> {
                     Optional.of(Component.text("Everybody is already in the lobby.")));
         }
 
-        for (PlayerView playerView : joiners) {
-            playerView.getPlayer().ifPresent(player -> {
-                player.setInstance(instance, instanceConfig.spawnPoint());
-                player.setGameMode(GameMode.ADVENTURE);
-            });
+        for (Pair<PlayerView, Player> player : joiners) {
+            player.second().setInstance(instance, instanceConfig.spawnPoint());
+            player.second().setGameMode(GameMode.ADVENTURE);
 
-            players.put(playerView.getUUID(), playerView);
+            players.put(player.first().getUUID(), player.first());
         }
 
         return new RouteResult(true, Optional.empty());

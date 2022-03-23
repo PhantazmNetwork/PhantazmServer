@@ -21,8 +21,12 @@ public record SceneKey<TScene extends Scene<?>>(@NotNull String key) {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         SceneKey<?> that = (SceneKey<?>) o;
         return key.equals(that.key);

@@ -58,12 +58,12 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
         Iterator<TScene> iterator = scenes.iterator();
 
         while (iterator.hasNext()) {
-            TScene scenes = iterator.next();
+            TScene scene = iterator.next();
 
-            if (scenes.isShutdown()) {
+            if (scene.isShutdown()) {
                 iterator.remove();
             } else {
-                scenes.tick();
+                scene.tick();
             }
         }
     }

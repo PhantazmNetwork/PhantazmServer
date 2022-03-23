@@ -17,7 +17,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
 
     private final Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders;
 
-    private final Map<UUID, Lobby> lobbyMap = new HashMap<>();
+    private final Map<UUID, Lobby> playerLobbyMap = new HashMap<>();
 
     private final Map<UUID, PlayerView> unmodifiablePlayers = new AbstractMap<>() {
 
@@ -27,7 +27,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
                 return false;
             }
 
-            return lobbyMap.containsKey(uuid);
+            return playerLobbyMap.containsKey(uuid);
         }
 
         @Override
@@ -36,14 +36,19 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
                 return null;
             }
 
-            return lobbyMap.get(uuid).getPlayers().get(uuid);
+            Lobby lobby = playerLobbyMap.get(uuid);
+            if (lobby == null) {
+                return null;
+            }
+
+            return lobby.getPlayers().get(uuid);
         }
 
         @NotNull
         @Override
         public Set<Entry<UUID, PlayerView>> entrySet() {
             Set<Entry<UUID, PlayerView>> entrySet = new HashSet<>();
-            for (Lobby lobby : lobbyMap.values()) {
+            for (Lobby lobby : playerLobbyMap.values()) {
                 entrySet.addAll(lobby.getPlayers().entrySet());
             }
 
@@ -87,7 +92,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
             RouteResult result = lobby.join(joinRequest);
             if (result.success()) {
                 for (PlayerView playerView : routeRequest.players()) {
-                    lobbyMap.put(playerView.getUUID(), lobby);
+                    playerLobbyMap.put(playerView.getUUID(), lobby);
                 }
             }
 
@@ -100,14 +105,14 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID uuid : leavers) {
-            if (!lobbyMap.containsKey(uuid)) {
+            if (!playerLobbyMap.containsKey(uuid)) {
                 return new RouteResult(false,
                         Optional.of(Component.text(uuid + " is not part of a scene in the lobby router.")));
             }
         }
 
         for (UUID uuid : leavers) {
-            lobbyMap.get(uuid).leave(Collections.singletonList(uuid));
+            playerLobbyMap.get(uuid).leave(Collections.singletonList(uuid));
         }
 
         return new RouteResult(true, Optional.empty());
@@ -150,7 +155,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
         for (SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider : lobbyProviders.values()) {
             lobbyProvider.forceShutdown();
         }
-        lobbyMap.clear();
+        playerLobbyMap.clear();
 
         shutdown = true;
     }

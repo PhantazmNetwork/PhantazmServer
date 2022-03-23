@@ -56,7 +56,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 float pitch = spawnPoint.getNumberOrThrow("pitch").floatValue();
                 InstanceConfig instanceConfig = new InstanceConfig(new Pos(x, y, z, yaw, pitch));
 
-                ConfigList lobbyPathsList = lobby.getValue().getListOrThrow( "lobbyPaths");
+                ConfigList lobbyPathsList = lobby.getValue().getListOrThrow("lobbyPaths");
                 List<String> lobbyPaths = new ArrayList<>(lobbyPathsList.size());
                 for (int i = 0; i < lobbyPathsList.size(); i++) {
                     lobbyPaths.add(lobbyPathsList.getStringOrThrow(i));

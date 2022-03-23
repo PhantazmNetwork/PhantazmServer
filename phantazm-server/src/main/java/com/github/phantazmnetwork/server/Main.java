@@ -150,19 +150,17 @@ public class Main {
         SceneFallback regularFallback = new CompositeFallback(List.of(lobbyFallback, finalFallback));
 
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
-            if (lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
-                continue;
+            if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
+                lobbyProviders.put(lobby.getKey(), new BasicLobbyProvider(
+                        lobby.getValue().maxPlayers(),
+                        lobby.getValue().maxLobbies(),
+                        instanceManager,
+                        instanceLoader,
+                        lobby.getValue().lobbyPaths(),
+                        regularFallback,
+                        lobby.getValue().instanceConfig()
+                ));
             }
-
-            lobbyProviders.put(lobby.getKey(), new BasicLobbyProvider(
-                    lobby.getValue().maxPlayers(),
-                    lobby.getValue().maxLobbies(),
-                    instanceManager,
-                    instanceLoader,
-                    lobby.getValue().lobbyPaths(),
-                    regularFallback,
-                    lobby.getValue().instanceConfig()
-            ));
         }
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {

@@ -5,7 +5,7 @@ import com.github.phantazmnetwork.api.game.scene.lobby.LobbyRouter;
 /**
  * A static class container for reusable {@link SceneKey}s.
  */
-public class SceneKeys {
+public final class SceneKeys {
 
     /**
      * Lobbies
@@ -13,7 +13,7 @@ public class SceneKeys {
     public static final SceneKey<LobbyRouter> LOBBY_ROUTER = new SceneKey<>("lobby_dispatcher");
 
     private SceneKeys() {
-
+        throw new UnsupportedOperationException();
     }
 
 }
