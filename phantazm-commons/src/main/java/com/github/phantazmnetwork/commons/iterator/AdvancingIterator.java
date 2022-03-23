@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  * {@code advance()} that tries to compute the next value as well as reporting if said computation was successful.</p>
  *
  * <p>This class does not serve as a general replacement or improvement upon the design pattern typically used for
- * iterators. Notably, it violates the generally-accepted "rule" that {@code hasNext} should be idempotent. However, it
+ * iterators. Notably, it violates the generally-accepted "rule" that {@code hasNext} should be stateless. However, it
  * can be very useful in instances which the logic for determining <i>if</i> an element exists and the logic for
  * actually <i>retrieving</i> that element are both similar and equally expensive (for example, if return values are
  * being calculated on the fly, and there is no efficient way to determine beforehand that said calculation will or will
