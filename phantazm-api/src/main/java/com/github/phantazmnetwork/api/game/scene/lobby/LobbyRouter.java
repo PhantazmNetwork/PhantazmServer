@@ -8,12 +8,7 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * {@link Scene} router for {@link Lobby}s.
@@ -24,9 +19,38 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
 
     private final Map<UUID, Lobby> lobbyMap = new HashMap<>();
 
-    private final Map<UUID, PlayerView> players = new HashMap<>();
+    private final Map<UUID, PlayerView> unmodifiablePlayers = new AbstractMap<>() {
 
-    private final Map<UUID, PlayerView> unmodifiablePlayers = Collections.unmodifiableMap(players);
+        @Override
+        public boolean containsKey(Object key) {
+            if (!(key instanceof UUID uuid)) {
+                return false;
+            }
+
+            return lobbyMap.containsKey(uuid);
+        }
+
+        @Override
+        public PlayerView get(Object key) {
+            if (!(key instanceof UUID uuid)) {
+                return null;
+            }
+
+            return lobbyMap.get(uuid).getPlayers().get(uuid);
+        }
+
+        @NotNull
+        @Override
+        public Set<Entry<UUID, PlayerView>> entrySet() {
+            Set<Entry<UUID, PlayerView>> entrySet = new HashSet<>();
+            for (Lobby lobby : lobbyMap.values()) {
+                entrySet.addAll(lobby.getPlayers().entrySet());
+            }
+
+            return Collections.unmodifiableSet(entrySet);
+        }
+
+    };
 
     private boolean shutdown = false;
 
@@ -64,7 +88,6 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
             if (result.success()) {
                 for (PlayerView playerView : routeRequest.players()) {
                     lobbyMap.put(playerView.getUUID(), lobby);
-                    players.put(playerView.getUUID(), playerView);
                 }
             }
 
@@ -85,7 +108,6 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
 
         for (UUID uuid : leavers) {
             lobbyMap.get(uuid).leave(Collections.singletonList(uuid));
-            players.remove(uuid);
         }
 
         return new RouteResult(true, Optional.empty());
@@ -129,7 +151,6 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
             lobbyProvider.forceShutdown();
         }
         lobbyMap.clear();
-        players.clear();
 
         shutdown = true;
     }

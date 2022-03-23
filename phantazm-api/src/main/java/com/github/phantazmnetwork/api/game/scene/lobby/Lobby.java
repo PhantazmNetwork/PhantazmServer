@@ -11,12 +11,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents a lobby. Most basic scene which contains {@link Player}s.
@@ -58,12 +53,24 @@ public class Lobby implements Scene<LobbyJoinRequest> {
             return new RouteResult(false, Optional.of(Component.text("Lobby is not joinable.")));
         }
 
+        Collection<PlayerView> joiners = new ArrayList<>();
         for (PlayerView playerView : joinRequest.players()) {
             playerView.getPlayer().ifPresent(player -> {
                 if (player.getInstance() != instance) {
-                    player.setInstance(instance, instanceConfig.spawnPoint());
-                    player.setGameMode(GameMode.ADVENTURE);
+                    joiners.add(playerView);
                 }
+            });
+        }
+
+        if (joiners.isEmpty()) {
+            return new RouteResult(false,
+                    Optional.of(Component.text("Everybody is already in the lobby.")));
+        }
+
+        for (PlayerView playerView : joiners) {
+            playerView.getPlayer().ifPresent(player -> {
+                player.setInstance(instance, instanceConfig.spawnPoint());
+                player.setGameMode(GameMode.ADVENTURE);
             });
 
             players.put(playerView.getUUID(), playerView);
@@ -74,11 +81,17 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+        boolean anyInside = false;
         for (UUID uuid : leavers) {
-            if (!players.containsKey(uuid)) {
-                return new RouteResult(false,
-                        Optional.of(Component.text(uuid + " is not in the lobby.")));
+            if (players.containsKey(uuid)) {
+                anyInside = true;
+                break;
             }
+        }
+
+        if (!anyInside) {
+            return new RouteResult(false,
+                    Optional.of(Component.text("None of the players are in the lobby.")));
         }
 
         for (UUID uuid : leavers) {

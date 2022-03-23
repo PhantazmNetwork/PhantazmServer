@@ -5,9 +5,9 @@ import com.github.phantazmnetwork.api.game.scene.fallback.CompositeFallback;
 import com.github.phantazmnetwork.api.game.scene.fallback.KickFallback;
 import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.game.scene.lobby.*;
-import com.github.phantazmnetwork.api.game.scene.router.BasicSceneRouterStore;
-import com.github.phantazmnetwork.api.game.scene.router.SceneRouterKeys;
-import com.github.phantazmnetwork.api.game.scene.router.SceneRouterStore;
+import com.github.phantazmnetwork.api.game.scene.BasicSceneStore;
+import com.github.phantazmnetwork.api.game.scene.SceneKeys;
+import com.github.phantazmnetwork.api.game.scene.SceneStore;
 import com.github.phantazmnetwork.api.instance.FileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.api.player.BasicPlayerView;
@@ -113,7 +113,7 @@ public class Main {
     }
 
     private static void initializeLobbies(LobbiesConfig lobbiesConfig) {
-        SceneRouterStore routerStore = new BasicSceneRouterStore();
+        SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         InstanceLoader instanceLoader = new FileSystemInstanceLoader(lobbiesConfig.instancesPath(), AnvilLoader::new);
@@ -122,7 +122,7 @@ public class Main {
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders
                 = new HashMap<>(lobbiesConfig.lobbies().size());
         LobbyRouter lobbyRouter = new LobbyRouter(lobbyProviders);
-        routerStore.addSceneRouter(SceneRouterKeys.LOBBY_ROUTER, lobbyRouter);
+        sceneStore.addScene(SceneKeys.LOBBY_ROUTER, lobbyRouter);
 
         LobbyConfig mainLobbyConfig = lobbiesConfig.lobbies().get(lobbiesConfig.mainLobbyName());
         if (mainLobbyConfig == null) {

@@ -5,13 +5,14 @@ import com.github.phantazmnetwork.api.game.scene.lobby.Lobby;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * Config for a single {@link Lobby}.
  */
 public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
-                          @NotNull String[] lobbyPaths,
+                          @NotNull List<String> lobbyPaths,
                           int maxPlayers,
                           int maxLobbies) {
 

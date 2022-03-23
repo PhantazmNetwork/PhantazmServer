@@ -8,6 +8,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -19,7 +21,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
     private final InstanceLoader instanceLoader;
 
-    private final String[] lobbyPaths;
+    private final List<String> lobbyPaths;
 
     private final SceneFallback fallback;
 
@@ -37,20 +39,20 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
      * @param instanceConfig The {@link InstanceConfig} for the {@link Lobby}s
      */
     public BasicLobbyProvider(int newLobbyThreshold, int maximumLobbies, @NotNull InstanceManager instanceManager,
-                              @NotNull InstanceLoader instanceLoader, @NotNull String[] lobbyPaths,
+                              @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths,
                               @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig) {
         super(newLobbyThreshold, maximumLobbies);
 
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
-        this.lobbyPaths = Objects.requireNonNull(lobbyPaths, "lobbyPaths");
+        this.lobbyPaths = Collections.unmodifiableList(Objects.requireNonNull(lobbyPaths, "lobbyPaths"));
         this.fallback = Objects.requireNonNull(fallback, "fallback");
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
     }
 
     @Override
     protected @NotNull Lobby createScene(@NotNull LobbyJoinRequest request) {
-        Instance instance = instanceLoader.loadInstance(instanceManager, lobbyPaths.clone());
+        Instance instance = instanceLoader.loadInstance(instanceManager, lobbyPaths);
         return new Lobby(instance, instanceConfig, fallback);
     }
 

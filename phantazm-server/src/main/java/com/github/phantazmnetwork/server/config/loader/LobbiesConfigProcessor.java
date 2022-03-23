@@ -57,9 +57,9 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 InstanceConfig instanceConfig = new InstanceConfig(new Pos(x, y, z, yaw, pitch));
 
                 ConfigList lobbyPathsList = lobby.getValue().getListOrThrow( "lobbyPaths");
-                String[] lobbyPaths = new String[lobbyPathsList.size()];
+                List<String> lobbyPaths = new ArrayList<>(lobbyPathsList.size());
                 for (int i = 0; i < lobbyPathsList.size(); i++) {
-                    lobbyPaths[i] = lobbyPathsList.getStringOrThrow(i);
+                    lobbyPaths.add(lobbyPathsList.getStringOrThrow(i));
                 }
 
                 int maxPlayers = lobby.getValue().getNumberOrThrow("maxPlayers").intValue();
@@ -92,7 +92,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             ConfigNode instanceConfigNode = new LinkedConfigNode();
             instanceConfigNode.put("spawnPoint", spawnPointNode);
 
-            Collection<ConfigElement> lobbyPathsList = new ArrayList<>(lobby.getValue().lobbyPaths().length);
+            Collection<ConfigElement> lobbyPathsList = new ArrayList<>(lobby.getValue().lobbyPaths().size());
             for (String subPath : lobby.getValue().lobbyPaths()) {
                 lobbyPathsList.add(new ConfigPrimitive(subPath));
             }

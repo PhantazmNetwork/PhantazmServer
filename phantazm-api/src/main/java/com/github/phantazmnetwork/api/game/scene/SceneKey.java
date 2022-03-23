@@ -1,22 +1,21 @@
-package com.github.phantazmnetwork.api.game.scene.router;
+package com.github.phantazmnetwork.api.game.scene;
 
-import com.github.phantazmnetwork.api.game.scene.Scene;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 /**
- * A key for {@link Scene} routers.
- * @param <TRouter> The type of the associated {@link Scene} router
+ * A key used to identify unique {@link Scene}.
+ * @param <TScene> The type of the associated {@link Scene}
  */
 @SuppressWarnings("unused")
-public record SceneRouterKey<TRouter extends Scene<?>>(@NotNull String key) {
+public record SceneKey<TScene extends Scene<?>>(@NotNull String key) {
 
     /**
-     * Creates a {@link Scene} router key.
+     * Creates a {@link Scene} key.
      * @param key The {@link String} representation of the key
      */
-    public SceneRouterKey {
+    public SceneKey {
         Objects.requireNonNull(key, "key");
     }
 
@@ -25,7 +24,7 @@ public record SceneRouterKey<TRouter extends Scene<?>>(@NotNull String key) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SceneRouterKey<?> that = (SceneRouterKey<?>) o;
+        SceneKey<?> that = (SceneKey<?>) o;
         return key.equals(that.key);
     }
 
