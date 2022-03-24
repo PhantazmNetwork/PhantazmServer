@@ -41,6 +41,9 @@ public class SpatialCollider implements Collider {
 
         we do this because it preserves the directional information of d in the final expanded bounding box. this
         information is critical to ensure performant iteration of solidsOverlapping
+
+        (incidentally, this fast, branchless directional expansion algorithm is why origin-vector form is used for
+        Collider impls)
          */
         double svX = Math.copySign(vX, dX);
         double svY = Math.copySign(vY, dY);
@@ -65,6 +68,7 @@ public class SpatialCollider implements Collider {
             eoZ -= svZ;
         }
 
+        //y-last iteration to ensure we can implement some fast-exit strategies
         Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
                 .iterator();
         double best = initialBest;
@@ -74,6 +78,7 @@ public class SpatialCollider implements Collider {
             double yW = Math.abs(vY);
             double zW = Math.abs(vZ);
 
+            //used as inputs to checkAxis calls
             double adjustedYZ = (Math.max(yW, zW) * (Math.abs(dY) + Math.abs(dZ))) / 2;
             double adjustedXZ = (Math.max(xW, zW) * (Math.abs(dX) + Math.abs(dZ))) / 2;
             double adjustedXY = (Math.max(xW, yW) * (Math.abs(dX) + Math.abs(dY))) / 2;
@@ -99,6 +104,7 @@ public class SpatialCollider implements Collider {
 
                 //only check solids not overlapping with the original bounds
                 if(!overlaps(oX, oY, oZ, vX, vY, vZ, cMinX, cMinY, cMinZ, cMaxX, cMaxY, cMaxZ)) {
+                    //TODO: test if accounting for double imprecision here is necessary
                     double minX = cMinX - centerX;
                     double minY = cMinY - centerY;
                     double minZ = cMinZ - centerZ;
@@ -141,10 +147,12 @@ public class SpatialCollider implements Collider {
                                     }
                                 }
 
+                                //no more solids to check, so return early
                                 if(Math.abs(evY - eoY) < VectorConstants.EPSILON) {
                                     return value;
                                 }
 
+                                //TODO: properly shrink bounding box to account for double imprecision before calling
                                 overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
                                         .iterator();
                             }

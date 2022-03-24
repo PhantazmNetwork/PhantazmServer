@@ -21,20 +21,21 @@ public abstract class VoxelSpace implements Space {
         int yEnd = Math.abs((int) Math.floor(oY + vY));
         int zEnd = Math.abs((int) Math.floor(oZ + vZ));
 
-        final int firstOrg;
-        final int secondOrg;
-        final int thirdOrg;
+        int firstOrg;
+        int secondOrg;
+        int thirdOrg;
 
-        final int firstInc;
-        final int secondInc;
-        final int thirdInc;
+        int firstInc;
+        int secondInc;
+        int thirdInc;
 
-        final int firstEnd;
-        final int secondEnd;
-        final int thirdEnd;
+        int firstEnd;
+        int secondEnd;
+        int thirdEnd;
 
-        final Vec3IFunction<Solid> solidGetter;
+        Vec3IFunction<Solid> solidGetter;
 
+        //TODO: switch cases here are triggering the duplication warning, find a way to deduplicate if possible (?)
         switch (order) {
             case XYZ -> {
                 firstOrg = xOrg;
