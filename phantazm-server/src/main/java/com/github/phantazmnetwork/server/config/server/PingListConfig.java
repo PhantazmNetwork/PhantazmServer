@@ -7,18 +7,17 @@ import java.util.Objects;
 
 /**
  * Config for the server's ping list.
- * @param description The MOTD set in the server list
  */
 public record PingListConfig(@NotNull Component description) {
     /**
-     * The default description string.
+     * The default description.
      */
-    public static final String DEFAULT_DESCRIPTION_STRING = "A Minecraft Server";
+    public static final Component DEFAULT_DESCRIPTION = Component.text("A Minecraft Server");
 
     /**
      * The default PingListConfig instance.
      */
-    public static final PingListConfig DEFAULT = new PingListConfig(Component.text(DEFAULT_DESCRIPTION_STRING));
+    public static final PingListConfig DEFAULT = new PingListConfig(DEFAULT_DESCRIPTION);
 
     /**
      * Creates config for the server's ping list.

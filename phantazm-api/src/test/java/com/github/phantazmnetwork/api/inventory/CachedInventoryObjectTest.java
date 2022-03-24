@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 public class CachedInventoryObjectTest {
 
     @Test
@@ -36,7 +38,7 @@ public class CachedInventoryObjectTest {
 
         inventoryObject.setDirty();
 
-        Assertions.assertSame(itemStack2, inventoryObject.getItemStack());
+        assertSame(itemStack2, inventoryObject.getItemStack());
     }
 
 }

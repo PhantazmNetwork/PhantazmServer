@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class InventoryObjectGroupTest {
 
     private @NotNull InventoryObjectGroup createGroup(@NotNull InventoryProfile profile, @NotNull IntSet slots) {
@@ -35,7 +38,7 @@ public class InventoryObjectGroupTest {
         InventoryProfile profile = new BasicInventoryProfile(slots.size());
         InventoryObjectGroup group = createGroup(profile, slots);
 
-        Assertions.assertTrue(group.isEmpty());
+        assertTrue(group.isEmpty());
     }
 
     @Test
@@ -47,7 +50,7 @@ public class InventoryObjectGroupTest {
 
         profile.setInventoryObject(0, new BasicInventoryObject(stack));
 
-        Assertions.assertFalse(group.isEmpty());
+        assertFalse(group.isEmpty());
     }
 
 }
