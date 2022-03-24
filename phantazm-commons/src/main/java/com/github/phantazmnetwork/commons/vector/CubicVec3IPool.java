@@ -7,7 +7,8 @@ import org.jetbrains.annotations.Nullable;
  * initialized. Initialized vectors are instances of {@link BasicVec3I}.</p>
  *
  * <p>Since an array is initialized with capacity sufficient to hold all possible values for any given width, it is
- * important to avoid allocating a very large pool, as there will be a significant portion of wasted memory.</p>
+ * important to avoid allocating a very large pool, as there will be a significant portion of wasted memory in many
+ * cases.</p>
  * @see BasicVec3I
  */
 class CubicVec3IPool implements Vec3IPool {

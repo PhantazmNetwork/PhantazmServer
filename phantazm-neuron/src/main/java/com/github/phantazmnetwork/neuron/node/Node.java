@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.neuron.node;
 
-import com.github.phantazmnetwork.commons.vector.BasicVec3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -148,7 +147,7 @@ public class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Gets the current heap index.
-     * @return the current heap index, or -1 if this node is not part of any {@link NodeQueue}
+     * @return the current heap index, or a negative value if this node is not part of any {@link NodeQueue}
      */
     public int getHeapIndex() {
         return heapIndex;

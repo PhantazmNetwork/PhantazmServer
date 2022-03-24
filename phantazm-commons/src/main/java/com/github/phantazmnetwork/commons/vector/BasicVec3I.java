@@ -4,23 +4,23 @@ package com.github.phantazmnetwork.commons.vector;
  * <p>Standard implementation of Vec3I. Provides a suitable implementation of {@link Object#equals(Object)} and
  * {@link Object#hashCode()}, so these may be safely used as keys for maps and stored in sets.</p>
  *
- * <p>Classes that need to maintain a single, immutable integer 3D vector should extend this one.</p>
+ * <p>This class cannot be inherited. It is not part of the public API. Instances can be obtained through the static
+ * factory method {@link Vec3I#of(int, int, int)}.</p>
  */
 @SuppressWarnings("ClassCanBeRecord")
-public final class BasicVec3I implements Vec3I {
+final class BasicVec3I implements Vec3I {
     private final int x;
     private final int y;
     private final int z;
 
     /**
-     * Creates a new BasicVec3I from the provided integers. This constructor is public, but it's generally
-     * preferable to use {@link Vec3I#of(int, int, int)} to create Vec3I instances because the latter may make use of
-     * a constant pool.
+     * Creates a new BasicVec3I from the provided integers. It's generally preferable to use
+     * {@link Vec3I#of(int, int, int)} to create Vec3I instances because the latter may make use of a constant pool.
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
      */
-    public BasicVec3I(int x, int y, int z) {
+    BasicVec3I(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;

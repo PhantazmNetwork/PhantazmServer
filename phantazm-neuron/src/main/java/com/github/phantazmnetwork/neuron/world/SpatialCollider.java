@@ -3,11 +3,13 @@ package com.github.phantazmnetwork.neuron.world;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.commons.vector.VectorConstants;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.DoubleFunction;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 @SuppressWarnings("ClassCanBeRecord")
@@ -24,8 +26,8 @@ public class SpatialCollider implements Collider {
     }
 
     private double collisionCheck(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
-                                  double dY, double dZ, double initialBest, double bestPossible,
-                                  ToDoubleFunction<Solid> valueFunction, DoubleBiPredicate betterThan) {
+                                  double dY, double dZ, double initialBest, ToDoubleFunction<Solid> valueFunction,
+                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer, boolean findingHighest) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
         double eoX = oX;
@@ -63,9 +65,9 @@ public class SpatialCollider implements Collider {
             eoZ -= svZ;
         }
 
-        Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ).iterator();
+        Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
+                .iterator();
         double best = initialBest;
-
         if(overlapping.hasNext()) {
             //make sure widths are positive
             double xW = Math.abs(vX);
@@ -82,6 +84,7 @@ public class SpatialCollider implements Collider {
 
             do {
                 Solid candidate = overlapping.next();
+
                 Vec3I candidatePos = candidate.getPosition();
                 Vec3F candidateMin = candidate.getMin();
                 Vec3F candidateMax = candidate.getMax();
@@ -110,9 +113,40 @@ public class SpatialCollider implements Collider {
 
                         //collision found
                         if(betterThan.test(value, best)) {
-                            //shortcut: we cannot possibly find a better collision
-                            if(betterThan.test(value, bestPossible)) {
-                                return value;
+                            //we have found the highest/lowest possible solid this layer, therefore, for efficiency,
+                            //perform another directional expansion
+                            if(bestThisLayer.test(candidate)) {
+                                //we expanded down
+                                if(evY < 0) {
+                                    //we're trying to find the highest
+                                    if(findingHighest) {
+                                        evY = value - eoY;
+                                    }
+                                    //we're finding the lowest
+                                    else {
+                                        double diff = eoY - value; //positive
+                                        eoY = value;
+                                        evY += diff;
+                                    }
+                                }
+                                //we expanded up
+                                else {
+                                    if(findingHighest) {
+                                        double diff = value - eoY;
+                                        eoY = value;
+                                        evY -= diff;
+                                    }
+                                    else {
+                                        evY = value - eoY;
+                                    }
+                                }
+
+                                if(Math.abs(evY - eoY) < VectorConstants.EPSILON) {
+                                    return value;
+                                }
+
+                                overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
+                                        .iterator();
                             }
 
                             best = value;
@@ -129,14 +163,17 @@ public class SpatialCollider implements Collider {
     @Override
     public double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                         double dY, double dZ) {
-        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.NEGATIVE_INFINITY, Math.max(oY, oY + vY),
-                solid -> solid.getPosition().getY() + solid.getMax().getY(), (value, best) -> value > best);
+        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.NEGATIVE_INFINITY,
+                solid -> solid.getPosition().getY() + solid.getMax().getY(), (value, best) -> value > best, solid ->
+                        solid.getMax().getY() == 1.0F, true);
     }
 
     @Override
     public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                        double dY, double dZ) {
-        return 0;
+        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.POSITIVE_INFINITY,
+                solid -> solid.getPosition().getY() + solid.getMin().getY(), (value, best) -> value < best, solid ->
+                        solid.getMin().getY() == 0.0F, false);
     }
 
     @Override

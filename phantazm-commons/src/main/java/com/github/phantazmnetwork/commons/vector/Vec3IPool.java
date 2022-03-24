@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.commons.vector;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * <p>Represents a <i>constant pool</i> of Vec3I instances. This is conceptually similar to the constant pools
+ * <p>Represents a <i>constant pool</i> of {@link Vec3I} instances. This is conceptually similar to the constant pools
  * maintained by the JVM for strings and certain boxed primitives.</p>
  *
  * <p>This interface is only used internally and is not part of the public API.</p>

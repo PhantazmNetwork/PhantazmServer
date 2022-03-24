@@ -2,11 +2,13 @@ package com.github.phantazmnetwork.commons.vector;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
  * A {@link Predicate} operating on three integer values.
  */
+@FunctionalInterface
 public interface Vec3IPredicate extends Predicate<Vec3I> {
     /**
      * Tests this predicate with the provided 3D integer vector.
@@ -18,11 +20,8 @@ public interface Vec3IPredicate extends Predicate<Vec3I> {
     boolean testVector(int x, int y, int z);
 
     @Override
-    default boolean test(Vec3I vec3I) {
-        if(vec3I == null) {
-            return false;
-        }
-
+    default boolean test(@NotNull Vec3I vec3I) {
+        Objects.requireNonNull(vec3I, "vec3I");
         return testVector(vec3I.getX(), vec3I.getY(), vec3I.getZ());
     }
 }
