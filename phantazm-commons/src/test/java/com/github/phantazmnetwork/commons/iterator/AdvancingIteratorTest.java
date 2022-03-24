@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.commons.iterator;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AdvancingIteratorTest {
     @Test
     void nextFailsNoAdvance() {
-        AdvancingIterator<String> iterator = new AdvancingIterator<>() {
+        Iterator<String> iterator = new AdvancingIterator<>() {
             @Override
             public boolean advance() {
                 return false;
@@ -22,7 +23,7 @@ class AdvancingIteratorTest {
 
     @Test
     void nextSucceedsThenFails() {
-        AdvancingIterator<String> iterator = new AdvancingIterator<>() {
+        Iterator<String> iterator = new AdvancingIterator<>() {
             int state = 0;
 
             @Override

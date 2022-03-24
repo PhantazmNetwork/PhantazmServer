@@ -127,7 +127,7 @@ public abstract class VoxelSpace implements Space {
 
                 solidGetter = (f, s, t) -> solidAt(f, t, s);
             }
-            default -> throw new IllegalStateException("Invalid Solid.Order value " + order);
+            default -> throw new IllegalStateException("Invalid Space.Order value " + order);
         }
 
         return () -> new AdvancingIterator<>() {

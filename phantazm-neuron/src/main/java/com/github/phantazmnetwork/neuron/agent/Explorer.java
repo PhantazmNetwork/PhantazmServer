@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Responsible for determining which nodes may be traversed by an {@link Agent}.
  */
+@FunctionalInterface
 public interface Explorer {
     /**
      * Produces an {@link Iterable} over {@link Vec3I} instances which may be added to {@code current} to produce new

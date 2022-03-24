@@ -45,7 +45,7 @@ import java.util.Objects;
  * @see NodeQueue
  * @see Vec3I
  */
-public class Node implements Comparable<Node>, Iterable<Node> {
+public final class Node implements Comparable<Node>, Iterable<Node> {
     private final Vec3I position;
 
     private float g;
@@ -206,6 +206,14 @@ public class Node implements Comparable<Node>, Iterable<Node> {
 
     @Override
     public boolean equals(Object obj) {
+        if(this == obj) {
+            return true;
+        }
+
+        if(obj == null) {
+            return false;
+        }
+
         if(obj instanceof Node other) {
             return position.equals(other.position) && g == other.g && h == other.h;
         }
