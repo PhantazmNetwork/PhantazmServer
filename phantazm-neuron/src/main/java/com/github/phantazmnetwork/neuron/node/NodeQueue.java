@@ -107,7 +107,7 @@ public class NodeQueue implements PriorityQueue<Node> {
 
     @Override
     public Comparator<? super Node> comparator() {
-        return NodeHeaps.NODE_SCORE_COMPARATOR;
+        return null;
     }
 
     @Override

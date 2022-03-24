@@ -21,7 +21,7 @@ public class BasicPathOperation implements PathOperation {
     private final Calculator calculator;
     private final Explorer explorer;
     private final NodeQueue openSet;
-    private final Map<Node, Node> graph;
+    private final Map<Vec3I, Node> graph;
 
     private State state;
     private Node current;
@@ -45,7 +45,7 @@ public class BasicPathOperation implements PathOperation {
 
         //add the first node
         openSet.enqueue(initial);
-        graph.put(initial, initial);
+        graph.put(start, initial);
     }
 
     private void complete(State state) {
@@ -91,13 +91,9 @@ public class BasicPathOperation implements PathOperation {
                 previously-existing value. for the purposes of all maps (even comparator-based ones using Node's natural
                 ordering), node objects are safe for use as keys because comparison-changing values are final
                  */
-                Node neighbor = graph.computeIfAbsent(new Node(Vec3I.of(x, y, z), Float.POSITIVE_INFINITY,
-                        Float.POSITIVE_INFINITY, current), key -> {
-                    Vec3I keyPos = key.getPosition();
-                    key.setH(calculator.heuristic(keyPos.getX(), keyPos.getY(), keyPos.getZ(), destination.getX(),
-                            destination.getY(), destination.getZ()));
-                    return key;
-                });
+                Node neighbor = graph.computeIfAbsent(Vec3I.of(x, y, z), key -> new Node(key, Float.POSITIVE_INFINITY,
+                        calculator.heuristic(key.getX(), key.getY(), key.getZ(), destination.getX(), destination.getY(),
+                                destination.getZ()), current));
 
                 Vec3I neighborPos = neighbor.getPosition();
                 //tentative g-score, we have to check if we've actually got a better score than our previous path

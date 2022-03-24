@@ -10,25 +10,9 @@ import it.unimi.dsi.fastutil.objects.ObjectHeaps;
  */
 public final class NodeHeaps {
     /**
-     * The comparator used to order the heap in {@link NodeHeaps#downHeap(Node[], int, int)} and
-     * {@link NodeHeaps#upHeap(Node[], int)}. Nodes are compared first by {@code f}-score, and then by their natural
-     * ordering. This comparator imposes an ordering that is inconsistent with equals.
-     * @see Node
-     */
-    public static final Comparator<Node> NODE_SCORE_COMPARATOR = (first, second) -> {
-        int fCompare = Float.compare(first.getF(), second.getF());
-        if(fCompare == 0) {
-            //use natural ordering as tiebreak: should never return 0 during actual pathfinding
-            return first.compareTo(second);
-        }
-
-        return fCompare;
-    };
-
-    /**
      * Method based on {@link ObjectHeaps#downHeap(Object[], int, int, Comparator)}, but specialized for {@link Node}
      * objects. This will ensure that the heap index of all moved nodes is updated to match its position in the actual
-     * array. Nodes are always compared using {@link NodeHeaps#NODE_SCORE_COMPARATOR}.
+     * array.
      * @param heap the min-heap of nodes
      * @param size the size of the heap
      * @param i the index of the node to potentially move down
@@ -39,11 +23,11 @@ public final class NodeHeaps {
         while ((child = (i << 1) + 1) < size) {
             Node childNode = heap[child];
             int right = child + 1;
-            if (right < size && (NODE_SCORE_COMPARATOR.compare(heap[right], childNode) < 0)) {
+            if (right < size && (heap[right].compareTo(childNode) < 0)) {
                 childNode = heap[child = right];
             }
 
-            if (NODE_SCORE_COMPARATOR.compare(first, childNode) <= 0) {
+            if (first.compareTo(childNode) <= 0) {
                 break;
             }
 
@@ -58,7 +42,7 @@ public final class NodeHeaps {
     /**
      * Method based on {@link ObjectHeaps#upHeap(Object[], int, int, Comparator)}, but specialized for {@link Node}
      * objects. This will ensure that the heap index of all moved nodes is updated to match its position in the actual
-     * array. Nodes are always compared using {@link NodeHeaps#NODE_SCORE_COMPARATOR}.
+     * array.
      * @param heap the min-heap of nodes
      * @param i the index of the node to potentially move up
      * @return the final index of the node which was moved
@@ -66,15 +50,15 @@ public final class NodeHeaps {
     public static int upHeap(Node[] heap, int i) {
         Node e = heap[i];
         while (i != 0) {
-            int parent = (i - 1) >>> 1;
-            Node t = heap[parent];
-            if (NODE_SCORE_COMPARATOR.compare(t, e) <= 0) {
+            int parentIndex = (i - 1) >>> 1;
+            Node parentNode = heap[parentIndex];
+            if (parentNode.compareTo(e) <= 0) {
                 break;
             }
 
-            heap[i] = t;
-            t.setHeapIndex(i);
-            i = parent;
+            heap[i] = parentNode;
+            parentNode.setHeapIndex(i);
+            i = parentIndex;
         }
 
         heap[i] = e;

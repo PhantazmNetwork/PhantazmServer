@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * of their components is equal. This allows for different Vec3I implementations to be compared against each other, and
  * ensures consistency with static methods like {@link Vec3I#equals(int, int, int, int, int, int)}.</p>
  */
-public interface Vec3I {
+public interface Vec3I extends Comparable<Vec3I> {
     /**
      * The x-component of this vector.
      * @return the x-component

@@ -23,8 +23,8 @@ import java.util.Objects;
  * node iteration.</p>
  *
  * <p>Node implements {@link Comparable}, with a natural ordering that is consistent with equals. Nodes are compared
- * first by x value, then y, then z. This allows nodes to be used as a key in comparison-based maps, and doing so is
- * "safe" in that nodes are only compared by their immutable attributes.</p>
+ * first by sum of {@code g} and {@code h} values, then by x value, then y, then z. Caution should be exercised when
+ * using Node objects as keys to maps.</p>
  *
  * <p>Although the position of the node cannot change throughout its lifespan, its parent, along with {@code g} and
  * {@code h} values, can and indeed are expected to be changed many times throughout path calculation.</p>
@@ -46,26 +46,6 @@ import java.util.Objects;
  * @see Vec3I
  */
 public class Node implements Comparable<Node>, Iterable<Node> {
-    private class NodeIterator implements Iterator<Node> {
-        private Node current = Node.this;
-
-        @Override
-        public boolean hasNext() {
-            return this.current != null;
-        }
-
-        @Override
-        public Node next() {
-            Node current = this.current;
-            if(current == null) {
-                throw new NoSuchElementException();
-            }
-
-            this.current = current.parent;
-            return current;
-        }
-    }
-
     private final Vec3I position;
 
     private float g;
@@ -210,17 +190,13 @@ public class Node implements Comparable<Node>, Iterable<Node> {
 
     @Override
     public int compareTo(@NotNull Node other) {
-        int xCompare = Integer.compare(position.getX(), other.position.getX());
-        if(xCompare == 0) {
-            int yCompare = Integer.compare(position.getY(), other.position.getY());
-            if(yCompare == 0) {
-                return Integer.compare(position.getZ(), other.position.getZ());
-            }
-
-            return yCompare;
+        int fCompare = Float.compare(getF(), other.getF());
+        if(fCompare == 0) {
+            //use natural ordering as tiebreak: should never return 0 during actual pathfinding
+            return position.compareTo(other.position);
         }
 
-        return xCompare;
+        return fCompare;
     }
 
     @Override
@@ -231,7 +207,7 @@ public class Node implements Comparable<Node>, Iterable<Node> {
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof Node other) {
-            return position.equals(other.position);
+            return position.equals(other.position) && g == other.g && h == other.h;
         }
 
         return false;
@@ -244,6 +220,24 @@ public class Node implements Comparable<Node>, Iterable<Node> {
 
     @Override
     public @NotNull Iterator<Node> iterator() {
-        return new NodeIterator();
+        return new Iterator<>() {
+            private Node current = Node.this;
+
+            @Override
+            public boolean hasNext() {
+                return this.current != null;
+            }
+
+            @Override
+            public Node next() {
+                Node current = this.current;
+                if(current == null) {
+                    throw new NoSuchElementException();
+                }
+
+                this.current = current.parent;
+                return current;
+            }
+        };
     }
 }

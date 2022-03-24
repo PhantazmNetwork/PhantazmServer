@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.commons.vector;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * <p>Standard implementation of Vec3I. Provides a suitable implementation of {@link Object#equals(Object)} and
  * {@link Object#hashCode()}, so these may be safely used as keys for maps and stored in sets.</p>
@@ -8,7 +10,7 @@ package com.github.phantazmnetwork.commons.vector;
  * factory method {@link Vec3I#of(int, int, int)}.</p>
  */
 @SuppressWarnings("ClassCanBeRecord")
-final class BasicVec3I implements Vec3I {
+final class BasicVec3I implements Vec3I, Comparable<Vec3I> {
     private final int x;
     private final int y;
     private final int z;
@@ -68,5 +70,20 @@ final class BasicVec3I implements Vec3I {
     @Override
     public String toString() {
         return "Vec3I{x=" + x + ", y=" + y + ", z=" + z + "}";
+    }
+
+    @Override
+    public int compareTo(@NotNull Vec3I o) {
+        int xCompare = Integer.compare(x, o.getX());
+        if(xCompare == 0) {
+            int yCompare = Integer.compare(y, o.getY());
+            if(yCompare == 0) {
+                return Integer.compare(z, o.getZ());
+            }
+
+            return yCompare;
+        }
+
+        return xCompare;
     }
 }
