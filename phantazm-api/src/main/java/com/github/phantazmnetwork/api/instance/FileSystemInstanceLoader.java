@@ -4,8 +4,10 @@ import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -21,7 +23,7 @@ public class FileSystemInstanceLoader implements InstanceLoader {
 
     /**
      * Creates an {@link InstanceLoader} based on a file system.
-     * @param rootPath The {@link Path} of the world directory
+     * @param rootPath The {@link Path} of the {@link Instance} directory
      * @param loaderCreator A creator for {@link Instance}s
      */
     public FileSystemInstanceLoader(@NotNull Path rootPath, @NotNull Function<Path, IChunkLoader> loaderCreator) {
@@ -31,7 +33,8 @@ public class FileSystemInstanceLoader implements InstanceLoader {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @NotNull Instance loadWorld(@NotNull InstanceManager instanceManager, @NotNull String... subPaths) {
+    public @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager,
+                                          @UnmodifiableView @NotNull List<String> subPaths) {
         Path path = rootPath;
         for (String subPath : subPaths) {
             path = path.resolve(subPath);

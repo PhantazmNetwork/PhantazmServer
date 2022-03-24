@@ -4,6 +4,9 @@ import net.kyori.adventure.key.Key;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
 public class InventoryProfileSwitcherTest {
 
     private final Key firstKey = Key.key("phantazm", "ade229bf");
@@ -17,7 +20,7 @@ public class InventoryProfileSwitcherTest {
 
         inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile);
 
-        Assertions.assertThrowsExactly(IllegalArgumentException.class, () ->
+        assertThrowsExactly(IllegalArgumentException.class, () ->
                 inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile));
     }
 
@@ -29,7 +32,7 @@ public class InventoryProfileSwitcherTest {
 
         inventoryProfileSwitcher.switchProfile(firstKey);
 
-        Assertions.assertSame(inventoryProfile, inventoryProfileSwitcher.getCurrentProfile());
+        assertSame(inventoryProfile, inventoryProfileSwitcher.getCurrentProfile());
     }
 
     @Test
@@ -43,7 +46,7 @@ public class InventoryProfileSwitcherTest {
         inventoryProfileSwitcher.switchProfile(firstKey);
         inventoryProfileSwitcher.switchProfile(secondKey);
 
-        Assertions.assertSame(secondInventoryProfile, inventoryProfileSwitcher.getCurrentProfile());
+        assertSame(secondInventoryProfile, inventoryProfileSwitcher.getCurrentProfile());
     }
 
     @Test
@@ -54,9 +57,9 @@ public class InventoryProfileSwitcherTest {
 
         inventoryProfileSwitcher.switchProfile(firstKey);
 
-        Assertions.assertThrowsExactly(IllegalArgumentException.class, () ->
+        assertThrowsExactly(IllegalArgumentException.class, () ->
                 inventoryProfileSwitcher.switchProfile(secondKey));
-        Assertions.assertSame(inventoryProfile, inventoryProfileSwitcher.getCurrentProfile());
+        assertSame(inventoryProfile, inventoryProfileSwitcher.getCurrentProfile());
     }
 
 }

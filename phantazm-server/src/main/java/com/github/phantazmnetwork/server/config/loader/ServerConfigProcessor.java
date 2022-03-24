@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * Config processor used for {@link ServerConfig}s.
+ * {@link ConfigProcessor} used for {@link ServerConfig}s.
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
@@ -38,28 +38,23 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         ConfigNode serverInfo = element.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
 
-        String serverAddress = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_SERVER_ADDRESS, "serverIP");
-
-        int port = serverInfo.getNumberOrDefault(ServerInfoConfig.DEFAULT_PORT, "port").intValue();
-        if(port < 0  || port > 65535) {
+        String serverAddress = serverInfo.getStringOrThrow("serverIP");
+        int port = serverInfo.getNumberOrThrow("port").intValue();
+        if (port < 0  || port > 65535) {
             throw new ConfigProcessException("Invalid port: " + port + ", must be in range [0, 65535]");
         }
 
-        boolean optifineEnabled = serverInfo.getBooleanOrDefault(ServerInfoConfig.DEFAULT_OPTIFINE_ENABLED,
-                "optifineEnabled");
-
-        AuthType authType = AuthType.getByName(serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_AUTH_TYPE.name(),
-                "authType").toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid " +
-                "AuthType, must be one of the following: " + Arrays.toString(AuthType.values())));
-        String velocitySecret = serverInfo.getStringOrDefault(ServerInfoConfig.DEFAULT_VELOCITY_SECRET,
-                "velocitySecret");
+        boolean optifineEnabled = serverInfo.getBooleanOrThrow("optifineEnabled");
+        AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType")
+                .toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid AuthType, " +
+                "must be one of the following: " + Arrays.toString(AuthType.values())));
+        String velocitySecret = serverInfo.getStringOrThrow("velocitySecret");
 
         ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverAddress, port, optifineEnabled, authType,
                 velocitySecret);
 
-        ConfigNode pingList = element.getNodeOrDefault(LinkedConfigNode::new, "pingList");
-        Component description = miniMessage.parse(pingList.getStringOrDefault(PingListConfig.DEFAULT_DESCRIPTION_STRING,
-                "description"));
+        ConfigNode pingList = element.getNodeOrThrow("pingList");
+        Component description = miniMessage.parse(pingList.getStringOrThrow("description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
         return new ServerConfig(serverInfoConfig, pingListConfig);
