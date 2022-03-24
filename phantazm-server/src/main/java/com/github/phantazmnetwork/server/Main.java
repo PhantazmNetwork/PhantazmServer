@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.api.game.scene.lobby.*;
 import com.github.phantazmnetwork.api.game.scene.BasicSceneStore;
 import com.github.phantazmnetwork.api.game.scene.SceneKeys;
 import com.github.phantazmnetwork.api.game.scene.SceneStore;
+import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.FileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.api.player.BasicPlayerView;
@@ -116,7 +117,7 @@ public class Main {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
-        InstanceLoader instanceLoader = new FileSystemInstanceLoader(lobbiesConfig.instancesPath(), AnvilLoader::new);
+        InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath());
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders
