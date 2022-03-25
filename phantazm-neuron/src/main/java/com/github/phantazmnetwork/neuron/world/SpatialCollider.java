@@ -90,6 +90,8 @@ public class SpatialCollider implements Collider {
             int startX = (int) Math.floor(oX);
             int startZ = (int) Math.floor(oZ);
 
+            int endY = (int) Math.floor(eoY + evY);
+
             do {
                 Solid candidate = overlapping.next();
 
@@ -124,7 +126,12 @@ public class SpatialCollider implements Collider {
                         if(betterThan.test(value, best)) {
                             //we have found the highest/lowest possible solid this layer
                             if(bestThisLayer.test(candidate)) {
-                                overlapping.setPointer(startX, (int) Math.floor(value), startZ);
+                                int newY = (int) Math.floor(value);
+                                if(newY == endY) {
+                                    return value;
+                                }
+
+                                overlapping.setPointer(startX, startZ, newY);
                             }
 
                             best = value;
@@ -149,9 +156,8 @@ public class SpatialCollider implements Collider {
     @Override
     public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                        double dY, double dZ) {
-        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.POSITIVE_INFINITY,
-                solid -> solid.getPosition().getY() + solid.getMin().getY(), (value, best) -> value < best, solid ->
-                        solid.getMin().getY() == 0.0F);
+        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.POSITIVE_INFINITY, solid -> solid.getPosition()
+                .getY() + solid.getMin().getY(), (value, best) -> value < best, solid -> solid.getMin().getY() == 0.0F);
     }
 
     @Override
