@@ -46,9 +46,11 @@ public final class BasicVec3D implements Vec3D {
 
     @Override
     public int hashCode() {
-        double result = 131 + x;
-        result = 131 * result + y;
-        return (int)(131 * result + z);
+        int hash = 7;
+        hash = 79 * hash + (int) (Double.doubleToLongBits(x) ^ (Double.doubleToLongBits(x) >>> 32));
+        hash = 79 * hash + (int) (Double.doubleToLongBits(y) ^ (Double.doubleToLongBits(y) >>> 32));
+        hash = 79 * hash + (int) (Double.doubleToLongBits(z) ^ (Double.doubleToLongBits(z) >>> 32));
+        return hash;
     }
 
     @Override

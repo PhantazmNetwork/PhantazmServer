@@ -62,9 +62,10 @@ final class BasicVec3I implements Vec3I, Comparable<Vec3I> {
 
     @Override
     public int hashCode() {
-        int result = 31 + x;
-        result = 31 * result + y;
-        return 31 * result + z;
+        int result = 7;
+        result = 79 * result + x;
+        result = 79 * result + y;
+        return 79 * result + z;
     }
 
     @Override
