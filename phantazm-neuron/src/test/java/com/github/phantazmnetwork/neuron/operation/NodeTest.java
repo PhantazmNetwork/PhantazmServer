@@ -32,8 +32,6 @@ class NodeTest {
 
         assertTrue(x.compareTo(z) > 0);
         assertTrue(z.compareTo(x) < 0);
-
-        assertEquals(new Node(Vec3I.of(1, 0, 0), 69, 69, z), x);
     }
 
     @Test

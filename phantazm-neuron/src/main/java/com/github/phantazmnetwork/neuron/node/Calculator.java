@@ -54,10 +54,22 @@ public interface Calculator {
      */
     float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ);
 
+    /**
+     * Convenience overload for {@link Calculator#heuristic(int, int, int, int, int, int)}.
+     * @param from the first vector
+     * @param to the second vector
+     * @return the heuristic value
+     */
     default float heuristic(@NotNull Vec3I from, @NotNull Vec3I to) {
         return heuristic(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
     }
 
+    /**
+     * Convenience overload for {@link Calculator#distance(int, int, int, int, int, int)}.
+     * @param from the first vector
+     * @param to the second vector
+     * @return the distance value
+     */
     default float distance(@NotNull Vec3I from, @NotNull Vec3I to) {
         return distance(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
     }

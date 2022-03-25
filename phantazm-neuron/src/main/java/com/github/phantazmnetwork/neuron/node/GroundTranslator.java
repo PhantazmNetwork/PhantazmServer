@@ -11,15 +11,21 @@ import java.util.Objects;
 @SuppressWarnings("ClassCanBeRecord")
 public class GroundTranslator implements NodeTranslator {
     private final Collider collider;
+    private final EnvironmentCache cache;
     private final GroundAgent agent;
 
-    public GroundTranslator(@NotNull Collider collider, @NotNull GroundAgent agent) {
+    public GroundTranslator(@NotNull Collider collider, @NotNull EnvironmentCache cache, @NotNull GroundAgent agent) {
         this.collider = Objects.requireNonNull(collider, "collider");
+        this.cache = Objects.requireNonNull(cache, "cache");
         this.agent = Objects.requireNonNull(agent, "agent");
     }
 
     @Override
     public @Nullable Vec3I translate(int x, int y, int z, int dX, int dY, int dZ) {
+        if(cache.isCached(agent, x, y, z, dX, dY, dZ)) {
+            return cache.forAgent(agent, x, y, z, dX, dY, dZ);
+        }
+
         //center of block at (x, y, z)
         double cX = x + 0.5;
         double cY = collider.heightAt(x, y, z);
@@ -49,7 +55,7 @@ public class GroundTranslator implements NodeTranslator {
                 float fall = agent.getFallTolerance();
                 highestY = collider.highestCollisionAlong(oX, oY, oZ, width, height, width, 0, -fall, 0);
                 if(highestY != Double.NEGATIVE_INFINITY) {
-                    return Vec3I.of(dX, (int)Math.floor(highestY), dZ);
+                    return Vec3I.of(dX, (int) Math.floor(highestY), dZ);
                 }
             }
             else if(jump > 0F) { //we should try to perform a jump, assuming we even can
@@ -61,7 +67,7 @@ public class GroundTranslator implements NodeTranslator {
 
                     highestY = collider.highestCollisionAlong(oX, oY, oZ, width, height, width, dX, dY, dZ);
                     if(highestY == Double.NEGATIVE_INFINITY) { //gap found
-                        return Vec3I.of(dX, (int)Math.floor(oY), dZ);
+                        return Vec3I.of(dX, (int) Math.floor(oY), dZ);
                     }
                 }
             }

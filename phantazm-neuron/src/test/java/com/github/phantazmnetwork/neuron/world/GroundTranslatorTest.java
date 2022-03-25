@@ -2,9 +2,11 @@ package com.github.phantazmnetwork.neuron.world;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundAgent;
+import com.github.phantazmnetwork.neuron.node.EnvironmentCache;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.Collections;
@@ -37,6 +39,9 @@ class GroundTranslatorTest {
             return arg.doubleValue();
         });
 
+        EnvironmentCache mockCache = mock(EnvironmentCache.class);
+        when(mockCache.isCached(any(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(false);
+
         OngoingStubbing<Double> highest = when(mockCollider.highestCollisionAlong(anyDouble(), anyDouble(), anyDouble(),
                 anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble()));
         for(Double collision : highestCollisions) {
@@ -51,7 +56,7 @@ class GroundTranslatorTest {
         }
         lowest.thenReturn(Double.POSITIVE_INFINITY);
 
-        return new GroundTranslator(mockCollider, mockAgent);
+        return new GroundTranslator(mockCollider, mockCache, mockAgent);
     }
 
     @Nested
