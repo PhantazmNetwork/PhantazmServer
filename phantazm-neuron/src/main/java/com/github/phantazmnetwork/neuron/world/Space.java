@@ -59,8 +59,8 @@ public interface Space {
 
         @FunctionalInterface
         interface IterationVariablesSupplier {
-            @NotNull IterationVariables make(int xOrg, int yOrg, int zOrg, int xInc, int yInc,
-                                             int zInc, int xEnd, int yEnd, int zEnd);
+            @NotNull IterationVariables make(int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd,
+                                             int yEnd, int zEnd);
         }
 
         record IterationVariables(int getFirstOrigin, int getSecondOrigin, int getThirdOrigin, int getFirstIncrement,
@@ -75,7 +75,7 @@ public interface Space {
             this.variablesSupplier = variablesSupplier;
         }
 
-        @NotNull SpaceAccessor getAccessor() {
+        @NotNull SpaceAccessor getSpaceAccessor() {
             return accessor;
         }
 
@@ -86,6 +86,6 @@ public interface Space {
 
     @Nullable Solid solidAt(int x, int y, int z);
 
-    @NotNull Iterable<? extends Solid> solidsOverlapping(double oX, double oY, double oZ, double vX, double vY,
+    @NotNull SolidIterable solidsOverlapping(double oX, double oY, double oZ, double vX, double vY,
                                                          double vZ, @NotNull Order order);
 }

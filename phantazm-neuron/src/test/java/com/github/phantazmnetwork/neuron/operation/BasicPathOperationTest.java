@@ -41,8 +41,8 @@ class BasicPathOperationTest {
         when(mockAgent.hasStartPosition()).thenReturn(true);
         when(mockAgent.getStartPosition()).thenReturn(startPosition);
 
-        return new BasicPathOperation(startPosition, destination, (x, y, z) -> Vec3I.equals(x, y, z, destination.getX(),
-                destination.getY(), destination.getZ()), calculator, mockExplorer);
+        return new BasicPathOperation(startPosition, destination, (vec) -> vec.equals(destination), calculator,
+                mockExplorer);
     }
 
     private static void assertPathMatches(Vec3I[] expectedPath, PathOperation.State expectedCompletionState,

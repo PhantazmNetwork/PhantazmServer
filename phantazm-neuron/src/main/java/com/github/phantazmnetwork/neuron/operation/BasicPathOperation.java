@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * An A* based {@link PathOperation} implementation. It will only be completed when the destination is found or all
@@ -17,7 +18,7 @@ import java.util.*;
  */
 public class BasicPathOperation implements PathOperation {
     private final Vec3I destination;
-    private final Vec3IPredicate successPredicate;
+    private final Predicate<Vec3I> successPredicate;
     private final Calculator calculator;
     private final Explorer explorer;
     private final NodeQueue openSet;
@@ -29,7 +30,7 @@ public class BasicPathOperation implements PathOperation {
     private PathResult result;
 
     public BasicPathOperation(@NotNull Vec3I start, @NotNull Vec3I destination,
-                              @NotNull Vec3IPredicate successPredicate, @NotNull Calculator calculator,
+                              @NotNull Predicate<Vec3I> successPredicate, @NotNull Calculator calculator,
                               @NotNull Explorer explorer) {
         this.destination = Objects.requireNonNull(destination, "destination");
         this.successPredicate = Objects.requireNonNull(successPredicate, "successPredicate");
@@ -40,8 +41,7 @@ public class BasicPathOperation implements PathOperation {
         this.graph = new Object2ObjectRBTreeMap<>();
         this.state = State.IN_PROGRESS;
 
-        Node initial = new Node(start, 0, calculator.heuristic(start.getX(), start.getY(), start.getZ(), destination
-                .getX(), destination.getY(), destination.getZ()), null);
+        Node initial = new Node(start, 0, calculator.heuristic(start, destination), null);
 
         //add the first node
         openSet.enqueue(initial);
@@ -74,7 +74,7 @@ public class BasicPathOperation implements PathOperation {
 
             //check if we reached our destination yet
             Vec3I currentPos = current.getPosition();
-            if(successPredicate.testVector(currentPos.getX(), currentPos.getY(), currentPos.getZ())) {
+            if(successPredicate.test(currentPos)) {
                 //success state, path was found
                 complete(State.SUCCEEDED);
                 return;
@@ -92,13 +92,11 @@ public class BasicPathOperation implements PathOperation {
                 ordering), node objects are safe for use as keys because comparison-changing values are final
                  */
                 Node neighbor = graph.computeIfAbsent(Vec3I.of(x, y, z), key -> new Node(key, Float.POSITIVE_INFINITY,
-                        calculator.heuristic(key.getX(), key.getY(), key.getZ(), destination.getX(), destination.getY(),
-                                destination.getZ()), current));
+                        calculator.heuristic(key, destination), current));
 
                 Vec3I neighborPos = neighbor.getPosition();
                 //tentative g-score, we have to check if we've actually got a better score than our previous path
-                float g = current.getG() + calculator.distance(currentPos.getX(), currentPos.getY(), currentPos.getZ(),
-                        neighborPos.getX(), neighborPos.getY(), neighborPos.getZ());
+                float g = current.getG() + calculator.distance(currentPos, neighborPos);
 
                 //for brand-new nodes, neighbor.getG() is equal to Float.POSITIVE_INFINITY, so this will run for sure
                 //if however neighbor.getG() is less optimal, we will not explore the node

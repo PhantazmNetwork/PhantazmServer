@@ -21,7 +21,6 @@ public interface Vec3IPredicate extends Predicate<Vec3I> {
 
     @Override
     default boolean test(@NotNull Vec3I vec3I) {
-        Objects.requireNonNull(vec3I, "vec3I");
         return testVector(vec3I.getX(), vec3I.getY(), vec3I.getZ());
     }
 }

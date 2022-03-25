@@ -1,5 +1,8 @@
 package com.github.phantazmnetwork.neuron.world;
 
+import com.github.phantazmnetwork.commons.vector.Vec3I;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * <p>Responsible for performing basic collision checks. Most methods operate on axis-aligned bounding boxes (two double
  * triplets representing a rectangular region in 3D space).</p>
@@ -61,4 +64,8 @@ public interface Collider {
      * @return the y-coordinate of the highest face, or y if no collisions exists here
      */
     double heightAt(int x, int y, int z);
+
+    default double heightAt(@NotNull Vec3I vec3I) {
+        return heightAt(vec3I.getX(), vec3I.getY(), vec3I.getZ());
+    }
 }

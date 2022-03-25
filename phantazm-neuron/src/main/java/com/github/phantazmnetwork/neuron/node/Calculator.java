@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>Represents a class capable of computing the <i>heuristic</i> and <i>distance</i> values for a given step. The
@@ -52,6 +53,14 @@ public interface Calculator {
      * @return the distance value
      */
     float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ);
+
+    default float heuristic(@NotNull Vec3I from, @NotNull Vec3I to) {
+        return heuristic(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
+    }
+
+    default float distance(@NotNull Vec3I from, @NotNull Vec3I to) {
+        return distance(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
+    }
 
     /**
      * A simple Calculator implementation whose heuristic and distance functions just return the squared distance

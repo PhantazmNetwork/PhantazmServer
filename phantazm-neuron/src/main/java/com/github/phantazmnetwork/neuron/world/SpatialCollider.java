@@ -27,7 +27,7 @@ public class SpatialCollider implements Collider {
 
     private double collisionCheck(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                   double dY, double dZ, double initialBest, ToDoubleFunction<Solid> valueFunction,
-                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer, boolean findingHighest) {
+                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
         double eoX = oX;
@@ -69,8 +69,8 @@ public class SpatialCollider implements Collider {
         }
 
         //y-last iteration to ensure we can implement some fast-exit strategies
-        Iterator<? extends Solid> overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
-                .iterator();
+        SolidIterator overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
+                .solidIterator();
         double best = initialBest;
         if(overlapping.hasNext()) {
             //make sure widths are positive
@@ -86,6 +86,9 @@ public class SpatialCollider implements Collider {
             double centerX = oX + (xW / 2);
             double centerY = oY + (yW / 2);
             double centerZ = oZ + (zW / 2);
+
+            int startX = (int) Math.floor(oX);
+            int startZ = (int) Math.floor(oZ);
 
             do {
                 Solid candidate = overlapping.next();
@@ -119,42 +122,9 @@ public class SpatialCollider implements Collider {
 
                         //collision found
                         if(betterThan.test(value, best)) {
-                            //we have found the highest/lowest possible solid this layer, therefore, for efficiency,
-                            //perform another directional expansion
+                            //we have found the highest/lowest possible solid this layer
                             if(bestThisLayer.test(candidate)) {
-                                //we expanded down
-                                if(evY < 0) {
-                                    //we're trying to find the highest
-                                    if(findingHighest) {
-                                        evY = value - eoY;
-                                    }
-                                    //we're finding the lowest
-                                    else {
-                                        double diff = eoY - value; //positive
-                                        eoY = value;
-                                        evY += diff;
-                                    }
-                                }
-                                //we expanded up
-                                else {
-                                    if(findingHighest) {
-                                        double diff = value - eoY;
-                                        eoY = value;
-                                        evY -= diff;
-                                    }
-                                    else {
-                                        evY = value - eoY;
-                                    }
-                                }
-
-                                //no more solids to check, so return early
-                                if(Math.abs(evY - eoY) < VectorConstants.EPSILON) {
-                                    return value;
-                                }
-
-                                //TODO: properly shrink bounding box to account for double imprecision before calling
-                                overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
-                                        .iterator();
+                                overlapping.setPointer(startX, (int) Math.floor(value), startZ);
                             }
 
                             best = value;
@@ -173,7 +143,7 @@ public class SpatialCollider implements Collider {
                                         double dY, double dZ) {
         return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.NEGATIVE_INFINITY,
                 solid -> solid.getPosition().getY() + solid.getMax().getY(), (value, best) -> value > best, solid ->
-                        solid.getMax().getY() == 1.0F, true);
+                        solid.getMax().getY() == 1.0F);
     }
 
     @Override
@@ -181,7 +151,7 @@ public class SpatialCollider implements Collider {
                                        double dY, double dZ) {
         return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.POSITIVE_INFINITY,
                 solid -> solid.getPosition().getY() + solid.getMin().getY(), (value, best) -> value < best, solid ->
-                        solid.getMin().getY() == 0.0F, false);
+                        solid.getMin().getY() == 0.0F);
     }
 
     @Override
