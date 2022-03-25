@@ -75,7 +75,7 @@ public class GroundTranslator implements NodeTranslator {
             }
         }
 
-        cache.offer(agent, x, y, z, dX, dY, dZ);
+        cache.offer(agent, x, y, z, dX, dY, dZ, result);
         return result;
     }
 }

@@ -10,5 +10,5 @@ public interface EnvironmentCache {
 
     boolean isCached(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
 
-    void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
+    void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ, @Nullable Vec3I result);
 }
