@@ -9,4 +9,6 @@ public interface EnvironmentCache {
     @Nullable Vec3I forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
 
     boolean isCached(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
+
+    void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
 }

@@ -46,6 +46,7 @@ public class GroundTranslator implements NodeTranslator {
         double highestJumpY = cY + jump;
 
         //check to make sure we can make the first jump, if not we'll just return null
+        Vec3I result = null;
         if(highestY <= highestJumpY) {
             if(highestY == Double.NEGATIVE_INFINITY) { //NEGATIVE_INFINITY means no collision was found
                 oX += dX;
@@ -55,7 +56,7 @@ public class GroundTranslator implements NodeTranslator {
                 float fall = agent.getFallTolerance();
                 highestY = collider.highestCollisionAlong(oX, oY, oZ, width, height, width, 0, -fall, 0);
                 if(highestY != Double.NEGATIVE_INFINITY) {
-                    return Vec3I.of(dX, (int) Math.floor(highestY), dZ);
+                    result = Vec3I.of(dX, (int) Math.floor(highestY), dZ);
                 }
             }
             else if(jump > 0F) { //we should try to perform a jump, assuming we even can
@@ -67,12 +68,14 @@ public class GroundTranslator implements NodeTranslator {
 
                     highestY = collider.highestCollisionAlong(oX, oY, oZ, width, height, width, dX, dY, dZ);
                     if(highestY == Double.NEGATIVE_INFINITY) { //gap found
-                        return Vec3I.of(dX, (int) Math.floor(oY), dZ);
+                        result = Vec3I.of(dX, (int) Math.floor(oY), dZ);
+                        break;
                     }
                 }
             }
         }
 
-        return null;
+        cache.offer(agent, x, y, z, dX, dY, dZ);
+        return result;
     }
 }
