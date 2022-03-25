@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 
@@ -29,4 +30,9 @@ public interface NodeTranslator {
      * @return the adjusted delta vector, or null if it's not possible to move this direction
      */
     @Nullable Vec3I translate(int x, int y, int z, int deltaX, int deltaY, int deltaZ);
+
+    default @Nullable Vec3I translate(@NotNull Vec3I nodePosition, @NotNull Vec3I delta) {
+        return translate(nodePosition.getX(), nodePosition.getY(), nodePosition.getZ(), delta.getX(), delta.getY(),
+                delta.getZ());
+    }
 }

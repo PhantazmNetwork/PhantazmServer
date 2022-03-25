@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A basic PathResult implementation, representing a completed (successful or failed) path.
  */
+//TODO: make this, and some similarly simple data containers, records?
 @SuppressWarnings("ClassCanBeRecord")
 public class BasicResult implements PathResult {
     private final Node path;

@@ -37,7 +37,6 @@ class CubicVec3IPool implements Vec3IPool {
         this.cache = new Vec3I[cacheWidth * cacheWidth * cacheWidth];
         this.halfCacheWidth = cacheWidth >> 1;
 
-        //fast way to compute log base 2 of power of 2
         this.shiftY = Integer.numberOfTrailingZeros(cacheWidth);
         this.shiftZ = shiftY << 1;
     }

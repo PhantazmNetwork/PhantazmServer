@@ -217,7 +217,7 @@ public class SpatialCollider implements Collider {
     First: (z * dirX) - (x * dirZ) < w
     Second: (z * dirX) - (x * dirZ) > -w
 
-    the function follows the truth table shown below. a question mark denotes "don't cares"
+    the function follows the truth table shown below. a question mark denotes "don't care"
 
     minInFirst   |   minInSecond   |   maxInFirst   |   maxInSecond   |   collides
     0                1                 0                ?                 0
