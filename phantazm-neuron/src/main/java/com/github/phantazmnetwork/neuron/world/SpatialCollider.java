@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.DoubleFunction;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
@@ -27,7 +28,7 @@ public class SpatialCollider implements Collider {
 
     private double collisionCheck(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                   double dY, double dZ, double initialBest, ToDoubleFunction<Solid> valueFunction,
-                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer, int shift) {
+                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
         double eoX = oX;
@@ -87,10 +88,8 @@ public class SpatialCollider implements Collider {
             double centerY = oY + (yW / 2);
             double centerZ = oZ + (zW / 2);
 
-            int startX = (int) Math.floor(oX);
-            int startZ = (int) Math.floor(oZ);
-
-            int endY = (int) Math.floor(eoY + evY) + shift;
+            Space.Order.IterationVariables variables = overlapping.getVariables();
+            int yEnd = variables.getThirdEnd() - variables.getThirdIncrement();
 
             do {
                 Solid candidate = overlapping.next();
@@ -126,12 +125,12 @@ public class SpatialCollider implements Collider {
                         if(betterThan.test(value, best)) {
                             //we have found the highest/lowest possible solid this layer
                             if(bestThisLayer.test(candidate)) {
-                                int newY = ((int) Math.floor(value)) + shift;
-                                if(newY == endY) {
+                                int newY = (int) Math.floor(value);
+                                if(newY == yEnd) {
                                     return value;
                                 }
 
-                                overlapping.setPointer(startX, startZ, newY);
+                                overlapping.setPointer(variables.getFirstOrigin(), variables.getThirdOrigin(), newY);
                             }
 
                             best = value;
@@ -149,16 +148,14 @@ public class SpatialCollider implements Collider {
     public double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                         double dY, double dZ) {
         return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.NEGATIVE_INFINITY, solid -> solid.getPosition()
-                .getY() + solid.getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F,
-                1);
+                .getY() + solid.getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F);
     }
 
     @Override
     public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                        double dY, double dZ) {
         return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.POSITIVE_INFINITY, solid -> solid.getPosition()
-                .getY() + solid.getMin().getY(), (value, best) -> value < best, solid -> solid.getMin().getY() == 0.0F,
-                -1);
+                .getY() + solid.getMin().getY(), (value, best) -> value < best, solid -> solid.getMin().getY() == 0.0F);
     }
 
     @Override

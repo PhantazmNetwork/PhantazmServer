@@ -43,9 +43,14 @@ public abstract class VoxelSpace implements Space {
 
         @Override
         public void setPointer(int first, int second, int third) {
-            this.first = first + variables.getFirstIncrement();
+            this.first = first - variables.getFirstIncrement();
             this.second = second;
             this.third = third;
+        }
+
+        @Override
+        public @NotNull Order.IterationVariables getVariables() {
+            return variables;
         }
     }
 

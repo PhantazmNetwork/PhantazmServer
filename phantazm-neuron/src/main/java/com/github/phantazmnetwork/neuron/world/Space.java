@@ -53,19 +53,19 @@ public interface Space {
                 new IterationVariables(xOrg, zOrg, yOrg, xInc, zInc, yInc, xEnd, zEnd, yEnd));
 
         @FunctionalInterface
-        interface SpaceAccessor {
+        public interface SpaceAccessor {
             @Nullable Solid getSolid(int x, int y, int z, Space space);
         }
 
         @FunctionalInterface
-        interface IterationVariablesSupplier {
+        public interface IterationVariablesSupplier {
             @NotNull IterationVariables make(int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd,
                                              int yEnd, int zEnd);
         }
 
-        record IterationVariables(int getFirstOrigin, int getSecondOrigin, int getThirdOrigin, int getFirstIncrement,
-                                  int getSecondIncrement, int getThirdIncrement, int getFirstEnd, int getSecondEnd,
-                                  int getThirdEnd) { }
+        public record IterationVariables(int getFirstOrigin, int getSecondOrigin, int getThirdOrigin,
+                                         int getFirstIncrement, int getSecondIncrement, int getThirdIncrement,
+                                         int getFirstEnd, int getSecondEnd, int getThirdEnd) { }
 
         private final SpaceAccessor accessor;
         private final IterationVariablesSupplier variablesSupplier;
@@ -75,17 +75,17 @@ public interface Space {
             this.variablesSupplier = variablesSupplier;
         }
 
-        @NotNull SpaceAccessor getSpaceAccessor() {
+        public @NotNull SpaceAccessor getSpaceAccessor() {
             return accessor;
         }
 
-        @NotNull IterationVariablesSupplier getVariablesSupplier() {
+        public @NotNull IterationVariablesSupplier getVariablesSupplier() {
             return variablesSupplier;
         }
     }
 
     @Nullable Solid solidAt(int x, int y, int z);
 
-    @NotNull SolidIterable solidsOverlapping(double oX, double oY, double oZ, double vX, double vY,
-                                                         double vZ, @NotNull Order order);
+    @NotNull SolidIterable solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
+                                             @NotNull Order order);
 }
