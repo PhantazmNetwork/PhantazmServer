@@ -26,6 +26,8 @@ import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
 import com.moandjiezana.toml.TomlWriter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -36,14 +38,12 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
+import net.minestom.server.network.ConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Launches the server.
@@ -99,7 +99,7 @@ public class Main {
             ServerConfig serverConfig = CONFIG_HANDLER.getData(SERVER_CONFIG_KEY);
             LobbiesConfig lobbiesConfig = CONFIG_HANDLER.getData(LOBBIES_CONFIG_KEY);
 
-            initializeLobbies(lobbiesConfig);
+            initializeLobbies(lobbiesConfig, logger);
             startServer(minecraftServer, serverConfig);
         }
         catch (ConfigProcessException e) {
@@ -110,7 +110,7 @@ public class Main {
         }
     }
 
-    private static void initializeLobbies(LobbiesConfig lobbiesConfig) {
+    private static void initializeLobbies(LobbiesConfig lobbiesConfig, Logger logger) {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
@@ -157,15 +157,33 @@ public class Main {
             }
         }
 
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
-            LobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, MinecraftServer.getConnectionManager());
+        Map<UUID, LoginLobbyJoinRequest> loginJoinRequests = new HashMap<>();
+        EventNode<Event> eventNode = MinecraftServer.getGlobalEventHandler();
+        eventNode.addListener(PlayerLoginEvent.class, event -> {
+            ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
+            LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, connectionManager);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
             RouteResult result = lobbyRouter.join(routeRequest);
             if (!result.success()) {
-                finalFallback.fallback(new BasicPlayerView(MinecraftServer.getConnectionManager(),
-                        event.getPlayer().getUuid()));
+                finalFallback.fallback(new BasicPlayerView(connectionManager, event.getPlayer().getUuid()));
             }
+            else {
+                loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
+            }
+        });
+        eventNode.addListener(PlayerSpawnEvent.class, event -> {
+           if (!event.isFirstSpawn()) {
+               return;
+           }
+
+           LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(event.getPlayer().getUuid());
+           if (joinRequest == null) {
+               logger.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
+           }
+           else {
+               joinRequest.handlePlayerInitializationComplete();
+           }
         });
     }
 

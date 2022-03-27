@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.api.player.BasicPlayerView;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +43,14 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
         event.setSpawningInstance(instance);
         event.getPlayer().setRespawnPoint(instanceConfig.spawnPoint());
         event.getPlayer().setGameMode(GameMode.ADVENTURE);
+    }
+
+    /**
+     * Handles when the player's initialization is complete.
+     * This should be fired from a handler to a {@link PlayerSpawnEvent}.
+     */
+    public void handlePlayerInitializationComplete() {
+        // NO-OP
     }
 
 }
