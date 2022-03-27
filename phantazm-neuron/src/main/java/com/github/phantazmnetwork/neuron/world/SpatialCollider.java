@@ -20,6 +20,11 @@ public class SpatialCollider implements Collider {
         boolean test(double a, double b);
     }
 
+    @FunctionalInterface
+    private interface ValueFunction {
+        double apply(Solid solid, int y);
+    }
+
     private final Space space;
 
     public SpatialCollider(@NotNull Space space) {
@@ -27,7 +32,7 @@ public class SpatialCollider implements Collider {
     }
 
     private double collisionCheck(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
-                                  double dY, double dZ, double initialBest, ToDoubleFunction<Solid> valueFunction,
+                                  double dY, double dZ, double initialBest, ValueFunction valueFunction,
                                   DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
@@ -88,38 +93,49 @@ public class SpatialCollider implements Collider {
             double centerY = oY + (yW / 2);
             double centerZ = oZ + (zW / 2);
 
+            //convert origin-vector form to min-max, for easier overlaps checking
+            double onX = oX + vX;
+            double onY = oY + vY;
+            double onZ = oZ + vZ;
+
+            double aMinX = Math.min(oX, onX) + VectorConstants.EPSILON;
+            double aMinY = Math.min(oY, onY) + VectorConstants.EPSILON;
+            double aMinZ = Math.min(oZ, onZ) + VectorConstants.EPSILON;
+
+            double aMaxX = Math.max(oX, onX) - VectorConstants.EPSILON;
+            double aMaxY = Math.max(oY, onY) - VectorConstants.EPSILON;
+            double aMaxZ = Math.max(oZ, onZ) - VectorConstants.EPSILON;
+
             Space.Order.IterationVariables variables = overlapping.getVariables();
             int yEnd = variables.getThirdEnd() - variables.getThirdIncrement();
 
             do {
                 Solid candidate = overlapping.next();
 
-                Vec3I candidatePos = candidate.getPosition();
                 Vec3F candidateMin = candidate.getMin();
                 Vec3F candidateMax = candidate.getMax();
 
-                double cMinX = candidatePos.getX() + candidateMin.getX();
-                double cMinY = candidatePos.getY() + candidateMin.getY();
-                double cMinZ = candidatePos.getZ() + candidateMin.getZ();
+                double cMinX = overlapping.getFirst() + candidateMin.getX();
+                double cMinY = overlapping.getThird() + candidateMin.getY();
+                double cMinZ = overlapping.getSecond() + candidateMin.getZ();
 
-                double cMaxX = candidatePos.getX() + candidateMax.getX();
-                double cMaxY = candidatePos.getY() + candidateMax.getY();
-                double cMaxZ = candidatePos.getZ() + candidateMax.getZ();
+                double cMaxX = overlapping.getFirst() + candidateMax.getX();
+                double cMaxY = overlapping.getThird() + candidateMax.getY();
+                double cMaxZ = overlapping.getSecond() + candidateMax.getZ();
 
                 //only check solids not overlapping with the original bounds
-                if(!overlaps(oX, oY, oZ, vX, vY, vZ, cMinX, cMinY, cMinZ, cMaxX, cMaxY, cMaxZ)) {
-                    //TODO: test if accounting for double imprecision here is necessary
+                if(!overlaps(aMinX, aMinY, aMinZ, aMaxX, aMaxY, aMaxZ, cMinX, cMinY, cMinZ, cMaxX, cMaxY, cMaxZ)) {
                     double minX = cMinX - centerX;
                     double minY = cMinY - centerY;
                     double minZ = cMinZ - centerZ;
 
                     double maxX = cMaxX - centerX;
-                    double maxY = cMaxX - centerX;
-                    double maxZ = cMaxX - centerX;
+                    double maxY = cMaxY - centerY;
+                    double maxZ = cMaxZ - centerZ;
 
                     if(checkAxis(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) && checkAxis(adjustedXY, dX, dY, minX,
                             minY, maxX, maxY) && checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY)) {
-                        double value = valueFunction.applyAsDouble(candidate);
+                        double value = valueFunction.apply(candidate, overlapping.getThird());
 
                         //collision found
                         if(betterThan.test(value, best)) {
@@ -147,15 +163,15 @@ public class SpatialCollider implements Collider {
     @Override
     public double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                         double dY, double dZ) {
-        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.NEGATIVE_INFINITY, solid -> solid.getPosition()
-                .getY() + solid.getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F);
+        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.NEGATIVE_INFINITY, (solid, y) -> y + solid
+                .getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F);
     }
 
     @Override
     public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
                                        double dY, double dZ) {
-        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.POSITIVE_INFINITY, solid -> solid.getPosition()
-                .getY() + solid.getMin().getY(), (value, best) -> value < best, solid -> solid.getMin().getY() == 0.0F);
+        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.POSITIVE_INFINITY, (solid, y) -> y + solid
+                .getMin().getY(), (value, best) -> value < best, solid -> solid.getMin().getY() == 0.0F);
     }
 
     @Override
@@ -225,13 +241,9 @@ public class SpatialCollider implements Collider {
         return (maxB * dA) - (maxA * dB) > -size; // ... && !minInSecond
     }
 
-    private static boolean overlaps(double oX1, double oY1, double oZ1, double vX1, double vY1, double vZ1, double minX,
-                                    double minY, double minZ, double maxX, double maxY, double maxZ) {
-        return Math.min(oX1, oX1 + vX1) < maxX &&
-                Math.min(oY1, oY1 + vY1) < maxY &&
-                Math.min(oZ1, oZ1 + vZ1) < maxZ &&
-                Math.max(oX1, oX1 + vX1) >= minX &&
-                Math.max(oY1, oY1 + vY1) >= minY &&
-                Math.max(oZ1, oZ1 + vZ1) >= minZ;
+    private static boolean overlaps(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
+                                    double minX2, double minY2, double minZ2, double maxX2, double maxY2,
+                                    double maxZ2) {
+        return minX < maxX2 && minY < maxY2 && minZ < maxZ2 && maxX >= minX2 && maxY >= minY2 && maxZ >= minZ2;
     }
 }

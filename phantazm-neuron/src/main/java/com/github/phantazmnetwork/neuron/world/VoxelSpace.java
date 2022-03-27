@@ -7,6 +7,7 @@ public abstract class VoxelSpace implements Space {
     class BasicSolidIterator extends AdvancingIterator<Solid> implements SolidIterator {
         private final Order order;
         private final Order.IterationVariables variables;
+
         private int first;
         private int second;
         private int third;
@@ -51,6 +52,21 @@ public abstract class VoxelSpace implements Space {
         @Override
         public @NotNull Order.IterationVariables getVariables() {
             return variables;
+        }
+
+        @Override
+        public int getFirst() {
+            return first;
+        }
+
+        @Override
+        public int getSecond() {
+            return second;
+        }
+
+        @Override
+        public int getThird() {
+            return third;
         }
     }
 
