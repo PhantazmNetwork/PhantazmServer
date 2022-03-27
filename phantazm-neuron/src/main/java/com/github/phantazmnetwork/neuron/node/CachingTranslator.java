@@ -17,7 +17,7 @@ public abstract class CachingTranslator implements NodeTranslator {
     @Override
     public @Nullable Vec3I translate(int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
         Agent agent = getAgent();
-        TranslateCache.CacheResult result = cache.forAgent(agent, x, y, z, deltaX, deltaY, deltaZ);
+        TranslateCache.Result result = cache.forAgent(agent, x, y, z, deltaX, deltaY, deltaZ);
         if(result.isHit()) {
             return result.getResult();
         }

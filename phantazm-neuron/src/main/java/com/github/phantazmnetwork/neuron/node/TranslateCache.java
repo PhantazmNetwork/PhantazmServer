@@ -6,13 +6,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface TranslateCache {
-    record CacheResult(boolean isHit, Vec3I getResult) {
-        public static final CacheResult MISS = new CacheResult(false, null);
+    record Result(boolean isHit, Vec3I getResult) {
+        public static final Result MISS = new Result(false, null);
+        public static final Result NULL_HIT = new Result(true, null);
     }
 
-    @NotNull CacheResult forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
+    @NotNull Result forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
 
     void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ, @Nullable Vec3I result);
 
     void remove(@NotNull Agent agent);
+
+    void clear();
+
+    int size();
 }

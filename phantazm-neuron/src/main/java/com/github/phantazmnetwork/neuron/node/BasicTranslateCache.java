@@ -57,14 +57,13 @@ public class BasicTranslateCache implements TranslateCache {
     private final SortedMap<PositionCacheKey, Vec3I> cache = new Object2ObjectAVLTreeMap<>();
 
     @Override
-    public @NotNull CacheResult forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ) {
+    public @NotNull Result forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ) {
         Vec3I position = Vec3I.of(x, y, z);
         Vec3I delta = Vec3I.of(dX, dY, dZ);
 
-
         AgentCacheKey agentKey = new AgentCacheKey(agent, position, delta);
-        Lock readLock = readWriteLock.readLock();
 
+        Lock readLock = readWriteLock.readLock();
         try {
             readLock.lock();
             SortedMap<PositionCacheKey, Vec3I> candidates = cache.tailMap(agentKey);
@@ -73,20 +72,21 @@ public class BasicTranslateCache implements TranslateCache {
             if(candidates.isEmpty()) {
                 //no exact match: cache miss
                 if(!cache.containsKey(agentKey)) {
-                    return CacheResult.MISS;
+                    return Result.MISS;
                 }
 
-                return new CacheResult(true, cache.get(agentKey));
+                Vec3I translate = cache.get(agentKey);
+                return translate == null ? Result.NULL_HIT : new Result(true, translate);
             }
 
             //now, search candidates using ONLY the position as a key, which ignores the agent
             PositionCacheKey positionKey = new PositionCacheKey(position, delta);
             if(!candidates.containsKey(positionKey)) {
-                return CacheResult.MISS;
+                return Result.MISS;
             }
 
-            Vec3I result = candidates.get(positionKey);
-            return new CacheResult(true, result);
+            Vec3I translate = candidates.get(positionKey);
+            return translate == null ? Result.NULL_HIT : new Result(true, translate);
         }
         finally {
             readLock.unlock();
@@ -117,15 +117,37 @@ public class BasicTranslateCache implements TranslateCache {
             writeLock.lock();
             while(entryIterator.hasNext()) {
                 Map.Entry<PositionCacheKey, Vec3I> entry = entryIterator.next();
-                if(entry.getKey() instanceof AgentCacheKey agentKey) {
-                    if(agentKey.agent == agent) {
-                        entryIterator.remove();
-                    }
+                if(entry.getKey() instanceof AgentCacheKey agentKey && agentKey.agent == agent) {
+                    entryIterator.remove();
                 }
             }
         }
         finally {
             writeLock.unlock();
+        }
+    }
+
+    @Override
+    public void clear() {
+        Lock writeLock = readWriteLock.writeLock();
+        try {
+            writeLock.lock();
+            cache.clear();
+        }
+        finally {
+            writeLock.unlock();
+        }
+    }
+
+    @Override
+    public int size() {
+        Lock readLock = readWriteLock.readLock();
+        try {
+            readLock.lock();
+            return cache.size();
+        }
+        finally {
+            readLock.unlock();
         }
     }
 }

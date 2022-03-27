@@ -39,7 +39,7 @@ class GroundTranslatorTest {
         });
 
         TranslateCache mockCache = mock(TranslateCache.class);
-        when(mockCache.forAgent(any(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(TranslateCache.CacheResult.MISS);
+        when(mockCache.forAgent(any(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(TranslateCache.Result.MISS);
 
         OngoingStubbing<Double> highest = when(mockCollider.highestCollisionAlong(anyDouble(), anyDouble(), anyDouble(),
                 anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble()));
