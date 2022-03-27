@@ -3,6 +3,6 @@
     port = 25567
     optifineEnabled = true
     authType = "BUNGEE"
-    velocitySecret = "TkZaQWDQlQUa"
+    velocitySecret = ""
 [pingList]
     description = "A Minecraft Server"
