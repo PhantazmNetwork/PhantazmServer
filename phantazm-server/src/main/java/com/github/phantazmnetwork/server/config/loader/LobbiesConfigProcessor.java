@@ -76,7 +76,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull LobbiesConfig lobbiesConfig) throws ConfigProcessException {
+    public @NotNull ConfigElement elementFromData(@NotNull LobbiesConfig lobbiesConfig) {
         ConfigNode lobbiesNode = new LinkedConfigNode();
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             ConfigNode lobbyNode = new LinkedConfigNode();

@@ -38,7 +38,8 @@ public record ServerInfoConfig(@NotNull String serverIP,
     public static final AuthType DEFAULT_AUTH_TYPE = AuthType.MOJANG;
 
     /**
-     * The default Velocity secret.
+     * The default Velocity secret. This is used so the config file gets filled in, but the empty string should NEVER
+     * be used as an actual secret during testing or production.
      */
     public static final String DEFAULT_VELOCITY_SECRET = "";
 

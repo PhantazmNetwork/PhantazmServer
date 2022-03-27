@@ -85,13 +85,13 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
                             + routeRequest.targetLobbyName() + ".")));
         }
 
-        LobbyJoinRequest joinRequest = new LobbyJoinRequest(routeRequest.players());
+        LobbyJoinRequest joinRequest = routeRequest.joinRequest();
         Optional<Lobby> lobbyOptional = lobbyProvider.provideScene(joinRequest);
         if (lobbyOptional.isPresent()) {
             Lobby lobby = lobbyOptional.get();
             RouteResult result = lobby.join(joinRequest);
             if (result.success()) {
-                for (PlayerView playerView : routeRequest.players()) {
+                for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
                     playerLobbyMap.put(playerView.getUUID(), lobby);
                 }
             }
@@ -112,7 +112,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
         }
 
         for (UUID uuid : leavers) {
-            playerLobbyMap.get(uuid).leave(Collections.singletonList(uuid));
+            playerLobbyMap.get(uuid).leave(Collections.singleton(uuid));
         }
 
         return new RouteResult(true, Optional.empty());
@@ -139,7 +139,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
     @Override
     public int getJoinWeight(@NotNull LobbyRouteRequest request) {
         int count = 0;
-        for (PlayerView ignored : request.players()) {
+        for (PlayerView ignored : request.joinRequest().getPlayers()) {
             count++;
         }
         return -(getIngamePlayerCount() + count);

@@ -55,7 +55,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
         }
 
         Collection<Pair<PlayerView, Player>> joiners = new ArrayList<>();
-        for (PlayerView playerView : joinRequest.players()) {
+        for (PlayerView playerView : joinRequest.getPlayers()) {
             playerView.getPlayer().ifPresent(player -> {
                 if (player.getInstance() != instance) {
                     joiners.add(Pair.of(playerView, player));
@@ -69,9 +69,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
         }
 
         for (Pair<PlayerView, Player> player : joiners) {
-            player.second().setInstance(instance, instanceConfig.spawnPoint());
-            player.second().setGameMode(GameMode.ADVENTURE);
-
+            joinRequest.handleJoin(instance, instanceConfig);
             players.put(player.first().getUUID(), player.first());
         }
 
@@ -121,11 +119,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     @Override
     public int getJoinWeight(@NotNull LobbyJoinRequest request) {
-        int count = 0;
-        for (PlayerView ignored : request.players()) {
-            count++;
-        }
-        return -(getIngamePlayerCount() + count);
+        return -(getIngamePlayerCount() + request.getPlayers().size());
     }
 
     @Override
