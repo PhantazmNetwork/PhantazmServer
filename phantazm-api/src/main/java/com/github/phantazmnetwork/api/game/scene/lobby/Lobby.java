@@ -119,11 +119,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     @Override
     public int getJoinWeight(@NotNull LobbyJoinRequest request) {
-        int count = 0;
-        for (PlayerView ignored : request.getPlayers()) {
-            count++;
-        }
-        return -(getIngamePlayerCount() + count);
+        return -(getIngamePlayerCount() + request.getPlayers().size());
     }
 
     @Override

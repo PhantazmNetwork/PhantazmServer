@@ -5,7 +5,10 @@ import com.github.phantazmnetwork.api.player.PlayerView;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -14,18 +17,18 @@ import java.util.Objects;
 @SuppressWarnings("ClassCanBeRecord")
 public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
-    private final Iterable<PlayerView> players;
+    private final Collection<PlayerView> players;
 
     /**
      * Creates a basic {@link LobbyJoinRequest}.
      * @param players The players in the request
      */
-    public BasicLobbyJoinRequest(@NotNull Iterable<PlayerView> players) {
-        this.players = Objects.requireNonNull(players, "players");
+    public BasicLobbyJoinRequest(@NotNull Collection<PlayerView> players) {
+        this.players = Collections.unmodifiableCollection(Objects.requireNonNull(players, "players"));
     }
 
     @Override
-    public @NotNull Iterable<PlayerView> getPlayers() {
+    public @UnmodifiableView @NotNull Collection<PlayerView> getPlayers() {
         return players;
     }
 

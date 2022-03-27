@@ -9,7 +9,9 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -34,7 +36,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
     }
 
     @Override
-    public @NotNull Iterable<PlayerView> getPlayers() {
+    public @UnmodifiableView @NotNull Collection<PlayerView> getPlayers() {
         return Collections.singleton(playerView);
     }
 
@@ -46,10 +48,11 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
     }
 
     /**
-     * Handles when the player's initialization is complete.
-     * This should be fired from a handler to a {@link PlayerSpawnEvent}.
+     * Handles when the player's login is complete.
+     * This should be fired from a handler to a {@link PlayerSpawnEvent}, as this occurs when a player
+     * has spawned for the first time.
      */
-    public void handlePlayerInitializationComplete() {
+    public void onPlayerLoginComplete() {
         // NO-OP
     }
 

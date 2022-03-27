@@ -6,10 +6,8 @@ import com.github.phantazmnetwork.api.game.scene.fallback.KickFallback;
 import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.game.scene.lobby.*;
 import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
-import com.github.phantazmnetwork.api.instance.FileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.api.player.BasicPlayerView;
-import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.server.config.loader.LobbiesConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
@@ -35,8 +33,6 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.instance.AnvilLoader;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.network.ConnectionManager;
 import org.slf4j.Logger;
@@ -182,7 +178,7 @@ public class Main {
                logger.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
            }
            else {
-               joinRequest.handlePlayerInitializationComplete();
+               joinRequest.onPlayerLoginComplete();
            }
         });
     }

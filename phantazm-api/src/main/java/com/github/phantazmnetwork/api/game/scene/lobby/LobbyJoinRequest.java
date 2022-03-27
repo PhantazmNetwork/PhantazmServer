@@ -4,7 +4,9 @@ import com.github.phantazmnetwork.api.config.InstanceConfig;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -13,10 +15,10 @@ import java.util.Objects;
 public interface LobbyJoinRequest {
 
     /**
-     * Gets the players in the request.
-     * @return The players in the request
+     * Gets an unmodifiable view of the players in the request.
+     * @return An unmodifiable view of the players in the request
      */
-    @NotNull Iterable<PlayerView> getPlayers();
+    @UnmodifiableView @NotNull Collection<PlayerView> getPlayers();
 
     /**
      * Handles {@link Instance} used for the join.
