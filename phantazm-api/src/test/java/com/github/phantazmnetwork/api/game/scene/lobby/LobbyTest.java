@@ -34,7 +34,7 @@ public class LobbyTest {
         lobby.forceShutdown();
         assertTrue(lobby.isShutdown());
 
-        RouteResult result = lobby.join(new LobbyJoinRequest(Collections.singletonList(playerView)));
+        RouteResult result = lobby.join(new BasicLobbyJoinRequest(Collections.singleton(playerView)));
         assertFalse(result.success());
     }
 
@@ -57,7 +57,7 @@ public class LobbyTest {
             }
         };
 
-        RouteResult result = lobby.join(new LobbyJoinRequest(Collections.singletonList(playerView)));
+        RouteResult result = lobby.join(new BasicLobbyJoinRequest(Collections.singleton(playerView)));
 
         assertTrue(result.success());
         verify(player).setInstance(eq(instance), eq(instanceConfig.spawnPoint()));

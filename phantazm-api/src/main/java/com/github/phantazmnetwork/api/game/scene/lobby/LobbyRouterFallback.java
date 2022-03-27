@@ -28,7 +28,8 @@ public class LobbyRouterFallback implements SceneFallback {
 
     @Override
     public boolean fallback(@NotNull PlayerView player) {
-        return lobbyRouter.join(new LobbyRouteRequest(Collections.singletonList(player), lobbyName)).success();
+        return lobbyRouter.join(new LobbyRouteRequest(lobbyName,
+                        new BasicLobbyJoinRequest(Collections.singleton(player)))).success();
     }
 
 }

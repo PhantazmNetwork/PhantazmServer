@@ -1,13 +1,10 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.game.scene.SceneProvider;
+import com.github.phantazmnetwork.api.game.scene.*;
 import com.github.phantazmnetwork.api.game.scene.fallback.CompositeFallback;
 import com.github.phantazmnetwork.api.game.scene.fallback.KickFallback;
 import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.game.scene.lobby.*;
-import com.github.phantazmnetwork.api.game.scene.BasicSceneStore;
-import com.github.phantazmnetwork.api.game.scene.SceneKeys;
-import com.github.phantazmnetwork.api.game.scene.SceneStore;
 import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.FileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
@@ -130,20 +127,15 @@ public class Main {
             throw new IllegalArgumentException("No main lobby config present");
         }
 
-        Instance initialInstance = instanceLoader.loadInstance(instanceManager, mainLobbyConfig.lobbyPaths());
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
-            event.setSpawningInstance(initialInstance);
-            event.getPlayer().setRespawnPoint(mainLobbyConfig.instanceConfig().spawnPoint());
-        });
-
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider = new BasicLobbyProvider(
-                mainLobbyConfig.maxPlayers(),
                 mainLobbyConfig.maxLobbies(),
+                -mainLobbyConfig.maxPlayers(),
                 instanceManager,
                 instanceLoader,
                 mainLobbyConfig.lobbyPaths(),
                 finalFallback,
-                mainLobbyConfig.instanceConfig()
+                mainLobbyConfig.instanceConfig(),
+                MinecraftServer.getChunkViewDistance()
         );
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
@@ -153,25 +145,27 @@ public class Main {
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
                 lobbyProviders.put(lobby.getKey(), new BasicLobbyProvider(
-                        lobby.getValue().maxPlayers(),
                         lobby.getValue().maxLobbies(),
+                        -lobby.getValue().maxPlayers(),
                         instanceManager,
                         instanceLoader,
                         lobby.getValue().lobbyPaths(),
                         regularFallback,
-                        lobby.getValue().instanceConfig()
+                        lobby.getValue().instanceConfig(),
+                        MinecraftServer.getChunkViewDistance()
                 ));
             }
         }
 
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
-            if (!event.isFirstSpawn()) {
-                return;
-            }
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
+            LobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, MinecraftServer.getConnectionManager());
+            LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
-            PlayerView playerView = new BasicPlayerView(MinecraftServer.getConnectionManager(),
-                    event.getPlayer().getUuid());
-            lobbyRouter.join(new LobbyRouteRequest(Collections.singleton(playerView), lobbiesConfig.mainLobbyName()));
+            RouteResult result = lobbyRouter.join(routeRequest);
+            if (!result.success()) {
+                finalFallback.fallback(new BasicPlayerView(MinecraftServer.getConnectionManager(),
+                        event.getPlayer().getUuid()));
+            }
         });
     }
 
