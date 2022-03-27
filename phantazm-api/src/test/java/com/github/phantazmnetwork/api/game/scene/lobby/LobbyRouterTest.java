@@ -22,7 +22,8 @@ public class LobbyRouterTest {
         Scene<LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
         router.setJoinable(false);
-        LobbyRouteRequest request = new LobbyRouteRequest(Collections.emptyList(), lobbyName);
+        LobbyRouteRequest request = new LobbyRouteRequest(lobbyName,
+                new BasicLobbyJoinRequest(Collections.emptyList()));
 
         assertFalse(router.join(request).success());
     }
@@ -37,7 +38,8 @@ public class LobbyRouterTest {
         Scene<LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
         router.forceShutdown();
-        LobbyRouteRequest request = new LobbyRouteRequest(Collections.emptyList(), lobbyName);
+        LobbyRouteRequest request = new LobbyRouteRequest(lobbyName,
+                new BasicLobbyJoinRequest(Collections.emptyList()));
 
         assertFalse(router.join(request).success());
     }
@@ -51,7 +53,8 @@ public class LobbyRouterTest {
                 (SceneProvider<Lobby, LobbyJoinRequest>) mock(SceneProvider.class));
         Scene<LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
-        LobbyRouteRequest request = new LobbyRouteRequest(Collections.emptyList(), "notMain");
+        LobbyRouteRequest request = new LobbyRouteRequest("notMain",
+                new BasicLobbyJoinRequest(Collections.emptyList()));
 
         assertFalse(router.join(request).success());
     }

@@ -16,12 +16,12 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
     /**
      * Creates an abstract {@link Lobby} {@link SceneProvider}.
      *
-     * @param maximumScenes The maximum number {@link Lobby}s in the provider.
+     * @param maximumLobbies The maximum number {@link Lobby}s in the provider.
      * @param newLobbyThreshold The weighting threshold for lobbies. If no lobbies are above this threshold,
      * a new {@link Lobby} will be created.
      */
-    public LobbyProviderAbstract(int maximumScenes, int newLobbyThreshold) {
-        super(maximumScenes);
+    public LobbyProviderAbstract(int maximumLobbies, int newLobbyThreshold) {
+        super(maximumLobbies);
 
         this.newLobbyThreshold = newLobbyThreshold;
     }

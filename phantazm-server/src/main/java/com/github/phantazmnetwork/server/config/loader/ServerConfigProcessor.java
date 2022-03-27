@@ -46,9 +46,13 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
         boolean optifineEnabled = serverInfo.getBooleanOrThrow("optifineEnabled");
         AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType")
-                .toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid AuthType, " +
-                "must be one of the following: " + Arrays.toString(AuthType.values())));
+                .toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid AuthType, must " +
+                "be one of the following: " + Arrays.toString(AuthType.values())));
         String velocitySecret = serverInfo.getStringOrThrow("velocitySecret");
+        if(authType == AuthType.VELOCITY && velocitySecret.equals(ServerInfoConfig.DEFAULT_VELOCITY_SECRET)) {
+            throw new ConfigProcessException("When using AuthType.VELOCITY, velocitySecret must be set to a value " +
+                    "other than the default for security reasons");
+        }
 
         ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverAddress, port, optifineEnabled, authType,
                 velocitySecret);
