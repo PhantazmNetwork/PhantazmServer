@@ -13,7 +13,7 @@ public class GroundTranslator extends CachingTranslator {
     private final Collider collider;
     private final GroundAgent agent;
 
-    public GroundTranslator(@NotNull EnvironmentCache cache, @NotNull Collider collider, @NotNull GroundAgent agent) {
+    public GroundTranslator(@NotNull TranslateCache cache, @NotNull Collider collider, @NotNull GroundAgent agent) {
         super(cache);
         this.collider = Objects.requireNonNull(collider, "collider");
         this.agent = Objects.requireNonNull(agent, "agent");

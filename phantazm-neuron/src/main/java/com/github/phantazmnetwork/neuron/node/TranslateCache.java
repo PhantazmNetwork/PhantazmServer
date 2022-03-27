@@ -5,10 +5,14 @@ import com.github.phantazmnetwork.neuron.agent.Agent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface EnvironmentCache {
-    @Nullable Vec3I forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
+public interface TranslateCache {
+    record CacheResult(boolean isHit, Vec3I getResult) {
+        public static final CacheResult MISS = new CacheResult(false, null);
+    }
 
-    boolean isCached(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
+    @NotNull CacheResult forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
 
     void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ, @Nullable Vec3I result);
+
+    void remove(@NotNull Agent agent);
 }

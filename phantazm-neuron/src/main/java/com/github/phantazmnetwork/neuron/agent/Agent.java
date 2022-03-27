@@ -4,13 +4,18 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
+
 /**
- * Represents something capable of pathfinding. This is the most general representation of a navigation-capable object,
- * and generally all that is required to be used by a pathfinding algorithm such as A*. More specific sub-interfaces
- * exist to expose more complex functionality.
+ * <p>Represents something capable of pathfinding. This is the most general representation of a navigation-capable
+ * object, and generally all that is required to be used by a pathfinding algorithm such as A*. More specific
+ * sub-interfaces exist to expose more complex functionality.</p>
+ *
+ * <p>Agent extends {@link Comparable}. Agents are compared in order to determine whether or not caching optimizations
+ * may </p>
  * @see PhysicalAgent
  */
-public interface Agent {
+public interface Agent extends Comparable<Agent> {
     /**
      * Determines if the agent has a starting location. In other words, returns {@code true} if the agent is capable of
      * pathfinding, and {@code false} if it isn't. {@link PathOperation} implementations query this method before

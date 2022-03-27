@@ -8,17 +8,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public abstract class CachingTranslator implements NodeTranslator {
-    private final EnvironmentCache cache;
+    private final TranslateCache cache;
 
-    public CachingTranslator(@NotNull EnvironmentCache cache) {
+    public CachingTranslator(@NotNull TranslateCache cache) {
         this.cache = Objects.requireNonNull(cache, "cache");
     }
 
     @Override
     public @Nullable Vec3I translate(int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
         Agent agent = getAgent();
-        if(cache.isCached(agent, x, y, z, deltaX, deltaY, deltaZ)) {
-            return cache.forAgent(agent, x, y, z, deltaX, deltaY, deltaZ);
+        TranslateCache.CacheResult result = cache.forAgent(agent, x, y, z, deltaX, deltaY, deltaZ);
+        if(result.isHit()) {
+            return result.getResult();
         }
 
         Vec3I translate = doTranslate(x, y, z, deltaX, deltaY, deltaZ);

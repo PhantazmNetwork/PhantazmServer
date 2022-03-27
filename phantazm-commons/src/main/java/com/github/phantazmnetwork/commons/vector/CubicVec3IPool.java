@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
  * <p>Since an array is initialized with capacity sufficient to hold all possible values for any given width, it is
  * important to avoid allocating a very large pool, as there will be a significant portion of wasted memory in many
  * cases.</p>
+ *
+ * <p>{@link CubicVec3IPool#fromCache(int, int, int)} is inherently thread-safe.</p>
  * @see BasicVec3I
  */
 class CubicVec3IPool implements Vec3IPool {
@@ -40,7 +42,7 @@ class CubicVec3IPool implements Vec3IPool {
         this.shiftY = Integer.numberOfTrailingZeros(cacheWidth);
         this.shiftZ = shiftY << 1;
 
-        //fill the entire cache: this allows fromCache to be made threadsafe without needing to synchronize, and
+        //fill the entire cache: this allows fromCache to be made threadsafe without needing to synchronize
         int pos = 0;
         for(int i = 0; i < cacheWidth; i++) {
             for(int j = 0; j < cacheWidth; j++) {
