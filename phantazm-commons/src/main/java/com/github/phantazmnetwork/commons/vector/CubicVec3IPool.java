@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  */
 class CubicVec3IPool implements Vec3IPool {
     private final Vec3I[] cache;
-    private final int halfCacheWidth;
+    private final int halfWidth;
     private final int shiftY;
     private final int shiftZ;
 
@@ -33,12 +33,22 @@ class CubicVec3IPool implements Vec3IPool {
             throw new IllegalArgumentException("cacheWidth must not be larger than 256");
         }
 
-        //assume we'll need the whole cache, but don't allocate any values yet
+        //assume we'll need the whole cache
         this.cache = new Vec3I[cacheWidth * cacheWidth * cacheWidth];
-        this.halfCacheWidth = cacheWidth >> 1;
+        this.halfWidth = cacheWidth >> 1;
 
         this.shiftY = Integer.numberOfTrailingZeros(cacheWidth);
         this.shiftZ = shiftY << 1;
+
+        //fill the entire cache: this allows fromCache to be made threadsafe without needing to synchronize, and
+        int pos = 0;
+        for(int i = 0; i < cacheWidth; i++) {
+            for(int j = 0; j < cacheWidth; j++) {
+                for(int k = 0; k < cacheWidth; k++) {
+                    cache[pos++] = new BasicVec3I(i - halfWidth, j - halfWidth, k - halfWidth);
+                }
+            }
+        }
     }
 
     private static boolean isPowerOf2(int value) {
@@ -46,21 +56,13 @@ class CubicVec3IPool implements Vec3IPool {
     }
 
     private boolean inRange(int value) {
-        return value >= -halfCacheWidth && value < halfCacheWidth;
+        return value >= -halfWidth && value < halfWidth;
     }
 
-    @SuppressWarnings("ReplaceNullCheck")
     @Override
     public @Nullable Vec3I fromCache(int x, int y, int z) {
         if(inRange(x) && inRange(y) && inRange(z)) {
-            int i = ((x + halfCacheWidth) << shiftZ) | ((y + halfCacheWidth) << shiftY) | (z + halfCacheWidth);
-            Vec3I cached = cache[i];
-            if(cached == null) {
-                //lazy initialization of cached vectors
-                return cache[i] = new BasicVec3I(x, y, z);
-            }
-
-            return cached;
+            return cache[((x + halfWidth) << shiftZ) | ((y + halfWidth) << shiftY) | (z + halfWidth)];
         }
 
         return null;

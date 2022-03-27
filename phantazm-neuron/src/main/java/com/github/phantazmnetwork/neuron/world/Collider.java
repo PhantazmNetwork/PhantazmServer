@@ -18,8 +18,8 @@ public interface Collider {
     /**
      * Returns a value representing the y-coordinate of the top face of the highest collision intersecting the path
      * travelled by a bounding box (in origin-vector form) along the movement vector (dX, dY, dZ). The bounding box must
-     * be in normalized origin-vector form. Colliding objects overlapping the initial position of the bounding box will
-     * not be considered.
+     * be in origin-vector form. Colliding objects overlapping the initial position of the bounding box will not be
+     * considered.
      * @param oX x-component of the origin vector
      * @param oY y-component of the origin vector
      * @param oZ z-component of the origin vector
@@ -38,8 +38,8 @@ public interface Collider {
     /**
      * Returns a value representing the y-coordinate of the bottom face of the lowest collision intersecting the path
      * travelled by a bounding box (in origin-vector form) along the movement vector (dX, dY, dZ). The bounding box must
-     * be in normalized origin-vector form. Colliding objects overlapping the initial position of the bounding box will
-     * not be considered.
+     * be in origin-vector form. Colliding objects overlapping the initial position of the bounding box will not be
+     * considered.
      * @param oX x-component of the origin vector
      * @param oY y-component of the origin vector
      * @param oZ z-component of the origin vector
@@ -56,8 +56,8 @@ public interface Collider {
                                 double dZ);
 
     /**
-     * Returns the y-coordinate of the highest face out of all collisions present in a hypothetical origin-vector
-     * bounding box (x, y, z, 1, 1, 1).
+     * Returns the y-coordinate of the highest face out of all collisions present in an origin-vector bounding box (x,
+     * y, z, 1, 1, 1).
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
