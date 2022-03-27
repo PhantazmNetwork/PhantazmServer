@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.GroundAgent;
 import com.github.phantazmnetwork.neuron.world.Collider;
 import org.jetbrains.annotations.NotNull;
@@ -8,24 +9,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-@SuppressWarnings("ClassCanBeRecord")
-public class GroundTranslator implements NodeTranslator {
+public class GroundTranslator extends CachingTranslator {
     private final Collider collider;
-    private final EnvironmentCache cache;
     private final GroundAgent agent;
 
-    public GroundTranslator(@NotNull Collider collider, @NotNull EnvironmentCache cache, @NotNull GroundAgent agent) {
+    public GroundTranslator(@NotNull EnvironmentCache cache, @NotNull Collider collider, @NotNull GroundAgent agent) {
+        super(cache);
         this.collider = Objects.requireNonNull(collider, "collider");
-        this.cache = Objects.requireNonNull(cache, "cache");
         this.agent = Objects.requireNonNull(agent, "agent");
     }
 
     @Override
-    public @Nullable Vec3I translate(int x, int y, int z, int dX, int dY, int dZ) {
-        if(cache.isCached(agent, x, y, z, dX, dY, dZ)) {
-            return cache.forAgent(agent, x, y, z, dX, dY, dZ);
-        }
-
+    public @Nullable Vec3I doTranslate(int x, int y, int z, int dX, int dY, int dZ) {
         //center of block at (x, y, z)
         double cX = x + 0.5;
         double cY = collider.heightAt(x, y, z);
@@ -75,7 +70,11 @@ public class GroundTranslator implements NodeTranslator {
             }
         }
 
-        cache.offer(agent, x, y, z, dX, dY, dZ, result);
         return result;
+    }
+
+    @Override
+    protected @NotNull Agent getAgent() {
+        return agent;
     }
 }

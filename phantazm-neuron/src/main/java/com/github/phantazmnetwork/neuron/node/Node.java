@@ -201,7 +201,10 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     @Override
     public int hashCode() {
-        return position.hashCode();
+        float result = 7;
+        result = 37 * result + g;
+        result = 37 * result + h;
+        return (int) (37 * result + position.hashCode());
     }
 
     @Override

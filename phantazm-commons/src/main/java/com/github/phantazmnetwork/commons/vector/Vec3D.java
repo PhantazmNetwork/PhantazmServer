@@ -1,11 +1,17 @@
 package com.github.phantazmnetwork.commons.vector;
 
-public interface Vec3D {
+import org.jetbrains.annotations.NotNull;
+
+public interface Vec3D extends Comparable<Vec3D> {
     double getX();
 
     double getY();
 
     double getZ();
+
+    static @NotNull Vec3D of(double x, double y, double z) {
+        return new BasicVec3D(x, y, z);
+    }
 
     /**
      * <p>Computes the <i>squared distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This uses the standard

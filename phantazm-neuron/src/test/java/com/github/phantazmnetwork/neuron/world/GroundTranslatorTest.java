@@ -6,7 +6,6 @@ import com.github.phantazmnetwork.neuron.node.EnvironmentCache;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.Collections;
@@ -56,7 +55,7 @@ class GroundTranslatorTest {
         }
         lowest.thenReturn(Double.POSITIVE_INFINITY);
 
-        return new GroundTranslator(mockCollider, mockCache, mockAgent);
+        return new GroundTranslator(mockCache, mockCollider, mockAgent);
     }
 
     @Nested

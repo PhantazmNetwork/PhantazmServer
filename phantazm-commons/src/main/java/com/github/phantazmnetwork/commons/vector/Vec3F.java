@@ -1,11 +1,17 @@
 package com.github.phantazmnetwork.commons.vector;
 
-public interface Vec3F {
+import org.jetbrains.annotations.NotNull;
+
+public interface Vec3F extends Comparable<Vec3F> {
     float getX();
 
     float getY();
 
     float getZ();
+
+    static @NotNull Vec3F of(float x, float y, float z) {
+        return new BasicVec3F(x, y, z);
+    }
 
     /**
      * Determines if two points are equal. Equivalent to <code>x1 == x2 && y1 == y2 && z1 == z2</code>.

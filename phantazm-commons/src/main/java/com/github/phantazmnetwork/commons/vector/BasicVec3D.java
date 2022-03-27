@@ -1,60 +1,34 @@
 package com.github.phantazmnetwork.commons.vector;
 
-@SuppressWarnings("ClassCanBeRecord")
-public final class BasicVec3D implements Vec3D {
-    private final double x;
-    private final double y;
-    private final double z;
+import org.jetbrains.annotations.NotNull;
 
-    public BasicVec3D(double x, double y, double z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    @Override
-    public double getX() {
-        return x;
-    }
-
-    @Override
-    public double getY() {
-        return y;
-    }
+/**
+ * Standard implementation of Vec3D. Not a part of the public API. Instances are compared lexicographically, first by
+ * {@code x} value, then {@code y} value, then {@code z} value. This object's {@link Vec3D#compareTo(Object)} method is
+ * <i>consistent</i> with {@link Object#equals(Object)}.
+ */
+final record BasicVec3D(double getX, double getY, double getZ) implements Vec3D {
+    /**
+     * Creates a new instance of this record. {@link Vec3D#of(double, double, double)} should be used in preference to
+     * this constructor.
+     * @param getX the x-component
+     * @param getY the y-component
+     * @param getZ the z-component
+     */
+    BasicVec3D {}
 
     @Override
-    public double getZ() {
-        return z;
-    }
+    public int compareTo(@NotNull Vec3D o) {
+        int xCompare = Double.compare(getX, o.getX());
+        if (xCompare == 0) {
+            int yCompare = Double.compare(getY, o.getY());
+            if (yCompare == 0) {
+                return Double.compare(getZ, o.getZ());
+            }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(this == obj) {
-            return true;
+            return yCompare;
         }
 
-        if(obj == null) {
-            return false;
-        }
-
-        if(obj instanceof Vec3D other) {
-            return Vec3D.equals(x, y, z, other.getX(), other.getY(), other.getZ());
-        }
-
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + (int) (Double.doubleToLongBits(x) ^ (Double.doubleToLongBits(x) >>> 32));
-        hash = 79 * hash + (int) (Double.doubleToLongBits(y) ^ (Double.doubleToLongBits(y) >>> 32));
-        hash = 79 * hash + (int) (Double.doubleToLongBits(z) ^ (Double.doubleToLongBits(z) >>> 32));
-        return hash;
-    }
-
-    @Override
-    public String toString() {
-        return "Vec3D{x=" + x + ", y=" + y + ", z=" + z + "}";
+        return xCompare;
     }
 }
