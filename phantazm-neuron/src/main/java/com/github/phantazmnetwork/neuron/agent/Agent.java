@@ -11,8 +11,10 @@ import java.util.Comparator;
  * object, and generally all that is required to be used by a pathfinding algorithm such as A*. More specific
  * sub-interfaces exist to expose more complex functionality.</p>
  *
- * <p>Agent extends {@link Comparable}. Agents are compared in order to determine whether or not caching optimizations
- * may </p>
+ * <p>Agent extends {@link Comparable}. Given two agents {@code a} and {@code b}, a is strictly larger than b if b can
+ * be proven capable of reaching all nodes a may reach, <i>plus some number of additional nodes a may not access</i>.
+ * For the purposes of comparison, {@code a == b} only if a and b may access all the same nodes. These facts are used
+ * to allow different but comparable agents to "share" cached values.</p>
  * @see PhysicalAgent
  */
 public interface Agent extends Comparable<Agent> {

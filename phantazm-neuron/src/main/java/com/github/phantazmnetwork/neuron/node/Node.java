@@ -23,11 +23,11 @@ import java.util.Objects;
  * node iteration.</p>
  *
  * <p>Node implements {@link Comparable}, with a natural ordering that is consistent with equals. Nodes are compared
- * first by sum of {@code g} and {@code h} values, then by x value, then y, then z. Caution should be exercised when
- * using Node objects as keys to maps.</p>
+ * first by sum of {@code g} and {@code h} values, then by x value, then y, then z.</p>
  *
  * <p>Although the position of the node cannot change throughout its lifespan, its parent, along with {@code g} and
- * {@code h} values, can and indeed are expected to be changed many times throughout path calculation.</p>
+ * {@code h} values, can and indeed are expected to be changed many times throughout path calculation. Therefore,
+ * caution should be exercised when using Node objects as keys to a map or entries in a set.</p>
  *
  * <p>Node objects are designed to work efficiently with {@link NodeQueue}. To this end, each node stores an index —
  * called {@code heapIndex} — which corresponds to the node's position within the queue's backing array. This index will
@@ -201,10 +201,10 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     @Override
     public int hashCode() {
-        float result = 7;
-        result = 37 * result + g;
-        result = 37 * result + h;
-        return (int) (37 * result + position.hashCode());
+        int result = 7;
+        result = 37 * result + Float.hashCode(g);
+        result = 37 * result + Float.hashCode(h);
+        return 37 * result + position.hashCode();
     }
 
     @Override

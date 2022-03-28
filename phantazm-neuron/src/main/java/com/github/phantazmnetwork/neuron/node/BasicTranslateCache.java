@@ -22,13 +22,13 @@ public class BasicTranslateCache implements TranslateCache {
     @Override
     public @NotNull Result forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ) {
         SortedMap<Agent, Map<TranslateKey, Vec3I>> tail = cache.tailMap(agent);
+        TranslateKey key = new TranslateKey(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
         return LockUtils.lock(readWriteLock.readLock(), () -> {
             if(!tail.isEmpty()) {
                 //pick the smallest agent as it can go all places larger agents can
                 Agent smallest = tail.firstKey();
                 Map<TranslateKey, Vec3I> map = cache.get(smallest);
                 if(!map.isEmpty()) {
-                    TranslateKey key = new TranslateKey(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
                     Vec3I cached = map.get(key);
 
                     if(cached != null) {
@@ -54,7 +54,8 @@ public class BasicTranslateCache implements TranslateCache {
     public void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ, @Nullable Vec3I result) {
         //get agents smaller than this (they can go all places we can)
         SortedMap<Agent, Map<TranslateKey, Vec3I>> head = cache.headMap(agent);
-        LockUtils.lock(readWriteLock.readLock(), () -> {
+        TranslateKey key = new TranslateKey(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
+        LockUtils.lock(readWriteLock.writeLock(), () -> {
             if(result != null) {
                 Agent agentKey;
 
@@ -67,18 +68,13 @@ public class BasicTranslateCache implements TranslateCache {
                     agentKey = agent;
                 }
 
-                LockUtils.lock(readWriteLock.writeLock(), () -> {
-                    cache.computeIfAbsent(agentKey, BasicTranslateCache::makeMap).put(new TranslateKey(Vec3I.of(x, y,
-                            z), Vec3I.of(dX, dY, dZ)), result);
-                });
+                cache.computeIfAbsent(agentKey, BasicTranslateCache::makeMap).put(key, result);
             }
             else {
                 //null result means we only store the value if we have an identical agent
                 Map<TranslateKey, Vec3I> map = cache.get(agent);
                 if(map != null) {
-                    LockUtils.lock(readWriteLock.writeLock(), () -> {
-                        map.put(new TranslateKey(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ)), null);
-                    });
+                    map.put(key, null);
                 }
             }
         });

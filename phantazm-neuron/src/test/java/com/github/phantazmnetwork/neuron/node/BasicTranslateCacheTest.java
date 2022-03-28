@@ -18,7 +18,7 @@ class BasicTranslateCacheTest {
 
         @Override
         public boolean hasStartPosition() {
-            return false;
+            return true;
         }
 
         @Override
@@ -28,16 +28,20 @@ class BasicTranslateCacheTest {
 
         @Override
         public int compareTo(@NotNull Agent o) {
-            if(o instanceof TestAgent agent) {
-                return Integer.compare(priority, agent.priority);
-            }
-
-            return 0;
+            return Integer.compare(priority, ((TestAgent)o).priority);
         }
     }
 
     @Test
-    void removeLikeAgents() {
+    void sharedCache() {
+        Agent smaller = new TestAgent(0);
+        Agent larger = new TestAgent(1);
+        Agent largest = new TestAgent(2);
 
+        TranslateCache cache = new BasicTranslateCache();
+        cache.offer(larger, 0, 0, 0, 0, 0, 0, Vec3I.ORIGIN);
+        assertEquals(cache.forAgent(smaller, 0, 0, 0, 0, 0, 0).getResult(), Vec3I.ORIGIN);
+        assertEquals(cache.forAgent(larger, 0, 0, 0, 0, 0, 0).getResult(), Vec3I.ORIGIN);
+        assertNull(cache.forAgent(largest, 0, 0, 0, 0, 0, 0).getResult());
     }
 }
