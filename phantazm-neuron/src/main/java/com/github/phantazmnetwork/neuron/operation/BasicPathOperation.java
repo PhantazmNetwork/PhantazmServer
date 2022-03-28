@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeQueue;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +38,7 @@ public class BasicPathOperation implements PathOperation {
         this.explorer = Objects.requireNonNull(explorer, "explorer");
 
         this.openSet = new NodeQueue();
-        this.graph = new Object2ObjectRBTreeMap<>();
+        this.graph = new Object2ObjectOpenHashMap<>();
         this.state = State.IN_PROGRESS;
 
         Node initial = new Node(start, 0, calculator.heuristic(start, destination), null);

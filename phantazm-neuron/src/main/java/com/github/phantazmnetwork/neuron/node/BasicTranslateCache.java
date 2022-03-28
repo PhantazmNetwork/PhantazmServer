@@ -1,153 +1,102 @@
 package com.github.phantazmnetwork.neuron.node;
 
+import com.github.phantazmnetwork.commons.sync.LockUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class BasicTranslateCache implements TranslateCache {
-    private static class PositionCacheKey implements Comparable<AgentCacheKey> {
-        protected final Vec3I position;
-        protected final Vec3I delta;
-
-        private PositionCacheKey(Vec3I position, Vec3I delta) {
-            this.position = position;
-            this.delta = delta;
-        }
-
-        @Override
-        public int compareTo(@NotNull BasicTranslateCache.AgentCacheKey o) {
-            int positionCompare = position.compareTo(o.position);
-            if(positionCompare == 0) {
-                return delta.compareTo(o.delta);
-            }
-
-            return positionCompare;
-        }
-    }
-
-    private static class AgentCacheKey extends PositionCacheKey {
-        private final Agent agent;
-
-        private AgentCacheKey(Agent agent, Vec3I position, Vec3I delta) {
-            super(position, delta);
-            this.agent = agent;
-        }
-
-        @Override
-        public int compareTo(@NotNull BasicTranslateCache.AgentCacheKey o) {
-            int agentCompare = agent.compareTo(o.agent);
-            if(agentCompare == 0) {
-                return super.compareTo(o);
-            }
-
-            return agentCompare;
-        }
-    }
+    private record TranslateKey(Vec3I getPosition, Vec3I getOffset) {}
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private final SortedMap<PositionCacheKey, Vec3I> cache = new Object2ObjectAVLTreeMap<>();
+    private final SortedMap<Agent, Map<TranslateKey, Vec3I>> cache = new Object2ObjectAVLTreeMap<>();
 
     @Override
     public @NotNull Result forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ) {
-        Vec3I position = Vec3I.of(x, y, z);
-        Vec3I delta = Vec3I.of(dX, dY, dZ);
+        SortedMap<Agent, Map<TranslateKey, Vec3I>> tail = cache.tailMap(agent);
+        return LockUtils.lock(readWriteLock.readLock(), () -> {
+            if(!tail.isEmpty()) {
+                //pick the smallest agent as it can go all places larger agents can
+                Agent smallest = tail.firstKey();
+                Map<TranslateKey, Vec3I> map = cache.get(smallest);
+                if(!map.isEmpty()) {
+                    TranslateKey key = new TranslateKey(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
+                    Vec3I cached = map.get(key);
 
-        AgentCacheKey agentKey = new AgentCacheKey(agent, position, delta);
-
-        Lock readLock = readWriteLock.readLock();
-        try {
-            readLock.lock();
-            SortedMap<PositionCacheKey, Vec3I> candidates = cache.tailMap(agentKey);
-
-            //no smaller agents, but we might have an exact match
-            if(candidates.isEmpty()) {
-                //no exact match: cache miss
-                if(!cache.containsKey(agentKey)) {
-                    return Result.MISS;
+                    if(cached != null) {
+                        //cache hit
+                        return new Result(true, cached);
+                    }
+                    else if(agent.compareTo(smallest) == 0 && map.containsKey(key)) {
+                        /*
+                        null is a cache hit if and only if the smallest agent is the same size as us. if we're smaller
+                        than the smallest agent currently in the cache, we might be able to go places it can't, so it's
+                        necessary to indicate a cache miss
+                         */
+                        return Result.NULL_HIT;
+                    }
                 }
-
-                Vec3I translate = cache.get(agentKey);
-                return translate == null ? Result.NULL_HIT : new Result(true, translate);
             }
 
-            //now, search candidates using ONLY the position as a key, which ignores the agent
-            PositionCacheKey positionKey = new PositionCacheKey(position, delta);
-            if(!candidates.containsKey(positionKey)) {
-                return Result.MISS;
-            }
-
-            Vec3I translate = candidates.get(positionKey);
-            return translate == null ? Result.NULL_HIT : new Result(true, translate);
-        }
-        finally {
-            readLock.unlock();
-        }
+            return Result.MISS;
+        });
     }
 
     @Override
     public void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ, @Nullable Vec3I result) {
-        Lock writeLock = readWriteLock.writeLock();
+        //get agents smaller than this (they can go all places we can)
+        SortedMap<Agent, Map<TranslateKey, Vec3I>> head = cache.headMap(agent);
+        LockUtils.lock(readWriteLock.readLock(), () -> {
+            if(result != null) {
+                Agent agentKey;
 
-        AgentCacheKey key = new AgentCacheKey(agent, Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
+                //if head is empty, we may have an exact match for agent, or a smaller element
+                if(!head.isEmpty()) {
+                    //if we have smaller elements, pick the smallest
+                    agentKey = head.firstKey();
+                }
+                else {
+                    agentKey = agent;
+                }
 
-        try {
-            writeLock.lock();
-            cache.put(key, result);
-        }
-        finally {
-            writeLock.unlock();
-        }
+                LockUtils.lock(readWriteLock.writeLock(), () -> {
+                    cache.computeIfAbsent(agentKey, BasicTranslateCache::makeMap).put(new TranslateKey(Vec3I.of(x, y,
+                            z), Vec3I.of(dX, dY, dZ)), result);
+                });
+            }
+            else {
+                //null result means we only store the value if we have an identical agent
+                Map<TranslateKey, Vec3I> map = cache.get(agent);
+                if(map != null) {
+                    LockUtils.lock(readWriteLock.writeLock(), () -> {
+                        map.put(new TranslateKey(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ)), null);
+                    });
+                }
+            }
+        });
     }
 
     @Override
     public void remove(@NotNull Agent agent) {
-        Iterator<Map.Entry<PositionCacheKey, Vec3I>> entryIterator = cache.entrySet().iterator();
-        Lock writeLock = readWriteLock.writeLock();
-
-        try {
-            writeLock.lock();
-            while(entryIterator.hasNext()) {
-                Map.Entry<PositionCacheKey, Vec3I> entry = entryIterator.next();
-                if(entry.getKey() instanceof AgentCacheKey agentKey && agentKey.agent == agent) {
-                    entryIterator.remove();
-                }
-            }
-        }
-        finally {
-            writeLock.unlock();
-        }
+        LockUtils.lock(readWriteLock.writeLock(), () -> {
+            cache.remove(agent);
+        });
     }
 
     @Override
     public void clear() {
-        Lock writeLock = readWriteLock.writeLock();
-        try {
-            writeLock.lock();
-            cache.clear();
-        }
-        finally {
-            writeLock.unlock();
-        }
+        LockUtils.lock(readWriteLock.writeLock(), cache::clear);
     }
 
-    @Override
-    public int size() {
-        Lock readLock = readWriteLock.readLock();
-        try {
-            readLock.lock();
-            return cache.size();
-        }
-        finally {
-            readLock.unlock();
-        }
+    private static Map<TranslateKey, Vec3I> makeMap(Agent agent) {
+        return new Object2ObjectOpenHashMap<>();
     }
 }

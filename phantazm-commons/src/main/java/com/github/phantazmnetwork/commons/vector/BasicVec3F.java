@@ -31,4 +31,9 @@ final record BasicVec3F(float getX, float getY, float getZ) implements Vec3F {
 
         return xCompare;
     }
+
+    @Override
+    public String toString() {
+        return "Vec3F[x=" + getX + ", y=" + getY + ", z=" + getZ + "]";
+    }
 }

@@ -31,4 +31,9 @@ final record BasicVec3I(int getX, int getY, int getZ) implements Vec3I {
 
         return xCompare;
     }
+
+    @Override
+    public String toString() {
+        return "Vec3I[x=" + getX + ", y=" + getY + ", z=" + getZ + "]";
+    }
 }

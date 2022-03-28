@@ -31,4 +31,9 @@ final record BasicVec3D(double getX, double getY, double getZ) implements Vec3D 
 
         return xCompare;
     }
+
+    @Override
+    public String toString() {
+        return "Vec3D[x=" + getX + ", y=" + getY + ", z=" + getZ + "]";
+    }
 }

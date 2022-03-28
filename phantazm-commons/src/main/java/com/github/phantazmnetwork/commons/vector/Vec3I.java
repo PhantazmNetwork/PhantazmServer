@@ -36,8 +36,11 @@ public interface Vec3I extends Comparable<Vec3I> {
     Vec3I ORIGIN = of(0, 0, 0);
 
     /**
-     * Returns an immutable Vec3I implementation. This may not always create a new vector; common values may (but are
-     * not guaranteed to be) returned from a persistent cache.
+     * <p>Returns an immutable Vec3I implementation. This may not always create a new vector; common values may (but are
+     * not guaranteed to be) returned from a persistent cache.</p>
+     *
+     * @apiNote This method is threadsafe, as it relies only on the global {@link Vec3IPool} instance to supply cached
+     * values.
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component

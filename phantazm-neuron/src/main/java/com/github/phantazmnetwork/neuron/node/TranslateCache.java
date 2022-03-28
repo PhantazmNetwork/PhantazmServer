@@ -18,6 +18,4 @@ public interface TranslateCache {
     void remove(@NotNull Agent agent);
 
     void clear();
-
-    int size();
 }
