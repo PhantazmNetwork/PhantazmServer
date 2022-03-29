@@ -26,10 +26,6 @@ public class BasicTranslateCache implements TranslateCache {
             }
         }
 
-        if(this.descriptors.isEmpty()) {
-            throw new IllegalArgumentException("Iterable must supply at least one descriptor");
-        }
-
         this.cache = Caffeine.newBuilder().maximumSize(2048).build();
     }
 
@@ -58,16 +54,18 @@ public class BasicTranslateCache implements TranslateCache {
     @Override
     public void offer(@NotNull Agent.Descriptor descriptor, int x, int y, int z, int dX, int dY, int dZ,
                       @Nullable Vec3I result) {
-        SortedSet<Agent.Descriptor> head = descriptors.headSet(descriptor);
-
         //null results are treated differently: only cache if we're an exact match
         if(result == null) {
             if(descriptors.contains(descriptor)) {
                 cache.put(new CacheKey(descriptor, Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ)), Wrapper.nullWrapper());
             }
         }
-        else if(!head.isEmpty()) {
-            cache.put(new CacheKey(head.first(), Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ)), Wrapper.immutable(result));
+        else {
+            SortedSet<Agent.Descriptor> head = descriptors.headSet(descriptor);
+            if(!head.isEmpty()) {
+                cache.put(new CacheKey(head.first(), Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ)), Wrapper
+                        .immutable(result));
+            }
         }
     }
 
