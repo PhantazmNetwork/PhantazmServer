@@ -16,18 +16,18 @@ public abstract class CachingTranslator implements NodeTranslator {
 
     @Override
     public @Nullable Vec3I translate(int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
-        Agent agent = getAgent();
-        TranslateCache.Result result = cache.forAgent(agent, x, y, z, deltaX, deltaY, deltaZ);
+        Agent.Descriptor agentDescriptor = getDescriptor();
+        TranslateCache.Result result = cache.forAgent(agentDescriptor, x, y, z, deltaX, deltaY, deltaZ);
         if(result.isHit()) {
             return result.getResult();
         }
 
         Vec3I translate = doTranslate(x, y, z, deltaX, deltaY, deltaZ);
-        cache.offer(agent, x, y, z, deltaX, deltaY, deltaZ, translate);
+        cache.offer(agentDescriptor, x, y, z, deltaX, deltaY, deltaZ, translate);
         return translate;
     }
 
     protected abstract @Nullable Vec3I doTranslate(int x, int y, int z, int deltaX, int deltaY, int deltaZ);
 
-    protected abstract @NotNull Agent getAgent();
+    protected abstract @NotNull Agent.Descriptor getDescriptor();
 }

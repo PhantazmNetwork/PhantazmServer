@@ -11,11 +11,10 @@ public interface TranslateCache {
         public static final Result NULL_HIT = new Result(true, null);
     }
 
-    @NotNull Result forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ);
+    @NotNull Result forAgent(@NotNull Agent.Descriptor descriptor, int x, int y, int z, int dX, int dY, int dZ);
 
-    void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ, @Nullable Vec3I result);
-
-    void remove(@NotNull Agent agent);
+    void offer(@NotNull Agent.Descriptor descriptor, int x, int y, int z, int dX, int dY, int dZ,
+               @Nullable Vec3I result);
 
     void clear();
 }

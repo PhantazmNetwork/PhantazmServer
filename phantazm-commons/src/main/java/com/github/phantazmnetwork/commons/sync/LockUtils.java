@@ -2,9 +2,9 @@ package com.github.phantazmnetwork.commons.sync;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -33,6 +33,8 @@ public final class LockUtils {
         }
     }
 
+
+
     /**
      * Executes the provided {@link Runnable} after acquiring the given lock. The lock will always be released after the
      * runnable executes, even if it throws an unchecked exception.
@@ -49,11 +51,20 @@ public final class LockUtils {
         }
     }
 
+    public static boolean lockBoolean(@NotNull Lock lock, @NotNull BooleanSupplier booleanSupplier) {
+        try {
+            lock.lock();
+            return booleanSupplier.getAsBoolean();
+        }
+        finally {
+            lock.unlock();
+        }
+    }
+
     /**
      * Executes the provided {@link Callable}, returning its result, after acquiring the given lock. The lock will
      * always be released after the callable executes, even if it throws an exception.
-     * @apiNote The signature of this method differs from {@link LockUtils#lock(Lock, Supplier)} to avoid ambiguity
-     * issues.
+     * @apiNote The name of this method differs from {@link LockUtils#lock(Lock, Supplier)} to avoid ambiguity issues.
      * @param lock the lock to acquire before calling the callable
      * @param callable the callable used to produce the returned value
      * @param <TReturn>> the type of value returned by the callable

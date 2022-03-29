@@ -74,7 +74,7 @@ public class GroundTranslator extends CachingTranslator {
     }
 
     @Override
-    protected @NotNull Agent getAgent() {
-        return agent;
+    protected @NotNull Agent.Descriptor getDescriptor() {
+        return agent.getDescriptor();
     }
 }

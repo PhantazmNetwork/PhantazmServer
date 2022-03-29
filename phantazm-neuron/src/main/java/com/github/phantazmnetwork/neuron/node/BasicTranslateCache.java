@@ -1,98 +1,79 @@
 package com.github.phantazmnetwork.neuron.node;
-
-import com.github.phantazmnetwork.commons.sync.LockUtils;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.phantazmnetwork.commons.logic.Wrapper;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
-import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.SortedSet;
 
 public class BasicTranslateCache implements TranslateCache {
-    private record TranslateKey(Vec3I getPosition, Vec3I getOffset) {}
+    private record CacheKey(Agent.Descriptor getDescriptor, Vec3I getPosition, Vec3I getOffset) { }
 
-    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private final SortedMap<Agent, Map<TranslateKey, Vec3I>> cache = new Object2ObjectAVLTreeMap<>();
+    //descriptors set is only written to during object construction, therefore we don't need to synchronize reads
+    private final SortedSet<Agent.Descriptor> descriptors = new ObjectRBTreeSet<>();
 
-    @Override
-    public @NotNull Result forAgent(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ) {
-        SortedMap<Agent, Map<TranslateKey, Vec3I>> tail = cache.tailMap(agent);
-        TranslateKey key = new TranslateKey(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
-        return LockUtils.lock(readWriteLock.readLock(), () -> {
-            if(!tail.isEmpty()) {
-                //pick the smallest agent as it can go all places larger agents can
-                Agent smallest = tail.firstKey();
-                Map<TranslateKey, Vec3I> map = cache.get(smallest);
-                if(!map.isEmpty()) {
-                    Vec3I cached = map.get(key);
+    //cache impls are specified to be threadsafe
+    private final Cache<CacheKey, Wrapper<Vec3I>> cache;
 
-                    if(cached != null) {
-                        //cache hit
-                        return new Result(true, cached);
-                    }
-                    else if(agent.compareTo(smallest) == 0 && map.containsKey(key)) {
-                        /*
-                        null is a cache hit if and only if the smallest agent is the same size as us. if we're smaller
-                        than the smallest agent currently in the cache, we might be able to go places it can't, so it's
-                        necessary to indicate a cache miss
-                         */
-                        return Result.NULL_HIT;
-                    }
-                }
+    public BasicTranslateCache(@NotNull Iterable<? extends Agent.Descriptor> descriptors) {
+        for(Agent.Descriptor descriptor : descriptors) {
+            if(!this.descriptors.add(descriptor)) {
+                throw new IllegalArgumentException("Duplicate descriptors are not permitted");
             }
+        }
 
-            return Result.MISS;
-        });
+        if(this.descriptors.isEmpty()) {
+            throw new IllegalArgumentException("Iterable must supply at least one descriptor");
+        }
+
+        this.cache = Caffeine.newBuilder().maximumSize(2048).build();
     }
 
     @Override
-    public void offer(@NotNull Agent agent, int x, int y, int z, int dX, int dY, int dZ, @Nullable Vec3I result) {
-        //get agents smaller than this (they can go all places we can)
-        SortedMap<Agent, Map<TranslateKey, Vec3I>> head = cache.headMap(agent);
-        TranslateKey key = new TranslateKey(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
-        LockUtils.lock(readWriteLock.writeLock(), () -> {
-            if(result != null) {
-                Agent agentKey;
+    public @NotNull Result forAgent(@NotNull Agent.Descriptor descriptor, int x, int y, int z, int dX, int dY, int dZ) {
+        SortedSet<Agent.Descriptor> tail = descriptors.tailSet(descriptor);
 
-                //if head is empty, we may have an exact match for agent, or a smaller element
-                if(!head.isEmpty()) {
-                    //if we have smaller elements, pick the smallest
-                    agentKey = head.firstKey();
+        //operations on cache don't need to be synchronized because it is threadsafe
+        if(!tail.isEmpty()) {
+            Wrapper<Vec3I> vectorWrapper = cache.getIfPresent(new CacheKey(tail.first(), Vec3I.of(x, y, z), Vec3I
+                    .of(dX, dY, dZ)));
+            if(vectorWrapper != null) {
+                Vec3I value = vectorWrapper.get();
+                if(value != null) {
+                    return new Result(true, value);
                 }
-                else {
-                    agentKey = agent;
-                }
-
-                cache.computeIfAbsent(agentKey, BasicTranslateCache::makeMap).put(key, result);
-            }
-            else {
-                //null result means we only store the value if we have an identical agent
-                Map<TranslateKey, Vec3I> map = cache.get(agent);
-                if(map != null) {
-                    map.put(key, null);
+                else if(descriptors.contains(descriptor)) {
+                    return Result.NULL_HIT;
                 }
             }
-        });
+        }
+
+        return Result.MISS;
     }
 
     @Override
-    public void remove(@NotNull Agent agent) {
-        LockUtils.lock(readWriteLock.writeLock(), () -> {
-            cache.remove(agent);
-        });
+    public void offer(@NotNull Agent.Descriptor descriptor, int x, int y, int z, int dX, int dY, int dZ,
+                      @Nullable Vec3I result) {
+        SortedSet<Agent.Descriptor> head = descriptors.headSet(descriptor);
+
+        //null results are treated differently: only cache if we're an exact match
+        if(result == null) {
+            if(descriptors.contains(descriptor)) {
+                cache.put(new CacheKey(descriptor, Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ)), Wrapper.nullWrapper());
+            }
+        }
+        else if(!head.isEmpty()) {
+            cache.put(new CacheKey(head.first(), Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ)), Wrapper.immutable(result));
+        }
     }
 
     @Override
     public void clear() {
-        LockUtils.lock(readWriteLock.writeLock(), cache::clear);
-    }
-
-    private static Map<TranslateKey, Vec3I> makeMap(Agent agent) {
-        return new Object2ObjectOpenHashMap<>();
+        cache.invalidateAll();
+        cache.cleanUp();
     }
 }

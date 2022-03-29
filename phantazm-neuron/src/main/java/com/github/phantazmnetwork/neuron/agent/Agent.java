@@ -16,8 +16,16 @@ import java.util.Comparator;
  * For the purposes of comparison, {@code a == b} only if a and b may access all the same nodes. These facts are used
  * to allow different but comparable agents to "share" cached values.</p>
  * @see PhysicalAgent
+ * @see GroundAgent
  */
 public interface Agent extends Comparable<Agent> {
+    record Descriptor(int getWeight) implements Comparable<Descriptor> {
+        @Override
+        public int compareTo(@NotNull Agent.Descriptor o) {
+            return Integer.compare(getWeight, o.getWeight);
+        }
+    }
+
     /**
      * Determines if the agent has a starting location. In other words, returns {@code true} if the agent is capable of
      * pathfinding, and {@code false} if it isn't. {@link PathOperation} implementations query this method before
@@ -49,4 +57,6 @@ public interface Agent extends Comparable<Agent> {
      * returns false
      */
     @NotNull Vec3I getStartPosition();
+
+    @NotNull Descriptor getDescriptor();
 }
