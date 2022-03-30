@@ -1,9 +1,12 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -25,12 +28,16 @@ class GroundExplorerTest {
                     .getArgument(5));
 
             if(shouldSkip.test(vec3I)) {
-                return null;
+                return Vec3I.ORIGIN;
             }
 
             return transform.apply(vec3I);
         });
-        return new GroundExplorer(mockTranslator, vectors);
+
+        PathContext mockContext = mock(PathContext.class);
+        when(mockContext.getStep(anyInt(), any())).thenReturn(null);
+        when(mockContext.watchSteps(anyInt(), any(), any())).thenAnswer(invocation -> invocation.getArgument(2));
+        return new GroundExplorer(mockContext, 0, mockTranslator, vectors);
     }
 
     private static void assertIteratorSameOrder(Iterator<?> expected, Iterator<?> actual) {

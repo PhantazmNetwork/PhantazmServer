@@ -9,18 +9,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class GroundTranslator extends CachingTranslator {
+@SuppressWarnings("ClassCanBeRecord")
+public class GroundTranslator implements NodeTranslator {
     private final Collider collider;
     private final GroundAgent agent;
 
-    public GroundTranslator(@NotNull TranslateCache cache, @NotNull Collider collider, @NotNull GroundAgent agent) {
-        super(cache);
+    public GroundTranslator(@NotNull Collider collider, @NotNull GroundAgent agent) {
         this.collider = Objects.requireNonNull(collider, "collider");
         this.agent = Objects.requireNonNull(agent, "agent");
     }
 
     @Override
-    public @Nullable Vec3I doTranslate(int x, int y, int z, int dX, int dY, int dZ) {
+    public @NotNull Vec3I translate(int x, int y, int z, int dX, int dY, int dZ) {
         //center of block at (x, y, z)
         double cX = x + 0.5;
         double cY = collider.heightAt(x, y, z);
@@ -40,8 +40,6 @@ public class GroundTranslator extends CachingTranslator {
         double highestY = collider.highestCollisionAlong(oX, oY, oZ, width, height, width, dX, dY, dZ);
         double highestJumpY = cY + jump;
 
-        //check to make sure we can make the first jump, if not we'll just return null
-        Vec3I result = null;
         if(highestY <= highestJumpY) {
             if(highestY == Double.NEGATIVE_INFINITY) { //NEGATIVE_INFINITY means no collision was found
                 oX += dX;
@@ -51,7 +49,7 @@ public class GroundTranslator extends CachingTranslator {
                 float fall = agent.getFallTolerance();
                 highestY = collider.highestCollisionAlong(oX, oY, oZ, width, height, width, 0, -fall, 0);
                 if(highestY != Double.NEGATIVE_INFINITY) {
-                    result = Vec3I.of(dX, (int) Math.floor(highestY), dZ);
+                    return Vec3I.of(dX, (int) Math.floor(highestY), dZ);
                 }
             }
             else if(jump > 0F) { //we should try to perform a jump, assuming we even can
@@ -63,18 +61,12 @@ public class GroundTranslator extends CachingTranslator {
 
                     highestY = collider.highestCollisionAlong(oX, oY, oZ, width, height, width, dX, dY, dZ);
                     if(highestY == Double.NEGATIVE_INFINITY) { //gap found
-                        result = Vec3I.of(dX, (int) Math.floor(oY), dZ);
-                        break;
+                        return Vec3I.of(dX, (int) Math.floor(oY), dZ);
                     }
                 }
             }
         }
 
-        return result;
-    }
-
-    @Override
-    protected @NotNull Agent.Descriptor getDescriptor() {
-        return agent.getDescriptor();
+        return Vec3I.ORIGIN;
     }
 }

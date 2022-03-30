@@ -45,9 +45,7 @@ public interface Vec3D extends Comparable<Vec3D> {
         return x1 == x2 && y1 == y2 && z1 == z2;
     }
 
-    static boolean fuzzyEquals(double x1, double y1, double z1, double x2, double y2, double z2) {
-        return Math.abs(x1 - x2) < VectorConstants.EPSILON && Math.abs(y1 - y2) < VectorConstants.EPSILON &&
-                Math.abs(z1 - z2) < VectorConstants.EPSILON;
-
+    static boolean fuzzyEquals(double x1, double y1, double z1, double x2, double y2, double z2, double epsilon) {
+        return Math.abs(x1 - x2) < epsilon && Math.abs(y1 - y2) < epsilon && Math.abs(z1 - z2) < epsilon;
     }
 }

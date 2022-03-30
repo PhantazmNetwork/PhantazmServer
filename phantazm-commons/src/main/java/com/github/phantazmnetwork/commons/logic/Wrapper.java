@@ -3,16 +3,18 @@ package com.github.phantazmnetwork.commons.logic;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * A simple container object which may contain some value, or {@code null}. Useful when lambda expressions need to pass
- * data outside their scope through captured variables.
+ * A simple container object which may contain some value, or {@code null}. The mutable implementation is useful when
+ * lambda expressions need to pass data outside their scope through captured variables. Either may be used in cases
+ * where it's necessary to distinguish between absence of a value and a null value, for example as a value stored in a
+ * map.
  * @param <T> the type of object stored in this reference
  */
-public interface Wrapper<T> extends Supplier<T> {
-    @SuppressWarnings("ClassCanBeRecord")
-    class Immutable<T> implements Wrapper<T> {
+public abstract class Wrapper<T> implements Supplier<T> {
+    private static final class Immutable<T> extends Wrapper<T> {
         private final T value;
 
         private Immutable(T value) {
@@ -20,21 +22,17 @@ public interface Wrapper<T> extends Supplier<T> {
         }
 
         @Override
-        public void set(@Nullable T value) {
-            throwSetException();
-        }
-
-        @Override
         public T get() {
             return value;
         }
 
-        private static void throwSetException() {
-            throw new UnsupportedOperationException("This reference is immutable");
+        @Override
+        public String toString() {
+            return "Wrapper.Immutable{value=" + value + "}";
         }
     }
 
-    class Mutable<T> implements Wrapper<T> {
+    private static final class Mutable<T> extends Wrapper<T> {
         private T value;
 
         private Mutable(T value) {
@@ -50,35 +48,94 @@ public interface Wrapper<T> extends Supplier<T> {
         public T get() {
             return value;
         }
-    }
 
-    /**
-     * Sets the value stored in this wrapper.
-     * @param value the new value
-     * @throws UnsupportedOperationException if this implementation is immutable
-     */
-    void set(@Nullable T value);
+        @Override
+        public String toString() {
+            return "Wrapper.Immutable{value=" + value + "}";
+        }
+    }
 
     /**
      * The immutable null wrapper, used by {@link Wrapper#nullWrapper()}.
      */
-    Wrapper<?> NULL = new Wrapper<>() {
-        @Override
-        public void set(@Nullable Object value) {
-            Immutable.throwSetException();
-        }
-
+    public static final Wrapper<?> NULL = new Wrapper<>() {
         @Override
         public Object get() {
             return null;
         }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(obj == null) {
+                return false;
+            }
+
+            if(obj instanceof Wrapper<?> other) {
+                return other.get() == null;
+            }
+
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "Wrapper.Immutable{value=null}";
+        }
     };
 
-    static <T> Wrapper<T> mutable(@Nullable T value) {
+    //disallow subclassing anywhere else
+    private Wrapper() {}
+
+    /**
+     * Sets the value stored in this wrapper. Throws an {@link UnsupportedOperationException} by default.
+     * @param value the new value
+     * @throws UnsupportedOperationException if this implementation is immutable
+     */
+    void set(@Nullable T value) {
+        throw new UnsupportedOperationException("This Wrapper is immutable");
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(get());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) {
+            return false;
+        }
+
+        if(obj instanceof Wrapper<?> other) {
+            return Objects.equals(get(), other.get());
+        }
+
+        return false;
+    }
+
+    /**
+     * Creates and returns a new, mutable Wrapper implementation.
+     * @param value the value to initially store in the wrapper
+     * @param <T> the type of value held in the wrapper
+     * @return a mutable Wrapper implementation
+     */
+    public static <T> @NotNull Wrapper<T> mutable(@Nullable T value) {
         return new Mutable<>(value);
-    };
+    }
 
-    static <T> Wrapper<T> immutable(@Nullable T value) {
+    /**
+     * Creates and returns an immutable Wrapper implementation. If the given value is null, the common immutable null
+     * wrapper will be returned.
+     * @param value the value stored in this wrapper
+     * @param <T> the type of object held in this wrapper
+     * @return a new immutable wrapper implementation if value is non-null, otherwise the shared null instance
+     */
+    public static <T> @NotNull Wrapper<T> immutable(@Nullable T value) {
         if(value == null) {
             return nullWrapper();
         }
@@ -91,8 +148,8 @@ public interface Wrapper<T> extends Supplier<T> {
      * @param <T> the type of reference held by this instance
      * @return the null reference, after casting
      */
-    static <T> @NotNull Wrapper<T> nullWrapper() {
+    public static <T> @NotNull Wrapper<T> nullWrapper() {
         //noinspection unchecked
-        return (Wrapper<T>)NULL;
+        return (Wrapper<T>) NULL;
     }
 }

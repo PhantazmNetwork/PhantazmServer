@@ -19,13 +19,6 @@ import java.util.Comparator;
  * @see GroundAgent
  */
 public interface Agent extends Comparable<Agent> {
-    record Descriptor(int getWeight) implements Comparable<Descriptor> {
-        @Override
-        public int compareTo(@NotNull Agent.Descriptor o) {
-            return Integer.compare(getWeight, o.getWeight);
-        }
-    }
-
     /**
      * Determines if the agent has a starting location. In other words, returns {@code true} if the agent is capable of
      * pathfinding, and {@code false} if it isn't. {@link PathOperation} implementations query this method before
@@ -58,5 +51,5 @@ public interface Agent extends Comparable<Agent> {
      */
     @NotNull Vec3I getStartPosition();
 
-    @NotNull Descriptor getDescriptor();
+    int getDescriptor();
 }

@@ -49,5 +49,4 @@ public enum AuthType {
         Objects.requireNonNull(name, "name");
         return Optional.ofNullable(BY_NAME.get(name));
     }
-
 }

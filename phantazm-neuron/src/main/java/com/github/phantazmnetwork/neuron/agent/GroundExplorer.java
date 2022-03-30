@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +14,7 @@ import java.util.Objects;
  * An {@link Explorer} implementation designed for ground-based movement. Agents can walk in any cardinal direction as
  * well as diagonally, and can perform jumps in certain circumstances.
  */
-@SuppressWarnings("ClassCanBeRecord")
-public class GroundExplorer implements Explorer {
+public class GroundExplorer extends ContextualExplorer {
     private final NodeTranslator translator;
     private final Iterable<? extends Vec3I> vectors;
 
@@ -23,13 +23,15 @@ public class GroundExplorer implements Explorer {
      * @param translator the translator used by this explorer
      * @param vectors the movements steps that will be explored
      */
-    public GroundExplorer(@NotNull NodeTranslator translator, @NotNull Iterable<? extends Vec3I> vectors) {
+    public GroundExplorer(@NotNull PathContext context, int descriptor, @NotNull NodeTranslator translator,
+                          @NotNull Iterable<? extends Vec3I> vectors) {
+        super(context, descriptor);
         this.translator = Objects.requireNonNull(translator, "agent");
         this.vectors = Objects.requireNonNull(vectors, "vectors");
     }
 
     @Override
-    public @NotNull Iterable<? extends Vec3I> walkVectors(@NotNull Node current) {
+    public @NotNull Iterator<? extends Vec3I> getWalkIterator(@NotNull Node current) {
         Vec3I currentPos = current.getPosition();
         int x = currentPos.getX();
         int y = currentPos.getY();
@@ -41,7 +43,7 @@ public class GroundExplorer implements Explorer {
         Vec3I parentPos = parentNode == null ? null : parentNode.getPosition();
 
         //use AdvancingIterator to reduce memory footprint; we don't need to actually store nodes in a collection
-        return () -> new AdvancingIterator<>() {
+        return new AdvancingIterator<>() {
             private final Iterator<? extends Vec3I> walkIterator = vectors.iterator();
 
             @Override
@@ -56,16 +58,14 @@ public class GroundExplorer implements Explorer {
                      */
                     if(parentPos == null || !Vec3I.equals(parentPos.getX(), parentPos.getY(), parentPos.getZ(), x +
                                     delta.getX(), y + delta.getY(), z + delta.getZ())) {
-                        //this might be null, which indicates our walk delta is not traversable
+                        //this might be (0, 0, 0), which indicates our walk delta is not traversable
                         Vec3I newDelta = translator.translate(x, y, z, delta.getX(), delta.getY(), delta.getZ());
 
                         /*
                         only explore the next node if our delta is non-zero (in other words, if we're going to get a new
-                        node). PathOperation implementations should handle this case gracefully, but if they don't this
-                        may prevent odd behavior
+                        node)
                          */
-                        if(newDelta != null && !Vec3I.equals(newDelta.getX(), newDelta.getY(), newDelta.getZ(), 0,
-                                0, 0)) {
+                        if(!Vec3I.equals(newDelta.getX(), newDelta.getY(), newDelta.getZ(), 0, 0, 0)) {
                             super.value = newDelta;
                             return true;
                         }

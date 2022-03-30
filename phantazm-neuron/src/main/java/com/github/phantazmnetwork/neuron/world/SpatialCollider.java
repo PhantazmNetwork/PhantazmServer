@@ -1,17 +1,10 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.commons.vector.VectorConstants;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.DoubleFunction;
 import java.util.function.Predicate;
-import java.util.function.ToDoubleFunction;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class SpatialCollider implements Collider {
@@ -24,6 +17,8 @@ public class SpatialCollider implements Collider {
     private interface ValueFunction {
         double apply(Solid solid, int y);
     }
+
+    private static final double EPSILON = 1E-5;
 
     private final Space space;
 
@@ -98,13 +93,13 @@ public class SpatialCollider implements Collider {
             double onY = oY + vY;
             double onZ = oZ + vZ;
 
-            double aMinX = Math.min(oX, onX) + VectorConstants.EPSILON;
-            double aMinY = Math.min(oY, onY) + VectorConstants.EPSILON;
-            double aMinZ = Math.min(oZ, onZ) + VectorConstants.EPSILON;
+            double aMinX = Math.min(oX, onX) + EPSILON;
+            double aMinY = Math.min(oY, onY) + EPSILON;
+            double aMinZ = Math.min(oZ, onZ) + EPSILON;
 
-            double aMaxX = Math.max(oX, onX) - VectorConstants.EPSILON;
-            double aMaxY = Math.max(oY, onY) - VectorConstants.EPSILON;
-            double aMaxZ = Math.max(oZ, onZ) - VectorConstants.EPSILON;
+            double aMaxX = Math.max(oX, onX) - EPSILON;
+            double aMaxY = Math.max(oY, onY) - EPSILON;
+            double aMaxZ = Math.max(oZ, onZ) - EPSILON;
 
             Space.Order.IterationVariables variables = overlapping.getVariables();
             int yEnd = variables.getThirdEnd() - variables.getThirdIncrement();

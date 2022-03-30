@@ -3,8 +3,8 @@ package com.github.phantazmnetwork.commons.vector;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * <p>A "cubical" cache of immutable Vec3I instances. Cached values are stored in an array. Values are lazily
- * initialized. Initialized vectors are instances of {@link BasicVec3I}.</p>
+ * <p>A "cubical" cache of immutable Vec3I instances. Cached values are stored in an array, which is populated with
+ * {@link BasicVec3I} instances in the constructor.</p>
  *
  * <p>Since an array is initialized with capacity sufficient to hold all possible values for any given width, it is
  * important to avoid allocating a very large pool, as there will be a significant portion of wasted memory in many
