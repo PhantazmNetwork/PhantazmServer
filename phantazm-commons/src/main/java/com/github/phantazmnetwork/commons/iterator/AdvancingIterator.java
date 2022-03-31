@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.commons.iterator;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -48,6 +50,7 @@ public abstract class AdvancingIterator<TValue> implements Iterator<TValue> {
         if(!hasValue) {
             //so try to advance; if we fail to advance in next() then throw an exception because we're out of elements
             if(!(hasValue = advance())) {
+                value = null;
                 throw new NoSuchElementException();
             }
         }

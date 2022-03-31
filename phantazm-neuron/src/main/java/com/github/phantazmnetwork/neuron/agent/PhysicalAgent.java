@@ -10,5 +10,7 @@ import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 public interface PhysicalAgent extends Agent {
     float getWidth();
 
+    float getDepth();
+
     float getHeight();
 }

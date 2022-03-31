@@ -12,11 +12,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class SpatialColliderTest {
+    private static final double EPSILON = 1E-5;
+
     private static final Solid BOTTOM_HALF_CUBE = makeSolid(Vec3F.of(0, 0, 0), Vec3F.of(1, 0.5F, 1));
 
     private static SpatialCollider makeCollider(Map<Vec3I, Solid> collisions) {
         //use spy so we use the VoxelSpace implementation of solidsOverlapping
         //this is to avoid having to duplicate the complex functionality of VoxelSpace.BasicSolidIterator
+        //yes i'm aware this is not strictly good practice but i've deemed my sanity to be more important in this case
         Space mockSpace = spy(VoxelSpace.class);
         for(Map.Entry<Vec3I, Solid> entry : collisions.entrySet()) {
             Vec3I pos = entry.getKey();
@@ -66,8 +69,9 @@ class SpatialColliderTest {
 
                     for(Map.Entry<Vec3I, Solid> entry : FEET.entrySet()) {
                         Vec3I dir = entry.getKey();
-                        assertEquals(entry.getValue().getMax().getY(), collider.highestCollisionAlong(0, 0, 0,
-                                1, 1, 1, dir.getX(), dir.getY(), dir.getZ()));
+                        assertEquals(entry.getValue().getMax().getY(), collider.highestCollisionAlong(EPSILON, EPSILON,
+                                EPSILON, 1 - EPSILON * 2, 1 - EPSILON * 2, 1 - EPSILON * 2, dir.getX(), dir.getY(),
+                                dir.getZ()));
                     }
                 }
 

@@ -33,8 +33,6 @@ public final class LockUtils {
         }
     }
 
-
-
     /**
      * Executes the provided {@link Runnable} after acquiring the given lock. The lock will always be released after the
      * runnable executes, even if it throws an unchecked exception.
@@ -45,16 +43,6 @@ public final class LockUtils {
         try {
             lock.lock();
             runnable.run();
-        }
-        finally {
-            lock.unlock();
-        }
-    }
-
-    public static boolean lockBoolean(@NotNull Lock lock, @NotNull BooleanSupplier booleanSupplier) {
-        try {
-            lock.lock();
-            return booleanSupplier.getAsBoolean();
         }
         finally {
             lock.unlock();

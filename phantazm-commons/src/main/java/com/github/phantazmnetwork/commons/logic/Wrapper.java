@@ -56,7 +56,7 @@ public abstract class Wrapper<T> implements Supplier<T> {
     }
 
     /**
-     * The immutable null wrapper, used by {@link Wrapper#nullWrapper()}.
+     * The immutable null wrapper, used by {@link Wrapper#nullWrapper()}. Holds a value of {@code null}.
      */
     public static final Wrapper<?> NULL = new Wrapper<>() {
         @Override

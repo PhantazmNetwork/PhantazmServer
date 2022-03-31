@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+/**
+ * A {@link Collider} implementation
+ */
 @SuppressWarnings("ClassCanBeRecord")
 public class SpatialCollider implements Collider {
     @FunctionalInterface
@@ -17,8 +20,6 @@ public class SpatialCollider implements Collider {
     private interface ValueFunction {
         double apply(Solid solid, int y);
     }
-
-    private static final double EPSILON = 1E-5;
 
     private final Space space;
 
@@ -93,16 +94,16 @@ public class SpatialCollider implements Collider {
             double onY = oY + vY;
             double onZ = oZ + vZ;
 
-            double aMinX = Math.min(oX, onX) + EPSILON;
-            double aMinY = Math.min(oY, onY) + EPSILON;
-            double aMinZ = Math.min(oZ, onZ) + EPSILON;
+            double aMinX = Math.min(oX, onX);
+            double aMinY = Math.min(oY, onY);
+            double aMinZ = Math.min(oZ, onZ);
 
-            double aMaxX = Math.max(oX, onX) - EPSILON;
-            double aMaxY = Math.max(oY, onY) - EPSILON;
-            double aMaxZ = Math.max(oZ, onZ) - EPSILON;
+            double aMaxX = Math.max(oX, onX);
+            double aMaxY = Math.max(oY, onY);
+            double aMaxZ = Math.max(oZ, onZ);
 
             Space.Order.IterationVariables variables = overlapping.getVariables();
-            int yEnd = variables.getThirdEnd() - variables.getThirdIncrement();
+            int yEnd = variables.getThirdEnd();
 
             do {
                 Solid candidate = overlapping.next();

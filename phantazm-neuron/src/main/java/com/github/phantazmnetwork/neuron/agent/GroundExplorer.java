@@ -12,7 +12,8 @@ import java.util.Objects;
 
 /**
  * An {@link Explorer} implementation designed for ground-based movement. Agents can walk in any cardinal direction as
- * well as diagonally, and can perform jumps in certain circumstances.
+ * well as diagonally, and can perform jumps in certain circumstances. This class extends {@link ContextualExplorer}
+ * and therefore takes advantage of the caching functionality provided by {@link PathContext}.
  */
 public class GroundExplorer extends ContextualExplorer {
     private final NodeTranslator translator;
@@ -23,15 +24,15 @@ public class GroundExplorer extends ContextualExplorer {
      * @param translator the translator used by this explorer
      * @param vectors the movements steps that will be explored
      */
-    public GroundExplorer(@NotNull PathContext context, int descriptor, @NotNull NodeTranslator translator,
-                          @NotNull Iterable<? extends Vec3I> vectors) {
+    public GroundExplorer(@NotNull PathContext context, @NotNull Agent.Descriptor descriptor,
+                          @NotNull NodeTranslator translator, @NotNull Iterable<? extends Vec3I> vectors) {
         super(context, descriptor);
         this.translator = Objects.requireNonNull(translator, "agent");
         this.vectors = Objects.requireNonNull(vectors, "vectors");
     }
 
     @Override
-    public @NotNull Iterator<? extends Vec3I> getWalkIterator(@NotNull Node current) {
+    public @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current) {
         Vec3I currentPos = current.getPosition();
         int x = currentPos.getX();
         int y = currentPos.getY();

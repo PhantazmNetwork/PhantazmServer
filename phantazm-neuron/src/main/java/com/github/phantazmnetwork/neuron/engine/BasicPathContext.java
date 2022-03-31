@@ -4,29 +4,32 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
+import com.github.phantazmnetwork.neuron.agent.Agent;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 public class BasicPathContext implements PathContext {
-    private static final class Entry implements Comparable<Entry> {
-        private final int descriptor;
+    private final class Entry implements Comparable<Entry> {
+        private final Agent.Descriptor descriptor;
 
         //mutable so we can update entries in-place instead of needing to remove from the set
         private Iterable<Vec3I> iterable;
 
-        private Entry(int descriptor, Iterable<Vec3I> iterable) {
+        private Entry(Agent.Descriptor descriptor, Iterable<Vec3I> iterable) {
             this.descriptor = descriptor;
             this.iterable = iterable;
         }
 
+        private Entry(Agent.Descriptor descriptor) {
+            this(descriptor, null);
+        }
+
         @Override
-        public int compareTo(@NotNull BasicPathContext.Entry o) {
-            return Integer.compare(descriptor, o.descriptor);
+        public int compareTo(@NotNull Entry other) {
+            return comparator.compare(descriptor, other.descriptor);
         }
 
         @Override
@@ -44,40 +47,48 @@ public class BasicPathContext implements PathContext {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(descriptor);
+            return descriptor.hashCode();
         }
     }
 
-    //shared cache for immutable collections: should help cut down on useless duplicate objects
-    private static final Cache<Collection<? extends Vec3I>, Iterable<Vec3I>> ITERABLE_CACHE = Caffeine.newBuilder()
-            .maximumSize(256).build();
+    private final Comparator<Agent.Descriptor> comparator;
+    private final Cache<Vec3I, ObjectOpenHashSet<Entry>> positionalCache;
 
-    private final IntSet descriptors;
-    private final Cache<Vec3I, SortedSet<Entry>> cache;
+    //global cache shared among all BasicPathContext instances. reduces duplication of cached Iterables (lists)
+    private static final Cache<List<Vec3I>, Iterable<Vec3I>> ITERABLE_CACHE = Caffeine.newBuilder().maximumSize(128)
+            .build();
 
-    public BasicPathContext(@NotNull IntSet descriptors) {
-        this.cache = Caffeine.newBuilder().maximumSize(1024).build();
-        this.descriptors = new IntOpenHashSet(descriptors);
+    public BasicPathContext(@NotNull Comparator<Agent.Descriptor> comparator, int maximumCacheSize) {
+        this.comparator = Objects.requireNonNull(comparator, "comparator");
+        this.positionalCache = Caffeine.newBuilder().maximumSize(maximumCacheSize).build();
     }
 
     @Override
-    public @Nullable Iterable<Vec3I> getStep(int descriptor, @NotNull Vec3I origin) {
-        SortedSet<Entry> entries = cache.getIfPresent(origin);
+    public @NotNull Optional<Iterable<Vec3I>> getStep(@NotNull Vec3I origin, @NotNull Agent.Descriptor descriptor) {
+        ObjectOpenHashSet<Entry> entries = positionalCache.getIfPresent(origin);
         if(entries != null) {
-            SortedSet<Entry> largerOrEqual = entries.tailSet(new Entry(descriptor, null));
-            if(!largerOrEqual.isEmpty()) {
-                return largerOrEqual.first().iterable;
+            //use our own synchronized block instead of wrapping cache entries in a synchronized collection: if we did
+            //the latter, we'd not be able to take advantage of the get method, which is defined on ObjectRBTreeSet
+            Entry hit;
+            synchronized (entries) {
+                hit = entries.get(new Entry(descriptor));
+            }
+
+            if(hit != null) {
+                //.of instead of .ofNullable because the iterable should never be null under normal conditions, and if
+                //it is, it's probably a bug
+                return Optional.of(hit.iterable);
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public @NotNull Iterator<Vec3I> watchSteps(int descriptor, @NotNull Vec3I origin,
+    public @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull Agent.Descriptor descriptor,
                                                @NotNull Iterator<? extends Vec3I> steps) {
         return new AdvancingIterator<>() {
-            private final ArrayList<Vec3I> list = new ArrayList<>();
+            private final List<Vec3I> list = new ArrayList<>();
 
             @Override
             public boolean advance() {
@@ -85,52 +96,43 @@ public class BasicPathContext implements PathContext {
                     list.add(this.value = steps.next());
                     return true;
                 }
-                else {
-                    SortedSet<Entry> entries = cache.get(origin, key -> new ObjectRBTreeSet<>());
-                    Entry key = new Entry(descriptor, null);
 
-                    if(entries.contains(key)) {
-                        SortedSet<Entry> entriesTail = entries.tailSet(key);
-                        entriesTail.first().iterable = makeView(list);
-                    }
-                    else {
-                        SortedSet<Entry> entriesHead = entries.headSet(key);
-                        if(!entriesHead.isEmpty()) {
-                            entriesHead.first().iterable = makeView(list);
-                        }
-                        else if(descriptors.contains(descriptor)) {
-                            //only add new entry if it's in descriptors
-                            key.iterable = makeView(list);
-                            entries.add(key);
-                        }
-                    }
-
-                    return false;
+                ObjectOpenHashSet<Entry> entries = positionalCache.get(origin, key -> new ObjectOpenHashSet<>());
+                Entry inSet;
+                synchronized (entries) {
+                    //this method is specific to ObjectOpenHashSet and highly useful here, so we can avoid removing and
+                    //adding and instead update the entry in-place
+                    inSet = entries.addOrGet(new Entry(descriptor));
                 }
+
+                inSet.iterable = getView(list);
+                return false;
             }
         };
     }
 
     @Override
     public void invalidateOrigin(@NotNull Vec3I origin) {
-        cache.invalidate(origin);
+        positionalCache.invalidate(origin);
     }
 
     @Override
     public void invalidateOrigins(@NotNull Iterable<? extends Vec3I> steps) {
-        cache.invalidateAll(steps);
+        positionalCache.invalidateAll(steps);
     }
 
     @Override
     public void invalidateAll() {
-        cache.invalidateAll();
+        positionalCache.invalidateAll();
     }
 
-    private Iterable<Vec3I> makeView(ArrayList<? extends Vec3I> arrayList) {
-        if(arrayList.size() == 0) {
+    //List is specified here instead of Collection because the latter's contract does not mandate an equals/hashCode
+    //based on contents
+    private Iterable<Vec3I> getView(List<Vec3I> list) {
+        if(list.size() == 0) {
             return Collections.emptyList();
         }
 
-        return ITERABLE_CACHE.get(arrayList, key -> Collections.unmodifiableCollection(arrayList));
+        return ITERABLE_CACHE.get(list, Collections::unmodifiableList);
     }
 }

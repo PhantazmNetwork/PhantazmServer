@@ -10,15 +10,26 @@ import java.util.Comparator;
  * <p>Represents something capable of pathfinding. This is the most general representation of a navigation-capable
  * object, and generally all that is required to be used by a pathfinding algorithm such as A*. More specific
  * sub-interfaces exist to expose more complex functionality.</p>
- *
- * <p>Agent extends {@link Comparable}. Given two agents {@code a} and {@code b}, a is strictly larger than b if b can
- * be proven capable of reaching all nodes a may reach, <i>plus some number of additional nodes a may not access</i>.
- * For the purposes of comparison, {@code a == b} only if a and b may access all the same nodes. These facts are used
- * to allow different but comparable agents to "share" cached values.</p>
  * @see PhysicalAgent
  * @see GroundAgent
  */
-public interface Agent extends Comparable<Agent> {
+public interface Agent {
+    /**
+     * <p>Marker interface used to denote a lightweight object that represents the agent's unique characteristics.
+     * These characteristics are entirely implementation-defined.</p>
+     *
+     * <p>Descriptor objects must provide a proper {@code equals}/{@code hashCode} implementation. In general, they
+     * must be safe for use as keys to a hash-based map or entries in a hash-based set. Descriptors do not have to
+     * implement {@link Comparable}.</p>
+     *
+     * <p>Descriptors exist to ease the process of creating a total ordering of Agent objects. Descriptors should take
+     * up comparatively less memory than Agents themselves, and are thus free to be stored as a persistent key in a map
+     * or element in a set. Descriptors may also be shared between Agents that have identical characteristics.</p>
+     *
+     * <p>An specialized external {@link Comparator} should generally be used to compare instances of Descriptor. </p>
+     */
+    interface Descriptor {}
+
     /**
      * Determines if the agent has a starting location. In other words, returns {@code true} if the agent is capable of
      * pathfinding, and {@code false} if it isn't. {@link PathOperation} implementations query this method before
@@ -51,5 +62,10 @@ public interface Agent extends Comparable<Agent> {
      */
     @NotNull Vec3I getStartPosition();
 
-    int getDescriptor();
+    /**
+     * Returns the descriptor for this agent. Each unique Agent implementation should in general provide its own
+     * descriptor.
+     * @return the descriptor used to indicate how this agent compares to other agents
+     */
+    @NotNull Descriptor getDescriptor();
 }

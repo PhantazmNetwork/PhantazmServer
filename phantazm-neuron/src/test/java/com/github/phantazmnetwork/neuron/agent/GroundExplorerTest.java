@@ -5,8 +5,6 @@ import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class GroundExplorerTest {
+    private static final double EPSILON = 1E-5;
+
     private static GroundExplorer makeExplorer(Iterable<? extends Vec3I> vectors, Predicate<Vec3I> shouldSkip,
                                                Function<Vec3I, Vec3I> transform) {
         NodeTranslator mockTranslator = mock(NodeTranslator.class);
@@ -35,9 +35,9 @@ class GroundExplorerTest {
         });
 
         PathContext mockContext = mock(PathContext.class);
-        when(mockContext.getStep(anyInt(), any())).thenReturn(null);
-        when(mockContext.watchSteps(anyInt(), any(), any())).thenAnswer(invocation -> invocation.getArgument(2));
-        return new GroundExplorer(mockContext, 0, mockTranslator, vectors);
+        when(mockContext.getStep(any(), any())).thenReturn(null);
+        when(mockContext.watchSteps(any(), any(), any())).thenAnswer(invocation -> invocation.getArgument(2));
+        return new GroundExplorer(mockContext, mock(Agent.Descriptor.class), mockTranslator, vectors);
     }
 
     private static void assertIteratorSameOrder(Iterator<?> expected, Iterator<?> actual) {

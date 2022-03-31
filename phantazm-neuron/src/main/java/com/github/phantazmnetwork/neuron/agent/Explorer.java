@@ -12,9 +12,10 @@ import org.jetbrains.annotations.NotNull;
 public interface Explorer {
     /**
      * Produces an {@link Iterable} over {@link Vec3I} instances which may be added to {@code current} to produce new
-     * nodes (which will typically be explored by a {@link PathOperation}).
+     * nodes (which will typically be explored by a {@link PathOperation}). The iterable may actively perform
+     * calculations as it is iterated. It may also be returned from a cache.
      * @param current the node from which to search for new nodes to expand
      * @return an Iterable which will iterate over the new nodes
      */
-    @NotNull Iterable<? extends Vec3I> walkVectors(@NotNull Node current);
+    @NotNull Iterable<Vec3I> walkVectors(@NotNull Node current);
 }

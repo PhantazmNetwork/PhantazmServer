@@ -10,24 +10,20 @@ import java.util.Objects;
 
 public abstract class ContextualExplorer implements Explorer {
     private final PathContext context;
-    private final int descriptor;
+    private final Agent.Descriptor descriptor;
 
-    public ContextualExplorer(@NotNull PathContext context, int descriptor) {
+    public ContextualExplorer(@NotNull PathContext context, @NotNull Agent.Descriptor descriptor) {
         this.context = Objects.requireNonNull(context, "context");
-        this.descriptor = descriptor;
+        this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
     }
 
     @Override
-    public final @NotNull Iterable<? extends Vec3I> walkVectors(@NotNull Node current) {
+    public final @NotNull Iterable<Vec3I> walkVectors(@NotNull Node current) {
         Vec3I currentPos = current.getPosition();
-        Iterable<? extends Vec3I> cached = context.getStep(descriptor, currentPos);
-        if(cached != null) {
-            return cached;
-        }
+        return context.getStep(currentPos, descriptor).orElseGet(() -> () -> context.watchSteps(currentPos, descriptor,
+                getWalkIterator(current)));
 
-        return () -> context.watchSteps(descriptor, currentPos, getWalkIterator(current));
     }
 
-
-    protected abstract @NotNull Iterator<? extends Vec3I> getWalkIterator(@NotNull Node current);
+    protected abstract @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current);
 }

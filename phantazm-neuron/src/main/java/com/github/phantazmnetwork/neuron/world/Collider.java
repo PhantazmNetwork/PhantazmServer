@@ -13,6 +13,9 @@ import org.jetbrains.annotations.NotNull;
  * first vector (the "origin") represents one corner of the bounding box, and the second vector represents an offset —
  * a vector added to the origin to obtain the opposite corner from the first corner. Therefore, the lengths of each edge
  * of the AABB are represented by the absolute value of the corresponding components of the second vector.</p>
+ *
+ * <p>Collider implementations should not attempt to account for floating point imprecision issues. When performing
+ * collision checks, the caller must shrink the bounding box by a tolerance value.</p>
  */
 public interface Collider {
     /**
@@ -65,6 +68,11 @@ public interface Collider {
      */
     double heightAt(int x, int y, int z);
 
+    /**
+     * Convenience overload for {@link Collider#heightAt(int, int, int)} that takes a {@link Vec3I}
+     * @param vec3I the location to check for solids at
+     * @return the height of the highest solid, if present, else the y-component of the given vector
+     */
     default double heightAt(@NotNull Vec3I vec3I) {
         return heightAt(vec3I.getX(), vec3I.getY(), vec3I.getZ());
     }

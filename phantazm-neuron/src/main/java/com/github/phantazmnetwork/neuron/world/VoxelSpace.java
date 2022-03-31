@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class VoxelSpace implements Space {
-    class BasicSolidIterator extends AdvancingIterator<Solid> implements SolidIterator {
+    private class BasicSolidIterator extends AdvancingIterator<Solid> implements SolidIterator {
         private final Order order;
         private final Order.IterationVariables variables;
 
@@ -12,7 +12,7 @@ public abstract class VoxelSpace implements Space {
         private int second;
         private int third;
 
-        BasicSolidIterator(@NotNull Order order, @NotNull Order.IterationVariables variables) {
+        private BasicSolidIterator(@NotNull Order order, @NotNull Order.IterationVariables variables) {
             this.order = order;
             this.variables = variables;
             this.first = variables.getFirstOrigin() - variables.getFirstIncrement();
@@ -47,6 +47,11 @@ public abstract class VoxelSpace implements Space {
             this.first = first - variables.getFirstIncrement();
             this.second = second;
             this.third = third;
+        }
+
+        @Override
+        public @NotNull Space.Order getOrder() {
+            return order;
         }
 
         @Override
