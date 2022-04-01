@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -16,11 +17,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class GroundExplorerTest {
-    private static final double EPSILON = 1E-5;
-
-    private static GroundExplorer makeExplorer(Iterable<? extends Vec3I> vectors, Predicate<Vec3I> shouldSkip,
-                                               Function<Vec3I, Vec3I> transform) {
+class TranslationExplorerTest {
+    private static TranslationExplorer makeExplorer(Iterable<? extends Vec3I> vectors, Predicate<Vec3I> shouldSkip,
+                                                    Function<Vec3I, Vec3I> transform) {
         NodeTranslator mockTranslator = mock(NodeTranslator.class);
         when(mockTranslator.translate(anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt())).thenAnswer(invocation
                 -> {
@@ -35,9 +34,9 @@ class GroundExplorerTest {
         });
 
         PathContext mockContext = mock(PathContext.class);
-        when(mockContext.getStep(any(), any())).thenReturn(null);
+        when(mockContext.getStep(any(), any())).thenReturn(Optional.empty());
         when(mockContext.watchSteps(any(), any(), any())).thenAnswer(invocation -> invocation.getArgument(2));
-        return new GroundExplorer(mockContext, mock(Agent.Descriptor.class), mockTranslator, vectors);
+        return new TranslationExplorer(mockContext, "test", mockTranslator, vectors);
     }
 
     private static void assertIteratorSameOrder(Iterator<?> expected, Iterator<?> actual) {
@@ -59,7 +58,7 @@ class GroundExplorerTest {
     @Test
     void visitsExpected() {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0));
-        GroundExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> vec3I);
+        TranslationExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> vec3I);
 
         Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), walks.iterator());
@@ -68,7 +67,7 @@ class GroundExplorerTest {
     @Test
     void emptyWhenNull() {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0));
-        GroundExplorer explorer = makeExplorer(walks, vec3I -> true, vec3I -> vec3I);
+        TranslationExplorer explorer = makeExplorer(walks, vec3I -> true, vec3I -> vec3I);
         Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), Collections.emptyIterator());
     }
@@ -77,7 +76,8 @@ class GroundExplorerTest {
     void transformApplies() {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0), Vec3I.of(2, 0, 0), Vec3I.of(3, 0, 0));
         List<Vec3I> transformed = List.of(Vec3I.of(2, 0, 0), Vec3I.of(3, 0, 0), Vec3I.of(4, 0, 0));
-        GroundExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> Vec3I.of(vec3I.getX() + 1, 0, 0));
+        TranslationExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> Vec3I.of(vec3I.getX() + 1, 0,
+                0));
         Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), transformed.iterator());
     }

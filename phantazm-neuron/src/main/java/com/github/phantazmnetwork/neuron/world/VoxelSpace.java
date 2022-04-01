@@ -3,6 +3,11 @@ package com.github.phantazmnetwork.neuron.world;
 import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A standard extension of {@link Space} which provides an implementation of
+ * {@link Space#solidsOverlapping(double, double, double, double, double, double, Order)} based off of
+ * {@link Space#solidAt(int, int, int)}.
+ */
 public abstract class VoxelSpace implements Space {
     private class BasicSolidIterator extends AdvancingIterator<Solid> implements SolidIterator {
         private final Order order;

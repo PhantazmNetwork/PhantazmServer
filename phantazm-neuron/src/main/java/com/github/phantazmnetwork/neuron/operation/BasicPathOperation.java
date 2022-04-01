@@ -25,10 +25,18 @@ public class BasicPathOperation implements PathOperation {
     private final Map<Vec3I, Node> graph;
 
     private State state;
-    private Node current;
     private Node best;
     private PathResult result;
 
+    /**
+     * Creates a new instance of BasicPathOperation from the given arguments.
+     * @param start the position of the starting node
+     * @param destination the position of the destination node
+     * @param successPredicate the predicate used to determine if the path has completed
+     * @param calculator the {@link Calculator} instance used to calculate distance/heuristics
+     * @param explorer the {@link Explorer} instance used to expand new nodes
+     * @throws NullPointerException if any of the arguments are null
+     */
     public BasicPathOperation(@NotNull Vec3I start, @NotNull Vec3I destination,
                               @NotNull Predicate<Vec3I> successPredicate, @NotNull Calculator calculator,
                               @NotNull Explorer explorer) {
@@ -48,17 +56,15 @@ public class BasicPathOperation implements PathOperation {
         graph.put(start, initial);
     }
 
-    private void complete(State state) {
+    private void complete(State state, Node node) {
         this.state = state;
 
         //clear the graph, we completed this operation
         openSet.clear();
         graph.clear();
 
-        boolean success = state == State.SUCCEEDED;
-        result = new BasicResult(success ? current.reverse() : (best == null ? null : best.reverse()), success);
+        result = new BasicResult(node.reverse(), state == State.SUCCEEDED);
         best = null;
-        current = null;
     }
 
     @Override
@@ -70,16 +76,17 @@ public class BasicPathOperation implements PathOperation {
 
         if(!openSet.isEmpty()) {
             //remove and return the smallest (most promising) node
-            current = openSet.dequeue();
+            Node current = openSet.dequeue();
 
             //check if we reached our destination yet
             Vec3I currentPos = current.getPosition();
             if(successPredicate.test(currentPos)) {
                 //success state, path was found
-                complete(State.SUCCEEDED);
+                complete(State.SUCCEEDED, current);
                 return;
             }
 
+            //we haven't reached the destination, expand current
             for(Vec3I walkVector : explorer.walkVectors(current)) {
                 //x, y, and z are the coordinates of the "neighbor" node we're trying to explore
                 int x = currentPos.getX() + walkVector.getX();
@@ -124,7 +131,7 @@ public class BasicPathOperation implements PathOperation {
         else {
             //we ran through every node and were unable to find the destination
             //we may still have a decent path to get close to it though
-            complete(State.FAILED);
+            complete(State.FAILED, best);
         }
     }
 

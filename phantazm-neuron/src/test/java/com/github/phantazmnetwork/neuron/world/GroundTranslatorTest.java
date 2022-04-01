@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.neuron.world;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.agent.GroundAgent;
+import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,11 +19,11 @@ class GroundTranslatorTest {
                                                    float fallTolerance, Map<Vec3I, Double> heightMap,
                                                    Iterable<Double> highestCollisions,
                                                    Iterable<Double> lowestCollisions) {
-        GroundAgent mockAgent = mock(GroundAgent.class);
-        when(mockAgent.getHeight()).thenReturn(agentHeight);
-        when(mockAgent.getWidth()).thenReturn(agentWidth);
-        when(mockAgent.getJumpHeight()).thenReturn(jumpHeight);
-        when(mockAgent.getFallTolerance()).thenReturn(fallTolerance);
+        GroundDescriptor mockDescriptor = mock(GroundDescriptor.class);
+        when(mockDescriptor.getHeight()).thenReturn(agentHeight);
+        when(mockDescriptor.getWidth()).thenReturn(agentWidth);
+        when(mockDescriptor.getJumpHeight()).thenReturn(jumpHeight);
+        when(mockDescriptor.getFallTolerance()).thenReturn(fallTolerance);
 
         Collider mockCollider = mock(Collider.class);
         when(mockCollider.heightAt(anyInt(), anyInt(), anyInt())).thenAnswer(invocation -> {
@@ -51,7 +51,7 @@ class GroundTranslatorTest {
         }
         lowest.thenReturn(Double.POSITIVE_INFINITY);
 
-        return new GroundTranslator(mockCollider, mockAgent);
+        return new GroundTranslator(mockCollider, agentWidth, agentHeight, agentWidth, jumpHeight, fallTolerance);
     }
 
     @Nested

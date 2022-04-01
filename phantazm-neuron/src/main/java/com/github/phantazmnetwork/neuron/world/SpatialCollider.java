@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
- * A {@link Collider} implementation
+ * A standard {@link Collider} implementation based off of a {@link Space} instance.
  */
 @SuppressWarnings("ClassCanBeRecord")
 public class SpatialCollider implements Collider {
@@ -23,6 +23,11 @@ public class SpatialCollider implements Collider {
 
     private final Space space;
 
+    /**
+     * Creates a new instance of SpatialCollider using the given {@link Space} implementation.
+     * @param space the Space implementation to use
+     * @throws NullPointerException if space is null
+     */
     public SpatialCollider(@NotNull Space space) {
         this.space = Objects.requireNonNull(space, "space");
     }

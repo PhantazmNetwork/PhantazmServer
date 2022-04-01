@@ -31,7 +31,15 @@ public interface NodeTranslator {
      */
     @NotNull Vec3I translate(int x, int y, int z, int deltaX, int deltaY, int deltaZ);
 
-    default @Nullable Vec3I translate(@NotNull Vec3I nodePosition, @NotNull Vec3I delta) {
+    /**
+     * Convenience override for {@link NodeTranslator#translate(int, int, int, int, int, int)} using {@link Vec3I}
+     * instances.
+     * @param nodePosition the position vector
+     * @param delta the offset vector
+     * @return the result of calling {@link NodeTranslator#translate(int, int, int, int, int, int)} with the components
+     * of {@code nodePosition} and {@code delta}
+     */
+    default @NotNull Vec3I translate(@NotNull Vec3I nodePosition, @NotNull Vec3I delta) {
         return translate(nodePosition.getX(), nodePosition.getY(), nodePosition.getZ(), delta.getX(), delta.getY(),
                 delta.getZ());
     }

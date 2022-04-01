@@ -4,108 +4,67 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.agent.Agent;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+/**
+ * The standard implementation of {@link PathContext}. Agents with identical descriptor IDs will share cached values.
+ * Uses a global cache of {@link Iterable}s to avoid duplication (as it is expected that many iterables will be
+ * identical across all contexts).
+ */
 public class BasicPathContext implements PathContext {
-    private final class Entry implements Comparable<Entry> {
-        private final Agent.Descriptor descriptor;
+    private static final int INITIAL_HASHMAP_CAPACITY = 8;
 
-        //mutable so we can update entries in-place instead of needing to remove from the set
-        private Iterable<Vec3I> iterable;
-
-        private Entry(Agent.Descriptor descriptor, Iterable<Vec3I> iterable) {
-            this.descriptor = descriptor;
-            this.iterable = iterable;
-        }
-
-        private Entry(Agent.Descriptor descriptor) {
-            this(descriptor, null);
-        }
-
-        @Override
-        public int compareTo(@NotNull Entry other) {
-            return comparator.compare(descriptor, other.descriptor);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if(obj == null) {
-                return false;
-            }
-
-            if(obj instanceof Entry entry) {
-                return descriptor == entry.descriptor;
-            }
-
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return descriptor.hashCode();
-        }
-    }
-
-    private final Comparator<Agent.Descriptor> comparator;
-    private final Cache<Vec3I, ObjectOpenHashSet<Entry>> positionalCache;
+    private final Cache<Vec3I, Map<String, Iterable<Vec3I>>> positionalCache;
 
     //global cache shared among all BasicPathContext instances. reduces duplication of cached Iterables (lists)
     private static final Cache<List<Vec3I>, Iterable<Vec3I>> ITERABLE_CACHE = Caffeine.newBuilder().maximumSize(128)
             .build();
 
-    public BasicPathContext(@NotNull Comparator<Agent.Descriptor> comparator, int maximumCacheSize) {
-        this.comparator = Objects.requireNonNull(comparator, "comparator");
+    /**
+     * Creates a new instance of this class with the specified maximum cache size. The number of cached iterables will
+     * never exceed this value for very long. Old values will be evicted according to an LRU algorithm.
+     * @param maximumCacheSize the maximum cache size
+     * @see Cache
+     */
+    public BasicPathContext(int maximumCacheSize) {
         this.positionalCache = Caffeine.newBuilder().maximumSize(maximumCacheSize).build();
     }
 
     @Override
-    public @NotNull Optional<Iterable<Vec3I>> getStep(@NotNull Vec3I origin, @NotNull Agent.Descriptor descriptor) {
-        ObjectOpenHashSet<Entry> entries = positionalCache.getIfPresent(origin);
+    public @NotNull Optional<Iterable<Vec3I>> getStep(@NotNull Vec3I origin, @NotNull String id) {
+        Map<String, Iterable<Vec3I>> entries = positionalCache.getIfPresent(origin);
         if(entries != null) {
-            //use our own synchronized block instead of wrapping cache entries in a synchronized collection: if we did
-            //the latter, we'd not be able to take advantage of the get method, which is defined on ObjectRBTreeSet
-            Entry hit;
-            synchronized (entries) {
-                hit = entries.get(new Entry(descriptor));
-            }
-
-            if(hit != null) {
-                //.of instead of .ofNullable because the iterable should never be null under normal conditions, and if
-                //it is, it's probably a bug
-                return Optional.of(hit.iterable);
-            }
+            return Optional.ofNullable(entries.get(id));
         }
 
         return Optional.empty();
     }
 
     @Override
-    public @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull Agent.Descriptor descriptor,
+    public @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull String id,
                                                @NotNull Iterator<? extends Vec3I> steps) {
         return new AdvancingIterator<>() {
             private final List<Vec3I> list = new ArrayList<>();
+            private boolean complete = false;
 
             @Override
             public boolean advance() {
+                if(complete) {
+                    return false;
+                }
+
                 if(steps.hasNext()) {
                     list.add(this.value = steps.next());
                     return true;
                 }
 
-                ObjectOpenHashSet<Entry> entries = positionalCache.get(origin, key -> new ObjectOpenHashSet<>());
-                Entry inSet;
-                synchronized (entries) {
-                    //this method is specific to ObjectOpenHashSet and highly useful here, so we can avoid removing and
-                    //adding and instead update the entry in-place
-                    inSet = entries.addOrGet(new Entry(descriptor));
-                }
-
-                inSet.iterable = getView(list);
+                positionalCache.get(origin, ignored -> Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>(
+                        INITIAL_HASHMAP_CAPACITY))).compute(id, (key, value) -> getView(list));
+                complete = true;
                 return false;
             }
         };

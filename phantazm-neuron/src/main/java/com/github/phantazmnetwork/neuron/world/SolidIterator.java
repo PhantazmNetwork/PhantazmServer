@@ -16,8 +16,8 @@ public interface SolidIterator extends Iterator<Solid> {
      * coordinate can be determined by checking the value returned by {@link SolidIterator#getOrder()}.</p>
      *
      * <p>Note that if the pointer is set to a value where any component is "beyond" the defined endpoint (which may
-     * occur when any component is greater than or less than the endpoint, depending on iteration direction), this
-     * method will throw an {@link IllegalArgumentException}.</p>
+     * occur when any component is greater than or less than the endpoint, depending on iteration direction), the
+     * iterator may never terminate.</p>
      * @param first the first position to update
      * @param second the second position to update
      * @param third the third position to update
@@ -25,13 +25,34 @@ public interface SolidIterator extends Iterator<Solid> {
      */
     void setPointer(int first, int second, int third);
 
+    /**
+     * Returns the iteration order used by this iterator.
+     * @return the iteration order used by this iterator
+     */
     @NotNull Space.Order getOrder();
 
+    /**
+     * Returns the immutable variables used by this iterator. This can be used to determine the beginning and endpoints
+     * of the SolidIterator, as well as the iteration direction.
+     * @return the iteration variables used by this iterator
+     */
     @NotNull Space.Order.IterationVariables getVariables();
 
+    /**
+     * Gets the current value of the "first" component of the pointer.
+     * @return the "first" component of the pointer
+     */
     int getFirst();
 
+    /**
+     * Gets the current value of the "second" component of the pointer.
+     * @return the "second" component of the pointer
+     */
     int getSecond();
 
+    /**
+     * Gets the current value of the "third" component of the pointer.
+     * @return the "third" component of the pointer
+     */
     int getThird();
 }

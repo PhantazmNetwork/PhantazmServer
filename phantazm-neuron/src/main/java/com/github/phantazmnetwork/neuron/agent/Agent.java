@@ -4,36 +4,14 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
-
 /**
  * <p>Represents something capable of pathfinding. This is the most general representation of a navigation-capable
- * object, and generally all that is required to be used by a pathfinding algorithm such as A*. More specific
- * sub-interfaces exist to expose more complex functionality.</p>
- * @see PhysicalAgent
- * @see GroundAgent
+ * object, and generally all that is required to be used by a pathfinding algorithm such as A*.</p>
  */
 public interface Agent {
     /**
-     * <p>Marker interface used to denote a lightweight object that represents the agent's unique characteristics.
-     * These characteristics are entirely implementation-defined.</p>
-     *
-     * <p>Descriptor objects must provide a proper {@code equals}/{@code hashCode} implementation. In general, they
-     * must be safe for use as keys to a hash-based map or entries in a hash-based set. Descriptors do not have to
-     * implement {@link Comparable}.</p>
-     *
-     * <p>Descriptors exist to ease the process of creating a total ordering of Agent objects. Descriptors should take
-     * up comparatively less memory than Agents themselves, and are thus free to be stored as a persistent key in a map
-     * or element in a set. Descriptors may also be shared between Agents that have identical characteristics.</p>
-     *
-     * <p>An specialized external {@link Comparator} should generally be used to compare instances of Descriptor. </p>
-     */
-    interface Descriptor {}
-
-    /**
      * Determines if the agent has a starting location. In other words, returns {@code true} if the agent is capable of
-     * pathfinding, and {@code false} if it isn't. {@link PathOperation} implementations query this method before
-     * pathfinding starts. If no start position exists, the operation immediately terminates in a failed state.
+     * pathfinding, and {@code false} if it isn't.
      * @return {@code true} if this agent has a starting position (is valid for pathing); {@code false} otherwise
      */
     boolean hasStartPosition();
@@ -63,9 +41,8 @@ public interface Agent {
     @NotNull Vec3I getStartPosition();
 
     /**
-     * Returns the descriptor for this agent. Each unique Agent implementation should in general provide its own
-     * descriptor.
-     * @return the descriptor used to indicate how this agent compares to other agents
+     * Returns the {@link Descriptor} used by this agent. Many distinct agents may share the same descriptor.
+     * @return an AgentDescriptor describing this agent
      */
     @NotNull Descriptor getDescriptor();
 }

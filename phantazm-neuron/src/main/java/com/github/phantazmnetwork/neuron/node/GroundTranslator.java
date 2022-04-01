@@ -1,24 +1,48 @@
 package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.agent.Agent;
-import com.github.phantazmnetwork.neuron.agent.GroundAgent;
+import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
 import com.github.phantazmnetwork.neuron.world.Collider;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-@SuppressWarnings("ClassCanBeRecord")
+/**
+ * A ground-based NodeTranslator that takes gravity into account and performs collision checks.
+ */
 public class GroundTranslator implements NodeTranslator {
     private static final double EPSILON = 1E-5;
 
     private final Collider collider;
-    private final GroundAgent agent;
+    private final float width;
+    private final float height;
+    private final float depth;
+    private final float jump;
+    private final float fall;
 
-    public GroundTranslator(@NotNull Collider collider, @NotNull GroundAgent agent) {
+    private final float halfWidth;
+    private final float halfDepth;
+
+    /**
+     * Creates a new GroundTranslator instance.
+     * @param collider the collider used to perform collision checks
+     * @param width the width of the agent (x-width)
+     * @param height the height of the agent (y-width)
+     * @param depth the depth of the agent (z-width)
+     * @param jump the maximum jump height of the agent
+     * @param fall the maximum distance the agent may fall
+     */
+    public GroundTranslator(@NotNull Collider collider, float width, float height, float depth, float jump,
+                            float fall) {
         this.collider = Objects.requireNonNull(collider, "collider");
-        this.agent = Objects.requireNonNull(agent, "agent");
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+        this.jump = jump;
+        this.fall = fall;
+
+        this.halfWidth = width / 2;
+        this.halfDepth = depth / 2;
     }
 
     @Override
@@ -27,14 +51,6 @@ public class GroundTranslator implements NodeTranslator {
         double cX = x + 0.5;
         double cY = collider.heightAt(x, y, z);
         double cZ = z + 0.5;
-
-        //agent-related variables we'll definitely need
-        float width = agent.getWidth();
-        float halfWidth = width / 2;
-        float depth = agent.getDepth();
-        float halfDepth = depth / 2;
-        float height = agent.getHeight();
-        float jump = agent.getJumpHeight();
 
         //oX, oY, oZ, vX, vY, vZ represent the bounds of the agent standing at (x, y, z) in origin-vector form
         double oX = cX - halfWidth + EPSILON;
@@ -54,7 +70,6 @@ public class GroundTranslator implements NodeTranslator {
                 oY += dY;
                 oZ += dZ;
 
-                float fall = agent.getFallTolerance();
                 highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, 0, -fall, 0);
                 if(highestY != Double.NEGATIVE_INFINITY) {
                     return Vec3I.of(dX, (int) Math.floor(highestY), dZ);

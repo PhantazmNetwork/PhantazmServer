@@ -15,14 +15,11 @@ public interface PathResult {
     boolean isSuccessful();
 
     /**
-     * <p>Retrieves the {@link Node} representing the start of this path, or null if no path could be calculated. All
-     * PathResults for which {@link PathResult#isSuccessful()} returns {@code true} will return a non-null node here.
-     * If the result is <i>not</i> successful the node will only be null if the agent attempting to pathfind determined
-     * it could not supply an initial node (in other words, if it is not valid for pathfinding).</p>
+     * <p>Retrieves the {@link Node} representing the start of this path.</p>
      *
      * <p>Since Node implements {@link Iterable}, one can iterate from the start of the path to the end of the path,
      * which will generally either lead to the destination itself or somewhere close to it if it is unreachable.</p>
      * @return a Node object representing a path
      */
-    Node getPath();
+    @NotNull Node getPath();
 }
