@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -45,4 +44,6 @@ public interface Agent {
      * @return an AgentDescriptor describing this agent
      */
     @NotNull Descriptor getDescriptor();
+
+    @NotNull Explorer getExplorer();
 }

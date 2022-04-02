@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.agent;
 
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import org.jetbrains.annotations.NotNull;
@@ -17,15 +18,10 @@ public interface Descriptor {
     @NotNull String getId();
 
     /**
-     * Creates an {@link Explorer} instance, given a {@link PathContext}.
-     * @param context the context which may be needed to create the explorer
-     * @return an Explorer instance
-     */
-    @NotNull Explorer getExplorer(@NotNull PathContext context);
-
-    /**
      * Returns the {@link Calculator} used to compute distance/heuristic values for this agent.
      * @return the Calculator instance which should be used by this agent
      */
     @NotNull Calculator getCalculator();
+
+    boolean isComplete(@NotNull Vec3I position);
 }

@@ -51,35 +51,14 @@ public abstract class Wrapper<T> implements Supplier<T> {
 
         @Override
         public String toString() {
-            return "Wrapper.Immutable{value=" + value + "}";
+            return "Wrapper.Mutable{value=" + value + "}";
         }
     }
 
-    /**
-     * The immutable null wrapper, used by {@link Wrapper#nullWrapper()}. Holds a value of {@code null}.
-     */
-    public static final Wrapper<?> NULL = new Wrapper<>() {
+    private static final Wrapper<?> NULL = new Wrapper<>() {
         @Override
         public Object get() {
             return null;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if(obj == null) {
-                return false;
-            }
-
-            if(obj instanceof Wrapper<?> other) {
-                return other.get() == null;
-            }
-
-            return false;
         }
 
         @Override

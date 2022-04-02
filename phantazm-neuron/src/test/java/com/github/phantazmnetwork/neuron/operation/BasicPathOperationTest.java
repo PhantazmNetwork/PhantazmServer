@@ -47,7 +47,7 @@ class BasicPathOperationTest {
 
     private static void assertPathMatches(Vec3I[] expectedPath, PathOperation.State expectedCompletionState,
                                           PathOperation operationToRun) {
-        PathResult result = operationToRun.runToCompletion();
+        PathResult result = operationToRun.runUninterruptibly();
         assertSame(expectedCompletionState, operationToRun.getState());
 
         List<Node> nodes = new ArrayList<>();

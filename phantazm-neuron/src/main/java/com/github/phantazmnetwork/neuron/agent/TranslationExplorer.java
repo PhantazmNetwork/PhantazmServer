@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.engine.PathContext;
+import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * A standard {@link Explorer} implementation that attempts to "move" in every direction specified by a given
  * {@link Vec3I} iterator. This class extends {@link ContextualExplorer} and therefore takes advantage of the caching
- * functionality provided by {@link PathContext}.
+ * functionality provided by {@link PathCache}.
  */
 public class TranslationExplorer extends ContextualExplorer {
     private final NodeTranslator translator;
@@ -23,9 +23,9 @@ public class TranslationExplorer extends ContextualExplorer {
      * Creates a new GroundExplorer which will use the given {@link NodeTranslator}.
      * @param translator the translator used by this explorer
      */
-    public TranslationExplorer(@NotNull PathContext context, @NotNull String id, @NotNull NodeTranslator translator,
+    public TranslationExplorer(@NotNull PathCache cache, @NotNull String id, @NotNull NodeTranslator translator,
                                @NotNull Iterable<? extends Vec3I> vectors) {
-        super(context, id);
+        super(cache, id);
         this.translator = Objects.requireNonNull(translator, "translator");
         this.vectors = Objects.requireNonNull(vectors, "vectors");
     }

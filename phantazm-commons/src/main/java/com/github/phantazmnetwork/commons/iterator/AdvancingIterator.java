@@ -49,7 +49,7 @@ public abstract class AdvancingIterator<TValue> implements Iterator<TValue> {
         //we don't currently have a value
         if(!hasValue) {
             //so try to advance; if we fail to advance in next() then throw an exception because we're out of elements
-            if(!(hasValue = advance())) {
+            if(!advance()) {
                 value = null;
                 throw new NoSuchElementException();
             }

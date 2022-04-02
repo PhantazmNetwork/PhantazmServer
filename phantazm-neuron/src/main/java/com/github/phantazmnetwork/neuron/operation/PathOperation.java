@@ -3,6 +3,8 @@ package com.github.phantazmnetwork.neuron.operation;
 import org.jetbrains.annotations.NotNull;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * Represents a potentially ongoing pathfinding operation. Implementations are typically responsible for computing
  * iterations of a particular pathfinding algorithm, such as A*.
@@ -67,8 +69,26 @@ public interface PathOperation {
     /**
      * Steps this operation until it is complete.
      * @return the {@link PathResult} representing a completed path
+     * @throws InterruptedException if the thread is interrupted before a result is found
      */
-    default @NotNull PathResult runToCompletion() {
+    default @NotNull PathResult run() throws InterruptedException {
+        while(!isComplete()) {
+            step();
+
+            if(Thread.interrupted()) {
+                throw new InterruptedException("Interrupted before result could be calculated");
+            }
+        }
+
+        return getResult();
+    }
+
+    /**
+     * Steps this operation until complete. Cannot be interrupted; this method will run until a result is found.
+     * @return the {@link PathResult} representing a completed path
+     */
+    @SuppressWarnings("SpellCheckingInspection") //"uninterruptibly" is the same spelling used in the JDK
+    default @NotNull PathResult runUninterruptibly() {
         while(!isComplete()) {
             step();
         }

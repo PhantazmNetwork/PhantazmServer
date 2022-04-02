@@ -11,11 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 /**
- * The standard implementation of {@link PathContext}. Agents with identical descriptor IDs will share cached values.
+ * The standard implementation of {@link PathCache}. Agents with identical descriptor IDs will share cached values.
  * Uses a global cache of {@link Iterable}s to avoid duplication (as it is expected that many iterables will be
- * identical across all contexts).
+ * identical across caches).
  */
-public class BasicPathContext implements PathContext {
+public class BasicPathCache implements PathCache {
     private static final int INITIAL_HASHMAP_CAPACITY = 8;
 
     private final Cache<Vec3I, Map<String, Iterable<Vec3I>>> positionalCache;
@@ -30,7 +30,7 @@ public class BasicPathContext implements PathContext {
      * @param maximumCacheSize the maximum cache size
      * @see Cache
      */
-    public BasicPathContext(int maximumCacheSize) {
+    public BasicPathCache(int maximumCacheSize) {
         this.positionalCache = Caffeine.newBuilder().maximumSize(maximumCacheSize).build();
     }
 
@@ -48,7 +48,7 @@ public class BasicPathContext implements PathContext {
     public @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull String id,
                                                @NotNull Iterator<? extends Vec3I> steps) {
         return new AdvancingIterator<>() {
-            private final List<Vec3I> list = new ArrayList<>();
+            private final ArrayList<Vec3I> list = new ArrayList<>();
             private boolean complete = false;
 
             @Override
@@ -85,13 +85,18 @@ public class BasicPathContext implements PathContext {
         positionalCache.invalidateAll();
     }
 
-    //List is specified here instead of Collection because the latter's contract does not mandate an equals/hashCode
-    //based on contents
-    private Iterable<Vec3I> getView(List<Vec3I> list) {
+    //ArrayList is specified here instead of Collection because the latter's contract does not mandate an
+    //equals/hashCode based on contents + we may want to use trimToSize() to ensure we don't waste space
+    private Iterable<Vec3I> getView(ArrayList<Vec3I> list) {
         if(list.size() == 0) {
             return Collections.emptyList();
         }
 
-        return ITERABLE_CACHE.get(list, Collections::unmodifiableList);
+        //only trim the list if it's getting stored, otherwise it'll just be garbage collected
+        return ITERABLE_CACHE.get(list, key -> {
+            //cast is safe, the key must be an arraylist
+            ((ArrayList<Vec3I>)key).trimToSize();
+            return Collections.unmodifiableList(key);
+        });
     }
 }

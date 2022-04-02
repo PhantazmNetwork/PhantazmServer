@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.engine.PathContext;
+import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class TranslationExplorerTest {
             return transform.apply(vec3I);
         });
 
-        PathContext mockContext = mock(PathContext.class);
+        PathCache mockContext = mock(PathCache.class);
         when(mockContext.getStep(any(), any())).thenReturn(Optional.empty());
         when(mockContext.watchSteps(any(), any(), any())).thenAnswer(invocation -> invocation.getArgument(2));
         return new TranslationExplorer(mockContext, "test", mockTranslator, vectors);

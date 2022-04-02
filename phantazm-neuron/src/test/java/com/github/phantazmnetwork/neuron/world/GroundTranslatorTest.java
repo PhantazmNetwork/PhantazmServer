@@ -22,6 +22,7 @@ class GroundTranslatorTest {
         GroundDescriptor mockDescriptor = mock(GroundDescriptor.class);
         when(mockDescriptor.getHeight()).thenReturn(agentHeight);
         when(mockDescriptor.getWidth()).thenReturn(agentWidth);
+        when(mockDescriptor.getDepth()).thenReturn(agentWidth);
         when(mockDescriptor.getJumpHeight()).thenReturn(jumpHeight);
         when(mockDescriptor.getFallTolerance()).thenReturn(fallTolerance);
 
