@@ -46,4 +46,10 @@ public interface Agent {
     @NotNull Descriptor getDescriptor();
 
     @NotNull Explorer getExplorer();
+
+    double getX();
+
+    double getY();
+
+    double getZ();
 }

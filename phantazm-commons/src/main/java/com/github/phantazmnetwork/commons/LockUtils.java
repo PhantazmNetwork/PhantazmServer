@@ -1,10 +1,9 @@
-package com.github.phantazmnetwork.commons.sync;
+package com.github.phantazmnetwork.commons;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**

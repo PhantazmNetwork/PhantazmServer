@@ -56,21 +56,21 @@ public class BasicPathOperation implements PathOperation {
         graph.put(start, initial);
     }
 
-    private void complete(State state, Node node) {
-        this.state = state;
+    private void complete(boolean succeeded, Node node) {
+        this.state = succeeded ? State.SUCCEEDED : State.FAILED;
 
         //clear the graph, we completed this operation
         openSet.clear();
         graph.clear();
 
-        result = new BasicResult(node.reverse(), state == State.SUCCEEDED);
+        result = new PathResult(node.reverse(), succeeded);
         best = null;
     }
 
     @Override
     public void step() {
         //don't allow users to keep calling step() after we've finished, they should be polling getState()
-        if(state != State.IN_PROGRESS) {
+        if(isComplete()) {
             throw new IllegalStateException("Operation has already finished");
         }
 
@@ -82,7 +82,7 @@ public class BasicPathOperation implements PathOperation {
             Vec3I currentPos = current.getPosition();
             if(successPredicate.test(currentPos)) {
                 //success state, path was found
-                complete(State.SUCCEEDED, current);
+                complete(true, current);
                 return;
             }
 
@@ -131,7 +131,7 @@ public class BasicPathOperation implements PathOperation {
         else {
             //we ran through every node and were unable to find the destination
             //we may still have a decent path to get close to it though
-            complete(State.FAILED, best);
+            complete(false, best);
         }
     }
 

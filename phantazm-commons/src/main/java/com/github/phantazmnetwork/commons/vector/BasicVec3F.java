@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
  * {@code x} value, then {@code y} value, then {@code z} value. This object's {@link Vec3F#compareTo(Object)} method is
  * <i>consistent</i> with {@link Object#equals(Object)}.
  */
-final record BasicVec3F(float getX, float getY, float getZ) implements Vec3F {
+record BasicVec3F(float getX, float getY, float getZ) implements Vec3F {
     /**
      * Creates a new instance of this record. {@link Vec3F#of(float, float, float)} should be used in preference to this
      * constructor.

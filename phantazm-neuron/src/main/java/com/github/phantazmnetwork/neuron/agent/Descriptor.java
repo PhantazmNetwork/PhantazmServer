@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import org.jetbrains.annotations.NotNull;
 

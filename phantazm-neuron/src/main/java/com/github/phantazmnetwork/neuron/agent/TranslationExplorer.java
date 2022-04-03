@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.agent;
 
-import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
+import com.github.phantazmnetwork.commons.AdvancingIterator;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.node.Node;
@@ -21,7 +21,10 @@ public class TranslationExplorer extends ContextualExplorer {
 
     /**
      * Creates a new GroundExplorer which will use the given {@link NodeTranslator}.
+     * @param cache the cache used to store computed translation vectors
+     * @param id the id of the agent using this explorer
      * @param translator the translator used by this explorer
+     * @param vectors the walk vectors to explore
      */
     public TranslationExplorer(@NotNull PathCache cache, @NotNull String id, @NotNull NodeTranslator translator,
                                @NotNull Iterable<? extends Vec3I> vectors) {
@@ -65,7 +68,7 @@ public class TranslationExplorer extends ContextualExplorer {
                         only explore the next node if our delta is non-zero (in other words, if we're going to get a new
                         node)
                          */
-                        if(!Vec3I.equals(newDelta.getX(), newDelta.getY(), newDelta.getZ(), 0, 0, 0)) {
+                        if(!newDelta.equals(Vec3I.ORIGIN)) {
                             super.value = newDelta;
                             return true;
                         }

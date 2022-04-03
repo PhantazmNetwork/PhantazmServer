@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.neuron.engine;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
+import com.github.phantazmnetwork.commons.AdvancingIterator;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -63,7 +63,7 @@ public class BasicPathCache implements PathCache {
                 }
 
                 positionalCache.get(origin, ignored -> Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>(
-                        INITIAL_HASHMAP_CAPACITY))).compute(id, (key, value) -> getView(list));
+                        INITIAL_HASHMAP_CAPACITY))).put(id, getView(list));
                 complete = true;
                 return false;
             }
@@ -88,7 +88,7 @@ public class BasicPathCache implements PathCache {
     //ArrayList is specified here instead of Collection because the latter's contract does not mandate an
     //equals/hashCode based on contents + we may want to use trimToSize() to ensure we don't waste space
     private Iterable<Vec3I> getView(ArrayList<Vec3I> list) {
-        if(list.size() == 0) {
+        if(list.isEmpty()) {
             return Collections.emptyList();
         }
 

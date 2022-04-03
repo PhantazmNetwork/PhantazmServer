@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
  * {@code x} value, then {@code y} value, then {@code z} value. This object's {@link Vec3I#compareTo(Object)} method is
  * <i>consistent</i> with {@link Object#equals(Object)}.
  */
-final record BasicVec3I(int getX, int getY, int getZ) implements Vec3I {
+record BasicVec3I(int getX, int getY, int getZ) implements Vec3I {
     /**
      * Creates a new instance of this record. {@link Vec3I#of(int, int, int)} should be used in preference to this
      * constructor.

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
+import com.github.phantazmnetwork.commons.AdvancingIterator;
 import org.jetbrains.annotations.NotNull;
 
 /**

@@ -7,5 +7,6 @@ repositories {
 }
 
 dependencies {
+    api(project(":phantazm-commons"))
     api(libs.ethylene.core)
 }

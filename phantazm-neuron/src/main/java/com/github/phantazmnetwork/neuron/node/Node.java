@@ -4,9 +4,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * <p>Represents a particular point along a path. Each node may be connected to at most one other node (referred to as
@@ -18,9 +16,9 @@ import java.util.Objects;
  *
  * <p>Since nodes can be linked in arbitrary ways, it is possible to have a structure in which a node's parent is
  * <i>itself</i>, or a node earlier in the chain. If this is the case, the iterator for any of the nodes present in the
- * structure will never terminate naturally. When creating chains of nodes, implementations must take care to ensure
- * such situations never occur, as keeping a record of visited nodes would add an unacceptable amount of overhead to
- * node iteration.</p>
+ * structure will never terminate naturally. When creating chains of nodes, users must take care to ensure such
+ * situations never occur, as keeping a record of visited nodes would add an unacceptable amount of overhead to node
+ * iteration.</p>
  *
  * <p>Node implements {@link Comparable}, with a natural ordering that is consistent with equals. Nodes are compared
  * first by sum of {@code g} and {@code h} values, then by x value, then y, then z.</p>
@@ -186,6 +184,16 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
      */
     public @NotNull Vec3I getPosition() {
         return position;
+    }
+
+    public @NotNull List<Node> toRandomAccessList() {
+        ArrayList<Node> nodes = new ArrayList<>();
+        for(Node node : this) {
+            nodes.add(node);
+        }
+
+        nodes.trimToSize();
+        return nodes;
     }
 
     @Override

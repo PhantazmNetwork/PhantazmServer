@@ -1,25 +1,20 @@
 package com.github.phantazmnetwork.neuron.operation;
 
 import com.github.phantazmnetwork.neuron.node.Node;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
- * Represents the result of a pathfinding operation.
+ * A basic PathResult implementation, representing a completed (successful or failed) path.
  */
-public interface PathResult {
+public record PathResult(Node getPath, boolean isSuccessful) {
     /**
-     * Returns {@code true} if the operation completed successfully (found its goal), returns {@code false} if it failed
-     * to find the goal, or if the agent did not provide a starting coordinate (is not valid for pathfinding).
-     * @return {@code true} if the operation completed successfully, {@code false} otherwise
-     */
-    boolean isSuccessful();
-
-    /**
-     * <p>Retrieves the {@link Node} representing the start of this path.</p>
+     * Creates a new BasicResult.
      *
-     * <p>Since Node implements {@link Iterable}, one can iterate from the start of the path to the end of the path,
-     * which will generally either lead to the destination itself or somewhere close to it if it is unreachable.</p>
-     * @return a Node object representing a path
+     * @param getPath the starting node
+     * @param isSuccessful if the path is successful
      */
-    @NotNull Node getPath();
+    public PathResult {
+        Objects.requireNonNull(getPath, "getPath");
+    }
 }

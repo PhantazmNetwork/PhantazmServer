@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.commons.logic;
+package com.github.phantazmnetwork.commons;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +75,7 @@ public abstract class Wrapper<T> implements Supplier<T> {
      * @param value the new value
      * @throws UnsupportedOperationException if this implementation is immutable
      */
-    void set(@Nullable T value) {
+    public void set(@Nullable T value) {
         throw new UnsupportedOperationException("This Wrapper is immutable");
     }
 

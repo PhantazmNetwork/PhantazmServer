@@ -63,10 +63,10 @@ public class SceneProviderAbstractTest {
         for (int i = 0; i < maximumLobbies; i++) {
             sceneProvider.provideScene(request);
         }
-        sceneProvider.tick();
+        sceneProvider.tick(0);
 
         for (Scene<Object> scene : scenes) {
-            Mockito.verify(scene).tick();
+            Mockito.verify(scene).tick(0);
         }
     }
 
@@ -90,10 +90,10 @@ public class SceneProviderAbstractTest {
 
         Object request = new Object();
         sceneProvider.provideScene(request);
-        sceneProvider.tick();
+        sceneProvider.tick(0);
 
         assertFalse(sceneProvider.getScenes().iterator().hasNext());
-        verify(scene, never()).tick();
+        verify(scene, never()).tick(0);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.commons.iterator;
+package com.github.phantazmnetwork.commons;
 
 import org.jetbrains.annotations.Nullable;
 

@@ -171,9 +171,9 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
     }
 
     @Override
-    public void tick() {
+    public void tick(long time) {
         for (SceneProvider<Lobby, LobbyJoinRequest> sceneProvider : lobbyProviders.values()) {
-            sceneProvider.tick();
+            sceneProvider.tick(time);
         }
     }
 

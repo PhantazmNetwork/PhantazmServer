@@ -7,7 +7,6 @@ import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -148,7 +147,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
     }
 
     @Override
-    public void tick() {
+    public void tick(long time) {
         // NO-OP
     }
 

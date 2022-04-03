@@ -77,7 +77,7 @@ public class SpatialCollider implements Collider {
 
         //y-last iteration to ensure we can implement some fast-exit strategies
         SolidIterator overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
-                .solidIterator();
+                .iterator();
         double best = initialBest;
         if(overlapping.hasNext()) {
             //make sure widths are positive

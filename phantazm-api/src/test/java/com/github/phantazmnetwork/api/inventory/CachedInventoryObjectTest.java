@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.api.inventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -17,7 +16,7 @@ public class CachedInventoryObjectTest {
         CachedInventoryObject inventoryObject = new CachedInventoryObject() {
 
             @Override
-            public void tick() {
+            public void tick(long time) {
                 // Fetches a list of all the good conventions used in adventure API
             }
 
