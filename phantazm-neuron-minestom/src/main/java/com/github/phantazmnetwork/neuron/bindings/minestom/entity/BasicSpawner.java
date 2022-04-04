@@ -1,13 +1,13 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
-import com.github.phantazmnetwork.neuron.engine.PathContext;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.UUID;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class BasicSpawner implements Spawner {
     private final ContextProvider contextProvider;
 
@@ -18,8 +18,7 @@ public class BasicSpawner implements Spawner {
     @Override
     public <TType extends MinestomDescriptor, TReturn extends NeuralEntity> @NotNull TReturn spawnEntity(
             @NotNull Instance instance, @NotNull TType type, @NotNull NeuralEntityFactory<TType, TReturn> factory) {
-        PathContext pathContext = contextProvider.provideContext(instance);
-        TReturn entity = factory.build(type, UUID.randomUUID(), pathContext);
+        TReturn entity = factory.build(type, UUID.randomUUID(), contextProvider);
         entity.setInstance(instance);
         return entity;
     }

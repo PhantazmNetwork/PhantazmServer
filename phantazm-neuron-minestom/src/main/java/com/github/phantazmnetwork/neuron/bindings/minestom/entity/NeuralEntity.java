@@ -1,41 +1,55 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
+import com.extollit.gaming.ai.path.HydrazinePathFinder;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.agent.TranslationExplorer;
+import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.BasicNavigator;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
+import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
+import com.github.phantazmnetwork.neuron.world.SpatialCollider;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.ai.EntityAIGroup;
+import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Root of all entities that use Neuron for pathfinding.
  */
-public class NeuralEntity extends LivingEntity implements Agent {
+public abstract class NeuralEntity extends LivingEntity implements Agent {
     private final MinestomDescriptor entityType;
 
-    private final Navigator navigator;
-    private final Controller controller;
-    private final Explorer explorer;
+    private final ContextProvider provider;
 
-    public NeuralEntity(@NotNull MinestomDescriptor entityType, @NotNull UUID uuid, @NotNull PathContext context,
-                        @NotNull NodeTranslator translator) {
+    private Navigator navigator;
+    private Controller controller;
+    private Explorer explorer;
+
+    private int removalAnimationDelay;
+
+    public NeuralEntity(@NotNull MinestomDescriptor entityType, @NotNull UUID uuid, @NotNull ContextProvider provider) {
         super(entityType.getEntityType(), uuid);
         this.entityType = entityType;
-        this.navigator = new BasicNavigator(context.getEngine(), this, 1000,
-                10000, 1000);
-        this.controller = new EntityController(this, entityType.getSpeed());
-        this.explorer = new TranslationExplorer(context.getCache(), entityType.getID(), translator);
+        this.provider = Objects.requireNonNull(provider, "provider");
+        this.removalAnimationDelay = 1000;
     }
 
     @Override
@@ -75,7 +89,7 @@ public class NeuralEntity extends LivingEntity implements Agent {
         return navigator;
     }
 
-    public void setDestination(@Nullable Entity target) {
+    public void setTarget(@Nullable Entity target) {
         if(target == null) {
             navigator.setDestination(null);
         }
@@ -86,4 +100,81 @@ public class NeuralEntity extends LivingEntity implements Agent {
             });
         }
     }
+
+    @Override
+    public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+        return super.setInstance(instance, spawnPosition).whenComplete((ignored, ex) -> {
+            PathContext context = provider.provideContext(instance);
+
+            if(navigator != null) {
+                //ensure that we cancel ongoing pathfinding
+                navigator.setDestination(null);
+            }
+
+            navigator = new BasicNavigator(context.getEngine(), this, 1000,
+                    10000, 1000);
+            controller = new EntityController(this, entityType.getSpeed());
+            explorer = new TranslationExplorer(context.getCache(), entityType.getID(), getTranslator(instance,
+                    context));
+        });
+    }
+
+    @Override
+    public void kill() {
+        super.kill();
+
+        if (removalAnimationDelay > 0) {
+            // Needed for proper death animation (wait for it to finish before destroying the entity)
+            scheduleRemove(Duration.of(removalAnimationDelay, TimeUnit.MILLISECOND));
+        } else {
+            // Instant removal without animation playback
+            remove();
+        }
+    }
+
+    /**
+     * Gets the kill animation delay before vanishing the entity.
+     *
+     * @return the removal animation delay in milliseconds, 0 if not any
+     */
+    public int getRemovalAnimationDelay() {
+        return removalAnimationDelay;
+    }
+
+    /**
+     * Changes the removal animation delay of the entity.
+     * <p>
+     * Testing shows that 1000 is the minimum value to display the death particles.
+     *
+     * @param removalAnimationDelay the new removal animation delay in milliseconds, 0 to remove it
+     */
+    public void setRemovalAnimationDelay(int removalAnimationDelay) {
+        this.removalAnimationDelay = removalAnimationDelay;
+    }
+
+    /**
+     * Calls a {@link EntityAttackEvent} with this entity as the source and {@code target} as the target.
+     *
+     * @param target    the entity target
+     * @param swingHand true to swing the entity main hand, false otherwise
+     */
+    public void attack(@NotNull Entity target, boolean swingHand) {
+        if (swingHand)
+            swingMainHand();
+        EntityAttackEvent attackEvent = new EntityAttackEvent(this, target);
+        EventDispatcher.call(attackEvent);
+    }
+
+    /**
+     * Calls a {@link EntityAttackEvent} with this entity as the source and {@code target} as the target.
+     * <p>
+     * This does not trigger the hand animation.
+     *
+     * @param target the entity target
+     */
+    public void attack(@NotNull Entity target) {
+        attack(target, false);
+    }
+
+    public abstract @NotNull NodeTranslator getTranslator(@NotNull Instance instance, @NotNull PathContext context);
 }
