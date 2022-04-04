@@ -3,5 +3,6 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":phantazm-commons"))
     implementation(project(":phantazm-neuron"))
 }

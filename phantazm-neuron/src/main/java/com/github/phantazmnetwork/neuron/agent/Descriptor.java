@@ -14,7 +14,7 @@ public interface Descriptor {
      * access the same cached values for certain operations.
      * @return the ID string for this descriptor
      */
-    @NotNull String getId();
+    @NotNull String getID();
 
     /**
      * Returns the {@link Calculator} used to compute distance/heuristic values for this agent.
@@ -22,5 +22,5 @@ public interface Descriptor {
      */
     @NotNull Calculator getCalculator();
 
-    boolean isComplete(@NotNull Vec3I position);
+    boolean isComplete(@NotNull Vec3I position, @NotNull Vec3I destination);
 }

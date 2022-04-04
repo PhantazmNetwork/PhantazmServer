@@ -37,7 +37,7 @@ public class BasicPathEngine implements PathEngine {
 
                 Descriptor descriptor = agent.getDescriptor();
                 PathOperation operation = new BasicPathOperation(agent.getStartPosition(), destination,
-                        descriptor::isComplete, descriptor.getCalculator(), agent.getExplorer());
+                        (pos) -> pos.equals(destination), descriptor.getCalculator(), agent.getExplorer());
 
                 while(!operation.isComplete() && !isCancelled) {
                     operation.step();
