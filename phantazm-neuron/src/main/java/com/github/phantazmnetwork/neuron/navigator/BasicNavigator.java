@@ -60,12 +60,16 @@ public class BasicNavigator implements Navigator {
                 }
             }
 
+            //null node means we may need to calculate a path
             if(currentNode == null) {
+                //there is no ongoing operation, maybe start one
                 if(currentOperation == null) {
+                    //if there was a path failure, wait out the penalty before re-calculating
                     if(!pathSuccessful && time - lastPathfind < pathFailurePenalty) {
                         return;
                     }
 
+                    //start the pathfinding op
                     currentOperation = pathEngine.pathfind(agent, destination);
                 }
 
@@ -82,16 +86,20 @@ public class BasicNavigator implements Navigator {
                 }
             }
             else if(time - lastNodeStart > slowTravelRecalculateInterval) {
+                //if it takes us too long to get to the next node, set the current node to null so we re-calculate
                 currentNode = null;
             }
             else {
                 Controller controller = agent.getController();
                 Vec3I nodePosition = currentNode.getPosition();
 
+                //progress towards the node
                 controller.moveTo(nodePosition);
 
                 if(Vec3D.squaredDistance(controller.getX(), controller.getY(), controller.getZ(), nodePosition.getX()
                         + 0.5, nodePosition.getY(), nodePosition.getZ() + 0.5) < NODE_REACHED_TOLERANCE) {
+                    //if we're close enough to the node, we've "reached" it, so progress to the next one
+                    //if we've reached the end, this will set currentNode to null, which triggers re-calculation
                     lastNodeStart = time;
                     currentNode = currentNode.getParent();
                 }
@@ -103,6 +111,7 @@ public class BasicNavigator implements Navigator {
     public void setDestination(@Nullable Supplier<Vec3I> destinationSupplier) {
         this.destinationSupplier = destinationSupplier;
         if(destinationSupplier == null) {
+            //setting to null == cancelling, so just reset everything
             cancelOperation();
             currentNode = null;
             currentDestination = null;
