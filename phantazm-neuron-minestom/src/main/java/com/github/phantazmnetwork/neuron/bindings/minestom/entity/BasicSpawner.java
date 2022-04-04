@@ -16,7 +16,7 @@ public class BasicSpawner implements Spawner {
     }
 
     @Override
-    public <TType extends NeuralEntityType, TReturn extends NeuralEntity> @NotNull TReturn spawnEntity(
+    public <TType extends MinestomDescriptor, TReturn extends NeuralEntity> @NotNull TReturn spawnEntity(
             @NotNull Instance instance, @NotNull TType type, @NotNull NeuralEntityFactory<TType, TReturn> factory) {
         PathContext pathContext = contextProvider.provideContext(instance);
         TReturn entity = factory.build(type, UUID.randomUUID(), pathContext);

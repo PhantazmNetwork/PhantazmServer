@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public class GroundNeuralEntity extends NeuralEntity {
-    public GroundNeuralEntity(@NotNull GroundNeuralEntityType entityType, @NotNull UUID uuid,
+    public GroundNeuralEntity(@NotNull GroundMinestomDescriptor entityType, @NotNull UUID uuid,
                               @NotNull PathContext context) {
         super(entityType, uuid, context, new GroundTranslator(context.getCollider(), entityType));
     }

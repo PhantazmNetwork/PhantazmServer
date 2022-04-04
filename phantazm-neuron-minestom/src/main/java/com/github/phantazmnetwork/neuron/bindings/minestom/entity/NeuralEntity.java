@@ -22,13 +22,13 @@ import java.util.UUID;
  * Root of all entities that use Neuron for pathfinding.
  */
 public class NeuralEntity extends LivingEntity implements Agent {
-    private final NeuralEntityType entityType;
+    private final MinestomDescriptor entityType;
 
     private final Navigator navigator;
     private final Controller controller;
     private final Explorer explorer;
 
-    public NeuralEntity(@NotNull NeuralEntityType entityType, @NotNull UUID uuid, @NotNull PathContext context,
+    public NeuralEntity(@NotNull MinestomDescriptor entityType, @NotNull UUID uuid, @NotNull PathContext context,
                         @NotNull NodeTranslator translator) {
         super(entityType.getEntityType(), uuid);
         this.entityType = entityType;

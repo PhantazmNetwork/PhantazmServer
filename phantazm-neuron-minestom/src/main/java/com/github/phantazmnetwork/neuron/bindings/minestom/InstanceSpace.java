@@ -23,8 +23,6 @@ public class InstanceSpace extends VoxelSpace {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable Solid solidAt(int x, int y, int z) {
-        Spawner spawner = null;
-
         Block block = instance.getBlock(x, y, z);
         if(!block.isSolid()) {
             return null;
