@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.navigator.Controller;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -47,9 +48,5 @@ public interface Agent {
 
     @NotNull Explorer getExplorer();
 
-    double getX();
-
-    double getY();
-
-    double getZ();
+    @NotNull Controller getController();
 }

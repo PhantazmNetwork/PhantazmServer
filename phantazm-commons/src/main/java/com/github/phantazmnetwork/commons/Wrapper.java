@@ -4,6 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -90,6 +93,10 @@ public abstract class Wrapper<T> implements Supplier<T> {
             return false;
         }
 
+        if(obj == this) {
+            return true;
+        }
+
         if(obj instanceof Wrapper<?> other) {
             return Objects.equals(get(), other.get());
         }
@@ -130,5 +137,33 @@ public abstract class Wrapper<T> implements Supplier<T> {
     public static <T> @NotNull Wrapper<T> nullWrapper() {
         //noinspection unchecked
         return (Wrapper<T>) NULL;
+    }
+
+    /**
+     * Makes this wrapper immutable. If this wrapper is already immutable, this object is returned.
+     * @return an immutable copy of this wrapper, or this wrapper if it is already immutable
+     */
+    public @NotNull Wrapper<T> immutable() {
+        if(this instanceof Immutable<?>) {
+            return this;
+        }
+
+        return immutable(get());
+    }
+
+    /**
+     * Creates a mutable copy of this wrapper.
+     * @return a mutable copy of this wrapper
+     */
+    public @NotNull Wrapper<T> mutable() {
+        return mutable(get());
+    }
+
+    /**
+     * Converts this Wrapper to an Optional instance.
+     * @return an Optional instance containing the same value as this wrapper
+     */
+    public @NotNull Optional<T> toOptional() {
+        return Optional.ofNullable(get());
     }
 }

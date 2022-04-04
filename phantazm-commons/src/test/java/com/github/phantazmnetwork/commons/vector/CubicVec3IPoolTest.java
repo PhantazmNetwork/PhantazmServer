@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.commons.vector;
 
+import com.github.phantazmnetwork.commons.Wrapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

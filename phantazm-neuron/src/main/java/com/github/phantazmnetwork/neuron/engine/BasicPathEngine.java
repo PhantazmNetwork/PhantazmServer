@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.engine;
 
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
@@ -44,7 +45,7 @@ public class BasicPathEngine implements PathEngine {
 
                 synchronized (cancelSync) {
                     isDone = true;
-                    result = operation.getResult();
+                    result = isCancelled ? null : operation.getResult();
                     waitLatch.countDown();
                 }
             });
