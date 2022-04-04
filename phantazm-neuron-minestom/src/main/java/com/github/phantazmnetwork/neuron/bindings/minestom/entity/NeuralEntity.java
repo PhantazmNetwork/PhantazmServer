@@ -1,36 +1,41 @@
-package com.github.phantazmnetwork.neuron.bindings.minestom;
+package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
-import com.github.phantazmnetwork.neuron.engine.PathEngine;
+import com.github.phantazmnetwork.neuron.agent.TranslationExplorer;
+import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.BasicNavigator;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
+import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
+/**
+ * Root of all entities that use Neuron for pathfinding.
+ */
 public class NeuralEntity extends LivingEntity implements Agent {
-    private final Navigator navigator;
-    private final Explorer explorer;
-    private final Descriptor descriptor;
-    private final Controller controller;
+    private final NeuralEntityType entityType;
 
-    public NeuralEntity(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull PathEngine pathEngine,
-                        @NotNull Explorer explorer, @NotNull Descriptor descriptor) {
-        super(entityType, uuid);
-        this.navigator = new BasicNavigator(pathEngine, this, 40, 100,
-                20);
-        this.explorer = explorer;
-        this.descriptor = descriptor;
-        this.controller = new MinestomController(this, 69);
+    private final Navigator navigator;
+    private final Controller controller;
+    private final Explorer explorer;
+
+    public NeuralEntity(@NotNull NeuralEntityType entityType, @NotNull UUID uuid, @NotNull PathContext context,
+                        @NotNull NodeTranslator translator) {
+        super(entityType.getEntityType(), uuid);
+        this.entityType = entityType;
+        this.navigator = new BasicNavigator(context.getEngine(), this, 1000,
+                10000, 1000);
+        this.controller = new EntityController(this, entityType.getSpeed());
+        this.explorer = new TranslationExplorer(context.getCache(), entityType.getID(), translator);
     }
 
     @Override
@@ -53,7 +58,7 @@ public class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public @NotNull Descriptor getDescriptor() {
-        return descriptor;
+        return entityType;
     }
 
     @Override
@@ -64,6 +69,10 @@ public class NeuralEntity extends LivingEntity implements Agent {
     @Override
     public @NotNull Controller getController() {
         return controller;
+    }
+
+    public @NotNull Navigator getNavigator() {
+        return navigator;
     }
 
     public void setDestination(@Nullable Entity target) {

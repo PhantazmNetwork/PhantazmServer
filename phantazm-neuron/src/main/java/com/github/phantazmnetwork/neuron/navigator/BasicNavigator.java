@@ -74,13 +74,15 @@ public class BasicNavigator implements Navigator {
                 }
 
                 if(currentOperation.isDone()) {
-                    try {
-                        PathResult result = currentOperation.get();
-                        currentNode = result.getPath();
-                        pathSuccessful = result.isSuccessful();
-                        lastNodeStart = time;
-                        lastPathfind = time;
-                    } catch (InterruptedException | ExecutionException ignored) {}
+                    if(!currentOperation.isCancelled()) {
+                        try {
+                            PathResult result = currentOperation.get();
+                            currentNode = result.getPath();
+                            pathSuccessful = result.isSuccessful();
+                            lastNodeStart = time;
+                            lastPathfind = time;
+                        } catch (InterruptedException | ExecutionException ignored) {}
+                    }
 
                     currentOperation = null;
                 }

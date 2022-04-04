@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import org.jetbrains.annotations.NotNull;
 

@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
+import com.github.phantazmnetwork.neuron.agent.PhysicalDescriptor;
 import com.github.phantazmnetwork.neuron.world.Collider;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,35 +15,17 @@ public class GroundTranslator implements NodeTranslator {
     private static final double EPSILON = 1E-5;
 
     private final Collider collider;
-    private final float width;
-    private final float height;
-    private final float depth;
-    private final float jump;
-    private final float fall;
+    private final GroundDescriptor descriptor;
 
     private final float halfWidth;
     private final float halfDepth;
 
-    /**
-     * Creates a new GroundTranslator instance.
-     * @param collider the collider used to perform collision checks
-     * @param width the width of the agent (x-width)
-     * @param height the height of the agent (y-width)
-     * @param depth the depth of the agent (z-width)
-     * @param jump the maximum jump height of the agent
-     * @param fall the maximum distance the agent may fall
-     */
-    public GroundTranslator(@NotNull Collider collider, float width, float height, float depth, float jump,
-                            float fall) {
+    public GroundTranslator(@NotNull Collider collider, @NotNull GroundDescriptor descriptor) {
         this.collider = Objects.requireNonNull(collider, "collider");
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
-        this.jump = jump;
-        this.fall = fall;
+        this.descriptor = descriptor;
 
-        this.halfWidth = width / 2;
-        this.halfDepth = depth / 2;
+        this.halfWidth = descriptor.getWidth() / 2;
+        this.halfDepth = descriptor.getDepth() / 2;
     }
 
     @Override
@@ -57,9 +40,12 @@ public class GroundTranslator implements NodeTranslator {
         double oY = cY + EPSILON;
         double oZ = cZ - halfDepth + EPSILON;
 
-        double vX = width - EPSILON;
+        float height = descriptor.getHeight();
+        float jump = descriptor.getJumpHeight();
+
+        double vX = descriptor.getWidth() - EPSILON;
         double vY = height - EPSILON;
-        double vZ = depth - EPSILON;
+        double vZ = descriptor.getDepth() - EPSILON;
 
         double highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ);
         double highestJumpY = cY + jump;
@@ -70,7 +56,8 @@ public class GroundTranslator implements NodeTranslator {
                 oY += dY;
                 oZ += dZ;
 
-                highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, 0, -fall, 0);
+                highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, 0, -descriptor.getFallTolerance(),
+                        0);
                 if(highestY != Double.NEGATIVE_INFINITY) {
                     return Vec3I.of(dX, (int) Math.floor(highestY), dZ);
                 }

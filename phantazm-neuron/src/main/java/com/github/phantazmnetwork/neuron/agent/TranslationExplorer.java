@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,6 +17,18 @@ import java.util.Objects;
  * functionality provided by {@link PathCache}.
  */
 public class TranslationExplorer extends ContextualExplorer {
+    private static final Iterable<? extends Vec3I> WALK_VECTORS = List.of(
+            Vec3I.of(1, 0, 0),
+            Vec3I.of(0, 0, 1),
+            Vec3I.of(-1, 0, 0),
+            Vec3I.of(0, 0, -1),
+
+            Vec3I.of(1, 0, 1),
+            Vec3I.of(-1, 0, 1),
+            Vec3I.of(-1, 0, 1),
+            Vec3I.of(-1, 0, -1)
+    );
+
     private final NodeTranslator translator;
     private final Iterable<? extends Vec3I> vectors;
 
@@ -31,6 +44,10 @@ public class TranslationExplorer extends ContextualExplorer {
         super(cache, id);
         this.translator = Objects.requireNonNull(translator, "translator");
         this.vectors = Objects.requireNonNull(vectors, "vectors");
+    }
+
+    public TranslationExplorer(@NotNull PathCache cache, @NotNull String id, @NotNull NodeTranslator translator) {
+        this(cache, id, translator, WALK_VECTORS);
     }
 
     @Override

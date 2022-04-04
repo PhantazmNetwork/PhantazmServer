@@ -52,7 +52,7 @@ class GroundTranslatorTest {
         }
         lowest.thenReturn(Double.POSITIVE_INFINITY);
 
-        return new GroundTranslator(mockCollider, agentWidth, agentHeight, agentWidth, jumpHeight, fallTolerance);
+        return new GroundTranslator(mockCollider, mockDescriptor);
     }
 
     @Nested

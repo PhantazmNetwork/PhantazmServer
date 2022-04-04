@@ -36,8 +36,8 @@ public class BasicPathEngine implements PathEngine {
                 }
 
                 Descriptor descriptor = agent.getDescriptor();
-                PathOperation operation = new BasicPathOperation(agent.getStartPosition(), destination,
-                        (pos) -> pos.equals(destination), descriptor.getCalculator(), agent.getExplorer());
+                PathOperation operation = new BasicPathOperation(agent.getStartPosition(), destination, (pos) ->
+                        descriptor.isComplete(pos, destination), descriptor.getCalculator(), agent.getExplorer());
 
                 while(!operation.isComplete() && !isCancelled) {
                     operation.step();
@@ -70,7 +70,9 @@ public class BasicPathEngine implements PathEngine {
 
         @Override
         public boolean isDone() {
-            return isDone;
+            synchronized (cancelSync) {
+                return isDone || isCancelled;
+            }
         }
 
         @Override

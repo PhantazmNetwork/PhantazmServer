@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":phantazm-commons"))
-    implementation(project(":phantazm-neuron"))
+    implementation(project(":phantazm-commons-minestom"))
+    api(project(":phantazm-neuron"))
 }
