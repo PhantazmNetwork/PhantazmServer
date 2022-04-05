@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The standard implementation of {@link PathCache}. Agents with identical descriptor IDs will share cached values.
@@ -17,12 +18,13 @@ import java.util.*;
  */
 public class BasicPathCache implements PathCache {
     private static final int INITIAL_HASHMAP_CAPACITY = 8;
+    private static final int CACHE_EXPIRE_SECONDS = 5;
 
     private final Cache<Vec3I, Map<String, Iterable<Vec3I>>> positionalCache;
 
     //global cache shared among all BasicPathContext instances. reduces duplication of cached Iterables (lists)
-    private static final Cache<List<Vec3I>, Iterable<Vec3I>> ITERABLE_CACHE = Caffeine.newBuilder().maximumSize(128)
-            .build();
+    private static final Cache<ArrayList<Vec3I>, Iterable<Vec3I>> ITERABLE_CACHE = Caffeine.newBuilder()
+            .maximumSize(128).build();
 
     /**
      * Creates a new instance of this class with the specified maximum cache size. The number of cached iterables will
@@ -31,11 +33,12 @@ public class BasicPathCache implements PathCache {
      * @see Cache
      */
     public BasicPathCache(int maximumCacheSize) {
-        this.positionalCache = Caffeine.newBuilder().maximumSize(maximumCacheSize).build();
+        this.positionalCache = Caffeine.newBuilder().maximumSize(maximumCacheSize).expireAfterWrite(
+                CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS).build();
     }
 
     @Override
-    public @NotNull Optional<Iterable<Vec3I>> getStep(@NotNull Vec3I origin, @NotNull String id) {
+    public @NotNull Optional<Iterable<Vec3I>> getSteps(@NotNull Vec3I origin, @NotNull String id) {
         Map<String, Iterable<Vec3I>> entries = positionalCache.getIfPresent(origin);
         if(entries != null) {
             return Optional.ofNullable(entries.get(id));
@@ -94,8 +97,7 @@ public class BasicPathCache implements PathCache {
 
         //only trim the list if it's getting stored, otherwise it'll just be garbage collected
         return ITERABLE_CACHE.get(list, key -> {
-            //cast is safe, the key must be an arraylist
-            ((ArrayList<Vec3I>)key).trimToSize();
+            key.trimToSize();
             return Collections.unmodifiableList(key);
         });
     }

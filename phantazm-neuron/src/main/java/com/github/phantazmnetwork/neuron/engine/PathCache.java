@@ -20,7 +20,7 @@ public interface PathCache {
      * {@link Optional#empty()} if there is a cache miss
      * @see Descriptor
      */
-    @NotNull Optional<Iterable<Vec3I>> getStep(@NotNull Vec3I origin, @NotNull String id);
+    @NotNull Optional<Iterable<Vec3I>> getSteps(@NotNull Vec3I origin, @NotNull String id);
 
     /**
      * Produces an {@link Iterator} that will iterate over the provided iterator while recording the values it

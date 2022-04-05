@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
+import com.github.phantazmnetwork.commons.minestom.vector.Vec;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
@@ -61,8 +62,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     @Override
     public @NotNull Vec3I getStartPosition() {
         //naive startPosition calculation
-        Pos pos = getPosition();
-        return Vec3I.of(pos.blockX(), pos.blockY(), pos.blockZ());
+        return Vec.toInt(getPosition());
     }
 
     @Override
@@ -89,10 +89,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             navigator.setDestination(null);
         }
         else {
-            navigator.setDestination(() -> {
-                Pos pos = target.getPosition();
-                return Vec3I.of(pos.blockX(), pos.blockY(), pos.blockZ());
-            });
+            navigator.setDestination(() -> Vec.toInt(target.getPosition()));
         }
     }
 
@@ -105,7 +102,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             navigator = new BasicNavigator(context.getEngine(), this, 1000,
                     10000, 1000);
             controller = new EntityController(this, entityType.getSpeed());
-            explorer = new TranslationExplorer(context.getCache(), entityType.getID(), getTranslator(instance,
+            explorer = new TranslationExplorer(context.getCache(), entityType.getID(), makeTranslator(instance,
                     context));
         });
     }
@@ -150,16 +147,17 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     }
 
     /**
-     * Calls a {@link EntityAttackEvent} with this entity as the source and {@code target} as the target.
+     * Calls an {@link EntityAttackEvent} with this entity as the source and {@code target} as the target.
      *
      * @param target    the entity target
      * @param swingHand true to swing the entity main hand, false otherwise
      */
     public void attack(@NotNull Entity target, boolean swingHand) {
-        if (swingHand)
+        if(swingHand) {
             swingMainHand();
-        EntityAttackEvent attackEvent = new EntityAttackEvent(this, target);
-        EventDispatcher.call(attackEvent);
+        }
+
+        EventDispatcher.call(new EntityAttackEvent(this, target));
     }
 
     /**
@@ -173,11 +171,11 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
         attack(target, false);
     }
 
+    public abstract @NotNull NodeTranslator makeTranslator(@NotNull Instance instance, @NotNull PathContext context);
+
     private void cancelNavigation() {
         if(navigator != null) {
             navigator.setDestination(null);
         }
     }
-
-    public abstract @NotNull NodeTranslator getTranslator(@NotNull Instance instance, @NotNull PathContext context);
 }

@@ -28,9 +28,8 @@ public abstract class CachingExplorer implements Explorer {
     @Override
     public final @NotNull Iterable<Vec3I> walkVectors(@NotNull Node current) {
         Vec3I currentPos = current.getPosition();
-
-        return () -> getWalkIterator(current);
-        //return context.getStep(currentPos, id).orElseGet(() -> () -> context.watchSteps(currentPos, id, getWalkIterator(current)));
+        return context.getSteps(currentPos, id).orElse(() -> context.watchSteps(currentPos, id,
+                getWalkIterator(current)));
     }
 
     /**

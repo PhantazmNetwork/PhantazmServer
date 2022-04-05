@@ -78,12 +78,13 @@ public class BasicNavigator implements Navigator {
                     if(!currentOperation.isCancelled()) {
                         try {
                             PathResult result = currentOperation.get();
-                            currentNode = result.getPath();
-                            System.out.println(Arrays.toString(currentNode.toRandomAccessList().toArray()));
 
-                            pathSuccessful = result.isSuccessful();
-                            lastNodeStart = time;
-                            lastPathfind = time;
+                            if(result != null) {
+                                currentNode = result.getPath();
+                                pathSuccessful = result.isSuccessful();
+                                lastNodeStart = time;
+                                lastPathfind = time;
+                            }
                         } catch (InterruptedException | ExecutionException ignored) {}
                     }
 
