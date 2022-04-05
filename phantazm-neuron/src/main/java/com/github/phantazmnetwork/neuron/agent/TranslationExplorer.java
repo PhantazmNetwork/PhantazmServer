@@ -13,10 +13,10 @@ import java.util.Objects;
 
 /**
  * A standard {@link Explorer} implementation that attempts to "move" in every direction specified by a given
- * {@link Vec3I} iterator. This class extends {@link ContextualExplorer} and therefore takes advantage of the caching
+ * {@link Vec3I} iterator. This class extends {@link CachingExplorer} and therefore takes advantage of the caching
  * functionality provided by {@link PathCache}.
  */
-public class TranslationExplorer extends ContextualExplorer {
+public class TranslationExplorer extends CachingExplorer {
     private static final Iterable<? extends Vec3I> WALK_VECTORS = List.of(
             Vec3I.of(1, 0, 0),
             Vec3I.of(0, 0, 1),
@@ -26,7 +26,9 @@ public class TranslationExplorer extends ContextualExplorer {
             Vec3I.of(1, 0, 1),
             Vec3I.of(-1, 0, 1),
             Vec3I.of(-1, 0, 1),
-            Vec3I.of(-1, 0, -1)
+            Vec3I.of(-1, 0, -1),
+
+            Vec3I.of(0, 1, 0)
     );
 
     private final NodeTranslator translator;

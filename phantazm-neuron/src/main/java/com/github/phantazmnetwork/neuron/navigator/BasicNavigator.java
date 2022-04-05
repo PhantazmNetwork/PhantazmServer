@@ -9,6 +9,7 @@ import com.github.phantazmnetwork.neuron.operation.PathResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -78,6 +79,8 @@ public class BasicNavigator implements Navigator {
                         try {
                             PathResult result = currentOperation.get();
                             currentNode = result.getPath();
+                            System.out.println(Arrays.toString(currentNode.toRandomAccessList().toArray()));
+
                             pathSuccessful = result.isSuccessful();
                             lastNodeStart = time;
                             lastPathfind = time;

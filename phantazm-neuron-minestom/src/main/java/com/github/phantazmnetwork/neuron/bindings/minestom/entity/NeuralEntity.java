@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.extollit.gaming.ai.path.HydrazinePathFinder;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
@@ -11,14 +10,10 @@ import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.BasicNavigator;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
-import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
-import com.github.phantazmnetwork.neuron.world.SpatialCollider;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.ai.EntityAIGroup;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Instance;
@@ -77,16 +72,16 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public @NotNull Explorer getExplorer() {
-        return explorer;
+        return Objects.requireNonNull(explorer);
     }
 
     @Override
     public @NotNull Controller getController() {
-        return controller;
+        return Objects.requireNonNull(controller);
     }
 
     public @NotNull Navigator getNavigator() {
-        return navigator;
+        return Objects.requireNonNull(navigator);
     }
 
     public void setTarget(@Nullable Entity target) {
@@ -106,11 +101,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
         return super.setInstance(instance, spawnPosition).whenComplete((ignored, ex) -> {
             PathContext context = provider.provideContext(instance);
 
-            if(navigator != null) {
-                //ensure that we cancel ongoing pathfinding
-                navigator.setDestination(null);
-            }
-
+            cancelNavigation();
             navigator = new BasicNavigator(context.getEngine(), this, 1000,
                     10000, 1000);
             controller = new EntityController(this, entityType.getSpeed());
@@ -130,6 +121,12 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             // Instant removal without animation playback
             remove();
         }
+    }
+
+    @Override
+    public void remove() {
+        super.remove();
+        cancelNavigation();
     }
 
     /**
@@ -174,6 +171,12 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
      */
     public void attack(@NotNull Entity target) {
         attack(target, false);
+    }
+
+    private void cancelNavigation() {
+        if(navigator != null) {
+            navigator.setDestination(null);
+        }
     }
 
     public abstract @NotNull NodeTranslator getTranslator(@NotNull Instance instance, @NotNull PathContext context);

@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * A general {@link Explorer} implementation that takes advantage of a {@link PathCache} object for caching.
  */
-public abstract class ContextualExplorer implements Explorer {
+public abstract class CachingExplorer implements Explorer {
     private final PathCache context;
     private final String id;
 
@@ -20,7 +20,7 @@ public abstract class ContextualExplorer implements Explorer {
      * @param context the PathContext instance used for caching
      * @param id the id of the agent performing the exploration
      */
-    public ContextualExplorer(@NotNull PathCache context, @NotNull String id) {
+    public CachingExplorer(@NotNull PathCache context, @NotNull String id) {
         this.context = Objects.requireNonNull(context, "context");
         this.id = Objects.requireNonNull(id, "id");
     }
@@ -28,8 +28,9 @@ public abstract class ContextualExplorer implements Explorer {
     @Override
     public final @NotNull Iterable<Vec3I> walkVectors(@NotNull Node current) {
         Vec3I currentPos = current.getPosition();
-        return context.getStep(currentPos, id).orElseGet(() -> () -> context.watchSteps(currentPos, id,
-                getWalkIterator(current)));
+
+        return () -> getWalkIterator(current);
+        //return context.getStep(currentPos, id).orElseGet(() -> () -> context.watchSteps(currentPos, id, getWalkIterator(current)));
     }
 
     /**

@@ -8,6 +8,13 @@ import com.github.phantazmnetwork.api.game.scene.lobby.*;
 import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.api.player.BasicPlayerView;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.bindings.minestom.BasicContextProvider;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.BasicSpawner;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundNeuralEntity;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
+import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.server.config.loader.LobbiesConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
@@ -24,8 +31,13 @@ import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
 import com.moandjiezana.toml.TomlWriter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -33,8 +45,11 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.ConnectionManager;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,9 +183,19 @@ public class Main {
                 loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
             }
         });
+
         eventNode.addListener(PlayerSpawnEvent.class, event -> {
            if (!event.isFirstSpawn()) {
                return;
+           }
+
+           //TODO remove, for testing
+           event.getPlayer().teleport(new Pos(0, 100, 0));
+           event.getPlayer().setGameMode(GameMode.CREATIVE);
+           event.getPlayer().setFlying(true);
+           Pos start = event.getPlayer().getPosition().sub(0, 1, 0);
+           for(int i = 0; i < 10; i++) {
+               event.getSpawnInstance().setBlock(start.add(i, 0, 0), Block.GOLD_BLOCK);
            }
 
            LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(event.getPlayer().getUuid());
@@ -180,6 +205,58 @@ public class Main {
            else {
                joinRequest.onPlayerLoginComplete();
            }
+        });
+
+        //TESTING CODE BELOW
+        //TODO remove
+        Spawner spawner = new BasicSpawner(new BasicContextProvider());
+        GroundMinestomDescriptor testDescriptor = new GroundMinestomDescriptor() {
+            @Override
+            public @NotNull EntityType getEntityType() {
+                return EntityType.ZOMBIE;
+            }
+
+            @Override
+            public float getSpeed() {
+                return 1F;
+            }
+
+            @Override
+            public @NotNull String getID() {
+                return "standard_humanoid";
+            }
+
+            @Override
+            public @NotNull Calculator getCalculator() {
+                return Calculator.SQUARED_DISTANCE;
+            }
+
+            @Override
+            public boolean isComplete(@NotNull Vec3I position, @NotNull Vec3I destination) {
+                return position.equals(destination);
+            }
+        };
+
+        eventNode.addListener(PlayerChatEvent.class, event -> {
+            String msg = event.getMessage();
+            Player player = event.getPlayer();
+            Instance instance = player.getInstance();
+
+            if(instance != null) {
+                switch (msg) {
+                    case "T" -> {
+                        GroundNeuralEntity entity = spawner.spawnEntity(instance, player.getPosition().add(5, 0,
+                                        0), testDescriptor,
+                                GroundNeuralEntity::new);
+                        entity.setTarget(player);
+                    }
+                    case "Z" -> {
+                        Pos playerPos = player.getPosition();
+                        instance.setBlock(playerPos.blockX(), playerPos.blockY(), playerPos.blockZ(), Block.GOLD_BLOCK);
+                    }
+                    case "C" -> event.getPlayer().setGameMode(GameMode.CREATIVE);
+                }
+            }
         });
     }
 
