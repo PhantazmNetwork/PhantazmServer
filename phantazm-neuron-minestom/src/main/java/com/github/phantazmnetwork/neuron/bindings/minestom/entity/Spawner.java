@@ -4,9 +4,11 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Consumer;
+
 @FunctionalInterface
 public interface Spawner {
     <TType extends MinestomDescriptor, TReturn extends NeuralEntity> @NotNull TReturn spawnEntity(
             @NotNull Instance instance, @NotNull Point point, @NotNull TType type,
-            @NotNull NeuralEntityFactory<TType, TReturn> factory);
+            @NotNull NeuralEntityFactory<TType, TReturn> factory, @NotNull Consumer<TReturn> settings);
 }

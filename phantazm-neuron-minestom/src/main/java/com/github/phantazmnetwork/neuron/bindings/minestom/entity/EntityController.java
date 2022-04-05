@@ -16,10 +16,12 @@ import java.util.Objects;
 public class EntityController implements Controller {
     private final Entity entity;
     private final double speed;
+    private final float jumpHeight;
 
-    public EntityController(@NotNull Entity entity, double speed) {
+    public EntityController(@NotNull Entity entity, double speed, float jumpHeight) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.speed = speed;
+        this.jumpHeight = jumpHeight;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class EntityController implements Controller {
     public void moveTo(@NotNull Vec3I vec3I) {
         Pos position = entity.getPosition();
         double dx = (vec3I.getX() + 0.5) - position.x();
-        double dy = (vec3I.getY()) - position.y();
+        double dy = vec3I.getY() - position.y();
         double dz = (vec3I.getZ() + 0.5) - position.z();
 
         // the purpose of these few lines is to slow down entities when they reach their destination
@@ -62,5 +64,13 @@ public class EntityController implements Controller {
         // Prevent ghosting
         PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
         this.entity.refreshPosition(physicsResult.newPosition().withView(yaw, pitch));
+
+        if(dy > 0 && dy <= jumpHeight) {
+            jump((float) dy);
+        }
+    }
+
+    private void jump(float height) {
+        this.entity.setVelocity(new Vec(0, height * 2.5f, 0));
     }
 }

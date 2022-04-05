@@ -101,7 +101,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             cancelNavigation();
             navigator = new BasicNavigator(context.getEngine(), this, 1000,
                     10000, 1000);
-            controller = new EntityController(this, entityType.getSpeed());
+            controller = makeController();
             explorer = new TranslationExplorer(context.getCache(), entityType.getID(), makeTranslator(instance,
                     context));
         });
@@ -172,6 +172,8 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     }
 
     public abstract @NotNull NodeTranslator makeTranslator(@NotNull Instance instance, @NotNull PathContext context);
+
+    public abstract @NotNull Controller makeController();
 
     private void cancelNavigation() {
         if(navigator != null) {

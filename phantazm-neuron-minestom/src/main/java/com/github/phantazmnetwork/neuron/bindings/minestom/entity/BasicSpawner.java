@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class BasicSpawner implements Spawner {
@@ -19,9 +20,10 @@ public class BasicSpawner implements Spawner {
     @Override
     public <TType extends MinestomDescriptor, TReturn extends NeuralEntity> @NotNull TReturn spawnEntity(
             @NotNull Instance instance, @NotNull Point point, @NotNull TType type,
-            @NotNull NeuralEntityFactory<TType, TReturn> factory) {
+            @NotNull NeuralEntityFactory<TType, TReturn> factory, @NotNull Consumer<TReturn> settings) {
         TReturn entity = factory.build(type, UUID.randomUUID(), contextProvider);
         entity.setInstance(instance, point);
+        settings.accept(entity);
         return entity;
     }
 }

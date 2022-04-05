@@ -21,6 +21,4 @@ public interface MinestomDescriptor extends PhysicalDescriptor {
     }
 
     @NotNull EntityType getEntityType();
-
-    float getSpeed();
 }

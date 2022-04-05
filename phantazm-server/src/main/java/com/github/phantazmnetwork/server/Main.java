@@ -31,7 +31,9 @@ import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
 import com.moandjiezana.toml.TomlWriter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityCreature;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -213,12 +215,7 @@ public class Main {
         GroundMinestomDescriptor testDescriptor = new GroundMinestomDescriptor() {
             @Override
             public @NotNull EntityType getEntityType() {
-                return EntityType.RAVAGER;
-            }
-
-            @Override
-            public float getSpeed() {
-                return 1F;
+                return EntityType.PHANTOM;
             }
 
             @Override
@@ -246,8 +243,8 @@ public class Main {
                 switch (msg) {
                     case "T" -> {
                         GroundNeuralEntity entity = spawner.spawnEntity(instance, player.getPosition().add(5, 0,
-                                        0), testDescriptor,
-                                GroundNeuralEntity::new);
+                                        0), testDescriptor, GroundNeuralEntity::new, neuralEntity -> neuralEntity
+                                .getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(1F));
                         entity.setTarget(player);
                     }
                     case "Z" -> {
