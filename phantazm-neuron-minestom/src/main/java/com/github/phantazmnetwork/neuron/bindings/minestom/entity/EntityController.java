@@ -2,11 +2,13 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,13 +16,11 @@ import java.util.Objects;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class EntityController implements Controller {
-    private final Entity entity;
-    private final double speed;
+    private final LivingEntity entity;
     private final float jumpHeight;
 
-    public EntityController(@NotNull Entity entity, double speed, float jumpHeight) {
+    public EntityController(@NotNull LivingEntity entity, float jumpHeight) {
         this.entity = Objects.requireNonNull(entity, "entity");
-        this.speed = speed;
         this.jumpHeight = jumpHeight;
     }
 
@@ -49,7 +49,7 @@ public class EntityController implements Controller {
 
         // the purpose of these few lines is to slow down entities when they reach their destination
         double distSquared = dx * dx + dy * dy + dz * dz;
-        double speed = this.speed;
+        double speed = entity.getAttribute(Attribute.MOVEMENT_SPEED).getValue();
         if (speed > distSquared) {
             speed = distSquared;
         }
@@ -66,7 +66,7 @@ public class EntityController implements Controller {
         this.entity.refreshPosition(physicsResult.newPosition().withView(yaw, pitch));
 
         if(dy > 0 && dy <= jumpHeight) {
-            jump((float) dy);
+            jump(1F);
         }
     }
 

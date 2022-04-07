@@ -75,21 +75,6 @@ public interface Vec3I extends Comparable<Vec3I> {
     }
 
     /**
-     * <p>Computes the <i>Manhattan distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This is defined as
-     * the sum of the absolute value of the differences between each component.</p>
-     * @param x1 first x-component
-     * @param y1 first y-component
-     * @param z1 first z-component
-     * @param x2 second x-component
-     * @param y2 second y-component
-     * @param z2 second z-component
-     * @return the Manhattan distance between the point {@code first} and the point {@code second}
-     */
-    static int manhattanDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
-        return Math.abs(x1 - x2) + Math.abs(y1 - y2) + Math.abs(z1 - z2);
-    }
-
-    /**
      * Determines if two points are equal. Equivalent to <code>x1 == x2 && y1 == y2 && z1 == z2</code>.
      * @param x1 first x-component
      * @param y1 first y-component

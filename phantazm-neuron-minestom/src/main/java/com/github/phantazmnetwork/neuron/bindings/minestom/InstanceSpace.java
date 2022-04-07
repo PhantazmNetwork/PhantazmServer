@@ -1,25 +1,102 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.*;
-import com.github.phantazmnetwork.neuron.world.BasicSolid;
+import com.github.phantazmnetwork.commons.SingletonIterator;
+import com.github.phantazmnetwork.commons.minestom.vector.Vec;
+import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import com.github.phantazmnetwork.neuron.world.VoxelSpace;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.util.Objects;
-import java.util.concurrent.Future;
+import java.util.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class InstanceSpace extends VoxelSpace {
+    private static class MinestomSolid implements Solid {
+        private final Shape shape;
+        private final Vec3F min;
+        private final Vec3F max;
+        private final Iterable<Solid> subSolids;
+
+        private MinestomSolid(Shape shape) {
+            this.shape = shape;
+            this.min = Vec.toFloat(shape.relativeStart());
+            this.max = Vec.toFloat(shape.relativeEnd());
+
+            List<BoundingBox> boundingBoxes = new ArrayList<>(3);
+            for(BoundingBox boundingBox : shape.boundingBoxes()) {
+                boundingBoxes.add(boundingBox);
+            }
+
+            if(boundingBoxes.size() == 1) {
+                subSolids = () -> new SingletonIterator<>(this);
+            }
+            else {
+                List<Solid> solids = new ArrayList<>(boundingBoxes.size());
+                for (BoundingBox boundingBox : boundingBoxes) {
+                    Vec3F min = Vec3F.of((float) boundingBox.minX(), (float) boundingBox.minY(), (float) boundingBox
+                            .minZ());
+                    Vec3F max = Vec3F.of((float) boundingBox.maxX(), (float) boundingBox.maxY(), (float) boundingBox
+                            .maxZ());
+                    Iterable<Solid> singleton = () -> new SingletonIterator<>(this);
+
+                    solids.add(new Solid() {
+                        @Override
+                        public @NotNull Vec3F getMin() {
+                            return min;
+                        }
+
+                        @Override
+                        public @NotNull Vec3F getMax() {
+                            return max;
+                        }
+
+                        @Override
+                        public @NotNull Iterable<Solid> getComponents() {
+                            return singleton;
+                        }
+
+                        @Override
+                        public boolean overlaps(double x, double y, double z, double width, double height,
+                                                double depth) {
+                            return boundingBox.intersectBox(new Pos(x, y, z), new BoundingBox(width, height, depth));
+                        }
+                    });
+                }
+                subSolids = Collections.unmodifiableList(solids);
+            }
+        }
+
+        @Override
+        public @NotNull Vec3F getMin() {
+            return min;
+        }
+
+        @Override
+        public @NotNull Vec3F getMax() {
+            return max;
+        }
+
+        @Override
+        public @NotNull Iterable<Solid> getComponents() {
+            return subSolids;
+        }
+
+        @Override
+        public boolean overlaps(double x, double y, double z, double width, double height, double depth) {
+            return shape.intersectBox(new Pos(x, y, z), new BoundingBox(width, height, depth));
+        }
+    }
+
     private static final Long2ObjectMap<Solid> SOLID_CACHE = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>(
             512));
     private final Instance instance;
@@ -46,13 +123,9 @@ public class InstanceSpace extends VoxelSpace {
             return null;
         }
 
+        //TODO: this naive approach won't work when the block collision exceeds a 1x1x1 cube
+        //add a way to split larger collisions into multiple sections
         return SOLID_CACHE.computeIfAbsent(((long) block.stateId() << Integer.SIZE) | block.id(),
-                (long ignored) -> {
-            Shape shape = block.registry().collisionShape();
-            Point start = shape.relativeStart();
-            Point end = shape.relativeEnd();
-            return new BasicSolid((float) start.x(), (float) start.y(), (float) start.z(), (float) end.x(),
-                    (float) end.y(), (float) end.z());
-        });
+                (long ignored) -> new MinestomSolid(block.registry().collisionShape()));
     }
 }

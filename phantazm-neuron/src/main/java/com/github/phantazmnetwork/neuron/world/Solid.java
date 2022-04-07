@@ -22,4 +22,8 @@ public interface Solid {
      * @return the minimum vector
      */
     @NotNull Vec3F getMax();
+
+    @NotNull Iterable<Solid> getComponents();
+
+    boolean overlaps(double x, double y, double z, double width, double height, double depth);
 }

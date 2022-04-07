@@ -73,8 +73,8 @@ abstract class CopyLibs : DefaultTask() {
                 val artifactFileName = relative.nameWithoutExtension
 
                 if(resolvedArtifacts.none { artifact ->
-                        artifact.moduleVersion.id.group == artifactFileGroup &&
-                                artifactFileName == artifact.file.nameWithoutExtension
+                        artifact.moduleVersion.id.group.equals(artifactFileGroup, true) &&
+                                artifact.file.nameWithoutExtension.equals(artifactFileName, true)
                     }) {
                     logger.info("Deleting $it because it does not match any known artifacts.")
                     it.delete()

@@ -1,7 +1,5 @@
 package com.github.phantazmnetwork.commons;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 

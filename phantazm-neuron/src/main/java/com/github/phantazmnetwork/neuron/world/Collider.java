@@ -15,48 +15,15 @@ import org.jetbrains.annotations.NotNull;
  * of the AABB are represented by the absolute value of the corresponding components of the second vector.</p>
  *
  * <p>Collider implementations should not attempt to account for floating point imprecision issues. When performing
- * collision checks, the caller must shrink the bounding box by a tolerance value.</p>
+ * collision checks, the caller must shrink the bounding box by a tolerance value. The exact value that must be used
+ * depends on the level of precision required as well as the numbers involved.</p>
  */
 public interface Collider {
-    /**
-     * Returns a value representing the y-coordinate of the top face of the highest collision intersecting the path
-     * travelled by a bounding box (in origin-vector form) along the movement vector (dX, dY, dZ). The bounding box must
-     * be in origin-vector form. Colliding objects overlapping the initial position of the bounding box will not be
-     * considered.
-     * @param oX x-component of the origin vector
-     * @param oY y-component of the origin vector
-     * @param oZ z-component of the origin vector
-     * @param vX x-component of the offset vector
-     * @param vY y-component of the offset vector
-     * @param vZ z-component of the offset vector
-     * @param dX x-component of the movement vector
-     * @param dY y-component of the movement vector
-     * @param dZ z-component of the movement vector
-     * @return the y-coordinate of the top face of the highest colliding solid in world-space coordinates, or
-     * Double.NEGATIVE_INFINITY if no collision exists
-     */
-    double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX, double dY,
-                                 double dZ);
+    double highestCollisionAlong(double x, double y, double z, double width, double height, double depth, double dX,
+                                 double dY, double dZ);
 
-    /**
-     * Returns a value representing the y-coordinate of the bottom face of the lowest collision intersecting the path
-     * travelled by a bounding box (in origin-vector form) along the movement vector (dX, dY, dZ). The bounding box must
-     * be in origin-vector form. Colliding objects overlapping the initial position of the bounding box will not be
-     * considered.
-     * @param oX x-component of the origin vector
-     * @param oY y-component of the origin vector
-     * @param oZ z-component of the origin vector
-     * @param vX x-component of the offset vector
-     * @param vY y-component of the offset vector
-     * @param vZ z-component of the offset vector
-     * @param dX x-component of the movement vector
-     * @param dY y-component of the movement vector
-     * @param dZ z-component of the movement vector
-     * @return the y-coordinate of the bottom face of the highest colliding solid in world-space coordinates, or
-     * Double.POSITIVE_INFINITY if no collision exists
-     */
-    double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX, double dY,
-                                double dZ);
+    double lowestCollisionAlong(double x, double y, double z, double width, double height, double depth, double dX,
+                                double dY, double dZ);
 
     /**
      * Returns the y-coordinate of the highest face out of all collisions present in an origin-vector bounding box (x,
@@ -69,7 +36,7 @@ public interface Collider {
     double heightAt(int x, int y, int z);
 
     /**
-     * Convenience overload for {@link Collider#heightAt(int, int, int)} that takes a {@link Vec3I}
+     * Convenience overload for {@link Collider#heightAt(int, int, int)} that takes a {@link Vec3I}.
      * @param vec3I the location to check for solids at
      * @return the height of the highest solid, if present, else the y-component of the given vector
      */

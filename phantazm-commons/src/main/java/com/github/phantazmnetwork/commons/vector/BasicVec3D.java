@@ -36,4 +36,21 @@ record BasicVec3D(double getX, double getY, double getZ) implements Vec3D {
     public String toString() {
         return "Vec3D[x=" + getX + ", y=" + getY + ", z=" + getZ + "]";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) {
+            return false;
+        }
+
+        if(obj == this) {
+            return true;
+        }
+
+        if(obj instanceof Vec3D other) {
+            return getX == other.getX() && getY == other.getY() && getZ == other.getZ();
+        }
+
+        return false;
+    }
 }

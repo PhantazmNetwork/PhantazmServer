@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
-import net.minestom.server.attribute.Attribute;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +26,6 @@ public class GroundNeuralEntity extends NeuralEntity {
 
     @Override
     public @NotNull Controller makeController() {
-        return new EntityController(this, getAttributeValue(Attribute.MOVEMENT_SPEED), entityType.getJumpHeight());
+        return new EntityController(this, entityType.getJumpHeight());
     }
 }

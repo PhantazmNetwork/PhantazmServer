@@ -22,8 +22,8 @@ public class BasicSpawner implements Spawner {
             @NotNull Instance instance, @NotNull Point point, @NotNull TType type,
             @NotNull NeuralEntityFactory<TType, TReturn> factory, @NotNull Consumer<TReturn> settings) {
         TReturn entity = factory.build(type, UUID.randomUUID(), contextProvider);
-        entity.setInstance(instance, point);
         settings.accept(entity);
+        entity.setInstance(instance, point);
         return entity;
     }
 }

@@ -32,14 +32,14 @@ public class SpatialCollider implements Collider {
         this.space = Objects.requireNonNull(space, "space");
     }
 
-    private double collisionCheck(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
+    private double collisionCheck(double x, double y, double z, double width, double height, double depth, double dX,
                                   double dY, double dZ, double initialBest, ValueFunction valueFunction,
                                   DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
-        double eoX = oX;
-        double eoY = oY;
-        double eoZ = oZ;
+        double eoX = x;
+        double eoY = y;
+        double eoZ = z;
 
         /*
         perform the actual directional expansion. to do this, first we orient the directional (expansion) vector d
@@ -52,9 +52,9 @@ public class SpatialCollider implements Collider {
         (incidentally, this fast, branchless directional expansion algorithm is why origin-vector form is used for
         Collider impls)
          */
-        double svX = Math.copySign(vX, dX);
-        double svY = Math.copySign(vY, dY);
-        double svZ = Math.copySign(vZ, dZ);
+        double svX = Math.copySign(width, dX);
+        double svY = Math.copySign(height, dY);
+        double svZ = Math.copySign(depth, dZ);
 
         //now that v and d have the same components, add them together to compute the final expansion vector
         double evX = svX + dX;
@@ -63,69 +63,57 @@ public class SpatialCollider implements Collider {
 
         //if we actually changed any components of v, we'll need to move the origin to compensate for the "shift" that
         //this would cause; thus making for a proper directional expansion
-        if(svX != vX) {
+        if(svX != width) {
             eoX -= svX;
         }
 
-        if(svY != vY) {
+        if(svY != height) {
             eoY -= svY;
         }
 
-        if(svZ != vZ) {
+        if(svZ != depth) {
             eoZ -= svZ;
         }
 
         //y-last iteration to ensure we can implement some fast-exit strategies
-        SolidIterator overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY)
-                .iterator();
+        SolidIterator overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY).iterator();
         double best = initialBest;
         if(overlapping.hasNext()) {
-            //make sure widths are positive
-            double xW = Math.abs(vX);
-            double yW = Math.abs(vY);
-            double zW = Math.abs(vZ);
-
             //used as inputs to checkAxis calls
-            double adjustedYZ = (Math.max(yW, zW) * (Math.abs(dY) + Math.abs(dZ))) / 2;
-            double adjustedXZ = (Math.max(xW, zW) * (Math.abs(dX) + Math.abs(dZ))) / 2;
-            double adjustedXY = (Math.max(xW, yW) * (Math.abs(dX) + Math.abs(dY))) / 2;
+            double adjustedYZ = (Math.max(height, depth) * (Math.abs(dY) + Math.abs(dZ))) / 2;
+            double adjustedXZ = (Math.max(width, depth) * (Math.abs(dX) + Math.abs(dZ))) / 2;
+            double adjustedXY = (Math.max(width, height) * (Math.abs(dX) + Math.abs(dY))) / 2;
 
-            double centerX = oX + (xW / 2);
-            double centerY = oY + (yW / 2);
-            double centerZ = oZ + (zW / 2);
-
-            //convert origin-vector form to min-max, for easier overlaps checking
-            double onX = oX + vX;
-            double onY = oY + vY;
-            double onZ = oZ + vZ;
-
-            double aMinX = Math.min(oX, onX);
-            double aMinY = Math.min(oY, onY);
-            double aMinZ = Math.min(oZ, onZ);
-
-            double aMaxX = Math.max(oX, onX);
-            double aMaxY = Math.max(oY, onY);
-            double aMaxZ = Math.max(oZ, onZ);
+            double centerX = x + (width / 2);
+            double centerY = y + (height / 2);
+            double centerZ = z + (depth / 2);
 
             Space.Order.IterationVariables variables = overlapping.getVariables();
-            int yEnd = variables.getThirdEnd();
-
             do {
                 Solid candidate = overlapping.next();
-
                 Vec3F candidateMin = candidate.getMin();
-                Vec3F candidateMax = candidate.getMax();
 
-                double cMinX = overlapping.getFirst() + candidateMin.getX();
-                double cMinY = overlapping.getThird() + candidateMin.getY();
-                double cMinZ = overlapping.getSecond() + candidateMin.getZ();
+                double relX = x - candidateMin.getX();
+                double relY = y - candidateMin.getY();
+                double relZ = z - candidateMin.getZ();
 
-                double cMaxX = overlapping.getFirst() + candidateMax.getX();
-                double cMaxY = overlapping.getThird() + candidateMax.getY();
-                double cMaxZ = overlapping.getSecond() + candidateMax.getZ();
+                for(Solid component : candidate.getComponents()) {
+                    //stop checking this solid if any of its sub-solids overlap original bounds
+                    if(component.overlaps(relX, relY, relZ, width, height, depth)) {
+                        break;
+                    }
 
-                //only check solids not overlapping with the original bounds
-                if(!overlaps(aMinX, aMinY, aMinZ, aMaxX, aMaxY, aMaxZ, cMinX, cMinY, cMinZ, cMaxX, cMaxY, cMaxZ)) {
+                    Vec3F componentMin = component.getMin();
+                    Vec3F componentMax = component.getMax();
+
+                    double cMinX = overlapping.getFirst() + componentMin.getX();
+                    double cMinY = overlapping.getThird() + componentMin.getY();
+                    double cMinZ = overlapping.getSecond() + componentMin.getZ();
+
+                    double cMaxX = overlapping.getFirst() + componentMax.getX();
+                    double cMaxY = overlapping.getThird() + componentMax.getY();
+                    double cMaxZ = overlapping.getSecond() + componentMax.getZ();
+
                     double minX = cMinX - centerX;
                     double minY = cMinY - centerY;
                     double minZ = cMinZ - centerZ;
@@ -142,17 +130,19 @@ public class SpatialCollider implements Collider {
                         if(betterThan.test(value, best)) {
                             //we have found the highest/lowest possible solid this layer
                             if(bestThisLayer.test(candidate)) {
-                                int newY = (int) Math.floor(value);
-                                if(newY == yEnd) {
+                                int nextY = overlapping.getThird() + variables.getThirdIncrement();
+                                if(nextY == variables.getThirdEnd()) {
                                     return value;
                                 }
 
-                                overlapping.setPointer(variables.getFirstOrigin(), variables.getSecondOrigin(),
-                                        newY + variables.getThirdIncrement());
+                                overlapping.setPointer(variables.getFirstOrigin(), variables.getSecondOrigin(), nextY);
                             }
 
                             best = value;
                         }
+
+                        //don't bother with other components
+                        break;
                     }
                 }
             }
@@ -163,10 +153,10 @@ public class SpatialCollider implements Collider {
     }
 
     @Override
-    public double highestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
-                                        double dY, double dZ) {
-        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.NEGATIVE_INFINITY, (solid, y) -> y + solid
-                .getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F);
+    public double highestCollisionAlong(double x, double y, double z, double width, double height, double depth,
+                                        double dX, double dY, double dZ) {
+        return collisionCheck(x, y, z, width, height, depth, dX, dY, dZ, Double.NEGATIVE_INFINITY, (solid, val) -> val +
+                solid.getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F);
     }
 
     @Override
@@ -182,11 +172,6 @@ public class SpatialCollider implements Collider {
         return solid == null ? y : y + solid.getMax().getY();
     }
 
-    /*
-    checks for collisions when travelling along a certain axis. as checkPlanes expects the min and max vectors to be
-    ordered in a certain way, performs a simple check on the 'slope' of the inequalities used for representing the
-    moving bounding box (see checkPlanes)
-    */
     private static boolean checkAxis(double size, double dA, double dB, double minA, double minB, double maxA,
                                      double maxB) {
         if(dA == 0 && dB == 0) {
@@ -197,37 +182,6 @@ public class SpatialCollider implements Collider {
                 minA, maxB);
     }
 
-    /*
-    this simple algorithm determines if a given bounds, denoted by a pair of 2d points, intersects the path traced by
-    a bounding box moving in the direction denoted by the vector <dirX, dirZ>. the width of the bounding box is given
-    by adjustedWidth, whose value must be precalculated as follows:
-
-    (width * (Math.abs(dirX) + Math.abs(dirZ))) / 2
-
-    the function works by testing points (min, max) against a pair of inequalities:
-
-    First: (z * dirX) - (x * dirZ) < w
-    Second: (z * dirX) - (x * dirZ) > -w
-
-    the function follows the truth table shown below. a question mark denotes "don't care"
-
-    minInFirst   |   minInSecond   |   maxInFirst   |   maxInSecond   |   collides
-    0                1                 0                ?                 0
-    0                1                 1                ?                 1
-    1                0                 ?                0                 0
-    1                0                 ?                1                 1  //same as #2 but inverted
-    1                1                 ?                ?                 1
-
-    some combinations of values are not possible given valid inputs, and thus they are not present in the truth table
-    and are not tested for either. for example, a point that satisfies neither of the inequalities is not possible for
-    a valid adjustedWidth parameter.
-
-    more specifically, regarding invalid input, all double parameters must be finite, and adjustedWidth must be greater
-    than 0. dirX and dirZ may be any pair of integers, including negative numbers, but they cannot both be zero (one
-    may be zero if the other is non-zero). minX, minZ, maxX, and maxZ must be finite and have an additional special
-    consideration that a vector drawn between them must NOT belong to the same or opposite quadrant as the direction
-    vector
-    */
     private static boolean checkPlanes(double size, double dA, double dB, double minA, double minB, double maxA,
                                        double maxB) {
         double bMinusAMin = (minB * dA) - (minA * dB);
@@ -241,11 +195,5 @@ public class SpatialCollider implements Collider {
         }
 
         return (maxB * dA) - (maxA * dB) > -size; // ... && !minInSecond
-    }
-
-    private static boolean overlaps(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
-                                    double minX2, double minY2, double minZ2, double maxX2, double maxY2,
-                                    double maxZ2) {
-        return minX < maxX2 && minY < maxY2 && minZ < maxZ2 && maxX >= minX2 && maxY >= minY2 && maxZ >= minZ2;
     }
 }
