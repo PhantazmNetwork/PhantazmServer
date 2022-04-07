@@ -34,7 +34,7 @@ public class SpatialCollider implements Collider {
 
     private double collisionCheck(double x, double y, double z, double width, double height, double depth, double dX,
                                   double dY, double dZ, double initialBest, ValueFunction valueFunction,
-                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer) {
+                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer, boolean highest) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
         double eoX = x;
@@ -135,6 +135,14 @@ public class SpatialCollider implements Collider {
                                     return value;
                                 }
 
+                                //fast exit if we are moving down or up
+                                if(highest && dY < 0) {
+                                    return value;
+                                }
+                                else if(!highest && dY > 0) {
+                                    return value;
+                                }
+
                                 overlapping.setPointer(variables.getFirstOrigin(), variables.getSecondOrigin(), nextY);
                             }
 
@@ -156,14 +164,16 @@ public class SpatialCollider implements Collider {
     public double highestCollisionAlong(double x, double y, double z, double width, double height, double depth,
                                         double dX, double dY, double dZ) {
         return collisionCheck(x, y, z, width, height, depth, dX, dY, dZ, Double.NEGATIVE_INFINITY, (solid, val) -> val +
-                solid.getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F);
+                solid.getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F,
+                true);
     }
 
     @Override
-    public double lowestCollisionAlong(double oX, double oY, double oZ, double vX, double vY, double vZ, double dX,
-                                       double dY, double dZ) {
-        return collisionCheck(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ, Double.POSITIVE_INFINITY, (solid, y) -> y + solid
-                .getMin().getY(), (value, best) -> value < best, solid -> solid.getMin().getY() == 0.0F);
+    public double lowestCollisionAlong(double x, double y, double z, double width, double height, double depth,
+                                       double dX, double dY, double dZ) {
+        return collisionCheck(x, y, z, width, height, depth, dX, dY, dZ, Double.POSITIVE_INFINITY, (solid, val) -> val +
+                solid.getMin().getY(), (value, best) -> value < best, solid -> solid.getMin().getY() == 0.0F,
+                false);
     }
 
     @Override
