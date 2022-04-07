@@ -32,24 +32,19 @@ public class InstanceSpace extends VoxelSpace {
             this.min = Vec.toFloat(shape.relativeStart());
             this.max = Vec.toFloat(shape.relativeEnd());
 
-            List<BoundingBox> boundingBoxes = new ArrayList<>(3);
-            for(BoundingBox boundingBox : shape.boundingBoxes()) {
-                boundingBoxes.add(boundingBox);
-            }
-
+            List<BoundingBox> boundingBoxes = shape.boundingBoxes();
             if(boundingBoxes.size() == 1) {
-                subSolids = () -> new SingletonIterator<>(this);
+                this.subSolids = () -> new SingletonIterator<>(this);
             }
             else {
                 List<Solid> solids = new ArrayList<>(boundingBoxes.size());
                 for (BoundingBox boundingBox : boundingBoxes) {
-                    Vec3F min = Vec3F.of((float) boundingBox.minX(), (float) boundingBox.minY(), (float) boundingBox
-                            .minZ());
-                    Vec3F max = Vec3F.of((float) boundingBox.maxX(), (float) boundingBox.maxY(), (float) boundingBox
-                            .maxZ());
-                    Iterable<Solid> singleton = () -> new SingletonIterator<>(this);
+                    Vec3F min = Vec3F.ofDouble(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
+                    Vec3F max = Vec3F.ofDouble(boundingBox.maxX(), boundingBox.maxY(), boundingBox.maxZ());
 
                     solids.add(new Solid() {
+                        private final Iterable<Solid> singleton = () -> new SingletonIterator<>(this);
+
                         @Override
                         public @NotNull Vec3F getMin() {
                             return min;
@@ -72,7 +67,8 @@ public class InstanceSpace extends VoxelSpace {
                         }
                     });
                 }
-                subSolids = Collections.unmodifiableList(solids);
+
+                this.subSolids = Collections.unmodifiableList(solids);
             }
         }
 

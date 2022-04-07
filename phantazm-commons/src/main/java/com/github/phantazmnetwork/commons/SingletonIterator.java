@@ -5,11 +5,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public final class SingletonIterator<T> implements Iterator<T> {
+/**
+ * A simple {@link Iterator} over a single value. This iterator does not support removal.
+ * @param <TTYpe> the type of value
+ */
+public final class SingletonIterator<TTYpe> implements Iterator<TTYpe> {
     private boolean end;
-    private T value;
+    private TTYpe value;
 
-    public SingletonIterator(@Nullable T value) {
+    /**
+     * Create a new SingletonIterator over the provided value.
+     * @param value the single element to iterate
+     */
+    public SingletonIterator(@Nullable TTYpe value) {
         this.value = value;
     }
 
@@ -19,14 +27,14 @@ public final class SingletonIterator<T> implements Iterator<T> {
     }
 
     @Override
-    public T next() {
+    public TTYpe next() {
         if(end) {
             throw new NoSuchElementException();
         }
 
         end = true;
 
-        T valueCopy = value;
+        TTYpe valueCopy = value;
         value = null;
 
         return valueCopy;

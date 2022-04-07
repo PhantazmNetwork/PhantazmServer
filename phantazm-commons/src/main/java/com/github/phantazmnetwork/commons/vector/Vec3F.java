@@ -13,6 +13,10 @@ public interface Vec3F extends Comparable<Vec3F> {
         return new BasicVec3F(x, y, z);
     }
 
+    static @NotNull Vec3F ofDouble(double x, double y, double z) {
+        return new BasicVec3F((float) x, (float) y, (float) z);
+    }
+
     /**
      * Determines if two points are equal. Equivalent to <code>x1 == x2 && y1 == y2 && z1 == z2</code>.
      * @param x1 first x-component
