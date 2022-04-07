@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3F;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.function.DoublePredicate;
 import java.util.function.Predicate;
 
 /**
@@ -34,7 +35,8 @@ public class SpatialCollider implements Collider {
 
     private double collisionCheck(double x, double y, double z, double width, double height, double depth, double dX,
                                   double dY, double dZ, double initialBest, ValueFunction valueFunction,
-                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer, boolean highest) {
+                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer,
+                                  DoublePredicate fastExit) {
         //bounding box of collision which will be directionally expanded
         //this is necessary to obtain an iterable of candidate solids to collision check
         double eoX = x;
@@ -131,15 +133,14 @@ public class SpatialCollider implements Collider {
                             //we have found the highest/lowest possible solid this layer
                             if(bestThisLayer.test(candidate)) {
                                 int nextY = overlapping.getThird() + variables.getThirdIncrement();
+
+                                //fast exit: we already found the best possible this layer + we're on the last layer
                                 if(nextY == variables.getThirdEnd()) {
                                     return value;
                                 }
 
-                                //fast exit if we are moving down or up
-                                if(highest && dY < 0) {
-                                    return value;
-                                }
-                                else if(!highest && dY > 0) {
+                                //fast exit: we must have found the best possible in the entire volume
+                                if(fastExit.test(dY)) {
                                     return value;
                                 }
 
@@ -165,7 +166,7 @@ public class SpatialCollider implements Collider {
                                         double dX, double dY, double dZ) {
         return collisionCheck(x, y, z, width, height, depth, dX, dY, dZ, Double.NEGATIVE_INFINITY, (solid, val) -> val +
                 solid.getMax().getY(), (value, best) -> value > best, solid -> solid.getMax().getY() == 1.0F,
-                true);
+                val -> val < 0);
     }
 
     @Override
@@ -173,7 +174,7 @@ public class SpatialCollider implements Collider {
                                        double dX, double dY, double dZ) {
         return collisionCheck(x, y, z, width, height, depth, dX, dY, dZ, Double.POSITIVE_INFINITY, (solid, val) -> val +
                 solid.getMin().getY(), (value, best) -> value < best, solid -> solid.getMin().getY() == 0.0F,
-                false);
+                val -> val > 0);
     }
 
     @Override
