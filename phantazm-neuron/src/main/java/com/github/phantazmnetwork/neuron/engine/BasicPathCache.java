@@ -50,28 +50,11 @@ public class BasicPathCache implements PathCache {
 
     @Override
     public @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull String id,
-                                               @NotNull Iterator<? extends Vec3I> steps) {
-        return new AdvancingIterator<>() {
-            private final ArrayList<Vec3I> list = new ArrayList<>();
-            private boolean complete = false;
-
-            @Override
-            public boolean advance() {
-                if(complete) {
-                    return false;
-                }
-
-                if(steps.hasNext()) {
-                    list.add(this.value = steps.next());
-                    return true;
-                }
-
-                positionalCache.get(origin, ignored -> Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>(
-                        INITIAL_HASHMAP_CAPACITY))).put(id, getView(list));
-                complete = true;
-                return false;
-            }
-        };
+                                               @NotNull Iterator<Vec3I> steps) {
+        ArrayList<Vec3I> list = new ArrayList<>();
+        return EnhancedIterator.adapt(steps).listen(list::add).after(() -> positionalCache.get(origin, ignored ->
+                Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>(INITIAL_HASHMAP_CAPACITY))).put(id,
+                getView(list)));
     }
 
     @Override

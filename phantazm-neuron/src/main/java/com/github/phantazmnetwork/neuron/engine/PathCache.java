@@ -32,7 +32,7 @@ public interface PathCache {
      * possibly caching them
      */
     @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull String id,
-                                        @NotNull Iterator<? extends Vec3I> steps);
+                                        @NotNull Iterator<Vec3I> steps);
 
     /**
      * Invalidates (removes) any values associated with the given origin vector.

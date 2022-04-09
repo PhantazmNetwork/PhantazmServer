@@ -42,10 +42,6 @@ public interface EnhancedIterator<TValue> extends Iterator<TValue> {
 
             @Override
             public TOut next() {
-                if(!EnhancedIterator.this.hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
                 return mapper.apply(EnhancedIterator.this.next());
             }
         };
@@ -123,13 +119,30 @@ public interface EnhancedIterator<TValue> extends Iterator<TValue> {
 
             @Override
             public TValue next() {
-                if(!EnhancedIterator.this.hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
                 TValue value = EnhancedIterator.this.next();
                 listener.accept(value);
                 return value;
+            }
+        };
+    }
+
+    default @NotNull EnhancedIterator<TValue> after(@NotNull Runnable action) {
+        return new EnhancedIterator<>() {
+            boolean finished = false;
+
+            @Override
+            public boolean hasNext() {
+                boolean hasNext = EnhancedIterator.this.hasNext();
+                if(!hasNext && !finished) {
+                    action.run();
+                    finished = true;
+                }
+                return hasNext;
+            }
+
+            @Override
+            public TValue next() {
+                return EnhancedIterator.this.next();
             }
         };
     }
@@ -178,10 +191,6 @@ public interface EnhancedIterator<TValue> extends Iterator<TValue> {
 
             @Override
             public TValue next() {
-                if(!iterator.hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
                 return iterator.next();
             }
         };
