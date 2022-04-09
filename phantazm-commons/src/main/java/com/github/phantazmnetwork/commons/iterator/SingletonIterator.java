@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.commons;
+package com.github.phantazmnetwork.commons.iterator;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +9,7 @@ import java.util.NoSuchElementException;
  * A simple {@link Iterator} over a single value. This iterator does not support removal.
  * @param <TTYpe> the type of value
  */
-public final class SingletonIterator<TTYpe> implements Iterator<TTYpe> {
+final class SingletonIterator<TTYpe> implements EnhancedIterator<TTYpe> {
     private boolean end;
     private TTYpe value;
 
@@ -17,7 +17,7 @@ public final class SingletonIterator<TTYpe> implements Iterator<TTYpe> {
      * Create a new SingletonIterator over the provided value.
      * @param value the single element to iterate
      */
-    public SingletonIterator(@Nullable TTYpe value) {
+    SingletonIterator(@Nullable TTYpe value) {
         this.value = value;
     }
 

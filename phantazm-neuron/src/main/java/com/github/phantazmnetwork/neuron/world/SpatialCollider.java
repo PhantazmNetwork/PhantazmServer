@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.neuron.world;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.DoublePredicate;
 import java.util.function.Predicate;

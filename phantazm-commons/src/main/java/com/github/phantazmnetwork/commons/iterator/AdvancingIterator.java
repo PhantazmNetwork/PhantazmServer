@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.commons;
+package com.github.phantazmnetwork.commons.iterator;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
  * case (sequential computation of elements not associated with a collection) does not call for it.</p>
  * @param <TValue> the type of value returned by {@link Iterator#next()}
  */
-public abstract class AdvancingIterator<TValue> implements Iterator<TValue> {
+public abstract class AdvancingIterator<TValue> implements EnhancedIterator<TValue> {
     //use boolean flag to indicate presence of a value: null values are allowed
     private boolean hasValue;
 

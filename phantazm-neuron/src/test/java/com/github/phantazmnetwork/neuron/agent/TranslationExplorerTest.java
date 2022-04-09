@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class TranslationExplorerTest {
-    private static TranslationExplorer makeExplorer(Iterable<? extends Vec3I> vectors, Predicate<Vec3I> shouldSkip,
+    private static TranslationExplorer makeExplorer(Iterable<Vec3I> vectors, Predicate<Vec3I> shouldSkip,
                                                     Function<Vec3I, Vec3I> transform) {
         NodeTranslator mockTranslator = mock(NodeTranslator.class);
         when(mockTranslator.translate(anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt())).thenAnswer(invocation

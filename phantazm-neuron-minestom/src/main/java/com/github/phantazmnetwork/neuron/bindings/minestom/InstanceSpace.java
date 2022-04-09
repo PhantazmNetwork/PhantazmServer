@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
-import com.github.phantazmnetwork.commons.SingletonIterator;
+import com.github.phantazmnetwork.commons.iterator.EnhancedIterator;
 import com.github.phantazmnetwork.commons.minestom.vector.Vec;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
@@ -34,7 +34,7 @@ public class InstanceSpace extends VoxelSpace {
 
             List<BoundingBox> boundingBoxes = shape.boundingBoxes();
             if(boundingBoxes.size() == 1) {
-                this.subSolids = () -> new SingletonIterator<>(this);
+                this.subSolids = () -> EnhancedIterator.of(this);
             }
             else {
                 List<Solid> solids = new ArrayList<>(boundingBoxes.size());
@@ -43,7 +43,7 @@ public class InstanceSpace extends VoxelSpace {
                     Vec3F max = Vec3F.ofDouble(boundingBox.maxX(), boundingBox.maxY(), boundingBox.maxZ());
 
                     solids.add(new Solid() {
-                        private final Iterable<Solid> singleton = () -> new SingletonIterator<>(this);
+                        private final Iterable<Solid> singleton = () -> EnhancedIterator.of(this);
 
                         @Override
                         public @NotNull Vec3F getMin() {
@@ -121,7 +121,7 @@ public class InstanceSpace extends VoxelSpace {
 
         //TODO: this naive approach won't work when the block collision exceeds a 1x1x1 cube
         //add a way to split larger collisions into multiple sections
-        return SOLID_CACHE.computeIfAbsent(((long) block.stateId() << Integer.SIZE) | block.id(),
-                (long ignored) -> new MinestomSolid(block.registry().collisionShape()));
+        return SOLID_CACHE.computeIfAbsent(((long) block.stateId() << Integer.SIZE) | block.id(), ignored ->
+                new MinestomSolid(block.registry().collisionShape()));
     }
 }

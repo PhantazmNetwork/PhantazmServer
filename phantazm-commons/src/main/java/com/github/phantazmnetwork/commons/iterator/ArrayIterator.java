@@ -1,8 +1,7 @@
-package com.github.phantazmnetwork.commons;
+package com.github.phantazmnetwork.commons.iterator;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -10,16 +9,16 @@ import java.util.Objects;
  * A simple iterator over an array. This iterator does not support removal.
  * @param <TComponent> the component type of the array
  */
-public final class ArrayIterator<TComponent> implements Iterator<TComponent> {
+final class ArrayIterator<TComponent> implements EnhancedIterator<TComponent> {
     private TComponent[] array;
     private int index;
 
     /**
-     * Creates a new ArrayIterator over the provided array, which must not be null (but may contain null components).
+     * Creates a new ArrayIterator over the provided array, which must not be null (but may contain null elements).
      * @param array the array
      * @throws NullPointerException if array is null
      */
-    public ArrayIterator(TComponent @NotNull [] array) {
+    ArrayIterator(TComponent @NotNull [] array) {
         this.array = Objects.requireNonNull(array, "array");
     }
 
@@ -38,6 +37,7 @@ public final class ArrayIterator<TComponent> implements Iterator<TComponent> {
         if(index == array.length) {
             array = null;
         }
+
         return element;
     }
 }

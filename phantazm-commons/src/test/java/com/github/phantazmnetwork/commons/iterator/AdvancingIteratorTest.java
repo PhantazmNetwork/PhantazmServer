@@ -1,6 +1,6 @@
-package com.github.phantazmnetwork.commons;
+package com.github.phantazmnetwork.commons.iterator;
 
-import com.github.phantazmnetwork.commons.AdvancingIterator;
+import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;

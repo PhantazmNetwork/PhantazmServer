@@ -2,7 +2,8 @@ package com.github.phantazmnetwork.neuron.engine;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.phantazmnetwork.commons.AdvancingIterator;
+import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
+import com.github.phantazmnetwork.commons.iterator.EnhancedIterator;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;

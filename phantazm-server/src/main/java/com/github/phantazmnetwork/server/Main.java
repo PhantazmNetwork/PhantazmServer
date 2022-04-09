@@ -214,7 +214,7 @@ public class Main {
         GroundMinestomDescriptor testDescriptor = new GroundMinestomDescriptor() {
             @Override
             public @NotNull EntityType getEntityType() {
-                return EntityType.PHANTOM;
+                return EntityType.ZOMBIE;
             }
 
             @Override
