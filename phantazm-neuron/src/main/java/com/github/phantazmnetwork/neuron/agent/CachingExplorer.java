@@ -12,6 +12,7 @@ import java.util.Objects;
  * A general {@link Explorer} implementation that takes advantage of a {@link PathCache} object for caching.
  */
 public abstract class CachingExplorer implements Explorer {
+    private static final boolean CACHE_ENABLED = true;
     private final PathCache context;
     private final String id;
 
@@ -27,9 +28,14 @@ public abstract class CachingExplorer implements Explorer {
 
     @Override
     public final @NotNull Iterable<Vec3I> walkVectors(@NotNull Node current) {
-        Vec3I currentPos = current.getPosition();
-        return context.getSteps(currentPos, id).orElse(() -> context.watchSteps(currentPos, id,
-                getWalkIterator(current)));
+        if(CACHE_ENABLED) {
+            Vec3I currentPos = current.getPosition();
+            return context.getSteps(currentPos, id).orElse(() -> context.watchSteps(currentPos, id,
+                    getWalkIterator(current)));
+        }
+        else {
+            return () -> getWalkIterator(current);
+        }
     }
 
     /**

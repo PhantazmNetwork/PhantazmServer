@@ -59,12 +59,7 @@ public class TranslationExplorer extends CachingExplorer {
         int y = currentPos.getY();
         int z = currentPos.getZ();
 
-        Node parentNode = current.getParent();
-
-        Vec3I parentPos = parentNode == null ? null : parentNode.getPosition();
-        return Pipe.from(vectors.iterator()).filter(delta -> parentPos == null || !Vec3I.equals(parentPos
-                        .getX(), parentPos.getY(), parentPos.getZ(), x + delta.getX(), y + delta.getY(), z +
-                        delta.getZ())).map(delta -> translator.translate(x, y, z, delta.getX(), delta.getY(), delta
-                .getZ())).filter(delta -> !delta.equals(Vec3I.ORIGIN));
+        return Pipe.from(vectors.iterator()).map(delta -> translator.translate(x, y, z, delta.getX(), delta.getY(),
+                delta.getZ())).filter(delta -> !delta.equals(Vec3I.ORIGIN));
     }
 }

@@ -1,13 +1,14 @@
 package com.github.phantazmnetwork.neuron.operation;
 
 import com.github.phantazmnetwork.neuron.node.Node;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 /**
- * A basic PathResult implementation, representing a completed (successful or failed) path.
+ * The result of a pathfinding operation, representing a completed (successful or failed) path.
  */
-public record PathResult(Node getPath, boolean isSuccessful) {
+public record PathResult(@NotNull Node getPath, boolean isSuccessful) {
     /**
      * Creates a new BasicResult.
      *

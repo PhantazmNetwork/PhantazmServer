@@ -61,6 +61,7 @@ public class EntityController implements Controller {
         //TODO alternative to cringe @ApiStatus.Internal methods?
         float yaw = PositionUtils.getLookYaw(dx, dz);
         float pitch = PositionUtils.getLookPitch(dx, dy, dz);
+
         // Prevent ghosting
         PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
         this.entity.refreshPosition(physicsResult.newPosition().withView(yaw, pitch));
