@@ -73,8 +73,8 @@ public abstract class Wrapper<TType> implements Supplier<TType> {
     }
 
     /**
-     * Creates and returns a new Wrapper implementation. For primitive values, instead consider using the appropriate
-     * primitive specialization of this method.
+     * Creates and returns a new Wrapper implementation. For primitive values, consider using the appropriate primitive
+     * specialization of this method.
      * @param value the value to initially store in the wrapper
      * @param <T> the type of value held in the wrapper
      * @return a mutable Wrapper implementation

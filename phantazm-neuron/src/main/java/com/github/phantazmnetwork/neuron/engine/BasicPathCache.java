@@ -2,8 +2,7 @@ package com.github.phantazmnetwork.neuron.engine;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
-import com.github.phantazmnetwork.commons.iterator.EnhancedIterator;
+import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -52,7 +51,7 @@ public class BasicPathCache implements PathCache {
     public @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull String id,
                                                @NotNull Iterator<Vec3I> steps) {
         ArrayList<Vec3I> list = new ArrayList<>();
-        return EnhancedIterator.adapt(steps).listen(list::add).after(() -> positionalCache.get(origin, ignored ->
+        return Pipe.from(steps).listen(list::add).onLast(ignored -> positionalCache.get(origin, ignored2 ->
                 Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>(INITIAL_HASHMAP_CAPACITY))).put(id,
                 getView(list)));
     }

@@ -1,23 +1,23 @@
-package com.github.phantazmnetwork.commons.iterator;
+package com.github.phantazmnetwork.commons.pipe;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * A simple {@link Iterator} over a single value. This iterator does not support removal.
- * @param <TTYpe> the type of value
+ * A {@link Pipe} object containing a single instance. Not part of the public API.
+ * @param <TTYpe> the type of element contained in this pipe
  */
-final class SingletonIterator<TTYpe> implements EnhancedIterator<TTYpe> {
+final class SingletonPipe<TTYpe> implements Pipe<TTYpe> {
     private boolean end;
     private TTYpe value;
 
     /**
-     * Create a new SingletonIterator over the provided value.
-     * @param value the single element to iterate
+     * Creates a new SingletonPipe containing the specified value. Instances may be obtained through
+     * {@link Pipe#of(Object[])}.
+     * @param value the only value contained in this pipe
      */
-    SingletonIterator(@Nullable TTYpe value) {
+    SingletonPipe(@Nullable TTYpe value) {
         this.value = value;
     }
 

@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.neuron.world;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.DoublePredicate;
 import java.util.function.Predicate;
@@ -79,7 +78,7 @@ public class SpatialCollider implements Collider {
         }
 
         //y-last iteration to ensure we can implement some fast-exit strategies
-        SolidIterator overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY).iterator();
+        SolidPipe overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY).iterator();
         double best = initialBest;
         if(overlapping.hasNext()) {
             //used as inputs to checkAxis calls

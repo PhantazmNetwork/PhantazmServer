@@ -151,7 +151,7 @@ public interface Space {
     @Nullable Solid solidAt(int x, int y, int z);
 
     /**
-     * Returns a {@link SolidIterable} over the provided origin-vector AABB, using the specified {@link Order}. The
+     * Returns a {@link SolidSource} over the provided origin-vector AABB, using the specified {@link Order}. The
      * iterable will iterate all solids in the region encompassed by the AABB, starting at the origin vector. See
      * {@link Collider} for more information about the origin-vector form of AABBs.
      * @param oX the origin x
@@ -163,6 +163,6 @@ public interface Space {
      * @param order the iteration order used
      * @return a SolidIterable which will iterate all solids present in the AABB
      */
-    @NotNull SolidIterable solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
-                                             @NotNull Order order);
+    @NotNull SolidSource solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
+                                           @NotNull Order order);
 }

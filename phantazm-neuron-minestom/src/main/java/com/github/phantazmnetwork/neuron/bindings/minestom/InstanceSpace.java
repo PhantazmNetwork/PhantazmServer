@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
-import com.github.phantazmnetwork.commons.iterator.EnhancedIterator;
+import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.minestom.vector.Vec;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
@@ -34,7 +34,7 @@ public class InstanceSpace extends VoxelSpace {
 
             List<BoundingBox> boundingBoxes = shape.boundingBoxes();
             if(boundingBoxes.size() == 1) {
-                this.subSolids = () -> EnhancedIterator.of(this);
+                this.subSolids = () -> Pipe.of(this);
             }
             else {
                 List<Solid> solids = new ArrayList<>(boundingBoxes.size());
@@ -43,7 +43,7 @@ public class InstanceSpace extends VoxelSpace {
                     Vec3F max = Vec3F.ofDouble(boundingBox.maxX(), boundingBox.maxY(), boundingBox.maxZ());
 
                     solids.add(new Solid() {
-                        private final Iterable<Solid> singleton = () -> EnhancedIterator.of(this);
+                        private final Iterable<Solid> singleton = () -> Pipe.of(this);
 
                         @Override
                         public @NotNull Vec3F getMin() {

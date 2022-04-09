@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.neuron.agent;
 
-import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
-import com.github.phantazmnetwork.commons.iterator.EnhancedIterator;
+import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.node.Node;
@@ -63,7 +62,7 @@ public class TranslationExplorer extends CachingExplorer {
         Node parentNode = current.getParent();
 
         Vec3I parentPos = parentNode == null ? null : parentNode.getPosition();
-        return EnhancedIterator.adapt(vectors.iterator()).filter(delta -> parentPos == null || !Vec3I.equals(parentPos
+        return Pipe.from(vectors.iterator()).filter(delta -> parentPos == null || !Vec3I.equals(parentPos
                         .getX(), parentPos.getY(), parentPos.getZ(), x + delta.getX(), y + delta.getY(), z +
                         delta.getZ())).map(delta -> translator.translate(x, y, z, delta.getX(), delta.getY(), delta
                 .getZ())).filter(delta -> !delta.equals(Vec3I.ORIGIN));

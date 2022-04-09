@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import com.github.phantazmnetwork.commons.iterator.AdvancingIterator;
+import com.github.phantazmnetwork.commons.pipe.Pipe;
+import com.github.phantazmnetwork.commons.wrapper.Wrapper;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  * {@link Space#solidAt(int, int, int)}.
  */
 public abstract class VoxelSpace implements Space {
-    private class BasicSolidIterator extends AdvancingIterator<Solid> implements SolidIterator {
+    private class BasicSolidPipe extends Pipe.Advancing<Solid> implements SolidPipe {
         private final Order order;
         private final Order.IterationVariables variables;
 
@@ -17,7 +18,7 @@ public abstract class VoxelSpace implements Space {
         private int second;
         private int third;
 
-        private BasicSolidIterator(@NotNull Order order, @NotNull Order.IterationVariables variables) {
+        private BasicSolidPipe(@NotNull Order order, @NotNull Order.IterationVariables variables) {
             this.order = order;
             this.variables = variables;
             this.first = variables.getFirstOrigin() - variables.getFirstIncrement();
@@ -26,7 +27,7 @@ public abstract class VoxelSpace implements Space {
         }
 
         @Override
-        public boolean advance() {
+        protected boolean advance() {
             Solid candidate;
             do {
                 if((first += variables.getFirstIncrement()) == variables.getFirstEnd()) {
@@ -81,8 +82,8 @@ public abstract class VoxelSpace implements Space {
     }
 
     @Override
-    public @NotNull SolidIterable solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
-                                                    @NotNull Order order) {
+    public @NotNull SolidSource solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
+                                                  @NotNull Order order) {
         int xOrg = (int) Math.floor(oX);
         int yOrg = (int) Math.floor(oY);
         int zOrg = (int) Math.floor(oZ);
@@ -97,6 +98,6 @@ public abstract class VoxelSpace implements Space {
 
         Order.IterationVariables variables = order.getVariablesSupplier().make(xOrg, yOrg, zOrg, xInc, yInc, zInc, xEnd,
                 yEnd, zEnd);
-        return () -> new BasicSolidIterator(order, variables);
+        return () -> new BasicSolidPipe(order, variables);
     }
 }
