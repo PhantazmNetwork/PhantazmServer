@@ -35,6 +35,18 @@ public interface Vec3I extends Comparable<Vec3I> {
      */
     Vec3I ORIGIN = of(0, 0, 0);
 
+    static @NotNull Vec3I floored(@NotNull Vec3D vec3D) {
+        return of((int)Math.floor(vec3D.getX()), (int)Math.floor(vec3D.getY()), (int)Math.floor(vec3D.getZ()));
+    }
+
+    static @NotNull Vec3I floored(double x, double y, double z) {
+        return of((int)Math.floor(x), (int)Math.floor(y), (int)Math.floor(z));
+    }
+
+    static @NotNull Vec3I floored(@NotNull Vec3F vec3F) {
+        return of((int)Math.floor(vec3F.getX()), (int)Math.floor(vec3F.getY()), (int)Math.floor(vec3F.getZ()));
+    }
+
     /**
      * <p>Returns an immutable Vec3I implementation. This may not always create a new vector; common values may (but are
      * not guaranteed to be) returned from a persistent cache.</p>
@@ -72,6 +84,17 @@ public interface Vec3I extends Comparable<Vec3I> {
         int dY = y1 - y2;
         int dZ = z1 - z2;
         return dX * dX + dY * dY + dZ * dZ;
+    }
+
+    static int manhattanDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
+        int dX = x1 - x2;
+        int dY = y1 - y2;
+        int dZ = z1 - z2;
+        return Math.abs(dX) + Math.abs(dY) + Math.abs(dZ);
+    }
+
+    static int manhattanDistance(@NotNull Vec3I from, @NotNull Vec3I to) {
+        return manhattanDistance(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
     }
 
     /**

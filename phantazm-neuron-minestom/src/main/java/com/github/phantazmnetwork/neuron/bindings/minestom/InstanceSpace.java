@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
 import com.github.phantazmnetwork.commons.pipe.Pipe;
-import com.github.phantazmnetwork.commons.minestom.vector.Vec;
+import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import com.github.phantazmnetwork.neuron.world.VoxelSpace;
@@ -29,8 +29,8 @@ public class InstanceSpace extends VoxelSpace {
 
         private MinestomSolid(Shape shape) {
             this.shape = shape;
-            this.min = Vec.toFloat(shape.relativeStart());
-            this.max = Vec.toFloat(shape.relativeEnd());
+            this.min = VecUtils.toFloat(shape.relativeStart());
+            this.max = VecUtils.toFloat(shape.relativeEnd());
 
             List<BoundingBox> boundingBoxes = shape.boundingBoxes();
             if(boundingBoxes.size() == 1) {

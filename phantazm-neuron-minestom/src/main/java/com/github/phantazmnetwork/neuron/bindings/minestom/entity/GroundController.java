@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
+import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
+import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import net.minestom.server.attribute.Attribute;
@@ -15,13 +17,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class EntityController implements Controller {
-    private final LivingEntity entity;
+public class GroundController implements Controller {
+    private final Entity entity;
     private final float jumpHeight;
+    private final double speed;
 
-    public EntityController(@NotNull LivingEntity entity, float jumpHeight) {
+    public GroundController(@NotNull Entity entity, float jumpHeight, double speed) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.jumpHeight = jumpHeight;
+        this.speed = speed;
     }
 
     @Override
@@ -39,9 +43,24 @@ public class EntityController implements Controller {
         return entity.getPosition().z();
     }
 
+    @Override
+    public double getVelocityX() {
+        return entity.getVelocity().x();
+    }
+
+    @Override
+    public double getVelocityY() {
+        return entity.getVelocity().y();
+    }
+
+    @Override
+    public double getVelocityZ() {
+        return entity.getVelocity().z();
+    }
+
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public void moveTo(@NotNull Vec3I vec3I) {
+    public @NotNull Vec3D advance(@NotNull Vec3I vec3I) {
         Pos position = entity.getPosition();
         double dx = (vec3I.getX() + 0.5) - position.x();
         double dy = vec3I.getY() - position.y();
@@ -49,7 +68,7 @@ public class EntityController implements Controller {
 
         // the purpose of these few lines is to slow down entities when they reach their destination
         double distSquared = dx * dx + dy * dy + dz * dz;
-        double speed = entity.getAttribute(Attribute.MOVEMENT_SPEED).getValue();
+        double speed = this.speed;
         if (speed > distSquared) {
             speed = distSquared;
         }
@@ -57,21 +76,13 @@ public class EntityController implements Controller {
         double speedX = Math.cos(radians) * speed;
         double speedY = dy * speed;
         double speedZ = Math.sin(radians) * speed;
-
-        //TODO alternative to cringe @ApiStatus.Internal methods?
         float yaw = PositionUtils.getLookYaw(dx, dz);
         float pitch = PositionUtils.getLookPitch(dx, dy, dz);
 
-        // Prevent ghosting
         PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
-        this.entity.refreshPosition(physicsResult.newPosition().withView(yaw, pitch));
+        Pos newPos = physicsResult.newPosition();
+        entity.refreshPosition(newPos.withView(yaw, pitch));
 
-        if(dy > 0 && dy <= jumpHeight) {
-            jump(1F);
-        }
-    }
-
-    private void jump(float height) {
-        this.entity.setVelocity(new Vec(0, height * 2.5f, 0));
+        return VecUtils.toDouble(newPos.sub(position));
     }
 }

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.NoSuchElementException;
 
 /**
- * A {@link Pipe} implementation backing an array. Not part of the public API.
+ * A {@link Pipe} implementation with a backing array. Not part of the public API.
  * @param <TComponent> the component type of the backing array
  */
 final class ArrayPipe<TComponent> implements Pipe<TComponent> {
@@ -14,7 +14,7 @@ final class ArrayPipe<TComponent> implements Pipe<TComponent> {
 
     /**
      * Creates a new ArrayPipe from the given array. Instances can be obtained through calls to
-     * {@link Pipe#of(Object[])}
+     * {@link Pipe#of(Object[])}.
      * @param array the backing array
      */
     ArrayPipe(TComponent @NotNull[] array) {

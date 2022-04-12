@@ -51,7 +51,7 @@ public class BasicPathCache implements PathCache {
     public @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull String id,
                                                @NotNull Iterator<Vec3I> steps) {
         ArrayList<Vec3I> list = new ArrayList<>();
-        return Pipe.from(steps).listen(list::add).onLast(ignored -> positionalCache.get(origin, ignored2 ->
+        return Pipe.from(steps).listen(list::add).whenLast(ignored -> positionalCache.get(origin, ignored2 ->
                 Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>(INITIAL_HASHMAP_CAPACITY))).put(id,
                 getView(list)));
     }

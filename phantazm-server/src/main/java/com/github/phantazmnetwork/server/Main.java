@@ -33,6 +33,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityCreature;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
@@ -40,6 +41,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
@@ -240,12 +242,9 @@ public class Main {
 
             if(instance != null) {
                 switch (msg) {
-                    case "T" -> {
-                        GroundNeuralEntity entity = spawner.spawnEntity(instance, player.getPosition().add(5, 0,
-                                        0), testDescriptor, GroundNeuralEntity::new, neuralEntity -> neuralEntity
-                                .getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(1F));
-                        entity.setTarget(player);
-                    }
+                    case "T" -> spawner.spawnEntity(instance, player.getPosition().add(5, 0, 0), testDescriptor,
+                            GroundNeuralEntity::new, neuralEntity -> neuralEntity.getAttribute(Attribute
+                                    .MOVEMENT_SPEED).setBaseValue(0.5F)).setTarget(player);
                     case "Z" -> {
                         Pos playerPos = player.getPosition();
                         instance.setBlock(playerPos.blockX(), playerPos.blockY(), playerPos.blockZ(), Block.GOLD_BLOCK);

@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.commons.pipe;
 
+import com.github.phantazmnetwork.commons.wrapper.Wrapper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -271,7 +270,7 @@ public interface Pipe<TValue> extends Iterator<TValue> {
      * @return a new pipe which will call the given Consumer with the final element when it is reached
      * @throws NullPointerException if consumer is null
      */
-    default @NotNull Pipe<TValue> onLast(@NotNull Consumer<? super TValue> consumer) {
+    default @NotNull Pipe<TValue> whenLast(@NotNull Consumer<? super TValue> consumer) {
         Objects.requireNonNull(consumer, "action");
 
         return new Pipe<>() {
@@ -293,7 +292,8 @@ public interface Pipe<TValue> extends Iterator<TValue> {
     }
 
     /**
-     * Drains (empties, or iterates) this pipe, calling the provided {@link Consumer} with every element.
+     * Drains (empties, or iterates) this pipe, calling the provided {@link Consumer} with every element. This is
+     * equivalent to {@link Iterator#forEachRemaining(Consumer)}.
      * @param consumer the consumer to sequentially receive each element
      * @throws NullPointerException if consumer is null
      */
@@ -306,25 +306,34 @@ public interface Pipe<TValue> extends Iterator<TValue> {
     }
 
     /**
-     * Drains the pipe, adding each element to the provided {@link Collection}
-     * @param receiver the collection to which all elements will be added
-     * @throws NullPointerException if receiver is null
-     */
-    default void drain(@NotNull Collection<? super TValue> receiver) {
-        Objects.requireNonNull(receiver, "receiver");
-
-        while(hasNext()) {
-            receiver.add(next());
-        }
-    }
-
-    /**
      * Drains the pipe, discarding all values.
      */
     default void drain() {
         while(hasNext()) {
             next();
         }
+    }
+
+    static <TValue> @NotNull Pipe<TValue> whileTrue(@NotNull Predicate<Wrapper<TValue>> predicate,
+                                                    @Nullable TValue initialValue) {
+        return new Advancing<>() {
+            private final Wrapper<TValue> value = Wrapper.of(initialValue);
+
+            @Override
+            protected boolean advance() {
+                boolean result = predicate.test(value);
+                if(!result) {
+                    return false;
+                }
+
+                super.value = value.get();
+                return true;
+            }
+        };
+    }
+
+    static <TValue> @NotNull Pipe<TValue> whileTrue(@NotNull Predicate<Wrapper<TValue>> predicate) {
+        return whileTrue(predicate, null);
     }
 
     /**

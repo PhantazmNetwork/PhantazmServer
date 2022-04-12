@@ -110,6 +110,7 @@ public abstract class Wrapper<TType> implements Supplier<TType> {
      * @return a new wrapper holding the mapped value
      */
     public <TNew> @NotNull Wrapper<TNew> map(@NotNull Function<? super TType, ? extends TNew> mapper) {
+        Objects.requireNonNull(mapper, "mapper");
         return new ObjectWrapper<>(mapper.apply(get()));
     }
 
@@ -119,6 +120,20 @@ public abstract class Wrapper<TType> implements Supplier<TType> {
      * @param mapper the mapping function to apply
      */
     public void apply(@NotNull Function<? super TType, ? extends TType> mapper) {
+        Objects.requireNonNull(mapper, "mapper");
         set(mapper.apply(get()));
+    }
+
+    /**
+     * Applies a mapping function to this wrapper's value. The result of the mapping function will be the new value held
+     * by this wrapper, and is returned.
+     * @param mapper the mapping function to apply
+     * @return the new value
+     */
+    public TType compute(@NotNull Function<? super TType, ? extends TType> mapper) {
+        Objects.requireNonNull(mapper, "mapper");
+        TType newValue = mapper.apply(get());
+        set(newValue);
+        return newValue;
     }
 }

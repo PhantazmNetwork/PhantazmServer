@@ -3,6 +3,8 @@ package com.github.phantazmnetwork.commons.vector;
 import org.jetbrains.annotations.NotNull;
 
 public interface Vec3D extends Comparable<Vec3D> {
+    Vec3D ORIGIN = new BasicVec3D(0, 0, 0);
+
     double getX();
 
     double getY();

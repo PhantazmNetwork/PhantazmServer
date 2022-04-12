@@ -56,7 +56,7 @@ class BasicPathOperationTest {
         assertSame(expectedCompletionState, operationToRun.getState());
 
         List<Node> nodes = new ArrayList<>();
-        for(Node node : result.getPath()) {
+        for(Node node : result.getStart()) {
             nodes.add(node);
         }
 

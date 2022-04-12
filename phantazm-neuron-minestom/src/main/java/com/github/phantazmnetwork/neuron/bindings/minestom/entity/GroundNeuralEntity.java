@@ -2,9 +2,12 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
+import com.github.phantazmnetwork.neuron.navigator.GroundNavigator;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
+import com.github.phantazmnetwork.neuron.navigator.Navigator;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,12 +23,17 @@ public class GroundNeuralEntity extends NeuralEntity {
     }
 
     @Override
+    public @NotNull Navigator makeNavigator(@NotNull PathContext context) {
+        return new GroundNavigator(context.getEngine(), this);
+    }
+
+    @Override
     public @NotNull NodeTranslator makeTranslator(@NotNull Instance instance, @NotNull PathContext context) {
         return new GroundTranslator(context.getCollider(), (GroundMinestomDescriptor) getDescriptor());
     }
 
     @Override
     public @NotNull Controller makeController() {
-        return new EntityController(this, entityType.getJumpHeight());
+        return new GroundController(this, entityType.getJumpHeight(), getAttributeValue(Attribute.MOVEMENT_SPEED));
     }
 }

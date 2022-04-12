@@ -8,14 +8,14 @@ import java.util.Objects;
 /**
  * The result of a pathfinding operation, representing a completed (successful or failed) path.
  */
-public record PathResult(@NotNull Node getPath, boolean isSuccessful) {
+public record PathResult(@NotNull Node getStart, boolean isSuccessful) {
     /**
      * Creates a new BasicResult.
      *
-     * @param getPath the starting node
+     * @param getStart the starting node
      * @param isSuccessful if the path is successful
      */
     public PathResult {
-        Objects.requireNonNull(getPath, "getPath");
+        Objects.requireNonNull(getStart, "getStart");
     }
 }

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.commons.minestom.vector.Vec;
+import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
@@ -8,7 +8,7 @@ import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.agent.TranslationExplorer;
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
-import com.github.phantazmnetwork.neuron.navigator.BasicNavigator;
+import com.github.phantazmnetwork.neuron.navigator.GroundNavigator;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
@@ -62,7 +62,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     @Override
     public @NotNull Vec3I getStartPosition() {
         //naive startPosition calculation
-        return Vec.toInt(getPosition());
+        return VecUtils.toBlockInt(getPosition());
     }
 
     @Override
@@ -89,7 +89,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             navigator.setDestination(null);
         }
         else {
-            navigator.setDestination(() -> Vec.toInt(target.getPosition()));
+            navigator.setDestination(() -> VecUtils.toBlockInt(target.getPosition()));
         }
     }
 
@@ -99,8 +99,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             PathContext context = provider.provideContext(instance);
 
             cancelNavigation();
-            navigator = new BasicNavigator(context.getEngine(), this, 1000,
-                    10000, 1000);
+            navigator = makeNavigator(context);
             controller = makeController();
             explorer = new TranslationExplorer(context.getCache(), entityType.getID(), makeTranslator(instance,
                     context));
@@ -170,6 +169,8 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     public void attack(@NotNull Entity target) {
         attack(target, false);
     }
+
+    public abstract @NotNull Navigator makeNavigator(@NotNull PathContext context);
 
     public abstract @NotNull NodeTranslator makeTranslator(@NotNull Instance instance, @NotNull PathContext context);
 

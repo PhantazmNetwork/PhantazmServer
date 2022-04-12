@@ -10,10 +10,10 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Utilities for converting phantazm-commons Vec3X objects to Minestom {@link Point} and vice-versa.
  */
-public final class Vec {
-    private Vec() { throw new UnsupportedOperationException(); }
+public final class VecUtils {
+    private VecUtils() { throw new UnsupportedOperationException(); }
 
-    public static @NotNull Vec3I toInt(@NotNull Point point) {
+    public static @NotNull Vec3I toBlockInt(@NotNull Point point) {
         return Vec3I.of(point.blockX(), point.blockY(), point.blockZ());
     }
 
