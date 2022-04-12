@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.api.player;
 
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -14,17 +13,17 @@ import java.util.UUID;
 @SuppressWarnings("ClassCanBeRecord")
 public class BasicPlayerView implements PlayerView {
 
-    private final ConnectionManager connectionManager;
+    private final PlayerContainer playerContainer;
 
     private final UUID playerUUID;
 
     /**
      * Creates a basic {@link PlayerView}.
-     * @param connectionManager The {@link ConnectionManager} used to find {@link Player}s based on their {@link UUID}
+     * @param playerContainer The {@link PlayerContainer} used to find {@link Player}s based on their {@link UUID}
      * @param playerUUID The {@link UUID} of the {@link Player} to store
      */
-    public BasicPlayerView(@NotNull ConnectionManager connectionManager, @NotNull UUID playerUUID) {
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
+    public BasicPlayerView(@NotNull PlayerContainer playerContainer, @NotNull UUID playerUUID) {
+        this.playerContainer = Objects.requireNonNull(playerContainer, "playerContainer");
         this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
     }
 
@@ -35,7 +34,7 @@ public class BasicPlayerView implements PlayerView {
 
     @Override
     public @NotNull Optional<Player> getPlayer() {
-        return Optional.ofNullable(connectionManager.getPlayer(playerUUID));
+        return Optional.ofNullable(playerContainer.getPlayer(playerUUID));
     }
 
 }

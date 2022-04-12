@@ -2,12 +2,12 @@ package com.github.phantazmnetwork.api.game.scene.lobby;
 
 import com.github.phantazmnetwork.api.config.InstanceConfig;
 import com.github.phantazmnetwork.api.player.BasicPlayerView;
+import com.github.phantazmnetwork.api.player.PlayerContainer;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -27,11 +27,11 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
     /**
      * Creates a {@link LobbyJoinRequest} for a newly joining player.
      * @param event The {@link PlayerLoginEvent} associated with the new player
-     * @param connectionManager The {@link ConnectionManager} for the server
+     * @param playerContainer The {@link PlayerContainer} for the server
      */
-    public LoginLobbyJoinRequest(@NotNull PlayerLoginEvent event, @NotNull ConnectionManager connectionManager) {
+    public LoginLobbyJoinRequest(@NotNull PlayerLoginEvent event, @NotNull PlayerContainer playerContainer) {
         this.event = Objects.requireNonNull(event, "event");
-        this.playerView = new BasicPlayerView(Objects.requireNonNull(connectionManager, "connectionManager"),
+        this.playerView = new BasicPlayerView(Objects.requireNonNull(playerContainer, "playerContainer"),
                 event.getPlayer().getUuid());
     }
 
