@@ -17,5 +17,7 @@ public interface Controller {
 
     double getVelocityZ();
 
+    void setVelocity(@NotNull Vec3D velocity);
+
     @NotNull Vec3D advance(@NotNull Vec3I vec3I);
 }

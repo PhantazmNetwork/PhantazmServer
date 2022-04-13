@@ -12,7 +12,7 @@ import java.util.Objects;
  * A general {@link Explorer} implementation that takes advantage of a {@link PathCache} object for caching.
  */
 public abstract class CachingExplorer implements Explorer {
-    private static final boolean CACHE_ENABLED = true;
+    private static final boolean CACHE_ENABLED = false;
     private final PathCache context;
     private final String id;
 

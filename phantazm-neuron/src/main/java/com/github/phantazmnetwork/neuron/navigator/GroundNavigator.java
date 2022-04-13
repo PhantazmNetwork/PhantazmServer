@@ -53,25 +53,21 @@ public class GroundNavigator implements Navigator {
             Controller controller = agent.getController();
             Vec3I nodePosition = node.getPosition();
 
-            //TODO convenience overrides for equals on two vec3D
-            //only advance if the velocity is zero
-            if(Vec3D.equals(controller.getVelocityX(), controller.getVelocityY(), controller.getVelocityZ(), 0, 0,
-                    0)) {
-                //delta == distance moved by entity this tick
-                Vec3D delta = controller.advance(nodePosition);
+            //delta == distance moved by entity this tick
+            Vec3D delta = controller.advance(nodePosition);
 
-                if(isInReach(nodePosition)) {
-                    node = node.getParent();
-                }
-                else if(delta.equals(Vec3D.ORIGIN)) {
-                    //out of reach node pos plus no movement this tick means the agent is stuck
-                    node = null;
-                }
+            if(nodePosition.getY() > agent.getController().getY()) {
+                System.out.println("Jumping");
+                controller.setVelocity(Vec3D.of(0, 2.5f, 0));
+            }
+
+            if(hasReached(nodePosition)) {
+                node = node.getParent();
             }
         }
     }
 
-    private boolean isInReach(Vec3I nodePosition) {
+    private boolean hasReached(Vec3I nodePosition) {
         Controller controller = agent.getController();
         return Vec3D.squaredDistance(controller.getX(), 0, controller.getZ(), nodePosition.getX() + 0.5,
                 0, nodePosition.getZ() + 0.5) < 0.25;

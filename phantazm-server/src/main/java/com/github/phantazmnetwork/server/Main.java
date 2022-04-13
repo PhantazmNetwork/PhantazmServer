@@ -35,15 +35,13 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityCreature;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
@@ -258,6 +256,13 @@ public class Main {
                         instance.setBlock(playerPos.blockX(), playerPos.blockY(), playerPos.blockZ(), Block.GOLD_BLOCK);
                     }
                     case "C" -> event.getPlayer().setGameMode(GameMode.CREATIVE);
+                    case "ZZ" -> {
+                        EntityCreature creature = new EntityCreature(EntityType.ZOMBIE);
+                        creature.setInstance(instance, player.getPosition().add(5, 0, 0));
+
+                        eventNode.addListener(PlayerMoveEvent.class, moveEvent -> creature.getNavigator().setPathTo(
+                                moveEvent.getPlayer().getPosition()));
+                    }
                 }
             }
         });

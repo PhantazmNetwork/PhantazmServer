@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.neuron.world;
 
 import com.github.phantazmnetwork.commons.pipe.Pipe;
-import com.github.phantazmnetwork.commons.wrapper.Wrapper;
 import org.jetbrains.annotations.NotNull;
 
 /**

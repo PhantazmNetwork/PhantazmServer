@@ -1,10 +1,11 @@
 package com.github.phantazmnetwork.commons.pipe;
 
-import com.github.phantazmnetwork.commons.wrapper.Wrapper;
+import com.github.phantazmnetwork.commons.Wrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -35,9 +36,11 @@ import java.util.stream.Stream;
  * by an iterator, the iteration order of the pipe is the same as the iterator. If it is backed by an array, the
  * iteration order is least to greatest by index.</p>
  *
- * <p>Iterating a Pipe is non-reversible. The pipe is "drained" when all elements have been exhausted (iterated). Many
- * operations (e.g. {@code filter}) do not drain the pipe; instead they create a new Pipe tied to this one which will
- * produce different values when it is eventually drained.</p>
+ * @implSpec Pipe implementations must guarantee that once {@code hasNext} returns false, it will continue to return
+ * false for any subsequent invocations. Likewise, a call to {@code next} must throw a {@link NoSuchElementException} if
+ * {@code hasNext} returns false. Failure to do so may result in undefined behavior from the pipes returned by the
+ * methods in this class.
+ *
  * @param <TValue> the type of element this pipe supplies
  */
 public interface Pipe<TValue> extends Iterator<TValue> {
@@ -61,29 +64,48 @@ public interface Pipe<TValue> extends Iterator<TValue> {
      * <p>On a surface level, this class appears to behave identically to typical Iterators during iteration. However,
      * to enable the necessary logic behind the operation of this class, {@link Advancing#hasNext()} is not stateless.
      * </p>
+     *
+     * <p>This class enforces the pipe invariant that {@code hasNext} should never return true again after it has
+     * returned false once. Therefore, after {@code advance} returns false once, it will never be called again during
+     * iteration, and the pipe will be drained.</p>
      * @param <TValue> the type of element this pipe supplies
      */
     abstract class Advancing<TValue> implements Pipe<TValue> {
+        private boolean ended;
         private boolean hasValue;
         protected TValue value;
 
         @Override
         public final boolean hasNext() {
+            if(ended) {
+                return false;
+            }
+
             //handle redundant calls to hasNext if the next value exists and has not been consumed by returning true
             if(hasValue) {
                 return true;
             }
 
-            return hasValue = advance();
+            hasValue = advance();
+            if(!hasValue) {
+                ended = true;
+            }
+
+            return hasValue;
         }
 
         @Override
         public final TValue next() {
+            if(ended) {
+                throw new NoSuchElementException();
+            }
+
             //we don't currently have a value...
             if(!hasValue) {
                 //...so try to advance; if we fail to advance here then throw an exception
                 //this corresponds to "unsafe" calls to next() that aren't preceded by hasNext()
                 if(!advance()) {
+                    ended = true;
                     value = null;
                     throw new NoSuchElementException();
                 }
@@ -265,12 +287,12 @@ public interface Pipe<TValue> extends Iterator<TValue> {
     /**
      * Creates a new pipe which will call the provided {@link Consumer} when the last element of this pipe is reached.
      * The "last" element is defined as the first element returned by a call to {@code next} for which a subsequent call
-     * to {@code hasNext} returns false.
+     * to {@code hasNext} returns false. If this pipe has no elements to begin with, the consumer will never be called.
      * @param consumer the consumer which receives the final element of the pipe
      * @return a new pipe which will call the given Consumer with the final element when it is reached
      * @throws NullPointerException if consumer is null
      */
-    default @NotNull Pipe<TValue> whenLast(@NotNull Consumer<? super TValue> consumer) {
+    default @NotNull Pipe<TValue> forLast(@NotNull Consumer<? super TValue> consumer) {
         Objects.requireNonNull(consumer, "action");
 
         return new Pipe<>() {
@@ -314,6 +336,64 @@ public interface Pipe<TValue> extends Iterator<TValue> {
         }
     }
 
+    default Optional<TValue> reduce(@NotNull BinaryOperator<TValue> operator) {
+        Objects.requireNonNull(operator, "operator");
+
+        boolean foundAny = false;
+        TValue running = null;
+        while(hasNext()) {
+            if(!foundAny) {
+                foundAny = true;
+                running = next();
+            }
+            else {
+                running = operator.apply(running, next());
+            }
+        }
+
+        return foundAny ? Optional.of(running) : Optional.empty();
+    }
+
+    default TValue reduce(TValue initial, @NotNull BinaryOperator<TValue> operator) {
+        TValue running = initial;
+        while(hasNext()) {
+            running = operator.apply(running, next());
+        }
+
+        return running;
+    }
+
+    default Optional<TValue> min(@NotNull Comparator<? super TValue> comparator) {
+        return reduce(BinaryOperator.minBy(comparator));
+    }
+
+    default Optional<TValue> max(@NotNull Comparator<? super TValue> comparator) {
+        return reduce(BinaryOperator.maxBy(comparator));
+    }
+
+    /**
+     * <p>Creates a new pipe which produces elements until the given predicate no longer returns {@code true}. Calling
+     * {@link Wrapper#set(Object)} (or another mutating method) on the predicate's argument will set the value to be
+     * returned for this iteration. If no mutating method is called, the same value will be returned.</p>
+     *
+     * <p>This method is primarily useful for creating pipes based on a condition rather than a pre-existing data set.
+     * For example, the following code uses pipes to find the largest hailstone sequence in the range [1, 1000]:</p>
+     *
+     * <pre>{@code
+     *         int max = Pipe.whileTrue(wrapper -> wrapper.apply(value -> value + 1) <= 1000, 0).map(value -> {
+     *             int count;
+     *             for(count = 1; value != 1; count++) {
+     *                 value = (value & 1) == 0 ? value >> 1 : value * 3 + 1;
+     *             }
+     *             return count;
+     *         }).max(Integer::compareTo).orElseThrow();
+     * }
+     * </pre>
+     * @param predicate the predicate which will determine pipe termination when it returns false
+     * @param initialValue the initial value to assign to the wrapper
+     * @param <TValue> the type of value returned by the new pipe
+     * @return a new pipe which will iterate until the given predicate returns false
+     */
     static <TValue> @NotNull Pipe<TValue> whileTrue(@NotNull Predicate<Wrapper<TValue>> predicate,
                                                     @Nullable TValue initialValue) {
         return new Advancing<>() {
@@ -332,6 +412,13 @@ public interface Pipe<TValue> extends Iterator<TValue> {
         };
     }
 
+    /**
+     * Equivalent to {@link Pipe#whileTrue(Predicate, Object)}, with an initial value of {@code null}.
+     * @param predicate the predicate which will determine pipe termination when it returns false
+     * @param <TValue> the type of value returned by the new pipe
+     * @return a new pipe which will iterate until the given predicate returns false, with an initial value of null
+     * @see Pipe#whileTrue(Predicate, Object)
+     */
     static <TValue> @NotNull Pipe<TValue> whileTrue(@NotNull Predicate<Wrapper<TValue>> predicate) {
         return whileTrue(predicate, null);
     }
@@ -351,17 +438,7 @@ public interface Pipe<TValue> extends Iterator<TValue> {
             return (Pipe<TValue>) pipe;
         }
 
-        return new Pipe<>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public TValue next() {
-                return iterator.next();
-            }
-        };
+        return new IteratorPipe<>(iterator);
     }
 
     /**

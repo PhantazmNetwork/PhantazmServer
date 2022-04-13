@@ -4,13 +4,11 @@ import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
-import net.minestom.server.attribute.Attribute;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,6 +54,11 @@ public class GroundController implements Controller {
     @Override
     public double getVelocityZ() {
         return entity.getVelocity().z();
+    }
+
+    @Override
+    public void setVelocity(@NotNull Vec3D velocity) {
+        entity.setVelocity(new Vec(velocity.getX(), velocity.getY(), velocity.getZ()));
     }
 
     @SuppressWarnings("UnstableApiUsage")

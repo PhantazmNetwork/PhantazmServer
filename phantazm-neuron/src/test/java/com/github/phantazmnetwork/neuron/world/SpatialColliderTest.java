@@ -1,9 +1,12 @@
 package com.github.phantazmnetwork.neuron.world;
 
+import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +33,17 @@ class SpatialColliderTest {
     }
 
     private static Solid makeSolid(Vec3F min, Vec3F max) {
+        return makeSolid(min, max, false);
+    }
+
+    private static Solid makeSolid(Vec3F min, Vec3F max, boolean overlaps) {
         Solid solid = mock(Solid.class);
         when(solid.getMin()).thenReturn(min);
         when(solid.getMax()).thenReturn(max);
+
+        when(solid.getComponents()).thenReturn(() -> Pipe.of(solid));
+        when(solid.overlaps(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble()))
+                .thenReturn(overlaps);
         return solid;
     }
 
@@ -47,6 +58,8 @@ class SpatialColliderTest {
         @Nested
         class FullCubes {
             private static final Solid FULL_CUBE = makeSolid(Vec3F.of(0, 0, 0), Vec3F.of(1, 1, 1));
+            private static final Solid FULL_CUBE_OVERLAPPING = makeSolid(Vec3F.of(0, 0, 0), Vec3F.of(1, 1,
+                    1), true);
 
             @Nested
             class CardinalSolids {
@@ -70,8 +83,8 @@ class SpatialColliderTest {
                     for(Map.Entry<Vec3I, Solid> entry : FEET.entrySet()) {
                         Vec3I dir = entry.getKey();
                         assertEquals(entry.getValue().getMax().getY(), collider.highestCollisionAlong(EPSILON, EPSILON,
-                                EPSILON, 1 - EPSILON * 2, 1 - EPSILON * 2, 1 - EPSILON * 2, dir.getX(), dir.getY(),
-                                dir.getZ()));
+                                EPSILON, 1 - EPSILON * 2, 1 - EPSILON * 2, 1 - EPSILON * 2, dir.getX(),
+                                dir.getY(), dir.getZ()), "For entry " + entry);
                     }
                 }
 
@@ -88,11 +101,12 @@ class SpatialColliderTest {
 
                 @Test
                 void noCollisionWhenOverlap() {
-                    SpatialCollider collider = makeCollider(Map.of(Vec3I.ORIGIN, FULL_CUBE));
+                    SpatialCollider collider = makeCollider(Map.of(Vec3I.ORIGIN, FULL_CUBE_OVERLAPPING));
 
                     for(Vec3I dir : ALL_WALKS) {
-                        assertEquals(Double.NEGATIVE_INFINITY, collider.highestCollisionAlong(0, 0, 0, 1,
-                                1, 1, dir.getX(), dir.getY(), dir.getZ()));
+                        assertEquals(Double.NEGATIVE_INFINITY, collider.highestCollisionAlong(EPSILON, EPSILON, EPSILON,
+                                1 - 2 * EPSILON, 1 - 2 * EPSILON, 1 - 2 * EPSILON, dir.getX(),
+                                dir.getY(), dir.getZ()));
                     }
                 }
 
@@ -129,6 +143,12 @@ class SpatialColliderTest {
                     }
                 }
             }
+        }
+
+        @Nested
+        class SmallPost {
+            private static final Solid SMALL_POST = makeSolid(Vec3F.of(0.4F, 0, 0.4F), Vec3F.of(0.6F, 1,
+                    0.6F));
         }
     }
 }

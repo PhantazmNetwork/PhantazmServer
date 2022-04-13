@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.commons.wrapper;
+package com.github.phantazmnetwork.commons;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -7,14 +7,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
- * <p>A simple container object which may contain some value, or {@code null}. This is primarily useful when attempting
- * to pass values outside the scope of a lambda expression, or to simulate pass-by-reference semantics.</p>
+ * <p>A simple mutable container object which may contain some value, or {@code null}. This is primarily useful when
+ * attempting to pass values outside the scope of a lambda expression, or to simulate pass-by-reference semantics.
+ * {@link Optional}, though similar in some ways, cannot be used for this purpose as it is shallowly immutable.</p>
  *
  * <p>Wrapper instances are considered equal if and only if the objects they contain are equal. Likewise, a wrapper's
  * hashcode is equal to the hashcode of the stored object, or 0 if {@code null}.</p>
+ *
+ * <p>Wrapper instances can be obtained through the static factory method {@link Wrapper#of(Object)} or
+ * {@link Wrapper#ofNull()}</p>
  * @param <TType> the type of object stored in this reference
  */
 public abstract class Wrapper<TType> implements Supplier<TType> {
@@ -36,8 +39,8 @@ public abstract class Wrapper<TType> implements Supplier<TType> {
         }
     }
 
-    //disallow subclassing outside package
-    Wrapper() {}
+    //disallow subclassing anywhere else
+    private Wrapper() {}
 
     /**
      * Sets the value stored by this wrapper.
@@ -73,27 +76,6 @@ public abstract class Wrapper<TType> implements Supplier<TType> {
     }
 
     /**
-     * Creates and returns a new Wrapper implementation. For primitive values, consider using the appropriate primitive
-     * specialization of this method.
-     * @param value the value to initially store in the wrapper
-     * @param <T> the type of value held in the wrapper
-     * @return a mutable Wrapper implementation
-     */
-    public static <T> @NotNull Wrapper<T> of(@Nullable T value) {
-        return new ObjectWrapper<>(value);
-    }
-
-    /**
-     * Creates and returns a new IntWrapper implementation. This is the primitive type specialization of Wrapper for
-     * {@code int}.
-     * @param value the initial value to store in the wrapper
-     * @return a new primitive wrapper
-     */
-    public static @NotNull IntWrapper ofInt(int value) {
-        return new IntWrapper(value);
-    }
-
-    /**
      * Converts this Wrapper to an Optional instance.
      * @return an Optional instance containing the same value as this wrapper, or {@link Optional#empty()} if this
      * wrapper contains null
@@ -115,25 +97,34 @@ public abstract class Wrapper<TType> implements Supplier<TType> {
     }
 
     /**
-     * Applies a mapping function to this wrapper's value. The result of the mapping function will be the new value
-     * held by this wrapper.
-     * @param mapper the mapping function to apply
-     */
-    public void apply(@NotNull Function<? super TType, ? extends TType> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
-        set(mapper.apply(get()));
-    }
-
-    /**
      * Applies a mapping function to this wrapper's value. The result of the mapping function will be the new value held
      * by this wrapper, and is returned.
      * @param mapper the mapping function to apply
      * @return the new value
      */
-    public TType compute(@NotNull Function<? super TType, ? extends TType> mapper) {
+    public TType apply(@NotNull Function<? super TType, ? extends TType> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         TType newValue = mapper.apply(get());
         set(newValue);
         return newValue;
+    }
+
+    /**
+     * Creates and returns a new Wrapper implementation.
+     * @param value the value to initially store in the wrapper
+     * @param <TType> the type of value held in the wrapper
+     * @return a mutable Wrapper implementation
+     */
+    public static <TType> @NotNull Wrapper<TType> of(@Nullable TType value) {
+        return new ObjectWrapper<>(value);
+    }
+
+    /**
+     * Creates and returns a new Wrapper with a null initial value.
+     * @param <TType> the type of value held in the wrapper
+     * @return a mutable Wrapper implementation
+     */
+    public static <TType> @NotNull Wrapper<TType> ofNull() {
+        return new ObjectWrapper<>(null);
     }
 }
