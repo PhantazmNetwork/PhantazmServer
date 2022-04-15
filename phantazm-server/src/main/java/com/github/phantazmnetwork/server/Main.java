@@ -12,7 +12,7 @@ import com.github.phantazmnetwork.api.player.PlayerContainer;
 import com.github.phantazmnetwork.api.player.UUIDPlayerContainer;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.BasicContextProvider;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.BasicSpawner;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.ContextualSpawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundNeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
@@ -218,7 +218,7 @@ public class Main {
 
         //TESTING CODE BELOW
         //TODO remove
-        Spawner spawner = new BasicSpawner(new BasicContextProvider());
+        Spawner spawner = new ContextualSpawner(new BasicContextProvider());
         GroundMinestomDescriptor testDescriptor = new GroundMinestomDescriptor() {
             @Override
             public @NotNull EntityType getEntityType() {

@@ -10,10 +10,10 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class BasicSpawner implements Spawner {
+public class ContextualSpawner implements Spawner {
     private final ContextProvider contextProvider;
 
-    public BasicSpawner(@NotNull ContextProvider contextProvider) {
+    public ContextualSpawner(@NotNull ContextProvider contextProvider) {
         this.contextProvider = Objects.requireNonNull(contextProvider, "contextProvider");
     }
 

@@ -363,10 +363,20 @@ public interface Pipe<TValue> extends Iterator<TValue> {
         return running;
     }
 
+    /**
+     * Drains this pipe, returning the smallest element as determined by the given {@link Comparator}.
+     * @param comparator the comparator to use for determining the smallest value
+     * @return an {@link Optional} containing the smallest value returned by the pipe, or empty if the pipe is empty
+     */
     default Optional<TValue> min(@NotNull Comparator<? super TValue> comparator) {
         return reduce(BinaryOperator.minBy(comparator));
     }
 
+    /**
+     * Drains this pipe, returning the largest element as determined by the given {@link Comparator}.
+     * @param comparator the comparator to use for determining the largest value
+     * @return an {@link Optional} containing the largest value returned by the pipe, or empty if the pipe is empty
+     */
     default Optional<TValue> max(@NotNull Comparator<? super TValue> comparator) {
         return reduce(BinaryOperator.maxBy(comparator));
     }

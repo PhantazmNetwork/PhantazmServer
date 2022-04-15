@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  * hashcode is equal to the hashcode of the stored object, or 0 if {@code null}.</p>
  *
  * <p>Wrapper instances can be obtained through the static factory method {@link Wrapper#of(Object)} or
- * {@link Wrapper#ofNull()}</p>
+ * {@link Wrapper#ofNull()}.</p>
  * @param <TType> the type of object stored in this reference
  */
 public abstract class Wrapper<TType> implements Supplier<TType> {

@@ -42,6 +42,8 @@ public class GroundNavigator implements Navigator {
                 } catch (InterruptedException | ExecutionException ignored) {}
 
                 if(result != null) {
+                    //TODO remove this, it's unnecessary but useful for debugging
+                    agent.getController().init(result);
                     node = result.getStart();
                 }
                 else {
@@ -53,13 +55,7 @@ public class GroundNavigator implements Navigator {
             Controller controller = agent.getController();
             Vec3I nodePosition = node.getPosition();
 
-            //delta == distance moved by entity this tick
-            Vec3D delta = controller.advance(nodePosition);
-
-            if(nodePosition.getY() > agent.getController().getY()) {
-                System.out.println("Jumping");
-                controller.setVelocity(Vec3D.of(0, 2.5f, 0));
-            }
+            controller.advance(nodePosition);
 
             if(hasReached(nodePosition)) {
                 node = node.getParent();
