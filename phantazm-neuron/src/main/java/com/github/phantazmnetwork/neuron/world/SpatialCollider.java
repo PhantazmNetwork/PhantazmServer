@@ -144,7 +144,7 @@ public class SpatialCollider implements Collider {
                                     return value;
                                 }
 
-                                //overlapping.setPointer(variables.getFirstOrigin(), variables.getSecondOrigin(), nextY);
+                                overlapping.setPointer(variables.getFirstOrigin(), variables.getSecondOrigin(), nextY);
                             }
 
                             best = value;

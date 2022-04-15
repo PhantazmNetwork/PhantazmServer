@@ -67,6 +67,12 @@ public class GroundTranslator implements NodeTranslator {
                 double ceiling = Math.min(collider.lowestCollisionAlong(oX, oY, oZ, vX, vY, vZ, 0, jump, 0) -
                         height, highestJumpY);
 
+                //disable diagonal movement if we have to jump, this avoids a lot of jank and means we don't have to
+                //perform 2 collision checks for every possible jump
+                if(dX * dZ != 0) {
+                    return Vec3I.ORIGIN;
+                }
+
                 while(highestY <= ceiling) {
                     oY = highestY;
 
