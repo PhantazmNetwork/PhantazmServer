@@ -12,15 +12,5 @@ public interface Controller {
 
     double getZ();
 
-    double getVelocityX();
-
-    double getVelocityY();
-
-    double getVelocityZ();
-
-    void setVelocity(@NotNull Vec3D velocity);
-
-    void init(PathResult result);
-
-    @NotNull Vec3D advance(@NotNull Vec3I vec3I);
+    void advance(@NotNull Vec3I vec3I);
 }

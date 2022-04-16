@@ -56,13 +56,13 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public boolean hasStartPosition() {
-        return getInstance() != null && !isDead() && isOnGround();
+        return getInstance() != null && !isDead();
     }
 
     @Override
     public @NotNull Vec3I getStartPosition() {
-        //naive startPosition calculation
-        return VecUtils.toBlockInt(getPosition());
+        Vec3I initial = VecUtils.toBlockInt(getPosition());
+        return initial;
     }
 
     @Override

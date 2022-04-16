@@ -1,13 +1,16 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
+import com.github.phantazmnetwork.commons.HashStrategies;
 import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import com.github.phantazmnetwork.neuron.world.VoxelSpace;
+import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Pos;
@@ -93,8 +96,9 @@ public class InstanceSpace extends VoxelSpace {
         }
     }
 
-    private static final Long2ObjectMap<Solid> SOLID_CACHE = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>(
-            512));
+    private static final Map<Shape, Solid> SHARED_SOLIDS = new Object2ObjectOpenCustomHashMap<>(512,
+            HashStrategies.identity());
+
     private final Instance instance;
 
 
@@ -102,7 +106,7 @@ public class InstanceSpace extends VoxelSpace {
         this.instance = Objects.requireNonNull(instance, "instance");
     }
 
-    @SuppressWarnings({"UnstableApiUsage", "SynchronizationOnLocalVariableOrMethodParameter"})
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     @Override
     public @Nullable Solid solidAt(int x, int y, int z) {
         Chunk chunk = instance.getChunk(x >> 4, z >> 4);
@@ -119,9 +123,6 @@ public class InstanceSpace extends VoxelSpace {
             return null;
         }
 
-        //TODO: this naive approach won't work when the block collision exceeds a 1x1x1 cube
-        //add a way to split larger collisions into multiple sections
-        return SOLID_CACHE.computeIfAbsent(((long) block.stateId() << Integer.SIZE) | block.id(), ignored ->
-                new MinestomSolid(block.registry().collisionShape()));
+        return SHARED_SOLIDS.computeIfAbsent(block.registry().collisionShape(), MinestomSolid::new);
     }
 }

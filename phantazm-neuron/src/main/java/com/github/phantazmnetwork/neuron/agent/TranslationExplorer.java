@@ -55,11 +55,8 @@ public class TranslationExplorer extends CachingExplorer {
     @Override
     public @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current) {
         Vec3I currentPos = current.getPosition();
-        int x = currentPos.getX();
-        int y = currentPos.getY();
-        int z = currentPos.getZ();
-
-        return Pipe.from(vectors.iterator()).map(delta -> translator.translate(x, y, z, delta.getX(), delta.getY(),
-                delta.getZ())).filter(delta -> !delta.equals(Vec3I.ORIGIN));
+        return Pipe.from(vectors.iterator()).map(delta -> translator.translate(currentPos.getX(), currentPos.getY(),
+                currentPos.getZ(), delta.getX(), delta.getY(), delta.getZ())).filter(delta -> !delta.equals(Vec3I
+                .ORIGIN));
     }
 }

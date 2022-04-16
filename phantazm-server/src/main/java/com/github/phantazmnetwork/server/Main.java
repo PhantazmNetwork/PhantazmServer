@@ -222,12 +222,12 @@ public class Main {
         GroundMinestomDescriptor testDescriptor = new GroundMinestomDescriptor() {
             @Override
             public @NotNull EntityType getEntityType() {
-                return EntityType.ZOMBIE;
+                return EntityType.PHANTOM;
             }
 
             @Override
             public @NotNull String getID() {
-                return "standard_humanoid";
+                return "i'm fast as fuck boiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
             }
 
             @Override

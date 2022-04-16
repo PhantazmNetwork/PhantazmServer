@@ -13,6 +13,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
+/**
+ * A {@link NeuralEntity} implementation with ground-based movement (gravitation).
+ */
 public class GroundNeuralEntity extends NeuralEntity {
     private final GroundMinestomDescriptor entityType;
 
@@ -35,5 +38,10 @@ public class GroundNeuralEntity extends NeuralEntity {
     @Override
     public @NotNull Controller makeController() {
         return new GroundController(this, entityType.getJumpHeight(), getAttributeValue(Attribute.MOVEMENT_SPEED));
+    }
+
+    @Override
+    public boolean hasStartPosition() {
+        return super.hasStartPosition() && isOnGround();
     }
 }

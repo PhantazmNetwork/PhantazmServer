@@ -15,6 +15,8 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 public class GroundNavigator implements Navigator {
+    private static final double NODE_REACHED_DISTANCE = 0.25;
+
     private final PathEngine pathEngine;
     private final Agent agent;
 
@@ -42,8 +44,6 @@ public class GroundNavigator implements Navigator {
                 } catch (InterruptedException | ExecutionException ignored) {}
 
                 if(result != null) {
-                    //TODO remove this, it's unnecessary but useful for debugging
-                    agent.getController().init(result);
                     node = result.getStart();
                 }
                 else {
@@ -66,7 +66,7 @@ public class GroundNavigator implements Navigator {
     private boolean hasReached(Vec3I nodePosition) {
         Controller controller = agent.getController();
         return Vec3D.squaredDistance(controller.getX(), 0, controller.getZ(), nodePosition.getX() + 0.5,
-                0, nodePosition.getZ() + 0.5) < 0.25;
+                0, nodePosition.getZ() + 0.5) < NODE_REACHED_DISTANCE;
     }
 
     @Override
