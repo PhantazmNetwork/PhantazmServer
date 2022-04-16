@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
  * bindings must generally create their own implementation of this interface.
  */
 public interface Solid {
+    boolean hasChildren();
+
     /**
      * Retrieves the minimum floating-point vector for this solid. Each component must range from [0.0, 1.0] and be
      * smaller than or equal to each equivalent component in the vector returned by {@code getMax()}.
@@ -23,7 +25,7 @@ public interface Solid {
      */
     @NotNull Vec3F getMax();
 
-    @NotNull Iterable<Solid> getComponents();
+    @NotNull Iterable<Solid> getChildren();
 
     boolean overlaps(double x, double y, double z, double width, double height, double depth);
 }

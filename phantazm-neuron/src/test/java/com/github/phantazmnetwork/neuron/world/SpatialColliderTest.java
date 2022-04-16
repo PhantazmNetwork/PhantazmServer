@@ -3,10 +3,8 @@ package com.github.phantazmnetwork.neuron.world;
 import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +39,7 @@ class SpatialColliderTest {
         when(solid.getMin()).thenReturn(min);
         when(solid.getMax()).thenReturn(max);
 
-        when(solid.getComponents()).thenReturn(() -> Pipe.of(solid));
+        when(solid.getChildren()).thenReturn(Pipe::empty);
         when(solid.overlaps(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble()))
                 .thenReturn(overlaps);
         return solid;

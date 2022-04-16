@@ -99,59 +99,44 @@ public class SpatialCollider implements Collider {
                 double relY = y - candidateMin.getY();
                 double relZ = z - candidateMin.getZ();
 
-                for(Solid component : candidate.getComponents()) {
-                    //stop checking this solid if any of its sub-solids overlap original bounds
-                    if(component.overlaps(relX, relY, relZ, width, height, depth)) {
-                        break;
+                boolean hit = false;
+                if(candidate.hasChildren()) {
+                    for(Solid component : candidate.getChildren()) {
+                        //noinspection AssignmentUsedAsCondition
+                        if(hit = checkSolid(overlapping, component, relX, relY, relZ, width, height, depth, centerX,
+                                centerY, centerZ, adjustedXZ, adjustedXY, adjustedYZ, dX, dY, dZ)) {
+                            break;
+                        }
                     }
+                }
+                else {
+                    hit = checkSolid(overlapping, candidate, relX, relY, relZ, width, height, depth, centerX, centerY,
+                            centerZ, adjustedXZ, adjustedXY, adjustedYZ, dX, dY, dZ);
+                }
 
-                    Vec3F componentMin = component.getMin();
-                    Vec3F componentMax = component.getMax();
+                if(hit) {
+                    double value = valueFunction.apply(candidate, overlapping.getThird());
 
-                    double cMinX = overlapping.getFirst() + componentMin.getX();
-                    double cMinY = overlapping.getThird() + componentMin.getY();
-                    double cMinZ = overlapping.getSecond() + componentMin.getZ();
+                    //collision found
+                    if(betterThan.test(value, best)) {
+                        //we have found the highest/lowest possible solid this layer
+                        if(bestThisLayer.test(candidate)) {
+                            int nextY = overlapping.getThird() + variables.getThirdIncrement();
 
-                    double cMaxX = overlapping.getFirst() + componentMax.getX();
-                    double cMaxY = overlapping.getThird() + componentMax.getY();
-                    double cMaxZ = overlapping.getSecond() + componentMax.getZ();
-
-                    double minX = cMinX - centerX;
-                    double minY = cMinY - centerY;
-                    double minZ = cMinZ - centerZ;
-
-                    double maxX = cMaxX - centerX;
-                    double maxY = cMaxY - centerY;
-                    double maxZ = cMaxZ - centerZ;
-
-                    if(checkAxis(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) && checkAxis(adjustedXY, dX, dY, minX,
-                            minY, maxX, maxY) && checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY)) {
-                        double value = valueFunction.apply(candidate, overlapping.getThird());
-
-                        //collision found
-                        if(betterThan.test(value, best)) {
-                            //we have found the highest/lowest possible solid this layer
-                            if(bestThisLayer.test(candidate)) {
-                                int nextY = overlapping.getThird() + variables.getThirdIncrement();
-
-                                //fast exit: we already found the best possible this layer + we're on the last layer
-                                if(nextY == variables.getThirdEnd()) {
-                                    return value;
-                                }
-
-                                //fast exit: we must have found the best possible in the entire volume
-                                if(fastExit.test(dY)) {
-                                    return value;
-                                }
-
-                                overlapping.setPointer(variables.getFirstOrigin(), variables.getSecondOrigin(), nextY);
+                            //fast exit: we already found the best possible this layer + we're on the last layer
+                            if(nextY == variables.getThirdEnd()) {
+                                return value;
                             }
 
-                            best = value;
+                            //fast exit: we must have found the best possible in the entire volume
+                            if(fastExit.test(dY)) {
+                                return value;
+                            }
+
+                            overlapping.setPointer(variables.getFirstOrigin(), variables.getSecondOrigin(), nextY);
                         }
 
-                        //don't bother with other components
-                        break;
+                        best = value;
                     }
                 }
             }
@@ -159,6 +144,38 @@ public class SpatialCollider implements Collider {
         }
 
         return best;
+    }
+
+    private static boolean checkSolid(SolidPipe overlapping, Solid component, double relX, double relY, double relZ,
+                                      double width, double height, double depth, double centerX, double centerY,
+                                      double centerZ, double adjustedXZ, double adjustedXY, double adjustedYZ,
+                                      double dX, double dY, double dZ) {
+        //stop checking this solid if any of its sub-solids overlap original bounds
+        if(component.overlaps(relX, relY, relZ, width, height, depth)) {
+            return false;
+        }
+
+        Vec3F componentMin = component.getMin();
+        Vec3F componentMax = component.getMax();
+
+        double cMinX = overlapping.getFirst() + componentMin.getX();
+        double cMinY = overlapping.getThird() + componentMin.getY();
+        double cMinZ = overlapping.getSecond() + componentMin.getZ();
+
+        double cMaxX = overlapping.getFirst() + componentMax.getX();
+        double cMaxY = overlapping.getThird() + componentMax.getY();
+        double cMaxZ = overlapping.getSecond() + componentMax.getZ();
+
+        double minX = cMinX - centerX;
+        double minY = cMinY - centerY;
+        double minZ = cMinZ - centerZ;
+
+        double maxX = cMaxX - centerX;
+        double maxY = cMaxY - centerY;
+        double maxZ = cMaxZ - centerZ;
+
+        return checkAxis(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) && checkAxis(adjustedXY, dX, dY, minX, minY, maxX,
+                maxY) && checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY);
     }
 
     @Override

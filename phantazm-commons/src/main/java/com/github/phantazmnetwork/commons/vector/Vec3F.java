@@ -3,6 +3,8 @@ package com.github.phantazmnetwork.commons.vector;
 import org.jetbrains.annotations.NotNull;
 
 public interface Vec3F extends Comparable<Vec3F> {
+    Vec3F ORIGIN = of(0F, 0F, 0F);
+
     float getX();
 
     float getY();
