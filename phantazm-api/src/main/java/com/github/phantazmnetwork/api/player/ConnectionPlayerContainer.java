@@ -11,15 +11,15 @@ import java.util.UUID;
  * Creates a {@link PlayerContainer} based on a {@link ConnectionManager}.
  */
 @SuppressWarnings("ClassCanBeRecord")
-public class ConnectionManagerPlayerContainer implements PlayerContainer {
+public class ConnectionPlayerContainer implements PlayerContainer {
 
     private final ConnectionManager connectionManager;
 
     /**
-     * Creates a new {@link ConnectionManagerPlayerContainer}.
+     * Creates a new {@link ConnectionPlayerContainer}.
      * @param connectionManager The {@link ConnectionManager} to use
      */
-    public ConnectionManagerPlayerContainer(@NotNull ConnectionManager connectionManager) {
+    public ConnectionPlayerContainer(@NotNull ConnectionManager connectionManager) {
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
     }
 
