@@ -28,7 +28,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     }
 
     @Override
-    public @NotNull PlayerView create(@NotNull UUID uuid) {
+    public @NotNull PlayerView fromUUID(@NotNull UUID uuid) {
         //caching *might* be unnecessary here, but could save memory
         return viewCache.get(uuid, key -> new BasicPlayerView(container, key));
     }

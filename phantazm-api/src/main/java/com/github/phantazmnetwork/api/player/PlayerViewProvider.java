@@ -17,5 +17,5 @@ public interface PlayerViewProvider {
      * @param uuid the UUID to create the view with
      * @return an PlayerView instance representing a player with the given UUID
      */
-    @NotNull PlayerView create(@NotNull UUID uuid);
+    @NotNull PlayerView fromUUID(@NotNull UUID uuid);
 }
