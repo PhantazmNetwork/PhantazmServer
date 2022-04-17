@@ -7,7 +7,7 @@ jetbrains-annotations = "23.0.0"
 
 junit-jupiter = "5.8.2"
 
-minestom = "e66823dda2"
+minestom = "725d7336d0"
 
 miniMessage = "4.2.0-SNAPSHOT"
 
@@ -31,6 +31,7 @@ minestom = { module = "com.github.PhantazmNetwork:Minestom", version.ref = "mine
 miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "miniMessage" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+
 fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }

@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.neuron.bindings.minestom;
 
 import com.github.phantazmnetwork.commons.IteratorUtils;
 import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
-import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import net.minestom.server.collision.BoundingBox;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link Shape}-based implementation of {@link Solid}. This is not part of the public API.
+ * {@link Shape}-based implementation of {@link Solid}. Not part of the public API.
  */
 @SuppressWarnings("UnstableApiUsage")
 class MinestomSolid implements Solid {
@@ -29,7 +28,7 @@ class MinestomSolid implements Solid {
         List<BoundingBox> children = shape.boundingBoxes();
         if(children.size() == 0) {
             this.hasChildren = false;
-            this.children = Pipe::empty;
+            this.children = IteratorUtils::empty;
         }
         else {
             ArrayList<Solid> childSolids = new ArrayList<>();

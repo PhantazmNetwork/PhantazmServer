@@ -12,6 +12,7 @@ import com.github.phantazmnetwork.api.player.PlayerContainer;
 import com.github.phantazmnetwork.api.player.UUIDPlayerContainer;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.BasicContextProvider;
+import com.github.phantazmnetwork.neuron.bindings.minestom.chunk.NeuralChunk;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.ContextualSpawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundNeuralEntity;
@@ -47,6 +48,7 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.block.Block;
@@ -135,7 +137,8 @@ public class Main {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
-        InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath());
+        InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(),
+                NeuralChunk::new);
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders

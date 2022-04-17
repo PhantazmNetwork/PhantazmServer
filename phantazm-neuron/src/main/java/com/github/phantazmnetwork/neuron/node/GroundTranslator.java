@@ -74,7 +74,7 @@ public class GroundTranslator implements NodeTranslator {
                 }
 
                 while(highestY <= ceiling) {
-                    oY = highestY;
+                    oY = highestY + EPSILON;
 
                     highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ);
                     if(highestY == Double.NEGATIVE_INFINITY) { //gap found

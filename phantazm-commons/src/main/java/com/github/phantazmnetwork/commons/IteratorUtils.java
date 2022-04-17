@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public final class IteratorUtils {
     private IteratorUtils() {throw new UnsupportedOperationException(); }
@@ -20,12 +21,14 @@ public final class IteratorUtils {
         }
     };
 
-    public static <T> Iterator<T> empty() {
+    public static <T> @NotNull Iterator<T> empty() {
         //noinspection unchecked
         return (Iterator<T>) EMPTY;
     }
 
-    public static <T> Iterator<T> unmodifiable(@NotNull Iterator<? extends T> iterator) {
+    public static <T> @NotNull Iterator<T> unmodifiable(@NotNull Iterator<? extends T> iterator) {
+        Objects.requireNonNull(iterator, "iterator");
+
         return new Iterator<>() {
             @Override
             public boolean hasNext() {
