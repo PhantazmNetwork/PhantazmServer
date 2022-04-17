@@ -7,6 +7,7 @@ import net.minestom.server.collision.Shape;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public class SolidProvider {
@@ -16,6 +17,7 @@ public class SolidProvider {
     private SolidProvider() { throw new UnsupportedOperationException(); }
 
     public static @NotNull Solid fromShape(@NotNull Shape shape) {
+        Objects.requireNonNull(shape, "shape");
         return SHARED_SOLIDS.computeIfAbsent(shape, MinestomSolid::new);
     }
 }

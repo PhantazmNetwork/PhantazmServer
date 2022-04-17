@@ -10,6 +10,10 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A custom extension of {@link DynamicChunk} that enables fast, asynchronous access to {@link Solid} objects
+ * representing collision bounds.
+ */
 @SuppressWarnings("UnstableApiUsage")
 public class NeuralChunk extends DynamicChunk {
     private static class ChunkSource implements SolidSource {
@@ -59,6 +63,8 @@ public class NeuralChunk extends DynamicChunk {
         super.setBlock(x, y, z, block);
 
         //TODO: handle splitting up of abnormal solids (those larger than 1 in some direction)
+        //since solids larger than 1 in x or z may require new chunks to have their data changed:
+        //only solids larger than 1 in y axis may be supported
         if(block.isSolid()) {
             chunkSource.set(x, y, z, SolidProvider.fromShape(block.registry().collisionShape()));
         }
