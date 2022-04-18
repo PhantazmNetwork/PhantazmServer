@@ -1,6 +1,10 @@
 package com.github.phantazmnetwork.api.player;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.minestom.server.entity.Player;
+import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.Reference;
@@ -8,6 +12,9 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Basic implementation of a {@link PlayerView}. Caches the player object, so {@code getPlayer} is safe to call
@@ -20,12 +27,14 @@ import java.util.UUID;
  * @see Player
  */
 public class BasicPlayerView implements PlayerView {
-
     private final PlayerContainer playerContainer;
 
     private final UUID playerUUID;
 
     private Reference<Player> playerReference;
+
+    private final Object usernameLock = new Object();
+    private volatile String username;
 
     /**
      * Creates a basic {@link PlayerView}.
@@ -41,6 +50,37 @@ public class BasicPlayerView implements PlayerView {
     @Override
     public @NotNull UUID getUUID() {
         return playerUUID;
+    }
+
+    @Override
+    public @NotNull CompletableFuture<String> getUsername() {
+        Player player = playerReference.get();
+        if(player != null && player.isOnline()) {
+            return CompletableFuture.completedFuture(username = player.getUsername());
+        }
+
+        synchronized (usernameLock) {
+            if(username != null) {
+                return CompletableFuture.completedFuture(username);
+            }
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            JsonObject response = MojangUtils.fromUuid(playerUUID.toString());
+            if(response != null) {
+                JsonElement nameElement = response.get(FieldNames.NAME);
+                if(nameElement != null && nameElement.isJsonPrimitive()) {
+                    JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
+                    if(primitive.isString()) {
+                        synchronized (usernameLock) {
+                            return username = primitive.getAsString();
+                        }
+                    }
+                }
+            }
+
+            return playerUUID.toString();
+        });
     }
 
     @Override

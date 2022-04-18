@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.api.player;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -24,8 +25,13 @@ public class ConnectionPlayerContainer implements PlayerContainer {
     }
 
     @Override
-    public Player getPlayer(@NotNull UUID uuid) {
+    public @Nullable Player getPlayer(@NotNull UUID uuid) {
         return connectionManager.getPlayer(uuid);
+    }
+
+    @Override
+    public @Nullable Player getPlayer(@NotNull String name) {
+        return connectionManager.getPlayer(name);
     }
 
 }

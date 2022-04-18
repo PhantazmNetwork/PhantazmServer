@@ -1,14 +1,15 @@
 package com.github.phantazmnetwork.api.player;
 
 import net.minestom.server.entity.Player;
+import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
 /**
  * Container to store {@link Player}s based on their {@link UUID}.
  */
-@FunctionalInterface
 public interface PlayerContainer {
 
     /**
@@ -16,6 +17,7 @@ public interface PlayerContainer {
      * @param uuid The {@link UUID} of the {@link Player}.
      * @return The {@link Player}
      */
-    Player getPlayer(@NotNull UUID uuid);
+    @Nullable Player getPlayer(@NotNull UUID uuid);
 
+    @Nullable Player getPlayer(@NotNull String name);
 }

@@ -8,8 +8,8 @@ import com.github.phantazmnetwork.api.game.scene.lobby.*;
 import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.api.player.BasicPlayerView;
+import com.github.phantazmnetwork.api.player.ConnectionPlayerContainer;
 import com.github.phantazmnetwork.api.player.PlayerContainer;
-import com.github.phantazmnetwork.api.player.UUIDPlayerContainer;
 import com.github.phantazmnetwork.server.config.loader.LobbiesConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
@@ -28,7 +28,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -37,7 +36,6 @@ import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.InstanceManager;
-import net.minestom.server.network.ConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,9 +96,8 @@ public class Main {
             ServerConfig serverConfig = CONFIG_HANDLER.getData(SERVER_CONFIG_KEY);
             LobbiesConfig lobbiesConfig = CONFIG_HANDLER.getData(LOBBIES_CONFIG_KEY);
 
-            UUIDPlayerContainer playerContainer = new UUIDPlayerContainer();
-            initializePlayerContainer(playerContainer);
-            initializeLobbies(playerContainer, lobbiesConfig, logger);
+            initializeLobbies(new ConnectionPlayerContainer(MinecraftServer.getConnectionManager()), lobbiesConfig,
+                    logger);
             startServer(minecraftServer, serverConfig);
         }
         catch (ConfigProcessException e) {
@@ -109,13 +106,6 @@ public class Main {
         catch (Exception e) {
             logger.error("Fatal error while starting up server", e);
         }
-    }
-
-    private static void initializePlayerContainer(UUIDPlayerContainer playerContainer) {
-        EventNode<Event> eventNode = MinecraftServer.getGlobalEventHandler();
-        eventNode.addListener(PlayerLoginEvent.class, event -> playerContainer.addPlayer(event.getPlayer()));
-        eventNode.addListener(PlayerDisconnectEvent.class,
-                event -> playerContainer.removePlayer(event.getPlayer().getUuid()));
     }
 
     private static void initializeLobbies(PlayerContainer playerContainer, LobbiesConfig lobbiesConfig, Logger logger) {

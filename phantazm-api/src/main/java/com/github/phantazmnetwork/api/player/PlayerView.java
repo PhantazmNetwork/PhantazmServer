@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 /**
  * Represents a view of a player that may be offline. Provides their UUID as well as a means to access the
@@ -23,6 +25,8 @@ public interface PlayerView {
      * @return The {@link UUID} of the player
      */
     @NotNull UUID getUUID();
+
+    @NotNull CompletableFuture<String> getUsername();
 
     /**
      * Gets an {@link Optional} which may contain the player, only if they are online.
