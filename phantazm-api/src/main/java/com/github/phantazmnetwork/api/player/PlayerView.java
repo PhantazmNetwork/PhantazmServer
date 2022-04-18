@@ -26,6 +26,13 @@ public interface PlayerView {
      */
     @NotNull UUID getUUID();
 
+    /**
+     * Attempts to resolve the username of this player. May perform a request to Mojang to determine the name from the
+     * UUID, if necessary, and should cache the results of these requests.
+     * @return a {@link CompletableFuture} representing an attempt at retrieving the username of this player. If the
+     * username cannot be found due to network conditions or an invalid UUID, the returned String will be the result of
+     * calling {@link UUID#toString()} on the stored UUID
+     */
     @NotNull CompletableFuture<String> getUsername();
 
     /**

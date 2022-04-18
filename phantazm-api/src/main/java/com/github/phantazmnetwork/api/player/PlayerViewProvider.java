@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.api.player;
 
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -7,8 +8,9 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Represents a provider of PlayerView instances, that may be obtained simply from a UUID. The returned PlayerView
- * instances are not necessarily online at the time of creation. PlayerView instances may or may not be cached.
+ * Represents a provider of PlayerView instances, that may be obtained from a UUID, name, or Player instance. The
+ * returned PlayerView instances are not necessarily online at the time of creation. PlayerView instances may or may not
+ * be cached.
  *
  * @implSpec Implementations should guarantee thread safety.
  */
@@ -47,4 +49,11 @@ public interface PlayerViewProvider {
      * @see PlayerViewProvider#fromName(String)
      */
     @NotNull Optional<PlayerView> fromNameIfOnline(@NotNull String name);
+
+    /**
+     * Creates a {@link PlayerView} from an already-existing {@link Player}.
+     * @param player the player to create a PlayerView instance from
+     * @return a PlayerView instance for the given Player
+     */
+    @NotNull PlayerView fromPlayer(@NotNull Player player);
 }
