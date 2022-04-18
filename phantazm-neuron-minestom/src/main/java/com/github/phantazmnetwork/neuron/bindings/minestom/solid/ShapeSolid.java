@@ -1,8 +1,7 @@
-package com.github.phantazmnetwork.neuron.bindings.minestom;
+package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
 import com.github.phantazmnetwork.commons.IteratorUtils;
 import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
-import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
@@ -15,15 +14,12 @@ import java.util.List;
  * {@link Shape}-based implementation of {@link Solid}. Not part of the public API.
  */
 @SuppressWarnings("UnstableApiUsage")
-class MinestomSolid implements Solid {
-    private final Vec3F min;
-    private final Vec3F max;
+class ShapeSolid extends MinestomSolid {
     private final boolean hasChildren;
     private final Iterable<Solid> children;
 
-    MinestomSolid(@NotNull Shape shape) {
-        this.min = VecUtils.toFloat(shape.relativeStart());
-        this.max = VecUtils.toFloat(shape.relativeEnd());
+    ShapeSolid(@NotNull Shape shape) {
+        super(VecUtils.toFloat(shape.relativeStart()), VecUtils.toFloat(shape.relativeEnd()));
 
         List<BoundingBox> children = shape.boundingBoxes();
         if(children.size() == 0) {
@@ -35,7 +31,7 @@ class MinestomSolid implements Solid {
             for(BoundingBox boundingBox : children) {
                 //recursive constructor is safe (on latest minestom build)
                 //children.size() will be empty for all child bounding boxes
-                childSolids.add(new MinestomSolid(boundingBox));
+                childSolids.add(new ShapeSolid(boundingBox));
             }
 
             childSolids.trimToSize();
@@ -50,23 +46,7 @@ class MinestomSolid implements Solid {
     }
 
     @Override
-    public @NotNull Vec3F getMin() {
-        return min;
-    }
-
-    @Override
-    public @NotNull Vec3F getMax() {
-        return max;
-    }
-
-    @Override
     public @NotNull Iterable<Solid> getChildren() {
         return children;
-    }
-
-    @Override
-    public boolean overlaps(double x, double y, double z, double width, double height, double depth) {
-        return x < max.getX() && y < max.getY() && z < max.getZ() && x + width > min.getX() && y + height > min.getY()
-                && z + depth > min.getZ();
     }
 }

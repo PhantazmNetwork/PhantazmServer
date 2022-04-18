@@ -1,6 +1,7 @@
-package com.github.phantazmnetwork.neuron.bindings.minestom;
+package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
 import com.github.phantazmnetwork.commons.HashStrategies;
+import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.minestom.server.collision.Shape;
@@ -11,13 +12,17 @@ import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public class SolidProvider {
-    private static final Map<Shape, Solid> SHARED_SOLIDS = new Object2ObjectOpenCustomHashMap<>(512,
-            HashStrategies.identity());
+    private static final Map<Shape, Solid> SHAPE_SOLIDS = new Object2ObjectOpenCustomHashMap<>(HashStrategies
+            .identity());
 
     private SolidProvider() { throw new UnsupportedOperationException(); }
 
     public static @NotNull Solid fromShape(@NotNull Shape shape) {
         Objects.requireNonNull(shape, "shape");
-        return SHARED_SOLIDS.computeIfAbsent(shape, MinestomSolid::new);
+        return SHAPE_SOLIDS.computeIfAbsent(shape, ShapeSolid::new);
+    }
+
+    public static @NotNull Solid fromPoints(@NotNull Vec3F min, @NotNull Vec3F max) {
+        return new PartialSolid(min, max);
     }
 }
