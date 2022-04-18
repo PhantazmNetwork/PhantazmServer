@@ -65,7 +65,6 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     public @NotNull CompletableFuture<PlayerView> fromName(@NotNull String name) {
         Objects.requireNonNull(name, "name");
         Player player = connectionManager.getPlayer(name);
-        UUID uuid;
         if(player != null) {
             //if player is online, use the player object
             nameToUuid.put(name, player.getUuid());
@@ -73,8 +72,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
         }
 
         //if the player is offline, check the nameToUuid cache
-        uuid = nameToUuid.getIfPresent(name);
-
+        UUID uuid = nameToUuid.getIfPresent(name);
         if(uuid != null) {
             //we were able to resolve the name, so return a corresponding PlayerView
             return CompletableFuture.completedFuture(fromUUID(uuid));
@@ -112,7 +110,6 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     @Override
     public @NotNull PlayerView fromPlayer(@NotNull Player player) {
-        Objects.requireNonNull(player, "player");
         return uuidToView.get(player.getUuid(), key -> new BasicPlayerView(connectionManager, player));
     }
 }
