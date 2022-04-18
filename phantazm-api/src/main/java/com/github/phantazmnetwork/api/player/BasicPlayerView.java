@@ -102,7 +102,7 @@ class BasicPlayerView implements PlayerView {
     @Override
     public @NotNull CompletableFuture<String> getUsername() {
         Player player = playerReference.get();
-        if(player != null && player.isOnline()) {
+        if(player != null) {
             return CompletableFuture.completedFuture(username = player.getUsername());
         }
 
