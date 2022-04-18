@@ -47,11 +47,8 @@ public class BasicPlayerView implements PlayerView {
     public @NotNull Optional<Player> getPlayer() {
         //first, try to get the cached player
         Player player = playerReference.get();
-        if(player != null) {
-            //only return the cached player if they're online
-            if(player.isOnline()) {
-                return Optional.of(player);
-            }
+        if(player != null && player.isOnline()) {
+            return Optional.of(player);
         }
 
         //if null or offline, update the reference (may still be null)
