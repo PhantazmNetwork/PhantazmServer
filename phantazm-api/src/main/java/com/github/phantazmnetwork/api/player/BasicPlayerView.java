@@ -110,9 +110,9 @@ class BasicPlayerView implements PlayerView {
             if(username != null) {
                 return CompletableFuture.completedFuture(username);
             }
-        }
 
-        return getUsernameRequest();
+            return getUsernameRequest();
+        }
     }
 
     @Override
