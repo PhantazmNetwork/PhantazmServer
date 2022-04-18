@@ -56,13 +56,9 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
         this(container, DEFAULT_TIMEOUT);
     }
 
-    private PlayerView fromUUIDInternal(UUID uuid) {
-        return uuidToView.get(uuid, key -> new BasicPlayerView(container, key));
-    }
-
     @Override
     public @NotNull PlayerView fromUUID(@NotNull UUID uuid) {
-        return fromUUIDInternal(uuid);
+        return uuidToView.get(uuid, key -> new BasicPlayerView(container, key));
     }
 
     @Override
@@ -82,7 +78,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
         if(uuid != null) {
             //we were able to resolve the name, so return a corresponding PlayerView
-            return CompletableFuture.completedFuture(fromUUIDInternal(uuid));
+            return CompletableFuture.completedFuture(fromUUID(uuid));
         }
 
         return CompletableFuture.supplyAsync(() -> {
@@ -95,7 +91,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
                     if(idPrimitive.isString()) {
                         UUID requestUuid = UUID.fromString(idPrimitive.getAsString());
                         nameToUuid.put(name, requestUuid);
-                        return fromUUIDInternal(requestUuid);
+                        return fromUUID(requestUuid);
                     }
                 }
             }
