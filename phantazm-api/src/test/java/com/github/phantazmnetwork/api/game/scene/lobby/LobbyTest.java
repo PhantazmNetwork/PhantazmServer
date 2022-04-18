@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -49,6 +50,11 @@ public class LobbyTest {
             @Override
             public @NotNull UUID getUUID() {
                 return playerUUID;
+            }
+
+            @Override
+            public @NotNull CompletableFuture<String> getUsername() {
+                return CompletableFuture.completedFuture(playerUUID.toString());
             }
 
             @Override
