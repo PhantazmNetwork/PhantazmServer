@@ -17,8 +17,6 @@ mockito = "4.3.1"
 
 fastutil = "8.5.6"
 
-caffeine = "3.0.6"
-
 [libraries]
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 
@@ -37,5 +35,3 @@ miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 
 fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
-
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
