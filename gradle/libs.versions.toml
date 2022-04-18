@@ -1,6 +1,8 @@
 metadata.format.version = "1.1"
 
 [versions]
+caffeine = "3.0.6"
+
 ethylene = "0.5.0"
 
 jetbrains-annotations = "23.0.0"
@@ -18,6 +20,8 @@ fastutil = "8.5.6"
 caffeine = "3.0.6"
 
 [libraries]
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
 
