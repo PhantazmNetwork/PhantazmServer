@@ -37,6 +37,9 @@ class BasicPlayerView implements PlayerView {
     private Reference<Player> playerReference;
 
     private final Object usernameLock = new Object();
+    private final Object usernameRequestLock = new Object();
+
+    private volatile CompletableFuture<String> usernameRequest;
     private volatile String username;
 
     /**
@@ -62,6 +65,35 @@ class BasicPlayerView implements PlayerView {
         this.username = player.getUsername();
     }
 
+    private CompletableFuture<String> getUsernameRequest() {
+        synchronized (usernameRequestLock) {
+            if(usernameRequest != null) {
+                return usernameRequest;
+            }
+
+            return usernameRequest = CompletableFuture.supplyAsync(() -> {
+                JsonObject response = MojangUtils.fromUuid(playerUUID.toString());
+                if(response != null) {
+                    JsonElement nameElement = response.get(MojangJSONKeys.PLAYER_NAME);
+                    if(nameElement != null && nameElement.isJsonPrimitive()) {
+                        JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
+                        if(primitive.isString()) {
+                            synchronized (usernameLock) {
+                                return username = primitive.getAsString();
+                            }
+                        }
+                    }
+                }
+
+                return playerUUID.toString();
+            }).whenComplete((result, ex) -> {
+                synchronized (usernameRequestLock) {
+                    usernameRequest = null;
+                }
+            });
+        }
+    }
+
     @Override
     public @NotNull UUID getUUID() {
         return playerUUID;
@@ -80,22 +112,7 @@ class BasicPlayerView implements PlayerView {
             }
         }
 
-        return CompletableFuture.supplyAsync(() -> {
-            JsonObject response = MojangUtils.fromUuid(playerUUID.toString());
-            if(response != null) {
-                JsonElement nameElement = response.get(MojangJSONKeys.PLAYER_NAME);
-                if(nameElement != null && nameElement.isJsonPrimitive()) {
-                    JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
-                    if(primitive.isString()) {
-                        synchronized (usernameLock) {
-                            return username = primitive.getAsString();
-                        }
-                    }
-                }
-            }
-
-            return playerUUID.toString();
-        });
+        return getUsernameRequest();
     }
 
     @Override
