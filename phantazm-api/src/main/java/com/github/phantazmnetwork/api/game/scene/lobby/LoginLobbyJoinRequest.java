@@ -30,7 +30,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      */
     public LoginLobbyJoinRequest(@NotNull PlayerLoginEvent event, @NotNull PlayerViewProvider viewProvider) {
         this.event = Objects.requireNonNull(event, "event");
-        this.viewProvider = Objects.requireNonNull(viewProvider);
+        this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
     }
 
     @Override
