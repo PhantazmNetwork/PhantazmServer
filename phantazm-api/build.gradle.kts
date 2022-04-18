@@ -8,4 +8,5 @@ repositories {
 
 dependencies {
     api(libs.ethylene.core)
+    api(libs.caffeine)
 }

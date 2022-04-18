@@ -7,9 +7,8 @@ import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.game.scene.lobby.*;
 import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
-import com.github.phantazmnetwork.api.player.BasicPlayerView;
-import com.github.phantazmnetwork.api.player.PlayerContainer;
-import com.github.phantazmnetwork.api.player.UUIDPlayerContainer;
+import com.github.phantazmnetwork.api.player.BasicPlayerViewProvider;
+import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import com.github.phantazmnetwork.server.config.loader.LobbiesConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
@@ -28,7 +27,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -98,9 +96,9 @@ public class Main {
             ServerConfig serverConfig = CONFIG_HANDLER.getData(SERVER_CONFIG_KEY);
             LobbiesConfig lobbiesConfig = CONFIG_HANDLER.getData(LOBBIES_CONFIG_KEY);
 
-            UUIDPlayerContainer playerContainer = new UUIDPlayerContainer();
-            initializePlayerContainer(playerContainer);
-            initializeLobbies(playerContainer, lobbiesConfig, logger);
+            PlayerViewProvider playerViewProvider = new BasicPlayerViewProvider(MinecraftServer.getConnectionManager());
+
+            initializeLobbies(playerViewProvider, lobbiesConfig, logger);
             startServer(minecraftServer, serverConfig);
         }
         catch (ConfigProcessException e) {
@@ -111,14 +109,8 @@ public class Main {
         }
     }
 
-    private static void initializePlayerContainer(UUIDPlayerContainer playerContainer) {
-        EventNode<Event> eventNode = MinecraftServer.getGlobalEventHandler();
-        eventNode.addListener(PlayerLoginEvent.class, event -> playerContainer.addPlayer(event.getPlayer()));
-        eventNode.addListener(PlayerDisconnectEvent.class,
-                event -> playerContainer.removePlayer(event.getPlayer().getUuid()));
-    }
-
-    private static void initializeLobbies(PlayerContainer playerContainer, LobbiesConfig lobbiesConfig, Logger logger) {
+    private static void initializeLobbies(PlayerViewProvider playerViewProvider, LobbiesConfig lobbiesConfig,
+                                          Logger logger) {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
@@ -168,12 +160,12 @@ public class Main {
         Map<UUID, LoginLobbyJoinRequest> loginJoinRequests = new HashMap<>();
         EventNode<Event> eventNode = MinecraftServer.getGlobalEventHandler();
         eventNode.addListener(PlayerLoginEvent.class, event -> {
-            LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerContainer);
+            LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
             RouteResult result = lobbyRouter.join(routeRequest);
             if (!result.success()) {
-                finalFallback.fallback(new BasicPlayerView(playerContainer, event.getPlayer().getUuid()));
+                finalFallback.fallback(playerViewProvider.fromPlayer(event.getPlayer()));
             }
             else {
                 loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
