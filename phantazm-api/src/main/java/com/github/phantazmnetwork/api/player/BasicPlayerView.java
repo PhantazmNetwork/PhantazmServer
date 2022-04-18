@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +46,18 @@ public class BasicPlayerView implements PlayerView {
         this.playerContainer = Objects.requireNonNull(playerContainer, "playerContainer");
         this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
         this.playerReference = new WeakReference<>(null);
+    }
+
+    /**
+     * Creates a basic {@link PlayerView} given a PlayerContainer and an already-existing {@link Player}.
+     * @param playerContainer the {@link PlayerContainer} used to find {@link Player}s based on their {@link UUID}
+     * @param player the player, whose UUID and username will be cached immediately
+     */
+    public BasicPlayerView(@NotNull PlayerContainer playerContainer, @NotNull Player player) {
+        this.playerContainer = Objects.requireNonNull(playerContainer, "playerContainer");
+        this.playerUUID = player.getUuid();
+        this.playerReference = new WeakReference<>(player);
+        this.username = player.getUsername();
     }
 
     @Override
