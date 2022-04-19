@@ -15,8 +15,6 @@ import static org.mockito.Mockito.*;
 class SpatialColliderTest {
     private static final double EPSILON = 1E-5;
 
-    private static final Solid BOTTOM_HALF_CUBE = makeSolid(Vec3F.of(0, 0, 0), Vec3F.of(1, 0.5F, 1));
-
     private static SpatialCollider makeCollider(Map<Vec3I, Solid> collisions) {
         //use spy, so we use the VoxelSpace implementation of solidsOverlapping
         //this is to avoid having to duplicate the complex functionality of VoxelSpace.BasicSolidIterator
@@ -144,9 +142,35 @@ class SpatialColliderTest {
         }
 
         @Nested
-        class SmallPost {
-            private static final Solid SMALL_POST = makeSolid(Vec3F.of(0.4F, 0, 0.4F), Vec3F.of(0.6F, 1,
-                    0.6F));
+        class HalfBlock {
+            private static final Solid BOTTOM_HALF_CUBE = makeSolid(Vec3F.of(0, 0, 0), Vec3F.of(1, 0.5F,
+                    1));
+
+            private static final Map<Vec3I, Solid> FEET = Map.of(Vec3I.of(1, 0, 0), BOTTOM_HALF_CUBE, Vec3I
+                    .of(-1, 0, 0), BOTTOM_HALF_CUBE, Vec3I.of(0, 0, 1), BOTTOM_HALF_CUBE, Vec3I.of(0,
+                    0, -1), BOTTOM_HALF_CUBE);
+
+            @Test
+            void feet() {
+                SpatialCollider collider = makeCollider(FEET);
+                for(Map.Entry<Vec3I, Solid> entry : FEET.entrySet()) {
+                    Vec3I dir = entry.getKey();
+                    assertEquals(entry.getValue().getMax().getY(), collider.highestCollisionAlong(EPSILON, EPSILON,
+                            EPSILON, 1 - EPSILON * 2, 1 - EPSILON * 2, 1 - EPSILON * 2, dir.getX(),
+                            dir.getY(), dir.getZ()), "For entry " + entry);
+                }
+            }
+
+            @Test
+            void belowFeet() {
+                SpatialCollider collider = makeCollider(FEET);
+                for(Map.Entry<Vec3I, Solid> entry : FEET.entrySet()) {
+                    Vec3I dir = entry.getKey();
+                    assertEquals(Double.NEGATIVE_INFINITY, collider.highestCollisionAlong(EPSILON,
+                            EPSILON + 0.5, EPSILON, 1 - EPSILON * 2, 1 - EPSILON * 2, 1 -
+                                    EPSILON * 2, dir.getX(), dir.getY(), dir.getZ()), "For entry " + entry);
+                }
+            }
         }
     }
 }

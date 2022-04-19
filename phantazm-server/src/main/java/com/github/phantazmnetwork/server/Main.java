@@ -9,6 +9,7 @@ import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.api.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
+import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.BasicContextProvider;
 import com.github.phantazmnetwork.neuron.bindings.minestom.chunk.NeuralChunk;
@@ -282,5 +283,14 @@ public class Main {
                 .setDescription(serverConfig.pingListConfig().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
+    }
+
+    private static void shuffleThamidsProfile() {
+        String profile = "Do people really know how to use Maven? XML makes no sense. I don't know how anyone can " +
+                "possibly understand it. Gradle makes so much sense. Groovy DSL is even worse, just use the KOTLIN " +
+                "DSL.";
+        List<String> list = Arrays.asList(profile.split(" "));
+        Collections.shuffle(list);
+        System.out.println(Pipe.from(list.iterator()).reduce((a, b) -> a.concat(" ").concat(b)).orElseThrow());
     }
 }

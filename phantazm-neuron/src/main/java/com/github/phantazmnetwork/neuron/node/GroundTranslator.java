@@ -14,6 +14,7 @@ import java.util.Objects;
  */
 public class GroundTranslator implements NodeTranslator {
     private static final double EPSILON = 1E-5;
+    private static final double DOUBLE_EPSILON = 2E-5;
 
     private final Collider collider;
     private final GroundDescriptor descriptor;
@@ -44,9 +45,9 @@ public class GroundTranslator implements NodeTranslator {
         float height = descriptor.getHeight();
         float jump = descriptor.getJumpHeight();
 
-        double vX = descriptor.getWidth() - EPSILON;
-        double vY = height - EPSILON;
-        double vZ = descriptor.getDepth() - EPSILON;
+        double vX = descriptor.getWidth() - DOUBLE_EPSILON;
+        double vY = height - DOUBLE_EPSILON;
+        double vZ = descriptor.getDepth() - DOUBLE_EPSILON;
 
         double highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, dX, dY, dZ);
         double highestJumpY = cY + jump;

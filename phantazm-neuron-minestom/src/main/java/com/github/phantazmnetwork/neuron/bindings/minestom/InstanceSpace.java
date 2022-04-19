@@ -25,7 +25,10 @@ public class InstanceSpace extends VoxelSpace {
         }
 
         if(chunk instanceof NeuralChunk neuralChunk) {
-            return neuralChunk.getSolid(x, y, z);
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (neuralChunk) {
+                return neuralChunk.getSolid(x, y, z);
+            }
         }
 
         throw new IllegalStateException("Instance must return NeuralChunks");

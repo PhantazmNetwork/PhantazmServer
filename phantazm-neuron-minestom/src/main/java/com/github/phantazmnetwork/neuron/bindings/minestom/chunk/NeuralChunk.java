@@ -25,7 +25,8 @@ import java.util.Map;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class NeuralChunk extends DynamicChunk {
-    private static final Map<Shape, Solid[]> SPLIT_MAP = new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity());
+    private static final Map<Shape, Solid[]> SPLIT_MAP = new Object2ObjectOpenCustomHashMap<>(HashStrategies
+            .identity());
 
     private final IntSet tallSolids;
 

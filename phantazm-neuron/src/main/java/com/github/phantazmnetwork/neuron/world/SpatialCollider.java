@@ -81,10 +81,14 @@ public class SpatialCollider implements Collider {
         SolidPipe overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY).iterator();
         double best = initialBest;
         if(overlapping.hasNext()) {
+            double adX = Math.abs(dX);
+            double adY = Math.abs(dY);
+            double adZ = Math.abs(dZ);
+
             //used as inputs to checkAxis calls
-            double adjustedYZ = (Math.max(height, depth) * (Math.abs(dY) + Math.abs(dZ))) / 2;
-            double adjustedXZ = (Math.max(width, depth) * (Math.abs(dX) + Math.abs(dZ))) / 2;
-            double adjustedXY = (Math.max(width, height) * (Math.abs(dX) + Math.abs(dY))) / 2;
+            double adjustedXY = (height * adX + width * adY) / 2;
+            double adjustedXZ = (depth * adX + width * adZ) / 2;
+            double adjustedYZ = (depth * adY + height * adZ) / 2;
 
             double centerX = x + (width / 2);
             double centerY = y + (height / 2);
@@ -102,16 +106,21 @@ public class SpatialCollider implements Collider {
                 boolean hit = false;
                 if(candidate.hasChildren()) {
                     for(Solid component : candidate.getChildren()) {
+                        //stop checking this solid if any of its sub-solids overlap original bounds
+                        if(component.overlaps(relX, relY, relZ, width, height, depth)) {
+                            break;
+                        }
+
                         //noinspection AssignmentUsedAsCondition
-                        if(hit = checkSolid(overlapping, component, relX, relY, relZ, width, height, depth, centerX,
-                                centerY, centerZ, adjustedXZ, adjustedXY, adjustedYZ, dX, dY, dZ)) {
+                        if(hit = checkSolid(overlapping, component, centerX, centerY, centerZ, adjustedXZ, adjustedXY,
+                                adjustedYZ, dX, dY, dZ)) {
                             break;
                         }
                     }
                 }
-                else {
-                    hit = checkSolid(overlapping, candidate, relX, relY, relZ, width, height, depth, centerX, centerY,
-                            centerZ, adjustedXZ, adjustedXY, adjustedYZ, dX, dY, dZ);
+                else if(!candidate.overlaps(relX, relY, relZ, width, height, depth)) {
+                    hit = checkSolid(overlapping, candidate, centerX, centerY, centerZ, adjustedXZ, adjustedXY,
+                            adjustedYZ, dX, dY, dZ);
                 }
 
                 if(hit) {
@@ -146,15 +155,9 @@ public class SpatialCollider implements Collider {
         return best;
     }
 
-    private static boolean checkSolid(SolidPipe overlapping, Solid component, double relX, double relY, double relZ,
-                                      double width, double height, double depth, double centerX, double centerY,
+    private static boolean checkSolid(SolidPipe overlapping, Solid component, double centerX, double centerY,
                                       double centerZ, double adjustedXZ, double adjustedXY, double adjustedYZ,
                                       double dX, double dY, double dZ) {
-        //stop checking this solid if any of its sub-solids overlap original bounds
-        if(component.overlaps(relX, relY, relZ, width, height, depth)) {
-            return false;
-        }
-
         Vec3F componentMin = component.getMin();
         Vec3F componentMax = component.getMax();
 
