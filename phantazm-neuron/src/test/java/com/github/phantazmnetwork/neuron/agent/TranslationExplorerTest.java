@@ -18,29 +18,25 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class TranslationExplorerTest {
-    private static TranslationExplorer makeExplorer(Iterable<Vec3I> vectors, Predicate<Vec3I> shouldSkip,
-                                                    Function<Vec3I, Vec3I> transform) {
+    private static TranslationExplorer makeExplorer(Iterable<Vec3I> vectors, Predicate<Vec3I> shouldSkip) {
         NodeTranslator mockTranslator = mock(NodeTranslator.class);
-        when(mockTranslator.translate(any(), anyInt(), anyInt(), anyInt())).thenAnswer(invocation
-                -> {
-            Vec3I vec3I = Vec3I.of(invocation.getArgument(3), invocation.getArgument(4), invocation
-                    .getArgument(5));
-
-            if(shouldSkip.test(vec3I)) {
+        when(mockTranslator.translate(any(), anyInt(), anyInt(), anyInt())).thenAnswer(invocation -> {
+            if(shouldSkip.test(((Node)invocation.getArgument(0)).getPosition())) {
                 return Vec3I.ORIGIN;
             }
 
-            return transform.apply(vec3I);
+            return Vec3I.of(invocation.getArgument(1), invocation.getArgument(2), invocation
+                    .getArgument(3));
         });
 
-        PathCache mockContext = mock(PathCache.class);
-        when(mockContext.getSteps(any(), any())).thenReturn(Optional.empty());
-        when(mockContext.watchSteps(any(), any(), any())).thenAnswer(invocation -> invocation.getArgument(2));
-
-        return new TranslationExplorer(mockContext, "", mockTranslator, vectors);
+        return new TranslationExplorer(null, "", mockTranslator, vectors);
     }
 
     private static void assertIteratorSameOrder(Iterator<?> expected, Iterator<?> actual) {
+        if(expected == actual) {
+            return;
+        }
+
         while(true) {
             boolean expectedHasNext = expected.hasNext();
             boolean actualHasNext = actual.hasNext();
@@ -59,27 +55,17 @@ class TranslationExplorerTest {
     @Test
     void visitsExpected() {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0));
-        TranslationExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> vec3I);
+        TranslationExplorer explorer = makeExplorer(walks, vec3I -> false);
 
-        Iterable<? extends Vec3I> vecs = explorer.expandNode(new Node(Vec3I.ORIGIN, 0, 0, null));
+        Iterable<Vec3I> vecs = explorer.expandNode(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), walks.iterator());
     }
 
     @Test
     void emptyWhenNull() {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0));
-        TranslationExplorer explorer = makeExplorer(walks, vec3I -> true, vec3I -> vec3I);
-        Iterable<? extends Vec3I> vecs = explorer.expandNode(new Node(Vec3I.ORIGIN, 0, 0, null));
+        TranslationExplorer explorer = makeExplorer(walks, vec3I -> true);
+        Iterable<Vec3I> vecs = explorer.expandNode(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), Collections.emptyIterator());
-    }
-
-    @Test
-    void transformApplies() {
-        List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0), Vec3I.of(2, 0, 0), Vec3I.of(3, 0, 0));
-        List<Vec3I> transformed = List.of(Vec3I.of(2, 0, 0), Vec3I.of(3, 0, 0), Vec3I.of(4, 0, 0));
-        TranslationExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> Vec3I.of(vec3I.getX() + 1, 0,
-                0));
-        Iterable<? extends Vec3I> vecs = explorer.expandNode(new Node(Vec3I.ORIGIN, 0, 0, null));
-        assertIteratorSameOrder(vecs.iterator(), transformed.iterator());
     }
 }
