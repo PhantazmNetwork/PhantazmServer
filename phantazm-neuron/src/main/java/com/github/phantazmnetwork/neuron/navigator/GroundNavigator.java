@@ -53,17 +53,16 @@ public class GroundNavigator implements Navigator {
             }
 
             Controller controller = agent.getController();
-            Vec3I nodePosition = node.getPosition();
+            controller.advance(node);
 
-            controller.advance(nodePosition);
-
-            if(hasReached(nodePosition)) {
+            if(hasReached(node)) {
                 node = node.getParent();
             }
         }
     }
 
-    private boolean hasReached(Vec3I nodePosition) {
+    private boolean hasReached(Node node) {
+        Vec3I nodePosition = node.getPosition();
         Controller controller = agent.getController();
         return Vec3D.squaredDistance(controller.getX(), 0, controller.getZ(), nodePosition.getX() + 0.5,
                 0, nodePosition.getZ() + 0.5) < NODE_REACHED_DISTANCE;

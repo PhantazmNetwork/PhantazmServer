@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -35,28 +36,32 @@ public class TranslationExplorer extends CachingExplorer {
     private final Iterable<Vec3I> vectors;
 
     /**
-     * Creates a new GroundExplorer which will use the given {@link NodeTranslator}.
-     * @param cache the cache used to store computed translation vectors
+     * Creates a new TranslationExplorer which will use the given {@link NodeTranslator}.
+     * @param cache the cache used to store computed translation vectors, if null caching will be disabled (not
+     *              recommended)
      * @param id the id of the agent using this explorer
      * @param translator the translator used by this explorer
      * @param vectors the walk vectors to explore
      */
-    public TranslationExplorer(@NotNull PathCache cache, @NotNull String id, @NotNull NodeTranslator translator,
+    public TranslationExplorer(@Nullable PathCache cache, @NotNull String id, @NotNull NodeTranslator translator,
                                @NotNull Iterable<Vec3I> vectors) {
         super(cache, id);
         this.translator = Objects.requireNonNull(translator, "translator");
         this.vectors = Objects.requireNonNull(vectors, "vectors");
     }
 
-    public TranslationExplorer(@NotNull PathCache cache, @NotNull String id, @NotNull NodeTranslator translator) {
+    public TranslationExplorer(@Nullable PathCache cache, @NotNull String id, @NotNull NodeTranslator translator) {
         this(cache, id, translator, WALK_VECTORS);
     }
 
     @Override
+    public void initializeNode(@NotNull Node node) {
+        translator.computeOffset(node);
+    }
+
+    @Override
     public @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current) {
-        Vec3I currentPos = current.getPosition();
-        return Pipe.from(vectors.iterator()).map(delta -> translator.translate(currentPos.getX(), currentPos.getY(),
-                currentPos.getZ(), delta.getX(), delta.getY(), delta.getZ())).filter(delta -> !delta.equals(Vec3I
-                .ORIGIN));
+        return Pipe.from(vectors.iterator()).map(delta -> translator.translate(current, delta.getX(), delta.getY(),
+                delta.getZ())).filter(delta -> !delta.equals(Vec3I.ORIGIN));
     }
 }

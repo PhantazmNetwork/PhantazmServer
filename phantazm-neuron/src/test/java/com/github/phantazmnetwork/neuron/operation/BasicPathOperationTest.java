@@ -23,7 +23,7 @@ class BasicPathOperationTest {
     private static PathOperation makeOperation(Vec3I destination, Vec3I startPosition, Iterable<Vec3I> walkDirections,
                                                Calculator calculator, Collection<Vec3I> solids) {
         Explorer mockExplorer = mock(Explorer.class);
-        when(mockExplorer.walkVectors(any())).thenAnswer(invocation -> {
+        when(mockExplorer.expandNode(any())).thenAnswer(invocation -> {
             Node node = invocation.getArgument(0);
             Vec3I nodePos = node.getPosition();
 

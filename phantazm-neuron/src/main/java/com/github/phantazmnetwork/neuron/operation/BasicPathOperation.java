@@ -6,7 +6,6 @@ import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectRBTreeMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -77,6 +76,7 @@ public class BasicPathOperation implements PathOperation {
         if(!openSet.isEmpty()) {
             //remove and return the smallest (most promising) node
             Node current = openSet.dequeue();
+            explorer.initializeNode(current);
 
             //check if we reached our destination yet
             Vec3I currentPos = current.getPosition();
@@ -87,7 +87,7 @@ public class BasicPathOperation implements PathOperation {
             }
 
             //we haven't reached the destination, expand current
-            for(Vec3I walkVector : explorer.walkVectors(current)) {
+            for(Vec3I walkVector : explorer.expandNode(current)) {
                 //x, y, and z are the coordinates of the "neighbor" node we're trying to explore
                 int x = currentPos.getX() + walkVector.getX();
                 int y = currentPos.getY() + walkVector.getY();

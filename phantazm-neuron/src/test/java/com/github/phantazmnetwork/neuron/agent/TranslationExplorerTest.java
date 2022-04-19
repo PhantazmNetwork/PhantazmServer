@@ -21,7 +21,7 @@ class TranslationExplorerTest {
     private static TranslationExplorer makeExplorer(Iterable<Vec3I> vectors, Predicate<Vec3I> shouldSkip,
                                                     Function<Vec3I, Vec3I> transform) {
         NodeTranslator mockTranslator = mock(NodeTranslator.class);
-        when(mockTranslator.translate(anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt())).thenAnswer(invocation
+        when(mockTranslator.translate(any(), anyInt(), anyInt(), anyInt())).thenAnswer(invocation
                 -> {
             Vec3I vec3I = Vec3I.of(invocation.getArgument(3), invocation.getArgument(4), invocation
                     .getArgument(5));
@@ -61,7 +61,7 @@ class TranslationExplorerTest {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0));
         TranslationExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> vec3I);
 
-        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
+        Iterable<? extends Vec3I> vecs = explorer.expandNode(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), walks.iterator());
     }
 
@@ -69,7 +69,7 @@ class TranslationExplorerTest {
     void emptyWhenNull() {
         List<Vec3I> walks = List.of(Vec3I.of(1, 0, 0));
         TranslationExplorer explorer = makeExplorer(walks, vec3I -> true, vec3I -> vec3I);
-        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
+        Iterable<? extends Vec3I> vecs = explorer.expandNode(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), Collections.emptyIterator());
     }
 
@@ -79,7 +79,7 @@ class TranslationExplorerTest {
         List<Vec3I> transformed = List.of(Vec3I.of(2, 0, 0), Vec3I.of(3, 0, 0), Vec3I.of(4, 0, 0));
         TranslationExplorer explorer = makeExplorer(walks, vec3I -> false, vec3I -> Vec3I.of(vec3I.getX() + 1, 0,
                 0));
-        Iterable<? extends Vec3I> vecs = explorer.walkVectors(new Node(Vec3I.ORIGIN, 0, 0, null));
+        Iterable<? extends Vec3I> vecs = explorer.expandNode(new Node(Vec3I.ORIGIN, 0, 0, null));
         assertIteratorSameOrder(vecs.iterator(), transformed.iterator());
     }
 }

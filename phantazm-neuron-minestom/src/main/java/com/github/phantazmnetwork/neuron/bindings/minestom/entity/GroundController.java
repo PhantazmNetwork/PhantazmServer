@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
+import com.github.phantazmnetwork.neuron.node.Node;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
@@ -43,11 +44,14 @@ public class GroundController implements Controller {
     //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public void advance(@NotNull Vec3I vec3I) {
+    public void advance(@NotNull Node node) {
+        Vec3I vec3I = node.getPosition();
         Pos position = entity.getPosition();
 
+        double exactHeight = vec3I.getY() + node.getHeightOffset();
+
         double dx = (vec3I.getX() + 0.5) - position.x();
-        double dy = vec3I.getY() - position.y();
+        double dy = (exactHeight) - position.y();
         double dz = (vec3I.getZ() + 0.5) - position.z();
 
         //slows down entities when they reach their position
@@ -68,8 +72,13 @@ public class GroundController implements Controller {
         PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
         entity.refreshPosition(physicsResult.newPosition().withView(yaw, pitch));
 
-        if(entity.getPosition().y() < vec3I.getY()) {
+        if(entity.getPosition().y() < exactHeight) {
             entity.setVelocity(new Vec(0, jumpHeight * 2.5F, 0));
         }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private boolean collides(PhysicsResult result) {
+        return result.collisionX() || result.collisionY() || result.collisionZ();
     }
 }

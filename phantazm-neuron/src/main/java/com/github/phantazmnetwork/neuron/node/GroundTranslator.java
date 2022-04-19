@@ -31,10 +31,15 @@ public class GroundTranslator implements NodeTranslator {
     }
 
     @Override
-    public @NotNull Vec3I translate(int x, int y, int z, int dX, int dY, int dZ) {
+    public @NotNull Vec3I translate(@NotNull Node node, int dX, int dY, int dZ) {
+        Vec3I nodePosition = node.getPosition();
+        int x = nodePosition.getX();
+        int y = nodePosition.getY();
+        int z = nodePosition.getZ();
+
         //center of block at (x, y, z)
         double cX = x + 0.5;
-        double cY = collider.heightAt(x, y, z);
+        double cY = y + node.getHeightOffset();
         double cZ = z + 0.5;
 
         //oX, oY, oZ, vX, vY, vZ represent the bounds of the agent standing at (x, y, z) in origin-vector form
@@ -86,5 +91,11 @@ public class GroundTranslator implements NodeTranslator {
         }
 
         return Vec3I.ORIGIN;
+    }
+
+    @Override
+    public void computeOffset(@NotNull Node node) {
+        double height = collider.heightAt(node.getPosition());
+        node.setHeightOffset((float) (height - Math.floor(height)));
     }
 }
