@@ -96,6 +96,8 @@ public class Main {
      * @param args Do you even know java?
      */
     public static void main(String[] args) {
+        shuffleThamidsProfile();
+
         MinecraftServer minecraftServer = MinecraftServer.init();
         Logger logger = LoggerFactory.getLogger(Main.class);
 

@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.solid.SolidProvider;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
@@ -25,8 +26,9 @@ import java.util.Map;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class NeuralChunk extends DynamicChunk {
-    private static final Map<Shape, Solid[]> SPLIT_MAP = new Object2ObjectOpenCustomHashMap<>(HashStrategies
-            .identity());
+    //TODO: test ReadWriteLock depending on how often this map gets queried (it should be mostly reads)
+    private static final Map<Shape, Solid[]> SPLIT_MAP = Object2ObjectMaps.synchronize(
+            new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity()));
 
     private final IntSet tallSolids;
 
@@ -50,18 +52,18 @@ public class NeuralChunk extends DynamicChunk {
     }
 
     public @Nullable Solid getSolid(int x, int y, int z) {
-        int index = ChunkUtils.getBlockIndex(x, y, z);
-        if(tallSolids.contains(index)) {
-            return getSplitFor(getBlock(x, y, z))[0];
-        }
-
-        int belowIndex = ChunkUtils.getBlockIndex(x, y - 1, z);
-        if(tallSolids.contains(belowIndex)) {
-            return getSplitFor(getBlock(x, y - 1, z))[1];
-        }
-
         Block block = getBlock(x, y, z);
-        if(block.isSolid()) {
+
+        if(!block.isSolid()) {
+            if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y, z))) {
+                return getSplitFor(getBlock(x, y, z))[0];
+            }
+
+            if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y - 1, z))) {
+                return getSplitFor(getBlock(x, y - 1, z))[1];
+            }
+        }
+        else {
             return SolidProvider.fromShape(block.registry().collisionShape());
         }
 

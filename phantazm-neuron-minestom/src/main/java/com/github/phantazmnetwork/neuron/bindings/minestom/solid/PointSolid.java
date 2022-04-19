@@ -5,8 +5,8 @@ import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import org.jetbrains.annotations.NotNull;
 
-class PartialSolid extends MinestomSolid {
-    PartialSolid(@NotNull Vec3F min, @NotNull Vec3F max) {
+class PointSolid extends MinestomSolid {
+    PointSolid(@NotNull Vec3F min, @NotNull Vec3F max) {
         super(min, max);
     }
 

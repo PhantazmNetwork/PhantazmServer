@@ -29,9 +29,8 @@ class ShapeSolid extends MinestomSolid {
         else {
             ArrayList<Solid> childSolids = new ArrayList<>();
             for(BoundingBox boundingBox : children) {
-                //recursive constructor is safe (on latest minestom build)
-                //children.size() will be empty for all child bounding boxes
-                childSolids.add(new ShapeSolid(boundingBox));
+                childSolids.add(new PointSolid(VecUtils.toFloat(boundingBox.relativeStart()), VecUtils
+                        .toFloat(boundingBox.relativeEnd())));
             }
 
             childSolids.trimToSize();

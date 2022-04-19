@@ -23,6 +23,8 @@ public class SolidProvider {
     }
 
     public static @NotNull Solid fromPoints(@NotNull Vec3F min, @NotNull Vec3F max) {
-        return new PartialSolid(min, max);
+        Objects.requireNonNull(min, "min");
+        Objects.requireNonNull(max, "max");
+        return new PointSolid(min, max);
     }
 }

@@ -13,16 +13,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class GroundController implements Controller {
     private final Entity entity;
-    private final float jumpHeight;
     private final double speed;
+    private final Vec jumpVelocity;
 
     public GroundController(@NotNull Entity entity, float jumpHeight, double speed) {
         this.entity = Objects.requireNonNull(entity, "entity");
-        this.jumpHeight = jumpHeight;
         this.speed = speed;
+        this.jumpVelocity = new Vec(0, 2.5 * jumpHeight, 0);
     }
 
     @Override
@@ -51,7 +50,7 @@ public class GroundController implements Controller {
         double exactHeight = vec3I.getY() + node.getHeightOffset();
 
         double dx = (vec3I.getX() + 0.5) - position.x();
-        double dy = (exactHeight) - position.y();
+        double dy = exactHeight - position.y();
         double dz = (vec3I.getZ() + 0.5) - position.z();
 
         //slows down entities when they reach their position
@@ -73,12 +72,7 @@ public class GroundController implements Controller {
         entity.refreshPosition(physicsResult.newPosition().withView(yaw, pitch));
 
         if(entity.getPosition().y() < exactHeight) {
-            entity.setVelocity(new Vec(0, jumpHeight * 2.5F, 0));
+            entity.setVelocity(jumpVelocity);
         }
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    private boolean collides(PhysicsResult result) {
-        return result.collisionX() || result.collisionY() || result.collisionZ();
     }
 }
