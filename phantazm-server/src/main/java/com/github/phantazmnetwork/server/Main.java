@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.server;
 
+import com.github.phantazmnetwork.api.chat.ChatChannel;
+import com.github.phantazmnetwork.api.chat.command.ChatCommand;
 import com.github.phantazmnetwork.api.game.scene.*;
 import com.github.phantazmnetwork.api.game.scene.fallback.CompositeFallback;
 import com.github.phantazmnetwork.api.game.scene.fallback.KickFallback;
@@ -23,10 +25,16 @@ import com.github.steanky.ethylene.core.processor.ConfigLoader;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
 import com.moandjiezana.toml.TomlWriter;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -34,8 +42,8 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
-import net.minestom.server.network.ConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,6 +107,7 @@ public class Main {
             PlayerViewProvider playerViewProvider = new BasicPlayerViewProvider(MinecraftServer.getConnectionManager());
 
             initializeLobbies(playerViewProvider, lobbiesConfig, logger);
+            initializeChat();
             startServer(minecraftServer, serverConfig);
         }
         catch (ConfigProcessException e) {
@@ -183,6 +192,43 @@ public class Main {
            else {
                joinRequest.onPlayerLoginComplete();
            }
+        });
+    }
+
+    private static void initializeChat() {
+        String defaultChannel = "all";
+        Map<String, ChatChannel> channels = Map.of(
+                defaultChannel,
+                (sender, message, messageType, filter) -> {
+                    if (sender instanceof Entity entity && sender instanceof Identified identified) {
+                        Instance instance = entity.getInstance();
+                        if (instance != null) {
+                            instance.filterAudience(filter).sendMessage(identified, message, MessageType.CHAT);
+                        }
+                    }
+                },
+                "self",
+                (sender, message, messageType, filter) -> {
+                    if (sender != null) {
+                        Identity identity = (sender instanceof Identified identified)
+                                ? identified.identity()
+                                : Identity.nil();
+                        sender.filterAudience(filter).sendMessage(identity, message, messageType);
+                    }
+                }
+        );
+        Map<UUID, ChatChannel> playerChannels = new HashMap<>();
+        MinecraftServer.getCommandManager().register(new ChatCommand(channels, playerChannels,
+                (player, channel) -> playerChannels.put(player.getUuid(), channel)));
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
+            event.setCancelled(true);
+
+            ChatChannel channel = playerChannels.computeIfAbsent(event.getPlayer().getUuid(),
+                    (unused) -> channels.get(defaultChannel));
+            Component message = (event.getChatFormatFunction() != null)
+                    ? event.getChatFormatFunction().apply(event)
+                    : event.getDefaultChatFormat().get();
+            channel.broadcast(event.getPlayer(), message, MessageType.CHAT, audience -> true);
         });
     }
 
