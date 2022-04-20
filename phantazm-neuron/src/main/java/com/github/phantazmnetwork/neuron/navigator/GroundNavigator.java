@@ -22,7 +22,9 @@ public class GroundNavigator implements Navigator {
 
     private Supplier<Vec3I> destinationSupplier;
     private Future<PathResult> currentOperation;
-    private Node node;
+
+    private Node current;
+    private Node target;
 
     public GroundNavigator(@NotNull PathEngine pathEngine, @NotNull Agent agent) {
         this.pathEngine = Objects.requireNonNull(pathEngine, "pathEngine");
@@ -32,7 +34,7 @@ public class GroundNavigator implements Navigator {
     @Override
     public void tick(long time) {
         if(destinationSupplier != null) {
-            if(node == null) {
+            if(target == null) {
                 if(currentOperation == null) {
                     currentOperation = pathEngine.pathfind(agent, destinationSupplier.get());
                 }
@@ -44,7 +46,8 @@ public class GroundNavigator implements Navigator {
                 } catch (InterruptedException | ExecutionException ignored) {}
 
                 if(result != null) {
-                    node = result.getStart();
+                    current = result.getStart();
+                    target = current;
                 }
                 else {
                     //path was cancelled or an exception was thrown
@@ -52,13 +55,14 @@ public class GroundNavigator implements Navigator {
                 }
             }
 
-            if(hasReached(node)) {
-                node = node.getParent();
+            if(hasReached(target)) {
+                current = target;
+                target = target.getParent();
             }
 
-            if(node != null) {
+            if(target != null) {
                 Controller controller = agent.getController();
-                controller.advance(node);
+                controller.advance(current, target);
             }
         }
     }
@@ -77,7 +81,7 @@ public class GroundNavigator implements Navigator {
         if(destinationSupplier == null) {
             //setting to null == cancelling, so just reset everything
             cancelOperation();
-            node = null;
+            target = null;
         }
     }
 

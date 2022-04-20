@@ -10,20 +10,23 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 public class GroundController implements Controller {
-    private static final double EPSILON = 1E-4;
+    private static final double EPSILON = 1E-5;
 
     private final Entity entity;
     private final double speed;
+    private final double step;
     private final Vec jumpVelocity;
 
-    public GroundController(@NotNull Entity entity, float jumpHeight, double speed) {
+    public GroundController(@NotNull Entity entity, float jumpHeight, float step, double speed) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.speed = speed;
-        this.jumpVelocity = new Vec(0, 6f * jumpHeight, 0);
+        this.step = step;
+        this.jumpVelocity = new Vec(0, 2.5f * jumpHeight, 0);
     }
 
     @Override
@@ -45,15 +48,17 @@ public class GroundController implements Controller {
     //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public void advance(@NotNull Node node) {
-        Vec3I vec3I = node.getPosition();
+    public void advance(@NotNull Node current, @NotNull Node target) {
+        Vec3I currentPos = current.getPosition();
+        Vec3I targetPos = target.getPosition();
         Pos position = entity.getPosition();
 
-        double exactHeight = vec3I.getY() + node.getHeightOffset();
+        double currentExact = currentPos.getY() + current.getHeightOffset();
+        double targetExact = targetPos.getY() + target.getHeightOffset();
 
-        double dx = (vec3I.getX() + 0.5) - position.x();
-        double dy = exactHeight - position.y();
-        double dz = (vec3I.getZ() + 0.5) - position.z();
+        double dx = (targetPos.getX() + 0.5) - position.x();
+        double dy = targetExact - position.y();
+        double dz = (targetPos.getZ() + 0.5) - position.z();
 
         //slows down entities when they reach their position
         double distSquared = dx * dx + dy * dy + dz * dz;
@@ -70,10 +75,18 @@ public class GroundController implements Controller {
         float yaw = PositionUtils.getLookYaw(dx, dz);
         float pitch = PositionUtils.getLookPitch(dx, dy, dz);
 
-        PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
-        entity.refreshPosition(physicsResult.newPosition().withView(yaw, pitch));
+        double diff = targetExact - currentExact;
 
-        if(exactHeight - entity.getPosition().y() > EPSILON && entity.isOnGround()) {
+        if(diff - EPSILON <= step && diff > EPSILON) {
+            entity.refreshPosition(new Pos(position.x() + speedX, targetExact + EPSILON, position.z() + speedZ)
+                    .withView(yaw, pitch));
+        }
+        else {
+            entity.refreshPosition(CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ)).newPosition()
+                    .withView(yaw, pitch));
+        }
+
+        if(diff > step && entity.isOnGround()) {
             entity.setVelocity(jumpVelocity);
         }
     }

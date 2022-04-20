@@ -12,4 +12,6 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
     default float getFallTolerance() {
         return 16F;
     }
+
+    float getStep();
 }

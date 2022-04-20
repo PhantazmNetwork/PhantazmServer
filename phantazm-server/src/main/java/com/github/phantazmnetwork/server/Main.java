@@ -221,6 +221,11 @@ public class Main {
         Spawner spawner = new ContextualSpawner(new BasicContextProvider());
         GroundMinestomDescriptor testDescriptor = new GroundMinestomDescriptor() {
             @Override
+            public float getStep() {
+                return 0.5F;
+            }
+
+            @Override
             public @NotNull EntityType getEntityType() {
                 return EntityType.PHANTOM;
             }

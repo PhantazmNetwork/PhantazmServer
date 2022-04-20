@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.navigator;
 
 import com.github.phantazmnetwork.neuron.node.Node;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface Controller {
     double getX();
@@ -10,5 +11,5 @@ public interface Controller {
 
     double getZ();
 
-    void advance(@NotNull Node node);
+    void advance(@NotNull Node current, @NotNull Node target);
 }
