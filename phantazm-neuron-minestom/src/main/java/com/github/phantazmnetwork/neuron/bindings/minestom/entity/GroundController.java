@@ -14,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class GroundController implements Controller {
+    private static final double EPSILON = 1E-4;
+
     private final Entity entity;
     private final double speed;
     private final Vec jumpVelocity;
@@ -21,7 +23,7 @@ public class GroundController implements Controller {
     public GroundController(@NotNull Entity entity, float jumpHeight, double speed) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.speed = speed;
-        this.jumpVelocity = new Vec(0, 2.5 * jumpHeight, 0);
+        this.jumpVelocity = new Vec(0, 6f * jumpHeight, 0);
     }
 
     @Override
@@ -71,7 +73,7 @@ public class GroundController implements Controller {
         PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
         entity.refreshPosition(physicsResult.newPosition().withView(yaw, pitch));
 
-        if(entity.getPosition().y() < exactHeight) {
+        if(exactHeight - entity.getPosition().y() > EPSILON && entity.isOnGround()) {
             entity.setVelocity(jumpVelocity);
         }
     }

@@ -41,9 +41,9 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     private int removalAnimationDelay;
 
-    public NeuralEntity(@NotNull MinestomDescriptor entityType, @NotNull UUID uuid, @NotNull ContextProvider provider) {
-        super(entityType.getEntityType(), uuid);
-        this.entityType = entityType;
+    public NeuralEntity(@NotNull MinestomDescriptor descriptor, @NotNull UUID uuid, @NotNull ContextProvider provider) {
+        super(descriptor.getEntityType(), uuid);
+        this.entityType = descriptor;
         this.provider = Objects.requireNonNull(provider, "provider");
         this.removalAnimationDelay = 1000;
     }
@@ -61,8 +61,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public @NotNull Vec3I getStartPosition() {
-        Vec3I initial = VecUtils.toBlockInt(getPosition());
-        return initial;
+        return VecUtils.toBlockInt(getPosition().add(0, 1E-5, 0));
     }
 
     @Override
@@ -72,16 +71,19 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public @NotNull Explorer getExplorer() {
-        return Objects.requireNonNull(explorer);
+        ifNullThrow(explorer);
+        return explorer;
     }
 
     @Override
     public @NotNull Controller getController() {
-        return Objects.requireNonNull(controller);
+        ifNullThrow(controller);
+        return controller;
     }
 
     public @NotNull Navigator getNavigator() {
-        return Objects.requireNonNull(navigator);
+        ifNullThrow(navigator);
+        return navigator;
     }
 
     public void setTarget(@Nullable Entity target) {
@@ -178,6 +180,12 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     private void cancelNavigation() {
         if(navigator != null) {
             navigator.setDestination(null);
+        }
+    }
+
+    private void ifNullThrow(Object object) {
+        if(object == null) {
+            throw new IllegalStateException("Entity has no instance set");
         }
     }
 }

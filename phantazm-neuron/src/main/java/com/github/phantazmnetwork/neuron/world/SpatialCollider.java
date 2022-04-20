@@ -81,6 +81,14 @@ public class SpatialCollider implements Collider {
         SolidPipe overlapping = space.solidsOverlapping(eoX, eoY, eoZ, evX, evY, evZ, Space.Order.XZY).iterator();
         double best = initialBest;
         if(overlapping.hasNext()) {
+            double minX = Math.min(eoX, eoX + evX);
+            double minY = Math.min(eoY, eoY + evY);
+            double minZ = Math.min(eoZ, eoZ + evZ);
+
+            double ewX = Math.abs(evX);
+            double ewY = Math.abs(evY);
+            double ewZ = Math.abs(evZ);
+
             double adX = Math.abs(dX);
             double adY = Math.abs(dY);
             double adZ = Math.abs(dZ);
@@ -99,15 +107,19 @@ public class SpatialCollider implements Collider {
                 Solid candidate = overlapping.next();
                 Vec3F candidateMin = candidate.getMin();
 
-                double relX = x - candidateMin.getX();
-                double relY = y - candidateMin.getY();
-                double relZ = z - candidateMin.getZ();
+                double moX = overlapping.getFirst() + candidateMin.getX();
+                double moY = overlapping.getThird() + candidateMin.getY();
+                double moZ = overlapping.getSecond() + candidateMin.getZ();
 
                 boolean hit = false;
                 if(candidate.hasChildren()) {
+                    double cmX = x - moX;
+                    double cmY = y - moY;
+                    double cmZ = z - moZ;
+
                     for(Solid component : candidate.getChildren()) {
                         //stop checking this solid if any of its sub-solids overlap original bounds
-                        if(component.overlaps(relX, relY, relZ, width, height, depth)) {
+                        if(component.overlaps(cmX, cmY, cmZ, width, height, depth)) {
                             break;
                         }
 
@@ -118,7 +130,8 @@ public class SpatialCollider implements Collider {
                         }
                     }
                 }
-                else if(!candidate.overlaps(relX, relY, relZ, width, height, depth)) {
+                else if(!candidate.overlaps(x - moX, y - moY, z - moZ, width, height, depth) && candidate
+                        .overlaps(minX - moX, minY - moY, minZ - moZ, ewX, ewY, ewZ)) {
                     hit = checkSolid(overlapping, candidate, centerX, centerY, centerZ, adjustedXZ, adjustedXY,
                             adjustedYZ, dX, dY, dZ);
                 }
@@ -161,21 +174,13 @@ public class SpatialCollider implements Collider {
         Vec3F componentMin = component.getMin();
         Vec3F componentMax = component.getMax();
 
-        double cMinX = overlapping.getFirst() + componentMin.getX();
-        double cMinY = overlapping.getThird() + componentMin.getY();
-        double cMinZ = overlapping.getSecond() + componentMin.getZ();
+        double minX = overlapping.getFirst() + componentMin.getX() - centerX;
+        double minY = overlapping.getThird() + componentMin.getY() - centerY;
+        double minZ = overlapping.getSecond() + componentMin.getZ() - centerZ;
 
-        double cMaxX = overlapping.getFirst() + componentMax.getX();
-        double cMaxY = overlapping.getThird() + componentMax.getY();
-        double cMaxZ = overlapping.getSecond() + componentMax.getZ();
-
-        double minX = cMinX - centerX;
-        double minY = cMinY - centerY;
-        double minZ = cMinZ - centerZ;
-
-        double maxX = cMaxX - centerX;
-        double maxY = cMaxY - centerY;
-        double maxZ = cMaxZ - centerZ;
+        double maxX = overlapping.getFirst() + componentMax.getX() - centerX;
+        double maxY = overlapping.getThird() + componentMax.getY() - centerY;
+        double maxZ = overlapping.getSecond() + componentMax.getZ() - centerZ;
 
         return checkAxis(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) && checkAxis(adjustedXY, dX, dY, minX, minY, maxX,
                 maxY) && checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY);

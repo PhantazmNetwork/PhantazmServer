@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
  * returned PlayerView instances are not necessarily online at the time of creation. PlayerView instances may or may not
  * be cached.
  *
- * @implSpec Implementations should guarantee thread safety.
+ * @implSpec Implementations should guarantee thread safety for all methods.
  */
 public interface PlayerViewProvider {
     /**

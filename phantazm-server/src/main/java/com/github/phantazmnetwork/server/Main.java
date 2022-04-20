@@ -227,7 +227,7 @@ public class Main {
 
             @Override
             public @NotNull String getID() {
-                return "i'm fast as fuck boiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
+                return "phantom";
             }
 
             @Override

@@ -20,6 +20,7 @@ public abstract class VoxelSpace implements Space {
         private BasicSolidPipe(@NotNull Order order, @NotNull Order.IterationVariables variables) {
             this.order = order;
             this.variables = variables;
+
             this.first = variables.getFirstOrigin() - variables.getFirstIncrement();
             this.second = variables.getSecondOrigin();
             this.third = variables.getThirdOrigin();

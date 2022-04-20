@@ -52,11 +52,13 @@ public class GroundNavigator implements Navigator {
                 }
             }
 
-            Controller controller = agent.getController();
-            controller.advance(node);
-
             if(hasReached(node)) {
                 node = node.getParent();
+            }
+
+            if(node != null) {
+                Controller controller = agent.getController();
+                controller.advance(node);
             }
         }
     }

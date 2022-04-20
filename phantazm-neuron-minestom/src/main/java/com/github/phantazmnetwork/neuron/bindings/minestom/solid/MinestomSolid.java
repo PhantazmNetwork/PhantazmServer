@@ -15,8 +15,12 @@ abstract class MinestomSolid implements Solid {
 
     @Override
     public boolean overlaps(double x, double y, double z, double width, double height, double depth) {
-        return x < max.getX() && y < max.getY() && z < max.getZ() && x + width > min.getX() && y + height > min.getY()
-                && z + depth > min.getZ();
+        double maxX = x + width;
+        double maxY = y + height;
+        double maxZ = z + depth;
+
+        return min.getX() < maxX && max.getX() > x && min.getY() < maxY && max.getY() > y && min.getZ() < maxZ &&
+                max.getZ() > z;
     }
 
     @Override

@@ -26,7 +26,7 @@ public class TranslationExplorer extends CachingExplorer {
 
             Vec3I.of(1, 0, 1),
             Vec3I.of(-1, 0, 1),
-            Vec3I.of(-1, 0, 1),
+            Vec3I.of(1, 0, -1),
             Vec3I.of(-1, 0, -1),
 
             Vec3I.of(0, 1, 0)
