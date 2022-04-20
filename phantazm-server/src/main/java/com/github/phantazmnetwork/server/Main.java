@@ -255,7 +255,7 @@ public class Main {
                 switch (msg) {
                     case "T" -> spawner.spawnEntity(instance, player.getPosition().add(5, 0, 0), testDescriptor,
                             GroundNeuralEntity::new, neuralEntity -> neuralEntity.getAttribute(Attribute
-                                    .MOVEMENT_SPEED).setBaseValue(0.5F)).setTarget(player);
+                                    .MOVEMENT_SPEED).setBaseValue(0.1F)).setTarget(player);
                     case "Z" -> {
                         Pos playerPos = player.getPosition();
                         instance.setBlock(playerPos.blockX(), playerPos.blockY(), playerPos.blockZ(), Block.GOLD_BLOCK);

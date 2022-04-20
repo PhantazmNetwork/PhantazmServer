@@ -19,14 +19,14 @@ public class GroundController implements Controller {
 
     private final Entity entity;
     private final double speed;
+    private final double speedInverse;
     private final double step;
-    private final Vec jumpVelocity;
 
-    public GroundController(@NotNull Entity entity, float jumpHeight, float step, double speed) {
+    public GroundController(@NotNull Entity entity, float step, double speed) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.speed = speed;
+        this.speedInverse = 1 / speed;
         this.step = step;
-        this.jumpVelocity = new Vec(0, 2.5f * jumpHeight, 0);
     }
 
     @Override
@@ -76,18 +76,18 @@ public class GroundController implements Controller {
         float pitch = PositionUtils.getLookPitch(dx, dy, dz);
 
         double diff = targetExact - currentExact;
+        PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
+        Pos pos = physicsResult.newPosition().withView(yaw, pitch);
 
-        if(diff - EPSILON <= step && diff > EPSILON) {
-            entity.refreshPosition(new Pos(position.x() + speedX, targetExact + EPSILON, position.z() + speedZ)
-                    .withView(yaw, pitch));
-        }
-        else {
-            entity.refreshPosition(CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ)).newPosition()
-                    .withView(yaw, pitch));
+        if(diff - EPSILON <= step && diff > EPSILON && !entity.hasVelocity() && (physicsResult.collisionX() ||
+                physicsResult.collisionY() || physicsResult.collisionZ())) {
+            pos = pos.add(speedX, diff + EPSILON, speedZ);
         }
 
-        if(diff > step && entity.isOnGround()) {
-            entity.setVelocity(jumpVelocity);
+        entity.refreshPosition(pos);
+
+        if(diff > step && entity.isOnGround() && !entity.hasVelocity()) {
+            entity.setVelocity(new Vec(0, dy * speedInverse, 0));
         }
     }
 }

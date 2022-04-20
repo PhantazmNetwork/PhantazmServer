@@ -37,8 +37,7 @@ public class GroundNeuralEntity extends NeuralEntity {
 
     @Override
     public @NotNull Controller makeController() {
-        return new GroundController(this, entityType.getJumpHeight(), entityType.getStep(),
-                getAttributeValue(Attribute.MOVEMENT_SPEED));
+        return new GroundController(this, entityType.getStep(), getAttributeValue(Attribute.MOVEMENT_SPEED));
     }
 
     @Override
