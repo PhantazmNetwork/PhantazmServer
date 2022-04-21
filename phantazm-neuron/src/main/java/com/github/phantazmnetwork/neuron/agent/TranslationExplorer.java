@@ -18,20 +18,6 @@ import java.util.Objects;
  * functionality provided by {@link PathCache}.
  */
 public class TranslationExplorer extends CachingExplorer {
-    private static final Iterable<Vec3I> WALK_VECTORS = List.of(
-            Vec3I.of(1, 0, 0),
-            Vec3I.of(0, 0, 1),
-            Vec3I.of(-1, 0, 0),
-            Vec3I.of(0, 0, -1),
-
-            Vec3I.of(1, 0, 1),
-            Vec3I.of(-1, 0, 1),
-            Vec3I.of(1, 0, -1),
-            Vec3I.of(-1, 0, -1),
-
-            Vec3I.of(0, 1, 0)
-    );
-
     private final NodeTranslator translator;
     private final Iterable<Vec3I> vectors;
 
@@ -48,10 +34,6 @@ public class TranslationExplorer extends CachingExplorer {
         super(cache, id);
         this.translator = Objects.requireNonNull(translator, "translator");
         this.vectors = Objects.requireNonNull(vectors, "vectors");
-    }
-
-    public TranslationExplorer(@Nullable PathCache cache, @NotNull String id, @NotNull NodeTranslator translator) {
-        this(cache, id, translator, WALK_VECTORS);
     }
 
     @Override

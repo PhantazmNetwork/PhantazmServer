@@ -27,6 +27,7 @@ import java.util.Map;
 @SuppressWarnings("UnstableApiUsage")
 public class NeuralChunk extends DynamicChunk {
     //TODO: test ReadWriteLock depending on how often this map gets queried (it should be mostly reads)
+    //(this would need to be done during an actual game, will leave for much later)
     private static final Map<Shape, Solid[]> SPLIT_MAP = Object2ObjectMaps.synchronize(
             new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity()));
 
@@ -41,9 +42,8 @@ public class NeuralChunk extends DynamicChunk {
     public void setBlock(int x, int y, int z, @NotNull Block block) {
         super.setBlock(x, y, z, block);
 
-        Shape shape = block.registry().collisionShape();
         int index = ChunkUtils.getBlockIndex(x, y, z);
-        if(shape.relativeEnd().y() > 1) {
+        if(block.registry().collisionShape().relativeEnd().y() > 1) {
             tallSolids.add(index);
         }
         else {
@@ -52,7 +52,10 @@ public class NeuralChunk extends DynamicChunk {
     }
 
     public @Nullable Solid getSolid(int x, int y, int z) {
-        Block block = getBlock(x, y, z);
+        Block block = getBlock(x, y, z, Condition.TYPE);
+        if(block == null) {
+            return null;
+        }
 
         if(!block.isSolid()) {
             if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y, z))) {
