@@ -20,18 +20,6 @@ import java.util.UUID;
  * A {@link NeuralEntity} implementation with ground-based movement (gravitation).
  */
 public class GroundNeuralEntity extends NeuralEntity {
-    private static final Iterable<Vec3I> WALK_STEP_DIRECTIONS = List.of(
-            Vec3I.of(1, 0, 0),
-            Vec3I.of(-1, 0, 0),
-            Vec3I.of(0, 0, 1),
-            Vec3I.of(0, 0, -1),
-
-            Vec3I.of(1, 0, 1),
-            Vec3I.of(-1, 0, -1),
-            Vec3I.of(-1, 0, 1),
-            Vec3I.of(1, 0, -1)
-    );
-
     private final GroundMinestomDescriptor entityType;
 
     public GroundNeuralEntity(@NotNull GroundMinestomDescriptor entityType, @NotNull UUID uuid,
