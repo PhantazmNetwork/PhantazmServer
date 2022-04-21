@@ -1,6 +1,8 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
+import com.github.phantazmnetwork.commons.pipe.Pipe;
+import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
@@ -29,10 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -47,6 +46,8 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     private Explorer explorer;
 
     private int removalAnimationDelay;
+
+    private Vec3I startPosition;
 
     public NeuralEntity(@NotNull MinestomDescriptor descriptor, @NotNull UUID uuid, @NotNull ContextProvider provider) {
         super(descriptor.getEntityType(), uuid);
@@ -63,24 +64,38 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public boolean hasStartPosition() {
-        return getInstance() != null && !isDead();
+        Vec3I current = VecUtils.toBlockInt(getPosition());
+        if(current.equals(startPosition)) {
+            return true;
+        }
+
+        return (startPosition = computeStartPosition()) != null;
     }
 
     @Override
     public @NotNull Vec3I getStartPosition() {
-        return VecUtils.toBlockInt(getPosition());
+        Vec3I current = VecUtils.toBlockInt(getPosition());
+        if(current.equals(startPosition)) {
+            return startPosition;
+        }
+
+        Vec3I position = computeStartPosition();
+        if(position == null) {
+            throw new IllegalStateException("No valid starting position can be found for this entity");
+        }
+
+        return position;
     }
 
     @SuppressWarnings({"UnstableApiUsage", "SynchronizationOnLocalVariableOrMethodParameter"})
     private @Nullable Vec3I computeStartPosition() {
         Instance instance = requireInstance();
-        Pos entityPos = getPosition();
 
-        //can't pathfind outside world border or in void
-        if(!instance.getWorldBorder().isInside(this) || instance.isInVoid(entityPos)) {
+        if(!canPathfind()) {
             return null;
         }
 
+        Pos entityPos = getPosition();
         Vec3I blockPos = VecUtils.toBlockInt(entityPos);
 
         int chunkX = blockPos.getX() >> 4;
@@ -102,27 +117,24 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             return blockPos;
         }
 
-        Iterable<Vec3I> checks = getStepDirections();
-        Vec3I neededShift = null;
-        for(Vec3I check : checks) {
+        //get the closest step direction that we won't collide with something in
+        Optional<Vec3I> closest = Pipe.from(getStepDirections()).filter(check -> {
             double dX = (blockPos.getX() + check.getX()) - entityPos.x();
             double dY = (blockPos.getY() + check.getY()) - entityPos.y();
             double dZ = (blockPos.getZ() + check.getZ()) - entityPos.z();
 
-            PhysicsResult result = CollisionUtils.handlePhysics(this, new Vec(dX, dY, dZ));
-            if(!PhysicsUtils.hasCollision(result)) {
-                neededShift = check;
-                break;
-            }
-        }
+            return !PhysicsUtils.hasCollision(CollisionUtils.handlePhysics(this, new Vec(dX, dY, dZ)));
+        }).min(Comparator.comparingDouble(vector -> Vec3D.squaredDistance(entityPos.x(), entityPos.y(), entityPos.z(),
+                vector.getX(), vector.getY(), vector.getZ())));
 
-        if(neededShift == null) {
+        if(closest.isEmpty()) {
             //couldn't find a starting pos
             return null;
         }
 
-        return Vec3I.of(blockPos.getX() + neededShift.getX(), blockPos.getY() + neededShift.getY(), blockPos
-                .getZ() + neededShift.getZ());
+        Vec3I shift = closest.get();
+        return Vec3I.of(blockPos.getX() + shift.getX(), blockPos.getY() + shift.getY(), blockPos.getZ() + shift
+                .getZ());
     }
 
     @Override
@@ -240,6 +252,11 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     protected abstract @NotNull Controller makeController();
 
     protected abstract @NotNull Iterable<Vec3I> getStepDirections();
+
+    protected boolean canPathfind() {
+        return !isDead() && isOnGround() && instance.getWorldBorder().isInside(this) && !instance
+                .isInVoid(getPosition());
+    }
 
     private void cancelNavigation() {
         if(navigator != null) {

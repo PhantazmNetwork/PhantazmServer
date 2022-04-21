@@ -43,7 +43,7 @@ public class TranslationExplorer extends CachingExplorer {
 
     @Override
     public @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current) {
-        return Pipe.from(vectors.iterator()).map(delta -> translator.translate(current, delta.getX(), delta.getY(),
-                delta.getZ())).filter(delta -> !delta.equals(Vec3I.ORIGIN));
+        return Pipe.from(vectors).map(delta -> translator.translate(current, delta.getX(), delta.getY(), delta.getZ()))
+                .filter(delta -> !delta.equals(Vec3I.ORIGIN));
     }
 }

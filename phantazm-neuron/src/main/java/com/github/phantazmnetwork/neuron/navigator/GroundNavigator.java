@@ -46,8 +46,12 @@ public class GroundNavigator implements Navigator {
                 } catch (InterruptedException | ExecutionException ignored) {}
 
                 if(result != null) {
-                    current = result.getStart();
-                    target = current;
+                    Controller controller = agent.getController();
+                    double controllerY = controller.getY();
+                    current = new Node(Vec3I.floored(controller.getX(), controllerY, controller.getZ()), 0, 0,
+                            null);
+                    current.setHeightOffset((float) (controllerY - Math.floor(controllerY)));
+                    target = result.getStart();
                 }
                 else {
                     //path was cancelled or an exception was thrown
@@ -90,9 +94,7 @@ public class GroundNavigator implements Navigator {
             currentOperation.cancel(true);
             try {
                 currentOperation.get();
-            } catch (InterruptedException | ExecutionException e) {
-                //TODO: log ExecutionException here (InterruptedException should never happen though)
-            }
+            } catch (InterruptedException | ExecutionException ignored) {}
 
             currentOperation = null;
         }

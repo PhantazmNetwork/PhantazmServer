@@ -298,6 +298,6 @@ public class Main {
                 "DSL.";
         List<String> list = Arrays.asList(profile.split(" "));
         Collections.shuffle(list);
-        System.out.println(Pipe.from(list.iterator()).reduce((a, b) -> a.concat(" ").concat(b)).orElseThrow());
+        System.out.println(Pipe.from(list).reduce((a, b) -> a.concat(" ").concat(b)).orElseThrow());
     }
 }

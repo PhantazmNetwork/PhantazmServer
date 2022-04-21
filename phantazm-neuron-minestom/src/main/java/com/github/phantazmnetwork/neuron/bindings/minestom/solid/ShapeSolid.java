@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
 import com.github.phantazmnetwork.commons.IteratorUtils;
 import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
+import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
@@ -27,10 +28,10 @@ class ShapeSolid extends MinestomSolid {
             this.children = IteratorUtils::empty;
         }
         else {
-            ArrayList<Solid> childSolids = new ArrayList<>();
+            ArrayList<Solid> childSolids = new ArrayList<>(2);
             for(BoundingBox boundingBox : children) {
-                childSolids.add(new PointSolid(VecUtils.toFloat(boundingBox.relativeStart()), VecUtils
-                        .toFloat(boundingBox.relativeEnd())));
+                childSolids.add(new PointSolid(VecUtils.toFloat(boundingBox.relativeStart()), VecUtils.toFloat(
+                        boundingBox.relativeEnd())));
             }
 
             childSolids.trimToSize();
@@ -42,6 +43,27 @@ class ShapeSolid extends MinestomSolid {
     @Override
     public boolean hasChildren() {
         return hasChildren;
+    }
+
+    @Override
+    public boolean overlaps(double x, double y, double z, double width, double height, double depth) {
+        if(!super.overlaps(x, y, z, width, height, depth)) {
+            return false;
+        }
+
+        if(hasChildren) {
+            for(Solid child : children) {
+                if(child.overlaps(x, y, z, width, height, depth)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        else {
+            //we have no children, and the bounding box overlaps with us, so return true
+            return true;
+        }
     }
 
     @Override

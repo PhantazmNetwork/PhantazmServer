@@ -111,18 +111,20 @@ public class SpatialCollider implements Collider {
                 double moY = overlapping.getThird() + candidateMin.getY();
                 double moZ = overlapping.getSecond() + candidateMin.getZ();
 
+                if(!candidate.overlaps(minX - moX, minY - moY, minZ - moZ, ewX, ewY, ewZ)) {
+                    //if candidate does not overlap the expanded bounds, we aren't colliding
+                    continue;
+                }
+
+                if(candidate.overlaps(x - moX, y - moY, z - moZ, width, height, depth)) {
+                    //if we're overlapping the original bounds, we aren't colliding
+                    continue;
+                }
+
                 boolean hit = false;
                 if(candidate.hasChildren()) {
-                    double cmX = x - moX;
-                    double cmY = y - moY;
-                    double cmZ = z - moZ;
-
                     for(Solid component : candidate.getChildren()) {
                         //stop checking this solid if any of its sub-solids overlap original bounds
-                        if(component.overlaps(cmX, cmY, cmZ, width, height, depth)) {
-                            break;
-                        }
-
                         //noinspection AssignmentUsedAsCondition
                         if(hit = checkSolid(overlapping, component, centerX, centerY, centerZ, adjustedXZ, adjustedXY,
                                 adjustedYZ, dX, dY, dZ)) {
@@ -130,8 +132,7 @@ public class SpatialCollider implements Collider {
                         }
                     }
                 }
-                else if(!candidate.overlaps(x - moX, y - moY, z - moZ, width, height, depth) && candidate
-                        .overlaps(minX - moX, minY - moY, minZ - moZ, ewX, ewY, ewZ)) {
+                else {
                     hit = checkSolid(overlapping, candidate, centerX, centerY, centerZ, adjustedXZ, adjustedXY,
                             adjustedYZ, dX, dY, dZ);
                 }

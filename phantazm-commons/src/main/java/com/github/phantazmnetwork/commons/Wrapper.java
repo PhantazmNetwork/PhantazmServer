@@ -110,7 +110,7 @@ public abstract class Wrapper<TType> implements Supplier<TType> {
     }
 
     /**
-     * Creates and returns a new Wrapper implementation.
+     * Creates and returns a new Wrapper object holding the given value.
      * @param value the value to initially store in the wrapper
      * @param <TType> the type of value held in the wrapper
      * @return a mutable Wrapper implementation

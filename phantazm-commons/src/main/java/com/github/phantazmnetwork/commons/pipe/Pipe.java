@@ -336,8 +336,23 @@ public interface Pipe<TValue> extends Iterator<TValue> {
         }
     }
 
-    default Optional<TValue> reduce(@NotNull BinaryOperator<TValue> operator) {
+    /**
+     * Drains this pipe, performing a reduction operation using the provided {@link BinaryOperator}. Can be used to
+     * "merge" all elements of a pipe into a single value. For example:
+     *
+     * <pre>{@code
+     * String merged = Pipe.of("a", "b", "c").reduce(String::concat).orElseThrow();
+     * }
+     * </pre>
+     *
+     * <p>Here, {@code merged} will be equal to "abc".</p>
+     * @param operator the BinaryOperator used to merge elements of this pipe
+     * @return an {@link Optional} containing the result of the reduction, which will be empty if this pipe is empty
+     */
+    default @NotNull Optional<TValue> reduce(@NotNull BinaryOperator<TValue> operator) {
         Objects.requireNonNull(operator, "operator");
+
+
 
         boolean foundAny = false;
         TValue running = null;
@@ -354,6 +369,13 @@ public interface Pipe<TValue> extends Iterator<TValue> {
         return foundAny ? Optional.of(running) : Optional.empty();
     }
 
+    /**
+     * Works similarly to {@link Pipe#reduce(BinaryOperator)}, but accepts an initial value which will be passed to the
+     * {@link BinaryOperator}, along with the first element of this pipe.
+     * @param initial the initial value
+     * @param operator the BinaryOperator used to merge elements of this pipe
+     * @return the result of the reduction operation
+     */
     default TValue reduce(TValue initial, @NotNull BinaryOperator<TValue> operator) {
         Objects.requireNonNull(operator, "operator");
 
@@ -381,6 +403,35 @@ public interface Pipe<TValue> extends Iterator<TValue> {
      */
     default Optional<TValue> max(@NotNull Comparator<? super TValue> comparator) {
         return reduce(BinaryOperator.maxBy(comparator));
+    }
+
+    /**
+     * Drains this pipe, checking each element against the provided Predicate. If the predicate returns true for any
+     * element, this method returns true. Otherwise, returns false. If this method returns true, any remaining elements
+     * in this pipe may not have been iterated.
+     * @param predicate the predicate to use
+     * @return true if at least one element was found that matches the given predicate, false otherwise
+     */
+    default boolean any(@NotNull Predicate<? super TValue> predicate) {
+        Objects.requireNonNull(predicate, "predicate");
+        while(hasNext()) {
+            if(predicate.test(next())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Drains this pipe, checking each element against the provided Predicate. If the predicate returns false for all
+     * elements, this method returns true. Otherwise, returns false. If this method returns false, any remaining
+     * elements in this pipe may not have been iterated.
+     * @param predicate the predicate to use
+     * @return true if no elements match the given predicate, false otherwise
+     */
+    default boolean none(@NotNull Predicate<? super TValue> predicate) {
+        return !any(predicate);
     }
 
     /**
@@ -451,6 +502,24 @@ public interface Pipe<TValue> extends Iterator<TValue> {
         }
 
         return new IteratorPipe<>(iterator);
+    }
+
+    /**
+     * Produces a new Pipe from the given {@link Iterable}'s iterator.
+     * @param iterable the iterable providing an iterator from which to create a pipe from
+     * @param <TValue> the type of element supplied by the iterator
+     * @return a new Pipe implementation from the given iterable. If {@code iterable} is an instance of Pipe.Source,
+     * its pipe is returned directly
+     */
+    static <TValue> @NotNull Pipe<TValue> from(@NotNull Iterable<? extends TValue> iterable) {
+        Objects.requireNonNull(iterable, "iterable");
+
+        if(iterable instanceof Pipe.Source<?> source) {
+            //noinspection unchecked
+            return (Pipe<TValue>) source.iterator();
+        }
+
+        return new IteratorPipe<>(iterable.iterator());
     }
 
     /**
