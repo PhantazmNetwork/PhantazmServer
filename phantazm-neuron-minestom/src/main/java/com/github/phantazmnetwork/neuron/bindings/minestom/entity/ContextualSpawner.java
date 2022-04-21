@@ -20,7 +20,8 @@ public class ContextualSpawner implements Spawner {
     @Override
     public <TType extends MinestomDescriptor, TReturn extends NeuralEntity> @NotNull TReturn spawnEntity(
             @NotNull Instance instance, @NotNull Point point, @NotNull TType type,
-            @NotNull NeuralEntityFactory<TType, TReturn> factory, @NotNull Consumer<TReturn> settings) {
+            @NotNull NeuralEntityFactory<? super TType, ? extends TReturn> factory,
+            @NotNull Consumer<? super TReturn> settings) {
         TReturn entity = factory.build(type, UUID.randomUUID(), contextProvider);
         settings.accept(entity);
         entity.setInstance(instance, point);
