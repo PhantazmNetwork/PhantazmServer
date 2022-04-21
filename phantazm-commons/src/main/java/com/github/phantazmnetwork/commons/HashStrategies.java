@@ -1,6 +1,8 @@
 package com.github.phantazmnetwork.commons;
 
 import it.unimi.dsi.fastutil.Hash;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.IdentityHashMap;
 
 /**
@@ -28,7 +30,7 @@ public final class HashStrategies {
      * @param <T> the key type for the map in which this is to be used
      * @return an identity-based hash strategy
      */
-    public static <T> Hash.Strategy<T> identity() {
+    public static <T> Hash.@NotNull Strategy<T> identity() {
         //this cast is always safe, IDENTITY's methods don't care about the object type
         //noinspection unchecked
         return (Hash.Strategy<T>) IDENTITY;
