@@ -254,8 +254,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     protected abstract @NotNull Iterable<Vec3I> getStepDirections();
 
     protected boolean canPathfind() {
-        return !isDead() && isOnGround() && instance.getWorldBorder().isInside(this) && !instance
-                .isInVoid(getPosition());
+        return !isDead() && instance.getWorldBorder().isInside(this) && !instance.isInVoid(getPosition());
     }
 
     private void cancelNavigation() {

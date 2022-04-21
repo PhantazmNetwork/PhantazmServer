@@ -49,7 +49,7 @@ public class GroundNeuralEntity extends NeuralEntity {
     }
 
     @Override
-    public boolean hasStartPosition() {
-        return super.hasStartPosition() && isOnGround();
+    protected boolean canPathfind() {
+        return super.canPathfind() && isOnGround();
     }
 }
