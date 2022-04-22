@@ -29,6 +29,7 @@ public class ChatCommand extends Command {
     public ChatCommand(@NotNull ChatChannelStore channelStore, @NotNull Map<UUID, ChatChannel> playerChannels) {
         super(COMMAND_ID);
 
+        Objects.requireNonNull(channelStore, "channelStore");
         Objects.requireNonNull(playerChannels, "playerChannels");
 
         Argument<Pair<String, ChatChannel>> channelArgument = new ArgumentChannel("channel", channelStore);
