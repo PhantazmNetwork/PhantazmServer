@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.api.chat;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Map;
 
@@ -34,10 +35,10 @@ public interface ChatChannelStore {
     void unregisterChannel(@NotNull String name);
 
     /**
-     * Gets a copy of the store's {@link ChatChannel}s.
+     * Gets an unmodifiable copy of the store's {@link ChatChannel}s.
      *
      * @return The store's {@link ChatChannel}s
      */
-    @NotNull Map<String, ChatChannel> getChannels();
+    @Unmodifiable @NotNull Map<String, ChatChannel> getChannels();
 
 }

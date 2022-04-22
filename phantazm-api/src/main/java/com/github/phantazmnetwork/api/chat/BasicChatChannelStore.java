@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.api.chat;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ public class BasicChatChannelStore implements ChatChannelStore {
 
     private final ChatChannel defaultChannel;
 
+    private Map<String, ChatChannel> channelsCopy;
+
     /**
      * Creates a basic {@link ChatChannelStore}.
      *
@@ -28,6 +31,7 @@ public class BasicChatChannelStore implements ChatChannelStore {
         this.defaultChannelName = Objects.requireNonNull(defaultChannelName, "defaultChannelName");
         this.defaultChannel = Objects.requireNonNull(defaultChannel, "defaultChannel");
         channels.put(defaultChannelName, defaultChannel);
+        channelsCopy = Collections.singletonMap(defaultChannelName, defaultChannel);
     }
 
     @Override
@@ -41,10 +45,11 @@ public class BasicChatChannelStore implements ChatChannelStore {
         Objects.requireNonNull(channel, "channel");
 
         if (channels.containsKey(name)) {
-            throw new IllegalArgumentException("channel already registered");
+            throw new IllegalArgumentException("Channel already registered");
         }
 
         channels.put(name, channel);
+        channelsCopy = Map.copyOf(channels);
     }
 
     @Override
@@ -55,13 +60,15 @@ public class BasicChatChannelStore implements ChatChannelStore {
             throw new IllegalArgumentException("Cannot unregister default channel");
         }
         if (channels.remove(name) == null) {
-            throw new IllegalArgumentException("Cannot not registered");
+            throw new IllegalArgumentException("Channel not registered");
         }
+
+        channelsCopy = Map.copyOf(channels);
     }
 
     @Override
-    public @NotNull Map<String, ChatChannel> getChannels() {
-        return Collections.unmodifiableMap(channels);
+    public @Unmodifiable @NotNull Map<String, ChatChannel> getChannels() {
+        return channelsCopy;
     }
 
 }
