@@ -9,11 +9,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
+/**
+ * Represents a channel where messages can be sent to a group of {@link Audience}s.
+ * These are typically subscribed to by players, such as all chat, party chat, or guild chat.
+ */
 @FunctionalInterface
 public interface ChatChannel {
 
     /**
      * Broadcasts a {@link Component}.
+     *
      * @param sender The associated {@link CommandSender}, or null if none such exists
      * @param message The message to send
      * @param messageType The type of the message

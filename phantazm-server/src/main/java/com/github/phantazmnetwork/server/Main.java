@@ -1,6 +1,8 @@
 package com.github.phantazmnetwork.server;
 
+import com.github.phantazmnetwork.api.chat.BasicChatChannelStore;
 import com.github.phantazmnetwork.api.chat.ChatChannel;
+import com.github.phantazmnetwork.api.chat.ChatChannelStore;
 import com.github.phantazmnetwork.api.chat.command.ChatCommand;
 import com.github.phantazmnetwork.api.game.scene.*;
 import com.github.phantazmnetwork.api.game.scene.fallback.CompositeFallback;
@@ -196,35 +198,30 @@ public class Main {
     }
 
     private static void initializeChat() {
-        String defaultChannel = "all";
-        Map<String, ChatChannel> channels = Map.of(
-                defaultChannel,
-                (sender, message, messageType, filter) -> {
-                    if (sender instanceof Entity entity && sender instanceof Identified identified) {
-                        Instance instance = entity.getInstance();
-                        if (instance != null) {
-                            instance.filterAudience(filter).sendMessage(identified, message, MessageType.CHAT);
-                        }
-                    }
-                },
-                "self",
-                (sender, message, messageType, filter) -> {
-                    if (sender != null) {
-                        Identity identity = (sender instanceof Identified identified)
-                                ? identified.identity()
-                                : Identity.nil();
-                        sender.filterAudience(filter).sendMessage(identity, message, messageType);
-                    }
+        ChatChannelStore channelStore = new BasicChatChannelStore("all", (sender, message, messageType, filter) -> {
+            if (sender instanceof Entity entity && sender instanceof Identified identified) {
+                Instance instance = entity.getInstance();
+                if (instance != null) {
+                    instance.filterAudience(filter).sendMessage(identified, message, messageType);
                 }
-        );
+            }
+        });
+        channelStore.registerChannel("self", (sender, message, messageType, filter) -> {
+            if (sender != null) {
+                Identity identity = (sender instanceof Identified identified)
+                        ? identified.identity()
+                        : Identity.nil();
+                sender.filterAudience(filter).sendMessage(identity, message, messageType);
+            }
+        });
+
         Map<UUID, ChatChannel> playerChannels = new HashMap<>();
-        MinecraftServer.getCommandManager().register(new ChatCommand(channels, playerChannels,
-                (player, channel) -> playerChannels.put(player.getUuid(), channel)));
+        MinecraftServer.getCommandManager().register(new ChatCommand(channelStore, playerChannels));
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
             event.setCancelled(true);
 
             ChatChannel channel = playerChannels.computeIfAbsent(event.getPlayer().getUuid(),
-                    (unused) -> channels.get(defaultChannel));
+                    (unused) -> channelStore.getDefaultChannel());
             Component message = (event.getChatFormatFunction() != null)
                     ? event.getChatFormatFunction().apply(event)
                     : event.getDefaultChatFormat().get();
