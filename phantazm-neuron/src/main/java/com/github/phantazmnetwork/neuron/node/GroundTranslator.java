@@ -2,11 +2,9 @@ package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
-import com.github.phantazmnetwork.neuron.agent.PhysicalDescriptor;
 import com.github.phantazmnetwork.neuron.world.Collider;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.channels.Pipe;
 import java.util.Objects;
 
 /**
