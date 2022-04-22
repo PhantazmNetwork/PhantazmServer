@@ -69,16 +69,15 @@ public class GroundController implements Controller {
         Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
         entity.refreshPosition(pos);
 
-        if(PhysicsUtils.hasCollision(physicsResult)) {
+        if(PhysicsUtils.hasCollision(physicsResult) && entity.getGravityTickCount() == 0 && pos.y() < targetExact) {
             Vec3I currentPos = current.getPosition();
             double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
-            if(entity.getGravityTickCount() == 0 && pos.y() < targetExact) {
-                if(nodeDiff > step) {
-                    entity.setVelocity(new Vec(speedX, nodeDiff * 9, speedZ));
-                }
-                else {
-                    entity.teleport(new Pos(pos.x() + speedX, pos.y() + nodeDiff, pos.z() + speedZ));
-                }
+
+            if(nodeDiff > step) {
+                entity.setVelocity(new Vec(speedX, nodeDiff * 9, speedZ));
+            }
+            else {
+                entity.teleport(new Pos(pos.x() + speedX, pos.y() + nodeDiff, pos.z() + speedZ));
             }
         }
     }

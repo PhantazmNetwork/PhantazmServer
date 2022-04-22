@@ -352,8 +352,6 @@ public interface Pipe<TValue> extends Iterator<TValue> {
     default @NotNull Optional<TValue> reduce(@NotNull BinaryOperator<TValue> operator) {
         Objects.requireNonNull(operator, "operator");
 
-
-
         boolean foundAny = false;
         TValue running = null;
         while(hasNext()) {

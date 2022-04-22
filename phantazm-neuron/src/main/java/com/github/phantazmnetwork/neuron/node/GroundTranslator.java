@@ -14,7 +14,7 @@ import java.util.Objects;
  */
 public class GroundTranslator implements NodeTranslator {
     private static final double EPSILON = 1E-5;
-    private static final double DOUBLE_EPSILON = 2E-5;
+    private static final double DOUBLE_EPSILON = EPSILON * 2;
 
     private final Collider collider;
     private final GroundDescriptor descriptor;

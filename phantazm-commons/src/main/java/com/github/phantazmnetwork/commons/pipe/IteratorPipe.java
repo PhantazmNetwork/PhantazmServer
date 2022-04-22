@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  * @param <TValue> the upper bound of the value held in the backing iterator
  */
 final class IteratorPipe<TValue> implements Pipe<TValue> {
-    private final Iterator<? extends TValue> iterator;
+    private Iterator<? extends TValue> iterator;
     private boolean ended;
 
     /**
@@ -30,6 +30,7 @@ final class IteratorPipe<TValue> implements Pipe<TValue> {
 
         boolean hasNext = iterator.hasNext();
         if(!hasNext) {
+            iterator = null;
             ended = true;
         }
 

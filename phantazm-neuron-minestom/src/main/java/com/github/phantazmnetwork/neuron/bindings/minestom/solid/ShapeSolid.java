@@ -28,13 +28,12 @@ class ShapeSolid extends MinestomSolid {
             this.children = IteratorUtils::empty;
         }
         else {
-            ArrayList<Solid> childSolids = new ArrayList<>(2);
+            ArrayList<Solid> childSolids = new ArrayList<>(children.size());
             for(BoundingBox boundingBox : children) {
                 childSolids.add(new PointSolid(VecUtils.toFloat(boundingBox.relativeStart()), VecUtils.toFloat(
                         boundingBox.relativeEnd())));
             }
 
-            childSolids.trimToSize();
             this.hasChildren = true;
             this.children = () -> IteratorUtils.unmodifiable(childSolids.iterator());
         }
@@ -60,10 +59,9 @@ class ShapeSolid extends MinestomSolid {
 
             return false;
         }
-        else {
-            //we have no children, and the bounding box overlaps with us, so return true
-            return true;
-        }
+
+        //we have no children, and the bounding box overlaps with us, so return true
+        return true;
     }
 
     @Override

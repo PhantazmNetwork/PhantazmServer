@@ -21,11 +21,11 @@ public class BasicPathCache implements PathCache {
     private static final int CACHE_EXPIRE_SECONDS = 5;
     private static final int ITERABLE_CACHE_SIZE = 128;
 
-    private final Cache<Vec3I, Map<String, Iterable<Vec3I>>> positionalCache;
-
     //global cache shared among all BasicPathContext instances. reduces duplication of cached Iterables (lists)
     private static final Cache<ArrayList<Vec3I>, Iterable<Vec3I>> ITERABLE_CACHE = Caffeine.newBuilder()
             .maximumSize(ITERABLE_CACHE_SIZE).build();
+
+    private final Cache<Vec3I, Map<String, Iterable<Vec3I>>> positionalCache;
 
     /**
      * Creates a new instance of this class with the specified maximum cache size. The number of cached iterables will
