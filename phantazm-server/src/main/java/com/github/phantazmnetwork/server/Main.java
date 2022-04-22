@@ -1,6 +1,11 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.game.scene.*;
+import com.github.phantazmnetwork.api.chat.BasicChatChannelStore;
+import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
+import com.github.phantazmnetwork.api.chat.ChatChannel;
+import com.github.phantazmnetwork.api.chat.ChatChannelStore;
+import com.github.phantazmnetwork.api.chat.command.ChatCommand;
 import com.github.phantazmnetwork.api.game.scene.fallback.CompositeFallback;
 import com.github.phantazmnetwork.api.game.scene.fallback.KickFallback;
 import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
@@ -32,6 +37,10 @@ import com.github.steanky.ethylene.core.processor.ConfigLoader;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
 import com.moandjiezana.toml.TomlWriter;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
@@ -40,8 +49,10 @@ import net.minestom.server.entity.EntityCreature;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.*;
@@ -119,8 +130,10 @@ public class Main {
             LobbiesConfig lobbiesConfig = CONFIG_HANDLER.getData(LOBBIES_CONFIG_KEY);
 
             PlayerViewProvider playerViewProvider = new BasicPlayerViewProvider(MinecraftServer.getConnectionManager());
+            EventNode<Event> phantazmEventNode = EventNode.all("phantazm-node");
 
             initializeLobbies(playerViewProvider, lobbiesConfig, logger);
+            initializeChat(phantazmEventNode);
             startServer(minecraftServer, serverConfig);
         }
         catch (ConfigProcessException e) {
@@ -272,6 +285,43 @@ public class Main {
                     }
                 }
             }
+        });
+    }
+
+    private static void initializeChat(EventNode<? super ChatChannelSendEvent> eventNode) {
+        ChatChannelStore channelStore = new BasicChatChannelStore("all", (sender, message, messageType, filter) -> {
+            if (sender instanceof Entity entity && sender instanceof Identified identified) {
+                Instance instance = entity.getInstance();
+                if (instance != null) {
+                    instance.filterAudience(filter).sendMessage(identified, message, messageType);
+                }
+            }
+        });
+        channelStore.registerChannel("self", (sender, message, messageType, filter) -> {
+            if (sender != null) {
+                Identity identity = (sender instanceof Identified identified)
+                        ? identified.identity()
+                        : Identity.nil();
+                sender.filterAudience(filter).sendMessage(identity, message, messageType);
+            }
+        });
+
+        Map<UUID, ChatChannel> playerChannels = new HashMap<>();
+        MinecraftServer.getCommandManager().register(new ChatCommand(channelStore, playerChannels));
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
+            event.setCancelled(true);
+
+            ChatChannel channel = playerChannels.computeIfAbsent(event.getPlayer().getUuid(),
+                    (unused) -> channelStore.getDefaultChannel());
+            Component message = (event.getChatFormatFunction() != null)
+                    ? event.getChatFormatFunction().apply(event)
+                    : event.getDefaultChatFormat().get();
+
+            ChatChannelSendEvent channelSendEvent = new ChatChannelSendEvent(channel, event.getPlayer(),
+                    event.getMessage(), message);
+            eventNode.callCancellable(channelSendEvent,
+                    () -> channel.broadcast(event.getPlayer(), channelSendEvent.getMessage(), MessageType.CHAT,
+                            audience -> true));
         });
     }
 

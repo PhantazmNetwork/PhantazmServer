@@ -26,7 +26,7 @@ public class BasicSceneStore implements SceneStore {
         Objects.requireNonNull(scene, "scene");
 
         if (scenes.containsKey(key)) {
-            throw new IllegalStateException("scene already associated with key " + key);
+            throw new IllegalStateException("Scene already associated with key " + key);
         }
         scenes.put(key, scene);
     }
