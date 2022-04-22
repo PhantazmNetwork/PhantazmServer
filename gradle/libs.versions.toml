@@ -5,6 +5,8 @@ caffeine = "3.0.6"
 
 ethylene = "0.5.0"
 
+fastutil = "8.5.6"
+
 jetbrains-annotations = "23.0.0"
 
 junit-jupiter = "5.8.2"
@@ -15,13 +17,13 @@ miniMessage = "4.2.0-SNAPSHOT"
 
 mockito = "4.3.1"
 
-fastutil = "8.5.6"
-
 [libraries]
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
+
+fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 
@@ -33,5 +35,3 @@ minestom = { module = "com.github.PhantazmNetwork:Minestom", version.ref = "mine
 miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "miniMessage" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
-
-fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }

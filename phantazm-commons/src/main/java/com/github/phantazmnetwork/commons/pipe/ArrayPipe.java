@@ -28,7 +28,8 @@ final class ArrayPipe<TComponent> implements Pipe<TComponent> {
 
     @Override
     public TComponent next() {
-        if(index >= array.length) {
+        if(!hasNext()) {
+            array = null;
             throw new NoSuchElementException();
         }
 

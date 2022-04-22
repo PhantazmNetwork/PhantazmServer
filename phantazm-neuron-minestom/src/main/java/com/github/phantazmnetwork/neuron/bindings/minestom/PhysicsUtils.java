@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
 import net.minestom.server.collision.PhysicsResult;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class PhysicsUtils {
@@ -8,7 +9,7 @@ public final class PhysicsUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static boolean hasCollision(PhysicsResult result) {
+    public static boolean hasCollision(@NotNull PhysicsResult result) {
         return result.collisionX() || result.collisionY() || result.collisionZ();
     }
 }

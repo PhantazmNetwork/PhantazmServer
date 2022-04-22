@@ -43,27 +43,35 @@ public class NeuralChunk extends DynamicChunk {
         super.setBlock(x, y, z, block);
 
         int index = ChunkUtils.getBlockIndex(x, y, z);
-        if(block.registry().collisionShape().relativeEnd().y() > 1) {
-            tallSolids.add(index);
-        }
-        else {
-            tallSolids.remove(index);
+        synchronized (tallSolids) {
+            if(block.registry().collisionShape().relativeEnd().y() > 1) {
+                tallSolids.add(index);
+            }
+            else {
+                tallSolids.remove(index);
+            }
         }
     }
 
     public @Nullable Solid getSolid(int x, int y, int z) {
-        Block block = getBlock(x, y, z, Condition.TYPE);
+        Block block;
+        synchronized (this) {
+            block = getBlock(x, y, z, Condition.TYPE);
+        }
+
         if(block == null) {
             return null;
         }
 
         if(!block.isSolid()) {
-            if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y, z))) {
-                return getSplitFor(getBlock(x, y, z))[0];
-            }
+            synchronized (tallSolids) {
+                if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y, z))) {
+                    return getSplitFor(getBlock(x, y, z))[0];
+                }
 
-            if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y - 1, z))) {
-                return getSplitFor(getBlock(x, y - 1, z))[1];
+                if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y - 1, z))) {
+                    return getSplitFor(getBlock(x, y - 1, z))[1];
+                }
             }
         }
         else {

@@ -23,7 +23,7 @@ class ShapeSolid extends MinestomSolid {
         super(VecUtils.toFloat(shape.relativeStart()), VecUtils.toFloat(shape.relativeEnd()));
 
         List<BoundingBox> children = shape.boundingBoxes();
-        if(children.size() == 0) {
+        if(children.isEmpty()) {
             this.hasChildren = false;
             this.children = IteratorUtils::empty;
         }

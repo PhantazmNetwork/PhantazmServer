@@ -19,12 +19,13 @@ import java.util.concurrent.TimeUnit;
 public class BasicPathCache implements PathCache {
     private static final int INITIAL_HASHMAP_CAPACITY = 8;
     private static final int CACHE_EXPIRE_SECONDS = 5;
+    private static final int ITERABLE_CACHE_SIZE = 128;
 
     private final Cache<Vec3I, Map<String, Iterable<Vec3I>>> positionalCache;
 
     //global cache shared among all BasicPathContext instances. reduces duplication of cached Iterables (lists)
     private static final Cache<ArrayList<Vec3I>, Iterable<Vec3I>> ITERABLE_CACHE = Caffeine.newBuilder()
-            .maximumSize(128).build();
+            .maximumSize(ITERABLE_CACHE_SIZE).build();
 
     /**
      * Creates a new instance of this class with the specified maximum cache size. The number of cached iterables will
