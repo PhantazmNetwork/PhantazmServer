@@ -18,6 +18,8 @@ import java.util.*;
  */
 public class ChatCommand extends Command {
 
+    public static final String COMMAND_ID = "chat";
+
     /**
      * Creates a chat {@link Command}.
      *
@@ -25,7 +27,7 @@ public class ChatCommand extends Command {
      * @param playerChannels A map of player channels based on their {@link UUID}
      */
     public ChatCommand(@NotNull ChatChannelStore channelStore, @NotNull Map<UUID, ChatChannel> playerChannels) {
-        super("chat");
+        super(COMMAND_ID);
 
         Objects.requireNonNull(playerChannels, "playerChannels");
 

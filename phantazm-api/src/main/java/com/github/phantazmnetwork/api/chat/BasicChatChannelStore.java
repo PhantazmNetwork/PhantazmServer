@@ -52,10 +52,10 @@ public class BasicChatChannelStore implements ChatChannelStore {
         Objects.requireNonNull(name, "name");
 
         if (defaultChannelName.equals(name)) {
-            throw new IllegalArgumentException("cannot unregister default channel");
+            throw new IllegalArgumentException("Cannot unregister default channel");
         }
         if (channels.remove(name) == null) {
-            throw new IllegalArgumentException("cannot not registered");
+            throw new IllegalArgumentException("Cannot not registered");
         }
     }
 

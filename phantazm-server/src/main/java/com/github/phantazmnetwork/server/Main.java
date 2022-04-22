@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.BasicChatChannelStore;
+import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.api.chat.ChatChannel;
 import com.github.phantazmnetwork.api.chat.ChatChannelStore;
 import com.github.phantazmnetwork.api.chat.command.ChatCommand;
@@ -107,9 +108,10 @@ public class Main {
             LobbiesConfig lobbiesConfig = CONFIG_HANDLER.getData(LOBBIES_CONFIG_KEY);
 
             PlayerViewProvider playerViewProvider = new BasicPlayerViewProvider(MinecraftServer.getConnectionManager());
+            EventNode<Event> phantazmEventNode = EventNode.all("phantazm-node");
 
             initializeLobbies(playerViewProvider, lobbiesConfig, logger);
-            initializeChat();
+            initializeChat(phantazmEventNode);
             startServer(minecraftServer, serverConfig);
         }
         catch (ConfigProcessException e) {
@@ -197,7 +199,7 @@ public class Main {
         });
     }
 
-    private static void initializeChat() {
+    private static void initializeChat(EventNode<? super ChatChannelSendEvent> eventNode) {
         ChatChannelStore channelStore = new BasicChatChannelStore("all", (sender, message, messageType, filter) -> {
             if (sender instanceof Entity entity && sender instanceof Identified identified) {
                 Instance instance = entity.getInstance();
@@ -225,7 +227,12 @@ public class Main {
             Component message = (event.getChatFormatFunction() != null)
                     ? event.getChatFormatFunction().apply(event)
                     : event.getDefaultChatFormat().get();
-            channel.broadcast(event.getPlayer(), message, MessageType.CHAT, audience -> true);
+
+            ChatChannelSendEvent channelSendEvent = new ChatChannelSendEvent(channel, event.getPlayer(),
+                    event.getMessage(), message);
+            eventNode.callCancellable(channelSendEvent,
+                    () -> channel.broadcast(event.getPlayer(), channelSendEvent.getMessage(), MessageType.CHAT,
+                            audience -> true));
         });
     }
 
