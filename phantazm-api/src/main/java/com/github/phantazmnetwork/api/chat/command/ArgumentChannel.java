@@ -19,6 +19,9 @@ import java.util.function.Function;
  */
 public class ArgumentChannel extends Argument<Function<Player, ChatChannel>> {
 
+    /**
+     * The error code representing an unknown channel.
+     */
     public static final int UNKNOWN_CHANNEL = 1;
 
     private final Map<String, Function<Player, ChatChannel>> channelFinders;
