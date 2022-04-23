@@ -4,9 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.minestom.server.utils.mojang.MojangUtils;
-import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -20,7 +18,7 @@ import java.util.concurrent.Executor;
  * @apiNote Currently, this utilizes {@link MojangUtils} utility methods and does not perform any caching of its own,
  * aside from that utilized by MojangUtils itself.
  */
-@Blocking
+@SuppressWarnings("ClassCanBeRecord")
 class MojangIdentitySource implements IdentitySource {
     private static final String NAME_KEY = "name";
     private static final String ID_KEY = "id";
