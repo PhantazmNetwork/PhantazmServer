@@ -48,7 +48,7 @@ class BasicPlayerView implements PlayerView {
                     @NotNull UUID uuid) {
         this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
-        this.uuid = Objects.requireNonNull(uuid, "playerUUID");
+        this.uuid = Objects.requireNonNull(uuid, "player");
         this.playerReference = new WeakReference<>(null);
     }
 
@@ -73,8 +73,7 @@ class BasicPlayerView implements PlayerView {
                 return usernameRequest;
             }
 
-            return usernameRequest = CompletableFuture.supplyAsync(() -> {
-                Optional<String> nameOptional = identitySource.getName(uuid);
+            return usernameRequest = identitySource.getName(uuid).thenApply(nameOptional -> {
                 if(nameOptional.isPresent()) {
                     synchronized (usernameLock) {
                         return username = nameOptional.get();

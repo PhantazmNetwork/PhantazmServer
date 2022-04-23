@@ -64,16 +64,10 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
             return CompletableFuture.completedFuture(Optional.of(fromUUID(cachedUuid)));
         }
 
-        return CompletableFuture.supplyAsync(() -> {
-            Optional<UUID> uuidOptional = identitySource.getUUID(name);
-            if(uuidOptional.isPresent()) {
-                UUID uuid = uuidOptional.get();
-                nameToUuid.put(name, uuid);
-                return Optional.of(fromUUID(uuid));
-            }
-
-            return Optional.empty();
-        });
+        return identitySource.getUUID(name).thenApply(uuidOptional -> uuidOptional.map(uuid -> {
+            nameToUuid.put(name, uuid);
+            return fromUUID(uuid);
+        }));
     }
 
     @Override
