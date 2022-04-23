@@ -27,6 +27,12 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     private final Cache<UUID, PlayerView> uuidToView;
     private final Cache<String, UUID> nameToUuid;
 
+    /**
+     * Creates a new BasicPlayerViewProvider instance from the given parameters.
+     * @param identitySource the {@link IdentitySource} used to resolve names, if necessary
+     * @param connectionManager the {@link ConnectionManager} used by this server
+     * @param duration the duration for which name-to-UUID mappings will be cached
+     */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
                                    @NotNull Duration duration) {
         this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
@@ -36,6 +42,12 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
                 .build();
     }
 
+    /**
+     * Creates a new BasicPlayerViewProvider instance from the given parameters and the default duration of two minutes
+     * for name-to-UUID mapping invalidation.
+     * @param identitySource the {@link IdentitySource} used to resolve names, if necessary
+     * @param connectionManager the {@link ConnectionManager} used by this server
+     */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource,
                                    @NotNull ConnectionManager connectionManager) {
         this(identitySource, connectionManager, DEFAULT_TIMEOUT);
