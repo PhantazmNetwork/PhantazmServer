@@ -73,15 +73,11 @@ class BasicPlayerView implements PlayerView {
                 return usernameRequest;
             }
 
-            return usernameRequest = identitySource.getName(uuid).thenApply(nameOptional -> {
-                if(nameOptional.isPresent()) {
-                    synchronized (usernameLock) {
-                        return username = nameOptional.get();
-                    }
+            return usernameRequest = identitySource.getName(uuid).thenApply(nameOptional -> nameOptional.map(name -> {
+                synchronized (usernameLock) {
+                    return username = name;
                 }
-
-                return uuid.toString();
-            }).whenComplete((result, ex) -> {
+            }).orElse(uuid.toString())).whenComplete((result, ex) -> {
                 synchronized (usernameRequestLock) {
                     usernameRequest = null;
                 }
