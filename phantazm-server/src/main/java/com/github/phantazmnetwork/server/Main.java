@@ -13,6 +13,7 @@ import com.github.phantazmnetwork.api.game.scene.lobby.*;
 import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
 import com.github.phantazmnetwork.api.player.BasicPlayerViewProvider;
+import com.github.phantazmnetwork.api.player.IdentitySource;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import com.github.phantazmnetwork.server.config.loader.LobbiesConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
@@ -107,7 +108,8 @@ public class Main {
             ServerConfig serverConfig = CONFIG_HANDLER.getData(SERVER_CONFIG_KEY);
             LobbiesConfig lobbiesConfig = CONFIG_HANDLER.getData(LOBBIES_CONFIG_KEY);
 
-            PlayerViewProvider playerViewProvider = new BasicPlayerViewProvider(MinecraftServer.getConnectionManager());
+            PlayerViewProvider playerViewProvider = new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer
+                    .getConnectionManager());
             EventNode<Event> phantazmEventNode = EventNode.all("phantazm-node");
 
             initializeLobbies(playerViewProvider, lobbiesConfig, logger);

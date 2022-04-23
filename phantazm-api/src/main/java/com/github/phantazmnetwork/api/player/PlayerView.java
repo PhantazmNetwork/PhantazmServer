@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.api.player;
 
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -27,8 +28,8 @@ public interface PlayerView {
     @NotNull UUID getUUID();
 
     /**
-     * Attempts to resolve the username of this player. May perform a request to Mojang to determine the name from the
-     * UUID, if necessary, and should cache the results of these requests.
+     * Attempts to resolve the username of this player. May perform an IO operation to determine the name from the UUID,
+     * if necessary, and should cache the results of this operation.
      * @return a {@link CompletableFuture} representing an attempt at retrieving the username of this player. If the
      * username cannot be found due to network conditions or an invalid UUID, the returned String will be the result of
      * calling {@link UUID#toString()} on the stored UUID
@@ -36,7 +37,8 @@ public interface PlayerView {
     @NotNull CompletableFuture<String> getUsername();
 
     /**
-     * Gets an {@link Optional} which may contain the player, only if they are online.
+     * Gets an {@link Optional} which may contain the player, only if they are online. Maintaining strong references to
+     * {@link Player} objects should be avoided.
      * @return An {@link Optional} of the player which is empty when the player is offline
      */
     @NotNull Optional<Player> getPlayer();
