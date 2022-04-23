@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.api.chat.command;
 
 import com.github.phantazmnetwork.api.chat.ChatChannel;
-import com.github.phantazmnetwork.api.chat.ChatChannelStore;
-import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.command.builder.NodeMaker;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
+import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
 import net.minestom.server.utils.binary.BinaryWriter;
 import org.jetbrains.annotations.NotNull;
@@ -13,43 +12,43 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
- * Argument class for a {@link ChatChannel}.
+ * Argument class for a {@link Function} that provides {@link ChatChannel}s based on a {@link Player}.
  */
-public class ArgumentChannel extends Argument<Pair<String, ChatChannel>> {
+public class ArgumentChannel extends Argument<Function<Player, ChatChannel>> {
 
     public static final int UNKNOWN_CHANNEL = 1;
 
-    private final ChatChannelStore channelStore;
+    private final Map<String, Function<Player, ChatChannel>> channelFinders;
 
     /**
      * Argument for a {@link ChatChannel} based on its name.
      *
      * @param id The id of the argument, used to retrieve the parsed value
-     * @param channelStore A {@link ChatChannelStore} used to find currently registered {@link ChatChannel}s
+     * @param channelFinders A map of channel names to a {@link Function}
+     *                       that will get a {@link ChatChannel} for a specific {@link Player}
      */
-    public ArgumentChannel(@NotNull String id, @NotNull ChatChannelStore channelStore) {
+    public ArgumentChannel(@NotNull String id, @NotNull Map<String, Function<Player, ChatChannel>> channelFinders) {
         super(id);
-        this.channelStore = Objects.requireNonNull(channelStore, "channelStore");
+        this.channelFinders = Objects.requireNonNull(channelFinders, "channelFinders");
     }
 
     @Override
-    public @NotNull Pair<String, ChatChannel> parse(@NotNull String input) throws ArgumentSyntaxException {
-        ChatChannel channel = channelStore.getChannels().get(input);
+    public @NotNull Function<Player, ChatChannel> parse(@NotNull String input) throws ArgumentSyntaxException {
+        Function<Player, ChatChannel> channelFinder = channelFinders.get(input);
 
-        if (channel == null) {
-            throw new ArgumentSyntaxException("No channel is associated", input, UNKNOWN_CHANNEL);
+        if (channelFinder == null) {
+            throw new ArgumentSyntaxException("No channel finder is associated", input, UNKNOWN_CHANNEL);
         }
 
-        return Pair.of(input, channel);
+        return channelFinder;
     }
 
     @Override
     public void processNodes(@NotNull NodeMaker nodeMaker, boolean executable) {
-        Map<String, ChatChannel> channels = channelStore.getChannels();
-
-        if (channels.isEmpty()) {
+        if (channelFinders.isEmpty()) {
             DeclareCommandsPacket.Node argumentNode = simpleArgumentNode(this, executable, false,
                     false);
             argumentNode.parser = "brigadier:string";
@@ -57,10 +56,10 @@ public class ArgumentChannel extends Argument<Pair<String, ChatChannel>> {
             nodeMaker.addNodes(new DeclareCommandsPacket.Node[]{ argumentNode });
         }
         else {
-            DeclareCommandsPacket.Node[] nodes = new DeclareCommandsPacket.Node[channels.size()];
+            DeclareCommandsPacket.Node[] nodes = new DeclareCommandsPacket.Node[channelFinders.size()];
 
             int i = 0;
-            for (Iterator<String> iterator = channels.keySet().iterator(); iterator.hasNext(); i++) {
+            for (Iterator<String> iterator = channelFinders.keySet().iterator(); iterator.hasNext(); i++) {
                 String name = iterator.next();
 
                 DeclareCommandsPacket.Node argumentNode = new DeclareCommandsPacket.Node();

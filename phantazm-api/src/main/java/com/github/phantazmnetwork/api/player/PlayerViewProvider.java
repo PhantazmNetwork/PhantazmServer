@@ -24,20 +24,22 @@ public interface PlayerViewProvider {
 
     /**
      * <p>Resolves the given name and attempts to create a corresponding {@link PlayerView} instance. Since this
-     * requires determining the UUID of the player, it may be necessary to make a request through Mojang's API, which
-     * will be performed asynchronously. Implementations should perform caching as-necessary to avoid making too many
-     * of these requests.</p>
+     * requires determining the UUID of the player, it may be necessary to perform an IO operation, which will be done
+     * asynchronously. Implementations should perform caching of results as-necessary.</p>
      *
      * <p>The returned {@link CompletableFuture} will provide a PlayerView instance upon completion. This may be null
-     * if a request was performed and failed due to network conditions or an invalid argument (like a nonexistent name).
-     * The Player represented by the PlayerView need not be online.</p>
+     * if a request was performed and failed due to IO error or an invalid argument (like a nonexistent name). The
+     * Player represented by the PlayerView need not be online.</p>
+     *
+     * <p>In general, if an online player exists with the provided name, no IO will be performed.</p>
      *
      * @param name the name of the player to resolve
-     * @return a CompletableFuture instance containing the view, or null if the name is invalid or a network problem
-     * occurred
+     * @return a CompletableFuture instance of an Optional containing the PlayerView, which will be empty if the player
+     * is offline, does not exist, or is offline but there was an IO error when attempting to retrieve a UUID from an
+     * {@link IdentitySource}
      * @see PlayerViewProvider#fromNameIfOnline(String)
      */
-    @NotNull CompletableFuture<PlayerView> fromName(@NotNull String name);
+    @NotNull CompletableFuture<Optional<PlayerView>> fromName(@NotNull String name);
 
     /**
      * Optionally returns a {@link PlayerView} instance with the given name, if they exist and are online. However, note

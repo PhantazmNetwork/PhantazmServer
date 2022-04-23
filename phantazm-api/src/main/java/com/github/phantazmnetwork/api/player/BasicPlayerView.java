@@ -1,11 +1,7 @@
 package com.github.phantazmnetwork.api.player;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
-import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.Reference;
@@ -30,37 +26,43 @@ import java.util.concurrent.CompletableFuture;
  * @see BasicPlayerViewProvider
  */
 class BasicPlayerView implements PlayerView {
+    private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
-
-    private final UUID playerUUID;
-
-    private Reference<Player> playerReference;
+    private final UUID uuid;
 
     private final Object usernameLock = new Object();
     private final Object usernameRequestLock = new Object();
+
+    private Reference<Player> playerReference;
 
     private volatile CompletableFuture<String> usernameRequest;
     private volatile String username;
 
     /**
      * Creates a basic {@link PlayerView}.
+     * @param identitySource The {@link IdentitySource} instance used to resolve usernames when necessary
      * @param connectionManager The {@link ConnectionManager} used to find {@link Player}s based on their {@link UUID}
-     * @param playerUUID The {@link UUID} of the {@link Player} to store
+     * @param uuid The {@link UUID} of the {@link Player} to store
      */
-    BasicPlayerView(@NotNull ConnectionManager connectionManager, @NotNull UUID playerUUID) {
+    BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
+                    @NotNull UUID uuid) {
+        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
-        this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
+        this.uuid = Objects.requireNonNull(uuid, "player");
         this.playerReference = new WeakReference<>(null);
     }
 
     /**
      * Creates a basic {@link PlayerView} given a {@link ConnectionManager} and an already-existing {@link Player}.
+     * @param identitySource The {@link IdentitySource} instance used to resolve usernames when necessary
      * @param connectionManager the ConnectionManager used to find {@link Player}s based on their {@link UUID}
      * @param player the player, whose UUID and username will be cached immediately
      */
-    BasicPlayerView(@NotNull ConnectionManager connectionManager, @NotNull Player player) {
+    BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
+                    @NotNull Player player) {
+        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
-        this.playerUUID = player.getUuid();
+        this.uuid = player.getUuid();
         this.playerReference = new WeakReference<>(player);
         this.username = player.getUsername();
     }
@@ -71,21 +73,14 @@ class BasicPlayerView implements PlayerView {
                 return usernameRequest;
             }
 
-            return usernameRequest = CompletableFuture.supplyAsync(() -> {
-                JsonObject response = MojangUtils.fromUuid(playerUUID.toString());
-                if(response != null) {
-                    JsonElement nameElement = response.get(MojangJSONKeys.PLAYER_NAME);
-                    if(nameElement != null && nameElement.isJsonPrimitive()) {
-                        JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
-                        if(primitive.isString()) {
-                            synchronized (usernameLock) {
-                                return username = primitive.getAsString();
-                            }
-                        }
+            return usernameRequest = identitySource.getName(uuid).thenApply(nameOptional -> {
+                if(nameOptional.isPresent()) {
+                    synchronized (usernameLock) {
+                        return username = nameOptional.get();
                     }
                 }
 
-                return playerUUID.toString();
+                return uuid.toString();
             }).whenComplete((result, ex) -> {
                 synchronized (usernameRequestLock) {
                     usernameRequest = null;
@@ -96,7 +91,7 @@ class BasicPlayerView implements PlayerView {
 
     @Override
     public @NotNull UUID getUUID() {
-        return playerUUID;
+        return uuid;
     }
 
     @Override
@@ -124,7 +119,7 @@ class BasicPlayerView implements PlayerView {
         }
 
         //if null or offline, update the reference (may still be null)
-        player = connectionManager.getPlayer(playerUUID);
+        player = connectionManager.getPlayer(uuid);
         playerReference = new WeakReference<>(player);
         return Optional.ofNullable(player);
     }

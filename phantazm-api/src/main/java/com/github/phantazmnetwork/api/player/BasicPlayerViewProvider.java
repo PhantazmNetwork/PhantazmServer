@@ -2,12 +2,8 @@ package com.github.phantazmnetwork.api.player;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
-import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -26,20 +22,20 @@ import java.util.concurrent.CompletableFuture;
 public class BasicPlayerViewProvider implements PlayerViewProvider {
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(2);
 
+    private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
     private final Cache<UUID, PlayerView> uuidToView;
     private final Cache<String, UUID> nameToUuid;
 
     /**
-     * Creates a new BasicPlayerViewProvider from the specified {@link ConnectionManager} and timeout duration, which is
-     * used to determine when to invalidate any given name-to-UUID mapping maintained by this class. These mappings are
-     * used by {@link BasicPlayerViewProvider#fromName(String)} to avoid making unnecessary requests to the Mojang API.
-     * They are not used by {@link BasicPlayerViewProvider#fromNameIfOnline(String)}.
-     *
-     * @param connectionManager the ConnectionManager instance to use for retrieving players
-     * @param duration the duration after writing the cache will consider entries to have expired
+     * Creates a new BasicPlayerViewProvider instance from the given parameters.
+     * @param identitySource the {@link IdentitySource} used to resolve names, if necessary
+     * @param connectionManager the {@link ConnectionManager} used by this server
+     * @param duration the duration for which name-to-UUID mappings will be cached
      */
-    public BasicPlayerViewProvider(@NotNull ConnectionManager connectionManager, @NotNull Duration duration) {
+    public BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
+                                   @NotNull Duration duration) {
+        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.uuidToView = Caffeine.newBuilder().weakValues().build();
         this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration, "duration"))
@@ -47,54 +43,43 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     }
 
     /**
-     * Creates a new BasicPlayerViewProvider using the default timeout duration — name to UUID mappings will be
-     * invalidated 2 minutes from creation.
-     * @param connectionManager the ConnectionManager instance to use for retrieving players
+     * Creates a new BasicPlayerViewProvider instance from the given parameters and the default duration of two minutes
+     * for name-to-UUID mapping invalidation.
+     * @param identitySource the {@link IdentitySource} used to resolve names, if necessary
+     * @param connectionManager the {@link ConnectionManager} used by this server
      */
-    public BasicPlayerViewProvider(@NotNull ConnectionManager connectionManager) {
-        this(connectionManager, DEFAULT_TIMEOUT);
+    public BasicPlayerViewProvider(@NotNull IdentitySource identitySource,
+                                   @NotNull ConnectionManager connectionManager) {
+        this(identitySource, connectionManager, DEFAULT_TIMEOUT);
     }
 
     @Override
     public @NotNull PlayerView fromUUID(@NotNull UUID uuid) {
         Objects.requireNonNull(uuid, "uuid");
-        return uuidToView.get(uuid, key -> new BasicPlayerView(connectionManager, key));
+        return uuidToView.get(uuid, key -> new BasicPlayerView(identitySource, connectionManager, key));
     }
 
     @Override
-    public @NotNull CompletableFuture<PlayerView> fromName(@NotNull String name) {
+    public @NotNull CompletableFuture<Optional<PlayerView>> fromName(@NotNull String name) {
         Objects.requireNonNull(name, "name");
         Player player = connectionManager.getPlayer(name);
         if(player != null) {
             //if player is online, use the player object
             nameToUuid.put(name, player.getUuid());
-            return CompletableFuture.completedFuture(fromPlayer(player));
+            return CompletableFuture.completedFuture(Optional.of(fromPlayer(player)));
         }
 
         //if the player is offline, check the nameToUuid cache
-        UUID uuid = nameToUuid.getIfPresent(name);
-        if(uuid != null) {
+        UUID cachedUuid = nameToUuid.getIfPresent(name);
+        if(cachedUuid != null) {
             //we were able to resolve the name, so return a corresponding PlayerView
-            return CompletableFuture.completedFuture(fromUUID(uuid));
+            return CompletableFuture.completedFuture(Optional.of(fromUUID(cachedUuid)));
         }
 
-        return CompletableFuture.supplyAsync(() -> {
-            //make a request to mojang for the UUID, returns null if no such name exists
-            JsonObject object = MojangUtils.fromUsername(name);
-            if(object != null) {
-                JsonElement id = object.get(MojangJSONKeys.PLAYER_ID);
-                if(id != null && id.isJsonPrimitive()) {
-                    JsonPrimitive idPrimitive = id.getAsJsonPrimitive();
-                    if(idPrimitive.isString()) {
-                        UUID requestUuid = UUID.fromString(idPrimitive.getAsString());
-                        nameToUuid.put(name, requestUuid);
-                        return fromUUID(requestUuid);
-                    }
-                }
-            }
-
-            return null;
-        });
+        return identitySource.getUUID(name).thenApply(uuidOptional -> uuidOptional.map(uuid -> {
+            nameToUuid.put(name, uuid);
+            return fromUUID(uuid);
+        }));
     }
 
     @Override
@@ -110,6 +95,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     @Override
     public @NotNull PlayerView fromPlayer(@NotNull Player player) {
-        return uuidToView.get(player.getUuid(), key -> new BasicPlayerView(connectionManager, player));
+        Objects.requireNonNull(player, "player");
+        return uuidToView.get(player.getUuid(), key -> new BasicPlayerView(identitySource, connectionManager, player));
     }
 }
