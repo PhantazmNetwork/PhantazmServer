@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.chat.BasicChatChannelStore;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.api.chat.ChatChannel;
-import com.github.phantazmnetwork.api.chat.ChatChannelStore;
 import com.github.phantazmnetwork.api.chat.command.ChatCommand;
 import com.github.phantazmnetwork.api.game.scene.*;
 import com.github.phantazmnetwork.api.game.scene.fallback.CompositeFallback;
@@ -36,6 +36,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
@@ -53,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Launches the server.
@@ -84,6 +86,11 @@ public class Main {
      */
     public static final ConfigHandler.ConfigKey<LobbiesConfig> LOBBIES_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
             LobbiesConfig.class, "lobbies_config");
+
+    /**
+     * The default {@link ChatChannel} name for players.
+     */
+    public static final String DEFAULT_CHAT_CHANNEL_NAME = "all";
 
     /**
      * Starting point for the server.
@@ -202,30 +209,41 @@ public class Main {
     }
 
     private static void initializeChat(EventNode<? super ChatChannelSendEvent> eventNode) {
-        ChatChannelStore channelStore = new BasicChatChannelStore("all", (sender, message, messageType, filter) -> {
+        ChatChannel defaultChannel = (sender, message, messageType, filter) -> {
             if (sender instanceof Entity entity && sender instanceof Identified identified) {
                 Instance instance = entity.getInstance();
                 if (instance != null) {
-                    instance.filterAudience(filter).sendMessage(identified, message, messageType);
+                    instance.filterAudience(filter).sendMessage(identified, Component.text().append(Component.text("all")).append(message), messageType);
                 }
             }
-        });
-        channelStore.registerChannel("self", (sender, message, messageType, filter) -> {
+        };
+        ChatChannel selfChannel = (sender, message, messageType, filter) -> {
             if (sender != null) {
                 Identity identity = (sender instanceof Identified identified)
                         ? identified.identity()
                         : Identity.nil();
-                sender.filterAudience(filter).sendMessage(identity, message, messageType);
+                sender.filterAudience(filter).sendMessage(identity, Component.text().append(Component.text("self")).append(message), messageType);
             }
-        });
+        };
+        Map<String, Function<Player, ChatChannel>> channels = new HashMap<>() {
+            @Override
+            public boolean remove(Object key, Object value) {
+                if (key.equals(DEFAULT_CHAT_CHANNEL_NAME)) {
+                    throw new IllegalArgumentException("Cannot remove default channel");
+                }
 
-        Map<UUID, ChatChannel> playerChannels = new HashMap<>();
-        MinecraftServer.getCommandManager().register(new ChatCommand(channelStore, playerChannels));
+                return super.remove(key, value);
+            }
+        };
+        channels.put(DEFAULT_CHAT_CHANNEL_NAME, (unused) -> defaultChannel);
+        channels.put("self", (unused) -> selfChannel);
+
+        Cache<UUID, ChatChannel> playerChannels = Caffeine.newBuilder().weakValues().build();
+        MinecraftServer.getCommandManager().register(new ChatCommand(channels, playerChannels, defaultChannel));
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
             event.setCancelled(true);
 
-            ChatChannel channel = playerChannels.computeIfAbsent(event.getPlayer().getUuid(),
-                    (unused) -> channelStore.getDefaultChannel());
+            ChatChannel channel = playerChannels.get(event.getPlayer().getUuid(), (unused) -> defaultChannel);
             Component message = (event.getChatFormatFunction() != null)
                     ? event.getChatFormatFunction().apply(event)
                     : event.getDefaultChatFormat().get();
