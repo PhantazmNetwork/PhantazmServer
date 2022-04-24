@@ -76,6 +76,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
             return CompletableFuture.completedFuture(Optional.of(fromUUID(cachedUuid)));
         }
 
+        //if we have no UUID cached for this player, try to resolve a UUID using the IdentitySource
         return identitySource.getUUID(name).thenApply(uuidOptional -> uuidOptional.map(uuid -> {
             nameToUuid.put(name, uuid);
             return fromUUID(uuid);

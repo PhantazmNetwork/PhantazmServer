@@ -9,7 +9,6 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-
 import java.util.*;
 import java.util.function.Function;
 
@@ -91,11 +90,12 @@ public class ChatCommand extends Command {
             }
 
             playerChannels.put(player.getUuid(), channel);
-            player.sendMessage(Component.text()
-                    .append(Component.text("Set chat channel to "),
+            player.sendMessage(Component
+                    .textOfChildren(
+                            Component.text("Set chat channel to "),
                             Component.text(channelName, NamedTextColor.GOLD),
-                            Component.text("."))
-                    .color(NamedTextColor.GREEN));
+                            Component.text(".")
+                    ).color(NamedTextColor.GREEN));
         }, channelArgument);
     }
 
