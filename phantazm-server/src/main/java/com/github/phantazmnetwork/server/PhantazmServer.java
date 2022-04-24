@@ -130,8 +130,6 @@ public class PhantazmServer {
             return;
         }
 
-
-
         try {
             LOGGER.info("Initializing features.");
             initializeFeatures(lobbiesConfig);
