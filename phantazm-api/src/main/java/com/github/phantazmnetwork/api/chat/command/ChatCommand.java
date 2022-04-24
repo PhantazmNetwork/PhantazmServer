@@ -18,6 +18,9 @@ import java.util.function.Function;
  */
 public class ChatCommand extends Command {
 
+    /**
+     * The ID for this command.
+     */
     public static final String COMMAND_ID = "chat";
 
     /**
@@ -26,6 +29,7 @@ public class ChatCommand extends Command {
      * @param channelFinders A map of channel names to a {@link Function}
      *                       that will get a {@link ChatChannel} for a specific {@link Player}
      * @param playerChannels A cache of player channels based on their {@link UUID}
+     * @param defaultChannel The default channel to be used
      */
     public ChatCommand(@NotNull Map<String, Function<Player, ChatChannel>> channelFinders,
                        @NotNull Cache<UUID, ChatChannel> playerChannels, @NotNull ChatChannel defaultChannel) {
