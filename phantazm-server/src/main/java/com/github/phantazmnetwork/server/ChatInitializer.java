@@ -24,6 +24,11 @@ import java.util.UUID;
 import java.util.function.Function;
 
 final class ChatInitializer {
+    /**
+     * The default {@link ChatChannel} name for players.
+     */
+    public static final String DEFAULT_CHAT_CHANNEL_NAME = "all";
+
     private ChatInitializer() {
         throw new UnsupportedOperationException();
     }
@@ -52,7 +57,7 @@ final class ChatInitializer {
         Map<String, Function<Player, ChatChannel>> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
-                if (key.equals(PhantazmServer.DEFAULT_CHAT_CHANNEL_NAME)) {
+                if (key.equals(DEFAULT_CHAT_CHANNEL_NAME)) {
                     throw new IllegalArgumentException("Cannot remove default channel");
                 }
 
@@ -60,7 +65,7 @@ final class ChatInitializer {
             }
         };
 
-        channels.put(PhantazmServer.DEFAULT_CHAT_CHANNEL_NAME, (unused) -> defaultChannel);
+        channels.put(DEFAULT_CHAT_CHANNEL_NAME, (unused) -> defaultChannel);
         channels.put("self", (unused) -> selfChannel);
 
         Cache<UUID, ChatChannel> playerChannels = Caffeine.newBuilder().weakValues().build();
