@@ -40,7 +40,6 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
     public @NotNull LobbiesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         try {
             Path instancesPath = Path.of(element.getStringOrThrow("instancesPath"));
-
             Component kickMessage = miniMessage.deserialize(element.getStringOrThrow("kickMessage"));
             String mainLobbyName = element.getStringOrThrow("mainLobbyName");
 

@@ -15,20 +15,20 @@ import java.util.concurrent.ForkJoinPool;
  */
 public interface IdentitySource {
     /**
-     * <p>Optionally resolves the given UUID to a name. If the UUID is invalid, or there is an IO related error, the
-     * returned Optional will be empty.</p>
-     * @param uuid the UUID of the player to resolve
-     * @return an Optional instance containing the name of the player associated with the given UUID, which will be
-     * empty if there is an IO problem or if the UUID is invalid
+     * Optionally resolves the given UUID to a username, typically asynchronously. If the UUID is invalid or does not
+     * exist, or there is an IO related error, the result of the returned {@link CompletableFuture} will be empty.
+     * @param uuid the UUID to determine a username from
+     * @return a CompletableFuture whose result is an Optional instance containing the username of the player associated
+     * with the given UUID, which will be empty if there is an IO problem or if the UUID is invalid
      */
     @NotNull CompletableFuture<Optional<String>> getName(@NotNull UUID uuid);
 
     /**
-     * Optionally resolves the given name to a UUID. If the name is invalid or does not exist, or there is an IO related
-     * error, the returned Optional will be empty.
-     * @param name the name of the player to resolve
-     * @return an Optional instance containing the UUID of the player associated with the given name, which will be
-     * empty if there is an IO problem or if the name is invalid
+     * Optionally resolves the given name to a UUID, typically asynchronously. If the name is invalid or does not exist,
+     * or there is an IO related error, the result of the returned {@link CompletableFuture} will be empty.
+     * @param name the username to determine a UUID from
+     * @return a CompletableFuture whose result is an Optional instance containing the UUID of the player associated
+     * with the given name, which will be empty if there is an IO problem or if the name is invalid
      */
     @NotNull CompletableFuture<Optional<UUID>> getUUID(@NotNull String name);
 
