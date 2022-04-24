@@ -4,6 +4,8 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.node.Node;
+import com.google.gson.internal.reflect.ReflectionHelper;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
@@ -15,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class GroundController implements Controller {
+    private static final double STEP_EPSILON = 1E-5;
+
     private final Entity entity;
     private final double speed;
     private final double step;
@@ -62,23 +66,33 @@ public class GroundController implements Controller {
 
         double radians = Math.atan2(dZ, dX);
         double speedX = Math.cos(radians) * speed;
-        double speedY = dY * speed;
         double speedZ = Math.sin(radians) * speed;
 
-        PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, speedY, speedZ));
+        PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
         Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
-        entity.refreshPosition(pos);
+        Pos dPos = pos.sub(entityPos);
+        System.out.println("Pos before stepPos: " + entityPos);
+        System.out.println("stepPos: " + dPos);
 
-        if(PhysicsUtils.hasCollision(physicsResult) && entity.getGravityTickCount() == 0 && pos.y() < targetExact) {
+        if(PhysicsUtils.hasCollision(physicsResult) && entity.isOnGround() && entityPos.y() < targetExact) {
             Vec3I currentPos = current.getPosition();
             double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
 
             if(nodeDiff > step) {
-                entity.setVelocity(new Vec(speedX, nodeDiff * 9, speedZ));
+                entity.setVelocity(new Vec(speedX, nodeDiff, speedZ));
             }
-            else {
-                entity.teleport(new Pos(pos.x() + speedX, pos.y() + nodeDiff, pos.z() + speedZ));
+            else if(nodeDiff > STEP_EPSILON && nodeDiff < step + STEP_EPSILON) {
+                System.out.println("Pos before step: " + entityPos);
+                entity.teleport(entityPos.add(speedX * 1.1, nodeDiff, speedZ * 1.1));
+                System.out.println("Pos after step: " + entity.getPosition());
+                System.out.println();
             }
+        }
+        else {
+            System.out.println("Pos before refresh: " + entityPos);
+            entity.refreshPosition(pos);
+            System.out.println("Pos after refresh: " + entity.getPosition());
+            System.out.println();
         }
     }
 }
