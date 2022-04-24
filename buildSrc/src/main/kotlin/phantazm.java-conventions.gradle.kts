@@ -33,5 +33,13 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
+tasks.getByName<Javadoc>("javadoc") {
+    (options as StandardJavadocDocletOptions).tags(
+        "apiNote:a:API Note:",
+        "implSpec:a:Implementation Requirements:",
+        "implNote:a:Implementation Note:"
+    )
+}
+
 tasks.register<CopyLibs>("copyLibs")
 tasks.register<SetupServer>("setupServer")
