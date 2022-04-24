@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.server;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.phantazmnetwork.api.game.scene.*;
-import com.github.phantazmnetwork.api.chat.BasicChatChannelStore;
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.api.chat.ChatChannel;
 import com.github.phantazmnetwork.api.chat.command.ChatCommand;
