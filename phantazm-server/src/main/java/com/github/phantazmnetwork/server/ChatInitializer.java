@@ -9,6 +9,8 @@ import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -38,8 +40,11 @@ final class ChatInitializer {
             if (sender instanceof Entity entity && sender instanceof Identified identified) {
                 Instance instance = entity.getInstance();
                 if (instance != null) {
-                    instance.filterAudience(filter).sendMessage(identified, Component.text().append(Component
-                            .text("all")).append(message), messageType);
+                    Component formatted = Component.join(JoinConfiguration.separator(Component.space()),
+                            Component.text("all"),
+                            Component.text(">", NamedTextColor.GRAY),
+                            message);
+                    instance.filterAudience(filter).sendMessage(identified, formatted, messageType);
                 }
             }
         };
@@ -49,8 +54,11 @@ final class ChatInitializer {
                 Identity identity = (sender instanceof Identified identified)
                         ? identified.identity()
                         : Identity.nil();
-                sender.filterAudience(filter).sendMessage(identity, Component.text().append(Component
-                        .text("self")).append(message), messageType);
+                Component formatted = Component.join(JoinConfiguration.separator(Component.space()),
+                        Component.text("self"),
+                        Component.text(">", NamedTextColor.GRAY),
+                        message);
+                sender.filterAudience(filter).sendMessage(identity, formatted, messageType);
             }
         };
 
