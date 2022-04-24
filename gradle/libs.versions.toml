@@ -11,7 +11,7 @@ junit-jupiter = "5.8.2"
 
 minestom = "6b26929f6b"
 
-miniMessage = "4.2.0-SNAPSHOT"
+miniMessage = "4.10.1"
 
 mockito = "4.3.1"
 

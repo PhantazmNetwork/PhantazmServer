@@ -58,7 +58,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                 velocitySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
-        Component description = miniMessage.parse(pingList.getStringOrThrow("description"));
+        Component description = miniMessage.deserialize(pingList.getStringOrThrow("description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
         return new ServerConfig(serverInfoConfig, pingListConfig);
