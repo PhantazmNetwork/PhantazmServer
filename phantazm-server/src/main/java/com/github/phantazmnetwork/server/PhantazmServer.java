@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Launches the server, and provides some useful static constants.
  */
-public class PhantazmServer {
+public final class PhantazmServer {
     /**
      * The default, global {@link Logger} for PhantazmServer.
      */
@@ -43,6 +43,7 @@ public class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         try {
             LOGGER.info("Loading configuration data.");
+            ConfigInitializer.initialize();
             ConfigInitializer.CONFIG_HANDLER.writeDefaultsAndGet();
 
             serverConfig = ConfigInitializer.CONFIG_HANDLER.getData(ConfigInitializer.SERVER_CONFIG_KEY);
@@ -76,7 +77,8 @@ public class PhantazmServer {
                 .getConnectionManager());
 
         LobbyInitializer.initialize(viewProvider, lobbiesConfig);
-        ChatInitializer.initialize(PHANTAZM_EVENT);
+        ChatInitializer.initialize();
+        NeuronTest.initialize();
     }
 
     private static void startServer(MinecraftServer server, ServerConfig serverConfig) {

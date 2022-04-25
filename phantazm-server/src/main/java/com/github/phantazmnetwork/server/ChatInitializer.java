@@ -14,11 +14,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.instance.Instance;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +32,7 @@ final class ChatInitializer {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> eventNode) {
+    static void initialize() {
         ChatChannel defaultChannel = (sender, message, messageType, filter) -> {
             if (sender instanceof Entity entity && sender instanceof Identified identified) {
                 Instance instance = entity.getInstance();
@@ -88,7 +85,7 @@ final class ChatInitializer {
 
             ChatChannelSendEvent channelSendEvent = new ChatChannelSendEvent(channel, event.getPlayer(),
                     event.getMessage(), message);
-            eventNode.callCancellable(channelSendEvent,
+            PhantazmServer.PHANTAZM_EVENT.callCancellable(channelSendEvent,
                     () -> channel.broadcast(event.getPlayer(), channelSendEvent.getMessage(), MessageType.CHAT,
                             audience -> true));
         });

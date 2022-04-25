@@ -4,8 +4,6 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.node.Node;
-import com.google.gson.internal.reflect.ReflectionHelper;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
@@ -17,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class GroundController implements Controller {
-    private static final double STEP_EPSILON = 1E-5;
+    private static final double EPSILON = 1E-5;
 
     private final Entity entity;
     private final double speed;
@@ -70,29 +68,19 @@ public class GroundController implements Controller {
 
         PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
         Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
-        Pos dPos = pos.sub(entityPos);
-        System.out.println("Pos before stepPos: " + entityPos);
-        System.out.println("stepPos: " + dPos);
-
         if(PhysicsUtils.hasCollision(physicsResult) && entity.isOnGround() && entityPos.y() < targetExact) {
             Vec3I currentPos = current.getPosition();
             double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
 
             if(nodeDiff > step) {
-                entity.setVelocity(new Vec(speedX, nodeDiff, speedZ));
+                entity.setVelocity(new Vec(speedX, nodeDiff * 2.5, speedZ));
             }
-            else if(nodeDiff > STEP_EPSILON && nodeDiff < step + STEP_EPSILON) {
-                System.out.println("Pos before step: " + entityPos);
-                entity.teleport(entityPos.add(speedX * 1.1, nodeDiff, speedZ * 1.1));
-                System.out.println("Pos after step: " + entity.getPosition());
-                System.out.println();
+            else if(nodeDiff > -EPSILON && nodeDiff < step + EPSILON) {
+                entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
             }
         }
         else {
-            System.out.println("Pos before refresh: " + entityPos);
             entity.refreshPosition(pos);
-            System.out.println("Pos after refresh: " + entity.getPosition());
-            System.out.println();
         }
     }
 }

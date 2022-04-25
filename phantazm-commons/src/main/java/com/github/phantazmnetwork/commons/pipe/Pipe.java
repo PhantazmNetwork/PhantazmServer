@@ -121,8 +121,8 @@ public interface Pipe<TValue> extends Iterator<TValue> {
 
         /**
          * <p>Attempts to compute the next value. If this computation is successful, the result must be assigned to the
-         * field {@link Advancing#value}, and this method must return {@link true}. If this method returns
-         * {@link false}, the Pipe is considered to have been emptied, which will cause iteration to terminate.</p>
+         * field {@link Advancing#value}, and this method must return {@code true}. If this method returns
+         * {@code false}, the Pipe is considered to have been emptied, which will cause iteration to terminate.</p>
          *
          * <p>This method should never throw a runtime exception. If this Pipe is being used as an iterator, doing so
          * may violate the expectation that {@link Iterator#hasNext()} will not throw an exception.</p>

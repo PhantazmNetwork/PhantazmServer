@@ -34,7 +34,7 @@ public interface Vec3D extends Comparable<Vec3D> {
     }
 
     /**
-     * Determines if two points are equal. Equivalent to <code>x1 == x2 && y1 == y2 && z1 == z2</code>.
+     * Determines if two points are equal.
      * @param x1 first x-component
      * @param y1 first y-component
      * @param z1 first z-component
