@@ -17,14 +17,11 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 final class NeuronTest {
     private NeuronTest() {
@@ -69,9 +66,8 @@ final class NeuronTest {
             if(instance != null) {
                 switch (msg) {
                     case "T" -> spawner.spawnEntity(instance, player.getPosition().add(5, 0, 0), testDescriptor,
-                            GroundNeuralEntity::new, neuralEntity -> {
-                        neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
-                            }).setTarget(player);
+                            GroundNeuralEntity::new, neuralEntity -> neuralEntity
+                                    .getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.3F)).setTarget(player);
                     case "Z" -> {
                         Pos playerPos = player.getPosition();
                         instance.setBlock(playerPos.blockX(), playerPos.blockY(), playerPos.blockZ(), Block.GOLD_BLOCK);

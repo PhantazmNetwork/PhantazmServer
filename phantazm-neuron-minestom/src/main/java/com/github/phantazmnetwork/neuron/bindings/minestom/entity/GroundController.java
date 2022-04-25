@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.node.Node;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
@@ -21,10 +22,16 @@ public class GroundController implements Controller {
     private final double speed;
     private final double step;
 
-    public GroundController(@NotNull Entity entity, float step, double speed) {
+    private boolean jumping;
+
+    public GroundController(@NotNull Entity entity, float step, double walkSpeed) {
         this.entity = Objects.requireNonNull(entity, "entity");
-        this.speed = speed;
+        this.speed = walkSpeed;
         this.step = step;
+    }
+
+    private double computeJumpVelocity(double gravitationalConstant, double requiredHeight) {
+        return Math.sqrt(-2 * -gravitationalConstant * (requiredHeight + entity.getGravityAcceleration() * 4));
     }
 
     @Override
@@ -43,7 +50,6 @@ public class GroundController implements Controller {
     }
 
     //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void advance(@NotNull Node current, @NotNull Node target) {
         Vec3I targetPos = target.getPosition();
@@ -66,21 +72,34 @@ public class GroundController implements Controller {
         double speedX = Math.cos(radians) * speed;
         double speedZ = Math.sin(radians) * speed;
 
-        PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
-        Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
-        if(PhysicsUtils.hasCollision(physicsResult) && entity.isOnGround() && entityPos.y() < targetExact) {
-            Vec3I currentPos = current.getPosition();
-            double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
+        if(!entity.hasVelocity()) {
+            if (entity.isOnGround()) {
+                PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
+                Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-            if(nodeDiff > step) {
-                entity.setVelocity(new Vec(speedX, nodeDiff * 2.5, speedZ));
-            }
-            else if(nodeDiff > -EPSILON && nodeDiff < step + EPSILON) {
-                entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
+                if (PhysicsUtils.hasCollision(physicsResult) && entityPos.y() < targetExact) {
+                    Vec3I currentPos = current.getPosition();
+                    double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
+                    if (nodeDiff > step) {
+                        entity.setVelocity(new Vec(speedX, computeJumpVelocity(entity.getGravityAcceleration(),
+                                nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
+                        jumping = true;
+                    } else if (nodeDiff > -EPSILON && nodeDiff < step + EPSILON) {
+                        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
+                        return;
+                    }
+                }
+
+                entity.refreshPosition(pos);
             }
         }
-        else {
-            entity.refreshPosition(pos);
+        else if(jumping) {
+            if(entityPos.y() > targetExact - EPSILON) {
+                entity.refreshPosition(new Pos(entityPos.x() + speedX, targetExact, entityPos.z() + speedZ)
+                        .withView(PositionUtils.getLookYaw(dX, dZ), 0));
+                entity.setVelocity(Vec.ZERO);
+                jumping = false;
+            }
         }
     }
 }
