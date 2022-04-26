@@ -1,13 +1,12 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.chunk;
 
 import com.github.phantazmnetwork.commons.HashStrategies;
-import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
+import com.github.phantazmnetwork.api.vector.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.bindings.minestom.solid.SolidProvider;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;

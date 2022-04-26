@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
+import com.github.phantazmnetwork.api.vector.VecUtils;
 import com.github.phantazmnetwork.commons.IteratorUtils;
-import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;

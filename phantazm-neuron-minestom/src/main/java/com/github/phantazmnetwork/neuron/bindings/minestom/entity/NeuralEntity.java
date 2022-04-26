@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
-import com.github.phantazmnetwork.commons.pipe.Pipe;
+import com.github.phantazmnetwork.api.vector.VecUtils;import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
@@ -14,9 +13,7 @@ import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.CollisionUtils;
-import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;

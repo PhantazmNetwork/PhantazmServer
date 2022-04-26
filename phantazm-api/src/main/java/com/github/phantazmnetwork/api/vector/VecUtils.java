@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.commons.minestom.vector;
+package com.github.phantazmnetwork.api.vector;
 
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
