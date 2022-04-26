@@ -43,6 +43,7 @@ public class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         try {
             LOGGER.info("Loading configuration data.");
+            ConfigInitializer.initialize();
             ConfigInitializer.CONFIG_HANDLER.writeDefaultsAndGet();
 
             serverConfig = ConfigInitializer.CONFIG_HANDLER.getData(ConfigInitializer.SERVER_CONFIG_KEY);
