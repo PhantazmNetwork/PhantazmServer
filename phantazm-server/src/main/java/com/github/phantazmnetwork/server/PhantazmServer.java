@@ -43,8 +43,8 @@ public final class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         try {
             LOGGER.info("Loading configuration data.");
-            Configuration.initialize();
-            Configuration.CONFIG_HANDLER.writeDefaultsAndGet();
+            ConfigInitializer.initialize();
+            ConfigInitializer.CONFIG_HANDLER.writeDefaultsAndGet();
 
             serverConfig = Configuration.CONFIG_HANDLER.getData(Configuration.SERVER_CONFIG_KEY);
             lobbiesConfig = Configuration.CONFIG_HANDLER.getData(Configuration.LOBBIES_CONFIG_KEY);
