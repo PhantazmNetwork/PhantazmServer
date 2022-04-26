@@ -15,36 +15,36 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.nio.file.Path;
 
-final class ConfigInitializer {
-    private ConfigInitializer() {
+public final class Configuration {
+    private Configuration() {
         throw new UnsupportedOperationException();
     }
 
     /**
      * The location of the server configuration file.
      */
-    static final Path SERVER_CONFIG_PATH = Path.of("./server-config.toml");
+    public static final Path SERVER_CONFIG_PATH = Path.of("./server-config.toml");
 
     /**
      * The location of the lobbies configuration file.
      */
-    static final Path LOBBIES_CONFIG_PATH = Path.of("./lobbies-config.toml");
+    public static final Path LOBBIES_CONFIG_PATH = Path.of("./lobbies-config.toml");
 
     /**
      * The {@link ConfigHandler} instance used to manage {@link ConfigLoader}s.
      */
-    static final ConfigHandler CONFIG_HANDLER = new BasicConfigHandler();
+    public static final ConfigHandler CONFIG_HANDLER = new BasicConfigHandler();
 
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link ServerConfig} loader.
      */
-    static final ConfigHandler.ConfigKey<ServerConfig> SERVER_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
+    public static final ConfigHandler.ConfigKey<ServerConfig> SERVER_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
             ServerConfig.class, "server_config");
 
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link LobbiesConfig} loader.
      */
-    static final ConfigHandler.ConfigKey<LobbiesConfig> LOBBIES_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
+    public static final ConfigHandler.ConfigKey<LobbiesConfig> LOBBIES_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
             LobbiesConfig.class, "lobbies_config");
 
     static void initialize() {

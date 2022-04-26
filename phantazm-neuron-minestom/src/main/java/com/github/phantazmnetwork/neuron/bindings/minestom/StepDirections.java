@@ -16,8 +16,6 @@ public final class StepDirections {
             Vec3I.of(1, 0, 1),
             Vec3I.of(-1, 0, 1),
             Vec3I.of(1, 0, -1),
-            Vec3I.of(-1, 0, -1),
-
-            Vec3I.of(0, 1, 0)
+            Vec3I.of(-1, 0, -1)
     );
 }

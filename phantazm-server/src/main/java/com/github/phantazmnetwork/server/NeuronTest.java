@@ -2,8 +2,6 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.bindings.minestom.BasicContextProvider;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.ContextualSpawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundNeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
@@ -29,39 +27,14 @@ final class NeuronTest {
     }
 
     static void initialize() {
-        Spawner spawner = new ContextualSpawner(new BasicContextProvider());
-        GroundMinestomDescriptor testDescriptor = new GroundMinestomDescriptor() {
-            @Override
-            public float getStep() {
-                return 0.5F;
-            }
-
-            @Override
-            public @NotNull EntityType getEntityType() {
-                return EntityType.PHANTOM;
-            }
-
-            @Override
-            public @NotNull String getID() {
-                return "phantom";
-            }
-
-            @Override
-            public @NotNull Calculator getCalculator() {
-                return Calculator.SQUARED_DISTANCE;
-            }
-
-            @Override
-            public boolean isComplete(@NotNull Vec3I position, @NotNull Vec3I destination) {
-                return position.equals(destination);
-            }
-        };
+        GroundMinestomDescriptor testDescriptor = GroundMinestomDescriptor.of(EntityType.PHANTOM, "phantom");
 
         EventNode<Event> globalNode = MinecraftServer.getGlobalEventHandler();
         PhantazmServer.PHANTAZM_EVENT.addListener(ChatChannelSendEvent.class, event -> {
             String msg = event.getInput();
             Player player = event.getPlayer();
             Instance instance = player.getInstance();
+            Spawner spawner = Neuron.getSpawner();
 
             if(instance != null) {
                 switch (msg) {

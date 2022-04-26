@@ -28,8 +28,8 @@ import java.util.Map;
 public class NeuralChunk extends DynamicChunk {
     //TODO: test ReadWriteLock depending on how often this map gets queried (it should be mostly reads)
     //(this would need to be done during an actual game, will leave for much later)
-    private static final Map<Shape, Solid[]> SPLIT_MAP = Object2ObjectMaps.synchronize(
-            new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity()));
+    private static final Map<Shape, Solid[]> SPLIT_MAP = new Object2ObjectOpenCustomHashMap<>(HashStrategies
+            .identity());
 
     private final IntSet tallSolids;
 
@@ -83,15 +83,28 @@ public class NeuralChunk extends DynamicChunk {
 
     private Solid[] getSplitFor(Block block) {
         Shape tallShape = block.registry().collisionShape();
-        return SPLIT_MAP.computeIfAbsent(tallShape, key -> {
-            Point start = key.relativeStart();
-            Point end = key.relativeEnd();
 
-            return new Solid[] {
-                    SolidProvider.fromPoints(VecUtils.toFloat(start), Vec3F.ofDouble(start.x(), 1, start.z())),
-                    SolidProvider.fromPoints(Vec3F.ofDouble(start.x(), 0, start.z()), Vec3F.ofDouble(start.x(),
-                            end.y() - 1, start.z()))
-            };
-        });
+        Solid[] split;
+        synchronized (SPLIT_MAP) {
+            split = SPLIT_MAP.get(tallShape);
+        }
+
+        if(split != null) {
+            return split;
+        }
+
+        Point start = tallShape.relativeStart();
+        Point end = tallShape.relativeEnd();
+        Solid[] newSplit = new Solid[] {
+                SolidProvider.fromPoints(VecUtils.toFloat(start), Vec3F.ofDouble(end.x(), 1, end.z())),
+                SolidProvider.fromPoints(Vec3F.ofDouble(start.x(), 0, start.z()), Vec3F.ofDouble(end.x(),
+                        end.y() - 1, end.z()))
+        };
+
+        synchronized (SPLIT_MAP) {
+            SPLIT_MAP.put(tallShape, newSplit);
+        }
+
+        return newSplit;
     }
 }

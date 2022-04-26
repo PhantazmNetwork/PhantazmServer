@@ -11,16 +11,29 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Objects;
 
-@SuppressWarnings("UnstableApiUsage")
-public class SolidProvider {
-    private static final Map<Shape, Solid> SHAPE_SOLIDS = Object2ObjectMaps.synchronize(
-            new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity()));
+public final class SolidProvider {
+    private static final Map<Shape, Solid> SHAPE_SOLIDS = new Object2ObjectOpenCustomHashMap<>(HashStrategies
+            .identity());
 
     private SolidProvider() { throw new UnsupportedOperationException(); }
 
     public static @NotNull Solid fromShape(@NotNull Shape shape) {
         Objects.requireNonNull(shape, "shape");
-        return SHAPE_SOLIDS.computeIfAbsent(shape, ShapeSolid::new);
+        Solid solid;
+        synchronized (SHAPE_SOLIDS) {
+            solid = SHAPE_SOLIDS.get(shape);
+        }
+
+        if(solid != null) {
+            return solid;
+        }
+
+        Solid newSolid = new ShapeSolid(shape);
+        synchronized (SHAPE_SOLIDS) {
+            SHAPE_SOLIDS.put(shape, newSolid);
+        }
+
+        return newSolid;
     }
 
     public static @NotNull Solid fromPoints(@NotNull Vec3F min, @NotNull Vec3F max) {

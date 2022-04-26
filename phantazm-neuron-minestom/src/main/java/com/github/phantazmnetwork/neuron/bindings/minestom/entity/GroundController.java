@@ -75,17 +75,17 @@ public class GroundController implements Controller {
         int tps = MinecraftServer.TICK_PER_SECOND;
 
         if(!entity.hasVelocity()) {
-            if (entity.isOnGround()) {
+            if(entity.isOnGround()) {
                 PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
                 Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-                if (entityPos.y() < targetExact && PhysicsUtils.hasCollision(physicsResult)) {
+                if(entityPos.y() < targetExact && PhysicsUtils.hasCollision(physicsResult)) {
                     Vec3I currentPos = current.getPosition();
                     double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
-                    if (nodeDiff > step) {
+                    if(nodeDiff > step) {
                         entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(tps));
                         jumping = true;
-                    } else if (nodeDiff > -EPSILON && nodeDiff < step + EPSILON) {
+                    } else if(nodeDiff > -EPSILON && nodeDiff < step + EPSILON) {
                         entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
                         return;
                     }
@@ -95,7 +95,7 @@ public class GroundController implements Controller {
             }
         }
         else if(jumping) {
-            if(entity.getVelocity().y() <= 0 && entity.getPosition().y() > targetExact) {
+            if(entity.getVelocity().y() <= 0 && entityPos.y() > targetExact) {
                 PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
                 entity.refreshPosition(physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
                 entity.setVelocity(Vec.ZERO);

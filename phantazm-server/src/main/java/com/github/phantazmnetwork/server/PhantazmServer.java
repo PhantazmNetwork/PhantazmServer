@@ -43,11 +43,11 @@ public final class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         try {
             LOGGER.info("Loading configuration data.");
-            ConfigInitializer.initialize();
-            ConfigInitializer.CONFIG_HANDLER.writeDefaultsAndGet();
+            Configuration.initialize();
+            Configuration.CONFIG_HANDLER.writeDefaultsAndGet();
 
-            serverConfig = ConfigInitializer.CONFIG_HANDLER.getData(ConfigInitializer.SERVER_CONFIG_KEY);
-            lobbiesConfig = ConfigInitializer.CONFIG_HANDLER.getData(ConfigInitializer.LOBBIES_CONFIG_KEY);
+            serverConfig = Configuration.CONFIG_HANDLER.getData(Configuration.SERVER_CONFIG_KEY);
+            lobbiesConfig = Configuration.CONFIG_HANDLER.getData(Configuration.LOBBIES_CONFIG_KEY);
             LOGGER.info("Configuration data loaded successfully.");
         }
         catch (ConfigProcessException e) {
@@ -57,11 +57,12 @@ public final class PhantazmServer {
 
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(lobbiesConfig);
+            initializeFeatures(serverConfig, lobbiesConfig);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during initialization", exception);
+            return;
         }
 
         try {
@@ -72,12 +73,13 @@ public final class PhantazmServer {
         }
     }
 
-    private static void initializeFeatures(LobbiesConfig lobbiesConfig) {
+    private static void initializeFeatures(ServerConfig serverConfig, LobbiesConfig lobbiesConfig) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer
                 .getConnectionManager());
 
-        LobbyInitializer.initialize(viewProvider, lobbiesConfig);
-        ChatInitializer.initialize();
+        Lobbies.initialize(viewProvider, lobbiesConfig);
+        Chat.initialize();
+        Neuron.initialize(serverConfig.pathfinderConfig());
         NeuronTest.initialize();
     }
 

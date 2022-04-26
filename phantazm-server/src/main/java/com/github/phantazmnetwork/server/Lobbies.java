@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-final class LobbyInitializer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LobbyInitializer.class);
+public final class Lobbies {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Lobbies.class);
 
-    private LobbyInitializer() {
+    private Lobbies() {
         throw new UnsupportedOperationException();
     }
 

@@ -9,11 +9,14 @@ import java.util.Objects;
  * @param serverInfoConfig Config for the server's setup
  * @param pingListConfig Config for the server's ping list
  */
-public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig, @NotNull PingListConfig pingListConfig) {
+public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig,
+                           @NotNull PingListConfig pingListConfig,
+                           @NotNull PathfinderConfig pathfinderConfig) {
     /**
      * The default ServerConfig instance.
      */
-    public static final ServerConfig DEFAULT = new ServerConfig(ServerInfoConfig.DEFAULT, PingListConfig.DEFAULT);
+    public static final ServerConfig DEFAULT = new ServerConfig(ServerInfoConfig.DEFAULT, PingListConfig.DEFAULT,
+            PathfinderConfig.DEFAULT);
 
     /**
      * Creates config for the server.
@@ -23,6 +26,7 @@ public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig, @NotNull 
     public ServerConfig {
         Objects.requireNonNull(serverInfoConfig, "serverInfoConfig");
         Objects.requireNonNull(pingListConfig, "pingListConfig");
+        Objects.requireNonNull(pathfinderConfig, "pathfinderConfig");
     }
 
 }

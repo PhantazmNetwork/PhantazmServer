@@ -22,13 +22,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-final class ChatInitializer {
+public final class Chat {
     /**
      * The default {@link ChatChannel} name for players.
      */
     public static final String DEFAULT_CHAT_CHANNEL_NAME = "all";
 
-    private ChatInitializer() {
+    private Chat() {
         throw new UnsupportedOperationException();
     }
 

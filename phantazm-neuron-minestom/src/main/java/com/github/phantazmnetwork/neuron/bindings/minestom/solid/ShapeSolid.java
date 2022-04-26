@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
 import com.github.phantazmnetwork.commons.IteratorUtils;
 import com.github.phantazmnetwork.commons.minestom.vector.VecUtils;
-import com.github.phantazmnetwork.commons.pipe.Pipe;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
@@ -14,7 +13,6 @@ import java.util.List;
 /**
  * {@link Shape}-based implementation of {@link Solid}. Not part of the public API.
  */
-@SuppressWarnings("UnstableApiUsage")
 class ShapeSolid extends MinestomSolid {
     private final boolean hasChildren;
     private final Iterable<Solid> children;
@@ -22,7 +20,7 @@ class ShapeSolid extends MinestomSolid {
     ShapeSolid(@NotNull Shape shape) {
         super(VecUtils.toFloat(shape.relativeStart()), VecUtils.toFloat(shape.relativeEnd()));
 
-        List<BoundingBox> children = shape.boundingBoxes();
+        List<BoundingBox> children = shape.childBounds();
         if(children.isEmpty()) {
             this.hasChildren = false;
             this.children = IteratorUtils::empty;
