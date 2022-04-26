@@ -4,5 +4,10 @@
     optifineEnabled = true
     authType = "BUNGEE"
     velocitySecret = ""
+
 [pingList]
     description = "A Minecraft Server"
+
+[pathfinder]
+    threads = 4
+    cacheSize = 1024
