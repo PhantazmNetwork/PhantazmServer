@@ -34,6 +34,7 @@ public class BasicContextProvider implements ContextProvider {
         synchronized (contextMap) {
             return contextMap.computeIfAbsent(instance, newInstance -> {
                 ExecutorService service = Executors.newFixedThreadPool(instanceThreads);
+
                 PathEngine engine = new BasicPathEngine(service);
                 Collider collider = new SpatialCollider(new InstanceSpace(newInstance));
                 PathCache cache = new BasicPathCache(instanceCache);
@@ -49,8 +50,7 @@ public class BasicContextProvider implements ContextProvider {
         }
 
         if(context != null) {
-            ExecutorService executor = context.left();
-            executor.shutdown();
+            context.left().shutdown();
         }
     }
 }

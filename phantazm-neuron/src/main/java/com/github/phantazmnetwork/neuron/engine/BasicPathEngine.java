@@ -21,20 +21,25 @@ public class BasicPathEngine implements PathEngine {
 
     @Override
     public @NotNull Future<PathResult> pathfind(@NotNull Agent agent, @NotNull Vec3I destination) {
-        return executor.submit(() -> {
-            if(!agent.hasStartPosition()) {
-                return null;
-            }
+        try {
+            return executor.submit(() -> {
+                if(!agent.hasStartPosition()) {
+                    return null;
+                }
 
-            Descriptor descriptor = agent.getDescriptor();
-            PathOperation operation = new BasicPathOperation(agent.getStartPosition(), destination, pos -> descriptor
-                    .isComplete(pos, destination), descriptor.getCalculator(), agent.getExplorer());
+                Descriptor descriptor = agent.getDescriptor();
+                PathOperation operation = new BasicPathOperation(agent.getStartPosition(), destination, pos -> descriptor
+                        .isComplete(pos, destination), descriptor.getCalculator(), agent.getExplorer());
 
-            while(!operation.isComplete() && !Thread.interrupted()) {
-                operation.step();
-            }
+                while(!operation.isComplete() && !Thread.interrupted()) {
+                    operation.step();
+                }
 
-            return operation.isComplete() ? operation.getResult() : null;
-        });
+                return operation.isComplete() ? operation.getResult() : null;
+            });
+        }
+        catch (RejectedExecutionException ignored) {
+            return CompletableFuture.completedFuture(null);
+        }
     }
 }
