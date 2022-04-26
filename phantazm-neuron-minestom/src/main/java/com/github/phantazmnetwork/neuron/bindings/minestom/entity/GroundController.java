@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class GroundController implements Controller {
-    private static final double EPSILON = 1E-5;
+    private static final double EPSILON = Vec.EPSILON;
 
     private final Entity entity;
     private final double speed;
@@ -28,10 +28,6 @@ public class GroundController implements Controller {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.speed = walkSpeed;
         this.step = step;
-    }
-
-    private double computeJumpVelocity(double gravitationalConstant, double requiredHeight) {
-        return Math.sqrt(-2 * -gravitationalConstant * (requiredHeight + entity.getGravityAcceleration() * 4));
     }
 
     @Override
@@ -69,20 +65,25 @@ public class GroundController implements Controller {
         }
 
         double radians = Math.atan2(dZ, dX);
-        double speedX = Math.cos(radians) * speed;
-        double speedZ = Math.sin(radians) * speed;
+        double vX = Math.cos(radians) * speed;
+        double vZ = Math.sin(radians) * speed;
+
+        //make sure speedX and speedZ cannot extend past the target
+        double speedX = Math.copySign(Math.min(Math.abs(vX), Math.abs(dX)), dX);
+        double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
+
+        int tps = MinecraftServer.TICK_PER_SECOND;
 
         if(!entity.hasVelocity()) {
             if (entity.isOnGround()) {
                 PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
                 Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-                if (PhysicsUtils.hasCollision(physicsResult) && entityPos.y() < targetExact) {
+                if (entityPos.y() < targetExact && PhysicsUtils.hasCollision(physicsResult)) {
                     Vec3I currentPos = current.getPosition();
                     double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
                     if (nodeDiff > step) {
-                        entity.setVelocity(new Vec(speedX, computeJumpVelocity(entity.getGravityAcceleration(),
-                                nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
+                        entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(tps));
                         jumping = true;
                     } else if (nodeDiff > -EPSILON && nodeDiff < step + EPSILON) {
                         entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
@@ -94,12 +95,18 @@ public class GroundController implements Controller {
             }
         }
         else if(jumping) {
-            if(entityPos.y() > targetExact - EPSILON) {
-                entity.refreshPosition(new Pos(entityPos.x() + speedX, targetExact, entityPos.z() + speedZ)
-                        .withView(PositionUtils.getLookYaw(dX, dZ), 0));
+            if(entity.getVelocity().y() <= 0 && entity.getPosition().y() > targetExact) {
+                PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
+                entity.refreshPosition(physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
                 entity.setVelocity(Vec.ZERO);
                 jumping = false;
             }
         }
+    }
+
+    private double computeJumpVelocity(double requiredHeight) {
+        double g = -entity.getGravityAcceleration();
+        double drag = entity.getGravityDragPerTick();
+        return Math.sqrt(-2 * (g - drag) * (requiredHeight + 0.125));
     }
 }

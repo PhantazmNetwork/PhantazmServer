@@ -87,7 +87,6 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
         return position;
     }
 
-    @SuppressWarnings({"UnstableApiUsage", "SynchronizationOnLocalVariableOrMethodParameter"})
     private @Nullable Vec3I computeStartPosition() {
         Instance instance = requireInstance();
 
@@ -108,6 +107,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
         }
 
         Block block;
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (chunk) {
             block = chunk.getBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Block.Getter.Condition.TYPE);
         }
@@ -254,7 +254,8 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     protected abstract @NotNull Iterable<Vec3I> getStepDirections();
 
     protected boolean canPathfind() {
-        return !isDead() && instance.getWorldBorder().isInside(this) && !instance.isInVoid(getPosition());
+        return !isDead() && instance.getWorldBorder().isInside(this) && !instance.isInVoid(getPosition()) &&
+                currentChunk.isLoaded() && vehicle == null;
     }
 
     private void cancelNavigation() {
