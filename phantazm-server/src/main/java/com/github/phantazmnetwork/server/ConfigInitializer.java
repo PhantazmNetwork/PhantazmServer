@@ -47,7 +47,7 @@ final class ConfigInitializer {
     static final ConfigHandler.ConfigKey<LobbiesConfig> LOBBIES_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
             LobbiesConfig.class, "lobbies_config");
 
-    void initialize() {
+    static void initialize() {
         ConfigCodec codec = new TomlCodec(new TomlWriter.Builder().padArrayDelimitersBy(1).indentValuesBy(4).build());
         MiniMessage miniMessage = MiniMessage.miniMessage();
         CONFIG_HANDLER.registerLoader(SERVER_CONFIG_KEY,
