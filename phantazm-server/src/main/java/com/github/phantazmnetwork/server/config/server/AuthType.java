@@ -32,8 +32,9 @@ public enum AuthType {
     private static final Map<String, AuthType> BY_NAME;
 
     static {
-        Map<String, AuthType> byName = new HashMap<>();
-        for (AuthType authType : AuthType.values()) {
+        AuthType[] authTypes = AuthType.values();
+        Map<String, AuthType> byName = new HashMap<>(authTypes.length);
+        for (AuthType authType : authTypes) {
             byName.put(authType.name(), authType);
         }
 
