@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,14 +27,14 @@ public final class VecUtils {
     }
 
     public static @NotNull Point toPoint(@NotNull Vec3I vec) {
-        return new Pos(vec.getX(), vec.getY(), vec.getZ());
+        return new Vec(vec.getX(), vec.getY(), vec.getZ());
     }
 
     public static @NotNull Point toPoint(@NotNull Vec3F vec) {
-        return new Pos(vec.getX(), vec.getY(), vec.getZ());
+        return new Vec(vec.getX(), vec.getY(), vec.getZ());
     }
 
     public static @NotNull Point toPoint(@NotNull Vec3D vec) {
-        return new Pos(vec.getX(), vec.getY(), vec.getZ());
+        return new Vec(vec.getX(), vec.getY(), vec.getZ());
     }
 }
