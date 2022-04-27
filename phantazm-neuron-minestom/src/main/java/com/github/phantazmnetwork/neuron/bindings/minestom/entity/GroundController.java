@@ -105,8 +105,7 @@ public class GroundController implements Controller {
     }
 
     private double computeJumpVelocity(double requiredHeight) {
-        double g = -entity.getGravityAcceleration();
-        double drag = entity.getGravityDragPerTick();
-        return Math.sqrt(-2 * (g - drag) * (requiredHeight + 0.125));
+        double initialVelocity = Math.sqrt(-2 * -entity.getGravityAcceleration() * requiredHeight);
+        return initialVelocity + (entity.getGravityDragPerTick() * (Math.ceil(requiredHeight / initialVelocity) + 1));
     }
 }
