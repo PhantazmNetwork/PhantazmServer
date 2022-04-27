@@ -33,7 +33,8 @@ public final class Lobbies {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull PlayerViewProvider playerViewProvider, @NotNull LobbiesConfig lobbiesConfig) {
+    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
+                           @NotNull LobbiesConfig lobbiesConfig) {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
@@ -82,8 +83,8 @@ public final class Lobbies {
         }
 
         Map<UUID, LoginLobbyJoinRequest> loginJoinRequests = new HashMap<>();
-        EventNode<Event> eventNode = MinecraftServer.getGlobalEventHandler();
-        eventNode.addListener(PlayerLoginEvent.class, event -> {
+
+        node.addListener(PlayerLoginEvent.class, event -> {
             LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
@@ -96,7 +97,7 @@ public final class Lobbies {
             }
         });
 
-        eventNode.addListener(PlayerSpawnEvent.class, event -> {
+        node.addListener(PlayerSpawnEvent.class, event -> {
             if (!event.isFirstSpawn()) {
                 return;
             }

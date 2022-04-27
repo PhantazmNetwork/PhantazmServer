@@ -5,6 +5,8 @@ import com.github.phantazmnetwork.neuron.world.Collider;
 import com.github.phantazmnetwork.neuron.world.SpatialCollider;
 import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceUnregisterEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -21,12 +23,12 @@ public class BasicContextProvider implements ContextProvider {
     private final int instanceThreads;
     private final int instanceCache;
 
-    public BasicContextProvider(int instanceThreads, int instanceCache) {
+    public BasicContextProvider(@NotNull EventNode<Event> node, int instanceThreads, int instanceCache) {
         this.contextMap = new WeakHashMap<>();
         this.instanceThreads = instanceThreads;
         this.instanceCache = instanceCache;
 
-        MinecraftServer.getGlobalEventHandler().addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
+        node.addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
     }
 
     @Override

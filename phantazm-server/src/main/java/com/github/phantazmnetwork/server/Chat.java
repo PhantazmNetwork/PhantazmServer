@@ -14,6 +14,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.instance.Instance;
 
@@ -32,7 +34,7 @@ public final class Chat {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize() {
+    static void initialize(EventNode<Event> node) {
         ChatChannel defaultChannel = (sender, message, messageType, filter) -> {
             if (sender instanceof Entity entity && sender instanceof Identified identified) {
                 Instance instance = entity.getInstance();
@@ -75,7 +77,7 @@ public final class Chat {
 
         Cache<UUID, ChatChannel> playerChannels = Caffeine.newBuilder().weakValues().build();
         MinecraftServer.getCommandManager().register(new ChatCommand(channels, playerChannels, defaultChannel));
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
+        node.addListener(PlayerChatEvent.class, event -> {
             event.setCancelled(true);
 
             ChatChannel channel = playerChannels.get(event.getPlayer().getUuid(), (unused) -> defaultChannel);
@@ -85,7 +87,7 @@ public final class Chat {
 
             ChatChannelSendEvent channelSendEvent = new ChatChannelSendEvent(channel, event.getPlayer(),
                     event.getMessage(), message);
-            PhantazmServer.PHANTAZM_EVENT.callCancellable(channelSendEvent,
+            PhantazmServer.PHANTAZM_NODE.callCancellable(channelSendEvent,
                     () -> channel.broadcast(event.getPlayer(), channelSendEvent.getMessage(), MessageType.CHAT,
                             audience -> true));
         });

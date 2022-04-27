@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundNeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
-import com.github.phantazmnetwork.neuron.node.Calculator;
+import com.github.phantazmnetwork.neuron.node.Node;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
@@ -26,11 +25,10 @@ final class NeuronTest {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize() {
+    static void initialize(@NotNull EventNode<Event> global, @NotNull EventNode<Event> phantazm) {
         GroundMinestomDescriptor testDescriptor = GroundMinestomDescriptor.of(EntityType.PHANTOM, "phantom");
 
-        EventNode<Event> globalNode = MinecraftServer.getGlobalEventHandler();
-        PhantazmServer.PHANTAZM_EVENT.addListener(ChatChannelSendEvent.class, event -> {
+        phantazm.addListener(ChatChannelSendEvent.class, event -> {
             String msg = event.getInput();
             Player player = event.getPlayer();
             Instance instance = player.getInstance();
@@ -50,14 +48,14 @@ final class NeuronTest {
                         EntityCreature creature = new EntityCreature(EntityType.ZOMBIE);
                         creature.setInstance(instance, player.getPosition().add(5, 0, 0));
 
-                        globalNode.addListener(PlayerMoveEvent.class, moveEvent -> creature.getNavigator().setPathTo(
+                        global.addListener(PlayerMoveEvent.class, moveEvent -> creature.getNavigator().setPathTo(
                                 moveEvent.getPlayer().getPosition()));
                     }
                 }
             }
         });
 
-        globalNode.addListener(PlayerSpawnEvent.class, event -> {
+        global.addListener(PlayerSpawnEvent.class, event -> {
             if(!event.isFirstSpawn()) {
                 return;
             }

@@ -4,6 +4,8 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.BasicContextProvider;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.ContextualSpawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.server.config.server.PathfinderConfig;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 
 public final class Neuron {
@@ -13,8 +15,8 @@ public final class Neuron {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull PathfinderConfig pathfinderConfig) {
-        spawner = new ContextualSpawner(new BasicContextProvider(pathfinderConfig.threads(), pathfinderConfig
+    static void initialize(@NotNull EventNode<Event> node, @NotNull PathfinderConfig pathfinderConfig) {
+        spawner = new ContextualSpawner(new BasicContextProvider(node, pathfinderConfig.threads(), pathfinderConfig
                 .cacheSize()));
     }
 

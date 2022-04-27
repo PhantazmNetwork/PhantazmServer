@@ -30,7 +30,7 @@ public final class PhantazmServer {
     /**
      * The global EventNode for Phantazm events.
      */
-    public static final EventNode<Event> PHANTAZM_EVENT = EventNode.all("phantazm");
+    public static final EventNode<Event> PHANTAZM_NODE = EventNode.all("phantazm");
 
     /**
      * Starting point for the server.
@@ -55,9 +55,10 @@ public final class PhantazmServer {
             return;
         }
 
+        EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(serverConfig, lobbiesConfig);
+            initializeFeatures(node, serverConfig, lobbiesConfig);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -66,24 +67,25 @@ public final class PhantazmServer {
         }
 
         try {
-            startServer(minecraftServer, serverConfig);
+            startServer(node, minecraftServer, serverConfig);
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
         }
     }
 
-    private static void initializeFeatures(ServerConfig serverConfig, LobbiesConfig lobbiesConfig) {
+    private static void initializeFeatures(EventNode<Event> node, ServerConfig serverConfig,
+                                           LobbiesConfig lobbiesConfig) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer
                 .getConnectionManager());
 
-        Lobbies.initialize(viewProvider, lobbiesConfig);
-        Chat.initialize();
-        Neuron.initialize(serverConfig.pathfinderConfig());
-        NeuronTest.initialize();
+        Lobbies.initialize(node, viewProvider, lobbiesConfig);
+        Chat.initialize(node);
+        Neuron.initialize(node, serverConfig.pathfinderConfig());
+        NeuronTest.initialize(node, PHANTAZM_NODE);
     }
 
-    private static void startServer(MinecraftServer server, ServerConfig serverConfig) {
+    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
 
         if (infoConfig.optifineEnabled()) {
@@ -96,8 +98,8 @@ public final class PhantazmServer {
             case VELOCITY -> VelocityProxy.enable(infoConfig.velocitySecret());
         }
 
-        MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event -> event.getResponseData()
-                .setDescription(serverConfig.pingListConfig().description()));
+        node.addListener(ServerListPingEvent.class, event -> event.getResponseData().setDescription(serverConfig
+                .pingListConfig().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
     }
