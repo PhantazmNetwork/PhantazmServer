@@ -113,7 +113,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
      * Determines if this node is currently present inside a {@link NodeQueue} by checking its heap index.
      * @return true if this node is present in a NodeQueue, false otherwise
      */
-    public boolean isOnHeap() {
+    boolean isOnHeap() {
         return heapIndex > -1;
     }
 
@@ -129,7 +129,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
      * Gets the current heap index.
      * @return the current heap index, or a negative value if this node is not part of any {@link NodeQueue}
      */
-    public int getHeapIndex() {
+    int getHeapIndex() {
         return heapIndex;
     }
 
@@ -188,6 +188,10 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
         return position;
     }
 
+    /**
+     * Creates a new random-access list implementation with the same nodes as represented by this one.
+     * @return a random-access List containing the same nodes as this
+     */
     public @NotNull List<Node> toRandomAccessList() {
         ArrayList<Node> nodes = new ArrayList<>();
         for(Node node : this) {

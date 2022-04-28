@@ -95,6 +95,7 @@ public class GroundController implements Controller {
             }
         }
         else if(jumping) {
+            System.out.println(entity.getPosition());
             if(entity.getVelocity().y() <= 0 && entityPos.y() > targetExact) {
                 PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
                 entity.refreshPosition(physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
@@ -105,7 +106,12 @@ public class GroundController implements Controller {
     }
 
     private double computeJumpVelocity(double requiredHeight) {
-        double initialVelocity = Math.sqrt(-2 * -entity.getGravityAcceleration() * requiredHeight);
-        return initialVelocity + (entity.getGravityDragPerTick() * (Math.ceil(requiredHeight / initialVelocity) + 1));
+        double g = entity.getGravityAcceleration();
+        double b = entity.getGravityDragPerTick();
+
+        double idealVelocity = Math.sqrt(2 * g * requiredHeight);
+        double gOverB = g / b;
+
+        return idealVelocity;
     }
 }

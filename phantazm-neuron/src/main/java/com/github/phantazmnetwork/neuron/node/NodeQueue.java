@@ -89,6 +89,22 @@ public class NodeQueue implements PriorityQueue<Node> {
     }
 
     /**
+     * If the given node is already in the heap, update its position, otherwise enqueue it.
+     * @param node the node to update or enqueue
+     */
+    public void enqueueOrUpdate(@NotNull Node node) {
+        Objects.requireNonNull(node, "node");
+        if(node.isOnHeap()) {
+            //if we're already on the heap, call changed to update its position in-place
+            changed(node);
+        }
+        else {
+            //otherwise, add it to the heap
+            enqueue(node);
+        }
+    }
+
+    /**
      * Updates the given node, using the index reported by {@link Node#getHeapIndex()}. If this index is negative, or
      * greater than the size of the heap, the node is assumed to not be a part of this queue and an
      * {@link IllegalArgumentException} is thrown. Otherwise, it may be repositioned such that the heap invariant is

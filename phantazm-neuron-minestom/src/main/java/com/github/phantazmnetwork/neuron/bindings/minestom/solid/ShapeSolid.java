@@ -26,7 +26,7 @@ class ShapeSolid extends MinestomSolid {
             this.children = IteratorUtils::empty;
         }
         else {
-            ArrayList<Solid> childSolids = new ArrayList<>(children.size());
+            List<Solid> childSolids = new ArrayList<>(children.size());
             for(BoundingBox boundingBox : children) {
                 childSolids.add(new PointSolid(VecUtils.toFloat(boundingBox.relativeStart()), VecUtils.toFloat(
                         boundingBox.relativeEnd())));

@@ -8,7 +8,6 @@ import com.github.phantazmnetwork.neuron.node.NodeQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -115,15 +114,7 @@ public class BasicPathOperation implements PathOperation {
                     //our path to this node is indeed better, update stuff
                     neighbor.setParent(current);
                     neighbor.setG(g);
-
-                    if(neighbor.isOnHeap()) {
-                        //if we're already on the heap, call changed to update its position in-place
-                        openSet.changed(neighbor);
-                    }
-                    else {
-                        //otherwise, add it to the heap
-                        openSet.enqueue(neighbor);
-                    }
+                    openSet.enqueueOrUpdate(neighbor);
                 }
             }
 
