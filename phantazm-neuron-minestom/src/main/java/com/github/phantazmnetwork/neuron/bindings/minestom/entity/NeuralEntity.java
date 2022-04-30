@@ -54,8 +54,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     }
 
     @Override
-    public void update(long time) {
-        super.update(time);
+    protected void preTick(long time) {
         navigator.tick(time);
     }
 

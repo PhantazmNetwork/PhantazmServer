@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
+import com.github.phantazmnetwork.commons.MathUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class GroundController implements Controller {
-    private static final double EPSILON = Vec.EPSILON;
+    private static final float JUMP_TOLERANCE = 0.125F;
 
     private final Entity entity;
     private final double speed;
@@ -85,7 +86,7 @@ public class GroundController implements Controller {
                     if(nodeDiff > step) {
                         entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(tps));
                         jumping = true;
-                    } else if(nodeDiff > -EPSILON && nodeDiff < step + EPSILON) {
+                    } else if(nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
                         entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
                         return;
                     }
@@ -105,13 +106,14 @@ public class GroundController implements Controller {
         }
     }
 
-    private double computeJumpVelocity(double requiredHeight) {
+    private double computeJumpVelocity(double h) {
+        double d = entity.getGravityDragPerTick();
         double g = entity.getGravityAcceleration();
-        double b = entity.getGravityDragPerTick();
 
-        double idealVelocity = Math.sqrt(2 * g * requiredHeight);
-        double gOverB = g / b;
+        double e = -Math.exp(-1 - ((d * d * h) / g));
+        double lam = MathUtils.lambertW(e);
+        double v = ((-g) - (g * lam)) / d;
 
-        return idealVelocity;
+        return v;
     }
 }

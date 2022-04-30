@@ -49,8 +49,13 @@ public class GroundNavigator implements Navigator {
                     } catch (InterruptedException | ExecutionException ignored) {}
 
                     if(result != null) {
-                        target = computeActualTarget(controller, result.getStart());
-                        current = computeActualStart(controller, target);
+                        current = result.getStart();
+                        target = current;
+
+                        do {
+                            target = target.getParent();
+                        }
+                        while (target != null && !withinDistance(controller, target));
 
                         //single node path
                         if(target == null) {
@@ -64,9 +69,7 @@ public class GroundNavigator implements Navigator {
                 }
             }
 
-            if(target != null) {
-                continueAlongPath();
-            }
+            continueAlongPath();
         }
     }
 
@@ -83,23 +86,6 @@ public class GroundNavigator implements Navigator {
         else {
             current = null;
         }
-    }
-
-    private static Node computeActualTarget(Controller controller, Node result) {
-        for(Node node : result) {
-            if(withinDistance(controller, node)) {
-                return node.getParent();
-            }
-        }
-
-        return null;
-    }
-
-    private static Node computeActualStart(Controller controller, Node next) {
-        double controllerY = controller.getY();
-        Node node = new Node(Vec3I.floored(controller.getX(), controllerY, controller.getZ()), 0, 0, next);
-        node.setHeightOffset((float) (controllerY - Math.floor(controllerY)));
-        return node;
     }
 
     private static boolean withinDistance(Controller controller, Node node) {
