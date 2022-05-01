@@ -116,7 +116,7 @@ public class GroundController implements Controller {
         double g = entity.getGravityAcceleration();
 
         if(b == 0) {
-            return Math.sqrt(2 * g * h) + (g / (1 -b));
+            return Math.sqrt(2 * g * h) + g;
         }
         else {
             double l_0 = Math.log(1 - b);
