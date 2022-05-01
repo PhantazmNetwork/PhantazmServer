@@ -67,6 +67,9 @@ public class GroundNavigator implements Navigator {
                         return;
                     }
                 }
+                else {
+                    return;
+                }
             }
 
             continueAlongPath();

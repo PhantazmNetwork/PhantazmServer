@@ -10,85 +10,83 @@ public final class MathUtils {
         throw new UnsupportedOperationException();
     }
 
-    private static final double[] branchCoefficients;
-
-    static {
-        branchCoefficients = new double[8];
-        branchCoefficients[0] = 1.0;
-        branchCoefficients[1] = 1.0;
-        for (int i = 2; i < branchCoefficients.length; i++) {
-            double t = 0.0;
-            for (int j = 2; j < i; j++) {
-                t += j * branchCoefficients[j] * branchCoefficients[i + 1 - j];
-            }
-            branchCoefficients[i] = (branchCoefficients[i - 1] - t) / (i + 1);
+    public static double lambertW(int branch, double z) {
+        if(branch != -1 && branch != 0) {
+            throw new IllegalArgumentException("The only valid values for branch_index is -1 (W_{-1}) and 0 (W_{0}).");
         }
+
+        if(z < -E_INVERSE) {
+            throw new IllegalArgumentException("The real branches of Lambert W function are not defined for z < -1/e," +
+                    " value was " + z);
+        }
+
+        double w = initW(branch, z);
+        if(Double.isNaN(w)) {
+            return w;
+        }
+
+        double delta;
+        for(int i = 0; i < SERIES_MAX; i++) {
+            double ew = Math.exp(w);
+            delta = w * ew - z;
+
+            if(delta == 0) {
+                break;
+            }
+
+            if(Math.abs(-delta / (ew * (w + 1))) < ACCURACY) {
+                break;
+            }
+
+            w -= delta / (ew * (w + 1) - (delta * (w + 2) / (2 * (w + 1))));
+        }
+
+        return w;
     }
 
-    /**
-     * <p>Computes the lambert-W (product logarithm) for the specified double value. Based on code from
-     * <a href="https://github.com/dcwuser/metanumerics">this GitHub repository.</a>.</p>
-     *
-     * <p>The input may not be smaller than {@link MathUtils#E_INVERSE}, or an IllegalArgumentException will be thrown.
-     * </p>
-     * @param x the input value
-     * @return the result of applying the lambert W function to the provided argument
-     */
-    public static double lambertW(double x) {
-        if (x < -E_INVERSE) {
-            throw new IllegalArgumentException("The Lambert W function is undefined for " + x);
-        }
-
+    private static double initW(int branch_index, double z) {
         double w;
-        if(x < -E_INVERSE / 2.0) {
-            double t = Math.sqrt(-2.0 * (1.0 + Math.log(-x)));
-            w = -1.0 + t;
-            double tk = t;
-            for (int i = 2; i < branchCoefficients.length; i++) {
-                double wOld = w;
-                tk *= -t;
-                w += branchCoefficients[i] * tk;
-                if (w == wOld) {
-                    return w;
+        if(z >= 0) {
+            if(branch_index == 0) {
+                if( z <= 500.0 ) {
+                    w = 0.665 * (1 + 0.0195 * Math.log(z + 1.0)) * Math.log(z + 1.0) + 0.04;
+                }
+                else {
+                    w  = Math.log(z - 4.0) - (1.0 - 1.0 / Math.log(z)) * Math.log(Math.log(z));
                 }
             }
-        }
-        else if(x < E_INVERSE) {
-            w = lambertSeriesZero(x);
-        }
-        else if(x > Math.E) {
-            w = lambertSeriesLarge(x);
-        }
-        else {
-            w = 0.5;
-        }
-
-        return lambertHalley(x, w);
-    }
-
-    private static double lambertSeriesZero(double x) {
-        return x * (1.0 - x + (3.0 / 2.0) * x * x - (8.0 / 3.0) * x * x * x + (125.0 / 24.0) * x * x * x * x);
-    }
-
-    private static double lambertSeriesLarge(double x) {
-        double l1 = Math.log(x);
-        double l2 = Math.log(l1);
-        return l1 - l2 + l2 / l1 + l2 * (l2 - 2.0) / (2.0 * l1 * l1) + l2 * (2.0 * l2 * l2 - 9.0 * l2 + 6.0) / (6.0 * l1
-                * l1 * l1);
-    }
-
-    private static double lambertHalley (double x, double w) {
-        for (int i = 0; i < SERIES_MAX; i++) {
-            double e = Math.exp(w);
-            double f = e * w - x;
-            double dW = f / ((w + 1.0) * e - ((w + 2.0) / (w + 1.0)) * f / 2.0);
-            w = w - dW;
-            if (Math.abs(dW) <= ACCURACY * Math.abs(w)) {
-                return (w);
+            else {
+                w = Double.NaN;
             }
         }
 
-        //should never happen
-        throw new ArithmeticException("Series does not converge");
+        // Negative z
+        else {
+            if(Math.abs(z + Math.exp(-1)) >  0.01) {
+                if(branch_index == 0) {
+                    w = 0;
+                }
+                else {
+                    w = Math.log(-z) - Math.log(-Math.log(-z));
+                }
+            }
+            else {
+                if(z == -Math.exp(-1)) {
+                    w = -1;
+                }
+                else {
+                    double sqrt = Math.sqrt(2 * (Math.exp(1) * z + 1));
+                    if(branch_index == 0) {
+                        w = -1 + sqrt;
+                    }
+                    else {
+                        w = -1 - sqrt;
+                    }
+                }
+
+            }
+        }
+
+        return w;
     }
 }

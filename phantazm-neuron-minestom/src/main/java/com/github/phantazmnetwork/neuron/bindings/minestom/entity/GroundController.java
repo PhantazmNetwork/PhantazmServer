@@ -74,30 +74,34 @@ public class GroundController implements Controller {
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
 
         int tps = MinecraftServer.TICK_PER_SECOND;
-
         if(!entity.hasVelocity()) {
             if(entity.isOnGround()) {
-                PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
-                Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
+                if(!jumping) {
+                    PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
+                    Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-                if(entityPos.y() < targetExact && PhysicsUtils.hasCollision(physicsResult)) {
-                    Vec3I currentPos = current.getPosition();
-                    double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
-                    if(nodeDiff > step) {
-                        entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(tps));
-                        jumping = true;
-                    } else if(nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
-                        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
-                        return;
+                    if(entityPos.y() < targetExact && PhysicsUtils.hasCollision(physicsResult)) {
+                        Vec3I currentPos = current.getPosition();
+                        double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
+                        if(nodeDiff > step) {
+                            entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(tps));
+                            jumping = true;
+                        } else if(nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
+                            entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
+                            return;
+                        }
                     }
-                }
 
-                entity.refreshPosition(pos);
+                    entity.refreshPosition(pos);
+                }
+                else {
+                    jumping = false;
+                }
             }
         }
         else if(jumping) {
-            System.out.println(entity.getPosition());
-            if(entity.getVelocity().y() <= 0 && entityPos.y() > targetExact) {
+            System.out.println(entityPos);
+            if(entityPos.y() > targetExact) {
                 PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
                 entity.refreshPosition(physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
                 entity.setVelocity(Vec.ZERO);
@@ -106,14 +110,20 @@ public class GroundController implements Controller {
         }
     }
 
+    //abandon hope, all ye who enter here expecting to understand how this works
     private double computeJumpVelocity(double h) {
-        double d = entity.getGravityDragPerTick();
+        double b = entity.getGravityDragPerTick();
         double g = entity.getGravityAcceleration();
 
-        double e = -Math.exp(-1 - ((d * d * h) / g));
-        double lam = MathUtils.lambertW(e);
-        double v = ((-g) - (g * lam)) / d;
+        double l_0 = Math.log(1 - b);
+        double x_0 = b * h * l_0;
+        double x_1 = g * (b - 1);
+        double x_2 = x_1 * Math.log(g - (b * g));
+        double x_3 = x_1 * b;
+        double x_4 = x_1 * l_0;
+        double x_5 = (-b * g) + g;
 
-        return v;
+        double exp = Math.exp((-x_0 + x_2 + x_3 + x_4 + x_5) / x_1);
+        return ((x_1 * MathUtils.lambertW(-1, exp / x_1) - x_5) / b) + (g / (1 - b));
     }
 }

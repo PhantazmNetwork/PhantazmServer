@@ -84,9 +84,8 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     }
 
     private @Nullable Vec3I computeStartPosition() {
-        Instance instance = requireInstance();
-
-        if(!canPathfind()) {
+        Instance instance = this.instance;
+        if(!canPathfind() || instance == null) {
             return null;
         }
 
@@ -252,8 +251,10 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     protected abstract @NotNull Iterable<Vec3I> getStepDirections();
 
     protected boolean canPathfind() {
-        return !isDead() && instance.getWorldBorder().isInside(this) && !instance.isInVoid(getPosition()) &&
-                currentChunk.isLoaded() && vehicle == null;
+        Instance instance = this.instance;
+        Chunk currentChunk = this.currentChunk;
+        return instance != null && currentChunk != null && !isDead() && instance.getWorldBorder().isInside(this)
+                && !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null;
     }
 
     private void cancelNavigation() {
