@@ -115,15 +115,20 @@ public class GroundController implements Controller {
         double b = entity.getGravityDragPerTick();
         double g = entity.getGravityAcceleration();
 
-        double l_0 = Math.log(1 - b);
-        double x_0 = b * h * l_0;
-        double x_1 = g * (b - 1);
-        double x_2 = x_1 * Math.log(g - (b * g));
-        double x_3 = x_1 * b;
-        double x_4 = x_1 * l_0;
-        double x_5 = (-b * g) + g;
+        if(b == 0) {
+            return Math.sqrt(2 * g * h) + (g / (1 -b));
+        }
+        else {
+            double l_0 = Math.log(1 - b);
+            double x_0 = b * h * l_0;
+            double x_1 = g * (b - 1);
+            double x_2 = x_1 * Math.log(g - (b * g));
+            double x_3 = x_1 * b;
+            double x_4 = x_1 * l_0;
+            double x_5 = (-b * g) + g;
 
-        double exp = Math.exp((-x_0 + x_2 + x_3 + x_4 + x_5) / x_1);
-        return ((x_1 * MathUtils.lambertW(-1, exp / x_1) - x_5) / b) + (g / (1 - b));
+            double exp = Math.exp((-x_0 + x_2 + x_3 + x_4 + x_5) / x_1);
+            return ((x_1 * MathUtils.lambertW(-1, exp / x_1) - x_5) / b) + (g / (1 - b));
+        }
     }
 }
