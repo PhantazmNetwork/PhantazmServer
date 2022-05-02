@@ -44,11 +44,11 @@ public final class MathUtils {
         return w;
     }
 
-    private static double initW(int branch_index, double z) {
+    private static double initW(int branch, double z) {
         double w;
         if(z >= 0) {
-            if(branch_index == 0) {
-                if( z <= 500.0 ) {
+            if(branch == 0) {
+                if(z <= 500.0) {
                     w = 0.665 * (1 + 0.0195 * Math.log(z + 1.0)) * Math.log(z + 1.0) + 0.04;
                 }
                 else {
@@ -59,11 +59,9 @@ public final class MathUtils {
                 w = Double.NaN;
             }
         }
-
-        // Negative z
         else {
             if(Math.abs(z + Math.exp(-1)) >  0.01) {
-                if(branch_index == 0) {
+                if(branch == 0) {
                     w = 0;
                 }
                 else {
@@ -76,7 +74,7 @@ public final class MathUtils {
                 }
                 else {
                     double sqrt = Math.sqrt(2 * (Math.exp(1) * z + 1));
-                    if(branch_index == 0) {
+                    if(branch == 0) {
                         w = -1 + sqrt;
                     }
                     else {
