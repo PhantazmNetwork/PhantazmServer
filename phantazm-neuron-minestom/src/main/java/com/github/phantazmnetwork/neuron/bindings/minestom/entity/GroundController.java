@@ -17,8 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class GroundController implements Controller {
-    private static final float JUMP_TOLERANCE = 0.125F;
-
     private final Entity entity;
     private final double speed;
     private final double step;
@@ -116,7 +114,7 @@ public class GroundController implements Controller {
         double g = entity.getGravityAcceleration();
 
         if(b == 0) {
-            return Math.sqrt(2 * g * h);
+            return Math.sqrt(2 * g * h) + g;
         }
         else {
             double x0 = b - 1;
