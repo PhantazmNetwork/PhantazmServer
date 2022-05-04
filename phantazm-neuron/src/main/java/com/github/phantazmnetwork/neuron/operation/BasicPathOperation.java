@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.operation;
 
+import com.github.phantazmnetwork.commons.MathUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.node.Calculator;
@@ -34,11 +35,13 @@ public class BasicPathOperation implements PathOperation {
      * @param successPredicate the predicate used to determine if the path has completed
      * @param calculator the {@link Calculator} instance used to calculate distance/heuristics
      * @param explorer the {@link Explorer} instance used to expand new nodes
+     * @param xOffset the x-offset of the starting node
+     * @param zOffset the z-offset of the starting node
      * @throws NullPointerException if any of the arguments are null
      */
     public BasicPathOperation(@NotNull Vec3I start, @NotNull Vec3I destination,
                               @NotNull Predicate<Vec3I> successPredicate, @NotNull Calculator calculator,
-                              @NotNull Explorer explorer) {
+                              @NotNull Explorer explorer, float xOffset, float zOffset) {
         this.destination = Objects.requireNonNull(destination, "destination");
         this.successPredicate = Objects.requireNonNull(successPredicate, "successPredicate");
         this.calculator = Objects.requireNonNull(calculator, "calculator");
@@ -50,22 +53,25 @@ public class BasicPathOperation implements PathOperation {
 
         Node initial = new Node(start, 0, calculator.heuristic(start, destination), null);
 
+        //y offset will be computed later, set == to 0 for now
+        initial.setOffset(xOffset, 0, zOffset);
+
         //add the first node
         openSet.enqueue(initial);
         graph.put(start, initial);
     }
 
     private void complete(boolean succeeded, Node node) {
-        this.state = succeeded ? State.SUCCEEDED : State.FAILED;
+        state = succeeded ? State.SUCCEEDED : State.FAILED;
+        result = new PathResult(node.reverse(), graph.size(), succeeded);
 
-        //clear the graph, we completed this operation
+        //clear everything and trim to minimize space immediately
         openSet.clear();
+        graph.clear();
+
+        graph.trim();
         openSet.trim();
 
-        graph.clear();
-        graph.trim();
-
-        result = new PathResult(node.reverse(), succeeded);
         best = null;
     }
 

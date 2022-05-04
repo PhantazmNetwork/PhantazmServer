@@ -8,10 +8,10 @@ import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
-import com.github.steanky.ethylene.core.processor.ConfigLoader;
 import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
 import com.moandjiezana.toml.TomlWriter;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
@@ -30,10 +30,7 @@ public final class Configuration {
      */
     public static final Path LOBBIES_CONFIG_PATH = Path.of("./lobbies-config.toml");
 
-    /**
-     * The {@link ConfigHandler} instance used to manage {@link ConfigLoader}s.
-     */
-    public static final ConfigHandler CONFIG_HANDLER = new BasicConfigHandler();
+    private static ConfigHandler handler;
 
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link ServerConfig} loader.
@@ -48,11 +45,21 @@ public final class Configuration {
             LobbiesConfig.class, "lobbies_config");
 
     static void initialize() {
+        handler = new BasicConfigHandler();
+
         ConfigCodec codec = new TomlCodec(new TomlWriter.Builder().padArrayDelimitersBy(1).indentValuesBy(4).build());
         MiniMessage miniMessage = MiniMessage.miniMessage();
-        CONFIG_HANDLER.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(
+        handler.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(
                 miniMessage), ServerConfig.DEFAULT, SERVER_CONFIG_PATH, codec));
-        CONFIG_HANDLER.registerLoader(LOBBIES_CONFIG_KEY, new SyncFileConfigLoader<>(new LobbiesConfigProcessor(
+        handler.registerLoader(LOBBIES_CONFIG_KEY, new SyncFileConfigLoader<>(new LobbiesConfigProcessor(
                 miniMessage), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));
+    }
+
+    public static @NotNull ConfigHandler getHandler() {
+        if(handler == null) {
+            throw new IllegalStateException("Configuration has not been initialized yet");
+        }
+
+        return handler;
     }
 }

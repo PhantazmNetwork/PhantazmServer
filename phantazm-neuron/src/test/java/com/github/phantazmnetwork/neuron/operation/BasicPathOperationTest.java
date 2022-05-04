@@ -42,7 +42,7 @@ class BasicPathOperationTest {
         when(mockAgent.getStartPosition()).thenReturn(startPosition);
 
         return new BasicPathOperation(startPosition, destination, (vec) -> vec.equals(destination), calculator,
-                mockExplorer);
+                mockExplorer, 0.5F, 0.5F);
     }
 
     private static void assertPathMatches(Vec3I[] expectedPath, PathOperation.State expectedCompletionState,

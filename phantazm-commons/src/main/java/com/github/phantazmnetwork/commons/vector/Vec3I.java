@@ -86,17 +86,6 @@ public interface Vec3I extends Comparable<Vec3I> {
         return dX * dX + dY * dY + dZ * dZ;
     }
 
-    static int manhattanDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
-        int dX = x1 - x2;
-        int dY = y1 - y2;
-        int dZ = z1 - z2;
-        return Math.abs(dX) + Math.abs(dY) + Math.abs(dZ);
-    }
-
-    static int manhattanDistance(@NotNull Vec3I from, @NotNull Vec3I to) {
-        return manhattanDistance(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
-    }
-
     /**
      * Determines if two points are equal.
      * @param x1 first x-component

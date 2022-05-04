@@ -1,8 +1,7 @@
 package com.github.phantazmnetwork.commons;
 
 public final class MathUtils {
-    public static final double E_INVERSE = 1.0 / Math.E;
-
+    private static final double E_INVERSE = 1.0 / Math.E;
     private static final int SERIES_MAX = 250;
     private static final double ACCURACY = Math.pow(2.0, -49);
 
@@ -86,5 +85,26 @@ public final class MathUtils {
         }
 
         return w;
+    }
+
+    /**
+     * Returns a {@code double} value representing the distance between {@code x} and the largest double value that is
+     * smaller than or equal to {@code x} and is a mathematical integer. This is equivalent to
+     * {@code x - Math.floor(x)}.
+     * @param x the value to find the floor offset for
+     * @return a non-negative double value
+     */
+    public static double floorOffset(double x) {
+        return x - Math.floor(x);
+    }
+
+    /**
+     * If the magnitude of {@code x} is smaller than {@code epsilon}, returns 0. Otherwise, returns {@code x}.
+     * @param x the number which will potentially be reduced to 0
+     * @param epsilon the tolerance value
+     * @return {@code x}, or 0 if x is sufficiently close to it
+     */
+    public static double epsilon(double x, double epsilon) {
+        return Math.abs(x) < epsilon ? 0 : x;
     }
 }

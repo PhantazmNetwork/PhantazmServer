@@ -22,7 +22,7 @@ public final class Neuron {
 
     public static @NotNull Spawner getSpawner() {
         if(spawner == null) {
-            throw new IllegalStateException("Pathfinding has not been initialized yet");
+            throw new IllegalStateException("Neuron has not been initialized yet");
         }
 
         return spawner;

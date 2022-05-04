@@ -30,7 +30,7 @@ public class GroundNeuralEntity extends NeuralEntity {
 
     @Override
     protected @NotNull Navigator makeNavigator(@NotNull PathContext context) {
-        return new GroundNavigator(context.getEngine(), this);
+        return new GroundNavigator(context.getEngine(), this, 500, 500);
     }
 
     @Override

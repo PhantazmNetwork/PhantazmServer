@@ -50,11 +50,11 @@ public class GroundController implements Controller {
         Vec3I targetPos = target.getPosition();
         Pos entityPos = entity.getPosition();
 
-        double targetExact = targetPos.getY() + target.getHeightOffset();
+        double exactTargetY = targetPos.getY() + target.getYOffset();
 
-        double dX = (targetPos.getX() + 0.5) - entityPos.x();
-        double dY = targetExact - entityPos.y();
-        double dZ = (targetPos.getZ() + 0.5) - entityPos.z();
+        double dX = (targetPos.getX() + target.getXOffset()) - entityPos.x();
+        double dY = exactTargetY - entityPos.y();
+        double dZ = (targetPos.getZ() + target.getZOffset()) - entityPos.z();
 
         //slows down entities when they reach their position
         double distSquared = dX * dX + dY * dY + dZ * dZ;
@@ -78,9 +78,9 @@ public class GroundController implements Controller {
                     PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
                     Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-                    if(entityPos.y() < targetExact && PhysicsUtils.hasCollision(physicsResult)) {
+                    if(entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
                         Vec3I currentPos = current.getPosition();
-                        double nodeDiff = targetExact - (currentPos.getY() + current.getHeightOffset());
+                        double nodeDiff = exactTargetY - (currentPos.getY() + current.getYOffset());
                         if(nodeDiff > step) {
                             entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(tps));
                             jumping = true;
@@ -98,14 +98,18 @@ public class GroundController implements Controller {
             }
         }
         else if(jumping) {
-            System.out.println(entityPos);
-            if(entityPos.y() > targetExact) {
-                PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
-                entity.refreshPosition(physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
+            if(entityPos.y() > exactTargetY) {
+                entity.refreshPosition(CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ)).newPosition()
+                        .withView(PositionUtils.getLookYaw(dX, dZ), 0));
                 entity.setVelocity(Vec.ZERO);
                 jumping = false;
             }
         }
+    }
+
+    @Override
+    public boolean isJumping() {
+        return jumping;
     }
 
     //abandon hope, all ye who enter here expecting to understand how this works

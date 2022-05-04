@@ -20,25 +20,43 @@ public class GroundNavigator implements Navigator {
     private final PathEngine pathEngine;
     private final Agent agent;
 
+    private final long immobileThreshold;
+    private final long missingStartDelay;
+
     private Supplier<Vec3I> destinationSupplier;
     private Future<PathResult> currentOperation;
 
     private Node current;
     private Node target;
 
-    public GroundNavigator(@NotNull PathEngine pathEngine, @NotNull Agent agent) {
+    private double lastPathfind;
+    private double recalculationDelay;
+
+    private long notMovingStart;
+
+    public GroundNavigator(@NotNull PathEngine pathEngine, @NotNull Agent agent, long immobileThreshold,
+                           long missingStartDelay) {
         this.pathEngine = Objects.requireNonNull(pathEngine, "pathEngine");
         this.agent = Objects.requireNonNull(agent, "agent");
+        this.notMovingStart = -1;
+
+        this.immobileThreshold = immobileThreshold;
+        this.missingStartDelay = missingStartDelay;
     }
 
     @Override
     public void tick(long time) {
         if(destinationSupplier != null) {
-            Controller controller = agent.getController();
-
             if(target == null) {
                 if(currentOperation == null) {
+                    if(time - lastPathfind < recalculationDelay) {
+                        //don't recalculate the path again too soon
+                        return;
+                    }
+
                     currentOperation = pathEngine.pathfind(agent, destinationSupplier.get());
+                    lastPathfind = time;
+                    recalculationDelay = 0;
                 }
 
                 if(currentOperation.isDone()) {
@@ -49,17 +67,31 @@ public class GroundNavigator implements Navigator {
                     } catch (InterruptedException | ExecutionException ignored) {}
 
                     if(result != null) {
-                        current = result.getStart();
-                        target = current;
+                        Controller controller = agent.getController();
+                        Node start = result.getStart();
 
-                        do {
-                            target = target.getParent();
+                        //try to find a node that we're on top of in case of de-sync
+                        Node nearest = null;
+                        for(Node node : start) {
+                            if(withinDistance(controller, node)) {
+                                nearest = node;
+                                break;
+                            }
                         }
-                        while (target != null && !withinDistance(controller, target));
 
-                        //single node path
-                        if(target == null) {
-                            target = current;
+                        if(nearest != null) {
+                            //we found a starting node
+                            current = nearest;
+                            Node parent = nearest.getParent();
+
+                            //in case of single-node path, current == target
+                            target = parent == null ? nearest : target;
+                            recalculationDelay = result.exploredCount();
+                        }
+                        else {
+                            //failed to find starting node — delay path recalculation
+                            recalculationDelay = missingStartDelay;
+                            return;
                         }
                     }
                     else {
@@ -68,15 +100,16 @@ public class GroundNavigator implements Navigator {
                     }
                 }
                 else {
+                    //path operation is still running (can take multiple ticks)
                     return;
                 }
             }
 
-            continueAlongPath();
+            continueAlongPath(time);
         }
     }
 
-    private void continueAlongPath() {
+    private void continueAlongPath(long time) {
         Controller controller = agent.getController();
         if(withinDistance(controller, target)) {
             current = target;
@@ -84,7 +117,30 @@ public class GroundNavigator implements Navigator {
         }
 
         if(target != null) {
+            double oX = controller.getX();
+            double oY = controller.getY();
+            double oZ = controller.getZ();
             controller.advance(current, target);
+
+            //if we're jumping, we'll have motion so only check when we're on the ground
+            if(!controller.isJumping()) {
+                //detect agents that are not moving
+                if(Vec3D.fuzzyEquals(oX, oY, oZ, controller.getX(), controller.getY(), controller.getZ(),
+                        1E-6)) {
+                    if(notMovingStart == -1) {
+                        notMovingStart = time;
+                    }
+                    else if(time - notMovingStart > immobileThreshold) {
+                        //if we aren't moving for too long, recalculate eventually, subject to any recalculation delay
+                        target = null;
+                        current = null;
+                        notMovingStart = -1;
+                    }
+                }
+                else {
+                    notMovingStart = -1;
+                }
+            }
         }
         else {
             current = null;
@@ -94,7 +150,7 @@ public class GroundNavigator implements Navigator {
     private static boolean withinDistance(Controller controller, Node node) {
         Vec3I nodePosition = node.getPosition();
         return Vec3D.squaredDistance(controller.getX(), controller.getY(), controller.getZ(), nodePosition.getX() +
-                0.5, nodePosition.getY() + node.getHeightOffset(), nodePosition.getZ() + 0.5) <
+                0.5, nodePosition.getY() + node.getYOffset(), nodePosition.getZ() + 0.5) <
                 NODE_REACHED_DISTANCE;
     }
 

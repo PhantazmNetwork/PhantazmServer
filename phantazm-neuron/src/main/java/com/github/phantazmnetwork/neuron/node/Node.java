@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.world.Solid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +51,10 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     private int heapIndex;
 
     private Node parent;
-    private float heightOffset;
+
+    private float xOffset;
+    private float yOffset;
+    private float zOffset;
 
     /**
      * Creates a new Node object with the specified parameters.
@@ -67,6 +69,10 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
         this.h = h;
         this.heapIndex = -1;
         this.parent = parent;
+
+        this.xOffset = 0.5F;
+        this.yOffset = 0F;
+        this.zOffset = 0.5F;
     }
 
     /**
@@ -202,12 +208,22 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
         return nodes;
     }
 
-    public void setHeightOffset(float heightOffset) {
-        this.heightOffset = heightOffset;
+    public void setOffset(float x, float y, float z) {
+        this.xOffset = x;
+        this.yOffset = y;
+        this.zOffset = z;
     }
 
-    public float getHeightOffset() {
-        return heightOffset;
+    public float getXOffset() {
+        return xOffset;
+    }
+
+    public float getYOffset() {
+        return yOffset;
+    }
+
+    public float getZOffset() {
+        return zOffset;
     }
 
     @Override

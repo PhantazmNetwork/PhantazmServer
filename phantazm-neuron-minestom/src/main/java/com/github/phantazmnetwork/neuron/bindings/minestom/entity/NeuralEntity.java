@@ -22,6 +22,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +55,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     }
 
     @Override
-    protected void preTick(long time) {
+    public void update(long time) {
         navigator.tick(time);
     }
 
@@ -84,52 +85,11 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     }
 
     private @Nullable Vec3I computeStartPosition() {
-        Instance instance = this.instance;
-        if(!canPathfind() || instance == null) {
+        if(!canPathfind()) {
             return null;
         }
 
-        Pos entityPos = getPosition();
-        Vec3I blockPos = VecUtils.toBlockInt(entityPos);
-
-        int chunkX = blockPos.getX() >> 4;
-        int chunkZ = blockPos.getZ() >> 4;
-
-        Chunk chunk = instance.getChunkAt(chunkX, chunkZ);
-        if(chunk == null) {
-            //unloaded chunk is an invalid start position
-            return null;
-        }
-
-        Block block;
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (chunk) {
-            block = chunk.getBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Block.Getter.Condition.TYPE);
-        }
-
-        if(!block.isSolid() || blockPos.getY() + block.registry().collisionShape().relativeEnd().y() < entityPos.y()) {
-            //if not solid, our starting pos is valid
-            return blockPos;
-        }
-
-        //get the closest step direction that we won't collide with something in
-        Optional<Vec3I> closest = Pipe.from(getStepDirections()).filter(check -> {
-            double dX = (blockPos.getX() + check.getX()) - entityPos.x();
-            double dY = (blockPos.getY() + check.getY()) - entityPos.y();
-            double dZ = (blockPos.getZ() + check.getZ()) - entityPos.z();
-
-            return !PhysicsUtils.hasCollision(CollisionUtils.handlePhysics(this, new Vec(dX, dY, dZ)));
-        }).min(Comparator.comparingDouble(vector -> Vec3D.squaredDistance(entityPos.x(), entityPos.y(), entityPos.z(),
-                vector.getX(), vector.getY(), vector.getZ())));
-
-        if(closest.isEmpty()) {
-            //couldn't find a starting pos
-            return null;
-        }
-
-        Vec3I shift = closest.get();
-        return Vec3I.of(blockPos.getX() + shift.getX(), blockPos.getY() + shift.getY(), blockPos.getZ() + shift
-                .getZ());
+        return VecUtils.toBlockInt(getPosition());
     }
 
     @Override

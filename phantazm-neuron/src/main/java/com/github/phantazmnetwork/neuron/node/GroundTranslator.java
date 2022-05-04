@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.node;
 
+import com.github.phantazmnetwork.commons.MathUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
 import com.github.phantazmnetwork.neuron.world.Collider;
@@ -35,10 +36,9 @@ public class GroundTranslator implements NodeTranslator {
         int y = nodePosition.getY();
         int z = nodePosition.getZ();
 
-        //center of block at (x, y, z)
-        double cX = x + 0.5;
-        double cY = y + node.getHeightOffset();
-        double cZ = z + 0.5;
+        double cX = x + node.getXOffset();
+        double cY = y + node.getYOffset();
+        double cZ = z + node.getZOffset();
 
         //oX, oY, oZ, vX, vY, vZ represent the bounds of the agent standing at (x, y, z) in origin-vector form
         double oX = cX - halfWidth + EPSILON;
@@ -93,7 +93,7 @@ public class GroundTranslator implements NodeTranslator {
 
     @Override
     public void computeOffset(@NotNull Node node) {
-        double height = collider.heightAt(node.getPosition());
-        node.setHeightOffset((float) (height - Math.floor(height)));
+        node.setOffset(node.getXOffset(), (float) MathUtils.floorOffset(collider.heightAt(node.getPosition())), node
+                .getZOffset());
     }
 }

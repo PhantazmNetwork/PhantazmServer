@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
+import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
@@ -42,13 +43,14 @@ public final class PhantazmServer {
         ServerConfig serverConfig;
         LobbiesConfig lobbiesConfig;
         try {
-            LOGGER.info("Loading configuration data.");
+            LOGGER.info("Loading server configuration data.");
             Configuration.initialize();
-            Configuration.CONFIG_HANDLER.writeDefaultsAndGet();
+            ConfigHandler handler = Configuration.getHandler();
+            handler.writeDefaultsAndGet();
 
-            serverConfig = Configuration.CONFIG_HANDLER.getData(Configuration.SERVER_CONFIG_KEY);
-            lobbiesConfig = Configuration.CONFIG_HANDLER.getData(Configuration.LOBBIES_CONFIG_KEY);
-            LOGGER.info("Configuration data loaded successfully.");
+            serverConfig = handler.getData(Configuration.SERVER_CONFIG_KEY);
+            lobbiesConfig = handler.getData(Configuration.LOBBIES_CONFIG_KEY);
+            LOGGER.info("Server configuration loaded successfully.");
         }
         catch (ConfigProcessException e) {
             LOGGER.error("Fatal error when loading configuration data", e);

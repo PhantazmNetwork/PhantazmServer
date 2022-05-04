@@ -11,4 +11,6 @@ public interface Controller {
     double getZ();
 
     void advance(@NotNull Node current, @NotNull Node target);
+
+    boolean isJumping();
 }
