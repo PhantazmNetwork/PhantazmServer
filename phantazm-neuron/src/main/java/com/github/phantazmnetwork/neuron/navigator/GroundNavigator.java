@@ -13,6 +13,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
+/**
+ * Standard {@link TrackingNavigator} implementation for ground-based movement.
+ */
 public class GroundNavigator extends TrackingNavigator {
     private static final double MOVEMENT_EPSILON = 1E-6;
     private static final double NODE_REACHED_DISTANCE = 0.25;
@@ -33,6 +36,18 @@ public class GroundNavigator extends TrackingNavigator {
     private long lastPathfind;
     private long lastMoved;
 
+    /**
+     * Creates a new GroundNavigator for gravity-bound movement.
+     * @param tracker the {@link NavigationTracker} used to record any events that occur during navigation
+     * @param pathEngine the {@link PathEngine} used to calculate paths
+     * @param agent the agent responsible for navigation
+     * @param immobileThreshold the time beyond which a non-moving agent will be considered "stuck" and the path will be
+     *                          recalculated
+     * @param missingStartDelay the time to wait before path recalculation if no starting position was found
+     * @param exploredDelayMultiplier the multiplier applied to the count of explored nodes after a path has been found,
+     *                                which is the time that the navigator will wait before recalculating if the
+     *                                destination changes
+     */
     public GroundNavigator(@NotNull NavigationTracker tracker, @NotNull PathEngine pathEngine, @NotNull Agent agent,
                            long immobileThreshold, long missingStartDelay, double exploredDelayMultiplier) {
         super(tracker, pathEngine, agent);
@@ -56,20 +71,15 @@ public class GroundNavigator extends TrackingNavigator {
             //if we don't already have a target, we must find a path in order to call continueAlongPath
             if(target == null) {
                 //try pathfinding to the current destination
-                if(!tryPathfind(time)) {
-                    //we aren't allowed to pathfind right now due to cooldown
-                    return;
-                }
-
-                //if we fail to properly initialize the result, return (can happen if we're still calculating a path)
-                if(!tryGetResult()) {
+                if(!tryPathfind(time) || !tryInitResult()) {
+                    //we aren't allowed to pathfind right now due to cooldown or an error condition
                     return;
                 }
             }
-            else if(destinationChange && !agent.getController().isJumping()) {
+            else if(destinationChange) {
                 //we already have a path, but our destination changed, so start calculating a new one (but keep moving)
                 if(tryPathfind(time)) {
-                    tryGetResult();
+                    tryInitResult();
                 }
             }
 
@@ -114,7 +124,7 @@ public class GroundNavigator extends TrackingNavigator {
         return true;
     }
 
-    private boolean tryGetResult() {
+    private boolean tryInitResult() {
         if(currentOperation.isDone()) {
             PathResult result = null;
             try {
@@ -156,21 +166,17 @@ public class GroundNavigator extends TrackingNavigator {
 
             controller.advance(current, target);
 
-            //if we're jumping, we'll have motion from physics engine, not the controller advancing, so only check when
-            //we're on the ground
-            if(!controller.isJumping()) {
-                //detect agents that are not moving
-                if(Vec3D.fuzzyEquals(oX, oY, oZ, controller.getX(), controller.getY(), controller.getZ(),
-                        MOVEMENT_EPSILON)) {
-                    //if we aren't moving for too long, consider the path complete (so we pathfind again)
-                    if(time - lastMoved > immobileThreshold) {
-                        navigationTracker.onNavigationError(this, NavigationTracker.ErrorType.STUCK);
-                        return true;
-                    }
+            //detect agents that are not moving
+            if(Vec3D.fuzzyEquals(oX, oY, oZ, controller.getX(), controller.getY(), controller.getZ(),
+                    MOVEMENT_EPSILON)) {
+                //if we aren't moving for too long, consider the path complete (so we pathfind again)
+                if(time - lastMoved > immobileThreshold) {
+                    navigationTracker.onNavigationError(this, NavigationTracker.ErrorType.STUCK);
+                    return true;
                 }
-                else {
-                    lastMoved = time;
-                }
+            }
+            else {
+                lastMoved = time;
             }
 
             return false;
@@ -210,7 +216,7 @@ public class GroundNavigator extends TrackingNavigator {
     }
 
     @Override
-    public boolean hasPath() {
+    public boolean hasDestination() {
         return hasPath;
     }
 

@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -38,7 +37,7 @@ public class TranslationExplorer extends CachingExplorer {
 
     @Override
     public void initializeNode(@NotNull Node node) {
-        translator.computeOffset(node);
+        translator.initializeNode(node);
     }
 
     @Override

@@ -22,5 +22,14 @@ public interface Descriptor {
      */
     @NotNull Calculator getCalculator();
 
+    /**
+     * Determines if the agent has completed pathfinding. The most basic implementation is to simply check if
+     * {@code position} and {@code destination} are equal. More complex conditions may be given, but care should be
+     * taken to ensure that they are correlated with the heuristic used
+     * ({@link Calculator#heuristic(int, int, int, int, int, int)}).
+     * @param position the current position
+     * @param destination the destination position
+     * @return whether this agent should have completed
+     */
     boolean isComplete(@NotNull Vec3I position, @NotNull Vec3I destination);
 }

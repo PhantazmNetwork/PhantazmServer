@@ -30,10 +30,9 @@ public interface NodeTranslator {
     @NotNull Vec3I translate(@NotNull Node node, int deltaX, int deltaY, int deltaZ);
 
     /**
-     * Computes the height offset value for this node. This is necessary to call for environments that have available,
-     * valid places for agents to stand whose heights are not integers. If this is the case, this method should always
-     * be called once for each node, before calling {@link NodeTranslator#translate(Node, int, int, int)}.
-     * @param node the node to compute the offset value for
+     * Performs initialization tasks on this node. This may include setting arbitrary properties like offset height.
+     * This should be called once per node.
+     * @param node the node to initialize
      */
-    void computeOffset(@NotNull Node node);
+    void initializeNode(@NotNull Node node);
 }

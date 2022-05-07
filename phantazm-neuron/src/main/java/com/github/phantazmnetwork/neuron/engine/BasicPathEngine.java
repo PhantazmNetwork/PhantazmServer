@@ -14,10 +14,19 @@ import javax.naming.ldap.Control;
 import java.util.Objects;
 import java.util.concurrent.*;
 
+/**
+ * A simple, asynchronous {@link PathEngine} implementation. {@link PathOperation}s are completed using the provided
+ * {@link ExecutorService}.
+ */
 @SuppressWarnings("ClassCanBeRecord")
 public class BasicPathEngine implements PathEngine {
     private final ExecutorService executor;
 
+    /**
+     * Creates a new BasicPathEngine from the given ExecutorService. The lifecycle of the executor is not managed by
+     * this class; thus, care must be taken to properly terminate the service if it is no longer needed.
+     * @param executor the {@link ExecutorService} used to run pathfinding operations asynchronously
+     */
     public BasicPathEngine(@NotNull ExecutorService executor) {
         this.executor = Objects.requireNonNull(executor, "executor");
     }
@@ -39,6 +48,7 @@ public class BasicPathEngine implements PathEngine {
                         .getZ()));
 
                 while(!operation.isComplete() && !Thread.interrupted()) {
+                    //step the operation until complete or we're interrupted
                     operation.step();
                 }
 

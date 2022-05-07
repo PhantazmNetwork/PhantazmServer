@@ -12,6 +12,10 @@ import org.jetbrains.annotations.NotNull;
  * degenerate (have one or more side lengths equal to 0).
  */
 public interface Solid {
+    /**
+     * Reports if this solid has "child" components.
+     * @return {@code true} if this solid has child components, {@code false} otherwise
+     */
     boolean hasChildren();
 
     /**
@@ -28,7 +32,22 @@ public interface Solid {
      */
     @NotNull Vec3F getMax();
 
+    /**
+     * Returns an {@link Iterable} over any child solids. Will be empty if this solid does not have any children.
+     * @return an iterable over any child solids
+     */
     @NotNull Iterable<Solid> getChildren();
 
+    /**
+     * Determines if this solid  overlaps the given bounds. The solid itself is considered relative to the origin
+     * (0, 0, 0).
+     * @param x the x-component of the minimum vector
+     * @param y the y-component of the minimum vector
+     * @param z the z-component of the minimum vector
+     * @param width the width of the bounding box (x-length)
+     * @param height the height of the bounding box (y-length)
+     * @param depth the depth of the bounding box (z-length)
+     * @return {@code true} if the given bounding box overlaps this solid, false otherwise
+     */
     boolean overlaps(double x, double y, double z, double width, double height, double depth);
 }

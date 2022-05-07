@@ -208,20 +208,39 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
         return nodes;
     }
 
+    /**
+     * Sets the offset vector for this node. This is used to keep track of precise position, when necessary (typically
+     * only for the first node in a path).
+     * @param x the x-offset
+     * @param y the y-offset
+     * @param z the z-offset
+     */
     public void setOffset(float x, float y, float z) {
         this.xOffset = x;
         this.yOffset = y;
         this.zOffset = z;
     }
 
+    /**
+     * Returns the x-component of the offset vector.
+     * @return the x-component of the offset vector
+     */
     public float getXOffset() {
         return xOffset;
     }
 
+    /**
+     * Returns the y-component of the offset vector.
+     * @return the y-component of the offset vector
+     */
     public float getYOffset() {
         return yOffset;
     }
 
+    /**
+     * Returns the z-component of the offset vector.
+     * @return the z-component of the offset vector
+     */
     public float getZOffset() {
         return zOffset;
     }

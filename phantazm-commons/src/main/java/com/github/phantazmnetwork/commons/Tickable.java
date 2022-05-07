@@ -5,12 +5,10 @@ package com.github.phantazmnetwork.commons;
  */
 @FunctionalInterface
 public interface Tickable {
-
     /**
      * Executes a "tick".
      * This enables implementations to run periodic behavior.
-     * @param time the current number of ticks that have elapsed
+     * @param time the number of milliseconds that have elapsed
      */
     void tick(long time);
-
 }

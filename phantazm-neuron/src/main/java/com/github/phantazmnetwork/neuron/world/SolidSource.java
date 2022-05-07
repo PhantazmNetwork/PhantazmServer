@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
+/**
+ * An extension of {@link Pipe.Source} specializing in iterating {@link Solid}s.
+ */
 @FunctionalInterface
 public interface SolidSource extends Pipe.Source<Solid> {
     @Override

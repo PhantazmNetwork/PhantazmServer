@@ -57,7 +57,7 @@ public interface PathOperation {
     @NotNull PathResult getResult();
 
     /**
-     * Equivalent to <code>getState() != State.IN_PROGRESS</code>.
+     * Equivalent to {@code getState() != State.IN_PROGRESS}.
      * @return {@code true} if this operation has completed (if its state is {@link State#FAILED} or
      * {@link State#SUCCEEDED}); false otherwise
      */

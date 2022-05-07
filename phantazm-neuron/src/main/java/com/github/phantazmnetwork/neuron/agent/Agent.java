@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import org.jetbrains.annotations.NotNull;
+import com.github.phantazmnetwork.neuron.node.Node;
 
 /**
  * Represents something capable of pathfinding. This is the most general representation of a navigation-capable object,
@@ -17,6 +17,11 @@ public interface Agent {
      */
     boolean hasStartPosition();
 
+    /**
+     * Returns the starting position for this Agent.
+     * @return the starting position for this Agent
+     * @throws IllegalStateException if this agent does not have a valid starting position
+     */
     @NotNull Vec3I getStartPosition();
 
     /**
@@ -25,7 +30,15 @@ public interface Agent {
      */
     @NotNull Descriptor getDescriptor();
 
+    /**
+     * Returns the {@link Explorer} used by this agent to expand {@link Node}s when pathfinding.
+     * @return the Explorer instance used to expand nodes
+     */
     @NotNull Explorer getExplorer();
 
+    /**
+     * Returns the {@link Controller} used to physically move this Agent along a completed path.
+     * @return the controller used to position this agent
+     */
     @NotNull Controller getController();
 }

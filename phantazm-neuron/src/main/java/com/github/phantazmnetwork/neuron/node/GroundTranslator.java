@@ -22,6 +22,12 @@ public class GroundTranslator implements NodeTranslator {
     private final float halfWidth;
     private final float halfDepth;
 
+    /**
+     * Creates a new instance of GroundTranslator from the given {@link Collider} (for collision checking) and
+     * {@link GroundDescriptor} describing an agent's characteristics.
+     * @param collider the collider used to perform collision checking
+     * @param descriptor the descriptor describing the characteristics of a gravity-bound agent
+     */
     public GroundTranslator(@NotNull Collider collider, @NotNull GroundDescriptor descriptor) {
         this.collider = Objects.requireNonNull(collider, "collider");
         this.descriptor = descriptor;
@@ -98,7 +104,7 @@ public class GroundTranslator implements NodeTranslator {
     }
 
     @Override
-    public void computeOffset(@NotNull Node node) {
+    public void initializeNode(@NotNull Node node) {
         node.setOffset(node.getXOffset(), (float) MathUtils.floorOffset(collider.heightAt(node.getPosition())), node
                 .getZOffset());
     }
