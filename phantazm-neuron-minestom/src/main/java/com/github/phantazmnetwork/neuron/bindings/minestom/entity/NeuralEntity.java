@@ -61,34 +61,11 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public boolean hasStartPosition() {
-        Vec3I current = VecUtils.toBlockInt(getPosition());
-        if(current.equals(startPosition)) {
-            return true;
-        }
-
-        return (startPosition = computeStartPosition()) != null;
+        return canPathfind();
     }
 
     @Override
     public @NotNull Vec3I getStartPosition() {
-        Vec3I current = VecUtils.toBlockInt(getPosition());
-        if(current.equals(startPosition)) {
-            return startPosition;
-        }
-
-        Vec3I position = computeStartPosition();
-        if(position == null) {
-            throw new IllegalStateException("No valid starting position can be found for this entity");
-        }
-
-        return position;
-    }
-
-    private @Nullable Vec3I computeStartPosition() {
-        if(!canPathfind()) {
-            return null;
-        }
-
         return VecUtils.toBlockInt(getPosition());
     }
 
@@ -258,12 +235,9 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
         }
     }
 
-    private @NotNull Instance requireInstance() {
-        Instance instance = getInstance();
+    private void requireInstance() {
         if(instance == null) {
             throw new IllegalStateException("Entity has no instance set");
         }
-
-        return instance;
     }
 }

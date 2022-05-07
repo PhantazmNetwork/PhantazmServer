@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDescriptor {
     @Override
     default float getJumpHeight() {
-        return 20F;
+        return 1F;
     }
 
     @Override

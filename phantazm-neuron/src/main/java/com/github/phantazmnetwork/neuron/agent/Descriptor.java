@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Describes the characteristics (type) of an agent. Many agents may share a single descriptor. Descriptors encapsulate
- * the pathfinding behavior of agents — agents will identical descriptors will exhibit identical behavior.
+ * the pathfinding behavior of agents — agents with identical descriptors will exhibit identical behavior.
  */
 public interface Descriptor {
     /**
