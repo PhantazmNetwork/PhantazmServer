@@ -6,8 +6,8 @@ import com.github.phantazmnetwork.neuron.navigator.Controller;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * <p>Represents something capable of pathfinding. This is the most general representation of a navigation-capable
- * object, and generally all that is required to be used by a pathfinding algorithm such as A*.</p>
+ * Represents something capable of pathfinding. This is the most general representation of a navigation-capable object,
+ * and generally all that is required to be used by a pathfinding algorithm such as A*.
  */
 public interface Agent {
     /**
@@ -17,28 +17,6 @@ public interface Agent {
      */
     boolean hasStartPosition();
 
-    /**
-     * <p>Retrieves, and potentially computes, the starting position of this agent. This value may be cached or lazily
-     * computed, but it should only expose <i>one</i> unchanging value. The starting position might not reflect the
-     * actual position of the agent. In particular, the agent's actual position will typically be a single or
-     * double-precision floating point 3D vector, whereas pathfinding only deals with 3D integer vectors.</p>
-     *
-     * <p>The computation of the starting position may be more complicated than one might expect. It is important to
-     * ensure that for any returned vector {@code vec}, there exists an unobstructed path from the agent's actual
-     * position to {@code vec}. Naive implementations of this method that do not perform the necessary checks may cause
-     * agents to become "stuck" as they attempt to walk to their "starting" node.</p>
-     *
-     * <p>In some cases, the agent may be unable to produce a meaningful starting position. This can happen if the
-     * agent's position is invalid (what this means is up to the implementation), or if world conditions are such that
-     * there is no way to determine the starting position. In these cases, this method should throw an
-     * {@link IllegalStateException}.</p>
-     *
-     * <p>Before calling this method, users must query {@link Agent#hasStartPosition()} to determine if a starting point
-     * exists, and by extension determine if this agent is valid for pathfinding.</p>
-     * @return the starting position of this entity, which should be immutable
-     * @throws IllegalStateException if no start position may be computed; only if {@link Agent#hasStartPosition()}
-     * returns false
-     */
     @NotNull Vec3I getStartPosition();
 
     /**

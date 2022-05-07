@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.commons.MathUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.node.Calculator;
@@ -53,7 +52,7 @@ public class BasicPathOperation implements PathOperation {
 
         Node initial = new Node(start, 0, calculator.heuristic(start, destination), null);
 
-        //y offset will be computed later, set == to 0 for now
+        //y offset will be computed later, set to 0 for now
         initial.setOffset(xOffset, 0, zOffset);
 
         //add the first node

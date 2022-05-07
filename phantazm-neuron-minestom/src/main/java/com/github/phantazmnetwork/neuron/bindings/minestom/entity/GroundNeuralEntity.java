@@ -2,16 +2,21 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
+import com.github.phantazmnetwork.neuron.bindings.minestom.DebugTracker;
 import com.github.phantazmnetwork.neuron.bindings.minestom.StepDirections;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.GroundNavigator;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
+import com.github.phantazmnetwork.neuron.navigator.NavigationTracker;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
+import com.github.phantazmnetwork.neuron.operation.PathResult;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +35,8 @@ public class GroundNeuralEntity extends NeuralEntity {
 
     @Override
     protected @NotNull Navigator makeNavigator(@NotNull PathContext context) {
-        return new GroundNavigator(context.getEngine(), this, 500, 500);
+        return new GroundNavigator(NavigationTracker.NULL, context.getEngine(), this, 500,
+                500, 10);
     }
 
     @Override

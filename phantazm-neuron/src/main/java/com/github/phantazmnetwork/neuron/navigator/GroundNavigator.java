@@ -9,107 +9,140 @@ import com.github.phantazmnetwork.neuron.operation.PathResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
-public class GroundNavigator implements Navigator {
+public class GroundNavigator extends TrackingNavigator {
+    private static final double MOVEMENT_EPSILON = 1E-6;
     private static final double NODE_REACHED_DISTANCE = 0.25;
-
-    private final PathEngine pathEngine;
-    private final Agent agent;
 
     private final long immobileThreshold;
     private final long missingStartDelay;
+    private final double exploredDelayMultiplier;
 
     private Supplier<Vec3I> destinationSupplier;
+    private Vec3I currentDestination;
     private Future<PathResult> currentOperation;
 
     private Node current;
     private Node target;
+    private boolean hasPath;
 
-    private double lastPathfind;
-    private double recalculationDelay;
+    private long recalculationDelay;
+    private long lastPathfind;
+    private long lastMoved;
 
-    private long notMovingStart;
-
-    public GroundNavigator(@NotNull PathEngine pathEngine, @NotNull Agent agent, long immobileThreshold,
-                           long missingStartDelay) {
-        this.pathEngine = Objects.requireNonNull(pathEngine, "pathEngine");
-        this.agent = Objects.requireNonNull(agent, "agent");
-        this.notMovingStart = -1;
-
+    public GroundNavigator(@NotNull NavigationTracker tracker, @NotNull PathEngine pathEngine, @NotNull Agent agent,
+                           long immobileThreshold, long missingStartDelay, double exploredDelayMultiplier) {
+        super(tracker, pathEngine, agent);
         this.immobileThreshold = immobileThreshold;
         this.missingStartDelay = missingStartDelay;
+        this.exploredDelayMultiplier = exploredDelayMultiplier;
     }
 
     @Override
     public void tick(long time) {
         if(destinationSupplier != null) {
+            Vec3I newDestination = destinationSupplier.get();
+
+            boolean destinationChange = false;
+            if(!newDestination.equals(currentDestination)) {
+                //destination change
+                destinationChange = true;
+                this.currentDestination = newDestination;
+            }
+
+            //if we don't already have a target, we must find a path in order to call continueAlongPath
             if(target == null) {
-                if(currentOperation == null) {
-                    if(time - lastPathfind < recalculationDelay) {
-                        //don't recalculate the path again too soon
-                        return;
-                    }
-
-                    currentOperation = pathEngine.pathfind(agent, destinationSupplier.get());
-                    lastPathfind = time;
-                    recalculationDelay = 0;
+                //try pathfinding to the current destination
+                if(!tryPathfind(time)) {
+                    //we aren't allowed to pathfind right now due to cooldown
+                    return;
                 }
 
-                if(currentOperation.isDone()) {
-                    PathResult result = null;
-                    try {
-                        result = currentOperation.get();
-                        currentOperation = null;
-                    } catch (InterruptedException | ExecutionException ignored) {}
-
-                    if(result != null) {
-                        Controller controller = agent.getController();
-                        Node start = result.getStart();
-
-                        //try to find a node that we're on top of in case of de-sync
-                        Node nearest = null;
-                        for(Node node : start) {
-                            if(withinDistance(controller, node)) {
-                                nearest = node;
-                                break;
-                            }
-                        }
-
-                        if(nearest != null) {
-                            //we found a starting node
-                            current = nearest;
-                            Node parent = nearest.getParent();
-
-                            //in case of single-node path, current == target
-                            target = parent == null ? nearest : target;
-                            recalculationDelay = result.exploredCount();
-                        }
-                        else {
-                            //failed to find starting node — delay path recalculation
-                            recalculationDelay = missingStartDelay;
-                            return;
-                        }
-                    }
-                    else {
-                        //path was cancelled or an exception was thrown
-                        return;
-                    }
-                }
-                else {
-                    //path operation is still running (can take multiple ticks)
+                //if we fail to properly initialize the result, return (can happen if we're still calculating a path)
+                if(!tryGetResult()) {
                     return;
                 }
             }
+            else if(destinationChange && !agent.getController().isJumping()) {
+                //we already have a path, but our destination changed, so start calculating a new one (but keep moving)
+                if(tryPathfind(time)) {
+                    tryGetResult();
+                }
+            }
 
-            continueAlongPath(time);
+            if(current == target || continueAlongPath(time)) {
+                //path has ended
+                navigationTracker.onDestinationReached(this);
+                reset(time);
+            }
         }
     }
 
-    private void continueAlongPath(long time) {
+    private boolean initializePath(PathResult result) {
+        Controller controller = agent.getController();
+        Node pathStart = result.getStart();
+
+        //search for an appropriate starting node
+        Node start = null;
+        for(Node node : pathStart) {
+            if(withinDistance(controller, node)) {
+                start = node;
+                break;
+            }
+        }
+
+        if(start == null) {
+            //failed to find starting node
+            navigationTracker.onNavigationError(this, NavigationTracker.ErrorType.NO_START);
+            recalculationDelay = missingStartDelay;
+            return false;
+        }
+
+        current = start;
+
+        //account for single-node path
+        Node currentParent = start.getParent();
+        target = currentParent == null ? start : currentParent;
+
+        recalculationDelay = Math.round(result.exploredCount() * exploredDelayMultiplier);
+        hasPath = true;
+
+        navigationTracker.onPathfindComplete(this, result);
+        return true;
+    }
+
+    private boolean tryGetResult() {
+        if(currentOperation.isDone()) {
+            PathResult result = null;
+            try {
+                result = currentOperation.get();
+                currentOperation = null;
+            } catch (ExecutionException | InterruptedException ignored) {}
+
+            return result != null && initializePath(result);
+        }
+
+        return false;
+    }
+
+    private boolean tryPathfind(long time) {
+        if(currentOperation == null) {
+            if(time - lastPathfind < recalculationDelay) {
+                return false;
+            }
+
+            lastPathfind = time;
+            currentOperation = pathEngine.pathfind(agent, currentDestination);
+            navigationTracker.onPathfind(this);
+        }
+
+        return true;
+    }
+
+    private boolean continueAlongPath(long time) {
         Controller controller = agent.getController();
         if(withinDistance(controller, target)) {
             current = target;
@@ -120,58 +153,73 @@ public class GroundNavigator implements Navigator {
             double oX = controller.getX();
             double oY = controller.getY();
             double oZ = controller.getZ();
+
             controller.advance(current, target);
 
-            //if we're jumping, we'll have motion so only check when we're on the ground
+            //if we're jumping, we'll have motion from physics engine, not the controller advancing, so only check when
+            //we're on the ground
             if(!controller.isJumping()) {
                 //detect agents that are not moving
                 if(Vec3D.fuzzyEquals(oX, oY, oZ, controller.getX(), controller.getY(), controller.getZ(),
-                        1E-6)) {
-                    if(notMovingStart == -1) {
-                        notMovingStart = time;
-                    }
-                    else if(time - notMovingStart > immobileThreshold) {
-                        //if we aren't moving for too long, recalculate eventually, subject to any recalculation delay
-                        target = null;
-                        current = null;
-                        notMovingStart = -1;
+                        MOVEMENT_EPSILON)) {
+                    //if we aren't moving for too long, consider the path complete (so we pathfind again)
+                    if(time - lastMoved > immobileThreshold) {
+                        navigationTracker.onNavigationError(this, NavigationTracker.ErrorType.STUCK);
+                        return true;
                     }
                 }
                 else {
-                    notMovingStart = -1;
+                    lastMoved = time;
                 }
             }
+
+            return false;
         }
-        else {
-            current = null;
-        }
+
+        return true;
+    }
+
+    private void reset(long time) {
+        currentDestination = null;
+        currentOperation = null;
+        current = null;
+        target = null;
+        hasPath = false;
+        lastPathfind = time;
+        lastMoved = time;
     }
 
     private static boolean withinDistance(Controller controller, Node node) {
         Vec3I nodePosition = node.getPosition();
         return Vec3D.squaredDistance(controller.getX(), controller.getY(), controller.getZ(), nodePosition.getX() +
-                0.5, nodePosition.getY() + node.getYOffset(), nodePosition.getZ() + 0.5) <
-                NODE_REACHED_DISTANCE;
+                node.getXOffset(), nodePosition.getY() + node.getYOffset(), nodePosition.getZ() + node
+                .getZOffset()) < NODE_REACHED_DISTANCE;
     }
 
     @Override
     public void setDestination(@Nullable Supplier<Vec3I> destinationSupplier) {
         this.destinationSupplier = destinationSupplier;
         if(destinationSupplier == null) {
-            //setting to null == cancelling, so just reset everything
-            cancelOperation();
-            target = null;
+            reset(0);
         }
     }
 
-    private void cancelOperation() {
-        if(currentOperation != null) {
-            currentOperation.cancel(true);
-            try {
-                currentOperation.get();
-            } catch (InterruptedException | ExecutionException ignored) {}
+    @Override
+    public @NotNull Agent getAgent() {
+        return agent;
+    }
 
-            currentOperation = null;
+    @Override
+    public boolean hasPath() {
+        return hasPath;
+    }
+
+    @Override
+    public @NotNull Vec3I getDestination() {
+        if(currentDestination == null) {
+            throw new IllegalStateException("Cannot get the destination for a Navigator that has no path");
         }
+
+        return currentDestination;
     }
 }

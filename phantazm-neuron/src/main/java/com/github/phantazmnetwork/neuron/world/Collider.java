@@ -3,21 +3,6 @@ package com.github.phantazmnetwork.neuron.world;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * <p>Responsible for performing basic collision checks. Most methods operate on axis-aligned bounding boxes (two double
- * triplets representing a rectangular region in 3D space).</p>
- *
- * <p>Those familiar with Bukkit and its implementation of bounding boxes should note that this class expects a slightly
- * different format. While Bukkit bounding boxes are represented by two vectors (one for each opposing corner of the
- * AABB), this class uses what is henceforth referred to as the <i>origin-vector</i> form. In origin-vector form, the
- * first vector (the "origin") represents one corner of the bounding box, and the second vector represents an offset —
- * a vector added to the origin to obtain the opposite corner from the first corner. Therefore, the lengths of each edge
- * of the AABB are represented by the absolute value of the corresponding components of the second vector.</p>
- *
- * <p>Collider implementations should not attempt to account for floating point imprecision issues. When performing
- * collision checks, the caller must shrink the bounding box by a tolerance value. The exact value that must be used
- * depends on the level of precision required as well as the numbers involved.</p>
- */
 public interface Collider {
     double highestCollisionAlong(double x, double y, double z, double width, double height, double depth, double dX,
                                  double dY, double dZ);

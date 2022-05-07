@@ -23,6 +23,12 @@ public class GroundController implements Controller {
 
     private boolean jumping;
 
+    private double lastH = -1;
+    private double lastB = -1;
+    private double lastG = -1;
+
+    private double lastJumpVelocity = -1;
+
     public GroundController(@NotNull Entity entity, float step, double walkSpeed) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.speed = walkSpeed;
@@ -71,38 +77,39 @@ public class GroundController implements Controller {
         double speedX = Math.copySign(Math.min(Math.abs(vX), Math.abs(dX)), dX);
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
 
-        int tps = MinecraftServer.TICK_PER_SECOND;
-        if(!entity.hasVelocity()) {
-            if(entity.isOnGround()) {
-                if(!jumping) {
-                    PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
-                    Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
-
-                    if(entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
-                        Vec3I currentPos = current.getPosition();
-                        double nodeDiff = exactTargetY - (currentPos.getY() + current.getYOffset());
-                        if(nodeDiff > step) {
-                            entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(tps));
-                            jumping = true;
-                        } else if(nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
-                            entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
-                            return;
-                        }
-                    }
-
-                    entity.refreshPosition(pos);
-                }
-                else {
-                    jumping = false;
-                }
-            }
-        }
-        else if(jumping) {
+        if(jumping) {
             if(entityPos.y() > exactTargetY) {
                 entity.refreshPosition(CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ)).newPosition()
                         .withView(PositionUtils.getLookYaw(dX, dZ), 0));
                 entity.setVelocity(Vec.ZERO);
                 jumping = false;
+            }
+            else if(entity.isOnGround()) {
+                jumping = false;
+            }
+
+            return;
+        }
+
+        if(!entity.hasVelocity()) {
+            if(entity.isOnGround()) {
+                PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
+                Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
+
+                if(entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
+                    Vec3I currentPos = current.getPosition();
+                    double nodeDiff = exactTargetY - (currentPos.getY() + current.getYOffset());
+                    if(nodeDiff > step) {
+                        entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer
+                                .TICK_PER_SECOND));
+                        jumping = true;
+                    } else if(nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
+                        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
+                        return;
+                    }
+                }
+
+                entity.refreshPosition(pos);
             }
         }
     }
@@ -117,17 +124,35 @@ public class GroundController implements Controller {
         double b = entity.getGravityDragPerTick();
         double g = entity.getGravityAcceleration();
 
+        //return a cached value if possible (lambertW can be expensive)
+        if(h == lastH && b == lastB && g == lastG) {
+            return lastJumpVelocity;
+        }
+
+        lastH = h;
+        lastB = b;
+        lastG = g;
+
         if(b == 0) {
-            return Math.sqrt(2 * g * h) + g;
+            //when there's no drag to contend with, use a simple height formula
+            return lastJumpVelocity = Math.sqrt(2 * g * h) + g;
         }
         else {
+            /*
+            calculate the precise required jump velocity using the inverse of the sum of two integrals A and -B, where
+            A is the definite integral of the standard entity velocity formula in terms of time from 0 to the time at
+            which we have reached our height (velocity is 0), and B is the definite integral from the time when we have
+            reached our height (t) to (t + 1). the latter is necessary due to time being discrete and us needing to
+            avoid underestimating height
+             */
+            double l0 = Math.log(1 - b);
             double x0 = b - 1;
             double x1 = -b * g + g;
-            double x2 = 2 * b * g + g * Math.log(1 - b) - g * Math.log(g);
-            double x3 = b * Math.log(1 - b);
+            double x2 = 2 * b * g + g * l0 - g * Math.log(g);
+            double x3 = b * l0;
 
             double z = -Math.exp((x0 * (-x1 - x2) - h * x3) / (g * x0)) / g;
-            return (-g * MathUtils.lambertW(-1, z) - x1) / b;
+            return lastJumpVelocity = (-g * MathUtils.lambertW(-1, z) - x1) / b;
         }
     }
 }

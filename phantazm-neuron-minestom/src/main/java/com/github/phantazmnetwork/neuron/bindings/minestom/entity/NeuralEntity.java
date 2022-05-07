@@ -1,29 +1,23 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.api.vector.VecUtils;import com.github.phantazmnetwork.commons.pipe.Pipe;
-import com.github.phantazmnetwork.commons.vector.Vec3D;
+import com.github.phantazmnetwork.api.vector.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.agent.TranslationExplorer;
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
-import com.github.phantazmnetwork.neuron.bindings.minestom.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
-import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.WorldBorder;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -55,7 +49,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     }
 
     @Override
-    public void update(long time) {
+    public void preTick(long time) {
         navigator.tick(time);
     }
 
