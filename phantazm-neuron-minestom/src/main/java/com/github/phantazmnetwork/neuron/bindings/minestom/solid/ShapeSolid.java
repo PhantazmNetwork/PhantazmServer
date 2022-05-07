@@ -17,6 +17,11 @@ class ShapeSolid extends MinestomSolid {
     private final boolean hasChildren;
     private final Iterable<Solid> children;
 
+    /**
+     * Creates a new instance of this class from the provided {@link Shape}. The shape's child bounding boxes, if any,
+     * will be accounted for.
+     * @param shape the shape to create this solid from
+     */
     ShapeSolid(@NotNull Shape shape) {
         super(VecUtils.toFloat(shape.relativeStart()), VecUtils.toFloat(shape.relativeEnd()));
 

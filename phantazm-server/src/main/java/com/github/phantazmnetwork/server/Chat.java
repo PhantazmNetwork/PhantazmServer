@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
+/**
+ * Entrypoint for chat-related features.
+ */
 public final class Chat {
     /**
      * The default {@link ChatChannel} name for players.
@@ -34,6 +37,10 @@ public final class Chat {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Initializes chat features. Should only be called once from {@link PhantazmServer#main(String[])}.
+     * @param node the node to register chat-related events to
+     */
     static void initialize(EventNode<Event> node) {
         ChatChannel defaultChannel = (sender, message, messageType, filter) -> {
             if (sender instanceof Entity entity && sender instanceof Identified identified) {

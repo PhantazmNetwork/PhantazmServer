@@ -22,6 +22,7 @@ public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig,
      * Creates config for the server.
      * @param serverInfoConfig Config for the server's setup
      * @param pingListConfig Config for the server's ping list
+     * @param pathfinderConfig config for pathfinding
      */
     public ServerConfig {
         Objects.requireNonNull(serverInfoConfig, "serverInfoConfig");

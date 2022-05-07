@@ -6,19 +6,23 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.node.Node;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * An implementation of {@link Controller} designed for gravity-bound movement.
+ */
 public class GroundController implements Controller {
-    private final Entity entity;
-    private final double speed;
+    private final LivingEntity entity;
     private final double step;
 
     private boolean jumping;
@@ -29,9 +33,13 @@ public class GroundController implements Controller {
 
     private double lastJumpVelocity = -1;
 
-    public GroundController(@NotNull Entity entity, float step, double walkSpeed) {
+    /**
+     * Creates a new GroundController managing the provided entity, using the given step distance and walk speed.
+     * @param entity the entity managed by this controller
+     * @param step the maximum distance the entity may "step up" blocks
+     */
+    public GroundController(@NotNull LivingEntity entity, float step) {
         this.entity = Objects.requireNonNull(entity, "entity");
-        this.speed = walkSpeed;
         this.step = step;
     }
 
@@ -64,7 +72,7 @@ public class GroundController implements Controller {
 
         //slows down entities when they reach their position
         double distSquared = dX * dX + dY * dY + dZ * dZ;
-        double speed = this.speed;
+        double speed = entity.getAttributeValue(Attribute.MOVEMENT_SPEED);
         if (speed > distSquared) {
             speed = distSquared;
         }
@@ -112,11 +120,6 @@ public class GroundController implements Controller {
                 entity.refreshPosition(pos);
             }
         }
-    }
-
-    @Override
-    public boolean isJumping() {
-        return jumping;
     }
 
     //abandon hope, all ye who enter here expecting to understand how this works

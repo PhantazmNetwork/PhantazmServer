@@ -15,6 +15,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
+/**
+ * Entrypoint for configuration-related features.
+ */
 public final class Configuration {
     private Configuration() {
         throw new UnsupportedOperationException();
@@ -44,6 +47,9 @@ public final class Configuration {
     public static final ConfigHandler.ConfigKey<LobbiesConfig> LOBBIES_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
             LobbiesConfig.class, "lobbies_config");
 
+    /**
+     * Initializes server configuration features. Should only be called once from {@link PhantazmServer#main(String[])}.
+     */
     static void initialize() {
         handler = new BasicConfigHandler();
 
@@ -55,6 +61,10 @@ public final class Configuration {
                 miniMessage), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));
     }
 
+    /**
+     * Returns the {@link ConfigHandler} used by Phantazm.
+     * @return the global ConfigHandler
+     */
     public static @NotNull ConfigHandler getHandler() {
         if(handler == null) {
             throw new IllegalStateException("Configuration has not been initialized yet");

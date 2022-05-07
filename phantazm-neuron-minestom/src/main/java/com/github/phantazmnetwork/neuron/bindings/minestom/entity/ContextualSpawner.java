@@ -9,10 +9,17 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+/**
+ * A {@link Spawner} implementation that uses a single {@link ContextProvider} to build and spawn all entities.
+ */
 @SuppressWarnings("ClassCanBeRecord")
 public class ContextualSpawner implements Spawner {
     private final ContextProvider contextProvider;
 
+    /**
+     * Creates a new ContextualSpawner that will use the given {@link ContextProvider} to build all entities.
+     * @param contextProvider the ContextProvider which will be used to construct new entities
+     */
     public ContextualSpawner(@NotNull ContextProvider contextProvider) {
         this.contextProvider = Objects.requireNonNull(contextProvider, "contextProvider");
     }

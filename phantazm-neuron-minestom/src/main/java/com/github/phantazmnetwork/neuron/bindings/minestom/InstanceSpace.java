@@ -10,9 +10,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * A {@link VoxelSpace} implementation which uses a Minestom {@link Instance} as a supplier of {@link NeuralChunk}s.
+ */
 public class InstanceSpace extends VoxelSpace {
     private final Instance instance;
 
+    /**
+     * Creates a new instance of this class. The given {@link Instance} may only supply {@link NeuralChunk}s, as these
+     * are used to properly locate and construct {@link Solid} objects.
+     * @param instance the instance which will supply solids and chunks as needed
+     */
     public InstanceSpace(@NotNull Instance instance) {
         this.instance = Objects.requireNonNull(instance, "instance");
     }

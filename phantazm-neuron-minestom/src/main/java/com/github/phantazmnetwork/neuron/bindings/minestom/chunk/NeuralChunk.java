@@ -32,6 +32,12 @@ public class NeuralChunk extends DynamicChunk {
 
     private final IntSet tallSolids;
 
+    /**
+     * Creates a new NeuralChunk for the given instance.
+     * @param instance the instance this chunk belongs to
+     * @param chunkX the chunk's x-coordinate
+     * @param chunkZ the chunk's z-coordinate
+     */
     public NeuralChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
         super(instance, chunkX, chunkZ);
         this.tallSolids = new IntOpenHashSet(8);
@@ -52,6 +58,14 @@ public class NeuralChunk extends DynamicChunk {
         }
     }
 
+    /**
+     * Tries to obtain a {@link Solid} located at the provided world coordinates. This properly accounts for blocks
+     * larger than 1, like walls and fences.
+     * @param x the x-coordinate of the solid
+     * @param y the y-coordinate of the solid
+     * @param z the z-coordinate of the solid
+     * @return the Solid located at the provided coordinates, or null if none exists
+     */
     public @Nullable Solid getSolid(int x, int y, int z) {
         Block block;
         synchronized (this) {

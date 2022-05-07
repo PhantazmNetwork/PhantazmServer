@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Main entrypoint for lobby-related features.
+ */
 public final class Lobbies {
     private static final Logger LOGGER = LoggerFactory.getLogger(Lobbies.class);
 
@@ -33,6 +36,12 @@ public final class Lobbies {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Initializes lobby-related features. Should only be called once from {@link PhantazmServer#main(String[])}.
+     * @param node the node to register lobby-related events to
+     * @param playerViewProvider the {@link PlayerViewProvider} instance used by the server
+     * @param lobbiesConfig the {@link LobbiesConfig} used to determine lobby behavior
+     */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
                            @NotNull LobbiesConfig lobbiesConfig) {
         SceneStore sceneStore = new BasicSceneStore();

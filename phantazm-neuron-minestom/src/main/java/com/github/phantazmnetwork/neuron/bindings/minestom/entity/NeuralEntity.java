@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Root of all entities that use Neuron for pathfinding.
+ * Root of all entities that use Neuron for pathfinding. This is both a {@link LivingEntity} and an {@link Agent}.
  */
 public abstract class NeuralEntity extends LivingEntity implements Agent {
     private final MinestomDescriptor descriptor;
@@ -41,6 +41,12 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     private Vec3I startPosition;
 
+    /**
+     * Creates a new NeuralEntity.
+     * @param descriptor the descriptor used to define this agent's characteristics
+     * @param uuid this entity's unique ID
+     * @param provider the {@link ContextProvider} used to provide {@link PathContext} instances for this entity
+     */
     public NeuralEntity(@NotNull MinestomDescriptor descriptor, @NotNull UUID uuid, @NotNull ContextProvider provider) {
         super(descriptor.getEntityType(), uuid);
         this.descriptor = descriptor;
@@ -103,11 +109,21 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
         return controller;
     }
 
+    /**
+     * Returns the {@link Navigator} managing this entity. Will throw an exception if this entity does not have an
+     * instance defined yet.
+     * @return the Navigator used for pathfinding
+     */
     public @NotNull Navigator getNavigator() {
         requireInstance();
         return navigator;
     }
 
+    /**
+     * Sets the given entity as a navigation target for this entity. If null, pathfinding will be cancelled. If
+     * non-null, this entity will follow the given entity according to its navigation capabilities.
+     * @param target the target entity to follow
+     */
     public void setTarget(@Nullable Entity target) {
         if(target == null) {
             navigator.setDestination(null);
@@ -196,14 +212,39 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
         attack(target, false);
     }
 
+    /**
+     * Creates a {@link Navigator} instance given a {@link PathContext}.
+     * @param context the current PathContext
+     * @return a new Navigator instance to use for navigation
+     */
     protected abstract @NotNull Navigator makeNavigator(@NotNull PathContext context);
 
+    /**
+     * Creates a {@link NodeTranslator} instance given an {@link Instance} and {@link PathContext}.
+     * @param instance the current instance
+     * @param context the current PathContext
+     * @return a new NodeTranslator instance to use for navigation
+     */
     protected abstract @NotNull NodeTranslator makeTranslator(@NotNull Instance instance, @NotNull PathContext context);
 
+    /**
+     * Creates a {@link Controller} suitable for making this entity move along a path.
+     * @return a Controller suitable for this entity's movement
+     */
     protected abstract @NotNull Controller makeController();
 
+    /**
+     * Returns an Iterable over the directions this entity may step during navigation.
+     * @return an Iterable over the directions this entity may step during navigation
+     */
     protected abstract @NotNull Iterable<Vec3I> getStepDirections();
 
+    /**
+     * Determines if this entity may pathfind or not. By default, entities cannot pathfind if they have no defined
+     * instance, the chunk they are in is unloaded, they are dead, outside the world border, in the void, or are
+     * currently riding another entity. Subclasses may define additional requirements.
+     * @return {@code true} if this entity may pathfind, {@code false} otherwise.
+     */
     protected boolean canPathfind() {
         Instance instance = this.instance;
         Chunk currentChunk = this.currentChunk;

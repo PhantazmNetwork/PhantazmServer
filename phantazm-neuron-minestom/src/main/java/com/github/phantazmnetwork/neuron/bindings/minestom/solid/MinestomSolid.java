@@ -2,12 +2,23 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
+import net.minestom.server.collision.Shape;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A general implementation of {@link Solid} for Minestom. Specifies an {@code overlaps} implementation and manages two
+ * points {@code min} and {@code max}. Instances may be obtained using {@link SolidProvider#fromShape(Shape)}. Not part
+ * of the public API.
+ */
 abstract class MinestomSolid implements Solid {
     private final Vec3F min;
     private final Vec3F max;
 
+    /**
+     * Creates a new instance of this class from the given min and max vectors.
+     * @param min the min vector
+     * @param max the max vector
+     */
     MinestomSolid(@NotNull Vec3F min, @NotNull Vec3F max) {
         this.min = min;
         this.max = max;
