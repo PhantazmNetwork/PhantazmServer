@@ -45,11 +45,9 @@ public class GroundTranslator implements NodeTranslator {
         double z = nodePosition.getZ() + node.getZOffset();
 
         double nX = nodePosition.getX() + dX + HALF_BLOCK;
-        double nY = nodePosition.getY() + dY;
         double nZ = nodePosition.getZ() + dZ + HALF_BLOCK;
 
         double adX = nX - x;
-        double adY = nY - y;
         double adZ = nZ - z;
 
         float height = descriptor.getHeight();
@@ -64,13 +62,12 @@ public class GroundTranslator implements NodeTranslator {
         double vY = height - DOUBLE_EPSILON;
         double vZ = descriptor.getDepth() - DOUBLE_EPSILON;
 
-        double highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, adX, adY, adZ);
+        double highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, adX, 0, adZ);
         double highestJumpY = y + jump;
 
         if(highestY <= highestJumpY) {
             if(highestY == Double.NEGATIVE_INFINITY) { //NEGATIVE_INFINITY means no collision was found
                 oX += adX;
-                oY += adY;
                 oZ += adZ;
 
                 highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, 0, -descriptor.getFallTolerance(),
@@ -92,7 +89,7 @@ public class GroundTranslator implements NodeTranslator {
                 while(highestY <= ceiling) {
                     oY = highestY + EPSILON;
 
-                    highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, adX, adY, adZ);
+                    highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, adX, 0, adZ);
                     if(highestY == Double.NEGATIVE_INFINITY) { //gap found
                         return Vec3I.of(dX, (int) Math.floor(oY - y), dZ);
                     }
