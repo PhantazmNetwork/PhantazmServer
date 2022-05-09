@@ -73,7 +73,7 @@ public class GroundTranslator implements NodeTranslator {
                 highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, 0, -descriptor.getFallTolerance(),
                         0);
                 if(highestY != Double.NEGATIVE_INFINITY) {
-                    return Vec3I.of(dX, (int) Math.floor(highestY - y), dZ);
+                    return Vec3I.of(dX, (int) Math.floor(highestY) - (int) Math.floor(y), dZ);
                 }
             }
             else if(jump > 0F) { //we should try to perform a jump, assuming we even can
