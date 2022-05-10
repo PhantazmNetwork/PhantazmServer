@@ -122,6 +122,11 @@ public class GroundController implements Controller {
         }
     }
 
+    @Override
+    public boolean hasControl() {
+        return jumping;
+    }
+
     //abandon hope, all ye who enter here expecting to understand how this works
     private double computeJumpVelocity(double h) {
         double b = entity.getGravityDragPerTick();

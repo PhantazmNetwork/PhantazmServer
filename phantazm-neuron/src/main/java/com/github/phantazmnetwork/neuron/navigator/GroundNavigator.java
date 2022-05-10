@@ -36,6 +36,10 @@ public class GroundNavigator extends TrackingNavigator {
     private long lastPathfind;
     private long lastMoved;
 
+    private double lastX;
+    private double lastY;
+    private double lastZ;
+
     /**
      * Creates a new GroundNavigator for gravity-bound movement.
      * @param tracker the {@link NavigationTracker} used to record any events that occur during navigation
@@ -140,7 +144,7 @@ public class GroundNavigator extends TrackingNavigator {
 
     private boolean tryPathfind(long time) {
         if(currentOperation == null) {
-            if(time - lastPathfind < recalculationDelay) {
+            if(time - lastPathfind < recalculationDelay || !agent.hasStartPosition()) {
                 return false;
             }
 
@@ -160,25 +164,25 @@ public class GroundNavigator extends TrackingNavigator {
         }
 
         if(target != null) {
-            double oX = controller.getX();
-            double oY = controller.getY();
-            double oZ = controller.getZ();
+            double currentX = controller.getX();
+            double currentY = controller.getY();
+            double currentZ = controller.getZ();
 
-            controller.advance(current, target);
-
-            //detect agents that are not moving
-            if(Vec3D.fuzzyEquals(oX, oY, oZ, controller.getX(), controller.getY(), controller.getZ(),
-                    MOVEMENT_EPSILON)) {
-                //if we aren't moving for too long, consider the path complete (so we pathfind again)
-                if(time - lastMoved > immobileThreshold) {
-                    navigationTracker.onNavigationError(this, NavigationTracker.ErrorType.STUCK);
+            if(!controller.hasControl()) {
+                if(!Vec3D.equals(currentX, currentY, currentZ, lastX, lastY, lastZ)) {
+                    lastMoved = time;
+                }
+                else if(time - lastMoved > immobileThreshold) {
+                    //if we don't have any movement, stop moving along this path
                     return true;
                 }
             }
-            else {
-                lastMoved = time;
-            }
 
+            controller.advance(current, target);
+
+            lastX = currentX;
+            lastY = currentY;
+            lastZ = currentZ;
             return false;
         }
 
@@ -193,6 +197,9 @@ public class GroundNavigator extends TrackingNavigator {
         hasPath = false;
         lastPathfind = time;
         lastMoved = time;
+        lastX = 0;
+        lastY = 0;
+        lastZ = 0;
     }
 
     private static boolean withinDistance(Controller controller, Node node) {
