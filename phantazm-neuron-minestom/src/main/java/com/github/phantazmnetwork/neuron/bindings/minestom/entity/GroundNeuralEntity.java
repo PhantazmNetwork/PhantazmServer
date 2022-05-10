@@ -28,7 +28,17 @@ public class GroundNeuralEntity extends NeuralEntity {
     @Override
     protected @NotNull Navigator makeNavigator(@NotNull PathContext context) {
         return new GroundNavigator(NavigationTracker.NULL, context.getEngine(), this, 500,
-                500, 1.5);
+                500, result -> {
+            if(!result.isSuccessful()) {
+                //for failed results, use steeper linear delay scaling based on the pessimistic assumption the target
+                //will stay inaccessible
+                return result.exploredCount() << 1;
+            }
+            else {
+                //for successful results, use much shallower linear delay scaling
+                return result.exploredCount() >> 2;
+            }
+        });
     }
 
     @Override

@@ -9,9 +9,13 @@ import com.github.phantazmnetwork.neuron.operation.PathResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.DoubleUnaryOperator;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 
 /**
  * Standard {@link TrackingNavigator} implementation for ground-based movement.
@@ -21,7 +25,7 @@ public class GroundNavigator extends TrackingNavigator {
 
     private final long immobileThreshold;
     private final long missingStartDelay;
-    private final double exploredDelayMultiplier;
+    private final ToIntFunction<? super PathResult> explorationDelayFunction;
 
     private Supplier<Vec3I> destinationSupplier;
     private Vec3I currentDestination;
@@ -47,16 +51,18 @@ public class GroundNavigator extends TrackingNavigator {
      * @param immobileThreshold the time beyond which a non-moving agent will be considered "stuck" and the path will be
      *                          recalculated
      * @param missingStartDelay the time to wait before path recalculation if no starting position was found
-     * @param exploredDelayMultiplier the multiplier applied to the count of explored nodes after a path has been found,
-     *                                which is the time that the navigator will wait before recalculating if the
-     *                                destination changes
+     * @param explorationDelayFunction a function used to compute the recalculation delay after a path has been found,
+     *                                 which is the time that the navigator will wait before recalculating if the
+     *                                 destination changes
      */
     public GroundNavigator(@NotNull NavigationTracker tracker, @NotNull PathEngine pathEngine, @NotNull Agent agent,
-                           long immobileThreshold, long missingStartDelay, double exploredDelayMultiplier) {
+                           long immobileThreshold, long missingStartDelay,
+                           @NotNull ToIntFunction<? super PathResult> explorationDelayFunction) {
         super(tracker, pathEngine, agent);
         this.immobileThreshold = immobileThreshold;
         this.missingStartDelay = missingStartDelay;
-        this.exploredDelayMultiplier = exploredDelayMultiplier;
+        this.explorationDelayFunction = Objects.requireNonNull(explorationDelayFunction,
+                "explorationDelayFunction");
     }
 
     @Override
@@ -120,7 +126,7 @@ public class GroundNavigator extends TrackingNavigator {
         Node currentParent = start.getParent();
         target = currentParent == null ? start : currentParent;
 
-        recalculationDelay = Math.round(result.exploredCount() * exploredDelayMultiplier);
+        recalculationDelay = explorationDelayFunction.applyAsInt(result);
         hasPath = true;
 
         navigationTracker.onPathfindComplete(this, result);
