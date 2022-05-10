@@ -17,7 +17,6 @@ import java.util.function.Supplier;
  * Standard {@link TrackingNavigator} implementation for ground-based movement.
  */
 public class GroundNavigator extends TrackingNavigator {
-    private static final double MOVEMENT_EPSILON = 1E-6;
     private static final double NODE_REACHED_DISTANCE = 0.25;
 
     private final long immobileThreshold;
