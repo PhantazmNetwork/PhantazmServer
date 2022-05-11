@@ -12,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
@@ -149,7 +147,7 @@ public class GroundNavigator extends TrackingNavigator {
 
     private boolean tryPathfind(long time) {
         if(currentOperation == null) {
-            if(time - lastPathfind < recalculationDelay || !agent.hasStartPosition()) {
+            if(time - lastPathfind < recalculationDelay || !agent.canPathfind()) {
                 return false;
             }
 

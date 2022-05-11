@@ -10,7 +10,6 @@ import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import com.github.phantazmnetwork.neuron.operation.PathResult;
 import org.jetbrains.annotations.NotNull;
 
-import javax.naming.ldap.Control;
 import java.util.Objects;
 import java.util.concurrent.*;
 
@@ -35,7 +34,7 @@ public class BasicPathEngine implements PathEngine {
     public @NotNull Future<PathResult> pathfind(@NotNull Agent agent, @NotNull Vec3I destination) {
         try {
             return executor.submit(() -> {
-                if(!agent.hasStartPosition()) {
+                if(!agent.canPathfind()) {
                     return null;
                 }
 

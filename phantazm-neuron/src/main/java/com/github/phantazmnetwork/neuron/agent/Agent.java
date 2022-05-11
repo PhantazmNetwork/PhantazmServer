@@ -15,7 +15,7 @@ public interface Agent {
      * pathfinding, and {@code false} if it isn't.
      * @return {@code true} if this agent has a starting position (is valid for pathing); {@code false} otherwise
      */
-    boolean hasStartPosition();
+    boolean canPathfind();
 
     /**
      * Returns the starting position for this Agent.

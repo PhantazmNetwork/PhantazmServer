@@ -39,8 +39,6 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     private int removalAnimationDelay;
 
-    private Vec3I startPosition;
-
     /**
      * Creates a new NeuralEntity.
      * @param descriptor the descriptor used to define this agent's characteristics
@@ -60,8 +58,11 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     }
 
     @Override
-    public boolean hasStartPosition() {
-        return canPathfind();
+    public boolean canPathfind() {
+        Instance instance = this.instance;
+        Chunk currentChunk = this.currentChunk;
+        return instance != null && currentChunk != null && !isDead() && instance.getWorldBorder().isInside(this)
+                && !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null;
     }
 
     @Override
@@ -214,19 +215,6 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
      * @return an Iterable over the directions this entity may step during navigation
      */
     protected abstract @NotNull Iterable<Vec3I> getStepDirections();
-
-    /**
-     * Determines if this entity may pathfind or not. By default, entities cannot pathfind if they have no defined
-     * instance, the chunk they are in is unloaded, they are dead, outside the world border, in the void, or are
-     * currently riding another entity. Subclasses may define additional requirements.
-     * @return {@code true} if this entity may pathfind, {@code false} otherwise.
-     */
-    protected boolean canPathfind() {
-        Instance instance = this.instance;
-        Chunk currentChunk = this.currentChunk;
-        return instance != null && currentChunk != null && !isDead() && instance.getWorldBorder().isInside(this)
-                && !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null;
-    }
 
     private void cancelNavigation() {
         if(navigator != null) {

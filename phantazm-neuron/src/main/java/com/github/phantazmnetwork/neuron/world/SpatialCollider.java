@@ -37,8 +37,8 @@ public class SpatialCollider implements Collider {
                                   double dY, double dZ, double initialBest, ValueFunction valueFunction,
                                   DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer,
                                   DoublePredicate fastExit) {
-        //bounding box of collision which will be directionally expanded
-        //this is necessary to obtain an iterable of candidate solids to collision check
+        //bounding box of collision which will be directionally expanded this is necessary to obtain an iterable of
+        //candidate solids to collision check
         double eoX = x;
         double eoY = y;
         double eoZ = z;

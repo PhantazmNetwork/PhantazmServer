@@ -38,7 +38,7 @@ class BasicPathOperationTest {
         });
 
         Agent mockAgent = mock(Agent.class);
-        when(mockAgent.hasStartPosition()).thenReturn(true);
+        when(mockAgent.canPathfind()).thenReturn(true);
         when(mockAgent.getStartPosition()).thenReturn(startPosition);
 
         return new BasicPathOperation(startPosition, destination, (vec) -> vec.equals(destination), calculator,
