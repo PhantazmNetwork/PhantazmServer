@@ -23,14 +23,14 @@ final class NeuronTest {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> global, @NotNull EventNode<Event> phantazm) {
+    static void initialize(@NotNull EventNode<Event> global, @NotNull Spawner spawner,
+                           @NotNull EventNode<Event> phantazm) {
         GroundMinestomDescriptor testDescriptor = GroundMinestomDescriptor.of(EntityType.PHANTOM, "phantom");
 
         phantazm.addListener(ChatChannelSendEvent.class, event -> {
             String msg = event.getInput();
             Player player = event.getPlayer();
             Instance instance = player.getInstance();
-            Spawner spawner = Neuron.getSpawner();
 
             if(instance != null) {
                 switch (msg) {

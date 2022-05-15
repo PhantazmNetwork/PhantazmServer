@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.server;
 import com.github.phantazmnetwork.api.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.api.player.IdentitySource;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
@@ -84,7 +85,7 @@ public final class PhantazmServer {
         Lobbies.initialize(node, viewProvider, lobbiesConfig);
         Chat.initialize(node);
         Neuron.initialize(node, serverConfig.pathfinderConfig());
-        NeuronTest.initialize(node, PHANTAZM_NODE);
+        NeuronTest.initialize(node, Neuron.getSpawner(), PHANTAZM_NODE);
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
