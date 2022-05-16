@@ -21,11 +21,10 @@ public final class Neuron {
 
     /**
      * Initializes pathfinding-related features. Should only be called once from {@link PhantazmServer#main(String[])}.
-     * @param node the node to register pathfinding-related events to
      * @param pathfinderConfig the {@link PathfinderConfig} instance used to configure pathfinding behavior
      */
-    static void initialize(@NotNull EventNode<Event> node, @NotNull PathfinderConfig pathfinderConfig) {
-        spawner = new ContextualSpawner(new BasicContextProvider(node, pathfinderConfig.threads(), pathfinderConfig
+    static void initialize(@NotNull PathfinderConfig pathfinderConfig) {
+        spawner = new ContextualSpawner(new BasicContextProvider(pathfinderConfig.threads(), pathfinderConfig
                 .cacheSize()));
     }
 
