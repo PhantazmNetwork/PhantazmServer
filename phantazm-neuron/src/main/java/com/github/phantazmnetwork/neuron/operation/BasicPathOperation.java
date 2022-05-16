@@ -8,7 +8,7 @@ import com.github.phantazmnetwork.neuron.node.NodeQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**

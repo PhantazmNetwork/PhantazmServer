@@ -1,9 +1,7 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import org.jetbrains.annotations.NotNull;
 import com.github.phantazmnetwork.neuron.agent.Agent;
-
-import java.util.concurrent.Semaphore;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a potentially ongoing pathfinding operation. Implementations are typically responsible for computing

@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
+import com.github.phantazmnetwork.neuron.engine.PathContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
-import com.github.phantazmnetwork.neuron.engine.PathContext;
 
 /**
  * Represents a supplier of {@link NeuralEntity} instances.

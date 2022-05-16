@@ -23,7 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -113,7 +114,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        return super.setInstance(instance, spawnPosition).whenComplete((ignored, ex) -> {
+        return super.setInstance(instance, spawnPosition).thenRun(() -> {
             PathContext context = provider.provideContext(instance);
 
             cancelNavigation();

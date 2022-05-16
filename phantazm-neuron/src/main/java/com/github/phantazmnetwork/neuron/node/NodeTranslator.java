@@ -1,9 +1,8 @@
 package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.github.phantazmnetwork.neuron.agent.Agent;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>This class converts a position and direction — represented by the vectors (x, y, z) and (deltaX, deltaY, deltaZ),

@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.navigator;
 
+import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.node.Node;
 import org.jetbrains.annotations.NotNull;
-import com.github.phantazmnetwork.neuron.agent.Agent;
 
 /**
  * <p>Represents an object which may be used to coerce an individual {@link Agent} along a path. Neuron does not provide

@@ -2,12 +2,12 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.neuron.bindings.minestom.BasicContextProvider;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.ContextualSpawner;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.server.config.server.PathfinderConfig;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 
 /**
  * Main entrypoint for Neuron-related features.

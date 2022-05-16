@@ -1,7 +1,8 @@
 package com.github.phantazmnetwork.neuron.node;
 
-import java.util.Comparator;
 import it.unimi.dsi.fastutil.objects.ObjectHeaps;
+
+import java.util.Comparator;
 
 /**
  * Utility method providing binary min-heap operations on {@link Node} arrays.

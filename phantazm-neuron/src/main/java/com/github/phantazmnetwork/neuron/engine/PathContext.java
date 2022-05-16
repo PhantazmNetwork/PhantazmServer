@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.engine;
 
+import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.world.Collider;
 import org.jetbrains.annotations.NotNull;
-import com.github.phantazmnetwork.neuron.agent.Agent;
 
 /**
  * Specification for what is essentially a data object providing shared functionality that may be needed by many

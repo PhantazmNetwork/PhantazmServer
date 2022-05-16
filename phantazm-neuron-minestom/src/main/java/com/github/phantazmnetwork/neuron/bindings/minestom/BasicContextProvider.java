@@ -1,12 +1,12 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
 import com.github.phantazmnetwork.neuron.engine.*;
+import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import com.github.phantazmnetwork.neuron.world.Collider;
 import com.github.phantazmnetwork.neuron.world.SpatialCollider;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceUnregisterEvent;
@@ -14,11 +14,8 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import com.github.phantazmnetwork.neuron.operation.PathOperation;
 
 /**
  * <p>A basic implementation of {@link ContextProvider}. Maintains a 1:1 correspondence of {@link Instance} objects to

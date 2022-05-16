@@ -2,8 +2,8 @@ package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
-import org.jetbrains.annotations.NotNull;
 import com.github.phantazmnetwork.neuron.node.Node;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents something capable of pathfinding. This is the most general representation of a navigation-capable object,

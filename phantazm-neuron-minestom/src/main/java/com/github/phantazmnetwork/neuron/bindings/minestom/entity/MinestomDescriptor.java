@@ -1,12 +1,12 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.PhysicalDescriptor;
 import com.github.phantazmnetwork.neuron.node.Calculator;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
-import com.github.phantazmnetwork.neuron.agent.Agent;
-import net.minestom.server.entity.Entity;
 
 /**
  * A {@link PhysicalDescriptor} extension designed for {@link Agent}s which are Minestom {@link Entity}s.

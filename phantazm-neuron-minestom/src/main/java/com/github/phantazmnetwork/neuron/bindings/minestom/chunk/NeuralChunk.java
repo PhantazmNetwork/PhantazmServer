@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.chunk;
 
-import com.github.phantazmnetwork.commons.HashStrategies;
 import com.github.phantazmnetwork.api.vector.VecUtils;
+import com.github.phantazmnetwork.commons.HashStrategies;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.bindings.minestom.solid.SolidProvider;
 import com.github.phantazmnetwork.neuron.world.Solid;

@@ -1,13 +1,11 @@
 package com.github.phantazmnetwork.api.player;
 
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 /**
  * Represents a view of a player that may be offline. Provides their UUID as well as a means to access the

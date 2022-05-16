@@ -8,7 +8,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Objects;
 
 /**
  * A {@link VoxelSpace} implementation which uses a Minestom {@link Instance} as a supplier of {@link NeuralChunk}s.

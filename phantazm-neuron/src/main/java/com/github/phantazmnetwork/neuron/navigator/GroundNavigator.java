@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
-import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
 /**
  * Standard {@link TrackingNavigator} implementation for ground-based movement.
@@ -23,7 +23,7 @@ public class GroundNavigator extends TrackingNavigator {
 
     private final long immobileThreshold;
     private final long missingStartDelay;
-    private final ToIntFunction<? super PathResult> explorationDelayFunction;
+    private final ToLongFunction<? super PathResult> explorationDelayFunction;
 
     private Supplier<Vec3I> destinationSupplier;
     private Vec3I currentDestination;
@@ -55,7 +55,7 @@ public class GroundNavigator extends TrackingNavigator {
      */
     public GroundNavigator(@NotNull NavigationTracker tracker, @NotNull PathEngine pathEngine, @NotNull Agent agent,
                            long immobileThreshold, long missingStartDelay,
-                           @NotNull ToIntFunction<? super PathResult> explorationDelayFunction) {
+                           @NotNull ToLongFunction<? super PathResult> explorationDelayFunction) {
         super(tracker, pathEngine, agent);
         this.immobileThreshold = immobileThreshold;
         this.missingStartDelay = missingStartDelay;
@@ -70,7 +70,6 @@ public class GroundNavigator extends TrackingNavigator {
 
             boolean destinationChange = false;
             if(!newDestination.equals(currentDestination)) {
-                //destination change
                 destinationChange = true;
                 this.currentDestination = newDestination;
             }
@@ -124,7 +123,7 @@ public class GroundNavigator extends TrackingNavigator {
         Node currentParent = start.getParent();
         target = currentParent == null ? start : currentParent;
 
-        recalculationDelay = explorationDelayFunction.applyAsInt(result);
+        recalculationDelay = explorationDelayFunction.applyAsLong(result);
         hasPath = true;
 
         navigationTracker.onPathfindComplete(this, result);

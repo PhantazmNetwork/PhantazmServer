@@ -3,8 +3,6 @@ package com.github.phantazmnetwork.neuron.world;
 import com.github.phantazmnetwork.commons.pipe.Pipe;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-
 /**
  * An extension of {@link Pipe.Source} specializing in iterating {@link Solid}s.
  */

@@ -4,7 +4,9 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * <p>Represents a particular point along a path. Each node may be connected to at most one other node (referred to as
@@ -192,20 +194,6 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
      */
     public @NotNull Vec3I getPosition() {
         return position;
-    }
-
-    /**
-     * Creates a new random-access list implementation with the same nodes as represented by this one.
-     * @return a random-access List containing the same nodes as this
-     */
-    public @NotNull List<Node> toRandomAccessList() {
-        ArrayList<Node> nodes = new ArrayList<>();
-        for(Node node : this) {
-            nodes.add(node);
-        }
-
-        nodes.trimToSize();
-        return nodes;
     }
 
     /**

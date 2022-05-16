@@ -2,9 +2,9 @@ package com.github.phantazmnetwork.neuron.engine;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
+import com.github.phantazmnetwork.neuron.operation.PathOperation;
 import com.github.phantazmnetwork.neuron.operation.PathResult;
 import org.jetbrains.annotations.NotNull;
-import com.github.phantazmnetwork.neuron.operation.PathOperation;
 
 import java.util.concurrent.Future;
 
