@@ -20,7 +20,7 @@ dependencies {
 }
 
 tasks.getByName<CopyLibs>("copyLibs") {
-    libraryDirectory = File("/run/server-1/libs")
+    libraryDirectory = File("run/server-1/libs")
 }
 
 tasks.jar {
