@@ -18,21 +18,18 @@ import java.util.Objects;
  */
 public class TranslationExplorer extends CachingExplorer {
     private final NodeTranslator translator;
-    private final Iterable<Vec3I> vectors;
 
     /**
      * Creates a new TranslationExplorer which will use the given {@link NodeTranslator}.
      * @param cache the cache used to store computed translation vectors, if null caching will be disabled (not
      *              recommended)
-     * @param id the id of the agent using this explorer
+     * @param descriptor the descriptor of the agent using this explorer
      * @param translator the translator used by this explorer
-     * @param vectors the walk vectors to explore
      */
-    public TranslationExplorer(@Nullable PathCache cache, @NotNull String id, @NotNull NodeTranslator translator,
-                               @NotNull Iterable<Vec3I> vectors) {
-        super(cache, id);
+    public TranslationExplorer(@Nullable PathCache cache, @NotNull Descriptor descriptor,
+                               @NotNull NodeTranslator translator) {
+        super(cache, descriptor);
         this.translator = Objects.requireNonNull(translator, "translator");
-        this.vectors = Objects.requireNonNull(vectors, "vectors");
     }
 
     @Override
@@ -42,7 +39,7 @@ public class TranslationExplorer extends CachingExplorer {
 
     @Override
     public @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current) {
-        return Pipe.from(vectors).map(delta -> translator.translate(current, delta.getX(), delta.getY(), delta.getZ()))
-                .filter(delta -> !delta.equals(Vec3I.ORIGIN));
+        return Pipe.from(descriptor.stepDirections()).map(delta -> translator.translate(current, delta.getX(), delta
+                .getY(), delta.getZ())).filter(delta -> !delta.equals(Vec3I.ORIGIN));
     }
 }

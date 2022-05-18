@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.api.vector;
+package com.github.phantazmnetwork.api;
 
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3F;

@@ -61,6 +61,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         ConfigNode pathfinderNode = element.getNodeOrThrow("pathfinder");
         int threads = pathfinderNode.getNumberOrThrow("threads").intValue();
         int cacheSize = pathfinderNode.getNumberOrThrow("cacheSize").intValue();
+        int updateQueueCapacity = pathfinderNode.getNumberOrThrow("updateQueueCapacity").intValue();
         if(threads < 1) {
             throw new ConfigProcessException("Invalid number of pathfinder threads, must be >= 1");
         }
@@ -69,7 +70,11 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
             throw new ConfigProcessException("Pathfinder cache size must be >= 0");
         }
 
-        PathfinderConfig pathfinderConfig = new PathfinderConfig(threads, cacheSize);
+        if(updateQueueCapacity < 0) {
+            throw new ConfigProcessException("Update queue capacity must be > 0");
+        }
+
+        PathfinderConfig pathfinderConfig = new PathfinderConfig(threads, cacheSize, updateQueueCapacity);
         return new ServerConfig(serverInfoConfig, pingListConfig, pathfinderConfig);
     }
 

@@ -233,6 +233,15 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
         return zOffset;
     }
 
+    /**
+     * Determines if this node's offset values are centered (are default). Equivalent to
+     * {@code node.getXOffset() == 0.5 && node.getYOffset() == 0 && node.getZOffset() == 0.5}.
+     * @return {@code true} if this node's x, y, and z offsets are centered, {@code false} otherwise
+     */
+    public boolean isCentered() {
+        return xOffset == 0.5 && yOffset == 0 && zOffset == 0.5;
+    }
+
     @Override
     public int compareTo(@NotNull Node other) {
         int fCompare = Float.compare(getF(), other.getF());

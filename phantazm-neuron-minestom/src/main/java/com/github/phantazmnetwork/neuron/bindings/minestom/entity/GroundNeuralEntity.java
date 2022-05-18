@@ -1,9 +1,7 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.api.vector.VecUtils;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
-import com.github.phantazmnetwork.neuron.bindings.minestom.StepDirections;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.GroundNavigator;
@@ -53,12 +51,7 @@ public class GroundNeuralEntity extends NeuralEntity {
 
     @Override
     protected @NotNull Controller makeController() {
-        return new GroundController(this, 0.5F);
-    }
-
-    @Override
-    protected @NotNull Iterable<Vec3I> getStepDirections() {
-        return StepDirections.WALK;
+        return new GroundController(this, ((GroundMinestomDescriptor)getDescriptor()).getStepHeight());
     }
 
     @Override

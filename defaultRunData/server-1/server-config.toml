@@ -10,4 +10,5 @@
 
 [pathfinder]
     threads = 4
-    cacheSize = 1024
+    cacheSize = 2048
+    updateQueueCapacity = 1024

@@ -83,7 +83,7 @@ public final class PhantazmServer {
 
         Lobbies.initialize(node, viewProvider, lobbiesConfig);
         Chat.initialize(node);
-        Neuron.initialize(serverConfig.pathfinderConfig());
+        Neuron.initialize(node, serverConfig.pathfinderConfig());
         NeuronTest.initialize(node, Neuron.getSpawner(), PHANTAZM_NODE);
     }
 

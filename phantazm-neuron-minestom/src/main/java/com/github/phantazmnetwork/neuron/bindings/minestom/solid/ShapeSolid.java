@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
-import com.github.phantazmnetwork.api.vector.VecUtils;
+import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.commons.IteratorUtils;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import net.minestom.server.collision.BoundingBox;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * {@link Shape}-based implementation of {@link Solid}. Not part of the public API.
  */
-class ShapeSolid extends MinestomSolid {
+class ShapeSolid extends PointSolid {
     private final boolean hasChildren;
     private final Iterable<Solid> children;
 
@@ -47,25 +47,6 @@ class ShapeSolid extends MinestomSolid {
         return hasChildren;
     }
 
-    @Override
-    public boolean overlaps(double x, double y, double z, double width, double height, double depth) {
-        if(!super.overlaps(x, y, z, width, height, depth)) {
-            return false;
-        }
-
-        if(hasChildren) {
-            for(Solid child : children) {
-                if(child.overlaps(x, y, z, width, height, depth)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        //we have no children, and the bounding box overlaps with us, so return true
-        return true;
-    }
 
     @Override
     public @NotNull Iterable<Solid> getChildren() {

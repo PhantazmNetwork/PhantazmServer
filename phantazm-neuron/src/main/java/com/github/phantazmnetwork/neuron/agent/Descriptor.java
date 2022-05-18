@@ -2,7 +2,9 @@ package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.node.Calculator;
+import com.github.phantazmnetwork.neuron.world.Solid;
 import org.jetbrains.annotations.NotNull;
+import com.github.phantazmnetwork.neuron.engine.PathCache;
 
 /**
  * Describes the characteristics (type) of an agent. Many agents may share a single descriptor. Descriptors encapsulate
@@ -32,4 +34,30 @@ public interface Descriptor {
      * @return whether this agent should have completed
      */
     boolean isComplete(@NotNull Vec3I position, @NotNull Vec3I destination);
+
+    /**
+     * <p>Determines if the cache entry starting at {@code origin} should be invalidated if an update occurred at
+     * location {@code update}.</p>
+     *
+     * <p>In order to avoid cases where stale values lead to incorrect pathfinding, this method should never return
+     * false if the update would impact pathfinding. However, returning {@code false} will lead to cache retention,
+     * which can improve performance, and should (but is not required to be) done as frequently as possible.</p>
+     *
+     * <p>Any detailed checks performed should be significantly faster than performing collision, in order to see any
+     * benefits from caching.</p>
+     *
+     * <p>The default implementation makes no assumptions about the environment, and always returns {@code true}.</p>
+     * @param origin the agent origin
+     * @param update the location of the update
+     * @param oldSolid the solid that was previously located at the given position
+     * @param newSolid the new solid located at the given position
+     * @return true if the cache should be invalidated, false if it should be retained
+     * @see PathCache
+     */
+    default boolean shouldInvalidate(@NotNull Vec3I origin, @NotNull Vec3I update, @NotNull Solid oldSolid,
+                                     @NotNull Solid newSolid) {
+        return true;
+    }
+
+    @NotNull Iterable<? extends Vec3I> stepDirections();
 }

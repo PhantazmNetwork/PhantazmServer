@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.api.vector.VecUtils;
+import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
@@ -121,8 +121,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             navigator = makeNavigator(context);
             controller = makeController();
 
-            explorer = new TranslationExplorer(context.getCache(), descriptor.getID(), makeTranslator(instance,
-                    context), getStepDirections());
+            explorer = new TranslationExplorer(context.getCache(), descriptor, makeTranslator(instance, context));
         });
     }
 
@@ -210,12 +209,6 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
      * @return a Controller suitable for this entity's movement
      */
     protected abstract @NotNull Controller makeController();
-
-    /**
-     * Returns an Iterable over the directions this entity may step during navigation.
-     * @return an Iterable over the directions this entity may step during navigation
-     */
-    protected abstract @NotNull Iterable<Vec3I> getStepDirections();
 
     private void cancelNavigation() {
         if(navigator != null) {

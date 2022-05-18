@@ -14,23 +14,24 @@ import java.util.Objects;
  */
 public abstract class CachingExplorer implements Explorer {
     private final PathCache cache;
-    private final String id;
+    protected final Descriptor descriptor;
 
     /**
      * Creates a new ContextualExplorer from the given {@link PathCache} and {@link Descriptor}.
      * @param cache the PathCache instance used for caching — if null no caching will be performed (not recommended)
-     * @param id the id of the agent performing the exploration
+     * @param descriptor the descriptor of the agent using this explorer
      */
-    public CachingExplorer(@Nullable PathCache cache, @NotNull String id) {
+    public CachingExplorer(@Nullable PathCache cache, @NotNull Descriptor descriptor) {
         this.cache = cache;
-        this.id = Objects.requireNonNull(id, "id");
+        this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
     }
 
     @Override
     public final @NotNull Iterable<Vec3I> expandNode(@NotNull Node current) {
-        if(cache != null) {
+        //only cache nodes that are centered
+        if(cache != null && current.isCentered()) {
             Vec3I currentPos = current.getPosition();
-            return cache.getSteps(currentPos, id).orElse(() -> cache.watchSteps(currentPos, id,
+            return cache.getSteps(currentPos, descriptor).orElse(() -> cache.watchSteps(currentPos, descriptor,
                     getWalkIterator(current)));
         }
         else {

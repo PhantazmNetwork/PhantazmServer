@@ -18,6 +18,10 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
         return 3F;
     }
 
+    default float getStepHeight() {
+        return 0.5F;
+    }
+
     /**
      * Creates a new GroundMinestomDescriptor using default values, the given {@link EntityType}, and the given id.
      * @param type the EntityType to use

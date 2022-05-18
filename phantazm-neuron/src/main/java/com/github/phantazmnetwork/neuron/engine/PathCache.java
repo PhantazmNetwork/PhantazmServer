@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.engine;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
+import com.github.phantazmnetwork.neuron.world.Solid;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -13,41 +14,30 @@ import java.util.Optional;
  */
 public interface PathCache {
     /**
-     * Attempts to retrieve a cached {@link Iterable} of translation vectors for the given descriptor ID.
+     * Attempts to retrieve a cached {@link Iterable} of translation vectors for the given descriptor.
      * @param origin the origin vector
-     * @param id the descriptor ID
+     * @param descriptor the descriptor
      * @return an {@link Optional} which may contain an {@link Iterable} over the cached translation vectors, or
      * {@link Optional#empty()} if there is a cache miss
      * @see Descriptor
      */
-    @NotNull Optional<Iterable<Vec3I>> getSteps(@NotNull Vec3I origin, @NotNull String id);
+    @NotNull Optional<Iterable<Vec3I>> getSteps(@NotNull Vec3I origin, @NotNull Descriptor descriptor);
 
     /**
      * Produces an {@link Iterator} that will iterate over the provided iterator while recording the values it
      * produces, possibly caching them when the iterator has completed.
      * @param origin the origin vector
-     * @param id the descriptor ID
+     * @param descriptor the descriptor
      * @param steps the iterator to record
      * @return an Iterator which wraps the provided iterator, while additionally recording the values it produces and
      * possibly caching them
      */
-    @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull String id,
+    @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull Descriptor descriptor,
                                         @NotNull Iterator<Vec3I> steps);
 
     /**
-     * Invalidates (removes) any values associated with the given origin vector.
-     * @param origin the origin value to invalidate
+     * Called when a solid is updated at the given location. Invalidates the appropriate entries in the internal cache.
+     * @param location the location of the update
      */
-    void invalidateOrigin(@NotNull Vec3I origin);
-
-    /**
-     * Invalidates (removes) all values associated with the given origin vectors.
-     * @param steps an {@link Iterable} over the origin vectors that will be invalidated
-     */
-    void invalidateOrigins(@NotNull Iterable<? extends Vec3I> steps);
-
-    /**
-     * Invalidates every entry in the cache.
-     */
-    void invalidateAll();
+    void handleUpdate(@NotNull Vec3I location, @NotNull Solid oldSolid, @NotNull Solid newSolid);
 }

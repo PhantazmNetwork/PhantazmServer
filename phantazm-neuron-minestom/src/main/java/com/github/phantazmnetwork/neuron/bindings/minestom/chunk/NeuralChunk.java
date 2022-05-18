@@ -1,23 +1,14 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.chunk;
 
-import com.github.phantazmnetwork.api.vector.VecUtils;
-import com.github.phantazmnetwork.commons.HashStrategies;
-import com.github.phantazmnetwork.commons.vector.Vec3F;
+import com.github.phantazmnetwork.api.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.bindings.minestom.solid.SolidProvider;
 import com.github.phantazmnetwork.neuron.world.Solid;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.minestom.server.collision.Shape;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 /**
  * A custom extension of {@link DynamicChunk} that enables fast, asynchronous access to {@link Solid} objects
@@ -25,13 +16,6 @@ import java.util.Map;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class NeuralChunk extends DynamicChunk {
-    //TODO: test ReadWriteLock depending on how often this map gets queried (it should be mostly reads)
-    //(this would need to be done during an actual game, will leave for much later)
-    private static final Map<Shape, Solid[]> SPLIT_MAP = new Object2ObjectOpenCustomHashMap<>(HashStrategies
-            .identity());
-
-    private final IntSet tallSolids;
-
     /**
      * Creates a new NeuralChunk for the given instance.
      * @param instance the instance this chunk belongs to
@@ -40,22 +24,6 @@ public class NeuralChunk extends DynamicChunk {
      */
     public NeuralChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
         super(instance, chunkX, chunkZ);
-        this.tallSolids = new IntOpenHashSet(8);
-    }
-
-    @Override
-    public void setBlock(int x, int y, int z, @NotNull Block block) {
-        super.setBlock(x, y, z, block);
-
-        int index = ChunkUtils.getBlockIndex(x, y, z);
-        synchronized (tallSolids) {
-            if(block.registry().collisionShape().relativeEnd().y() > 1) {
-                tallSolids.add(index);
-            }
-            else {
-                tallSolids.remove(index);
-            }
-        }
     }
 
     /**
@@ -67,57 +35,36 @@ public class NeuralChunk extends DynamicChunk {
      * @return the Solid located at the provided coordinates, or null if none exists
      */
     public @Nullable Solid getSolid(int x, int y, int z) {
-        Block block;
-        synchronized (this) {
-            block = getBlock(x, y, z, Condition.TYPE);
+        Block current = getBlock_UNSAFE(x, y, z, Condition.TYPE);
+        Shape currentShape = current.registry().collisionShape();
+
+        double height = currentShape.relativeEnd().y();
+        if(height > 0.5) { //no point in checking below
+            return SolidProvider.fromShape(currentShape);
         }
 
-        if(block == null) {
+        //we need to check below
+        Block below = getBlock_UNSAFE(x, y - 1, z, Condition.TYPE);
+        Shape belowShape = below.registry().collisionShape();
+
+        boolean currentCollidable = PhysicsUtils.isCollidable(currentShape);
+
+        if(PhysicsUtils.isTall(belowShape)) {
+            //split tall shape
+            Solid upperSolid = SolidProvider.getSplit(belowShape)[1];
+
+            if(currentCollidable) {
+                //if the current shape also has collision, combine with the split
+                return SolidProvider.composite(upperSolid, SolidProvider.fromShape(currentShape));
+            }
+
+            return upperSolid;
+        }
+
+        if(!currentCollidable) {
             return null;
         }
 
-        if(!block.isSolid()) {
-            synchronized (tallSolids) {
-                if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y, z))) {
-                    return getSplitFor(getBlock(x, y, z))[0];
-                }
-
-                if(tallSolids.contains(ChunkUtils.getBlockIndex(x, y - 1, z))) {
-                    return getSplitFor(getBlock(x, y - 1, z))[1];
-                }
-            }
-        }
-        else {
-            return SolidProvider.fromShape(block.registry().collisionShape());
-        }
-
-        return null;
-    }
-
-    private Solid[] getSplitFor(Block block) {
-        Shape tallShape = block.registry().collisionShape();
-
-        Solid[] split;
-        synchronized (SPLIT_MAP) {
-            split = SPLIT_MAP.get(tallShape);
-        }
-
-        if(split != null) {
-            return split;
-        }
-
-        Point start = tallShape.relativeStart();
-        Point end = tallShape.relativeEnd();
-        Solid[] newSplit = new Solid[] {
-                SolidProvider.fromPoints(VecUtils.toFloat(start), Vec3F.ofDouble(end.x(), 1, end.z())),
-                SolidProvider.fromPoints(Vec3F.ofDouble(start.x(), 0, start.z()), Vec3F.ofDouble(end.x(),
-                        end.y() - 1, end.z()))
-        };
-
-        synchronized (SPLIT_MAP) {
-            SPLIT_MAP.put(tallShape, newSplit);
-        }
-
-        return newSplit;
+        return SolidProvider.fromShape(currentShape);
     }
 }

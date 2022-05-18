@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.MathUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.neuron.bindings.minestom.PhysicsUtils;
+import com.github.phantazmnetwork.api.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.node.Node;
 import net.minestom.server.MinecraftServer;
@@ -86,16 +86,21 @@ public class GroundController implements Controller {
 
         if(jumping) {
             if(entityPos.y() > exactTargetY) {
+                //jump completed successfully
                 entity.refreshPosition(CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ)).newPosition()
                         .withView(PositionUtils.getLookYaw(dX, dZ), 0));
                 entity.setVelocity(Vec.ZERO);
                 jumping = false;
+                return;
             }
             else if(entity.isOnGround()) {
+                //jump failed (we're back on the ground)
                 jumping = false;
             }
-
-            return;
+            else {
+                //still jumping
+                return;
+            }
         }
 
         if(!entity.hasVelocity()) {
