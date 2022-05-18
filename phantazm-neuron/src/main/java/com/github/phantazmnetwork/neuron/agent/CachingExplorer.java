@@ -34,9 +34,8 @@ public abstract class CachingExplorer implements Explorer {
             return cache.getSteps(currentPos, descriptor).orElse(() -> cache.watchSteps(currentPos, descriptor,
                     getWalkIterator(current)));
         }
-        else {
-            return () -> getWalkIterator(current);
-        }
+
+        return () -> getWalkIterator(current);
     }
 
     /**

@@ -1,21 +1,23 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
 import com.github.phantazmnetwork.api.VecUtils;
-import com.github.phantazmnetwork.commons.IteratorUtils;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * {@link Shape}-based implementation of {@link Solid}. Not part of the public API.
  */
 class ShapeSolid extends PointSolid {
     private final boolean hasChildren;
-    private final Iterable<Solid> children;
+    private final Set<Solid> children;
 
     /**
      * Creates a new instance of this class from the provided {@link Shape}. The shape's child bounding boxes, if any,
@@ -28,7 +30,7 @@ class ShapeSolid extends PointSolid {
         List<BoundingBox> children = shape.childBounds();
         if(children.isEmpty()) {
             this.hasChildren = false;
-            this.children = IteratorUtils::empty;
+            this.children = Collections.emptySet();
         }
         else {
             List<Solid> childSolids = new ArrayList<>(children.size());
@@ -38,7 +40,7 @@ class ShapeSolid extends PointSolid {
             }
 
             this.hasChildren = true;
-            this.children = () -> IteratorUtils.unmodifiable(childSolids.iterator());
+            this.children = Set.of(childSolids.toArray(new Solid[0]));
         }
     }
 
@@ -49,7 +51,7 @@ class ShapeSolid extends PointSolid {
 
 
     @Override
-    public @NotNull Iterable<Solid> getChildren() {
+    public @Unmodifiable @NotNull Set<Solid> getChildren() {
         return children;
     }
 }

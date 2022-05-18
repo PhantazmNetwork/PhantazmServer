@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The standard implementation of {@link PathCache}. Agents with identical descriptor IDs will share cached values.
@@ -62,36 +61,35 @@ public class BasicPathCache implements PathCache {
         if(entries != null) {
             CacheEntry entry = entries.get(descriptor.getID());
             if(entry != null) {
-                long mostRecent;
                 synchronized (updateQueue) {
-                    mostRecent = update;
-                }
+                    long mostRecent = update;
+                    long diff = mostRecent - entry.update;
+                    entry.update = mostRecent;
 
-                long diff = mostRecent - entry.update;
-                entry.update = mostRecent;
+                    if(diff == 0) {
+                        //we're up-to-date, no blocks to check against
+                        return Optional.of(entry.steps);
+                    }
 
-                if(diff == 0) {
-                    //we're up-to-date, no blocks to check against
-                    return Optional.of(entry.steps);
-                }
-
-                //for sufficiently out of date entries, don't bother iterating, consider invalid
-                //also allows us to evict sufficiently old updates in handleUpdate, since they won't be used
-                if(diff > updateQueueCapacity) {
-                    positionalCache.invalidate(origin);
-                    return Optional.empty();
-                }
-
-                Iterator<Update> iterator = updateQueue.descendingIterator();
-                Update update;
-                while (iterator.hasNext() && (update = iterator.next()).id > mostRecent) {
-                    if(descriptor.shouldInvalidate(origin, update.position, update.oldSolid, update.newSolid)) {
+                    //for sufficiently out of date entries, don't bother iterating, consider invalid
+                    //also allows us to evict sufficiently old updates in handleUpdate, since they won't be used
+                    if(diff > updateQueueCapacity) {
                         positionalCache.invalidate(origin);
                         return Optional.empty();
                     }
-                }
 
-                return Optional.of(entry.steps);
+                    Iterator<Update> iterator = updateQueue.descendingIterator();
+                    Update update;
+                    while (iterator.hasNext() && (update = iterator.next()).id > mostRecent) {
+                        if(descriptor.shouldInvalidate(entry.steps, origin, update.position, update.oldSolid, update
+                                .newSolid)) {
+                            positionalCache.invalidate(origin);
+                            return Optional.empty();
+                        }
+                    }
+
+                    return Optional.of(entry.steps);
+                }
             }
         }
 

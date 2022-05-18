@@ -52,10 +52,11 @@ public final class SolidProvider {
     }
 
     /**
-     * Creates a new composite solid from the given solids.
+     * Creates a new composite solid from the given solids. The two solids may not be equal.
      * @param first the first solid
      * @param second the second solid
      * @return a solid consisting of both of the original solids
+     * @throws IllegalArgumentException if the two solids are equal
      */
     public static @NotNull Solid composite(@NotNull Solid first, @NotNull Solid second) {
         return new CompositeSolid(first, second);

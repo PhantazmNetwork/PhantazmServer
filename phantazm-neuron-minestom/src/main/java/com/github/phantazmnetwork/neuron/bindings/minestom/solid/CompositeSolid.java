@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * A {@link Solid} implementation based on a combination of exactly two other solids.
@@ -14,12 +14,18 @@ class CompositeSolid extends PointSolid {
         double apply(float x, float y);
     }
 
-    private final Iterable<Solid> children;
+    private final Set<Solid> children;
 
+    /**
+     * Creates a new CompositeSolid from two other solids. The solids must not be equal, or a
+     * {@link IllegalArgumentException} will be thrown.
+     * @param first the first solid
+     * @param second the second solid
+     */
     CompositeSolid(@NotNull Solid first, @NotNull Solid second) {
         super(computePoint(first.getMin(), second.getMin(), Math::min), computePoint(first.getMax(), second.getMax(),
                 Math::max));
-        this.children = List.of(first, second);
+        this.children = Set.of(first, second);
     }
 
     @Override
@@ -28,7 +34,7 @@ class CompositeSolid extends PointSolid {
     }
 
     @Override
-    public @NotNull Iterable<Solid> getChildren() {
+    public @NotNull Set<Solid> getChildren() {
         return children;
     }
 

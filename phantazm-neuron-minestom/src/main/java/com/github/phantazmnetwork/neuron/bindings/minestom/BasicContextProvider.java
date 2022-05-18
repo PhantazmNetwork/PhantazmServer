@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.commons.HashStrategies;
 import com.github.phantazmnetwork.neuron.bindings.minestom.solid.SolidProvider;
 import com.github.phantazmnetwork.neuron.engine.*;
-import com.github.phantazmnetwork.neuron.world.Solid;
 import com.github.phantazmnetwork.neuron.world.SpatialCollider;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;

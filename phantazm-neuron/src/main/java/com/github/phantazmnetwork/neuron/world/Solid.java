@@ -2,11 +2,17 @@ package com.github.phantazmnetwork.neuron.world;
 
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.Set;
 
 /**
- * Represents an object that has collision. Each Solid is a single AABB (axis-aligned bounding box) specified by two
+ * <p>Represents an object that has collision. Each Solid is a single AABB (axis-aligned bounding box) specified by two
  * points (the "minimum" point and "maximum" point, with the region between encompassing the bounds). Platform-specific
- * bindings must generally create their own implementation of this interface.
+ * bindings must generally create their own implementation of this interface.</p>
+ *
+ * <p>Solid implementations should be considered equal if and only if their min and max vectors are equal, and their
+ * children sets are equal (as defined in {@link Set#equals(Object)}).</p>
  */
 public interface Solid {
     /**
@@ -33,7 +39,7 @@ public interface Solid {
      * Returns an {@link Iterable} over any child solids. Will be empty if this solid does not have any children.
      * @return an iterable over any child solids
      */
-    @NotNull Iterable<Solid> getChildren();
+    @NotNull @Unmodifiable Set<Solid> getChildren();
 
     /**
      * Determines if this solid  overlaps the given bounds. The solid itself is considered relative to the origin

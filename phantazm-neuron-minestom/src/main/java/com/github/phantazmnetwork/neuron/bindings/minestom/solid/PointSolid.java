@@ -1,9 +1,13 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
-import com.github.phantazmnetwork.commons.IteratorUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
 
 class PointSolid implements Solid {
     private final Vec3F min;
@@ -25,8 +29,8 @@ class PointSolid implements Solid {
     }
 
     @Override
-    public @NotNull Iterable<Solid> getChildren() {
-        return IteratorUtils::empty;
+    public @Unmodifiable @NotNull Set<Solid> getChildren() {
+        return Collections.emptySet();
     }
 
     @Override
@@ -51,7 +55,6 @@ class PointSolid implements Solid {
         return false;
     }
 
-
     @Override
     public @NotNull Vec3F getMin() {
         return min;
@@ -60,5 +63,27 @@ class PointSolid implements Solid {
     @Override
     public @NotNull Vec3F getMax() {
         return max;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(min, max, getChildren());
+    }
+
+    @Override
+    public final boolean equals(Object obj) {
+        if(obj == null) {
+            return false;
+        }
+
+        if(obj == this) {
+            return true;
+        }
+
+        if(obj instanceof Solid solid) {
+            return min.equals(solid.getMin()) && max.equals(solid.getMax()) && getChildren().equals(solid.getChildren());
+        }
+
+        return false;
     }
 }

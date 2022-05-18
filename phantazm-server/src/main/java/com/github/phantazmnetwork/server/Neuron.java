@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.ContextualSpaw
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.server.config.server.PathfinderConfig;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;

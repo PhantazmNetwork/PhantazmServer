@@ -1,10 +1,12 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import org.jetbrains.annotations.NotNull;
-import com.github.phantazmnetwork.neuron.engine.PathCache;
+
+import java.util.Collection;
 
 /**
  * Describes the characteristics (type) of an agent. Many agents may share a single descriptor. Descriptors encapsulate
@@ -47,6 +49,7 @@ public interface Descriptor {
      * benefits from caching.</p>
      *
      * <p>The default implementation makes no assumptions about the environment, and always returns {@code true}.</p>
+     * @param cached the cached iterable representing the steps the agent may make
      * @param origin the agent origin
      * @param update the location of the update
      * @param oldSolid the solid that was previously located at the given position
@@ -54,10 +57,14 @@ public interface Descriptor {
      * @return true if the cache should be invalidated, false if it should be retained
      * @see PathCache
      */
-    default boolean shouldInvalidate(@NotNull Vec3I origin, @NotNull Vec3I update, @NotNull Solid oldSolid,
-                                     @NotNull Solid newSolid) {
+    default boolean shouldInvalidate(@NotNull Iterable<? extends Vec3I> cached, @NotNull Vec3I origin,
+                                     @NotNull Vec3I update, @NotNull Solid oldSolid, @NotNull Solid newSolid) {
         return true;
     }
 
-    @NotNull Iterable<? extends Vec3I> stepDirections();
+    /**
+     * Gets the directions this agent should try to step.
+     * @return a collection of the step directions for an agent using this descriptor
+     */
+    @NotNull Collection<? extends Vec3I> stepDirections();
 }

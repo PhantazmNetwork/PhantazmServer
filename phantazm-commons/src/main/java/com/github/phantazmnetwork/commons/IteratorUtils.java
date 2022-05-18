@@ -58,4 +58,32 @@ public final class IteratorUtils {
             }
         };
     }
+
+    /**
+     * Iterates both iterators, checking each returned element. If both iterators return the same number of elements,
+     * and every element is equal, and in the same order, this method returns true. Otherwise, it returns false.
+     * @param first the first iterator to check
+     * @param second the second iterator to check
+     * @return true if the iterators are equal, false otherwise
+     * @param <T> a common supertype for both iterators
+     */
+    public static <T> boolean iteratorEquals(@NotNull Iterator<? extends T> first,
+                                             @NotNull Iterator<? extends T> second) {
+        while (true) {
+            boolean firstHasNext = first.hasNext();
+            boolean secondHasNext = second.hasNext();
+
+            if(!firstHasNext && !secondHasNext) {
+                return true;
+            }
+
+            if(firstHasNext != secondHasNext) {
+                return false;
+            }
+
+            if(!Objects.equals(first.next(), second.next())) {
+                return false;
+            }
+        }
+    }
 }
