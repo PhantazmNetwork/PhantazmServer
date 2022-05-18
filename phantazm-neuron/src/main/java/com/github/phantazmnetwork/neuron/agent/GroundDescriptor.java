@@ -45,6 +45,11 @@ public interface GroundDescriptor extends PhysicalDescriptor {
     @Override
     default boolean shouldInvalidate(@NotNull Iterable<? extends Vec3I> cached, @NotNull Vec3I origin,
                                      @NotNull Vec3I update, @NotNull Solid oldSolid, @NotNull Solid newSolid) {
+        if(oldSolid.equals(newSolid)) {
+            //don't invalidate if no change occurred
+            return false;
+        }
+
         List<Vec3I> steps = new ArrayList<>(stepDirections());
         for(Vec3I step : cached) { //check cached steps first
             if(overlaps(origin, step, update)) {

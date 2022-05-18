@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.navigator;
 
+import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.operation.PathResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,13 +20,13 @@ public interface NavigationTracker {
         public void onPathfind(@NotNull Navigator navigator) {}
 
         @Override
-        public void onPathfindComplete(@NotNull Navigator navigator, @Nullable PathResult result) {}
+        public void onPathfindComplete(@NotNull Navigator navigator, @NotNull Node pathStart, @Nullable PathResult result) {}
 
         @Override
         public void onDestinationReached(@NotNull Navigator navigator) {}
 
         @Override
-        public void onNavigationError(@NotNull Navigator navigator, @NotNull ErrorType errorType) {}
+        public void onNavigationError(@NotNull Navigator navigator, @Nullable Node pathStart, @NotNull ErrorType errorType) {}
     };
 
     /**
@@ -57,7 +58,7 @@ public interface NavigationTracker {
      * @param result the {@link PathResult} representing the completed pathfinding operation, which may be null if the
      *               operation was cancelled or an error occurred
      */
-    void onPathfindComplete(@NotNull Navigator navigator, @Nullable PathResult result);
+    void onPathfindComplete(@NotNull Navigator navigator, @NotNull Node pathStart, @Nullable PathResult result);
 
     /**
      * Called directly after the given {@link Navigator} reaches its destination (but before a new destination is
@@ -71,5 +72,5 @@ public interface NavigationTracker {
      * @param navigator the navigator which just erred
      * @param errorType the {@link ErrorType} describing the error
      */
-    void onNavigationError(@NotNull Navigator navigator, @NotNull ErrorType errorType);
+    void onNavigationError(@NotNull Navigator navigator, @Nullable Node pathStart, @NotNull ErrorType errorType);
 }

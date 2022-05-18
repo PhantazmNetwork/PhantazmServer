@@ -35,36 +35,38 @@ public class NeuralChunk extends DynamicChunk {
      * @return the Solid located at the provided coordinates, or null if none exists
      */
     public @Nullable Solid getSolid(int x, int y, int z) {
-        Block current = getBlock_UNSAFE(x, y, z, Condition.TYPE);
-        Shape currentShape = current.registry().collisionShape();
+        synchronized (this) {
+            Block current = getBlock(x, y, z, Condition.TYPE);
+            Shape currentShape = current.registry().collisionShape();
 
-        double height = currentShape.relativeEnd().y();
-        if(height > 0.5) { //no point in checking below
-            return SolidProvider.fromShape(currentShape);
-        }
-
-        //we need to check below
-        Block below = getBlock_UNSAFE(x, y - 1, z, Condition.TYPE);
-        Shape belowShape = below.registry().collisionShape();
-
-        boolean currentCollidable = PhysicsUtils.isCollidable(currentShape);
-
-        if(PhysicsUtils.isTall(belowShape)) {
-            //split tall shape
-            Solid upperSolid = SolidProvider.getSplit(belowShape)[1];
-
-            if(currentCollidable) {
-                //if the current shape also has collision, combine with the split
-                return SolidProvider.composite(upperSolid, SolidProvider.fromShape(currentShape));
+            double height = currentShape.relativeEnd().y();
+            if(height > 0.5) { //no point in checking below
+                return SolidProvider.fromShape(currentShape);
             }
 
-            return upperSolid;
-        }
+            //we need to check below
+            Block below = getBlock(x, y - 1, z, Condition.TYPE);
+            Shape belowShape = below.registry().collisionShape();
 
-        if(!currentCollidable) {
-            return null;
-        }
+            boolean currentCollidable = PhysicsUtils.isCollidable(currentShape);
 
-        return SolidProvider.fromShape(currentShape);
+            if(PhysicsUtils.isTall(belowShape)) {
+                //split tall shape
+                Solid upperSolid = SolidProvider.getSplit(belowShape)[1];
+
+                if(currentCollidable) {
+                    //if the current shape also has collision, combine with the split
+                    return SolidProvider.composite(upperSolid, SolidProvider.fromShape(currentShape));
+                }
+
+                return upperSolid;
+            }
+
+            if(!currentCollidable) {
+                return null;
+            }
+
+            return SolidProvider.fromShape(currentShape);
+        }
     }
 }

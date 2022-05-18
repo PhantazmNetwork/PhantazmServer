@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
+import com.github.phantazmnetwork.neuron.bindings.minestom.DebugNavigationTracker;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.GroundNavigator;
@@ -16,6 +17,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -30,8 +32,9 @@ public class GroundNeuralEntity extends NeuralEntity {
 
     @Override
     protected @NotNull Navigator makeNavigator(@NotNull PathContext context) {
-        return new GroundNavigator(NavigationTracker.NULL, context.getEngine(), this, 500,
-                500, result -> {
+        return new GroundNavigator(new DebugNavigationTracker(LoggerFactory.getLogger(GroundNeuralEntity.class),
+                getInstance()),
+                context.getEngine(), this, 500, 500, result -> {
             if(!result.isSuccessful()) {
                 //for failed results, use steeper linear delay scaling based on the pessimistic assumption the target
                 //will stay inaccessible
@@ -67,13 +70,9 @@ public class GroundNeuralEntity extends NeuralEntity {
         }
         else {
             navigator.setDestination(() -> {
-                if(entity.isOnGround()) {
-                    return VecUtils.toBlockInt(entity.getPosition());
-                }
-
                 PhysicsResult result = CollisionUtils.handlePhysics(entity, new Vec(0, -16, 0));
                 if(result.isOnGround()) {
-                    return VecUtils.toBlockInt(result.newPosition());
+                    return VecUtils.toBlockInt(result.collidedBlockY().add(0, 1, 0));
                 }
 
                 return VecUtils.toBlockInt(entity.getPosition());

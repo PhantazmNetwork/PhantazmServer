@@ -121,7 +121,7 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             navigator = makeNavigator(context);
             controller = makeController();
 
-            explorer = new TranslationExplorer(context.getCache(), descriptor, makeTranslator(instance, context));
+            explorer = new TranslationExplorer(null, descriptor, makeTranslator(instance, context));
         });
     }
 

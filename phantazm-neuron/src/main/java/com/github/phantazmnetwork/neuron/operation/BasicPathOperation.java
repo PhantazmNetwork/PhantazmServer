@@ -24,6 +24,7 @@ public class BasicPathOperation implements PathOperation {
     private final Object2ObjectOpenHashMap<Vec3I, Node> graph;
 
     private State state;
+    private final Node initial;
     private Node best;
     private PathResult result;
 
@@ -50,7 +51,7 @@ public class BasicPathOperation implements PathOperation {
         this.graph = new Object2ObjectOpenHashMap<>();
         this.state = State.IN_PROGRESS;
 
-        Node initial = new Node(start, 0, calculator.heuristic(start, destination), null);
+        this.initial = new Node(start, 0, calculator.heuristic(start, destination), null);
 
         //y offset will be computed later, set to 0 for now
         initial.setOffset(xOffset, 0, zOffset);
@@ -108,6 +109,14 @@ public class BasicPathOperation implements PathOperation {
                  */
                 Node neighbor = graph.computeIfAbsent(Vec3I.of(x, y, z), (Vec3I key) -> new Node(key, Float
                         .POSITIVE_INFINITY, calculator.heuristic(key, destination), current));
+
+                if(neighbor == initial) {
+                    //when re-visiting the first node, reset the offset value as we should be at the center
+                    neighbor.setOffset(0.5F, neighbor.getYOffset(), 0.5F);
+                }
+
+                //if re-visiting nodes, assume a default horizonal offset
+                //neighbor.setOffset(0.5F, neighbor.getYOffset(), 0.5F);
 
                 Vec3I neighborPos = neighbor.getPosition();
                 //tentative g-score, we have to check if we've actually got a better score than our previous path

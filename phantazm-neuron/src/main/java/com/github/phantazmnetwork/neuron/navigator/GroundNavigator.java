@@ -103,18 +103,33 @@ public class GroundNavigator extends TrackingNavigator {
 
         //search for an appropriate starting node
         Node start = null;
+        Node nearest = null;
+        double nearestDistance = Double.POSITIVE_INFINITY;
         for(Node node : pathStart) {
             if(withinDistance(controller, node)) {
                 start = node;
                 break;
             }
+
+            Vec3I nodePos = node.getPosition();
+            double distance = Vec3D.squaredDistance(nodePos.getX() + node.getXOffset(), nodePos.getY() + node
+                            .getYOffset(), nodePos.getZ() + node.getZOffset(), controller.getX(), controller.getY(),
+                    controller.getZ());
+            if(distance < nearestDistance) {
+                nearestDistance = distance;
+                nearest = node;
+            }
         }
 
         if(start == null) {
-            //failed to find starting node
-            navigationTracker.onNavigationError(this, NavigationTracker.ErrorType.NO_START);
-            recalculationDelay = missingStartDelay;
-            return false;
+            if(nearestDistance > 1) {
+                //failed to find adequate starting node
+                navigationTracker.onNavigationError(this, pathStart, NavigationTracker.ErrorType.NO_START);
+                recalculationDelay = missingStartDelay;
+                return false;
+            }
+
+            start = nearest;
         }
 
         current = start;
@@ -126,7 +141,11 @@ public class GroundNavigator extends TrackingNavigator {
         recalculationDelay = explorationDelayFunction.applyAsLong(result);
         hasPath = true;
 
-        navigationTracker.onPathfindComplete(this, result);
+        if(!result.isSuccessful()) {
+            System.out.println("Path failed");
+            System.out.println("Destination: " + currentDestination);
+        }
+        navigationTracker.onPathfindComplete(this, pathStart, result);
         return true;
     }
 
@@ -175,6 +194,8 @@ public class GroundNavigator extends TrackingNavigator {
                     lastMoved = time;
                 }
                 else if(time - lastMoved > immobileThreshold) {
+                    navigationTracker.onNavigationError(this, null, NavigationTracker.ErrorType
+                            .STUCK);
                     //if we don't have any movement, stop moving along this path
                     return true;
                 }
@@ -206,9 +227,9 @@ public class GroundNavigator extends TrackingNavigator {
 
     private static boolean withinDistance(Controller controller, Node node) {
         Vec3I nodePosition = node.getPosition();
-        return Vec3D.squaredDistance(controller.getX(), controller.getY(), controller.getZ(), nodePosition.getX() +
-                node.getXOffset(), nodePosition.getY() + node.getYOffset(), nodePosition.getZ() + node
-                .getZOffset()) < NODE_REACHED_DISTANCE;
+        Vec3I floored = Vec3I.floored(controller.getX(), controller.getY(), controller.getZ());
+
+        return nodePosition.equals(floored);
     }
 
     @Override
