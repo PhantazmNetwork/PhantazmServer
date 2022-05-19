@@ -54,18 +54,20 @@ public class DebugNavigationTracker implements NavigationTracker {
                 controller.getZ()) + ", navigating to " + navigator.getDestination() + ": ERROR_TYPE " + errorType +
                 ", starting node " + pathStart);
 
-        double nearest = Double.POSITIVE_INFINITY;
-        Node nearestNode = null;
-        for(Node node : pathStart) {
-            Vec3I nodePos = node.getPosition();
-            double distance = Vec3D.squaredDistance(nodePos.getX() + 0.5, nodePos.getY() + node.getYOffset(),
-                    nodePos.getZ() + 0.5, controller.getX(), controller.getY(), controller.getZ());
-            if(distance < nearest) {
-                nearest = distance;
-                nearestNode = node;
+        if (pathStart != null) {
+            double nearest = Double.POSITIVE_INFINITY;
+            Node nearestNode = null;
+            for (Node node : pathStart) {
+                Vec3I nodePos = node.getPosition();
+                double distance = Vec3D.squaredDistance(nodePos.getX() + 0.5, nodePos.getY() + node.getYOffset(),
+                        nodePos.getZ() + 0.5, controller.getX(), controller.getY(), controller.getZ());
+                if (distance < nearest) {
+                    nearest = distance;
+                    nearestNode = node;
+                }
             }
-        }
 
-        logger.error("Nearest node: " + nearestNode + ", was " + Math.sqrt(nearest) + " blocks away");
+            logger.error("Nearest node: " + nearestNode + ", was " + Math.sqrt(nearest) + " blocks away");
+        }
     }
 }

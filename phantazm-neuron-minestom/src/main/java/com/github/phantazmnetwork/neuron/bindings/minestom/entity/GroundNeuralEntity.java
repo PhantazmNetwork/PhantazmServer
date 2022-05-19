@@ -32,18 +32,16 @@ public class GroundNeuralEntity extends NeuralEntity {
 
     @Override
     protected @NotNull Navigator makeNavigator(@NotNull PathContext context) {
-        return new GroundNavigator(new DebugNavigationTracker(LoggerFactory.getLogger(GroundNeuralEntity.class),
-                getInstance()),
-                context.getEngine(), this, 500, 500, result -> {
+        return new GroundNavigator(NavigationTracker.NULL, context.getEngine(), this, 2000,
+                500, result -> {
             if(!result.isSuccessful()) {
                 //for failed results, use steeper linear delay scaling based on the pessimistic assumption the target
                 //will stay inaccessible
                 return result.exploredCount() * 2L;
             }
-            else {
-                //for successful results, use much shallower linear delay scaling
-                return result.exploredCount() / 2L;
-            }
+
+            //for successful results, use much shallower linear delay scaling
+            return result.exploredCount() / 2L;
         });
     }
 
@@ -72,7 +70,8 @@ public class GroundNeuralEntity extends NeuralEntity {
             navigator.setDestination(() -> {
                 PhysicsResult result = CollisionUtils.handlePhysics(entity, new Vec(0, -16, 0));
                 if(result.isOnGround()) {
-                    return VecUtils.toBlockInt(result.collidedBlockY().add(0, 1, 0));
+                    return VecUtils.toBlockInt(result.collidedBlockY().add(0, result.blockTypeY().registry()
+                            .collisionShape().relativeEnd().y(), 0));
                 }
 
                 return VecUtils.toBlockInt(entity.getPosition());

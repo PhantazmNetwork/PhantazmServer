@@ -19,8 +19,6 @@ import java.util.function.ToLongFunction;
  * Standard {@link TrackingNavigator} implementation for ground-based movement.
  */
 public class GroundNavigator extends TrackingNavigator {
-    private static final double NODE_REACHED_DISTANCE = 0.25;
-
     private final long immobileThreshold;
     private final long missingStartDelay;
     private final ToLongFunction<? super PathResult> explorationDelayFunction;
@@ -140,11 +138,6 @@ public class GroundNavigator extends TrackingNavigator {
 
         recalculationDelay = explorationDelayFunction.applyAsLong(result);
         hasPath = true;
-
-        if(!result.isSuccessful()) {
-            System.out.println("Path failed");
-            System.out.println("Destination: " + currentDestination);
-        }
         navigationTracker.onPathfindComplete(this, pathStart, result);
         return true;
     }
@@ -200,6 +193,10 @@ public class GroundNavigator extends TrackingNavigator {
                     return true;
                 }
             }
+            else {
+                //if jumping, keep updating lastMoved, so we don't consider ourselves stuck
+                lastMoved = time;
+            }
 
             controller.advance(current, target);
 
@@ -226,10 +223,7 @@ public class GroundNavigator extends TrackingNavigator {
     }
 
     private static boolean withinDistance(Controller controller, Node node) {
-        Vec3I nodePosition = node.getPosition();
-        Vec3I floored = Vec3I.floored(controller.getX(), controller.getY(), controller.getZ());
-
-        return nodePosition.equals(floored);
+        return node.getPosition().equals(Vec3I.floored(controller.getX(), controller.getY(), controller.getZ()));
     }
 
     @Override

@@ -20,7 +20,6 @@ public interface Agent {
     /**
      * Returns the starting position for this Agent.
      * @return the starting position for this Agent
-     * @throws IllegalStateException if this agent does not have a valid starting position
      */
     @NotNull Vec3I getStartPosition();
 
