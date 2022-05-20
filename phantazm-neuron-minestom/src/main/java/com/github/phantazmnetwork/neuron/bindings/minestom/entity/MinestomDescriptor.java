@@ -52,8 +52,18 @@ public interface MinestomDescriptor extends PhysicalDescriptor {
      */
     @NotNull EntityType getEntityType();
 
+    /**
+     * Computes the block position (destination node vector) for the given entity.
+     * @param targetEntity the entity to compute the target position for
+     * @return the destination node vector
+     */
     @NotNull Vec3I computeTargetPosition(@NotNull Entity targetEntity);
 
+    /**
+     * Determines if the given entity is valid for pathfinding.
+     * @param entity the entity
+     * @return {@code true} if the entity is valid for pathfinding, {@code false} otherwise
+     */
     boolean canPathfind(@NotNull NeuralEntity entity);
 
     /**

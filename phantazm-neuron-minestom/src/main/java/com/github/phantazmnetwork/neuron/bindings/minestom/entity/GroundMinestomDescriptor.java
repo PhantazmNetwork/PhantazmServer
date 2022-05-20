@@ -23,6 +23,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * A {@link MinestomDescriptor} for gravity-bound entities.
+ * @see GroundDescriptor
+ * @see MinestomDescriptor
  */
 public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDescriptor {
     @Override
