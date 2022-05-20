@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Root of all entities that use Neuron for pathfinding. This is both a {@link LivingEntity} and an {@link Agent}.
  */
-public abstract class NeuralEntity extends LivingEntity implements Agent {
+public class NeuralEntity extends LivingEntity implements Agent {
     private final MinestomDescriptor descriptor;
     private final ContextProvider provider;
 
@@ -63,7 +63,8 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
         Instance instance = this.instance;
         Chunk currentChunk = this.currentChunk;
         return instance != null && currentChunk != null && !isDead() && instance.getWorldBorder().isInside(this)
-                && !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null;
+                && !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null && descriptor
+                .canPathfind(this);
     }
 
     @Override
@@ -104,11 +105,12 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
      * @param target the target entity to follow
      */
     public void setTarget(@Nullable Entity target) {
+        Navigator navigator = getNavigator();
         if(target == null) {
             navigator.setDestination(null);
         }
         else {
-            navigator.setDestination(() -> VecUtils.toBlockInt(target.getPosition()));
+            navigator.setDestination(() -> descriptor.computeTargetPosition(target));
         }
     }
 
@@ -118,10 +120,10 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
             PathContext context = provider.provideContext(instance);
 
             cancelNavigation();
-            navigator = makeNavigator(context);
-            controller = makeController();
+            navigator = descriptor.makeNavigator(context, this);
+            controller = descriptor.makeController(this);
 
-            explorer = new TranslationExplorer(null, descriptor, makeTranslator(instance, context));
+            explorer = new TranslationExplorer(null, descriptor, descriptor.makeTranslator(instance, context));
         });
     }
 
@@ -188,27 +190,6 @@ public abstract class NeuralEntity extends LivingEntity implements Agent {
     public void attack(@NotNull Entity target) {
         attack(target, false);
     }
-
-    /**
-     * Creates a {@link Navigator} instance given a {@link PathContext}.
-     * @param context the current PathContext
-     * @return a new Navigator instance to use for navigation
-     */
-    protected abstract @NotNull Navigator makeNavigator(@NotNull PathContext context);
-
-    /**
-     * Creates a {@link NodeTranslator} instance given an {@link Instance} and {@link PathContext}.
-     * @param instance the current instance
-     * @param context the current PathContext
-     * @return a new NodeTranslator instance to use for navigation
-     */
-    protected abstract @NotNull NodeTranslator makeTranslator(@NotNull Instance instance, @NotNull PathContext context);
-
-    /**
-     * Creates a {@link Controller} suitable for making this entity move along a path.
-     * @return a Controller suitable for this entity's movement
-     */
-    protected abstract @NotNull Controller makeController();
 
     private void cancelNavigation() {
         if(navigator != null) {
