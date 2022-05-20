@@ -19,12 +19,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
 import java.util.UUID;
 
 /**
  * A {@link NeuralEntity} implementation with ground-based movement (gravitation).
  */
 public class GroundNeuralEntity extends NeuralEntity {
+    private static final Random ENTITY_RANDOM = new Random();
+
     public GroundNeuralEntity(@NotNull GroundMinestomDescriptor entityType, @NotNull UUID uuid,
                               @NotNull ContextProvider contextProvider) {
         super(entityType, uuid, contextProvider);
@@ -34,14 +37,16 @@ public class GroundNeuralEntity extends NeuralEntity {
     protected @NotNull Navigator makeNavigator(@NotNull PathContext context) {
         return new GroundNavigator(NavigationTracker.NULL, context.getEngine(), this, 2000,
                 500, result -> {
+            //randomize navigation delay to make horde navigation look smoother
+            double delayMultiplier = ENTITY_RANDOM.nextDouble(0.5D, 1.5D);
             if(!result.isSuccessful()) {
                 //for failed results, use steeper linear delay scaling based on the pessimistic assumption the target
                 //will stay inaccessible
-                return result.exploredCount() * 2L;
+                return (long) ((result.exploredCount() * 2L) * delayMultiplier);
             }
 
             //for successful results, use much shallower linear delay scaling
-            return result.exploredCount() / 2L;
+            return (long)((result.exploredCount() / 2L) * delayMultiplier);
         });
     }
 

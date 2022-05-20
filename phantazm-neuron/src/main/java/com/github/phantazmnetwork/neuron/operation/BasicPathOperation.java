@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  */
 public class BasicPathOperation implements PathOperation {
     private final Vec3I destination;
-    private final Predicate<Vec3I> successPredicate;
+    private final Predicate<? super Vec3I> successPredicate;
     private final Calculator calculator;
     private final Explorer explorer;
     private final NodeQueue openSet;
@@ -40,7 +40,7 @@ public class BasicPathOperation implements PathOperation {
      * @throws NullPointerException if any of the arguments are null
      */
     public BasicPathOperation(@NotNull Vec3I start, @NotNull Vec3I destination,
-                              @NotNull Predicate<Vec3I> successPredicate, @NotNull Calculator calculator,
+                              @NotNull Predicate<? super Vec3I> successPredicate, @NotNull Calculator calculator,
                               @NotNull Explorer explorer, float xOffset, float zOffset) {
         this.destination = Objects.requireNonNull(destination, "destination");
         this.successPredicate = Objects.requireNonNull(successPredicate, "successPredicate");
@@ -48,7 +48,7 @@ public class BasicPathOperation implements PathOperation {
         this.explorer = Objects.requireNonNull(explorer, "explorer");
 
         this.openSet = new NodeQueue();
-        this.graph = new Object2ObjectOpenHashMap<>();
+        this.graph = new Object2ObjectOpenHashMap<>(32);
         this.state = State.IN_PROGRESS;
 
         this.initial = new Node(start, 0, calculator.heuristic(start, destination), null);
@@ -115,12 +115,8 @@ public class BasicPathOperation implements PathOperation {
                     neighbor.setOffset(0.5F, neighbor.getYOffset(), 0.5F);
                 }
 
-                //if re-visiting nodes, assume a default horizonal offset
-                //neighbor.setOffset(0.5F, neighbor.getYOffset(), 0.5F);
-
-                Vec3I neighborPos = neighbor.getPosition();
                 //tentative g-score, we have to check if we've actually got a better score than our previous path
-                float g = current.getG() + calculator.distance(currentPos, neighborPos);
+                float g = current.getG() + calculator.distance(currentPos, neighbor.getPosition());
 
                 //for brand-new nodes, neighbor.getG() is equal to Float.POSITIVE_INFINITY, so this will run for sure
                 //if however neighbor.getG() is less optimal, we will not explore the node

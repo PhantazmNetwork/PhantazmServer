@@ -17,7 +17,7 @@ class CompositeSolid extends PointSolid {
     private final Set<Solid> children;
 
     /**
-     * Creates a new CompositeSolid from two other solids. The solids must not be equal, or a
+     * Creates a new CompositeSolid from two other solids. The solids must not be equal, or an
      * {@link IllegalArgumentException} will be thrown.
      * @param first the first solid
      * @param second the second solid
