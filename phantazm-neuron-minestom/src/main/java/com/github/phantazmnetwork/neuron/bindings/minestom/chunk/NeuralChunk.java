@@ -37,6 +37,10 @@ public class NeuralChunk extends DynamicChunk {
     public @Nullable Solid getSolid(int x, int y, int z) {
         synchronized (this) {
             Block current = getBlock(x, y, z, Condition.TYPE);
+            if(current == null) {
+                return null; //result of getBlock with Condition.TYPE should never actually be null
+            }
+
             Shape currentShape = current.registry().collisionShape();
 
             double height = currentShape.relativeEnd().y();
@@ -44,22 +48,23 @@ public class NeuralChunk extends DynamicChunk {
                 return SolidProvider.fromShape(currentShape);
             }
 
+            boolean currentCollidable = PhysicsUtils.isCollidable(currentShape);
             //we need to check below
             Block below = getBlock(x, y - 1, z, Condition.TYPE);
-            Shape belowShape = below.registry().collisionShape();
 
-            boolean currentCollidable = PhysicsUtils.isCollidable(currentShape);
+            if(below != null) {
+                Shape belowShape = below.registry().collisionShape();
+                if(PhysicsUtils.isTall(belowShape)) {
+                    //split tall shape
+                    Solid upperSolid = SolidProvider.getSplit(belowShape)[1];
 
-            if(PhysicsUtils.isTall(belowShape)) {
-                //split tall shape
-                Solid upperSolid = SolidProvider.getSplit(belowShape)[1];
+                    if(currentCollidable) {
+                        //if the current shape also has collision, combine with the split
+                        return SolidProvider.composite(upperSolid, SolidProvider.fromShape(currentShape));
+                    }
 
-                if(currentCollidable) {
-                    //if the current shape also has collision, combine with the split
-                    return SolidProvider.composite(upperSolid, SolidProvider.fromShape(currentShape));
+                    return upperSolid;
                 }
-
-                return upperSolid;
             }
 
             if(!currentCollidable) {
