@@ -17,6 +17,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -37,6 +38,11 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
         return 3F;
     }
 
+    /**
+     * Returns the maximum "step height" for this agent. For vertical distances greater less than the step height,
+     * the agent should teleport up instantaneously instead of jumping.
+     * @return the step height for this agent
+     */
     default float getStepHeight() {
         return 0.5F;
     }

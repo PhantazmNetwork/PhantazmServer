@@ -1,10 +1,13 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityCreature;
 import net.minestom.server.entity.EntityType;
@@ -13,9 +16,20 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.player.PlayerPacketEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.listener.ChatMessageListener;
+import net.minestom.server.listener.PlayerPositionListener;
+import net.minestom.server.listener.manager.PacketListenerConsumer;
+import net.minestom.server.listener.manager.PacketListenerManager;
+import net.minestom.server.network.PacketProcessor;
+import net.minestom.server.network.packet.client.ClientPacket;
+import net.minestom.server.network.packet.client.play.ClientAnimationPacket;
+import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
+import net.minestom.server.network.packet.client.play.ClientPlayerPacket;
+import net.minestom.server.network.packet.client.play.ClientPlayerPositionPacket;
 import org.jetbrains.annotations.NotNull;
 
 final class NeuronTest {
@@ -49,7 +63,12 @@ final class NeuronTest {
                         Pos playerPos = player.getPosition();
                         instance.setBlock(playerPos.blockX(), playerPos.blockY(), playerPos.blockZ(), Block.GOLD_BLOCK);
                     }
+                    case "L" -> {
+                        Pos playerPos = player.getPosition();
+                        instance.setBlock(playerPos.blockX(), playerPos.blockY(), playerPos.blockZ(), Block.LADDER);
+                    }
                     case "C" -> event.getPlayer().setGameMode(GameMode.CREATIVE);
+                    case "S" -> event.getPlayer().setGameMode(GameMode.SURVIVAL);
                     case "ZZ" -> {
                         EntityCreature creature = new EntityCreature(EntityType.ZOMBIE);
                         creature.setInstance(instance, player.getPosition().add(5, 0, 0));
