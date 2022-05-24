@@ -5,11 +5,13 @@ caffeine = "3.0.6"
 
 ethylene = "0.5.0"
 
+fastutil = "8.5.6"
+
 jetbrains-annotations = "23.0.0"
 
 junit-jupiter = "5.8.2"
 
-minestom = "6b26929f6b"
+minestom = "486a27c506"
 
 miniMessage = "4.10.1"
 
@@ -20,6 +22,8 @@ caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "c
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
+
+fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 

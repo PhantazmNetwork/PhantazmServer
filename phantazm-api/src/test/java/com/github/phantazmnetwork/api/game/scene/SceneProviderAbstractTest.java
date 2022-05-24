@@ -4,9 +4,13 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class SceneProviderAbstractTest {
@@ -63,10 +67,10 @@ public class SceneProviderAbstractTest {
         for (int i = 0; i < maximumLobbies; i++) {
             sceneProvider.provideScene(request);
         }
-        sceneProvider.tick();
+        sceneProvider.tick(0);
 
         for (Scene<Object> scene : scenes) {
-            Mockito.verify(scene).tick();
+            Mockito.verify(scene).tick(0);
         }
     }
 
@@ -90,10 +94,10 @@ public class SceneProviderAbstractTest {
 
         Object request = new Object();
         sceneProvider.provideScene(request);
-        sceneProvider.tick();
+        sceneProvider.tick(0);
 
         assertFalse(sceneProvider.getScenes().iterator().hasNext());
-        verify(scene, never()).tick();
+        verify(scene, never()).tick(0);
     }
 
 }

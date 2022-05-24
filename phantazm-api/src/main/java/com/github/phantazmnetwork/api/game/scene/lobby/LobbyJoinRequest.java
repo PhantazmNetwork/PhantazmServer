@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collection;
-import java.util.Objects;
 
 /**
  * A join request for lobbies.
