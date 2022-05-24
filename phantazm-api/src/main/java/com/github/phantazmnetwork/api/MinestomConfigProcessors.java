@@ -27,7 +27,9 @@ public final class MinestomConfigProcessors {
         }
     };
 
-    private MinestomConfigProcessors() {}
+    private MinestomConfigProcessors() {
+        throw new UnsupportedOperationException();
+    }
 
     public static @NotNull ConfigProcessor<ItemStack> itemStack() {
         return itemStack;
