@@ -1,5 +1,8 @@
 package com.github.phantazmnetwork.commons;
 
+/**
+ * Contains static functions related to mathematical operations and functions.
+ */
 public final class MathUtils {
     private static final double E_INVERSE = 1.0 / Math.E;
     private static final int SERIES_MAX = 250;
@@ -9,6 +12,12 @@ public final class MathUtils {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Computes the lambertW (product logarithm) for a given real value and branch.
+     * @param branch the branch to use (either 0 or -1)
+     * @param z the value to compute W for
+     * @return the product logarithm of {@code z} on {@code branch}
+     */
     public static double lambertW(int branch, double z) {
         if(branch != -1 && branch != 0) {
             throw new IllegalArgumentException("The only valid values for branch_index is -1 (W_{-1}) and 0 (W_{0}).");

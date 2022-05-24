@@ -14,6 +14,7 @@ public record PathfinderConfig(int threads, int cacheSize, int updateQueueCapaci
      * Creates a config for pathfinding.
      * @param threads the number of threads to use per instance for pathfinding operations
      * @param cacheSize the size allocated to the cache, used to minimize collision checks
+     * @param updateQueueCapacity the size of the update queue
      */
     public PathfinderConfig {}
 }

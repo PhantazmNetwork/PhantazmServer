@@ -35,16 +35,16 @@ public interface Vec3I extends Comparable<Vec3I> {
      */
     Vec3I ORIGIN = of(0, 0, 0);
 
-    static @NotNull Vec3I floored(@NotNull Vec3D vec3D) {
-        return of((int)Math.floor(vec3D.getX()), (int)Math.floor(vec3D.getY()), (int)Math.floor(vec3D.getZ()));
-    }
-
+    /**
+     * Returns a Vec3I created from taking the mathematical floor of each given {@code double} component before casting
+     * to an integer.
+     * @param x the x-component of the new vector, which will be floored
+     * @param y the y-component of the new vector, which will be floored
+     * @param z the z-component of the new vector, which will be floored
+     * @return the floored vector
+     */
     static @NotNull Vec3I floored(double x, double y, double z) {
         return of((int)Math.floor(x), (int)Math.floor(y), (int)Math.floor(z));
-    }
-
-    static @NotNull Vec3I floored(@NotNull Vec3F vec3F) {
-        return of((int)Math.floor(vec3F.getX()), (int)Math.floor(vec3F.getY()), (int)Math.floor(vec3F.getZ()));
     }
 
     /**

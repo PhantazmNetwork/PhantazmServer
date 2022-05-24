@@ -29,6 +29,11 @@ public class MojangIdentitySource implements IdentitySource {
 
     private final Executor executor;
 
+    /**
+     * Creates a new instance of this class using the provided {@link Executor} to (typically asynchronously) execute
+     * name or UUID resolution requests to the Mojang API.
+     * @param executor the executor used to run requests
+     */
     public MojangIdentitySource(@NotNull Executor executor) {
         this.executor = Objects.requireNonNull(executor, "executor");
     }

@@ -55,6 +55,7 @@ public interface NavigationTracker {
      * Called directly after the given {@link Navigator} finishes a pathfinding operation (but before it begins walking
      * along it). The navigator should have a set destination.
      * @param navigator the navigator which just finished a pathfinding operation
+     * @param pathStart the beginning of the path
      * @param result the {@link PathResult} representing the completed pathfinding operation, which may be null if the
      *               operation was cancelled or an error occurred
      */
@@ -70,6 +71,7 @@ public interface NavigationTracker {
     /**
      * Called when the given {@link Navigator} encounters a navigation error.
      * @param navigator the navigator which just erred
+     * @param pathStart the beginning of the path
      * @param errorType the {@link ErrorType} describing the error
      */
     void onNavigationError(@NotNull Navigator navigator, @Nullable Node pathStart, @NotNull ErrorType errorType);
