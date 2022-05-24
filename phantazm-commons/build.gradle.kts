@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     api(libs.fastutil)
+    api(libs.ethylene.core)
 }
