@@ -2,15 +2,40 @@ package com.github.phantazmnetwork.commons.vector;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents a 3-dimensional double-precision floating point vector.
+ */
 public interface Vec3D extends Comparable<Vec3D> {
+    /**
+     * Represents the origin (0, 0, 0).
+     */
     Vec3D ORIGIN = new BasicVec3D(0, 0, 0);
 
+    /**
+     * Gets the x-component of this vector.
+     * @return the x-component of this vector
+     */
     double getX();
 
+    /**
+     * Gets the y-component of this vector.
+     * @return the y-component of this vector
+     */
     double getY();
 
+    /**
+     * Gets the z-component of this vector.
+     * @return the z-component of this vector
+     */
     double getZ();
 
+    /**
+     * Returns a new implementation of this interface. The returned object will be immutable.
+     * @param x the x-component of the new vector
+     * @param y the y-component of the new vector
+     * @param z the z-component of the new vector
+     * @return a new, immutable vector
+     */
     static @NotNull Vec3D of(double x, double y, double z) {
         return new BasicVec3D(x, y, z);
     }
@@ -45,9 +70,5 @@ public interface Vec3D extends Comparable<Vec3D> {
      */
     static boolean equals(double x1, double y1, double z1, double x2, double y2, double z2) {
         return x1 == x2 && y1 == y2 && z1 == z2;
-    }
-
-    static boolean fuzzyEquals(double x1, double y1, double z1, double x2, double y2, double z2, double epsilon) {
-        return Math.abs(x1 - x2) < epsilon && Math.abs(y1 - y2) < epsilon && Math.abs(z1 - z2) < epsilon;
     }
 }

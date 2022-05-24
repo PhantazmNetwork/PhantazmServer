@@ -18,6 +18,10 @@ import java.util.Objects;
 public abstract class FileSystemInstanceLoader implements InstanceLoader {
 
     private final Path rootPath;
+
+    /**
+     * The {@link ChunkSupplier} to be used by instances loaded from this InstanceLoader
+     */
     protected final ChunkSupplier chunkSupplier;
 
     /**

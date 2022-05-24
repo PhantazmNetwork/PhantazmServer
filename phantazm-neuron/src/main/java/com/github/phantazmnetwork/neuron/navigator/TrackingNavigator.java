@@ -11,8 +11,19 @@ import java.util.Objects;
  * {@link Agent}.
  */
 public abstract class TrackingNavigator implements Navigator {
+    /**
+     * The {@link NavigationTracker} instance used to record navigation events.
+     */
     protected final NavigationTracker navigationTracker;
+
+    /**
+     * The {@link PathEngine} used to initiate pathfinding operations.
+     */
     protected final PathEngine pathEngine;
+
+    /**
+     * The {@link Agent} this navigator is responsible for controlling.
+     */
     protected final Agent agent;
 
     /**

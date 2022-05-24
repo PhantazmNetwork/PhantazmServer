@@ -34,8 +34,13 @@ public class BasicContextProvider implements ContextProvider {
 
     /**
      * Creates a new instance of this class.
+     * @param globalEventNode the event node to which listeners for {@link BlockChangeEvent} and
+     * {@link InstanceUnregisterEvent} will be registered
      * @param threads the number of threads to maintain for pathfinding
      * @param instanceCache the maximum size of the {@link PathCache} maintained for each instance
+     * @param updateQueueCapacity the capacity of the update queue (maximum number of block state changes that will be
+     *                            kept in-memory at any given time; larger values mean more memory is used but may
+     *                            prevent unnecessary cache invalidation
      */
     public BasicContextProvider(@NotNull EventNode<Event> globalEventNode, int threads, int instanceCache,
                                 int updateQueueCapacity) {

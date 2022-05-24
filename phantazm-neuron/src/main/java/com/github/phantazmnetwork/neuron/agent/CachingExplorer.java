@@ -14,6 +14,10 @@ import java.util.Objects;
  */
 public abstract class CachingExplorer implements Explorer {
     private final PathCache cache;
+
+    /**
+     * The descriptor for the {@link Agent} using this Explorer.
+     */
     protected final Descriptor descriptor;
 
     /**

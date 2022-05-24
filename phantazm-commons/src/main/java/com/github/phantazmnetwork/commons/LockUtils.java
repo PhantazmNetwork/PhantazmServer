@@ -56,6 +56,7 @@ public final class LockUtils {
      * @param callable the callable used to produce the returned value
      * @param <TReturn>> the type of value returned by the callable
      * @return the value returned by the callable
+     * @throws Exception if the callable throws an exception
      */
     public static <TReturn> TReturn lockCallable(@NotNull Lock lock, @NotNull Callable<? extends TReturn> callable)
             throws Exception {

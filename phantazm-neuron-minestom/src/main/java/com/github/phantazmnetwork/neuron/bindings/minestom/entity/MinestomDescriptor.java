@@ -68,6 +68,7 @@ public interface MinestomDescriptor extends PhysicalDescriptor {
 
     /**
      * Creates a {@link Controller} suitable for making the given entity move along a path.
+     * @param entity the entity to make a controller for
      * @return a Controller suitable for the given entity's movement
      */
     @NotNull Controller makeController(@NotNull NeuralEntity entity);
@@ -83,6 +84,7 @@ public interface MinestomDescriptor extends PhysicalDescriptor {
     /**
      * Creates a {@link Navigator} instance given a {@link PathContext}.
      * @param context the current PathContext
+     * @param agent the agent to make a navigator for
      * @return a new Navigator instance to use for navigation
      */
     @NotNull Navigator makeNavigator(@NotNull PathContext context, @NotNull Agent agent);

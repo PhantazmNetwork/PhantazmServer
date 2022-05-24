@@ -62,6 +62,13 @@ public final class SolidProvider {
         return new CompositeSolid(first, second);
     }
 
+    /**
+     * Returns the "split" for a tall {@link Shape}. The first half of the split will be exactly 1 block in height,
+     * whereas the remainder will generally be less than 1 in height.
+     * @param shape the tall shape to split
+     * @return an array with exactly two elements, the first being the lower portion of the shape, the second being the
+     * higher portion
+     */
     public static @NotNull Solid @NotNull [] getSplit(@NotNull Shape shape) {
         if(shape.relativeEnd().y() < 1) {
             throw new IllegalArgumentException("Can't split a shape that isn't tall");

@@ -73,6 +73,10 @@ public interface Pipe<TValue> extends Iterator<TValue> {
     abstract class Advancing<TValue> implements Pipe<TValue> {
         private boolean ended;
         private boolean hasValue;
+
+        /**
+         * The value currently held by this pipe.
+         */
         protected TValue value;
 
         @Override

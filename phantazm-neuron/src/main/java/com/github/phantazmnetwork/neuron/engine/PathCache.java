@@ -38,6 +38,8 @@ public interface PathCache {
     /**
      * Called when a solid is updated at the given location. Invalidates the appropriate entries in the internal cache.
      * @param location the location of the update
+     * @param oldSolid the solid previously locate at the location
+     * @param newSolid the new solid at the location
      */
     void handleUpdate(@NotNull Vec3I location, @NotNull Solid oldSolid, @NotNull Solid newSolid);
 }

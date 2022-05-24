@@ -12,6 +12,9 @@ import java.util.List;
  * A {@link Descriptor} for agents that are subject to gravity and can jump or fall.
  */
 public interface GroundDescriptor extends PhysicalDescriptor {
+    /**
+     * The default value returned by {@link GroundDescriptor#stepDirections()}.
+     */
     Collection<? extends Vec3I> DEFAULT_WALK_DIRECTIONS = List.of(
             Vec3I.of(1, 0, 0),
             Vec3I.of(0, 0, 1),
