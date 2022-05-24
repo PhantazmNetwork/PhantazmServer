@@ -197,8 +197,8 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     }
 
     /**
-     * Sets the offset vector for this node. This is used to keep track of precise position, when necessary (typically
-     * only for the first node in a path).
+     * Sets the offset vector for this node. This is used to keep track of precise position, when necessary. Typically
+     * only used for the first node in a path.
      * @param x the x-offset
      * @param y the y-offset
      * @param z the z-offset
@@ -235,11 +235,11 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Determines if this node's offset values are centered (are default). Equivalent to
-     * {@code node.getXOffset() == 0.5 && node.getYOffset() == 0 && node.getZOffset() == 0.5}.
-     * @return {@code true} if this node's x, y, and z offsets are centered, {@code false} otherwise
+     * {@code node.getXOffset() == 0.5 && node.getZOffset() == 0.5}.
+     * @return {@code true} if this node's x and z offsets are centered, {@code false} otherwise
      */
     public boolean isCentered() {
-        return xOffset == 0.5 && yOffset == 0 && zOffset == 0.5;
+        return xOffset == 0.5F && zOffset == 0.5F;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.api.player.IdentitySource;
+import com.github.phantazmnetwork.api.player.MojangIdentitySource;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
@@ -18,6 +19,8 @@ import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * Launches the server, and provides some useful static constants.
@@ -60,7 +63,7 @@ public final class PhantazmServer {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(node, serverConfig, lobbiesConfig);
+            initializeFeatures(node, PHANTAZM_NODE, serverConfig, lobbiesConfig);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -76,15 +79,15 @@ public final class PhantazmServer {
         }
     }
 
-    private static void initializeFeatures(EventNode<Event> node, ServerConfig serverConfig,
+    private static void initializeFeatures(EventNode<Event> global, EventNode<Event> phantazm, ServerConfig serverConfig,
                                            LobbiesConfig lobbiesConfig) {
-        PlayerViewProvider viewProvider = new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer
-                .getConnectionManager());
+        PlayerViewProvider viewProvider = new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool
+                .commonPool()), MinecraftServer.getConnectionManager());
 
-        Lobbies.initialize(node, viewProvider, lobbiesConfig);
-        Chat.initialize(node);
-        Neuron.initialize(node, serverConfig.pathfinderConfig());
-        NeuronTest.initialize(node, Neuron.getSpawner(), PHANTAZM_NODE);
+        Lobbies.initialize(global, viewProvider, lobbiesConfig);
+        Chat.initialize(global);
+        Neuron.initialize(global, serverConfig.pathfinderConfig());
+        NeuronTest.initialize(global, Neuron.getSpawner(), phantazm);
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
