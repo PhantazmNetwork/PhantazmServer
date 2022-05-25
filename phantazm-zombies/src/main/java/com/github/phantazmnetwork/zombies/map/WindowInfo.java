@@ -6,5 +6,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record WindowInfo(@NotNull Key room, @NotNull RegionInfo frameRegion,
-                         @NotNull List<RegionInfo> internalRegions, @NotNull Vec3I spawn, @NotNull Vec3I target) { }
+public record WindowInfo(@NotNull Key room, @NotNull RegionInfo frameRegion, @NotNull List<RegionInfo> internalRegions,
+                         @NotNull Vec3I spawn, @NotNull Vec3I target, @NotNull Key repairSound,
+                         @NotNull Key repairAllSound, @NotNull Key breakSound, @NotNull Key breakAllSound) { }

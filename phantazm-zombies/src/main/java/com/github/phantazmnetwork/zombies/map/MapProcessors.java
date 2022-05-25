@@ -36,6 +36,10 @@ public final class MapProcessors {
     private static final String INTERNAL_REGIONS = "internalRegions";
     private static final String SPAWN = "spawn";
     private static final String TARGET = "target";
+    private static final String REPAIR_SOUND = "repairSound";
+    private static final String REPAIR_ALL_SOUND = "repairAllSound";
+    private static final String BREAK_SOUND = "breakSound";
+    private static final String BREAK_ALL_SOUND = "breakAllSound";
     private static final String LENGTHS = "lengths";
     private static final String ROUND = "round";
     private static final String WAVES = "waves";
@@ -43,11 +47,11 @@ public final class MapProcessors {
     private static final String AMOUNT = "amount";
 
     private static final ConfigProcessor<MapInfo> mapInfo = new ConfigProcessor<>() {
-        private static final String DEFAULT_ROOMS_NAME = "rooms";
-        private static final String DEFAULT_DOORS_NAME = "doors";
-        private static final String DEFAULT_SHOPS_NAME = "shops";
-        private static final String DEFAULT_WINDOWS_NAME = "windows";
-        private static final String DEFAULT_ROUNDS_NAME = "rounds";
+        private static final String DEFAULT_ROOMS_PATH = "rooms";
+        private static final String DEFAULT_DOORS_PATH = "doors";
+        private static final String DEFAULT_SHOPS_PATH = "shops";
+        private static final String DEFAULT_WINDOWS_PATH = "windows";
+        private static final String DEFAULT_ROUNDS_PATH = "rounds";
 
         @Override
         public MapInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -57,12 +61,11 @@ public final class MapProcessors {
             ItemStack displayItem = MinestomConfigProcessors.itemStack().dataFromElement(element.getElement(
                     DISPLAY_ITEM));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(ORIGIN));
-            String roomsPath = element.getStringOrDefault(DEFAULT_ROOMS_NAME, ROOMS_PATH);
-            String doorsPath = element.getStringOrDefault(DEFAULT_DOORS_NAME, DOORS_PATH);
-            String shopsPath = element.getStringOrDefault(DEFAULT_SHOPS_NAME, SHOPS_PATH);
-            String windowsPath = element.getStringOrDefault(DEFAULT_WINDOWS_NAME, WINDOWS_PATH);
-            String roundsPath = element.getStringOrDefault(DEFAULT_ROUNDS_NAME, ROUNDS_PATH);
-
+            String roomsPath = element.getStringOrDefault(DEFAULT_ROOMS_PATH, ROOMS_PATH);
+            String doorsPath = element.getStringOrDefault(DEFAULT_DOORS_PATH, DOORS_PATH);
+            String shopsPath = element.getStringOrDefault(DEFAULT_SHOPS_PATH, SHOPS_PATH);
+            String windowsPath = element.getStringOrDefault(DEFAULT_WINDOWS_PATH, WINDOWS_PATH);
+            String roundsPath = element.getStringOrDefault(DEFAULT_ROUNDS_PATH, ROUNDS_PATH);
             return new MapInfo(version, id, displayName, displayItem, origin, roomsPath, doorsPath, shopsPath,
                     windowsPath, roundsPath);
         }
@@ -73,16 +76,20 @@ public final class MapProcessors {
             node.put(VERSION, new ConfigPrimitive(mapConfig.version()));
             node.put(ID, MinestomConfigProcessors.key().elementFromData(mapConfig.id()));
             node.put(DISPLAY_NAME, new ConfigPrimitive(mapConfig.displayName()));
-            node.put(DISPLAY_ITEM, MinestomConfigProcessors.itemStack().elementFromData(mapConfig
-                    .displayItem()));
+            node.put(DISPLAY_ITEM, MinestomConfigProcessors.itemStack().elementFromData(mapConfig.displayItem()));
             node.put(ORIGIN, VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
-            node.put(ROOMS_PATH, new ConfigPrimitive(mapConfig.roomsPath()));
-            node.put(DOORS_PATH, new ConfigPrimitive(mapConfig.doorsPath()));
-            node.put(SHOPS_PATH, new ConfigPrimitive(mapConfig.shopsPath()));
-            node.put(WINDOWS_PATH, new ConfigPrimitive(mapConfig.windowsPath()));
-            node.put(ROUNDS_PATH, new ConfigPrimitive(mapConfig.roundsPath()));
-
+            putIfNotDefault(node, ROOMS_PATH, mapConfig.roomsPath(), DEFAULT_ROOMS_PATH);
+            putIfNotDefault(node, DOORS_PATH, mapConfig.doorsPath(), DEFAULT_DOORS_PATH);
+            putIfNotDefault(node, SHOPS_PATH, mapConfig.shopsPath(), DEFAULT_SHOPS_PATH);
+            putIfNotDefault(node, WINDOWS_PATH, mapConfig.windowsPath(), DEFAULT_WINDOWS_PATH);
+            putIfNotDefault(node, ROUNDS_PATH, mapConfig.roundsPath(), DEFAULT_ROUNDS_PATH);
             return node;
+        }
+
+        private static void putIfNotDefault(ConfigNode node, String key, String path, String defaultPath) {
+            if(!path.equals(defaultPath)) {
+                node.put(key, new ConfigPrimitive(path));
+            }
         }
     };
 
@@ -137,8 +144,7 @@ public final class MapProcessors {
         public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode();
             node.put(ID, MinestomConfigProcessors.key().elementFromData(shopInfo.id()));
-            node.put(TRIGGER_LOCATION, VectorConfigProcessors.vec3I().elementFromData(shopInfo
-                    .triggerLocation()));
+            node.put(TRIGGER_LOCATION, VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
             return node;
         }
     };
@@ -148,11 +154,15 @@ public final class MapProcessors {
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key room = MinestomConfigProcessors.key().dataFromElement(element.getElement(ROOM_NAME));
             RegionInfo frameRegion = regionInfo.dataFromElement(element.getElement(FRAME_REGION));
-            List<RegionInfo> internalRegions = regionInfoList.dataFromElement(element.getListOrThrow(
-                    INTERNAL_REGIONS));
+            List<RegionInfo> internalRegions = regionInfoList.dataFromElement(element.getListOrThrow(INTERNAL_REGIONS));
             Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(SPAWN));
             Vec3I target = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(TARGET));
-            return new WindowInfo(room, frameRegion, internalRegions, spawn, target);
+            Key repairSound = MinestomConfigProcessors.key().dataFromElement(element.getElement(REPAIR_SOUND));
+            Key repairAllSound = MinestomConfigProcessors.key().dataFromElement(element.getElement(REPAIR_ALL_SOUND));
+            Key breakSound = MinestomConfigProcessors.key().dataFromElement(element.getElement(BREAK_SOUND));
+            Key breakAllSound = MinestomConfigProcessors.key().dataFromElement(element.getElement(BREAK_ALL_SOUND));
+            return new WindowInfo(room, frameRegion, internalRegions, spawn, target, repairSound, repairAllSound,
+                    breakSound, breakAllSound);
         }
 
         @Override
@@ -163,6 +173,10 @@ public final class MapProcessors {
             node.put(INTERNAL_REGIONS, regionInfoList.elementFromData(windowData.internalRegions()));
             node.put(SPAWN, VectorConfigProcessors.vec3I().elementFromData(windowData.spawn()));
             node.put(TARGET, VectorConfigProcessors.vec3I().elementFromData(windowData.target()));
+            node.put(REPAIR_SOUND, MinestomConfigProcessors.key().elementFromData(windowData.repairSound()));
+            node.put(REPAIR_ALL_SOUND, MinestomConfigProcessors.key().elementFromData(windowData.repairAllSound()));
+            node.put(BREAK_SOUND, MinestomConfigProcessors.key().elementFromData(windowData.breakSound()));
+            node.put(BREAK_ALL_SOUND, MinestomConfigProcessors.key().elementFromData(windowData.breakAllSound()));
             return node;
         }
     };
@@ -172,7 +186,6 @@ public final class MapProcessors {
         public RegionInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(ORIGIN));
             Vec3I lengths = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(LENGTHS));
-
             return new RegionInfo(origin, lengths);
         }
 

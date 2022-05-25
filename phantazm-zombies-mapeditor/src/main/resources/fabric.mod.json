@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "phantazm-zombies-mapeditor",
+  "version": "1.0.0-SNAPSHOT",
+  "name": "Phantazm Zombies Mapeditor",
+  "description": "A tool for creating Zombies maps.",
+  "authors": [ "Steank" ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/phantazm-zombies-mapeditor/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorClient"
+    ]
+  },
+  "mixins": [
+    "phantazm-zombies-mapeditor.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.12.0",
+    "minecraft": "1.18.2"
+  }
+}
