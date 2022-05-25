@@ -25,6 +25,7 @@ dependencies {
     modImplementation(libs.renderer)
 
     implementation(project(":phantazm-commons"))
+    implementation(project(":phantazm-zombies-mapdata"))
 }
 
 tasks.processResources {

@@ -9,10 +9,14 @@ import me.x150.renderer.event.events.RenderEvent;
 import me.x150.renderer.renderer.Renderer3d;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.kyori.adventure.key.Key;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 public class MapeditorClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
@@ -22,13 +26,18 @@ public class MapeditorClient implements ClientModInitializer {
     }
 
     private static class Renderer implements ObjectRenderer {
+        private boolean enabled;
         private boolean renderThroughWalls = false;
-
-        private final ArrayList<RenderObject> renderObjects = new ArrayList<>();
+        private final Map<Key, RenderObject> renderObjects = new HashMap<>();
+        private final Collection<RenderObject> values = renderObjects.values();
         private RenderObject[] baked;
 
         @EventListener(shift = Shift.POST, type = EventType.WORLD_RENDER)
-        void worldRender(RenderEvent event) {
+        void worldRender(@NotNull RenderEvent event) {
+            if(!enabled) {
+                return;
+            }
+
             MatrixStack stack = event.getStack();
             if(renderThroughWalls) {
                 Renderer3d.startRenderingThroughWalls();
@@ -39,9 +48,19 @@ public class MapeditorClient implements ClientModInitializer {
             }
 
             for(ObjectRenderer.RenderObject object : baked) {
+                boolean resetWallRender = false;
+                if(!renderThroughWalls && object.renderThroughWalls()) {
+                    Renderer3d.startRenderingThroughWalls();
+                    resetWallRender = true;
+                }
+
                 switch (object.type()) {
-                    case FILLED -> Renderer3d.renderFilled(stack, object.start(), object.end(), object.color());
-                    case OUTLINE -> Renderer3d.renderOutline(stack, object.start(), object.end(), object.color());
+                    case FILLED -> Renderer3d.renderFilled(stack, object.start(), object.dimensions(), object.color());
+                    case OUTLINE -> Renderer3d.renderOutline(stack, object.start(), object.dimensions(), object.color());
+                }
+
+                if(resetWallRender) {
+                    Renderer3d.stopRenderingThroughWalls();
                 }
             }
 
@@ -49,30 +68,56 @@ public class MapeditorClient implements ClientModInitializer {
         }
 
         private void bake() {
-            baked = renderObjects.toArray(new RenderObject[0]);
+            baked = values.toArray(new RenderObject[0]);
         }
 
         @Override
-        public void addObject(@NotNull RenderObject object) {
-            renderObjects.add(object);
+        public void removeObject(@NotNull Key key) {
+            renderObjects.remove(key);
             baked = null;
         }
 
         @Override
-        public void removeObject(int index) {
-            renderObjects.remove(index);
-            baked = null;
-        }
+        public void setObject(@NotNull RenderObject value) {
+            renderObjects.put(value.key(), value);
 
-        @Override
-        public void setObject(int index, @NotNull RenderObject value) {
-            renderObjects.set(index, value);
-            baked[index] = value;
+            if(baked != null) {
+                if(baked.length == 0) {
+                    baked = null;
+                    return;
+                }
+
+                int i = 0;
+
+                for(RenderObject object : baked) {
+                    if(object.key().equals(value.key())) {
+                        baked[i] = value;
+                        return;
+                    }
+
+                    i++;
+                }
+            }
         }
 
         @Override
         public void setRenderThroughWalls(boolean renderThroughWalls) {
             this.renderThroughWalls = renderThroughWalls;
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        @Override
+        public int size() {
+            return renderObjects.size();
         }
     }
 }

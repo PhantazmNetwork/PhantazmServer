@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.render;
 
+import net.kyori.adventure.key.Key;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,13 +12,18 @@ public interface ObjectRenderer {
         OUTLINE
     }
 
-    record RenderObject(@NotNull RenderType type, @NotNull Vec3d start, @NotNull Vec3d end, @NotNull Color color) {}
+    record RenderObject(@NotNull Key key, @NotNull RenderType type, @NotNull Vec3d start, @NotNull Vec3d dimensions,
+                        @NotNull Color color, boolean renderThroughWalls) {}
 
-    void addObject(@NotNull RenderObject object);
+    void removeObject(@NotNull Key key);
 
-    void removeObject(int index);
-
-    void setObject(int index, @NotNull RenderObject value);
+    void setObject(@NotNull RenderObject value);
 
     void setRenderThroughWalls(boolean rendersThroughWalls);
+
+    void setEnabled(boolean enabled);
+
+    boolean isEnabled();
+
+    int size();
 }
