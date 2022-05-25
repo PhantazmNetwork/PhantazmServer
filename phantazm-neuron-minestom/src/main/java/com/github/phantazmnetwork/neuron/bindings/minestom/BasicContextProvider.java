@@ -50,10 +50,8 @@ public class BasicContextProvider implements ContextProvider {
         this.instanceCache = instanceCache;
         this.updateQueueCapacity = updateQueueCapacity;
 
-        Handler handler = new Handler(contextMap);
-
-        globalEventNode.addListener(BlockChangeEvent.class, handler::onBlockChange);
-        globalEventNode.addListener(InstanceUnregisterEvent.class, handler::onInstanceUnregister);
+        globalEventNode.addListener(BlockChangeEvent.class, this::onBlockChange);
+        globalEventNode.addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
     }
 
     @Override
@@ -63,18 +61,16 @@ public class BasicContextProvider implements ContextProvider {
                 new BasicPathCache(instanceCache, updateQueueCapacity)));
     }
 
-    private record Handler(Map<Instance, PathContext> contextMap) {
-        private void onBlockChange(@NotNull BlockChangeEvent event) {
-            PathContext context = contextMap.get(event.getInstance());
-            if(context != null) {
-                context.getCache().handleUpdate(VecUtils.toBlockInt(event.blockPosition()), SolidProvider.fromShape(
-                        event.getOldBlock().registry().collisionShape()), SolidProvider.fromShape(event.getBlock()
-                        .registry().collisionShape()));
-            }
+    private void onBlockChange(@NotNull BlockChangeEvent event) {
+        PathContext context = contextMap.get(event.getInstance());
+        if(context != null) {
+            context.getCache().handleUpdate(VecUtils.toBlockInt(event.blockPosition()), SolidProvider.fromShape(
+                    event.getOldBlock().registry().collisionShape()), SolidProvider.fromShape(event.getBlock()
+                    .registry().collisionShape()));
         }
+    }
 
-        private void onInstanceUnregister(@NotNull InstanceUnregisterEvent event) {
-            contextMap.remove(event.getInstance());
-        }
+    private void onInstanceUnregister(@NotNull InstanceUnregisterEvent event) {
+        contextMap.remove(event.getInstance());
     }
 }
