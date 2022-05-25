@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.player.BasicPlayerViewProvider;
-import com.github.phantazmnetwork.api.player.IdentitySource;
 import com.github.phantazmnetwork.api.player.MojangIdentitySource;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;

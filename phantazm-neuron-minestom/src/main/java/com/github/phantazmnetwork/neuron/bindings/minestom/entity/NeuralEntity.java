@@ -10,7 +10,6 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
-import com.github.phantazmnetwork.neuron.node.NodeTranslator;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;

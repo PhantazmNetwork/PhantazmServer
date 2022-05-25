@@ -6,12 +6,10 @@ import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.BiPredicate;
-import java.util.stream.Stream;
 
 public class FilesystemMapLoader implements MapLoader {
     private static final String MAP_DATA_EXTENSION = ".mapconfig";
