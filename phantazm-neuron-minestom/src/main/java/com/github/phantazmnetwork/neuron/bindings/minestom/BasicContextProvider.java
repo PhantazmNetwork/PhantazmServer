@@ -15,6 +15,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,17 +37,17 @@ public class BasicContextProvider implements ContextProvider {
      * Creates a new instance of this class.
      * @param globalEventNode the event node to which listeners for {@link BlockChangeEvent} and
      * {@link InstanceUnregisterEvent} will be registered
-     * @param threads the number of threads to maintain for pathfinding
+     * @param executor the {@link ExecutorService} used to run all pathfinding operations
      * @param instanceCache the maximum size of the {@link PathCache} maintained for each instance
      * @param updateQueueCapacity the capacity of the update queue (maximum number of block state changes that will be
      *                            kept in-memory at any given time; larger values mean more memory is used but may
      *                            prevent unnecessary cache invalidation
      */
-    public BasicContextProvider(@NotNull EventNode<Event> globalEventNode, int threads, int instanceCache,
-                                int updateQueueCapacity) {
+    public BasicContextProvider(@NotNull EventNode<Event> globalEventNode, @NotNull ExecutorService executor,
+                                int instanceCache, int updateQueueCapacity) {
         this.contextMap = Object2ObjectMaps.synchronize(new Object2ObjectOpenCustomHashMap<>(HashStrategies
                 .identity()));
-        this.executorService = Executors.newWorkStealingPool(threads);
+        this.executorService = Objects.requireNonNull(executor, "executor");
         this.instanceCache = instanceCache;
         this.updateQueueCapacity = updateQueueCapacity;
 
