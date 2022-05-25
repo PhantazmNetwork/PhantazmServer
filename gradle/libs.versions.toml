@@ -1,41 +1,43 @@
 metadata.format.version = "1.1"
 
 [versions]
-adventure = "4.10.1"
-
-caffeine = "3.0.6"
-
 ethylene = "0.5.1"
 
-fastutil = "8.5.6"
+junit-jupiter = "5.9.0-M1"
 
-jetbrains-annotations = "23.0.0"
-
-junit-jupiter = "5.8.2"
-
-minestom = "486a27c506"
-
-miniMessage = "4.10.1"
-
-mockito = "4.3.1"
 
 [libraries]
-adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
+adventure-api = { module = "net.kyori:adventure-api", version.ref = "4.10.1" }
 
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "3.1.0" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
 
-fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.53.0+1.18.2" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version = "0.14.6" }
 
-jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+fastutil = { module = "it.unimi.dsi:fastutil", version = "8.5.8" }
+
+jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.0" }
 
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 
-minestom = { module = "com.github.PhantazmNetwork:Minestom", version.ref = "minestom" }
+minecraft = { module = "com.mojang:minecraft", version = "1.18.2" }
 
-miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "miniMessage" }
+minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "486a27c506" }
 
-mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+miniMessage = { module = "net.kyori:adventure-text-minimessage", version = "4.10.1" }
+
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
+
+yarn-mappings = { module = "net.fabricmc:yarn", version = "1.18.2+build.3" }
+
+
+[bundles]
+fabric = ["fabric-api", "fabric-loader"]
+
+
+[plugins]
+fabric-loom = { id = "fabric-loom", version = "0.12-SNAPSHOT" }
