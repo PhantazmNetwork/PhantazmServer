@@ -5,4 +5,5 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public record MapData(@NotNull MapInfo info, @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors,
-                      @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds) { }
+                      @NotNull List<ShopInfo> shops, @NotNull List<WindowInfo> windows,
+                      @NotNull List<RoundInfo> rounds) { }

@@ -9,25 +9,25 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 
 public final class VectorConfigProcessors {
-    private static final String X_COMPONENT_NAME = "x";
-    private static final String Y_COMPONENT_NAME = "y";
-    private static final String Z_COMPONENT_NAME = "z";
+    private static final String X_COMPONENT_STRING = "x";
+    private static final String Y_COMPONENT_STRING = "y";
+    private static final String Z_COMPONENT_STRING = "z";
 
     private static final ConfigProcessor<Vec3D> vec3D = new ConfigProcessor<>() {
         @Override
         public @NotNull Vec3D dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            double x = element.getNumberOrThrow(X_COMPONENT_NAME).doubleValue();
-            double y = element.getNumberOrThrow(Y_COMPONENT_NAME).doubleValue();
-            double z = element.getNumberOrThrow(Z_COMPONENT_NAME).doubleValue();
+            double x = element.getNumberOrThrow(X_COMPONENT_STRING).doubleValue();
+            double y = element.getNumberOrThrow(Y_COMPONENT_STRING).doubleValue();
+            double z = element.getNumberOrThrow(Z_COMPONENT_STRING).doubleValue();
             return Vec3D.of(x, y, z);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3D vec3D) {
             ConfigNode node = new LinkedConfigNode();
-            node.put(X_COMPONENT_NAME, new ConfigPrimitive(vec3D.getX()));
-            node.put(Y_COMPONENT_NAME, new ConfigPrimitive(vec3D.getY()));
-            node.put(Z_COMPONENT_NAME, new ConfigPrimitive(vec3D.getZ()));
+            node.put(X_COMPONENT_STRING, new ConfigPrimitive(vec3D.getX()));
+            node.put(Y_COMPONENT_STRING, new ConfigPrimitive(vec3D.getY()));
+            node.put(Z_COMPONENT_STRING, new ConfigPrimitive(vec3D.getZ()));
             return node;
         }
     };
@@ -35,18 +35,18 @@ public final class VectorConfigProcessors {
     private static final ConfigProcessor<Vec3I> vec3I = new ConfigProcessor<>() {
         @Override
         public @NotNull Vec3I dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            int x = element.getNumberOrThrow(X_COMPONENT_NAME).intValue();
-            int y = element.getNumberOrThrow(Y_COMPONENT_NAME).intValue();
-            int z = element.getNumberOrThrow(Z_COMPONENT_NAME).intValue();
+            int x = element.getNumberOrThrow(X_COMPONENT_STRING).intValue();
+            int y = element.getNumberOrThrow(Y_COMPONENT_STRING).intValue();
+            int z = element.getNumberOrThrow(Z_COMPONENT_STRING).intValue();
             return Vec3I.of(x, y, z);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3I vec) {
             ConfigNode node = new LinkedConfigNode();
-            node.put(X_COMPONENT_NAME, new ConfigPrimitive(vec.getX()));
-            node.put(Y_COMPONENT_NAME, new ConfigPrimitive(vec.getY()));
-            node.put(Z_COMPONENT_NAME, new ConfigPrimitive(vec.getZ()));
+            node.put(X_COMPONENT_STRING, new ConfigPrimitive(vec.getX()));
+            node.put(Y_COMPONENT_STRING, new ConfigPrimitive(vec.getY()));
+            node.put(Z_COMPONENT_STRING, new ConfigPrimitive(vec.getZ()));
             return node;
         }
     };
@@ -54,18 +54,18 @@ public final class VectorConfigProcessors {
     private static final ConfigProcessor<Vec3F> vec3F = new ConfigProcessor<>() {
         @Override
         public @NotNull Vec3F dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            float x = element.getNumberOrThrow(X_COMPONENT_NAME).floatValue();
-            float y = element.getNumberOrThrow(Y_COMPONENT_NAME).floatValue();
-            float z = element.getNumberOrThrow(Z_COMPONENT_NAME).floatValue();
+            float x = element.getNumberOrThrow(X_COMPONENT_STRING).floatValue();
+            float y = element.getNumberOrThrow(Y_COMPONENT_STRING).floatValue();
+            float z = element.getNumberOrThrow(Z_COMPONENT_STRING).floatValue();
             return Vec3F.of(x, y, z);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3F vec) {
             ConfigNode node = new LinkedConfigNode();
-            node.put(X_COMPONENT_NAME, new ConfigPrimitive(vec.getX()));
-            node.put(Y_COMPONENT_NAME, new ConfigPrimitive(vec.getY()));
-            node.put(Z_COMPONENT_NAME, new ConfigPrimitive(vec.getZ()));
+            node.put(X_COMPONENT_STRING, new ConfigPrimitive(vec.getX()));
+            node.put(Y_COMPONENT_STRING, new ConfigPrimitive(vec.getY()));
+            node.put(Z_COMPONENT_STRING, new ConfigPrimitive(vec.getZ()));
             return node;
         }
     };
