@@ -4,14 +4,14 @@ import com.github.phantazmnetwork.api.config.InstanceConfig;
 import com.github.phantazmnetwork.api.game.scene.SceneProviderAbstract;
 import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.instance.InstanceLoader;
-import it.unimi.dsi.fastutil.objects.ObjectArrays;
-import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Phaser;
 
 /**
@@ -54,7 +54,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         this.lobbyPaths = Collections.unmodifiableList(Objects.requireNonNull(lobbyPaths, "lobbyPaths"));
         this.fallback = Objects.requireNonNull(fallback, "fallback");
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
-        this.chunkViewDistance = chunkViewDistance;;
+        this.chunkViewDistance = chunkViewDistance;
     }
 
     @SuppressWarnings("UnstableApiUsage")

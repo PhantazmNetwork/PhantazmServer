@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.api.inventory;
 
 import net.kyori.adventure.key.Key;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertSame;

@@ -14,6 +14,7 @@ java {
 
 repositories {
     mavenCentral()
+    maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
 }
 
 val catalogs = extensions.getByType<VersionCatalogsExtension>()

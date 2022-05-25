@@ -54,7 +54,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
     }
 
     @Override
-    public void tick() {
+    public void tick(long time) {
         Iterator<TScene> iterator = scenes.iterator();
 
         while (iterator.hasNext()) {
@@ -63,7 +63,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
             if (scene.isShutdown()) {
                 iterator.remove();
             } else {
-                scene.tick();
+                scene.tick(time);
             }
         }
     }

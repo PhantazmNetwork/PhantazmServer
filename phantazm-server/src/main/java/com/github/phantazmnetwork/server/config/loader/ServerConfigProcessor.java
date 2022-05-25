@@ -1,9 +1,6 @@
 package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.server.config.server.AuthType;
-import com.github.phantazmnetwork.server.config.server.PingListConfig;
-import com.github.phantazmnetwork.server.config.server.ServerConfig;
-import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
+import com.github.phantazmnetwork.server.config.server.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -36,7 +33,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
     @Override
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-        ConfigNode serverInfo = element.getNodeOrDefault(LinkedConfigNode::new, "serverInfo");
+        ConfigNode serverInfo = element.getNodeOrThrow("serverInfo");
 
         String serverAddress = serverInfo.getStringOrThrow("serverIP");
         int port = serverInfo.getNumberOrThrow("port").intValue();
@@ -61,7 +58,24 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         Component description = miniMessage.deserialize(pingList.getStringOrThrow("description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
-        return new ServerConfig(serverInfoConfig, pingListConfig);
+        ConfigNode pathfinderNode = element.getNodeOrThrow("pathfinder");
+        int threads = pathfinderNode.getNumberOrThrow("threads").intValue();
+        int cacheSize = pathfinderNode.getNumberOrThrow("cacheSize").intValue();
+        int updateQueueCapacity = pathfinderNode.getNumberOrThrow("updateQueueCapacity").intValue();
+        if(threads < 1) {
+            throw new ConfigProcessException("Invalid number of pathfinder threads, must be >= 1");
+        }
+
+        if(cacheSize < 0) {
+            throw new ConfigProcessException("Pathfinder cache size must be >= 0");
+        }
+
+        if(updateQueueCapacity < 0) {
+            throw new ConfigProcessException("Update queue capacity must be > 0");
+        }
+
+        PathfinderConfig pathfinderConfig = new PathfinderConfig(threads, cacheSize, updateQueueCapacity);
+        return new ServerConfig(serverInfoConfig, pingListConfig, pathfinderConfig);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.api.game.scene;
 
-import com.github.phantazmnetwork.api.util.Tickable;
+import com.github.phantazmnetwork.commons.Tickable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 

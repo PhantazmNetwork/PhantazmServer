@@ -5,9 +5,9 @@ import com.github.phantazmnetwork.api.game.scene.RouteResult;
 import com.github.phantazmnetwork.api.game.scene.Scene;
 import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.commons.Wrapper;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -105,16 +105,17 @@ public class Lobby implements Scene<LobbyJoinRequest> {
 
     @Override
     public int getIngamePlayerCount() {
-        int[] count = new int[1];
+        Wrapper<Integer> count = Wrapper.of(0);
+
         for (PlayerView playerView : getPlayers().values()) {
             playerView.getPlayer().ifPresent(player -> {
                 if (player.getInstance() == instance) {
-                    count[0]++;
+                    count.apply(val -> val + 1);
                 }
             });
         }
 
-        return count[0];
+        return count.get();
     }
 
     @Override
@@ -148,7 +149,7 @@ public class Lobby implements Scene<LobbyJoinRequest> {
     }
 
     @Override
-    public void tick() {
+    public void tick(long time) {
         // NO-OP
     }
 

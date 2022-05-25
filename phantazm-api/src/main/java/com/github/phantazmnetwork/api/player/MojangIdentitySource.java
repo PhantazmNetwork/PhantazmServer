@@ -22,14 +22,19 @@ import java.util.concurrent.Executor;
  * aside from that utilized by MojangUtils itself.
  */
 @SuppressWarnings("ClassCanBeRecord")
-class MojangIdentitySource implements IdentitySource {
+public class MojangIdentitySource implements IdentitySource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MojangIdentitySource.class);
     private static final String NAME_KEY = "name";
     private static final String ID_KEY = "id";
 
     private final Executor executor;
 
-    MojangIdentitySource(@NotNull Executor executor) {
+    /**
+     * Creates a new instance of this class using the provided {@link Executor} to (typically asynchronously) execute
+     * name or UUID resolution requests to the Mojang API.
+     * @param executor the executor used to run requests
+     */
+    public MojangIdentitySource(@NotNull Executor executor) {
         this.executor = Objects.requireNonNull(executor, "executor");
     }
 

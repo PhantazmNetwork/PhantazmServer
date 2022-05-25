@@ -2,7 +2,9 @@ package com.github.phantazmnetwork.api.instance;
 
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
+import net.minestom.server.utils.chunk.ChunkSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -18,11 +20,18 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
     private final Path rootPath;
 
     /**
+     * The {@link ChunkSupplier} to be used by instances loaded from this InstanceLoader
+     */
+    protected final ChunkSupplier chunkSupplier;
+
+    /**
      * Creates an {@link InstanceLoader} based on a file system.
      * @param rootPath The {@link Path} of the {@link Instance} directory
+     * @param chunkSupplier The {@link ChunkSupplier} used to define the chunk implementation used
      */
-    public FileSystemInstanceLoader(@NotNull Path rootPath) {
+    public FileSystemInstanceLoader(@NotNull Path rootPath, @NotNull ChunkSupplier chunkSupplier) {
         this.rootPath = Objects.requireNonNull(rootPath, "rootPath");
+        this.chunkSupplier = Objects.requireNonNull(chunkSupplier, "chunkSupplier");
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -34,7 +43,9 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
             path = path.resolve(subPath);
         }
 
-        return instanceManager.createInstanceContainer(createChunkLoader(path));
+        InstanceContainer container = instanceManager.createInstanceContainer(createChunkLoader(path));
+        container.setChunkSupplier(chunkSupplier);
+        return container;
     }
 
     /**
