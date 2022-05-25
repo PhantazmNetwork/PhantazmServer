@@ -1,6 +1,6 @@
 rootProject.name = "phantazm"
 include("phantazm-api", "phantazm-server", "phantazm-zombies", "phantazm-commons", "phantazm-neuron",
-    "phantazm-neuron-minestom")
+    "phantazm-neuron-minestom", "phantazm-mob")
 
 val localSettings = file("local.settings.gradle.kts")
 if(localSettings.exists()) {
