@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.api.VecUtils;
+import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
@@ -48,13 +49,28 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
 
     @Override
     default @NotNull Vec3I computeTargetPosition(@NotNull Entity targetEntity) {
-        PhysicsResult result = CollisionUtils.handlePhysics(targetEntity, new Vec(0, -16, 0));
+        PhysicsResult result = CollisionUtils.handlePhysics(targetEntity, new Vec(0,
+                -computeDownwardsCheckDistance(targetEntity), 0));
         if(result.isOnGround()) {
             return VecUtils.toBlockInt(result.collidedBlockY().add(0, result.blockTypeY().registry()
                     .collisionShape().relativeEnd().y(), 0));
         }
 
         return VecUtils.toBlockInt(targetEntity.getPosition());
+    }
+
+    /**
+     * Computes the distance that will be searched below an entity in order to determine the block it is above. This is
+     * the point to which gravity-bound entities will navigate.
+     * @param target the target entity
+     * @return the downwards check distance
+     */
+    default double computeDownwardsCheckDistance(@NotNull Entity target) {
+        if(target.isOnGround()) {
+            return 1;
+        }
+
+        return 16;
     }
 
     @Override

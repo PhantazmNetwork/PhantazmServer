@@ -9,6 +9,8 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.Executors;
+
 /**
  * Main entrypoint for Neuron-related features.
  */
@@ -24,8 +26,8 @@ public final class Neuron {
      * @param pathfinderConfig the {@link PathfinderConfig} instance used to configure pathfinding behavior
      */
     static void initialize(@NotNull EventNode<Event> globalNode, @NotNull PathfinderConfig pathfinderConfig) {
-        spawner = new ContextualSpawner(new BasicContextProvider(globalNode, pathfinderConfig.threads(),
-                pathfinderConfig.cacheSize(), pathfinderConfig.updateQueueCapacity()));
+        spawner = new ContextualSpawner(new BasicContextProvider(globalNode, Executors.newWorkStealingPool(
+                pathfinderConfig.threads()), pathfinderConfig.cacheSize(), pathfinderConfig.updateQueueCapacity()));
     }
 
     /**
