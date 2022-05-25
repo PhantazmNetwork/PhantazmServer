@@ -8,5 +8,5 @@ repositories {
 
 dependencies {
     implementation(project(":phantazm-commons"))
-    implementation(libs.adventure.api)
+    implementation(libs.adventure.key)
 }

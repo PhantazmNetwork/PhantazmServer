@@ -1,13 +1,15 @@
 metadata.format.version = "1.1"
 
 [versions]
+adventure = "4.10.1"
+
 ethylene = "0.5.1"
 
 junit-jupiter = "5.9.0-M1"
 
 
 [libraries]
-adventure-api = { module = "net.kyori:adventure-api", version = "4.10.1" }
+adventure-key = { module = "net.kyori:adventure-key", version.ref = "adventure" }
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.0" }
 
@@ -28,7 +30,7 @@ minecraft = { module = "com.mojang:minecraft", version = "1.18.2" }
 
 minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "486a27c506" }
 
-miniMessage = { module = "net.kyori:adventure-text-minimessage", version = "4.10.1" }
+miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
 
