@@ -11,4 +11,4 @@ if(localSettings.exists()) {
 
 //add settings from phantazm-zombies-mapeditor too
 apply("./phantazm-zombies-mapeditor/settings.gradle.kts")
-
+include("phantazm-zombies-mapdata")

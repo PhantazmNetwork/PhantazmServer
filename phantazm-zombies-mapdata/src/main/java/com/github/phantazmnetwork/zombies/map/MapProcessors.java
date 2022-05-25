@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.api.MinestomConfigProcessors;
 import com.github.phantazmnetwork.commons.ConfigProcessorUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.commons.vector.VectorConfigProcessors;
@@ -10,8 +9,8 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -56,10 +55,9 @@ public final class MapProcessors {
         @Override
         public MapInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             int version = element.getNumberOrThrow(VERSION).intValue();
-            Key id = MinestomConfigProcessors.key().dataFromElement(element.getElement(ID));
+            Key id = key.dataFromElement(element.getElement(ID));
             String displayName = element.getStringOrThrow(DISPLAY_NAME);
-            ItemStack displayItem = MinestomConfigProcessors.itemStack().dataFromElement(element.getElement(
-                    DISPLAY_ITEM));
+            String displayItem = element.getStringOrThrow(DISPLAY_ITEM);
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(ORIGIN));
             String roomsPath = element.getStringOrDefault(DEFAULT_ROOMS_PATH, ROOMS_PATH);
             String doorsPath = element.getStringOrDefault(DEFAULT_DOORS_PATH, DOORS_PATH);
@@ -74,9 +72,9 @@ public final class MapProcessors {
         public @NotNull ConfigElement elementFromData(MapInfo mapConfig) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode();
             node.put(VERSION, new ConfigPrimitive(mapConfig.version()));
-            node.put(ID, MinestomConfigProcessors.key().elementFromData(mapConfig.id()));
+            node.put(ID, key.elementFromData(mapConfig.id()));
             node.put(DISPLAY_NAME, new ConfigPrimitive(mapConfig.displayName()));
-            node.put(DISPLAY_ITEM, MinestomConfigProcessors.itemStack().elementFromData(mapConfig.displayItem()));
+            node.put(DISPLAY_ITEM, new ConfigPrimitive(mapConfig.displayItem()));
             node.put(ORIGIN, VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
             putIfNotDefault(node, ROOMS_PATH, mapConfig.roomsPath(), DEFAULT_ROOMS_PATH);
             putIfNotDefault(node, DOORS_PATH, mapConfig.doorsPath(), DEFAULT_DOORS_PATH);
@@ -96,7 +94,7 @@ public final class MapProcessors {
     private static final ConfigProcessor<RoomInfo> roomInfo = new ConfigProcessor<>() {
         @Override
         public RoomInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = MinestomConfigProcessors.key().dataFromElement(element.getElement(ID));
+            Key id = key.dataFromElement(element.getElement(ID));
             String displayName = element.getStringOrThrow(DISPLAY_NAME);
             List<RegionInfo> regions = regionInfoList.dataFromElement(element.getListOrThrow(REGIONS));
             return new RoomInfo(id, displayName, regions);
@@ -105,7 +103,7 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(RoomInfo roomInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode();
-            node.put(ID, MinestomConfigProcessors.key().elementFromData(roomInfo.id()));
+            node.put(ID, key.elementFromData(roomInfo.id()));
             node.put(DISPLAY_NAME, new ConfigPrimitive(roomInfo.displayName()));
             node.put(REGIONS, regionInfoList.elementFromData(roomInfo.regions()));
             return node;
@@ -134,7 +132,7 @@ public final class MapProcessors {
     private static final ConfigProcessor<ShopInfo> shopInfo = new ConfigProcessor<>() {
         @Override
         public ShopInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = MinestomConfigProcessors.key().dataFromElement(element.getElement(ID));
+            Key id = key.dataFromElement(element.getElement(ID));
             Vec3I triggerLocation = VectorConfigProcessors.vec3I().dataFromElement(element
                     .getElement(TRIGGER_LOCATION));
             return new ShopInfo(id, triggerLocation);
@@ -143,7 +141,7 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode();
-            node.put(ID, MinestomConfigProcessors.key().elementFromData(shopInfo.id()));
+            node.put(ID, key.elementFromData(shopInfo.id()));
             node.put(TRIGGER_LOCATION, VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
             return node;
         }
@@ -152,15 +150,15 @@ public final class MapProcessors {
     private static final ConfigProcessor<WindowInfo> windowInfo = new ConfigProcessor<>() {
         @Override
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key room = MinestomConfigProcessors.key().dataFromElement(element.getElement(ROOM_NAME));
+            Key room = key.dataFromElement(element.getElement(ROOM_NAME));
             RegionInfo frameRegion = regionInfo.dataFromElement(element.getElement(FRAME_REGION));
             List<RegionInfo> internalRegions = regionInfoList.dataFromElement(element.getListOrThrow(INTERNAL_REGIONS));
             Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(SPAWN));
             Vec3I target = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(TARGET));
-            Key repairSound = MinestomConfigProcessors.key().dataFromElement(element.getElement(REPAIR_SOUND));
-            Key repairAllSound = MinestomConfigProcessors.key().dataFromElement(element.getElement(REPAIR_ALL_SOUND));
-            Key breakSound = MinestomConfigProcessors.key().dataFromElement(element.getElement(BREAK_SOUND));
-            Key breakAllSound = MinestomConfigProcessors.key().dataFromElement(element.getElement(BREAK_ALL_SOUND));
+            Key repairSound = key.dataFromElement(element.getElement(REPAIR_SOUND));
+            Key repairAllSound = key.dataFromElement(element.getElement(REPAIR_ALL_SOUND));
+            Key breakSound = key.dataFromElement(element.getElement(BREAK_SOUND));
+            Key breakAllSound = key.dataFromElement(element.getElement(BREAK_ALL_SOUND));
             return new WindowInfo(room, frameRegion, internalRegions, spawn, target, repairSound, repairAllSound,
                     breakSound, breakAllSound);
         }
@@ -168,15 +166,15 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull WindowInfo windowData) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode();
-            node.put(ROOM_NAME, MinestomConfigProcessors.key().elementFromData(windowData.room()));
+            node.put(ROOM_NAME, key.elementFromData(windowData.room()));
             node.put(FRAME_REGION, regionInfo.elementFromData(windowData.frameRegion()));
             node.put(INTERNAL_REGIONS, regionInfoList.elementFromData(windowData.internalRegions()));
             node.put(SPAWN, VectorConfigProcessors.vec3I().elementFromData(windowData.spawn()));
             node.put(TARGET, VectorConfigProcessors.vec3I().elementFromData(windowData.target()));
-            node.put(REPAIR_SOUND, MinestomConfigProcessors.key().elementFromData(windowData.repairSound()));
-            node.put(REPAIR_ALL_SOUND, MinestomConfigProcessors.key().elementFromData(windowData.repairAllSound()));
-            node.put(BREAK_SOUND, MinestomConfigProcessors.key().elementFromData(windowData.breakSound()));
-            node.put(BREAK_ALL_SOUND, MinestomConfigProcessors.key().elementFromData(windowData.breakAllSound()));
+            node.put(REPAIR_SOUND, key.elementFromData(windowData.repairSound()));
+            node.put(REPAIR_ALL_SOUND, key.elementFromData(windowData.repairAllSound()));
+            node.put(BREAK_SOUND, key.elementFromData(windowData.breakSound()));
+            node.put(BREAK_ALL_SOUND, key.elementFromData(windowData.breakAllSound()));
             return node;
         }
     };
@@ -233,7 +231,7 @@ public final class MapProcessors {
     private static final ConfigProcessor<SpawnInfo> spawnInfo = new ConfigProcessor<>() {
         @Override
         public SpawnInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = MinestomConfigProcessors.key().dataFromElement(element.getElement(ID));
+            Key id = key.dataFromElement(element.getElement(ID));
             int amount = element.getNumberOrThrow(AMOUNT).intValue();
             return new SpawnInfo(id, amount);
         }
@@ -241,14 +239,35 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(SpawnInfo spawnInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode();
-            node.put(ID, MinestomConfigProcessors.key().elementFromData(spawnInfo.id()));
+            node.put(ID, key.elementFromData(spawnInfo.id()));
             node.put(AMOUNT, new ConfigPrimitive(spawnInfo.amount()));
             return node;
         }
     };
 
-    private static final ConfigProcessor<List<Key>> keyList = ConfigProcessorUtils.newListProcessor(
-            MinestomConfigProcessors.key());
+    private static final ConfigProcessor<Key> key = new ConfigProcessor<>() {
+        @Override
+        public Key dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            if(!element.isString()) {
+                throw new ConfigProcessException("Element must be a string");
+            }
+
+            try {
+                //noinspection PatternValidation
+                return Key.key(element.asString());
+            }
+            catch (InvalidKeyException keyException) {
+                throw new ConfigProcessException(keyException);
+            }
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(Key key) {
+            return new ConfigPrimitive(key.asString());
+        }
+    };
+
+    private static final ConfigProcessor<List<Key>> keyList = ConfigProcessorUtils.newListProcessor(key);
 
     private static final ConfigProcessor<List<RegionInfo>> regionInfoList = ConfigProcessorUtils
             .newListProcessor(regionInfo);

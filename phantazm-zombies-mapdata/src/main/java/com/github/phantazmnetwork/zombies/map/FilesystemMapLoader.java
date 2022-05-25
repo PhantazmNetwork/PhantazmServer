@@ -13,7 +13,7 @@ import java.util.function.BiPredicate;
 
 public class FilesystemMapLoader implements MapLoader {
     private static final String MAP_DATA_EXTENSION = ".mapconfig";
-    private static final String MAP_INFO_NAME = "map" + MAP_DATA_EXTENSION;
+    private static final String MAP_INFO_NAME = "com/github/phantazmnetwork/zombies" + MAP_DATA_EXTENSION;
     private static final BiPredicate<Path, BasicFileAttributes> CONFIG_PREDICATE = (path, attributes) -> attributes
             .isRegularFile() && path.toString().endsWith(MAP_DATA_EXTENSION);
 
