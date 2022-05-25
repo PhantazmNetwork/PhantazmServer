@@ -10,6 +10,10 @@ base {
     archivesName.set("phantazm-zombies-mapeditor")
 }
 
+repositories {
+    maven("https://jitpack.io")
+}
+
 dependencies {
     minecraft(libs.minecraft)
     mappings(libs.yarn.mappings) {
@@ -18,6 +22,7 @@ dependencies {
         }
     }
     modImplementation(libs.bundles.fabric)
+    modImplementation(libs.renderer)
 
     implementation(project(":phantazm-commons"))
 }

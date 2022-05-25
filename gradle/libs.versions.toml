@@ -7,9 +7,9 @@ junit-jupiter = "5.9.0-M1"
 
 
 [libraries]
-adventure-api = { module = "net.kyori:adventure-api", version.ref = "4.10.1" }
+adventure-api = { module = "net.kyori:adventure-api", version = "4.10.1" }
 
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "3.1.0" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.0" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
@@ -31,6 +31,8 @@ minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "486a27c5
 miniMessage = { module = "net.kyori:adventure-text-minimessage", version = "4.10.1" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
+
+renderer = { module = "com.github.Steanky:Renderer", version = "0923ca9be7" }
 
 yarn-mappings = { module = "net.fabricmc:yarn", version = "1.18.2+build.3" }
 
