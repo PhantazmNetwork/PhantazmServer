@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class LineOfSightSelector<TReturn> extends NearestEntitySelector<TReturn> {
 
-    public LineOfSightSelector(double range, int limit) {
-        super(range, limit);
+    public LineOfSightSelector(double range, int targetLimit) {
+        super(range, targetLimit);
     }
 
     @SuppressWarnings("UnstableApiUsage")

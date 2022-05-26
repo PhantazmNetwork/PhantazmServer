@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.mob.target;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -15,11 +14,11 @@ public abstract class NearestEntitySelector<TReturn> implements TargetSelector<I
 
     private final double range;
 
-    private final int limit;
+    private final int targetLimit;
 
-    public NearestEntitySelector(double range, int limit) {
+    public NearestEntitySelector(double range, int targetLimit) {
         this.range = range;
-        this.limit = limit;
+        this.targetLimit = targetLimit;
     }
 
     @Override
@@ -57,13 +56,21 @@ public abstract class NearestEntitySelector<TReturn> implements TargetSelector<I
             }
         }));
 
-        int targetCount = Math.min(potentialTargets.size(), limit);
+        int targetCount = Math.min(potentialTargets.size(), targetLimit);
         Collection<TReturn> targets = new ArrayList<>(targetCount);
         for (int i = 0; i < targetCount; i++) {
             targets.add(targetMap.get(potentialTargets.get(i).getUuid()));
         }
 
         return Optional.of(targets);
+    }
+
+    public double getRange() {
+        return range;
+    }
+
+    public int getTargetLimit() {
+        return targetLimit;
     }
 
     protected abstract @NotNull Optional<TReturn> mapTarget(@NotNull Entity entity);
