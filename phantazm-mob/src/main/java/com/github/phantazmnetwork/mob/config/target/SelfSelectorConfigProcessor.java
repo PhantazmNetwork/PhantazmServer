@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.mob.config.target;
 import com.github.phantazmnetwork.mob.target.SelfSelector;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 

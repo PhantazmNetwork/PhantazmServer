@@ -2,29 +2,38 @@ package com.github.phantazmnetwork.api.config;
 
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTException;
+import org.jglrxavpok.hephaistos.parser.SNBTParser;
+
+import java.io.StringReader;
 
 public class ItemStackConfigProcessor implements ConfigProcessor<ItemStack> {
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull ItemStack dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-        Material material = Material.fromNamespaceId(element.getStringOrThrow("material"));
-        if (material == null) {
-            throw new ConfigProcessException("unknown material");
+        if (!element.isString()) {
+            throw new ConfigProcessException("itemstack is not string");
         }
-        return ItemStack.of(material);
+
+        String nbtString = element.asString();
+        NBTCompound itemCompound;
+        try {
+            itemCompound = (NBTCompound) new SNBTParser(new StringReader(nbtString)).parse();
+        } catch (NBTException e) {
+            throw new ConfigProcessException(e);
+        }
+
+        return ItemStack.fromItemNBT(itemCompound);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull ItemStack itemStack) {
-        ConfigNode element = new LinkedConfigNode();
-        element.put("material", new ConfigPrimitive(itemStack.material().namespace().namespace()));
-
-        return element;
+        return new ConfigPrimitive(itemStack.toItemNBT().toSNBT());
     }
 }

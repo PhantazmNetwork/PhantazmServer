@@ -26,4 +26,9 @@ public class TestSkill implements Skill {
         Component posComponent = Component.join(JoinConfiguration.separator(Component.text(", ")), Component.text(pos.x()), Component.text(pos.y()), Component.text(pos.z()));
         instance.sendMessage(LinearComponents.linear(name, Component.text(" is at ("), posComponent, Component.text(").")));
     }
+
+    @Override
+    public @NotNull String getSerialType() {
+        return "test";
+    }
 }

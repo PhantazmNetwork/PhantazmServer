@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Objects;
 
-public class VariantConfigProcessor<TValue> implements ConfigProcessor<TValue> {
+public class VariantConfigProcessor<TValue extends VariantSerializable> implements ConfigProcessor<TValue> {
 
     private final Map<String, ConfigProcessor<TValue>> subProcessors;
 
@@ -24,11 +24,17 @@ public class VariantConfigProcessor<TValue> implements ConfigProcessor<TValue> {
             throw new ConfigProcessException("no subprocessor");
         }
 
-        return processor.dataFromElement(element.getElementOrThrow("skill"));
+        return processor.dataFromElement(element);
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull TValue skill) {
-        return null;
+    public @NotNull ConfigElement elementFromData(@NotNull TValue data) throws ConfigProcessException {
+        String type = data.getSerialType();
+        ConfigProcessor<TValue> processor = subProcessors.get(type);
+        if (processor == null) {
+            throw new ConfigProcessException("no subprocessor");
+        }
+
+        return processor.elementFromData(data);
     }
 }
