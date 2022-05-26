@@ -23,7 +23,6 @@ import java.util.*;
 /**
  * {@link ConfigProcessor} used for {@link LobbiesConfig}s.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
     private final MiniMessage miniMessage;

@@ -42,6 +42,10 @@ public class MobModel<TDescriptor extends MinestomDescriptor, TEntity extends Ne
         this.equipment = Objects.requireNonNull(equipment, "equipment");
     }
 
+    public @NotNull TDescriptor getDescriptor() {
+        return descriptor;
+    }
+
     public @NotNull Map<String, Skill> getSkills() {
         return Map.copyOf(skills);
     }
