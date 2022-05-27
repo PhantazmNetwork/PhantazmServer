@@ -26,7 +26,7 @@ public class FilesystemMapLoader implements MapLoader {
     }
 
     @Override
-    public @NotNull MapData load(@NotNull String mapName) throws IOException {
+    public @NotNull ZombiesMap load(@NotNull String mapName) throws IOException {
         Path mapFolder = FileUtils.findFirstOrThrow(root, (path, basicFileAttributes) -> basicFileAttributes
                 .isDirectory() && path.endsWith(mapName), () -> "Unable to find map folder for " + mapName);
 
@@ -62,13 +62,13 @@ public class FilesystemMapLoader implements MapLoader {
 
         rounds.sort(Comparator.comparingInt(RoundInfo::round));
 
-        return new MapData(mapInfo, Collections.unmodifiableList(rooms), Collections.unmodifiableList(doors),
+        return new ZombiesMap(mapInfo, Collections.unmodifiableList(rooms), Collections.unmodifiableList(doors),
                 Collections.unmodifiableList(shops), Collections.unmodifiableList(windows), Collections
                 .unmodifiableList(rounds));
     }
 
     @Override
-    public void save(@NotNull MapData data, @NotNull String mapName) {
+    public void save(@NotNull ZombiesMap data, @NotNull String mapName) {
 
     }
 }

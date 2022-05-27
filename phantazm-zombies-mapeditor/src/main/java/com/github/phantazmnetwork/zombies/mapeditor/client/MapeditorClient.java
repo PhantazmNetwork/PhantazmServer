@@ -1,6 +1,13 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
+import com.github.phantazmnetwork.zombies.map.RegionInfo;
+import com.github.phantazmnetwork.zombies.map.RoomInfo;
+import com.github.phantazmnetwork.zombies.mapeditor.client.render.EditorGroupAbstract;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
+import com.github.phantazmnetwork.zombies.mapeditor.client.render.EditorGroup;
+import com.github.phantazmnetwork.zombies.mapeditor.client.ui.ConfigGui;
+import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorScreen;
+import it.unimi.dsi.fastutil.Pair;
 import me.x150.renderer.event.EventListener;
 import me.x150.renderer.event.EventType;
 import me.x150.renderer.event.Events;
@@ -8,24 +15,42 @@ import me.x150.renderer.event.Shift;
 import me.x150.renderer.event.events.RenderEvent;
 import me.x150.renderer.renderer.Renderer3d;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.kyori.adventure.key.Key;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.awt.*;
+import java.util.*;
 
 public class MapeditorClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ObjectRenderer renderer = new Renderer();
         Events.registerEventHandlerClass(renderer);
-        UseBlockCallback.EVENT.register(new BasicMapeditorSession(renderer)::handleBlockUse);
+
+        MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, Set.of());
+        UseBlockCallback.EVENT.register(mapeditorSession::handleBlockUse);
+
+        KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, TranslationKeys
+                .CATEGORY_MAPEDITOR_ALL));
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if(keyBinding.wasPressed()) {
+                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ConfigGui(mapeditorSession)));
+            }
+        });
     }
 
     private static class Renderer implements ObjectRenderer {
+        private static final RenderObject[] EMPTY_RENDER_OBJECT_ARRAY = new RenderObject[0];
         private boolean enabled;
         private boolean renderThroughWalls = false;
         private final Map<Key, RenderObject> renderObjects = new HashMap<>();
@@ -48,15 +73,27 @@ public class MapeditorClient implements ClientModInitializer {
             }
 
             for(ObjectRenderer.RenderObject object : baked) {
+                if(!object.shouldRender) {
+                    continue;
+                }
+
                 boolean resetWallRender = false;
-                if(!renderThroughWalls && object.renderThroughWalls()) {
+                if(!renderThroughWalls && object.renderThroughWalls) {
                     Renderer3d.startRenderingThroughWalls();
                     resetWallRender = true;
                 }
 
-                switch (object.type()) {
-                    case FILLED -> Renderer3d.renderFilled(stack, object.start(), object.dimensions(), object.color());
-                    case OUTLINE -> Renderer3d.renderOutline(stack, object.start(), object.dimensions(), object.color());
+                switch (object.type) {
+                    case FILLED -> {
+                        for(int i = 0; i < object.bounds.length; i += 2) {
+                            Renderer3d.renderFilled(stack, object.bounds[i], object.bounds[i + 1], object.color);
+                        }
+                    }
+                    case OUTLINE -> {
+                        for(int i = 0; i < object.bounds.length; i += 2) {
+                            Renderer3d.renderOutline(stack, object.bounds[i], object.bounds[i + 1], object.color);
+                        }
+                    }
                 }
 
                 if(resetWallRender) {
@@ -68,18 +105,22 @@ public class MapeditorClient implements ClientModInitializer {
         }
 
         private void bake() {
-            baked = values.toArray(new RenderObject[0]);
+            baked = values.toArray(EMPTY_RENDER_OBJECT_ARRAY);
         }
 
         @Override
         public void removeObject(@NotNull Key key) {
+            Objects.requireNonNull(key, "key");
+
             renderObjects.remove(key);
             baked = null;
         }
 
         @Override
-        public void setObject(@NotNull RenderObject value) {
-            renderObjects.put(value.key(), value);
+        public void putObject(@NotNull RenderObject value) {
+            Objects.requireNonNull(value, "value");
+
+            renderObjects.put(value.key, value);
 
             if(baked != null) {
                 if(baked.length == 0) {
@@ -88,9 +129,8 @@ public class MapeditorClient implements ClientModInitializer {
                 }
 
                 int i = 0;
-
                 for(RenderObject object : baked) {
-                    if(object.key().equals(value.key())) {
+                    if(object.key.equals(value.key)) {
                         baked[i] = value;
                         return;
                     }
@@ -111,6 +151,11 @@ public class MapeditorClient implements ClientModInitializer {
         }
 
         @Override
+        public boolean hasObject(@NotNull Key key) {
+            return renderObjects.containsKey(key);
+        }
+
+        @Override
         public boolean isEnabled() {
             return enabled;
         }
@@ -118,6 +163,12 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public int size() {
             return renderObjects.size();
+        }
+
+        @Override
+        public void clear() {
+            renderObjects.clear();
+            baked = null;
         }
     }
 }

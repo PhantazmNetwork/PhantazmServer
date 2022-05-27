@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.10.1"
 
-ethylene = "0.5.1"
+ethylene = "0.5.2"
 
 junit-jupiter = "5.9.0-M1"
 
@@ -25,6 +25,8 @@ jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.
 
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
+
+libgui = { module = "io.github.cottonmc:LibGui", version = "5.4.1+1.18.2" }
 
 minecraft = { module = "com.mojang:minecraft", version = "1.18.2" }
 

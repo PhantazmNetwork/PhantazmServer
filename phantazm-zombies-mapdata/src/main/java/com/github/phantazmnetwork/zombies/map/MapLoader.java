@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 public interface MapLoader {
-    @NotNull MapData load(@NotNull String mapName) throws IOException;
+    @NotNull ZombiesMap load(@NotNull String mapName) throws IOException;
 
-    void save(@NotNull MapData data, @NotNull String mapName) throws IOException;
+    void save(@NotNull ZombiesMap data, @NotNull String mapName) throws IOException;
 }

@@ -12,6 +12,7 @@ base {
 
 repositories {
     maven("https://jitpack.io")
+    maven("https://server.bbkr.space/artifactory/libs-release")
 }
 
 dependencies {
@@ -23,6 +24,7 @@ dependencies {
     }
     modImplementation(libs.bundles.fabric)
     modImplementation(libs.renderer)
+    modImplementation(libs.libgui)
 
     implementation(project(":phantazm-commons"))
     implementation(project(":phantazm-zombies-mapdata"))

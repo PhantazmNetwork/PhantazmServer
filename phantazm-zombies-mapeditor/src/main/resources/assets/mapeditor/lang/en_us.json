@@ -1,0 +1,7 @@
+{
+  "key.mapeditor.config": "Map configuration",
+  "category.mapeditor.all": "Mapeditor",
+  "gui.mapeditor.enable": "Enable",
+  "gui.mapeditor.disable": "Disable",
+  "gui.mapeditor.toggle_views": "Toggle Views"
+}
