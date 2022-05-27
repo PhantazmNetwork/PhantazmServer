@@ -36,7 +36,7 @@ miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
 
-renderer = { module = "com.github.Steanky:Renderer", version = "0923ca9be7" }
+renderer = { module = "com.github.0x3C50:Renderer", version = "51f5a72f86" }
 
 yarn-mappings = { module = "net.fabricmc:yarn", version = "1.18.2+build.3" }
 
