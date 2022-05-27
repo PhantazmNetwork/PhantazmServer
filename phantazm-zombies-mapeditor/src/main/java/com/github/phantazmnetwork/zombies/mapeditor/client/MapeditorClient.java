@@ -38,12 +38,13 @@ public class MapeditorClient implements ClientModInitializer {
         EditorGroup<RoomInfo> roomGroup = new EditorGroupAbstract<>(renderer, TranslationKeys
                 .GUI_MAPEDITOR_EDITOR_GROUP_ROOM) {
             private static final Color ROOM_COLOR = new Color(0, 0, 255, 50);
+
             @Override
             protected ObjectRenderer.@NotNull RenderObject makeRenderObject(@NotNull Key key,
                                                                             @NotNull RoomInfo roomInfo) {
-                return new ObjectRenderer.RenderObject(key, ObjectRenderer.RenderType
-                        .FILLED, ROOM_COLOR, true, false, RenderUtils
-                        .arrayFromRegions(roomInfo.regions()));
+                return new ObjectRenderer.RenderObject(key, ObjectRenderer.RenderType.FILLED, ROOM_COLOR,
+                        true, false, RenderUtils.arrayFromRegions(roomInfo
+                        .regions()));
             }
         };
 
@@ -89,7 +90,7 @@ public class MapeditorClient implements ClientModInitializer {
                 }
 
                 boolean resetWallRender = false;
-                if(!renderThroughWalls && object.renderThroughWalls) {
+                if(!renderThroughWalls && !object.renderThroughWalls) {
                     Renderer3d.startRenderingThroughWalls();
                     resetWallRender = true;
                 }
