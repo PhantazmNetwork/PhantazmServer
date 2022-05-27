@@ -9,6 +9,9 @@ import java.awt.*;
 import java.util.Objects;
 
 public interface ObjectRenderer {
+    float EPSILON = 1E-3F;
+    float DOUBLE_EPSILON = EPSILON * 2;
+
     enum RenderType {
         FILLED,
         OUTLINE

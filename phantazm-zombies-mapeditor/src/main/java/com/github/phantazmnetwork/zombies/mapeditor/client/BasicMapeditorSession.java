@@ -26,8 +26,6 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color SELECTION_COLOR = new Color(0, 255, 0, 128);
     private static final Color CURSOR_COLOR = Color.RED;
     private static final Color OUTLINE_COLOR = Color.BLACK;
-    private static final float EPSILON = 1E-3F;
-    private static final float DOUBLE_EPSILON = EPSILON * 2;
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
     private static final Key SELECTION_KEY = Key.key(StringConstants.PHANTAZM_NAMESPACE, "mapeditor_selection");
@@ -146,16 +144,16 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     private void setSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {
-        Vec3d startVec = new Vec3d(areaStart.getX(), areaStart.getY(), areaStart.getZ());
-        Vec3d dimensionsVec = new Vec3d(dimensions.getX(), dimensions.getY(), dimensions.getZ());
+        Vec3d startVec = new Vec3d(areaStart.getX() - ObjectRenderer.EPSILON, areaStart.getY() - ObjectRenderer
+                .EPSILON, areaStart.getZ() - ObjectRenderer.EPSILON);
+        Vec3d dimensionsVec = new Vec3d(dimensions.getX() + ObjectRenderer.DOUBLE_EPSILON, dimensions.getY() +
+                ObjectRenderer.DOUBLE_EPSILON, dimensions.getZ() + ObjectRenderer.DOUBLE_EPSILON);
         Vec3d clickedVec = new Vec3d(clicked.getX(), clicked.getY(), clicked.getZ());
 
         renderer.putObject(new ObjectRenderer.RenderObject(SELECTION_KEY, ObjectRenderer.RenderType.FILLED,
-                SELECTION_COLOR, true, false, startVec.subtract(EPSILON, EPSILON,
-                EPSILON), dimensionsVec.add(DOUBLE_EPSILON, DOUBLE_EPSILON, DOUBLE_EPSILON)));
+                SELECTION_COLOR, true, false, startVec, dimensionsVec));
         renderer.putObject(new ObjectRenderer.RenderObject(OUTLINE_KEY, ObjectRenderer.RenderType.OUTLINE,
-                OUTLINE_COLOR, true, false, startVec.subtract(EPSILON, EPSILON,
-                EPSILON), dimensionsVec.add(DOUBLE_EPSILON, DOUBLE_EPSILON, DOUBLE_EPSILON)));
+                OUTLINE_COLOR, true, false, startVec, dimensionsVec));
         renderer.putObject(new ObjectRenderer.RenderObject(CURSOR_KEY, ObjectRenderer.RenderType.OUTLINE, CURSOR_COLOR,
                 true, true, clickedVec.add(0.25, 0.25, 0.25),
                 HALF));
