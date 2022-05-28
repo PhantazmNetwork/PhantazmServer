@@ -87,6 +87,7 @@ public final class PhantazmServer {
         Chat.initialize(global);
         Neuron.initialize(global, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner(), phantazm);
+        MobTest.initialize(phantazm);
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {

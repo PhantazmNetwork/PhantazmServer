@@ -58,8 +58,10 @@ public class MobModel<TDescriptor extends MinestomDescriptor, TEntity extends Ne
         return Map.copyOf(equipment);
     }
 
-    public @NotNull TEntity spawn(@NotNull Spawner spawner, @NotNull Instance instance, @NotNull Point point) {
-        return spawner.spawnEntity(instance, point, descriptor, entityFactory, this::onSpawn);
+    public @NotNull PhantazmMob<TEntity> spawn(@NotNull Spawner spawner, @NotNull Instance instance,
+                                               @NotNull Point point) {
+        return new PhantazmMob<>(this, spawner.spawnEntity(instance, point, descriptor, entityFactory,
+                this::onSpawn));
     }
 
     protected void onSpawn(@NotNull TEntity entity) {

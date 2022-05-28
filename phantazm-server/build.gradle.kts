@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation(project(":phantazm-api"))
+    implementation(project(":phantazm-mob"))
     implementation(project(":phantazm-neuron-minestom"))
     implementation(project(":phantazm-zombies"))
 
