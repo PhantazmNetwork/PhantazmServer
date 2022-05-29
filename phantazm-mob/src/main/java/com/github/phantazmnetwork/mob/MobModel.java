@@ -25,7 +25,7 @@ public class MobModel<TDescriptor extends MinestomDescriptor, TEntity extends Ne
 
     private final NeuralEntityFactory<? super TDescriptor, ? extends TEntity> entityFactory;
 
-    private final Map<String, Skill> skills;
+    private final Map<String, ? extends Skill> skills;
 
     private final Component displayName;
 
@@ -33,7 +33,7 @@ public class MobModel<TDescriptor extends MinestomDescriptor, TEntity extends Ne
 
     public MobModel(@NotNull TDescriptor descriptor,
                     @NotNull NeuralEntityFactory<? super TDescriptor, ? extends TEntity> entityFactory,
-                    @NotNull Map<String, Skill> skills, @Nullable Component displayName,
+                    @NotNull Map<String, ? extends Skill> skills, @Nullable Component displayName,
                     @NotNull Map<EquipmentSlot, ItemStack> equipment) {
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.entityFactory = Objects.requireNonNull(entityFactory, "entityFactory");

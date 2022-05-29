@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class BasicMobModel<TDescriptor extends MinestomDescriptor> extends MobModel<TDescriptor, NeuralEntity> {
 
-    public BasicMobModel(@NotNull TDescriptor descriptor, @NotNull Map<String, Skill> skills,
+    public BasicMobModel(@NotNull TDescriptor descriptor, @NotNull Map<String, ? extends Skill> skills,
                          @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment) {
         super(descriptor, NeuralEntity::new, skills, displayName, equipment);
     }

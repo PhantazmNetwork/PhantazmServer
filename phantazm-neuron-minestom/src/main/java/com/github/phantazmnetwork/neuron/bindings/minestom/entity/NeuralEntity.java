@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.neuron.agent.Descriptor;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.agent.TranslationExplorer;
 import com.github.phantazmnetwork.neuron.bindings.minestom.ContextProvider;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
@@ -22,6 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -32,6 +35,8 @@ import java.util.concurrent.CompletableFuture;
 public class NeuralEntity extends LivingEntity implements Agent {
     private final MinestomDescriptor descriptor;
     private final ContextProvider provider;
+
+    private final Collection<GoalGroup> goalGroups = new ArrayList<>();
 
     private Navigator navigator;
     private Controller controller;
@@ -55,6 +60,23 @@ public class NeuralEntity extends LivingEntity implements Agent {
     @Override
     public void preTick(long time) {
         navigator.tick(time);
+    }
+
+    @Override
+    public void update(long time) {
+        aiTick(time);
+
+        super.update(time);
+    }
+
+    protected void aiTick(long time) {
+        for (GoalGroup group : goalGroups) {
+            group.tick(time);
+        }
+    }
+
+    public void addGoalGroup(@NotNull GoalGroup group) {
+        goalGroups.add(group);
     }
 
     @Override
