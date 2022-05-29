@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Root of all entities that use Neuron for pathfinding. This is both a {@link LivingEntity} and an {@link Agent}.
  */
-public class NeuralEntity extends LivingEntity implements Agent {
+public final class NeuralEntity extends LivingEntity implements Agent {
     private final MinestomDescriptor descriptor;
     private final ContextProvider provider;
 

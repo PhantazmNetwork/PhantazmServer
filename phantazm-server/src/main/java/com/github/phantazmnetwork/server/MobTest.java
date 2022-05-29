@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
-import com.github.phantazmnetwork.mob.BasicMobModel;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.goal.FollowPlayerGoal;
@@ -11,8 +10,6 @@ import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.target.NearestEntitySelector;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
@@ -54,7 +51,7 @@ final class MobTest {
             }
 
             @Override
-            protected boolean isTargetValid(@NotNull PhantazmMob<?> mob, @NotNull Entity targetEntity,
+            protected boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity,
                                             @NotNull Player target) {
                 return true;
             }
@@ -72,7 +69,7 @@ final class MobTest {
         };
 
         String defaultSkillName = "testSkill";
-        MobModel<MinestomDescriptor, NeuralEntity> model = new BasicMobModel<>(
+        MobModel model = new MobModel(
                 GroundMinestomDescriptor.of(EntityType.ZOMBIE, "test"),
                 Map.of(defaultSkillName, new PlaySoundSkill(playerSelector, Sound.sound(
                         Key.key("entity.elder_guardian.curse"),
@@ -86,7 +83,7 @@ final class MobTest {
                 )
         );
 
-        AtomicReference<PhantazmMob<?>> mobReference = new AtomicReference<>();
+        AtomicReference<PhantazmMob> mobReference = new AtomicReference<>();
         phantazm.addListener(ChatChannelSendEvent.class, event -> {
             String msg = event.getInput();
             Player player = event.getPlayer();
@@ -95,7 +92,7 @@ final class MobTest {
             if (instance != null) {
                 switch (msg) {
                     case "spawnmob":
-                        PhantazmMob<?> mob = model.spawn(spawner, instance, player.getPosition());
+                        PhantazmMob mob = model.spawn(spawner, instance, player.getPosition());
                         addGoalGroups(mob, playerSelector, mob.model().getSkills().get(defaultSkillName));
                         mobReference.set(mob);
                 }
@@ -103,7 +100,7 @@ final class MobTest {
         });
     }
 
-    private static void addGoalGroups(@NotNull PhantazmMob<?> mob, @NotNull TargetSelector<Player> playerSelector,
+    private static void addGoalGroups(@NotNull PhantazmMob mob, @NotNull TargetSelector<Player> playerSelector,
                                       @NotNull Skill skill) {
         NeuralGoal followPlayerGoal = new FollowPlayerGoal(mob, playerSelector);
         NeuralGoal useSkillGoal = new UseSkillGoal(mob, skill, 5000L);

@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class UseSkillGoal implements NeuralGoal {
 
-    private final PhantazmMob<?> mob;
+    private final PhantazmMob mob;
 
     private final Skill skill;
 
@@ -17,7 +17,7 @@ public class UseSkillGoal implements NeuralGoal {
 
     private long lastUsage = System.currentTimeMillis();
 
-    public UseSkillGoal(@NotNull PhantazmMob<?> mob, @NotNull Skill skill, long period) {
+    public UseSkillGoal(@NotNull PhantazmMob mob, @NotNull Skill skill, long period) {
         this.mob = Objects.requireNonNull(mob, "mob");
         this.skill = Objects.requireNonNull(skill, "skill");
         this.period = period;

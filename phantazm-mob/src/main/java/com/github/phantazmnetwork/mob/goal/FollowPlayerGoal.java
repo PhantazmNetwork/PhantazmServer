@@ -11,11 +11,11 @@ import java.util.Objects;
 
 public class FollowPlayerGoal implements NeuralGoal {
 
-    private final PhantazmMob<?> mob;
+    private final PhantazmMob mob;
 
     private final TargetSelector<Player> playerSelector;
 
-    public FollowPlayerGoal(@NotNull PhantazmMob<?> mob, @NotNull TargetSelector<Player> playerSelector) {
+    public FollowPlayerGoal(@NotNull PhantazmMob mob, @NotNull TargetSelector<Player> playerSelector) {
         this.mob = Objects.requireNonNull(mob, "mob");
         this.playerSelector = Objects.requireNonNull(playerSelector, "playerSelector");
     }

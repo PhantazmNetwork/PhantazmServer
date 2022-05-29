@@ -14,7 +14,7 @@ public abstract class LineOfSightSelector<TReturn> extends NearestEntitySelector
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    protected boolean isTargetValid(@NotNull PhantazmMob<?> mob, @NotNull Entity targetEntity, @NotNull TReturn target) {
+    protected boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity, @NotNull TReturn target) {
         Vec start = mob.entity().getPosition().asVec();
         Vec dir = mob.entity().getPosition().direction();
         Pos pos = targetEntity.getPosition();

@@ -22,7 +22,7 @@ public abstract class NearestEntitySelector<TReturn> implements TargetSelector<I
     }
 
     @Override
-    public @NotNull Optional<Iterable<TReturn>> selectTarget(@NotNull PhantazmMob<?> mob) {
+    public @NotNull Optional<Iterable<TReturn>> selectTarget(@NotNull PhantazmMob mob) {
         Instance instance = mob.entity().getInstance();
         if (instance == null) {
             throw new IllegalStateException("instance unset");
@@ -75,7 +75,7 @@ public abstract class NearestEntitySelector<TReturn> implements TargetSelector<I
 
     protected abstract @NotNull Optional<TReturn> mapTarget(@NotNull Entity entity);
 
-    protected abstract boolean isTargetValid(@NotNull PhantazmMob<?> mob, @NotNull Entity targetEntity,
+    protected abstract boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity,
                                              @NotNull TReturn target);
 
 }
