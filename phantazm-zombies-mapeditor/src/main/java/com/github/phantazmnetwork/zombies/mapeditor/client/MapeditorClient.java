@@ -1,10 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
-import com.github.phantazmnetwork.zombies.map.RoomInfo;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.EditorGroupAbstract;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.EditorGroup;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.ConfigGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorScreen;
 import me.x150.renderer.event.EventListener;
@@ -25,7 +21,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-import java.awt.*;
 import java.util.*;
 
 public class MapeditorClient implements ClientModInitializer {
@@ -35,28 +30,17 @@ public class MapeditorClient implements ClientModInitializer {
         ObjectRenderer renderer = new Renderer();
         Events.registerEventHandlerClass(renderer);
 
-        EditorGroup<RoomInfo> roomGroup = new EditorGroupAbstract<>(renderer, TranslationKeys
-                .GUI_MAPEDITOR_EDITOR_GROUP_ROOM) {
-            private static final Color ROOM_COLOR = new Color(0, 0, 255, 50);
-
-            @Override
-            protected ObjectRenderer.@NotNull RenderObject makeRenderObject(@NotNull Key key,
-                                                                            @NotNull RoomInfo roomInfo) {
-                return new ObjectRenderer.RenderObject(key, ObjectRenderer.RenderType.FILLED, ROOM_COLOR,
-                        true, false, RenderUtils.arrayFromRegions(roomInfo
-                        .regions()));
-            }
-        };
-
-        MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, Set.of());
+        MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer);
         UseBlockCallback.EVENT.register(mapeditorSession::handleBlockUse);
 
         KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, TranslationKeys
                 .CATEGORY_MAPEDITOR_ALL));
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(keyBinding.wasPressed()) {
-                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ConfigGui(mapeditorSession)));
+                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ConfigGui(mapeditorSession
+                        .getViewModel())));
             }
         });
     }
@@ -90,7 +74,7 @@ public class MapeditorClient implements ClientModInitializer {
                 }
 
                 boolean resetWallRender = false;
-                if(!renderThroughWalls && !object.renderThroughWalls) {
+                if(!renderThroughWalls && object.renderThroughWalls) {
                     Renderer3d.startRenderingThroughWalls();
                     resetWallRender = true;
                 }

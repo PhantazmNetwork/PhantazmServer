@@ -1,7 +1,10 @@
 {
   "key.mapeditor.config": "Map configuration",
   "category.mapeditor.all": "Mapeditor",
-  "gui.mapeditor.enable": "Enable",
-  "gui.mapeditor.disable": "Disable",
-  "gui.mapeditor.toggle_views": "Toggle Views"
+  "gui.mapeditor.enabled": "Editor enabled",
+  "gui.mapeditor.disabled": "Editor disabled",
+  "gui.mapeditor.toggle_views": "Toggle Views",
+  "gui.mapeditor.add": "Create...",
+  "gui.mapeditor.new_map": "New map",
+  "gui.mapeditor.delete_map": "Delete map"
 }

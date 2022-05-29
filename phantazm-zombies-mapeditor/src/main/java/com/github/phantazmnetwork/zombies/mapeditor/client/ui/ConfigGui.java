@@ -1,87 +1,70 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.zombies.mapeditor.client.Identifiers;
-import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.TranslatableText;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public class ConfigGui extends LightweightGuiDescription {
-    private final MapeditorSession mapeditorSession;
-
-    public ConfigGui(@NotNull MapeditorSession mapeditorSession) {
-        super();
-        this.mapeditorSession = Objects.requireNonNull(mapeditorSession, "mapeditorSession");
-        boolean initiallyEnabled = mapeditorSession.isEnabled();
-
+    public ConfigGui(@NotNull MapeditorViewModel viewModel) {
         WGridPanel root = new WGridPanel();
         setRootPanel(root);
 
-        root.setSize(300, 240);
+        root.setSize(200, 150);
         root.setInsets(Insets.ROOT_PANEL);
 
+        //create GUI components...
         WSprite icon = new WSprite(Identifiers.ICON);
+        WToggleButton mapeditorToggle = new WToggleButton();
+        WTextField mapName = new WTextField();
+        WButton newMap = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_MAP));
+
+        //...add them to root
         root.add(icon, 0, 0, 2, 2);
+        root.add(mapeditorToggle, 3, 0);
+        root.add(mapName, 0, 3, 7, 0);
+        root.add(newMap, 0, 5, 4, 0);
 
-        WButton enableButton = new WButton();
-        if(initiallyEnabled) {
-            enableButton.setLabel(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISABLE));
-        }
-        else {
-            enableButton.setLabel(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ENABLE));
-        }
+        //generic configuration
+        mapName.setTextPredicate(StringUtils::isAsciiPrintable);
 
-        enableButton.setOnClick(() -> {
-            if(!mapeditorSession.isEnabled()) {
-                mapeditorSession.setEnabled(true);
-                enableButton.setLabel(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISABLE));
+        //configure data bindings (two-way)
+        viewModel.enabled().addListener((oldValue, newValue) -> {
+            if(newValue) {
+                mapeditorToggle.setToggle(true);
+                mapeditorToggle.setLabel(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ENABLED));
             }
             else {
-                mapeditorSession.setEnabled(false);
-                enableButton.setLabel(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ENABLE));
+                mapeditorToggle.setToggle(false);
+                mapeditorToggle.setLabel(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISABLED));
             }
         });
 
-        root.add(enableButton, 3, 0, 5, 1);
+        mapeditorToggle.setOnToggle(viewModel.enabled()::set);
 
-        WButton toggleViews = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_TOGGLE_VIEWS));
-        toggleViews.setOnClick(() -> {
-            MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ViewsGui(), true));
+        viewModel.currentMapName().addListener((oldValue, newValue) -> {
+            if(newValue != null) {
+                mapName.setText(newValue);
+                newMap.setLabel(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DELETE_MAP));
+            }
+            else {
+                mapName.setText("");
+                newMap.setLabel(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_MAP));
+            }
         });
 
-        root.add(toggleViews, 9, 0, 5, 1);
-
-        WGridPanel scrollGrid = new WGridPanel();
-        scrollGrid.setSize(300, 240);
-        scrollGrid.setInsets(Insets.ROOT_PANEL);
-
-        WScrollPanel scrollPanel = new WScrollPanel(scrollGrid);
-        root.add(scrollPanel, 0, 3, 17, 9);
-
-        root.add(new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ADD)), 0, 13, 5,
-                0);
-
-        root.validate(this);
-    }
-
-    private class ViewsGui extends LightweightGuiDescription {
-        public ViewsGui() {
-            WGridPanel root = new WGridPanel();
-            root.setSize(300, 240);
-            root.setInsets(Insets.ROOT_PANEL);
-
-            setRootPanel(root);
-
-            WButton button = new WButton();
-            root.add(button, 0, 0, 1, 5);
-
-            root.validate(this);
-        }
+        newMap.setOnClick(() -> {
+           String currentMap = viewModel.currentMapName().get();
+           if(currentMap == null) { //create mode
+               viewModel.currentMapName().set(mapName.getText());
+           }
+           else { //delete mode
+               viewModel.currentMapName().set(null);
+           }
+        });
     }
 }
