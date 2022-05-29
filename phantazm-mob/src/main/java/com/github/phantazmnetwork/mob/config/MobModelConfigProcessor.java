@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.mob.config;
 
 import com.github.phantazmnetwork.mob.MobModel;
-import com.github.phantazmnetwork.mob.goal.GoalGroupCreator;
+import com.github.phantazmnetwork.mob.goal.GoalCreator;
 import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -28,7 +28,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
     private final ConfigProcessor<Skill> skillConfigProcessor;
 
-    private final ConfigProcessor<GoalGroupCreator> goalGroupCreatorConfigProcessor;
+    private final ConfigProcessor<GoalCreator<?>> goalCreatorConfigProcessor;
 
     private final ConfigProcessor<ItemStack> itemStackConfigProcessor;
 
@@ -42,13 +42,13 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
     public MobModelConfigProcessor(@NotNull ConfigProcessor<MinestomDescriptor> descriptorProcessor,
                                    @NotNull ConfigProcessor<Skill> skillConfigProcessor,
-                                   @NotNull ConfigProcessor<GoalGroupCreator> goalGroupCreatorConfigProcessor,
+                                   @NotNull ConfigProcessor<GoalCreator<?>> goalCreatorConfigProcessor,
                                    @NotNull ConfigProcessor<ItemStack> itemStackConfigProcessor,
                                    @NotNull MiniMessage miniMessage) {
         this.descriptorProcessor = Objects.requireNonNull(descriptorProcessor, "descriptorProcessor");
         this.skillConfigProcessor = Objects.requireNonNull(skillConfigProcessor, "skillConfigProcessor");
-        this.goalGroupCreatorConfigProcessor = Objects.requireNonNull(goalGroupCreatorConfigProcessor,
-                "goalGroupCreatorConfigProcessor");
+        this.goalCreatorConfigProcessor = Objects.requireNonNull(goalCreatorConfigProcessor,
+                "goalCreatorConfigProcessor");
         this.itemStackConfigProcessor = Objects.requireNonNull(itemStackConfigProcessor,
                 "itemStackConfigProcessor");
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
@@ -64,10 +64,20 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             skills.put(entry.getKey(), skillConfigProcessor.dataFromElement(entry.getValue()));
         }
 
-        ConfigList goalGroupCreatorsList = element.getListOrThrow("goalGroupCreators");
-        Collection<GoalGroupCreator> goalGroupCreators = new ArrayList<>(goalGroupCreatorsList.size());
-        for (ConfigElement goalGroupCreatorElement : goalGroupCreatorsList) {
-            goalGroupCreators.add(goalGroupCreatorConfigProcessor.dataFromElement(goalGroupCreatorElement));
+        ConfigList goalCreatorsGroupsList = element.getListOrThrow("goalCreators");
+        Collection<Iterable<GoalCreator<?>>> goalCreatorsGroups = new ArrayList<>(goalCreatorsGroupsList.size());
+        for (ConfigElement goalCreatorsElement : goalCreatorsGroupsList) {
+            if (!goalCreatorsElement.isList()) {
+                throw new ConfigProcessException("goal creators are not a list");
+            }
+
+            ConfigList goalCreatorsList = goalCreatorsElement.asList();
+            Collection<GoalCreator<?>> goalCreators = new ArrayList<>(goalCreatorsList.size());
+            for (ConfigElement goalCreatorElement : goalCreatorsList) {
+                goalCreators.add(goalCreatorConfigProcessor.dataFromElement(goalCreatorElement));
+            }
+
+            goalCreatorsGroups.add(goalCreators);
         }
 
         String displayNameString = element.getStringOrDefault((String) null, "displayName");
@@ -88,7 +98,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             equipment.put(equipmentSlot, itemStackConfigProcessor.dataFromElement(entry.getValue()));
         }
 
-        return new MobModel(descriptor, skills, goalGroupCreators, displayName, equipment);
+        return new MobModel(descriptor, skills, goalCreatorsGroups, displayName, equipment);
     }
 
     @Override
@@ -100,9 +110,14 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             skillsNode.put(entry.getKey(), skillConfigProcessor.elementFromData(entry.getValue()));
         }
 
-        ConfigList goalGroupCreators = new ArrayConfigList();
-        for (GoalGroupCreator creator : model.getGoalGroupCreators()) {
-            goalGroupCreators.add(goalGroupCreatorConfigProcessor.elementFromData(creator));
+        ConfigList goalCreatorsGroups = new ArrayConfigList();
+        for (Iterable<GoalCreator<?>> creators : model.getGoalCreatorsGroups()) {
+            ConfigList goalCreatorsList = new ArrayConfigList();
+            for (GoalCreator<?> creator : creators) {
+                goalCreatorsList.add(goalCreatorConfigProcessor.elementFromData(creator));
+            }
+
+            goalCreatorsGroups.add(goalCreatorsList);
         }
 
         ConfigElement displayName = model.getDisplayName()
@@ -118,7 +133,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ConfigNode element = new LinkedConfigNode();
         element.put("descriptor", descriptor);
         element.put("skills", skillsNode);
-        element.put("goalGroupCreators", goalGroupCreators);
+        element.put("goalGroupCreators", goalCreatorsGroups);
         element.put("displayName", displayName);
         element.put("equipment", equipmentNode);
 

@@ -4,20 +4,24 @@ import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class FollowPlayerGoal implements NeuralGoal {
+public class FollowEntityGoal<TEntity extends Entity> implements NeuralGoal {
 
     private final PhantazmMob mob;
 
-    private final TargetSelector<Player> playerSelector;
+    private final TargetSelector<TEntity> entitySelector;
 
-    public FollowPlayerGoal(@NotNull PhantazmMob mob, @NotNull TargetSelector<Player> playerSelector) {
+    public FollowEntityGoal(@NotNull PhantazmMob mob, @NotNull TargetSelector<TEntity> playerSelector) {
         this.mob = Objects.requireNonNull(mob, "mob");
-        this.playerSelector = Objects.requireNonNull(playerSelector, "playerSelector");
+        this.entitySelector = Objects.requireNonNull(playerSelector, "entitySelector");
+    }
+
+    public @NotNull TargetSelector<TEntity> getEntitySelector() {
+        return entitySelector;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class FollowPlayerGoal implements NeuralGoal {
     @Override
     public void start() {
         mob.entity().getNavigator().setDestination(() -> {
-            return playerSelector.selectTarget(mob)
+            return entitySelector.selectTarget(mob)
                     .map(player -> VecUtils.toBlockInt(player.getPosition()))
                     .orElse(null);
         });

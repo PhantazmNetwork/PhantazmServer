@@ -1,11 +1,13 @@
 package com.github.phantazmnetwork.mob;
 
 import com.github.phantazmnetwork.commons.IteratorUtils;
-import com.github.phantazmnetwork.mob.goal.GoalGroupCreator;
+import com.github.phantazmnetwork.mob.goal.GoalCreator;
 import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EquipmentSlot;
@@ -24,18 +26,18 @@ public class MobModel {
 
     private final Map<String, ? extends Skill> skills;
 
-    private final Iterable<GoalGroupCreator> goalGroupCreators;
+    private final Iterable<Iterable<GoalCreator<?>>> goalCreatorsGroups;
 
     private final Component displayName;
 
     private final Map<EquipmentSlot, ItemStack> equipment;
 
     public MobModel(@NotNull MinestomDescriptor descriptor, @NotNull Map<String, ? extends Skill> skills,
-                    @NotNull Iterable<GoalGroupCreator> goalGroupCreators, @Nullable Component displayName,
+                    @NotNull Iterable<Iterable<GoalCreator<?>>> goalCreatorsGroups, @Nullable Component displayName,
                     @NotNull Map<EquipmentSlot, ItemStack> equipment) {
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.skills = Objects.requireNonNull(skills, "skills");
-        this.goalGroupCreators = Objects.requireNonNull(goalGroupCreators, "goalGroupCreators");
+        this.goalCreatorsGroups = Objects.requireNonNull(goalCreatorsGroups, "goalCreatorsGroups");
         this.displayName = displayName;
         this.equipment = Objects.requireNonNull(equipment, "equipment");
     }
@@ -48,16 +50,19 @@ public class MobModel {
         return Map.copyOf(skills);
     }
 
-    public @Unmodifiable @NotNull Iterable<GoalGroupCreator> getGoalGroupCreators() {
-        return new Iterable<>() {
+    public @Unmodifiable @NotNull Iterable<Iterable<GoalCreator<?>>> getGoalCreatorsGroups() {
+        return () -> new Iterator<>() {
 
-            private final Iterator<GoalGroupCreator> iterator
-                    = IteratorUtils.unmodifiable(goalGroupCreators.iterator());
+            private final Iterator<Iterable<GoalCreator<?>>> iterableIterator = goalCreatorsGroups.iterator();
 
-            @NotNull
             @Override
-            public Iterator<GoalGroupCreator> iterator() {
-                return iterator;
+            public boolean hasNext() {
+                return iterableIterator.hasNext();
+            }
+
+            @Override
+            public Iterable<GoalCreator<?>> next() {
+                return () -> IteratorUtils.unmodifiable(iterableIterator.next().iterator());
             }
         };
     }
@@ -91,8 +96,13 @@ public class MobModel {
     }
 
     protected void postSpawn(@NotNull PhantazmMob mob) {
-        for (GoalGroupCreator creator : goalGroupCreators) {
-            mob.entity().addGoalGroup(creator.createGoalGroup(mob));
+        for (Iterable<GoalCreator<?>> creators : goalCreatorsGroups) {
+            Collection<NeuralGoal> goals = new ArrayList<>();
+            for (GoalCreator<?> creator : creators) {
+                goals.add(creator.createGoal(mob));
+            }
+
+            mob.entity().addGoalGroup(new GoalGroup(goals));
         }
     }
 

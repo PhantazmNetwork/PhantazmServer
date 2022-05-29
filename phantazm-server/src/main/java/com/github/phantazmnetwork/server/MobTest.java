@@ -3,16 +3,13 @@ package com.github.phantazmnetwork.server;
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.mob.goal.FollowPlayerGoal;
+import com.github.phantazmnetwork.mob.goal.FollowEntityGoal;
 import com.github.phantazmnetwork.mob.goal.UseSkillGoal;
-import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.target.NearestEntitySelector;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -27,10 +24,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class MobTest {
@@ -77,6 +71,11 @@ final class MobTest {
                         1.0F,
                         1.0F
                 ), true)),
+                List.of(
+                        Collections.singleton(mob -> new FollowEntityGoal<>(mob, playerSelector)),
+                        Collections.singleton(mob -> new UseSkillGoal(mob,
+                                mob.model().getSkills().get(defaultSkillName), 500L))
+                ),
                 Component.text("Test Mob"),
                 Map.of(
                         EquipmentSlot.CHESTPLATE, ItemStack.of(Material.LEATHER_CHESTPLATE)
@@ -93,20 +92,10 @@ final class MobTest {
                 switch (msg) {
                     case "spawnmob":
                         PhantazmMob mob = model.spawn(spawner, instance, player.getPosition());
-                        addGoalGroups(mob, playerSelector, mob.model().getSkills().get(defaultSkillName));
                         mobReference.set(mob);
                 }
             }
         });
-    }
-
-    private static void addGoalGroups(@NotNull PhantazmMob mob, @NotNull TargetSelector<Player> playerSelector,
-                                      @NotNull Skill skill) {
-        NeuralGoal followPlayerGoal = new FollowPlayerGoal(mob, playerSelector);
-        NeuralGoal useSkillGoal = new UseSkillGoal(mob, skill, 5000L);
-
-        mob.entity().addGoalGroup(new GoalGroup(Collections.singleton(followPlayerGoal)));
-        mob.entity().addGoalGroup(new GoalGroup(Collections.singleton(useSkillGoal)));
     }
 
 }
