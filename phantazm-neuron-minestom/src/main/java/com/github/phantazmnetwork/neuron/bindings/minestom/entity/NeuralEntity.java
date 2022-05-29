@@ -59,7 +59,9 @@ public class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public void preTick(long time) {
-        navigator.tick(time);
+        if (canPathfind()) {
+            navigator.tick(time);
+        }
     }
 
     @Override
