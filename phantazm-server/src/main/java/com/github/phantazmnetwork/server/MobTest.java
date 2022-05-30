@@ -1,18 +1,25 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
+import com.github.phantazmnetwork.api.config.ItemStackConfigProcessor;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
 import com.github.phantazmnetwork.mob.goal.FollowEntityGoal;
 import com.github.phantazmnetwork.mob.goal.UseSkillGoal;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
+import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.mob.target.NearestEntitySelector;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.config.MinestomDescriptorConfigProcessor;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
@@ -62,25 +69,30 @@ final class MobTest {
             return Optional.empty();
         };
 
-        String defaultSkillName = "testSkill";
+        Skill skill = new PlaySoundSkill(playerSelector, Sound.sound(
+                Key.key("entity.elder_guardian.curse"),
+                Sound.Source.MASTER,
+                1.0F,
+                1.0F
+        ), true);
         MobModel model = new MobModel(
                 GroundMinestomDescriptor.of(EntityType.ZOMBIE, "test"),
-                Map.of(defaultSkillName, new PlaySoundSkill(playerSelector, Sound.sound(
-                        Key.key("entity.elder_guardian.curse"),
-                        Sound.Source.MASTER,
-                        1.0F,
-                        1.0F
-                ), true)),
                 List.of(
-                        Collections.singleton(mob -> new FollowEntityGoal<>(mob, playerSelector)),
-                        Collections.singleton(mob -> new UseSkillGoal(mob,
-                                mob.model().getSkills().get(defaultSkillName), 500L))
+                        Collections.singleton(new FollowEntityGoal<>(playerSelector)),
+                        Collections.singleton(new UseSkillGoal(skill, 5000L))
                 ),
                 Component.text("Test Mob"),
                 Map.of(
                         EquipmentSlot.CHESTPLATE, ItemStack.of(Material.LEATHER_CHESTPLATE)
                 )
         );
+        /*
+        ConfigProcessor<MobModel> modelProcessor = new MobModelConfigProcessor(
+                new MinestomDescriptorConfigProcessor(),
+                new ItemStackConfigProcessor(),
+                MiniMessage.miniMessage()
+        );
+        */
 
         AtomicReference<PhantazmMob> mobReference = new AtomicReference<>();
         phantazm.addListener(ChatChannelSendEvent.class, event -> {

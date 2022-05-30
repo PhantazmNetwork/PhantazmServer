@@ -29,7 +29,7 @@ public class VariantConfigProcessor<TValue extends VariantSerializable> implemen
 
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull TValue data) throws ConfigProcessException {
-        String type = data.getSerialType();
+        String type = data.getSerialName();
         ConfigProcessor<TValue> processor = subProcessors.get(type);
         if (processor == null) {
             throw new ConfigProcessException("no subprocessor");

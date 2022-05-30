@@ -4,6 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface VariantSerializable {
 
-    @NotNull String getSerialType();
+    @NotNull String getSerialName();
 
 }

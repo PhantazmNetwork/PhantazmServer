@@ -23,20 +23,15 @@ import java.util.*;
 public class MobModel {
 
     private final MinestomDescriptor descriptor;
-
-    private final Map<String, ? extends Skill> skills;
-
-    private final Iterable<Iterable<GoalCreator<?>>> goalCreatorsGroups;
+    private final Iterable<Iterable<GoalCreator>> goalCreatorsGroups;
 
     private final Component displayName;
 
     private final Map<EquipmentSlot, ItemStack> equipment;
 
-    public MobModel(@NotNull MinestomDescriptor descriptor, @NotNull Map<String, ? extends Skill> skills,
-                    @NotNull Iterable<Iterable<GoalCreator<?>>> goalCreatorsGroups, @Nullable Component displayName,
-                    @NotNull Map<EquipmentSlot, ItemStack> equipment) {
+    public MobModel(@NotNull MinestomDescriptor descriptor, @NotNull Iterable<Iterable<GoalCreator>> goalCreatorsGroups,
+                    @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment) {
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
-        this.skills = Objects.requireNonNull(skills, "skills");
         this.goalCreatorsGroups = Objects.requireNonNull(goalCreatorsGroups, "goalCreatorsGroups");
         this.displayName = displayName;
         this.equipment = Objects.requireNonNull(equipment, "equipment");
@@ -46,14 +41,10 @@ public class MobModel {
         return descriptor;
     }
 
-    public @Unmodifiable @NotNull Map<String, Skill> getSkills() {
-        return Map.copyOf(skills);
-    }
-
-    public @Unmodifiable @NotNull Iterable<Iterable<GoalCreator<?>>> getGoalCreatorsGroups() {
+    public @Unmodifiable @NotNull Iterable<Iterable<GoalCreator>> getGoalCreatorsGroups() {
         return () -> new Iterator<>() {
 
-            private final Iterator<Iterable<GoalCreator<?>>> iterableIterator = goalCreatorsGroups.iterator();
+            private final Iterator<Iterable<GoalCreator>> iterableIterator = goalCreatorsGroups.iterator();
 
             @Override
             public boolean hasNext() {
@@ -61,7 +52,7 @@ public class MobModel {
             }
 
             @Override
-            public Iterable<GoalCreator<?>> next() {
+            public Iterable<GoalCreator> next() {
                 return () -> IteratorUtils.unmodifiable(iterableIterator.next().iterator());
             }
         };
@@ -96,9 +87,9 @@ public class MobModel {
     }
 
     protected void postSpawn(@NotNull PhantazmMob mob) {
-        for (Iterable<GoalCreator<?>> creators : goalCreatorsGroups) {
+        for (Iterable<GoalCreator> creators : goalCreatorsGroups) {
             Collection<NeuralGoal> goals = new ArrayList<>();
-            for (GoalCreator<?> creator : creators) {
+            for (GoalCreator creator : creators) {
                 goals.add(creator.createGoal(mob));
             }
 

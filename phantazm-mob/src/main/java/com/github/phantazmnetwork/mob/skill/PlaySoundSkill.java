@@ -11,6 +11,8 @@ import java.util.Objects;
 
 public class PlaySoundSkill implements Skill, VariantSerializable {
 
+    public final static String SERIAL_NAME = "playSoundSkill";
+    
     private final TargetSelector<? extends Audience> audienceSelector;
 
     private final Sound sound;
@@ -37,7 +39,7 @@ public class PlaySoundSkill implements Skill, VariantSerializable {
     }
 
     @Override
-    public @NotNull String getSerialType() {
-        return "playSoundSkill";
+    public @NotNull String getSerialName() {
+        return SERIAL_NAME;
     }
 }
