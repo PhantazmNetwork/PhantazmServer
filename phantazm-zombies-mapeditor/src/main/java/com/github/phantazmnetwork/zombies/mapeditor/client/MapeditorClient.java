@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
-import com.github.phantazmnetwork.zombies.mapeditor.client.ui.ConfigGui;
+import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorScreen;
 import me.x150.renderer.event.EventListener;
 import me.x150.renderer.event.EventType;
@@ -39,8 +39,7 @@ public class MapeditorClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(keyBinding.wasPressed()) {
-                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ConfigGui(mapeditorSession
-                        .getViewModel())));
+                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new MainGui(mapeditorSession)));
             }
         });
     }

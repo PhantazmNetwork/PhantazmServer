@@ -1,11 +1,9 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
-import com.github.phantazmnetwork.commons.StringConstants;
-import com.github.phantazmnetwork.commons.databind.Property;
-import com.github.phantazmnetwork.zombies.map.MapInfo;
+import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
-import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorViewModel;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -18,6 +16,8 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class BasicMapeditorSession implements MapeditorSession {
@@ -26,59 +26,52 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color OUTLINE_COLOR = Color.BLACK;
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
-    private static final Key SELECTION_KEY = Key.key(StringConstants.PHANTAZM_NAMESPACE, "mapeditor_selection");
-    private static final Key OUTLINE_KEY = Key.key(StringConstants.PHANTAZM_NAMESPACE, "mapeditor_selection_outline");
-    private static final Key CURSOR_KEY = Key.key(StringConstants.PHANTAZM_NAMESPACE, "mapeditor_cursor");
+    private static final Key SELECTION_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection");
+    private static final Key OUTLINE_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection_outline");
+    private static final Key CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_cursor");
 
     private final ObjectRenderer renderer;
-    private final MapeditorViewModel viewModel;
+    private boolean enabled;
+
+    private Vec3i firstSelected;
+    private Vec3i secondSelected;
 
     private ZombiesMap currentMap;
 
+    private final Map<Key, ZombiesMap> maps;
+
     public BasicMapeditorSession(@NotNull ObjectRenderer renderer) {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
-        this.viewModel = new MapeditorViewModel(Property.of(false), Property.of(), Property.of(), Property
-                .of());
-        this.viewModel.enabled().addListener((oldValue, newValue) -> renderer.setEnabled(newValue));
-        this.viewModel.currentMapName().addListener((oldValue, newValue) -> {
-            if(newValue == null) {
-                currentMap = null;
-            }
-            else {
-
-            }
-        });
+        this.maps = new HashMap<>();
     }
 
     @Override
     public @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
                                                 @NotNull BlockHitResult blockHitResult) {
-        if(!viewModel.enabled().get() || !player.getInventory().getMainHandStack().getItem().equals(Items
+        if(!enabled || !player.getInventory().getMainHandStack().getItem().equals(Items
                 .STICK)) {
             return ActionResult.PASS;
         }
 
         if(hand == Hand.MAIN_HAND) {
-            Vec3i firstSelection = viewModel.firstSelected().get();
-            Vec3i newSelection = blockHitResult.getBlockPos();
+            Vec3i first = firstSelected;
+            Vec3i second = blockHitResult.getBlockPos();
 
-            if(firstSelection == null) {
-                viewModel.firstSelected().set(newSelection);
-                viewModel.secondSelected().set(newSelection);
-
-                updateSelectionRender(newSelection, ONE, newSelection);
+            if(first == null) {
+                firstSelected = second;
+                secondSelected = second;
+                updateSelectionRender(second, ONE, second);
             }
             else {
+                Vec3i min = new Vec3i(Math.min(second.getX(), first.getX()), Math.min(second.getY(), first.getY()), Math
+                        .min(second.getZ(), first.getZ()));
+                Vec3i max = new Vec3i(Math.max(second.getX(), first.getX()), Math.max(second.getY(), first.getY()), Math
+                        .max(second.getZ(), first.getZ()));
 
-                Vec3i min = new Vec3i(Math.min(newSelection.getX(), firstSelection.getX()), Math.min(newSelection
-                        .getY(), firstSelection.getY()), Math.min(newSelection.getZ(), firstSelection.getZ()));
-                Vec3i max = new Vec3i(Math.max(newSelection.getX(), firstSelection.getX()), Math.max(newSelection
-                        .getY(), firstSelection.getY()), Math.max(newSelection.getZ(), firstSelection.getZ()));
+                firstSelected = second;
+                secondSelected = firstSelected;
 
-                viewModel.secondSelected().set(firstSelection);
-                viewModel.firstSelected().set(newSelection);
-
-                updateSelectionRender(min, max.subtract(min).add(1, 1, 1), newSelection);
+                updateSelectionRender(min, max.subtract(min).add(1, 1, 1), second);
             }
 
             return ActionResult.CONSUME;
@@ -88,8 +81,75 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
-    public @NotNull MapeditorViewModel getViewModel() {
-        return viewModel;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        this.renderer.setEnabled(enabled);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean hasSelection() {
+        return firstSelected != null && secondSelected != null;
+    }
+
+    @Override
+    public @NotNull Vec3I getFirstSelection() {
+        if(firstSelected == null) {
+            throw new IllegalStateException("No selection");
+        }
+
+        return Vec3I.of(firstSelected.getX(), firstSelected.getY(), firstSelected.getZ());
+    }
+
+    @Override
+    public @NotNull Vec3I getSecondSelection() {
+        if(secondSelected == null) {
+            throw new IllegalStateException("No selection");
+        }
+
+        return Vec3I.of(secondSelected.getX(), secondSelected.getY(), secondSelected.getZ());
+    }
+
+    @Override
+    public boolean hasMap() {
+        return currentMap != null;
+    }
+
+    @Override
+    public @NotNull ZombiesMap getMap() {
+        if(currentMap == null) {
+            throw new IllegalStateException("No map");
+        }
+
+        return currentMap;
+    }
+
+    @Override
+    public void addMap(@NotNull Key id, @NotNull ZombiesMap map) {
+        if(maps.containsKey(id)) {
+            throw new IllegalArgumentException("A map with id " + id + " already exists");
+        }
+
+        maps.put(id, map);
+    }
+
+    @Override
+    public void removeMap(@NotNull Key id) {
+        maps.remove(id);
+    }
+
+    @Override
+    public void setCurrent(@NotNull Key id) {
+        ZombiesMap newCurrent = maps.get(id);
+        if(newCurrent == null) {
+            throw new IllegalArgumentException("A map with that ID does not exist");
+        }
+
+        this.currentMap = newCurrent;
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {

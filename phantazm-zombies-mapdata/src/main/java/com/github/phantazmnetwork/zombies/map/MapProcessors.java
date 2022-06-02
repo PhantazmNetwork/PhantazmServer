@@ -18,7 +18,7 @@ import java.util.List;
 public final class MapProcessors {
     private static final String ID = "id";
     private static final String DISPLAY_NAME = "displayName";
-    private static final String DISPLAY_ITEM = "displayItem";
+    private static final String DISPLAY_ITEM = "displayItemNBT";
     private static final String ORIGIN = "origin";
     private static final String ROOMS_PATH = "roomsPath";
     private static final String DOORS_PATH = "doorsPath";
@@ -45,16 +45,15 @@ public final class MapProcessors {
     private static final String SPAWNS = "spawns";
     private static final String AMOUNT = "amount";
 
-    private static final ConfigProcessor<MapInfo> mapInfo = new ConfigProcessor<>() {
-        private static final String DEFAULT_ROOMS_PATH = "rooms";
-        private static final String DEFAULT_DOORS_PATH = "doors";
-        private static final String DEFAULT_SHOPS_PATH = "shops";
-        private static final String DEFAULT_WINDOWS_PATH = "windows";
-        private static final String DEFAULT_ROUNDS_PATH = "rounds";
+    public static final String DEFAULT_ROOMS_PATH = "rooms";
+    public static final String DEFAULT_DOORS_PATH = "doors";
+    public static final String DEFAULT_SHOPS_PATH = "shops";
+    public static final String DEFAULT_WINDOWS_PATH = "windows";
+    public static final String DEFAULT_ROUNDS_PATH = "rounds";
 
+    private static final ConfigProcessor<MapInfo> mapInfo = new ConfigProcessor<>() {
         @Override
         public MapInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            int version = element.getNumberOrThrow(VERSION).intValue();
             Key id = key.dataFromElement(element.getElement(ID));
             String displayName = element.getStringOrThrow(DISPLAY_NAME);
             String displayItem = element.getStringOrThrow(DISPLAY_ITEM);
@@ -64,17 +63,16 @@ public final class MapProcessors {
             String shopsPath = element.getStringOrDefault(DEFAULT_SHOPS_PATH, SHOPS_PATH);
             String windowsPath = element.getStringOrDefault(DEFAULT_WINDOWS_PATH, WINDOWS_PATH);
             String roundsPath = element.getStringOrDefault(DEFAULT_ROUNDS_PATH, ROUNDS_PATH);
-            return new MapInfo(version, id, displayName, displayItem, origin, roomsPath, doorsPath, shopsPath,
-                    windowsPath, roundsPath);
+            return new MapInfo(id, displayName, displayItem, origin, roomsPath, doorsPath, shopsPath, windowsPath,
+                    roundsPath);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(MapInfo mapConfig) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode();
-            node.put(VERSION, new ConfigPrimitive(mapConfig.version()));
             node.put(ID, key.elementFromData(mapConfig.id()));
             node.put(DISPLAY_NAME, new ConfigPrimitive(mapConfig.displayName()));
-            node.put(DISPLAY_ITEM, new ConfigPrimitive(mapConfig.displayItem()));
+            node.put(DISPLAY_ITEM, new ConfigPrimitive(mapConfig.displayItemNBT()));
             node.put(ORIGIN, VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
             putIfNotDefault(node, ROOMS_PATH, mapConfig.roomsPath(), DEFAULT_ROOMS_PATH);
             putIfNotDefault(node, DOORS_PATH, mapConfig.doorsPath(), DEFAULT_DOORS_PATH);
