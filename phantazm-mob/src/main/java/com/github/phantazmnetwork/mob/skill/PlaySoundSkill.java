@@ -26,6 +26,18 @@ public class PlaySoundSkill implements Skill, VariantSerializable {
         this.followAudience = followAudience;
     }
 
+    public @NotNull TargetSelector<? extends Audience> getAudienceSelector() {
+        return audienceSelector;
+    }
+
+    public @NotNull Sound getSound() {
+        return sound;
+    }
+
+    public boolean shouldFollowAudience() {
+        return followAudience;
+    }
+
     @Override
     public void use(@NotNull PhantazmMob sender) {
         audienceSelector.selectTarget(sender).ifPresent(audience -> {

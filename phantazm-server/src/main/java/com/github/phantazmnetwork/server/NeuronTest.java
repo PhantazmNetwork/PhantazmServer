@@ -35,14 +35,13 @@ final class NeuronTest {
             if(instance != null) {
                 switch (msg) {
                     case "T" -> spawner.spawnEntity(instance, player.getPosition().add(5, 0, 0), testDescriptor,
-                            NeuralEntity::new, neuralEntity -> {
+                            neuralEntity -> {
                         //neuralEntity.setGravity(0, 0.2);
                         neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
                             }).setTarget(player);
                     case "TT" -> {
                         for(int i = 0; i < 500; i++) {
-                            spawner.spawnEntity(instance, player.getPosition(), testDescriptor, NeuralEntity::new)
-                                    .setTarget(player);
+                            spawner.spawnEntity(instance, player.getPosition(), testDescriptor).setTarget(player);
                         }
                     }
                     case "Z" -> {
