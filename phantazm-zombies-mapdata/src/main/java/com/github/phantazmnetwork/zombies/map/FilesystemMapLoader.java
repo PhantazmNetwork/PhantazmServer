@@ -13,6 +13,13 @@ import java.util.*;
 import java.util.function.BiPredicate;
 
 public class FilesystemMapLoader implements MapLoader {
+    private record FolderPaths(Path rooms, Path doors, Path shops, Path windows, Path rounds) {
+        FolderPaths(Path root, MapInfo info) {
+            this(root.resolve(info.roomsPath()), root.resolve(info.doorsPath()), root.resolve(info.shopsPath()), root
+                    .resolve(info.windowsPath()), root.resolve(info.roundsPath()));
+        }
+    }
+
     private static final String MAP_DATA_EXTENSION = ".mapconfig";
     private static final String MAP_INFO_NAME = "info" + MAP_DATA_EXTENSION;
     private static final BiPredicate<Path, BasicFileAttributes> CONFIG_PREDICATE = (path, attributes) -> attributes
@@ -34,31 +41,26 @@ public class FilesystemMapLoader implements MapLoader {
         Path mapInfoFile = mapFolder.resolve(MAP_INFO_NAME);
 
         MapInfo mapInfo = ConfigBridges.read(mapInfoFile, codec, MapProcessors.mapInfo());
-        Path roomsFolder = root.resolve(mapInfo.roomsPath());
-        Path doorsFolder = root.resolve(mapInfo.doorsPath());
-        Path shopsFolder = root.resolve(mapInfo.shopsPath());
-        Path windowsFolder = root.resolve(mapInfo.windowsPath());
-        Path roundsFolder = root.resolve(mapInfo.roundsPath());
-
+        FolderPaths paths = new FolderPaths(mapFolder, mapInfo);
         List<RoomInfo> rooms = new ArrayList<>();
         List<DoorInfo> doors = new ArrayList<>();
         List<ShopInfo> shops = new ArrayList<>();
         List<WindowInfo> windows = new ArrayList<>();
         List<RoundInfo> rounds = new ArrayList<>();
 
-        FileUtils.forEachFileMatching(roomsFolder, CONFIG_PREDICATE, file -> rooms.add(ConfigBridges.read(file, codec,
+        FileUtils.forEachFileMatching(paths.rooms, CONFIG_PREDICATE, file -> rooms.add(ConfigBridges.read(file, codec,
                 MapProcessors.roomInfo())));
 
-        FileUtils.forEachFileMatching(doorsFolder, CONFIG_PREDICATE, file -> doors.add(ConfigBridges.read(file, codec,
+        FileUtils.forEachFileMatching(paths.doors, CONFIG_PREDICATE, file -> doors.add(ConfigBridges.read(file, codec,
                 MapProcessors.doorInfo())));
 
-        FileUtils.forEachFileMatching(shopsFolder, CONFIG_PREDICATE, file -> shops.add(ConfigBridges.read(file, codec,
+        FileUtils.forEachFileMatching(paths.shops, CONFIG_PREDICATE, file -> shops.add(ConfigBridges.read(file, codec,
                 MapProcessors.shopInfo())));
 
-        FileUtils.forEachFileMatching(windowsFolder, CONFIG_PREDICATE, file -> windows.add(ConfigBridges.read(file,
+        FileUtils.forEachFileMatching(paths.windows, CONFIG_PREDICATE, file -> windows.add(ConfigBridges.read(file,
                 codec, MapProcessors.windowInfo())));
 
-        FileUtils.forEachFileMatching(roundsFolder, CONFIG_PREDICATE, file -> rounds.add(ConfigBridges.read(file, codec,
+        FileUtils.forEachFileMatching(paths.rounds, CONFIG_PREDICATE, file -> rounds.add(ConfigBridges.read(file, codec,
                 MapProcessors.roundInfo())));
 
         rounds.sort(Comparator.comparingInt(RoundInfo::round));
@@ -74,51 +76,47 @@ public class FilesystemMapLoader implements MapLoader {
         Files.createDirectories(mapDirectory);
 
         MapInfo mapInfo = data.info();
-        Path roomsFolder = root.resolve(mapInfo.roomsPath());
-        Path doorsFolder = root.resolve(mapInfo.doorsPath());
-        Path shopsFolder = root.resolve(mapInfo.shopsPath());
-        Path windowsFolder = root.resolve(mapInfo.windowsPath());
-        Path roundsFolder = root.resolve(mapInfo.roundsPath());
+        FolderPaths paths = new FolderPaths(mapDirectory, mapInfo);
 
-        FileUtils.deleteRecursivelyIfExists(roomsFolder);
-        FileUtils.deleteRecursivelyIfExists(doorsFolder);
-        FileUtils.deleteRecursivelyIfExists(shopsFolder);
-        FileUtils.deleteRecursivelyIfExists(windowsFolder);
-        FileUtils.deleteRecursivelyIfExists(roundsFolder);
+        FileUtils.deleteRecursivelyIfExists(paths.rooms);
+        FileUtils.deleteRecursivelyIfExists(paths.doors);
+        FileUtils.deleteRecursivelyIfExists(paths.shops);
+        FileUtils.deleteRecursivelyIfExists(paths.windows);
+        FileUtils.deleteRecursivelyIfExists(paths.rounds);
 
-        Files.createDirectories(roomsFolder);
-        Files.createDirectories(doorsFolder);
-        Files.createDirectories(shopsFolder);
-        Files.createDirectories(windowsFolder);
-        Files.createDirectories(roundsFolder);
+        Files.createDirectories(paths.rooms);
+        Files.createDirectories(paths.doors);
+        Files.createDirectories(paths.shops);
+        Files.createDirectories(paths.windows);
+        Files.createDirectories(paths.rounds);
 
         for(RoomInfo room : data.rooms()) {
-            ConfigBridges.write(roomsFolder.resolve(room.id().value() + MAP_DATA_EXTENSION), MapProcessors
+            ConfigBridges.write(paths.rooms.resolve(room.id().value() + MAP_DATA_EXTENSION), MapProcessors
                             .roomInfo().elementFromData(room), codec);
         }
 
         int i = 0;
         for(DoorInfo door : data.doors()) {
-            ConfigBridges.write(doorsFolder.resolve("door_" + i + MAP_DATA_EXTENSION), MapProcessors.doorInfo()
+            ConfigBridges.write(paths.doors.resolve("door_" + i + MAP_DATA_EXTENSION), MapProcessors.doorInfo()
                     .elementFromData(door), codec);
             i++;
         }
 
         for(ShopInfo shop : data.shops()) {
-            ConfigBridges.write(shopsFolder.resolve(shop.id().value()), MapProcessors.shopInfo().elementFromData(shop),
+            ConfigBridges.write(paths.shops.resolve(shop.id().value()), MapProcessors.shopInfo().elementFromData(shop),
                     codec);
         }
 
         int j = 0;
         for(WindowInfo window : data.windows()) {
-            ConfigBridges.write(windowsFolder.resolve(window.room().value() + "_window_" + j), MapProcessors
-                            .windowInfo().elementFromData(window), codec);
+            ConfigBridges.write(paths.windows.resolve(window.room().value() + "_window_" + j +
+                    MAP_DATA_EXTENSION), MapProcessors.windowInfo().elementFromData(window), codec);
             j++;
         }
 
         for(RoundInfo round : data.rounds()) {
-            ConfigBridges.write(roundsFolder.resolve("round_" + round.round()), MapProcessors.roundInfo()
-                    .elementFromData(round), codec);
+            ConfigBridges.write(paths.rounds.resolve("round_" + round.round() + MAP_DATA_EXTENSION),
+                    MapProcessors.roundInfo().elementFromData(round), codec);
         }
     }
 }
