@@ -40,7 +40,7 @@ public interface MapeditorSession {
 
     void setCurrent(@NotNull Key id);
 
-    void reloadMaps();
+    void loadMapsFromDisk();
 
     void saveMaps();
 }

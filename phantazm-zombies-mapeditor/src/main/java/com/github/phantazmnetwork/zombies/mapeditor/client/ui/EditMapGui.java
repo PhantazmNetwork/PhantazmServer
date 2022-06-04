@@ -23,13 +23,12 @@ public class EditMapGui extends LightweightGuiDescription {
         root.setSize(200, 150);
         root.setInsets(Insets.ROOT_PANEL);
 
-        Vec3I originVector = session.getFirstSelection();
         MapInfo info = map.info();
 
         WText mapNameText = new WText(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_CREATING_MAP, info.id()
                 .value()));
-        WText origin = new WText(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ORIGIN,
-                formatVector(originVector)));
+        WText origin = new WText(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ORIGIN, formatVector(info
+                .origin())));
         WText mapDisplayNameText = new WText(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_NAME));
         WText mapDisplayItemText = new WText(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_ITEM_NBT));
         WTextField displayNameBox = new WTextField();
@@ -54,9 +53,8 @@ public class EditMapGui extends LightweightGuiDescription {
         save.setOnClick(() -> {
             Key id = info.id();
             ZombiesMap newMap = new ZombiesMap(new MapInfo(id, displayNameBox.getText(), displayItemNBTBox.getText(),
-                    session.getFirstSelection(), info.roomsPath(), info.doorsPath(), info.shopsPath(), info
-                    .windowsPath(), info.roundsPath()), map.rooms(), map.doors(), map.shops(), map.windows(), map
-                    .rounds());
+                    info.origin(), info.roomsPath(), info.doorsPath(), info.shopsPath(), info.windowsPath(), info
+                    .roundsPath()), map.rooms(), map.doors(), map.shops(), map.windows(), map.rounds());
             session.removeMap(id);
             session.addMap(id, newMap);
             session.setCurrent(id);

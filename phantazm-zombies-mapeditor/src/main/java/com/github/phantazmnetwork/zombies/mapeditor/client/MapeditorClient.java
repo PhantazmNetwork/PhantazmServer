@@ -39,8 +39,9 @@ public class MapeditorClient implements ClientModInitializer {
 
         MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, new FilesystemMapLoader(
                 defaultMapDirectory, tomlCodec), defaultMapDirectory);
-        UseBlockCallback.EVENT.register(mapeditorSession::handleBlockUse);
+        mapeditorSession.loadMapsFromDisk();
 
+        UseBlockCallback.EVENT.register(mapeditorSession::handleBlockUse);
 
         KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(TranslationKeys
                 .KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, TranslationKeys.CATEGORY_MAPEDITOR_ALL));

@@ -17,15 +17,22 @@ public final class RenderUtils {
 
         int i = 0;
         for(RegionInfo info : regions) {
-            Vec3I origin = info.origin();
-            Vec3I lengths = info.lengths();
-
-            boundsArray[i] = new Vec3d(origin.getX() - ObjectRenderer.EPSILON, origin.getY() - ObjectRenderer
-                    .EPSILON, origin.getZ() - ObjectRenderer.EPSILON);
-            boundsArray[i + 1] = new Vec3d(lengths.getX() + ObjectRenderer.DOUBLE_EPSILON, lengths.getY() +
-                    ObjectRenderer.DOUBLE_EPSILON, lengths.getZ() + ObjectRenderer.DOUBLE_EPSILON);
+            arrayFromRegion(info, boundsArray, i);
             i += 2;
         }
+
+        return boundsArray;
+    }
+
+    public static Vec3d @NotNull [] arrayFromRegion(@NotNull RegionInfo info, Vec3d @NotNull [] boundsArray,
+                                                    int offset) {
+        Vec3I origin = info.origin();
+        Vec3I lengths = info.lengths();
+
+        boundsArray[offset] = new Vec3d(origin.getX() - ObjectRenderer.EPSILON, origin.getY() - ObjectRenderer
+                .EPSILON, origin.getZ() - ObjectRenderer.EPSILON);
+        boundsArray[offset + 1] = new Vec3d(lengths.getX() + ObjectRenderer.DOUBLE_EPSILON, lengths.getY() +
+                ObjectRenderer.DOUBLE_EPSILON, lengths.getZ() + ObjectRenderer.DOUBLE_EPSILON);
 
         return boundsArray;
     }

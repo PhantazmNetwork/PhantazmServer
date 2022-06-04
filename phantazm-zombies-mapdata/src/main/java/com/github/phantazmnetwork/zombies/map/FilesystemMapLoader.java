@@ -22,8 +22,8 @@ public class FilesystemMapLoader implements MapLoader {
 
     private static final String MAP_DATA_EXTENSION = ".mapconfig";
     private static final String MAP_INFO_NAME = "info" + MAP_DATA_EXTENSION;
-    private static final BiPredicate<Path, BasicFileAttributes> CONFIG_PREDICATE = (path, attributes) -> attributes
-            .isRegularFile() && path.toString().endsWith(MAP_DATA_EXTENSION);
+    private static final BiPredicate<Path, BasicFileAttributes> CONFIG_PREDICATE = (path, attr) -> attr.isRegularFile()
+            && path.getFileName().toString().endsWith(MAP_DATA_EXTENSION);
 
     private final Path root;
     private final ConfigCodec codec;
@@ -35,13 +35,13 @@ public class FilesystemMapLoader implements MapLoader {
 
     @Override
     public @NotNull ZombiesMap load(@NotNull String mapName) throws IOException {
-        Path mapFolder = FileUtils.findFirstOrThrow(root, (path, basicFileAttributes) -> basicFileAttributes
-                .isDirectory() && path.endsWith(mapName), () -> "Unable to find map folder for " + mapName);
+        Path mapDirectory = FileUtils.findFirstOrThrow(root, (path, attr) -> attr.isDirectory() && path
+                .endsWith(mapName), () -> "Unable to find map folder for " + mapName);
 
-        Path mapInfoFile = mapFolder.resolve(MAP_INFO_NAME);
+        Path mapInfoFile = mapDirectory.resolve(MAP_INFO_NAME);
 
         MapInfo mapInfo = ConfigBridges.read(mapInfoFile, codec, MapProcessors.mapInfo());
-        FolderPaths paths = new FolderPaths(mapFolder, mapInfo);
+        FolderPaths paths = new FolderPaths(mapDirectory, mapInfo);
         List<RoomInfo> rooms = new ArrayList<>();
         List<DoorInfo> doors = new ArrayList<>();
         List<ShopInfo> shops = new ArrayList<>();
@@ -65,9 +65,7 @@ public class FilesystemMapLoader implements MapLoader {
 
         rounds.sort(Comparator.comparingInt(RoundInfo::round));
 
-        return new ZombiesMap(mapInfo, Collections.unmodifiableList(rooms), Collections.unmodifiableList(doors),
-                Collections.unmodifiableList(shops), Collections.unmodifiableList(windows), Collections
-                .unmodifiableList(rounds));
+        return new ZombiesMap(mapInfo, rooms, doors, shops, windows, rounds);
     }
 
     @Override
@@ -76,6 +74,9 @@ public class FilesystemMapLoader implements MapLoader {
         Files.createDirectories(mapDirectory);
 
         MapInfo mapInfo = data.info();
+        ConfigBridges.write(mapDirectory.resolve(MAP_INFO_NAME), MapProcessors.mapInfo().elementFromData(mapInfo),
+                codec);
+
         FolderPaths paths = new FolderPaths(mapDirectory, mapInfo);
 
         FileUtils.deleteRecursivelyIfExists(paths.rooms);

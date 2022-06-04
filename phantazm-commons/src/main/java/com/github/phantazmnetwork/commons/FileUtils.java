@@ -18,7 +18,7 @@ public final class FileUtils {
             BasicFileAttributes> predicate, @NotNull Supplier<? extends String> messageSupplier)
             throws IOException {
         Path target;
-        try(Stream<Path> pathStream = Files.find(root, 0, predicate, FileVisitOption.FOLLOW_LINKS)) {
+        try(Stream<Path> pathStream = Files.find(root, 1, predicate, FileVisitOption.FOLLOW_LINKS)) {
             target = pathStream.findFirst().orElseThrow(() -> new IOException(messageSupplier.get()));
         }
 
@@ -27,7 +27,7 @@ public final class FileUtils {
 
     public static void forEachFileMatching(@NotNull Path root, @NotNull BiPredicate<Path,
             BasicFileAttributes> predicate, @NotNull IOConsumer<? super Path> consumer) throws IOException {
-        try(Stream<Path> stream = Files.find(root, 0, predicate, FileVisitOption.FOLLOW_LINKS)) {
+        try(Stream<Path> stream = Files.find(root, 1, predicate, FileVisitOption.FOLLOW_LINKS)) {
             for(Path path : (Iterable<? extends Path>) (stream::iterator)) {
                 consumer.accept(path);
             }
