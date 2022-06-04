@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
+import com.github.phantazmnetwork.zombies.map.FilesystemMapLoader;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorScreen;
@@ -28,7 +29,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class MapeditorClient implements ClientModInitializer {
-
     @Override
     public void onInitializeClient() {
         ObjectRenderer renderer = new Renderer();
@@ -37,8 +37,10 @@ public class MapeditorClient implements ClientModInitializer {
 
         Events.registerEventHandlerClass(renderer);
 
-        MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, defaultMapDirectory, tomlCodec);
+        MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, new FilesystemMapLoader(
+                defaultMapDirectory, tomlCodec), defaultMapDirectory);
         UseBlockCallback.EVENT.register(mapeditorSession::handleBlockUse);
+
 
         KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(TranslationKeys
                 .KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, TranslationKeys.CATEGORY_MAPEDITOR_ALL));

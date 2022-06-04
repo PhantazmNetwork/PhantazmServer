@@ -1,7 +1,9 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
+import com.github.phantazmnetwork.commons.FileUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.zombies.map.MapLoader;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
@@ -15,15 +17,24 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class BasicMapeditorSession implements MapeditorSession {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicMapeditorSession.class);
+
     private static final Color SELECTION_COLOR = new Color(0, 255, 0, 128);
     private static final Color CURSOR_COLOR = Color.RED;
     private static final Color OUTLINE_COLOR = Color.BLACK;
@@ -34,8 +45,8 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Key CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_cursor");
 
     private final ObjectRenderer renderer;
-    private final Path mapDirectory;
-    private final ConfigCodec mapCodec;
+    private final Path mapFolder;
+    private final MapLoader loader;
     private boolean enabled;
 
     private Vec3i firstSelected;
@@ -45,19 +56,17 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     private final Map<Key, ZombiesMap> maps;
 
-    public BasicMapeditorSession(@NotNull ObjectRenderer renderer, @NotNull Path mapDirectory,
-                                 @NotNull ConfigCodec mapCodec) {
+    public BasicMapeditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
+        this.mapFolder = Objects.requireNonNull(mapFolder, "mapFolder");
         this.maps = new HashMap<>();
-        this.mapDirectory = Objects.requireNonNull(mapDirectory, "mapDirectory");
-        this.mapCodec = Objects.requireNonNull(mapCodec, "mapCodec");
+        this.loader = Objects.requireNonNull(loader, "loader");
     }
 
     @Override
     public @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
                                                 @NotNull BlockHitResult blockHitResult) {
-        if(!enabled || !player.getInventory().getMainHandStack().getItem().equals(Items
-                .STICK)) {
+        if(!enabled || !player.getInventory().getMainHandStack().getItem().equals(Items.STICK)) {
             return ActionResult.PASS;
         }
 
@@ -179,7 +188,37 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     @Override
     public void reloadMaps() {
+        try {
+            Map<Key, ZombiesMap> newMaps = loadMaps();
+            this.maps.clear();
+            this.maps.putAll(newMaps);
+        }
+        catch (IOException e) {
+            LOGGER.warn("IOException when loading maps", e);
+        }
+    }
 
+    @Override
+    public void saveMaps() {
+        for(ZombiesMap map : maps.values()) {
+            try {
+                loader.save(map);
+            }
+            catch (IOException e) {
+                LOGGER.warn("Error when trying to save map " + map.info().id());
+            }
+        }
+    }
+
+    private Map<Key, ZombiesMap> loadMaps() throws IOException {
+        Map<Key, ZombiesMap> newMaps = new HashMap<>();
+        FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory(), mapFolder -> {
+            String name = mapFolder.getFileName().toString();
+            ZombiesMap map = loader.load(name);
+            newMaps.put(map.info().id(), map);
+        });
+
+        return newMaps;
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {

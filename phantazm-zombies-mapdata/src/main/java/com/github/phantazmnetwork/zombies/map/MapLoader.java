@@ -7,5 +7,5 @@ import java.io.IOException;
 public interface MapLoader {
     @NotNull ZombiesMap load(@NotNull String mapName) throws IOException;
 
-    void save(@NotNull ZombiesMap data, @NotNull String mapName) throws IOException;
+    void save(@NotNull ZombiesMap data) throws IOException;
 }

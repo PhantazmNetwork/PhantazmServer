@@ -16,7 +16,8 @@ public final class ConfigProcessorUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static <TType> @NotNull ConfigProcessor<List<TType>> newListProcessor(@NotNull ConfigProcessor<TType> processor) {
+    public static <TType> @NotNull ConfigProcessor<List<TType>> newListProcessor(
+            @NotNull ConfigProcessor<TType> elementProcessor) {
         return new ConfigProcessor<>() {
             @Override
             public List<TType> dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -27,7 +28,7 @@ public final class ConfigProcessorUtils {
                 ConfigList list = element.asList();
                 List<TType> elements = new ArrayList<>(list.size());
                 for(ConfigElement object : list) {
-                    elements.add(processor.dataFromElement(object));
+                    elements.add(elementProcessor.dataFromElement(object));
                 }
 
                 return Collections.unmodifiableList(elements);
@@ -37,7 +38,7 @@ public final class ConfigProcessorUtils {
             public @NotNull ConfigElement elementFromData(List<TType> elements) throws ConfigProcessException {
                 ConfigList list = new ArrayConfigList();
                 for(TType element : elements) {
-                    list.add(processor.elementFromData(element));
+                    list.add(elementProcessor.elementFromData(element));
                 }
 
                 return list;
