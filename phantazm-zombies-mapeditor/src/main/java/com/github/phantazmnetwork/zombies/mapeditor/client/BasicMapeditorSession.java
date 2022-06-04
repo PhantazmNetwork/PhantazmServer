@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
+import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -16,6 +17,8 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -31,6 +34,8 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Key CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_cursor");
 
     private final ObjectRenderer renderer;
+    private final Path mapDirectory;
+    private final ConfigCodec mapCodec;
     private boolean enabled;
 
     private Vec3i firstSelected;
@@ -40,9 +45,12 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     private final Map<Key, ZombiesMap> maps;
 
-    public BasicMapeditorSession(@NotNull ObjectRenderer renderer) {
+    public BasicMapeditorSession(@NotNull ObjectRenderer renderer, @NotNull Path mapDirectory,
+                                 @NotNull ConfigCodec mapCodec) {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
         this.maps = new HashMap<>();
+        this.mapDirectory = Objects.requireNonNull(mapDirectory, "mapDirectory");
+        this.mapCodec = Objects.requireNonNull(mapCodec, "mapCodec");
     }
 
     @Override
@@ -130,6 +138,8 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     @Override
     public void addMap(@NotNull Key id, @NotNull ZombiesMap map) {
+        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(map, "map");
         if(maps.containsKey(id)) {
             throw new IllegalArgumentException("A map with id " + id + " already exists");
         }
@@ -138,8 +148,23 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
+    public boolean containsMap(@NotNull Key id) {
+        Objects.requireNonNull(id, "id");
+        return maps.containsKey(id);
+    }
+
+    @Override
     public void removeMap(@NotNull Key id) {
         maps.remove(id);
+
+        if(currentMap != null && currentMap.info().id().equals(id)) {
+            currentMap = null;
+        }
+    }
+
+    @Override
+    public @NotNull Map<Key, ZombiesMap> mapView() {
+        return Collections.unmodifiableMap(maps);
     }
 
     @Override
@@ -150,6 +175,11 @@ public class BasicMapeditorSession implements MapeditorSession {
         }
 
         this.currentMap = newCurrent;
+    }
+
+    @Override
+    public void reloadMaps() {
+
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {

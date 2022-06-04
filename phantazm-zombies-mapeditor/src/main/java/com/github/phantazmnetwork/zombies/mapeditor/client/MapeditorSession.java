@@ -10,6 +10,8 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public interface MapeditorSession {
     @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
                                          @NotNull BlockHitResult blockHitResult);
@@ -30,7 +32,13 @@ public interface MapeditorSession {
 
     void addMap(@NotNull Key id, @NotNull ZombiesMap map);
 
+    boolean containsMap(@NotNull Key id);
+
     void removeMap(@NotNull Key id);
 
+    @NotNull Map<Key, ZombiesMap> mapView();
+
     void setCurrent(@NotNull Key id);
+
+    void reloadMaps();
 }

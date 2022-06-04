@@ -3,6 +3,8 @@ package com.github.phantazmnetwork.zombies.mapeditor.client;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorScreen;
+import com.github.steanky.ethylene.codec.toml.TomlCodec;
+import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import me.x150.renderer.event.EventListener;
 import me.x150.renderer.event.EventType;
 import me.x150.renderer.event.Events;
@@ -13,6 +15,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.key.Key;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -21,6 +24,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.nio.file.Path;
 import java.util.*;
 
 public class MapeditorClient implements ClientModInitializer {
@@ -28,18 +32,25 @@ public class MapeditorClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ObjectRenderer renderer = new Renderer();
+        ConfigCodec tomlCodec = new TomlCodec();
+        Path defaultMapDirectory = FabricLoader.getInstance().getConfigDir().resolve("mapeditor");
+
         Events.registerEventHandlerClass(renderer);
 
-        MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer);
+        MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, defaultMapDirectory, tomlCodec);
         UseBlockCallback.EVENT.register(mapeditorSession::handleBlockUse);
 
-        KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, TranslationKeys
-                .CATEGORY_MAPEDITOR_ALL));
+        KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(TranslationKeys
+                .KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, TranslationKeys.CATEGORY_MAPEDITOR_ALL));
+        KeyBinding newObject = KeyBindingHelper.registerKeyBinding(new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE,
+                InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N, TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if(keyBinding.wasPressed()) {
+            if(mapeditorBinding.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new MapeditorScreen(new MainGui(mapeditorSession)));
+            }
+            else if(newObject.wasPressed()) {
+
             }
         });
     }

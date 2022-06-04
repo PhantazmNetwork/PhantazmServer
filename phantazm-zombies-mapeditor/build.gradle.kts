@@ -1,7 +1,8 @@
 plugins {
     id("phantazm.java-library-conventions")
 
-    // this IntelliJ error is a false-positive, just ignore it: https://youtrack.jetbrains.com/issue/KTIJ-19369/False-positive-can-t-be-called-in-this-context-by-implicit-recei
+    // this IntelliJ error is a false-positive, just ignore it:
+    // https://youtrack.jetbrains.com/issue/KTIJ-19369/False-positive-can-t-be-called-in-this-context-by-implicit-recei
     @Suppress("UnstableApiUsage")
     alias(libs.plugins.fabric.loom)
 }
@@ -28,6 +29,8 @@ dependencies {
 
     implementation(project(":phantazm-commons"))
     implementation(project(":phantazm-zombies-mapdata"))
+
+    implementation(libs.ethylene.toml)
 }
 
 tasks.processResources {
