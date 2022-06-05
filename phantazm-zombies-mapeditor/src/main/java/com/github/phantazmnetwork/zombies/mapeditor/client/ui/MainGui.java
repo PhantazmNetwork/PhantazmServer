@@ -42,7 +42,6 @@ public class MainGui extends LightweightGuiDescription {
         WTextField mapNameBox = new WTextField();
         WText feedback = new WText(new LiteralText(StringUtils.EMPTY));
         WButton newMap = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_MAP));
-        WButton editMap = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_EDIT_MAP));
         WButton deleteMap = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DELETE_MAP));
         WListPanel<Key, WButton> listPanel = new WListPanel<>(mapNames, WButton::new, (k, w) -> {
             w.setLabel(new LiteralText(k.value()));
@@ -63,7 +62,6 @@ public class MainGui extends LightweightGuiDescription {
         root.add(mapNameBox, 0, 2, 6, 1);
         root.add(feedback, 0, 3, 6, 1);
         root.add(newMap, 0, 4, 6, 1);
-        root.add(editMap, 0, 5, 6, 1);
         root.add(deleteMap, 0, 6, 6, 1);
         root.add(listPanel, 6, 2, 6, 6);
         root.add(displaySettings, 0, 7, 3, 1);
@@ -108,23 +106,20 @@ public class MainGui extends LightweightGuiDescription {
                 return;
             }
 
-            ZombiesMap newMapData = new ZombiesMap(new MapInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            session.addMap(mapKey, new ZombiesMap(new MapInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+            session.setCurrent(mapKey);
 
-            MinecraftClient.getInstance().setScreen(new MapeditorScreen(new EditMapGui(session, newMapData)));
-        });
-
-        editMap.setOnClick(() -> {
-            if(hasMap(session, feedback)) {
-                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new EditMapGui(session, session.getMap())));
-            }
+            ScreenUtils.closeCurrentScreen();
+            MinecraftClient.getInstance().setScreen(new MapeditorScreen(new MainGui(session)));
         });
 
         deleteMap.setOnClick(() -> {
             if(hasMap(session, feedback)) {
                 MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ConfirmationGui(new TranslatableText(
-                        TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> session.removeMap(session.getMap().info()
-                        .id()))));
+                        TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> {
+                    session.removeMap(session.getMap().info().id());
+                })));
             }
         });
 

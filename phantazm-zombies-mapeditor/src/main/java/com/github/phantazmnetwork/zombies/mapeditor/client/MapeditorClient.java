@@ -123,14 +123,16 @@ public class MapeditorClient implements ClientModInitializer {
         public void removeObject(@NotNull Key key) {
             Objects.requireNonNull(key, "key");
 
-            renderObjects.remove(key);
-            baked = null;
+            if(renderObjects.remove(key) != null) {
+                baked = null;
+            }
         }
 
         @Override
         public void removeIf(@NotNull Predicate<? super Key> keyPredicate) {
-            renderObjects.keySet().removeIf(keyPredicate);
-            baked = null;
+            if(renderObjects.keySet().removeIf(keyPredicate)) {
+                baked = null;
+            }
         }
 
         @Override
@@ -145,24 +147,23 @@ public class MapeditorClient implements ClientModInitializer {
         public void putObject(@NotNull RenderObject value) {
             Objects.requireNonNull(value, "value");
 
-            renderObjects.put(value.key, value);
+            if(renderObjects.containsKey(value.key)) {
+                if(baked != null) {
+                    //to avoid having to re-bake, we can find the object in the render array and update in-place
+                    int i = 0;
+                    for(RenderObject object : baked) {
+                        if(object.key.equals(value.key)) {
+                            baked[i] = value;
+                            return;
+                        }
 
-            if(baked != null) {
-                if(baked.length == 0) {
-                    baked = null;
-                    return;
-                }
-
-                int i = 0;
-                for(RenderObject object : baked) {
-                    if(object.key.equals(value.key)) {
-                        baked[i] = value;
-                        return;
+                        i++;
                     }
-
-                    i++;
                 }
             }
+
+            renderObjects.put(value.key, value);
+            baked = null;
         }
 
         @Override

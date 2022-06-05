@@ -38,7 +38,7 @@ public class FilesystemMapLoader implements MapLoader {
         String preferredExtension = codec.getPreferredExtension();
         this.configPredicate = (path, attr) -> attr.isRegularFile() && path.getFileName().toString()
                 .endsWith(preferredExtension);
-        this.mapInfoName = "info" + preferredExtension;
+        this.mapInfoName = "info." + preferredExtension;
     }
 
     @Override
@@ -82,8 +82,7 @@ public class FilesystemMapLoader implements MapLoader {
         Files.createDirectories(mapDirectory);
 
         MapInfo mapInfo = data.info();
-        ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapInfo),
-                codec);
+        ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapInfo), codec);
 
         FolderPaths paths = new FolderPaths(mapDirectory);
 
@@ -100,32 +99,32 @@ public class FilesystemMapLoader implements MapLoader {
         Files.createDirectories(paths.rounds);
 
         for(RoomInfo room : data.rooms()) {
-            ConfigBridges.write(paths.rooms.resolve(room.id().value() + codec.getPreferredExtension()),
+            ConfigBridges.write(paths.rooms.resolve(room.id().value() + "." + codec.getPreferredExtension()),
                     MapProcessors.roomInfo().elementFromData(room), codec);
         }
 
         int i = 0;
         for(DoorInfo door : data.doors()) {
-            ConfigBridges.write(paths.doors.resolve("door_" + i + codec.getPreferredExtension()), MapProcessors
-                    .doorInfo().elementFromData(door), codec);
+            ConfigBridges.write(paths.doors.resolve("door_" + i + "." + codec.getPreferredExtension()),
+                    MapProcessors.doorInfo().elementFromData(door), codec);
             i++;
         }
 
         for(ShopInfo shop : data.shops()) {
-            ConfigBridges.write(paths.shops.resolve(shop.id().value()), MapProcessors.shopInfo().elementFromData(shop),
-                    codec);
+            ConfigBridges.write(paths.shops.resolve(shop.id().value() + "." + codec.getPreferredExtension()),
+                    MapProcessors.shopInfo().elementFromData(shop), codec);
         }
 
         int j = 0;
         for(WindowInfo window : data.windows()) {
-            ConfigBridges.write(paths.windows.resolve(window.room().value() + "_window_" + j +
+            ConfigBridges.write(paths.windows.resolve(window.room().value() + "_window_" + j + "." +
                     codec.getPreferredExtension()), MapProcessors.windowInfo().elementFromData(window), codec);
             j++;
         }
 
         for(RoundInfo round : data.rounds()) {
-            ConfigBridges.write(paths.rounds.resolve("round_" + round.round() + codec.getPreferredExtension()),
-                    MapProcessors.roundInfo().elementFromData(round), codec);
+            ConfigBridges.write(paths.rounds.resolve("round_" + round.round() + "." + codec
+                    .getPreferredExtension()), MapProcessors.roundInfo().elementFromData(round), codec);
         }
     }
 }

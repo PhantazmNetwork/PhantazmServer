@@ -34,7 +34,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color SELECTION_COLOR = new Color(0, 255, 0, 128);
     private static final Color CURSOR_COLOR = Color.RED;
     private static final Color OUTLINE_COLOR = Color.BLACK;
-    private static final Color ORIGIN_COLOR = new Color(0, 0, 255, 128);
+    private static final Color ORIGIN_COLOR = new Color(0, 0, 255, 32);
     private static final Color ROOM_COLOR = new Color(255, 255, 255, 64);
     private static final Color WINDOW_COLOR = new Color(0, 251, 201, 64);
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
@@ -235,7 +235,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     @SuppressWarnings("PatternValidation")
     private void updateMapRender(ZombiesMap map) {
         if(map == null) {
-            renderer.removeIf(key -> key.equals(CURSOR_KEY) || key.equals(OUTLINE_KEY) || key.equals(SELECTION_KEY));
+            renderer.removeIf(key -> !key.equals(CURSOR_KEY) || !key.equals(OUTLINE_KEY) || !key.equals(SELECTION_KEY));
             return;
         }
 
