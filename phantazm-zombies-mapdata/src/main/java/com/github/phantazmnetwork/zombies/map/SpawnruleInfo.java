@@ -5,4 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record SpawnruleInfo(@NotNull Key id, @NotNull List<Key> spawns, boolean isBlacklist) { }
+public record SpawnruleInfo(@NotNull Key id,
+                            @NotNull List<Key> spawns,
+                            boolean isBlacklist) { }

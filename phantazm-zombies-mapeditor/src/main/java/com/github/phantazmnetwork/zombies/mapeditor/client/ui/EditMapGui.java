@@ -32,7 +32,7 @@ public class EditMapGui extends LightweightGuiDescription {
         WText mapDisplayNameText = new WText(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_NAME));
         WText mapDisplayItemText = new WText(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_ITEM_NBT));
         WTextField displayNameBox = new WTextField();
-        WTextField displayItemNBTBox = new WTextField();
+        WTextField displayItemTagBox = new WTextField();
         WButton save = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_SAVE));
 
         root.add(mapNameText, 0, 0, 10, 1);
@@ -40,19 +40,19 @@ public class EditMapGui extends LightweightGuiDescription {
         root.add(mapDisplayNameText, 7, 1, 7, 1);
         root.add(mapDisplayItemText, 7, 3, 7, 1);
         root.add(displayNameBox, 0, 1, 6, 1);
-        root.add(displayItemNBTBox, 0, 3, 6, 1);
+        root.add(displayItemTagBox, 0, 3, 6, 1);
         root.add(save, 0, 6, 5, 1);
 
         //configuration
         displayNameBox.setMaxLength(512);
-        displayNameBox.setText(info.displayName());
-        displayItemNBTBox.setMaxLength(65535);
-        displayItemNBTBox.setText(info.displayItemNBT());
+        displayNameBox.setText(info.displayName().toString());
+        displayItemTagBox.setMaxLength(65535);
+        displayItemTagBox.setText(info.displayItemTag());
 
         //events
         save.setOnClick(() -> {
             Key id = info.id();
-            ZombiesMap newMap = new ZombiesMap(new MapInfo(id, displayNameBox.getText(), displayItemNBTBox.getText(),
+            ZombiesMap newMap = new ZombiesMap(new MapInfo(id, displayNameBox.getText(), displayItemTagBox.getText(),
                     info.origin(), info.roomsPath(), info.doorsPath(), info.shopsPath(), info.windowsPath(), info
                     .roundsPath()), map.rooms(), map.doors(), map.shops(), map.windows(), map.rounds());
             session.removeMap(id);

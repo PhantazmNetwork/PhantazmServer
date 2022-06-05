@@ -108,11 +108,8 @@ public class MainGui extends LightweightGuiDescription {
                 return;
             }
 
-            ZombiesMap newMapData = new ZombiesMap(new MapInfo(mapKey, StringUtils.EMPTY, DEFAULT_ITEM_NBT, session
-                    .getFirstSelection(), MapProcessors.DEFAULT_ROOMS_PATH, MapProcessors.DEFAULT_DOORS_PATH,
-                    MapProcessors.DEFAULT_SHOPS_PATH, MapProcessors.DEFAULT_WINDOWS_PATH, MapProcessors
-                    .DEFAULT_ROUNDS_PATH), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                    new ArrayList<>());
+            ZombiesMap newMapData = new ZombiesMap(new MapInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
             MinecraftClient.getInstance().setScreen(new MapeditorScreen(new EditMapGui(session, newMapData)));
         });

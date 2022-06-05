@@ -13,17 +13,20 @@ import java.util.*;
 import java.util.function.BiPredicate;
 
 public class FilesystemMapLoader implements MapLoader {
+    private static final String ROOMS_PATH = "rooms";
+    private static final String DOORS_PATH = "doors";
+    private static final String SHOPS_PATH = "shops";
+    private static final String WINDOWS_PATH = "windows";
+    private static final String ROUNDS_PATH = "rounds";
+
     private record FolderPaths(Path rooms, Path doors, Path shops, Path windows, Path rounds) {
-        FolderPaths(Path root, MapInfo info) {
-            this(root.resolve(info.roomsPath()), root.resolve(info.doorsPath()), root.resolve(info.shopsPath()), root
-                    .resolve(info.windowsPath()), root.resolve(info.roundsPath()));
+        FolderPaths(Path root) {
+            this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH), root
+                    .resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH));
         }
     }
-
-    private static final String MAP_DATA_EXTENSION = ".mapconfig";
-    private static final String MAP_INFO_NAME = "info" + MAP_DATA_EXTENSION;
-    private static final BiPredicate<Path, BasicFileAttributes> CONFIG_PREDICATE = (path, attr) -> attr.isRegularFile()
-            && path.getFileName().toString().endsWith(MAP_DATA_EXTENSION);
+    private final String mapInfoName;
+    private final BiPredicate<Path, BasicFileAttributes> configPredicate;
 
     private final Path root;
     private final ConfigCodec codec;
@@ -31,6 +34,11 @@ public class FilesystemMapLoader implements MapLoader {
     public FilesystemMapLoader(@NotNull Path root, @NotNull ConfigCodec codec) {
         this.root = Objects.requireNonNull(root, "root");
         this.codec = Objects.requireNonNull(codec, "codec");
+
+        String preferredExtension = codec.getPreferredExtension();
+        this.configPredicate = (path, attr) -> attr.isRegularFile() && path.getFileName().toString()
+                .endsWith(preferredExtension);
+        this.mapInfoName = "info" + preferredExtension;
     }
 
     @Override
@@ -38,29 +46,29 @@ public class FilesystemMapLoader implements MapLoader {
         Path mapDirectory = FileUtils.findFirstOrThrow(root, (path, attr) -> attr.isDirectory() && path
                 .endsWith(mapName), () -> "Unable to find map folder for " + mapName);
 
-        Path mapInfoFile = mapDirectory.resolve(MAP_INFO_NAME);
+        Path mapInfoFile = mapDirectory.resolve(mapInfoName);
 
         MapInfo mapInfo = ConfigBridges.read(mapInfoFile, codec, MapProcessors.mapInfo());
-        FolderPaths paths = new FolderPaths(mapDirectory, mapInfo);
+        FolderPaths paths = new FolderPaths(mapDirectory);
         List<RoomInfo> rooms = new ArrayList<>();
         List<DoorInfo> doors = new ArrayList<>();
         List<ShopInfo> shops = new ArrayList<>();
         List<WindowInfo> windows = new ArrayList<>();
         List<RoundInfo> rounds = new ArrayList<>();
 
-        FileUtils.forEachFileMatching(paths.rooms, CONFIG_PREDICATE, file -> rooms.add(ConfigBridges.read(file, codec,
+        FileUtils.forEachFileMatching(paths.rooms, configPredicate, file -> rooms.add(ConfigBridges.read(file, codec,
                 MapProcessors.roomInfo())));
 
-        FileUtils.forEachFileMatching(paths.doors, CONFIG_PREDICATE, file -> doors.add(ConfigBridges.read(file, codec,
+        FileUtils.forEachFileMatching(paths.doors, configPredicate, file -> doors.add(ConfigBridges.read(file, codec,
                 MapProcessors.doorInfo())));
 
-        FileUtils.forEachFileMatching(paths.shops, CONFIG_PREDICATE, file -> shops.add(ConfigBridges.read(file, codec,
+        FileUtils.forEachFileMatching(paths.shops, configPredicate, file -> shops.add(ConfigBridges.read(file, codec,
                 MapProcessors.shopInfo())));
 
-        FileUtils.forEachFileMatching(paths.windows, CONFIG_PREDICATE, file -> windows.add(ConfigBridges.read(file,
+        FileUtils.forEachFileMatching(paths.windows, configPredicate, file -> windows.add(ConfigBridges.read(file,
                 codec, MapProcessors.windowInfo())));
 
-        FileUtils.forEachFileMatching(paths.rounds, CONFIG_PREDICATE, file -> rounds.add(ConfigBridges.read(file, codec,
+        FileUtils.forEachFileMatching(paths.rounds, configPredicate, file -> rounds.add(ConfigBridges.read(file, codec,
                 MapProcessors.roundInfo())));
 
         rounds.sort(Comparator.comparingInt(RoundInfo::round));
@@ -74,10 +82,10 @@ public class FilesystemMapLoader implements MapLoader {
         Files.createDirectories(mapDirectory);
 
         MapInfo mapInfo = data.info();
-        ConfigBridges.write(mapDirectory.resolve(MAP_INFO_NAME), MapProcessors.mapInfo().elementFromData(mapInfo),
+        ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapInfo),
                 codec);
 
-        FolderPaths paths = new FolderPaths(mapDirectory, mapInfo);
+        FolderPaths paths = new FolderPaths(mapDirectory);
 
         FileUtils.deleteRecursivelyIfExists(paths.rooms);
         FileUtils.deleteRecursivelyIfExists(paths.doors);
@@ -92,14 +100,14 @@ public class FilesystemMapLoader implements MapLoader {
         Files.createDirectories(paths.rounds);
 
         for(RoomInfo room : data.rooms()) {
-            ConfigBridges.write(paths.rooms.resolve(room.id().value() + MAP_DATA_EXTENSION), MapProcessors
-                            .roomInfo().elementFromData(room), codec);
+            ConfigBridges.write(paths.rooms.resolve(room.id().value() + codec.getPreferredExtension()),
+                    MapProcessors.roomInfo().elementFromData(room), codec);
         }
 
         int i = 0;
         for(DoorInfo door : data.doors()) {
-            ConfigBridges.write(paths.doors.resolve("door_" + i + MAP_DATA_EXTENSION), MapProcessors.doorInfo()
-                    .elementFromData(door), codec);
+            ConfigBridges.write(paths.doors.resolve("door_" + i + codec.getPreferredExtension()), MapProcessors
+                    .doorInfo().elementFromData(door), codec);
             i++;
         }
 
@@ -111,12 +119,12 @@ public class FilesystemMapLoader implements MapLoader {
         int j = 0;
         for(WindowInfo window : data.windows()) {
             ConfigBridges.write(paths.windows.resolve(window.room().value() + "_window_" + j +
-                    MAP_DATA_EXTENSION), MapProcessors.windowInfo().elementFromData(window), codec);
+                    codec.getPreferredExtension()), MapProcessors.windowInfo().elementFromData(window), codec);
             j++;
         }
 
         for(RoundInfo round : data.rounds()) {
-            ConfigBridges.write(paths.rounds.resolve("round_" + round.round() + MAP_DATA_EXTENSION),
+            ConfigBridges.write(paths.rounds.resolve("round_" + round.round() + codec.getPreferredExtension()),
                     MapProcessors.roundInfo().elementFromData(round), codec);
         }
     }

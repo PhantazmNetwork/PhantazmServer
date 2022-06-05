@@ -4,4 +4,5 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record RoundInfo(int round, @NotNull List<WaveInfo> waves) { }
+public record RoundInfo(int round,
+                        @NotNull List<WaveInfo> waves) { }

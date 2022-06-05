@@ -3,10 +3,11 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
     maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
 }
 
 dependencies {
     implementation(project(":phantazm-commons"))
-    api(libs.adventure.key)
+    api(libs.adventure.text.minimessage)
 }

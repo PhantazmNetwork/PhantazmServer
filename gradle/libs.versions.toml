@@ -1,15 +1,15 @@
 metadata.format.version = "1.1"
 
 [versions]
-adventure = "4.10.1"
+adventure = "4.11.0"
 
-ethylene = "0.5.2"
+ethylene = "0.6.0"
 
 junit-jupiter = "5.9.0-M1"
 
 
 [libraries]
-adventure-key = { module = "net.kyori:adventure-key", version.ref = "adventure" }
+adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.0" }
 
@@ -32,18 +32,14 @@ minecraft = { module = "com.mojang:minecraft", version = "1.18.2" }
 
 minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "486a27c506" }
 
-miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
-
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
 
 renderer = { module = "com.github.0x3C50:Renderer", version = "51f5a72f86" }
 
 yarn-mappings = { module = "net.fabricmc:yarn", version = "1.18.2+build.3" }
 
-
 [bundles]
 fabric = ["fabric-api", "fabric-loader"]
-
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version = "0.12-SNAPSHOT" }
