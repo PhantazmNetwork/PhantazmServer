@@ -1,12 +1,13 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.render;
 
-import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface ObjectRenderer {
     float EPSILON = 1E-3F;
@@ -49,6 +50,7 @@ public interface ObjectRenderer {
             if (obj instanceof RenderObject other) {
                 return key.equals(other.key);
             }
+
             return false;
         }
 
@@ -59,6 +61,10 @@ public interface ObjectRenderer {
     }
 
     void removeObject(@NotNull Key key);
+
+    void removeIf(@NotNull Predicate<? super Key> keyPredicate);
+
+    void forEach(@NotNull Consumer<? super RenderObject> object);
 
     void putObject(@NotNull RenderObject value);
 

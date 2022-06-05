@@ -27,6 +27,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class MapeditorClient implements ClientModInitializer {
     @Override
@@ -123,6 +125,20 @@ public class MapeditorClient implements ClientModInitializer {
 
             renderObjects.remove(key);
             baked = null;
+        }
+
+        @Override
+        public void removeIf(@NotNull Predicate<? super Key> keyPredicate) {
+            renderObjects.keySet().removeIf(keyPredicate);
+            baked = null;
+        }
+
+        @Override
+        public void forEach(@NotNull Consumer<? super RenderObject> object) {
+            Objects.requireNonNull(object, "object");
+            for(RenderObject sample : values) {
+                object.accept(sample);
+            }
         }
 
         @Override

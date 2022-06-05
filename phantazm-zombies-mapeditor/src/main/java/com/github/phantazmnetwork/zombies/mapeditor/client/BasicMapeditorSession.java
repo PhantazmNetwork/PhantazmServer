@@ -3,10 +3,7 @@ package com.github.phantazmnetwork.zombies.mapeditor.client;
 import com.github.phantazmnetwork.commons.FileUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.map.MapLoader;
-import com.github.phantazmnetwork.zombies.map.RegionInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
 import net.kyori.adventure.key.Key;
@@ -38,6 +35,8 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color CURSOR_COLOR = Color.RED;
     private static final Color OUTLINE_COLOR = Color.BLACK;
     private static final Color ORIGIN_COLOR = new Color(0, 0, 255, 128);
+    private static final Color ROOM_COLOR = new Color(255, 255, 255, 64);
+    private static final Color WINDOW_COLOR = new Color(0, 251, 201, 64);
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
     private static final Key SELECTION_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection");
@@ -169,6 +168,7 @@ public class BasicMapeditorSession implements MapeditorSession {
 
         if(currentMap != null && currentMap.info().id().equals(id)) {
             currentMap = null;
+            updateMapRender(null);
         }
     }
 
@@ -232,9 +232,10 @@ public class BasicMapeditorSession implements MapeditorSession {
         return newMaps;
     }
 
+    @SuppressWarnings("PatternValidation")
     private void updateMapRender(ZombiesMap map) {
         if(map == null) {
-            renderer.removeObject(ORIGIN_KEY);
+            renderer.removeIf(key -> key.equals(CURSOR_KEY) || key.equals(OUTLINE_KEY) || key.equals(SELECTION_KEY));
             return;
         }
 
@@ -242,6 +243,12 @@ public class BasicMapeditorSession implements MapeditorSession {
         renderer.putObject(new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR,
                 true, true, RenderUtils.arrayFromRegion(new RegionInfo(info.origin(),
                 Vec3I.of(1, 1, 1)), new Vec3d[2], 0)));
+
+        for(RoomInfo room : map.rooms()) {
+            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
+                    .value()), ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true,
+                    false, RenderUtils.arrayFromRegions(room.regions())));
+        }
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {

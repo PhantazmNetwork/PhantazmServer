@@ -25,7 +25,6 @@ public final class MapProcessors {
     private static final String SHOPS_PATH = "shopsPath";
     private static final String WINDOWS_PATH = "windowsPath";
     private static final String ROUNDS_PATH = "roundsPath";
-    private static final String VERSION = "version";
     private static final String REGIONS = "regions";
     private static final String COST = "cost";
     private static final String OPENS_TO = "opensTo";
@@ -44,6 +43,10 @@ public final class MapProcessors {
     private static final String WAVES = "waves";
     private static final String SPAWNS = "spawns";
     private static final String AMOUNT = "amount";
+    private static final String IS_BLACKLIST = "isBlacklist";
+    private static final String POSITION = "position";
+    private static final String SPAWN_RULE = "spawnRule";
+    private static final String TYPE = "type";
 
     public static final String DEFAULT_ROOMS_PATH = "rooms";
     public static final String DEFAULT_DOORS_PATH = "doors";
@@ -69,7 +72,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(MapInfo mapConfig) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(4);
             node.put(ID, key.elementFromData(mapConfig.id()));
             node.put(DISPLAY_NAME, new ConfigPrimitive(mapConfig.displayName()));
             node.put(DISPLAY_ITEM, new ConfigPrimitive(mapConfig.displayItemNBT()));
@@ -100,7 +103,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(RoomInfo roomInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(3);
             node.put(ID, key.elementFromData(roomInfo.id()));
             node.put(DISPLAY_NAME, new ConfigPrimitive(roomInfo.displayName()));
             node.put(REGIONS, regionInfoList.elementFromData(roomInfo.regions()));
@@ -119,7 +122,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(3);
             node.put(COST, new ConfigPrimitive(doorInfo.cost()));
             node.put(OPENS_TO, keyList.elementFromData(doorInfo.opensTo()));
             node.put(REGIONS, regionInfoList.elementFromData(doorInfo.doorRegions()));
@@ -138,7 +141,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(2);
             node.put(ID, key.elementFromData(shopInfo.id()));
             node.put(TRIGGER_LOCATION, VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
             return node;
@@ -163,7 +166,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull WindowInfo windowData) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(9);
             node.put(ROOM_NAME, key.elementFromData(windowData.room()));
             node.put(FRAME_REGION, regionInfo.elementFromData(windowData.frameRegion()));
             node.put(INTERNAL_REGIONS, regionInfoList.elementFromData(windowData.internalRegions()));
@@ -187,7 +190,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(RegionInfo regionInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(2);
             node.put(ORIGIN, VectorConfigProcessors.vec3I().elementFromData(regionInfo.origin()));
             node.put(LENGTHS, VectorConfigProcessors.vec3I().elementFromData(regionInfo.lengths()));
             return node;
@@ -204,7 +207,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(RoundInfo roundInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(2);
             node.put(ROUND, new ConfigPrimitive(roundInfo.round()));
             node.put(WAVES, waveInfoList.elementFromData(roundInfo.waves()));
             return node;
@@ -220,7 +223,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(WaveInfo waveInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(1);
             node.put(SPAWNS, spawnInfoList.elementFromData(waveInfo.spawns()));
             return node;
         }
@@ -236,10 +239,69 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(SpawnInfo spawnInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(2);
             node.put(ID, key.elementFromData(spawnInfo.id()));
             node.put(AMOUNT, new ConfigPrimitive(spawnInfo.amount()));
             return node;
+        }
+    };
+
+    private static final ConfigProcessor<SpawnpointInfo> spawnpointInfo = new ConfigProcessor<>() {
+        @Override
+        public SpawnpointInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Vec3I position = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(POSITION));
+            Key spawnRule = key.dataFromElement(element.getElement(SPAWN_RULE));
+            SpawnType spawnType = MapProcessors.spawnType.dataFromElement(element.getElement(TYPE));
+            return new SpawnpointInfo(position, spawnRule, spawnType);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(SpawnpointInfo spawnpointInfo) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(3);
+            node.put(POSITION, VectorConfigProcessors.vec3I().elementFromData(spawnpointInfo.position()));
+            node.put(SPAWN_RULE, key.elementFromData(spawnpointInfo.spawnRule()));
+            node.put(TYPE, spawnType.elementFromData(spawnpointInfo.type()));
+            return node;
+        }
+    };
+
+    private static final ConfigProcessor<SpawnruleInfo> spawnruleInfo = new ConfigProcessor<>() {
+        @Override
+        public SpawnruleInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Key id = key.dataFromElement(element.getElement(ID));
+            List<Key> spawns = keyList.dataFromElement(element.getElement(SPAWNS));
+            boolean isBlacklist = element.getBooleanOrThrow(IS_BLACKLIST);
+            return new SpawnruleInfo(id, spawns, isBlacklist);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(SpawnruleInfo spawnruleInfo) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(3);
+            node.put(ID, key.elementFromData(spawnruleInfo.id()));
+            node.put(SPAWNS, keyList.elementFromData(spawnruleInfo.spawns()));
+            node.put(IS_BLACKLIST, new ConfigPrimitive(spawnruleInfo.isBlacklist()));
+            return node;
+        }
+    };
+
+    private static final ConfigProcessor<SpawnType> spawnType = new ConfigProcessor<>() {
+        @Override
+        public SpawnType dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            if(!element.isString()) {
+                throw new ConfigProcessException("Element is not a string");
+            }
+
+            try {
+                return SpawnType.valueOf(element.asString());
+            }
+            catch (IllegalArgumentException e) {
+                throw new ConfigProcessException(e);
+            }
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(SpawnType spawnType) {
+            return new ConfigPrimitive(spawnType.toString());
         }
     };
 
@@ -295,6 +357,18 @@ public final class MapProcessors {
 
     public static @NotNull ConfigProcessor<WindowInfo> windowInfo() {
         return windowInfo;
+    }
+
+    public static @NotNull ConfigProcessor<SpawnpointInfo> spawnpointInfo() {
+        return spawnpointInfo;
+    }
+
+    public static @NotNull ConfigProcessor<SpawnruleInfo> spawnruleInfo() {
+        return spawnruleInfo;
+    }
+
+    public static @NotNull ConfigProcessor<SpawnType> spawnType() {
+        return spawnType;
     }
 
     public static @NotNull ConfigProcessor<RegionInfo> regionInfo() {
