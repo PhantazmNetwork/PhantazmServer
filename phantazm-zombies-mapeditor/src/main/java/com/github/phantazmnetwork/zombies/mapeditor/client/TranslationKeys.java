@@ -9,6 +9,7 @@ public final class TranslationKeys {
     public static final String GUI_MAPEDITOR_ENABLED = "gui.mapeditor.enabled";
     public static final String GUI_MAPEDITOR_DISABLED = "gui.mapeditor.disabled";
     public static final String GUI_MAPEDITOR_NEW_MAP = "gui.mapeditor.new_map";
+    public static final String GUI_MAPEDITOR_NEW_ROOM = "gui.mapeditor.new_room";
     public static final String GUI_MAPEDITOR_CREATING_MAP = "gui.mapeditor.creating_map";
     public static final String GUI_MAPEDITOR_SAVE = "gui.mapeditor.save";
     public static final String GUI_MAPEDITOR_EDIT_MAP = "gui.mapeditor.edit_map";
@@ -26,4 +27,5 @@ public final class TranslationKeys {
     public static final String GUI_MAPEDITOR_NO = "gui.mapeditor.no";
     public static final String GUI_MAPEDITOR_DELETE_MAP_QUERY = "gui.mapeditor.delete_map_query";
     public static final String GUI_MAPEDITOR_DISPLAY_SETTINGS = "gui.mapeditor.display_settings";
+    public static final String GUI_MAPEDITOR_ADD = "gui.mapeditor.add";
 }

@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.zombies.map.MapProcessors;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.Identifiers;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
+import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
@@ -22,8 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainGui extends LightweightGuiDescription {
-    private static final String DEFAULT_ITEM_NBT = "{id:\"stone\",Count:1,tag:{Name:\"New Map\"}}";
-
     @SuppressWarnings("PatternValidation")
     public MainGui(@NotNull MapeditorSession session) {
         WGridPanel root = new WGridPanel();
@@ -62,25 +61,17 @@ public class MainGui extends LightweightGuiDescription {
         root.add(mapNameBox, 0, 2, 6, 1);
         root.add(feedback, 0, 3, 6, 1);
         root.add(newMap, 0, 4, 6, 1);
-        root.add(deleteMap, 0, 6, 6, 1);
+        root.add(deleteMap, 0, 5, 6, 1);
         root.add(listPanel, 6, 2, 6, 6);
-        root.add(displaySettings, 0, 7, 3, 1);
-        root.add(save, 3, 7, 3, 1);
+        root.add(displaySettings, 0, 6, 6, 1);
+        root.add(save, 0, 7, 6, 1);
 
         //generic configuration
         updateMapeditorToggle(mapeditorToggle, session.isEnabled());
         updateCurrentMap(session, currentMap);
 
         mapNameBox.setMaxLength(512);
-        mapNameBox.setTextPredicate(string -> {
-            try {
-                Key.key(Namespaces.PHANTAZM, string);
-                return true;
-            }
-            catch (InvalidKeyException ignored) {
-                return false;
-            }
-        });
+        mapNameBox.setTextPredicate(TextPredicates.validKeyPredicate());
 
         //events
         mapeditorToggle.setOnToggle(toggled -> {
@@ -117,9 +108,8 @@ public class MainGui extends LightweightGuiDescription {
         deleteMap.setOnClick(() -> {
             if(hasMap(session, feedback)) {
                 MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ConfirmationGui(new TranslatableText(
-                        TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> {
-                    session.removeMap(session.getMap().info().id());
-                })));
+                        TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> session.removeMap(session.getMap().info()
+                        .id()))));
             }
         });
 

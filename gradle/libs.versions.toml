@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.11.0"
 
-ethylene = "0.6.0"
+ethylene = "0.7.0"
 
 junit-jupiter = "5.9.0-M1"
 
@@ -14,6 +14,8 @@ adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.0" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
+ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }
+ethylene-json = { module = "com.github.steanky:ethylene-json", version.ref = "ethylene" }
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
 
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.53.0+1.18.2" }

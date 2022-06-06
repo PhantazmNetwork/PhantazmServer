@@ -31,12 +31,12 @@ public final class ConfigProcessorUtils {
                     elements.add(elementProcessor.dataFromElement(object));
                 }
 
-                return Collections.unmodifiableList(elements);
+                return elements;
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(List<TType> elements) throws ConfigProcessException {
-                ConfigList list = new ArrayConfigList();
+                ConfigList list = new ArrayConfigList(elements.size());
                 for(TType element : elements) {
                     list.add(elementProcessor.elementFromData(element));
                 }

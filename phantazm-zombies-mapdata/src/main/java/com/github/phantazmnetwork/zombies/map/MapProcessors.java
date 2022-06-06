@@ -131,8 +131,9 @@ public final class MapProcessors {
         @Override
         public RoomInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = key.dataFromElement(element.getElement(ID));
-            Component displayName = MiniMessage.miniMessage().deserialize(element.getStringOrThrow(DISPLAY_NAME));
-            List<RegionInfo> regions = regionInfoList.dataFromElement(element.getListOrThrow(REGIONS));
+            Component displayName = component.dataFromElement(element.getElement(DISPLAY_NAME));
+            List<RegionInfo> regions = regionInfoList.dataFromElement(element.getElement(REGIONS));
+            System.out.println("dataFromElement: " + element);
             return new RoomInfo(id, displayName, regions);
         }
 
@@ -140,8 +141,9 @@ public final class MapProcessors {
         public @NotNull ConfigElement elementFromData(RoomInfo roomInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(3);
             node.put(ID, key.elementFromData(roomInfo.id()));
-            node.put(DISPLAY_NAME, new ConfigPrimitive(roomInfo.displayName()));
+            node.put(DISPLAY_NAME, component.elementFromData(roomInfo.displayName()));
             node.put(REGIONS, regionInfoList.elementFromData(roomInfo.regions()));
+            System.out.println("elementFromData: " + node);
             return node;
         }
     };
@@ -188,21 +190,18 @@ public final class MapProcessors {
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key room = key.dataFromElement(element.getElement(ROOM_NAME));
             RegionInfo frameRegion = regionInfo.dataFromElement(element.getElement(FRAME_REGION));
-            List<RegionInfo> internalRegions = regionInfoList.dataFromElement(element.getListOrThrow(INTERNAL_REGIONS));
             Key repairSound = key.dataFromElement(element.getElement(REPAIR_SOUND));
             Key repairAllSound = key.dataFromElement(element.getElement(REPAIR_ALL_SOUND));
             Key breakSound = key.dataFromElement(element.getElement(BREAK_SOUND));
             Key breakAllSound = key.dataFromElement(element.getElement(BREAK_ALL_SOUND));
-            return new WindowInfo(room, frameRegion, internalRegions, repairSound, repairAllSound, breakSound,
-                    breakAllSound);
+            return new WindowInfo(room, frameRegion, repairSound, repairAllSound, breakSound, breakAllSound);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull WindowInfo windowData) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(9);
+            ConfigNode node = new LinkedConfigNode(6);
             node.put(ROOM_NAME, key.elementFromData(windowData.room()));
             node.put(FRAME_REGION, regionInfo.elementFromData(windowData.frameRegion()));
-            node.put(INTERNAL_REGIONS, regionInfoList.elementFromData(windowData.internalRegions()));
             node.put(REPAIR_SOUND, key.elementFromData(windowData.repairSound()));
             node.put(REPAIR_ALL_SOUND, key.elementFromData(windowData.repairAllSound()));
             node.put(BREAK_SOUND, key.elementFromData(windowData.breakSound()));
@@ -369,8 +368,9 @@ public final class MapProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(Component component) throws ConfigProcessException {
-            return new ConfigPrimitive(MiniMessage.miniMessage().serialize(component));
+        public @NotNull ConfigElement elementFromData(Component component) {
+            String string = MiniMessage.miniMessage().serialize(component);
+            return new ConfigPrimitive(string);
         }
     };
 
@@ -388,7 +388,7 @@ public final class MapProcessors {
             .newListProcessor(spawnInfo);
 
     private static final ConfigProcessor<List<Integer>> integerList = ConfigProcessorUtils.newListProcessor(
-            new ConfigProcessor<Integer>() {
+            new ConfigProcessor<>() {
         @Override
         public Integer dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             try {
@@ -400,7 +400,7 @@ public final class MapProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(Integer integer) throws ConfigProcessException {
+        public @NotNull ConfigElement elementFromData(Integer integer) {
             return new ConfigPrimitive(integer);
         }
     });

@@ -36,4 +36,19 @@ public final class RenderUtils {
 
         return boundsArray;
     }
+
+    public static @NotNull RegionInfo regionFromPoints(@NotNull Vec3I first, @NotNull Vec3I second) {
+        System.out.println("First: " + first);
+        System.out.println("Second: " + second);
+
+        int x = Math.min(first.getX(), second.getX());
+        int y = Math.min(first.getY(), second.getY());
+        int z = Math.min(first.getZ(), second.getZ());
+
+        int dX = Math.abs(first.getX() - second.getX()) + 1;
+        int dY = Math.abs(first.getY() - second.getY()) + 1;
+        int dZ = Math.abs(first.getZ() - second.getZ()) + 1;
+
+        return new RegionInfo(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
+    }
 }

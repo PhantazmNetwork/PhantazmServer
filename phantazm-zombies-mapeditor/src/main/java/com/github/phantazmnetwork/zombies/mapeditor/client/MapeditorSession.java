@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.zombies.map.RoomInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
@@ -9,6 +10,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -43,4 +45,10 @@ public interface MapeditorSession {
     void loadMapsFromDisk();
 
     void saveMaps();
+
+    void setLastRoom(@Nullable RoomInfo room);
+
+    void refreshRooms();
+
+    @Nullable RoomInfo lastRoom();
 }

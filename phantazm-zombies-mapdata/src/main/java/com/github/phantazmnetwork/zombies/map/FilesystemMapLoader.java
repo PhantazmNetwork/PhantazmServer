@@ -100,7 +100,7 @@ public class FilesystemMapLoader implements MapLoader {
 
         for(RoomInfo room : data.rooms()) {
             ConfigBridges.write(paths.rooms.resolve(room.id().value() + "." + codec.getPreferredExtension()),
-                    MapProcessors.roomInfo().elementFromData(room), codec);
+                    codec, MapProcessors.roomInfo(), room);
         }
 
         int i = 0;

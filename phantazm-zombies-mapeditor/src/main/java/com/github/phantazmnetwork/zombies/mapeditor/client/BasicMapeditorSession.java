@@ -16,6 +16,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,8 @@ public class BasicMapeditorSession implements MapeditorSession {
     private final ObjectRenderer renderer;
     private final Path mapFolder;
     private final MapLoader loader;
+
+    private RoomInfo lastRoom;
     private boolean enabled;
 
     private Vec3i firstSelected;
@@ -72,23 +75,23 @@ public class BasicMapeditorSession implements MapeditorSession {
 
         if(hand == Hand.MAIN_HAND) {
             Vec3i first = firstSelected;
-            Vec3i second = blockHitResult.getBlockPos();
+            Vec3i newSelection = blockHitResult.getBlockPos();
 
             if(first == null) {
-                firstSelected = second;
-                secondSelected = second;
-                updateSelectionRender(second, ONE, second);
+                firstSelected = newSelection;
+                secondSelected = newSelection;
+                updateSelectionRender(newSelection, ONE, newSelection);
             }
             else {
-                Vec3i min = new Vec3i(Math.min(second.getX(), first.getX()), Math.min(second.getY(), first.getY()), Math
-                        .min(second.getZ(), first.getZ()));
-                Vec3i max = new Vec3i(Math.max(second.getX(), first.getX()), Math.max(second.getY(), first.getY()), Math
-                        .max(second.getZ(), first.getZ()));
+                Vec3i min = new Vec3i(Math.min(newSelection.getX(), first.getX()), Math.min(newSelection.getY(), first
+                        .getY()), Math.min(newSelection.getZ(), first.getZ()));
+                Vec3i max = new Vec3i(Math.max(newSelection.getX(), first.getX()), Math.max(newSelection.getY(), first
+                        .getY()), Math.max(newSelection.getZ(), first.getZ()));
 
-                firstSelected = second;
                 secondSelected = firstSelected;
+                firstSelected = newSelection;
 
-                updateSelectionRender(min, max.subtract(min).add(1, 1, 1), second);
+                updateSelectionRender(min, max.subtract(min).add(1, 1, 1), newSelection);
             }
 
             return ActionResult.CONSUME;
@@ -168,7 +171,7 @@ public class BasicMapeditorSession implements MapeditorSession {
 
         if(currentMap != null && currentMap.info().id().equals(id)) {
             currentMap = null;
-            updateMapRender(null);
+            updateMapRender();
         }
     }
 
@@ -185,7 +188,7 @@ public class BasicMapeditorSession implements MapeditorSession {
         }
 
         this.currentMap = newCurrent;
-        updateMapRender(currentMap);
+        updateMapRender();
     }
 
     @Override
@@ -212,6 +215,30 @@ public class BasicMapeditorSession implements MapeditorSession {
         }
     }
 
+    @Override
+    public void setLastRoom(@Nullable RoomInfo room) {
+        this.lastRoom = room;
+    }
+
+    @Override
+    @SuppressWarnings("PatternValidation")
+    public void refreshRooms() {
+        if(currentMap == null) {
+            throw new IllegalStateException("No map");
+        }
+
+        for(RoomInfo room : currentMap.rooms()) {
+            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
+                    .value()), ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true,
+                    false, RenderUtils.arrayFromRegions(room.regions())));
+        }
+    }
+
+    @Override
+    public @Nullable RoomInfo lastRoom() {
+        return lastRoom;
+    }
+
     private Map<Key, ZombiesMap> loadMaps() throws IOException {
         Map<Key, ZombiesMap> newMaps = new HashMap<>();
         FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory() && !path.equals(mapFolder),
@@ -232,23 +259,18 @@ public class BasicMapeditorSession implements MapeditorSession {
         return newMaps;
     }
 
-    @SuppressWarnings("PatternValidation")
-    private void updateMapRender(ZombiesMap map) {
-        if(map == null) {
+    private void updateMapRender() {
+        if(currentMap == null) {
             renderer.removeIf(key -> !key.equals(CURSOR_KEY) || !key.equals(OUTLINE_KEY) || !key.equals(SELECTION_KEY));
             return;
         }
 
-        MapInfo info = map.info();
+        MapInfo info = currentMap.info();
         renderer.putObject(new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR,
                 true, true, RenderUtils.arrayFromRegion(new RegionInfo(info.origin(),
                 Vec3I.of(1, 1, 1)), new Vec3d[2], 0)));
 
-        for(RoomInfo room : map.rooms()) {
-            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
-                    .value()), ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true,
-                    false, RenderUtils.arrayFromRegions(room.regions())));
-        }
+        refreshRooms();
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {

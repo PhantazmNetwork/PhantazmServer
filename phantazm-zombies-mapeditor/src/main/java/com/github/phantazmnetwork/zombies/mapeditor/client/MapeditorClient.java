@@ -4,6 +4,9 @@ import com.github.phantazmnetwork.zombies.map.FilesystemMapLoader;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorScreen;
+import com.github.phantazmnetwork.zombies.mapeditor.client.ui.NewObjectGui;
+import com.github.steanky.ethylene.codec.hjson.HjsonCodec;
+import com.github.steanky.ethylene.codec.json.JsonCodec;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import me.x150.renderer.event.EventListener;
@@ -19,9 +22,11 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.key.Key;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -34,13 +39,13 @@ public class MapeditorClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ObjectRenderer renderer = new Renderer();
-        ConfigCodec tomlCodec = new TomlCodec();
+        ConfigCodec codec = new TomlCodec();
         Path defaultMapDirectory = FabricLoader.getInstance().getConfigDir().resolve("mapeditor");
 
         Events.registerEventHandlerClass(renderer);
 
         MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, new FilesystemMapLoader(
-                defaultMapDirectory, tomlCodec), defaultMapDirectory);
+                defaultMapDirectory, codec), defaultMapDirectory);
         mapeditorSession.loadMapsFromDisk();
 
         UseBlockCallback.EVENT.register(mapeditorSession::handleBlockUse);
@@ -55,7 +60,24 @@ public class MapeditorClient implements ClientModInitializer {
                 MinecraftClient.getInstance().setScreen(new MapeditorScreen(new MainGui(mapeditorSession)));
             }
             else if(newObject.wasPressed()) {
+                ClientPlayerEntity player = client.player;
+                if(player == null) {
+                    return;
+                }
 
+                if(!mapeditorSession.hasMap()) {
+                    player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP),
+                            true);
+                    return;
+                }
+
+                if(!mapeditorSession.hasSelection()) {
+                    player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION),
+                            true);
+                    return;
+                }
+
+                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewObjectGui(mapeditorSession)));
             }
         });
     }
