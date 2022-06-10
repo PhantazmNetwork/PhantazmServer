@@ -22,13 +22,14 @@ public final class MapProcessors {
     private static final String DISPLAY_NAME = "displayName";
     private static final String DISPLAY_ITEM_TAG = "displayItemTag";
     private static final String ORIGIN = "origin";
+    private static final String PITCH = "pitch";
+    private static final String YAW = "yaw";
     private static final String REGIONS = "regions";
     private static final String COST = "cost";
     private static final String OPENS_TO = "opensTo";
     private static final String TRIGGER_LOCATION = "triggerLocation";
     private static final String ROOM_NAME = "roomName";
     private static final String FRAME_REGION = "frameRegion";
-    private static final String INTERNAL_REGIONS = "internalRegions";
     private static final String REPAIR_SOUND = "repairSound";
     private static final String REPAIR_ALL_SOUND = "repairAllSound";
     private static final String BREAK_SOUND = "breakSound";
@@ -68,6 +69,8 @@ public final class MapProcessors {
         public MapInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = key.dataFromElement(element.getElement(ID));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(ORIGIN));
+            float pitch = element.getNumberOrThrow(PITCH).floatValue();
+            float yaw = element.getNumberOrThrow(YAW).floatValue();
             Component displayName = component.dataFromElement(element.getElement(DISPLAY_NAME));
             String displayItemTag = element.getStringOrThrow(DISPLAY_ITEM_TAG);
             List<Component> introMessages = componentList.dataFromElement(element.getElement(INTRO_MESSAGES));
@@ -90,7 +93,7 @@ public final class MapProcessors {
             int rollsPerChest = element.getNumberOrThrow(ROLLS_PER_CHEST).intValue();
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElement(MILESTONE_ROUNDS));
             List<Key> defaultEquipment = keyList.dataFromElement(element.getElement(DEFAULT_EQUIPMENT));
-            return new MapInfo(id, origin, displayName, displayItemTag, introMessages, scoreboardHeader,
+            return new MapInfo(id, origin, pitch, yaw, displayName, displayItemTag, introMessages, scoreboardHeader,
                     leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers, startingCoins,
                     repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius, canWallshoot,
                     perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
@@ -98,9 +101,11 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(MapInfo mapConfig) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(23);
+            ConfigNode node = new LinkedConfigNode(25);
             node.put(ID, key.elementFromData(mapConfig.id()));
             node.put(ORIGIN, VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
+            node.put(PITCH, new ConfigPrimitive(mapConfig.pitch()));
+            node.put(YAW, new ConfigPrimitive(mapConfig.yaw()));
             node.put(DISPLAY_NAME, component.elementFromData(mapConfig.displayName()));
             node.put(DISPLAY_ITEM_TAG, new ConfigPrimitive(mapConfig.displayItemTag()));
             node.put(INTRO_MESSAGES, componentList.elementFromData(mapConfig.introMessages()));

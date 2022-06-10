@@ -6,6 +6,9 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -230,7 +233,7 @@ public class BasicMapeditorSession implements MapeditorSession {
         for(RoomInfo room : currentMap.rooms()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
                     .value()), ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true,
-                    false, RenderUtils.arrayFromRegions(room.regions())));
+                    false, RenderUtils.arrayFromRegions(room.regions(), currentMap.info().origin())));
         }
     }
 
@@ -260,15 +263,16 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     private void updateMapRender() {
+        renderer.removeIf(key -> !key.equals(CURSOR_KEY) || !key.equals(OUTLINE_KEY) || !key.equals(SELECTION_KEY));
+
         if(currentMap == null) {
-            renderer.removeIf(key -> !key.equals(CURSOR_KEY) || !key.equals(OUTLINE_KEY) || !key.equals(SELECTION_KEY));
             return;
         }
 
         MapInfo info = currentMap.info();
         renderer.putObject(new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR,
                 true, true, RenderUtils.arrayFromRegion(new RegionInfo(info.origin(),
-                Vec3I.of(1, 1, 1)), new Vec3d[2], 0)));
+                Vec3I.of(1, 1, 1)), Vec3I.ORIGIN, new Vec3d[2], 0)));
 
         refreshRooms();
     }

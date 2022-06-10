@@ -17,6 +17,7 @@ ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "et
 ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }
 ethylene-json = { module = "com.github.steanky:ethylene-json", version.ref = "ethylene" }
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
+ethylene-yaml = { module = "com.github.steanky:ethylene-yaml", version.ref = "ethylene" }
 
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.53.0+1.18.2" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version = "0.14.6" }

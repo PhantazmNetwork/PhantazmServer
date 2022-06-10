@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.ethylene.toml)
     implementation(libs.ethylene.json)
     implementation(libs.ethylene.hjson)
+    implementation(libs.ethylene.yaml)
 }
 
 tasks.processResources {

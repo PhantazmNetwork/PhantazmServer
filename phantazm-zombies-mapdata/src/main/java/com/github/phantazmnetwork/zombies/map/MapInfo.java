@@ -10,6 +10,8 @@ import java.util.List;
 
 public record MapInfo(@NotNull Key id,
                       @NotNull Vec3I origin,
+                      float pitch,
+                      float yaw,
                       @NotNull Component displayName,
                       @NotNull String displayItemTag,
                       @NotNull List<Component> introMessages,
@@ -35,6 +37,8 @@ public record MapInfo(@NotNull Key id,
         this(
                 id,
                 origin,
+                0,
+                0,
                 Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"New Map\"}}",
                 new ArrayList<>(),

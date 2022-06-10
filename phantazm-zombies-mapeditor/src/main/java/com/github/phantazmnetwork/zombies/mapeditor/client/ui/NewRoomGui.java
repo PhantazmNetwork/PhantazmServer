@@ -42,19 +42,21 @@ public class NewRoomGui extends LightweightGuiDescription {
         root.add(roomId, 0, 0, 5, 1);
         root.add(add, 0, 2, 5, 1);
 
-        RegionInfo selected = RenderUtils.regionFromPoints(session.getFirstSelection(), session.getSecondSelection());
+        ZombiesMap currentMap = session.getMap();
+        RegionInfo selected = RenderUtils.regionFromPoints(session.getFirstSelection(), session.getSecondSelection(),
+                currentMap.info().origin());
         add.setOnClick(() -> {
             String value = roomId.getText();
             if(value.isEmpty()) {
                 return;
             }
 
-            ZombiesMap currentMap = session.getMap();
             Key roomKey = Key.key(Namespaces.PHANTAZM, roomId.getText());
             for(RoomInfo roomInfo : currentMap.rooms()) {
                 if(roomInfo.id().equals(roomKey)) {
                     roomInfo.regions().add(selected);
                     session.refreshRooms();
+                    session.setLastRoom(roomInfo);
                     ScreenUtils.closeCurrentScreen();
                     return;
                 }
@@ -62,9 +64,10 @@ public class NewRoomGui extends LightweightGuiDescription {
 
             ArrayList<RegionInfo> bounds = new ArrayList<>();
             bounds.add(selected);
-            System.out.println("Creating room with region " + selected);
 
-            currentMap.rooms().add(new RoomInfo(roomKey, Component.text(roomKey.value()), bounds));
+            RoomInfo newRoom = new RoomInfo(roomKey, Component.text(roomKey.value()), bounds);
+            session.setLastRoom(newRoom);
+            currentMap.rooms().add(newRoom);
             session.refreshRooms();
             ScreenUtils.closeCurrentScreen();
         });
