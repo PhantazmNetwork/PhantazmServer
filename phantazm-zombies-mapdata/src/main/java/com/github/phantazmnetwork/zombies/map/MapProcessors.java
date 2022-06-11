@@ -169,7 +169,7 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(4);
-            node.put(ID, new ConfigPrimitive(doorInfo.id()));
+            node.put(ID, key.elementFromData(doorInfo.id()));
             node.put(COST, new ConfigPrimitive(doorInfo.cost()));
             node.put(OPENS_TO, keyList.elementFromData(doorInfo.opensTo()));
             node.put(REGIONS, regionInfoList.elementFromData(doorInfo.regions()));
