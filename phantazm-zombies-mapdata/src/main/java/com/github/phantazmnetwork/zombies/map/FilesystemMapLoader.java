@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.FileUtils;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import org.jetbrains.annotations.NotNull;
@@ -18,11 +19,15 @@ public class FilesystemMapLoader implements MapLoader {
     private static final String SHOPS_PATH = "shops";
     private static final String WINDOWS_PATH = "windows";
     private static final String ROUNDS_PATH = "rounds";
+    private static final String SPAWNRULES_PATH = "spawnrules";
+    private static final String SPAWNPOINTS_PATH = "spawnpoints";
 
-    private record FolderPaths(Path rooms, Path doors, Path shops, Path windows, Path rounds) {
+    private record FolderPaths(Path rooms, Path doors, Path shops, Path windows, Path rounds, Path spawnrules,
+                               Path spawnpoints) {
         FolderPaths(Path root) {
             this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH), root
-                    .resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH));
+                    .resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH), root
+                    .resolve(SPAWNPOINTS_PATH));
         }
     }
     private final String mapInfoName;
@@ -55,6 +60,8 @@ public class FilesystemMapLoader implements MapLoader {
         List<ShopInfo> shops = new ArrayList<>();
         List<WindowInfo> windows = new ArrayList<>();
         List<RoundInfo> rounds = new ArrayList<>();
+        List<SpawnruleInfo> spawnrules = new ArrayList<>();
+        List<SpawnpointInfo> spawnpoints = new ArrayList<>();
 
         FileUtils.forEachFileMatching(paths.rooms, configPredicate, file -> rooms.add(ConfigBridges.read(file, codec,
                 MapProcessors.roomInfo())));
@@ -71,9 +78,15 @@ public class FilesystemMapLoader implements MapLoader {
         FileUtils.forEachFileMatching(paths.rounds, configPredicate, file -> rounds.add(ConfigBridges.read(file, codec,
                 MapProcessors.roundInfo())));
 
+        FileUtils.forEachFileMatching(paths.spawnrules, configPredicate, file -> spawnrules.add(ConfigBridges.read(file,
+                codec, MapProcessors.spawnruleInfo())));
+
+        FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate, file -> spawnpoints.add(ConfigBridges
+                .read(file, codec, MapProcessors.spawnpointInfo())));
+
         rounds.sort(Comparator.comparingInt(RoundInfo::round));
 
-        return new ZombiesMap(mapInfo, rooms, doors, shops, windows, rounds);
+        return new ZombiesMap(mapInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints);
     }
 
     @Override
@@ -91,40 +104,60 @@ public class FilesystemMapLoader implements MapLoader {
         FileUtils.deleteRecursivelyIfExists(paths.shops);
         FileUtils.deleteRecursivelyIfExists(paths.windows);
         FileUtils.deleteRecursivelyIfExists(paths.rounds);
+        FileUtils.deleteRecursivelyIfExists(paths.spawnrules);
+        FileUtils.deleteRecursivelyIfExists(paths.spawnpoints);
 
         Files.createDirectories(paths.rooms);
         Files.createDirectories(paths.doors);
         Files.createDirectories(paths.shops);
         Files.createDirectories(paths.windows);
         Files.createDirectories(paths.rounds);
+        Files.createDirectories(paths.spawnrules);
+        Files.createDirectories(paths.spawnpoints);
+
+        String extension = "." + codec.getPreferredExtension();
 
         for(RoomInfo room : data.rooms()) {
-            ConfigBridges.write(paths.rooms.resolve(room.id().value() + "." + codec.getPreferredExtension()),
-                    codec, MapProcessors.roomInfo(), room);
+            ConfigBridges.write(paths.rooms.resolve(room.id().value() + extension), codec, MapProcessors
+                    .roomInfo(), room);
         }
 
         int i = 0;
         for(DoorInfo door : data.doors()) {
-            ConfigBridges.write(paths.doors.resolve("door_" + i + "." + codec.getPreferredExtension()),
-                    MapProcessors.doorInfo().elementFromData(door), codec);
+            ConfigBridges.write(paths.doors.resolve("door_" + i + extension), MapProcessors.doorInfo()
+                    .elementFromData(door), codec);
             i++;
         }
 
         for(ShopInfo shop : data.shops()) {
-            ConfigBridges.write(paths.shops.resolve(shop.id().value() + "." + codec.getPreferredExtension()),
-                    MapProcessors.shopInfo().elementFromData(shop), codec);
+            ConfigBridges.write(paths.shops.resolve(shop.id().value() + extension), MapProcessors.shopInfo()
+                    .elementFromData(shop), codec);
         }
 
         int j = 0;
         for(WindowInfo window : data.windows()) {
-            ConfigBridges.write(paths.windows.resolve(window.room().value() + "_window_" + j + "." +
-                    codec.getPreferredExtension()), MapProcessors.windowInfo().elementFromData(window), codec);
+            ConfigBridges.write(paths.windows.resolve(window.room().value() + "_window_" + j + extension),
+                    MapProcessors.windowInfo().elementFromData(window), codec);
             j++;
         }
 
         for(RoundInfo round : data.rounds()) {
-            ConfigBridges.write(paths.rounds.resolve("round_" + round.round() + "." + codec
-                    .getPreferredExtension()), MapProcessors.roundInfo().elementFromData(round), codec);
+            ConfigBridges.write(paths.rounds.resolve("round_" + round.round() + extension), MapProcessors
+                    .roundInfo().elementFromData(round), codec);
+        }
+
+        for(SpawnruleInfo spawnrule : data.spawnrules()) {
+            ConfigBridges.write(paths.spawnrules.resolve(spawnrule.id().value() + extension), MapProcessors
+                    .spawnruleInfo().elementFromData(spawnrule), codec);
+        }
+
+        int k = 0;
+        for(SpawnpointInfo spawnpoint : data.spawnpoints()) {
+            Vec3I position = spawnpoint.position();
+            String positionString = position.getX() + "_" + position.getY() + "_" + position.getZ();
+            ConfigBridges.write(paths.spawnpoints.resolve(positionString + "-" + k + extension), MapProcessors
+                    .spawnpointInfo().elementFromData(spawnpoint), codec);
+            k++;
         }
     }
 }

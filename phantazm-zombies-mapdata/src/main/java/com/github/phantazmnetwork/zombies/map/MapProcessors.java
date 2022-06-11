@@ -22,6 +22,7 @@ public final class MapProcessors {
     private static final String DISPLAY_NAME = "displayName";
     private static final String DISPLAY_ITEM_TAG = "displayItemTag";
     private static final String ORIGIN = "origin";
+    private static final String SPAWN = "spawn";
     private static final String PITCH = "pitch";
     private static final String YAW = "yaw";
     private static final String REGIONS = "regions";
@@ -69,6 +70,7 @@ public final class MapProcessors {
         public MapInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = key.dataFromElement(element.getElement(ID));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(ORIGIN));
+            Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(SPAWN));
             float pitch = element.getNumberOrThrow(PITCH).floatValue();
             float yaw = element.getNumberOrThrow(YAW).floatValue();
             Component displayName = component.dataFromElement(element.getElement(DISPLAY_NAME));
@@ -93,17 +95,18 @@ public final class MapProcessors {
             int rollsPerChest = element.getNumberOrThrow(ROLLS_PER_CHEST).intValue();
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElement(MILESTONE_ROUNDS));
             List<Key> defaultEquipment = keyList.dataFromElement(element.getElement(DEFAULT_EQUIPMENT));
-            return new MapInfo(id, origin, pitch, yaw, displayName, displayItemTag, introMessages, scoreboardHeader,
-                    leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers, startingCoins,
-                    repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius, canWallshoot,
-                    perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
+            return new MapInfo(id, origin, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
+                    scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
+                    startingCoins, repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius,
+                    canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(MapInfo mapConfig) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(25);
+            ConfigNode node = new LinkedConfigNode(26);
             node.put(ID, key.elementFromData(mapConfig.id()));
             node.put(ORIGIN, VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
+            node.put(SPAWN, VectorConfigProcessors.vec3I().elementFromData(mapConfig.spawn()));
             node.put(PITCH, new ConfigPrimitive(mapConfig.pitch()));
             node.put(YAW, new ConfigPrimitive(mapConfig.yaw()));
             node.put(DISPLAY_NAME, component.elementFromData(mapConfig.displayName()));

@@ -226,9 +226,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     @Override
     @SuppressWarnings("PatternValidation")
     public void refreshRooms() {
-        if(currentMap == null) {
-            throw new IllegalStateException("No map");
-        }
+        assertMap();
 
         for(RoomInfo room : currentMap.rooms()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
@@ -290,5 +288,11 @@ public class BasicMapeditorSession implements MapeditorSession {
                 OUTLINE_COLOR, true, false, startVec, dimensionsVec));
         renderer.putObject(new ObjectRenderer.RenderObject(CURSOR_KEY, ObjectRenderer.RenderType.OUTLINE, CURSOR_COLOR,
                 true, true, clickedVec.add(0.25, 0.25, 0.25), HALF));
+    }
+
+    private void assertMap() {
+        if(currentMap == null) {
+            throw new IllegalStateException("No map");
+        }
     }
 }

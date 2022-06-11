@@ -10,6 +10,7 @@ import java.util.List;
 
 public record MapInfo(@NotNull Key id,
                       @NotNull Vec3I origin,
+                      @NotNull Vec3I spawn,
                       float pitch,
                       float yaw,
                       @NotNull Component displayName,
@@ -36,6 +37,7 @@ public record MapInfo(@NotNull Key id,
     public MapInfo(@NotNull Key id, @NotNull Vec3I origin) {
         this(
                 id,
+                origin,
                 origin,
                 0,
                 0,

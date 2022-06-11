@@ -9,4 +9,6 @@ public record ZombiesMap(@NotNull MapInfo info,
                          @NotNull List<DoorInfo> doors,
                          @NotNull List<ShopInfo> shops,
                          @NotNull List<WindowInfo> windows,
-                         @NotNull List<RoundInfo> rounds) { }
+                         @NotNull List<RoundInfo> rounds,
+                         @NotNull List<SpawnruleInfo> spawnrules,
+                         @NotNull List<SpawnpointInfo> spawnpoints) { }
