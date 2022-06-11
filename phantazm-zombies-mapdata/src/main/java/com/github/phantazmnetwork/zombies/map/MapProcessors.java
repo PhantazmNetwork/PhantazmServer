@@ -68,17 +68,17 @@ public final class MapProcessors {
     private static final ConfigProcessor<MapInfo> mapInfo = new ConfigProcessor<>() {
         @Override
         public MapInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = key.dataFromElement(element.getElement(ID));
-            Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(ORIGIN));
-            Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(SPAWN));
+            Key id = key.dataFromElement(element.getElementOrThrow(ID));
+            Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow(ORIGIN));
+            Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow(SPAWN));
             float pitch = element.getNumberOrThrow(PITCH).floatValue();
             float yaw = element.getNumberOrThrow(YAW).floatValue();
-            Component displayName = component.dataFromElement(element.getElement(DISPLAY_NAME));
+            Component displayName = component.dataFromElement(element.getElementOrThrow(DISPLAY_NAME));
             String displayItemTag = element.getStringOrThrow(DISPLAY_ITEM_TAG);
-            List<Component> introMessages = componentList.dataFromElement(element.getElement(INTRO_MESSAGES));
-            Component scoreboardHeader = component.dataFromElement(element.getElement(SCOREBOARD_HEADER));
+            List<Component> introMessages = componentList.dataFromElement(element.getElementOrThrow(INTRO_MESSAGES));
+            Component scoreboardHeader = component.dataFromElement(element.getElementOrThrow(SCOREBOARD_HEADER));
             Vec3I leaderboardPosition = VectorConfigProcessors.vec3I().dataFromElement(element
-                    .getElement(LEADERBOARD_POSITION));
+                    .getElementOrThrow(LEADERBOARD_POSITION));
             int leaderboardLength = element.getNumberOrThrow(LEADERBOARD_LENGTH).intValue();
             int worldTime = element.getNumberOrThrow(WORLD_TIME).intValue();
             int maxPlayers = element.getNumberOrThrow(MAX_PLAYERS).intValue();
@@ -93,8 +93,8 @@ public final class MapProcessors {
             boolean perksLostOnDeath = element.getBooleanOrThrow(PERKS_LOST_ON_DEATH);
             int baseReviveTicks = element.getNumberOrThrow(BASE_REVIVE_TICKS).intValue();
             int rollsPerChest = element.getNumberOrThrow(ROLLS_PER_CHEST).intValue();
-            List<Integer> milestoneRounds = integerList.dataFromElement(element.getElement(MILESTONE_ROUNDS));
-            List<Key> defaultEquipment = keyList.dataFromElement(element.getElement(DEFAULT_EQUIPMENT));
+            List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow(MILESTONE_ROUNDS));
+            List<Key> defaultEquipment = keyList.dataFromElement(element.getElementOrThrow(DEFAULT_EQUIPMENT));
             return new MapInfo(id, origin, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius,
@@ -138,9 +138,9 @@ public final class MapProcessors {
     private static final ConfigProcessor<RoomInfo> roomInfo = new ConfigProcessor<>() {
         @Override
         public RoomInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = key.dataFromElement(element.getElement(ID));
-            Component displayName = component.dataFromElement(element.getElement(DISPLAY_NAME));
-            List<RegionInfo> regions = regionInfoList.dataFromElement(element.getElement(REGIONS));
+            Key id = key.dataFromElement(element.getElementOrThrow(ID));
+            Component displayName = component.dataFromElement(element.getElementOrThrow(DISPLAY_NAME));
+            List<RegionInfo> regions = regionInfoList.dataFromElement(element.getElementOrThrow(REGIONS));
             System.out.println("dataFromElement: " + element);
             return new RoomInfo(id, displayName, regions);
         }
@@ -159,18 +159,20 @@ public final class MapProcessors {
     private static final ConfigProcessor<DoorInfo> doorInfo = new ConfigProcessor<>() {
         @Override
         public DoorInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Key id = key.dataFromElement(element.getElementOrThrow(ID));
             int cost = element.getNumberOrThrow(COST).intValue();
-            List<Key> opensTo = keyList.dataFromElement(element.getElement(OPENS_TO));
+            List<Key> opensTo = keyList.dataFromElement(element.getElementOrThrow(OPENS_TO));
             List<RegionInfo> regions = regionInfoList.dataFromElement(element.getListOrThrow(REGIONS));
-            return new DoorInfo(cost, opensTo, regions);
+            return new DoorInfo(id, cost, opensTo, regions);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(3);
+            ConfigNode node = new LinkedConfigNode(4);
+            node.put(ID, new ConfigPrimitive(doorInfo.id()));
             node.put(COST, new ConfigPrimitive(doorInfo.cost()));
             node.put(OPENS_TO, keyList.elementFromData(doorInfo.opensTo()));
-            node.put(REGIONS, regionInfoList.elementFromData(doorInfo.doorRegions()));
+            node.put(REGIONS, regionInfoList.elementFromData(doorInfo.regions()));
             return node;
         }
     };
@@ -178,9 +180,9 @@ public final class MapProcessors {
     private static final ConfigProcessor<ShopInfo> shopInfo = new ConfigProcessor<>() {
         @Override
         public ShopInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = key.dataFromElement(element.getElement(ID));
+            Key id = key.dataFromElement(element.getElementOrThrow(ID));
             Vec3I triggerLocation = VectorConfigProcessors.vec3I().dataFromElement(element
-                    .getElement(TRIGGER_LOCATION));
+                    .getElementOrThrow(TRIGGER_LOCATION));
             return new ShopInfo(id, triggerLocation);
         }
 
@@ -196,12 +198,12 @@ public final class MapProcessors {
     private static final ConfigProcessor<WindowInfo> windowInfo = new ConfigProcessor<>() {
         @Override
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key room = key.dataFromElement(element.getElement(ROOM_NAME));
-            RegionInfo frameRegion = regionInfo.dataFromElement(element.getElement(FRAME_REGION));
-            Key repairSound = key.dataFromElement(element.getElement(REPAIR_SOUND));
-            Key repairAllSound = key.dataFromElement(element.getElement(REPAIR_ALL_SOUND));
-            Key breakSound = key.dataFromElement(element.getElement(BREAK_SOUND));
-            Key breakAllSound = key.dataFromElement(element.getElement(BREAK_ALL_SOUND));
+            Key room = key.dataFromElement(element.getElementOrThrow(ROOM_NAME));
+            RegionInfo frameRegion = regionInfo.dataFromElement(element.getElementOrThrow(FRAME_REGION));
+            Key repairSound = key.dataFromElement(element.getElementOrThrow(REPAIR_SOUND));
+            Key repairAllSound = key.dataFromElement(element.getElementOrThrow(REPAIR_ALL_SOUND));
+            Key breakSound = key.dataFromElement(element.getElementOrThrow(BREAK_SOUND));
+            Key breakAllSound = key.dataFromElement(element.getElementOrThrow(BREAK_ALL_SOUND));
             return new WindowInfo(room, frameRegion, repairSound, repairAllSound, breakSound, breakAllSound);
         }
 
@@ -221,8 +223,8 @@ public final class MapProcessors {
     private static final ConfigProcessor<RegionInfo> regionInfo = new ConfigProcessor<>() {
         @Override
         public RegionInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(ORIGIN));
-            Vec3I lengths = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(LENGTHS));
+            Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow(ORIGIN));
+            Vec3I lengths = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow(LENGTHS));
             return new RegionInfo(origin, lengths);
         }
 
@@ -270,7 +272,7 @@ public final class MapProcessors {
     private static final ConfigProcessor<SpawnInfo> spawnInfo = new ConfigProcessor<>() {
         @Override
         public SpawnInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = key.dataFromElement(element.getElement(ID));
+            Key id = key.dataFromElement(element.getElementOrThrow(ID));
             int amount = element.getNumberOrThrow(AMOUNT).intValue();
             return new SpawnInfo(id, amount);
         }
@@ -287,9 +289,9 @@ public final class MapProcessors {
     private static final ConfigProcessor<SpawnpointInfo> spawnpointInfo = new ConfigProcessor<>() {
         @Override
         public SpawnpointInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Vec3I position = VectorConfigProcessors.vec3I().dataFromElement(element.getElement(POSITION));
-            Key spawnRule = key.dataFromElement(element.getElement(SPAWN_RULE));
-            SpawnType spawnType = MapProcessors.spawnType.dataFromElement(element.getElement(TYPE));
+            Vec3I position = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow(POSITION));
+            Key spawnRule = key.dataFromElement(element.getElementOrThrow(SPAWN_RULE));
+            SpawnType spawnType = MapProcessors.spawnType.dataFromElement(element.getElementOrThrow(TYPE));
             return new SpawnpointInfo(position, spawnRule, spawnType);
         }
 
@@ -306,8 +308,8 @@ public final class MapProcessors {
     private static final ConfigProcessor<SpawnruleInfo> spawnruleInfo = new ConfigProcessor<>() {
         @Override
         public SpawnruleInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = key.dataFromElement(element.getElement(ID));
-            List<Key> spawns = keyList.dataFromElement(element.getElement(SPAWNS));
+            Key id = key.dataFromElement(element.getElementOrThrow(ID));
+            List<Key> spawns = keyList.dataFromElement(element.getElementOrThrow(SPAWNS));
             boolean isBlacklist = element.getBooleanOrThrow(IS_BLACKLIST);
             return new SpawnruleInfo(id, spawns, isBlacklist);
         }

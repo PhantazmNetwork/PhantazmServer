@@ -33,6 +33,4 @@ public class ConfirmationGui extends LightweightGuiDescription {
 
         deny.setOnClick(ScreenUtils::closeCurrentScreen);
     }
-
-
 }

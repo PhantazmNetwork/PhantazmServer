@@ -98,7 +98,8 @@ public class MainGui extends LightweightGuiDescription {
             }
 
             session.addMap(mapKey, new ZombiesMap(new MapInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                    new ArrayList<>()));
             session.setCurrent(mapKey);
 
             ScreenUtils.closeCurrentScreen();

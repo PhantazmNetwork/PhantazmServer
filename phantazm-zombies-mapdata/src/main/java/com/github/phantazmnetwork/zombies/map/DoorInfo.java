@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record DoorInfo(int cost,
+public record DoorInfo(@NotNull Key id,
+                       int cost,
                        @NotNull List<Key> opensTo,
-                       @NotNull List<RegionInfo> doorRegions) { }
+                       @NotNull List<RegionInfo> regions) { }

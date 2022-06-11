@@ -19,9 +19,12 @@ public class NewObjectGui extends LightweightGuiDescription {
         root.setInsets(Insets.ROOT_PANEL);
 
         WButton newRoom = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_ROOM));
+        WButton newDoor = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_DOOR));
 
         root.add(newRoom, 0, 0, 5, 1);
+        root.add(newDoor, 0, 1, 5, 1);
 
         newRoom.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewRoomGui(session))));
+        newDoor.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewDoorGui(session))));
     }
 }

@@ -6,9 +6,6 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -30,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public class BasicMapeditorSession implements MapeditorSession {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMapeditorSession.class);
@@ -40,6 +36,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color OUTLINE_COLOR = Color.BLACK;
     private static final Color ORIGIN_COLOR = new Color(0, 0, 255, 32);
     private static final Color ROOM_COLOR = new Color(255, 255, 255, 64);
+    private static final Color DOOR_COLOR = new Color(189, 0, 255, 64);
     private static final Color WINDOW_COLOR = new Color(0, 251, 201, 64);
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
@@ -53,6 +50,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     private final MapLoader loader;
 
     private RoomInfo lastRoom;
+    private DoorInfo lastDoor;
     private boolean enabled;
 
     private Vec3i firstSelected;
@@ -224,6 +222,11 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
+    public void setLastDoor(@Nullable DoorInfo door) {
+        this.lastDoor = door;
+    }
+
+    @Override
     @SuppressWarnings("PatternValidation")
     public void refreshRooms() {
         assertMap();
@@ -231,13 +234,32 @@ public class BasicMapeditorSession implements MapeditorSession {
         for(RoomInfo room : currentMap.rooms()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
                     .value()), ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true,
-                    false, RenderUtils.arrayFromRegions(room.regions(), currentMap.info().origin())));
+                    false, RenderUtils.arrayFromRegions(room.regions(), currentMap.info()
+                    .origin())));
+        }
+    }
+
+    @SuppressWarnings("PatternValidation")
+    @Override
+    public void refreshDoors() {
+        assertMap();
+
+        for(DoorInfo door : currentMap.doors()) {
+            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "door." + door.id()
+                    .value()), ObjectRenderer.RenderType.FILLED, DOOR_COLOR, true,
+                    false, RenderUtils.arrayFromRegions(door.regions(), currentMap.info()
+                    .origin())));
         }
     }
 
     @Override
     public @Nullable RoomInfo lastRoom() {
         return lastRoom;
+    }
+
+    @Override
+    public @Nullable DoorInfo lastDoor() {
+        return lastDoor;
     }
 
     private Map<Key, ZombiesMap> loadMaps() throws IOException {
@@ -261,7 +283,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     private void updateMapRender() {
-        renderer.removeIf(key -> !key.equals(CURSOR_KEY) || !key.equals(OUTLINE_KEY) || !key.equals(SELECTION_KEY));
+        renderer.removeIf(key -> !(key.equals(CURSOR_KEY) || key.equals(OUTLINE_KEY) || key.equals(SELECTION_KEY)));
 
         if(currentMap == null) {
             return;
@@ -273,6 +295,7 @@ public class BasicMapeditorSession implements MapeditorSession {
                 Vec3I.of(1, 1, 1)), Vec3I.ORIGIN, new Vec3d[2], 0)));
 
         refreshRooms();
+        refreshDoors();
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {

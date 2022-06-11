@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import net.kyori.adventure.key.Key;
@@ -48,7 +49,13 @@ public interface MapeditorSession {
 
     void setLastRoom(@Nullable RoomInfo room);
 
+    void setLastDoor(@Nullable DoorInfo door);
+
     void refreshRooms();
 
+    void refreshDoors();
+
     @Nullable RoomInfo lastRoom();
+
+    @Nullable DoorInfo lastDoor();
 }

@@ -1,9 +1,8 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.RegionInfo;
-import com.github.phantazmnetwork.zombies.map.RoomInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
@@ -15,49 +14,47 @@ import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 import net.minecraft.text.TranslatableText;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class NewRoomGui extends LightweightGuiDescription {
+public class NewDoorGui extends LightweightGuiDescription {
     @SuppressWarnings("PatternValidation")
-    public NewRoomGui(@NotNull MapeditorSession session) {
+    public NewDoorGui(@NotNull MapeditorSession session) {
         WGridPanel root = new WGridPanel();
         setRootPanel(root);
 
         root.setSize(100, 150);
         root.setInsets(Insets.ROOT_PANEL);
 
-        WTextField roomId = new WTextField();
+        WTextField doorId = new WTextField();
         WButton add = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ADD));
 
-        RoomInfo lastRoom = session.lastRoom();
-        roomId.setMaxLength(512);
-        roomId.setText(lastRoom == null ? StringUtils.EMPTY : lastRoom.id().value());
-        roomId.setTextPredicate(TextPredicates.validKeyPredicate());
+        DoorInfo lastDoor = session.lastDoor();
+        doorId.setMaxLength(512);
+        doorId.setText(lastDoor == null ? StringUtils.EMPTY : lastDoor.id().value());
+        doorId.setTextPredicate(TextPredicates.validKeyPredicate());
 
-        root.add(roomId, 0, 0, 5, 1);
+        root.add(doorId, 0, 0, 5, 1);
         root.add(add, 0, 2, 5, 1);
 
         ZombiesMap currentMap = session.getMap();
         RegionInfo selected = RenderUtils.regionFromPoints(session.getFirstSelection(), session.getSecondSelection(),
                 currentMap.info().origin());
         add.setOnClick(() -> {
-            String value = roomId.getText();
+            String value = doorId.getText();
             if(value.isEmpty()) {
                 return;
             }
 
-            Key roomKey = Key.key(Namespaces.PHANTAZM, roomId.getText());
-            for(RoomInfo roomInfo : currentMap.rooms()) {
-                if(roomInfo.id().equals(roomKey)) {
-                    roomInfo.regions().add(selected);
-                    session.refreshRooms();
-                    session.setLastRoom(roomInfo);
+            Key doorKey = Key.key(Namespaces.PHANTAZM, doorId.getText());
+            for(DoorInfo doorInfo : currentMap.doors()) {
+                if(doorInfo.id().equals(doorKey)) {
+                    doorInfo.regions().add(selected);
+                    session.refreshDoors();
+                    session.setLastDoor(doorInfo);
                     ScreenUtils.closeCurrentScreen();
                     return;
                 }
@@ -66,11 +63,12 @@ public class NewRoomGui extends LightweightGuiDescription {
             ArrayList<RegionInfo> bounds = new ArrayList<>();
             bounds.add(selected);
 
-            RoomInfo newRoom = new RoomInfo(roomKey, Component.text(roomKey.value()), bounds);
-            session.setLastRoom(newRoom);
-            currentMap.rooms().add(newRoom);
-            session.refreshRooms();
+            DoorInfo newDoor = new DoorInfo(doorKey, 0, new ArrayList<>(), bounds);
+            session.setLastDoor(newDoor);
+            currentMap.doors().add(newDoor);
+            session.refreshDoors();
             ScreenUtils.closeCurrentScreen();
         });
     }
 }
+

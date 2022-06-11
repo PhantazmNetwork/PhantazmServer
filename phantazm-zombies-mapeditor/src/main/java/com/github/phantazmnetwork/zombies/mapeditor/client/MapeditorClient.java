@@ -148,7 +148,6 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public void removeObject(@NotNull Key key) {
             Objects.requireNonNull(key, "key");
-
             if(renderObjects.remove(key) != null) {
                 baked = null;
             }
@@ -173,7 +172,6 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public void putObject(@NotNull RenderObject value) {
             Objects.requireNonNull(value, "value");
-
             if(renderObjects.containsKey(value.key)) {
                 if(baked != null) {
                     //to avoid having to re-bake, we can find the object in the render array and update in-place
