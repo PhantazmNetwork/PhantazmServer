@@ -20,6 +20,7 @@ import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.mob.target.NearestEntitySelector;
 import com.github.phantazmnetwork.mob.target.SerializableMappedSelector;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
+import com.github.phantazmnetwork.mob.trigger.TriggerKeys;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.config.MinestomDescriptorConfigProcessor;
@@ -31,6 +32,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.entity.Entity;
@@ -39,6 +41,7 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -82,7 +85,7 @@ final class MobTest {
             return Optional.empty();
         };
 
-        Skill skill = new PlaySoundSkill(playerSelector, Sound.sound(
+        Skill testSkill = new PlaySoundSkill(playerSelector, Sound.sound(
                 Key.key("entity.elder_guardian.curse"),
                 Sound.Source.MASTER,
                 1.0F,
@@ -92,7 +95,16 @@ final class MobTest {
                 GroundMinestomDescriptor.of(EntityType.ZOMBIE, "test"),
                 List.of(
                         Collections.singleton(new FollowEntityGoal<>(playerSelector)),
-                        Collections.singleton(new UseSkillGoal(skill, 5000L))
+                        Collections.singleton(new UseSkillGoal(testSkill, 5000L))
+                ),
+                Map.of(
+                        TriggerKeys.DAMAGE_TRIGGER,
+                        Collections.singleton(sender -> {
+                            Instance instance = sender.entity().getInstance();
+                            if (instance != null) {
+                                instance.sendMessage(Component.text("Ow!", NamedTextColor.RED));
+                            }
+                        })
                 ),
                 Component.text("Test Mob"),
                 Map.of(
@@ -179,6 +191,7 @@ final class MobTest {
                 MiniMessage.miniMessage()
         );
 
+        Map<UUID, PhantazmMob> uuidToMob = new HashMap<>();
         AtomicReference<PhantazmMob> mobReference = new AtomicReference<>();
         phantazm.addListener(ChatChannelSendEvent.class, event -> {
             String msg = event.getInput();
@@ -190,9 +203,24 @@ final class MobTest {
                     case "spawnmob":
                         PhantazmMob mob = model.spawn(spawner, instance, player.getPosition());
                         mobReference.set(mob);
+                        uuidToMob.put(mob.entity().getUuid(), mob);
                 }
             }
         });
+
+        for (Map.Entry<Key, Class<? extends EntityEvent>> entry : TriggerKeys.TRIGGER_EVENT_MAP.entrySet()) {
+            phantazm.addListener(entry.getValue(), event -> {
+                PhantazmMob mob = uuidToMob.get(event.getEntity().getUuid());
+                if (mob != null) {
+                    Iterable<Skill> skills = mob.model().getTriggers().get(entry.getKey());
+                    if (skills != null) {
+                        for (Skill skill : skills) {
+                            skill.use(mob);
+                        }
+                    }
+                }
+            });
+        }
     }
 
 }

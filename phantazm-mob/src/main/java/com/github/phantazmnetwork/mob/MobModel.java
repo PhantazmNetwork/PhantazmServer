@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Point;
@@ -27,6 +28,8 @@ public class MobModel {
 
     private final Iterable<Iterable<GoalCreator>> goalCreatorsGroups;
 
+    private final Map<Key, Iterable<Skill>> triggers;
+
     private final Component displayName;
 
     private final Map<EquipmentSlot, ItemStack> equipment;
@@ -34,10 +37,11 @@ public class MobModel {
     private final float maxHealth;
 
     public MobModel(@NotNull MinestomDescriptor descriptor, @NotNull Iterable<Iterable<GoalCreator>> goalCreatorsGroups,
-                    @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment,
-                    float maxHealth) {
+                    @NotNull Map<Key, Iterable<Skill>> triggers, @Nullable Component displayName,
+                    @NotNull Map<EquipmentSlot, ItemStack> equipment, float maxHealth) {
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.goalCreatorsGroups = Objects.requireNonNull(goalCreatorsGroups, "goalCreatorsGroups");
+        this.triggers = Objects.requireNonNull(triggers, "triggers");
         this.displayName = displayName;
         this.equipment = Objects.requireNonNull(equipment, "equipment");
         this.maxHealth = maxHealth;
@@ -62,6 +66,10 @@ public class MobModel {
                 return () -> IteratorUtils.unmodifiable(iterableIterator.next().iterator());
             }
         };
+    }
+
+    public @Unmodifiable @NotNull Map<Key, Iterable<Skill>> getTriggers() {
+        return Map.copyOf(triggers);
     }
 
     public @NotNull Optional<Component> getDisplayName() {
