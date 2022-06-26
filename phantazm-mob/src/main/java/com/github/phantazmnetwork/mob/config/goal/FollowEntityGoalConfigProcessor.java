@@ -14,9 +14,9 @@ import java.util.Objects;
 
 public class FollowEntityGoalConfigProcessor<TEntity extends Entity> implements ConfigProcessor<FollowEntityGoal<TEntity>> {
 
-    private final ConfigProcessor<TargetSelector<TEntity>> targetSelectorConfigProcessor;
+    private final ConfigProcessor<? extends TargetSelector<TEntity>> targetSelectorConfigProcessor;
 
-    public FollowEntityGoalConfigProcessor(@NotNull ConfigProcessor<TargetSelector<TEntity>> targetSelectorConfigProcessor) {
+    public FollowEntityGoalConfigProcessor(@NotNull ConfigProcessor<? extends TargetSelector<TEntity>> targetSelectorConfigProcessor) {
         this.targetSelectorConfigProcessor = Objects.requireNonNull(targetSelectorConfigProcessor,
                 "targetSelectorConfigProcessor");
     }
@@ -28,10 +28,12 @@ public class FollowEntityGoalConfigProcessor<TEntity extends Entity> implements 
         return new FollowEntityGoal<>(targetSelector);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull FollowEntityGoal<TEntity> followEntityGoal) throws ConfigProcessException {
         ConfigNode node = new LinkedConfigNode();
-        node.put("targetSelector", targetSelectorConfigProcessor.elementFromData(followEntityGoal.entitySelector()));
+        ConfigProcessor<TargetSelector<TEntity>> genericProcessor = (ConfigProcessor<TargetSelector<TEntity>>) targetSelectorConfigProcessor;
+        node.put("targetSelector", genericProcessor.elementFromData(followEntityGoal.entitySelector()));
 
         return node;
     }
