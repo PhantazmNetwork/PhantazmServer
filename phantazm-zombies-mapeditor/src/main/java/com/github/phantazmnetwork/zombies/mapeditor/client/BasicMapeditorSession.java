@@ -8,7 +8,6 @@ import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
 import net.kyori.adventure.key.Key;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
@@ -180,7 +179,7 @@ public class BasicMapeditorSession implements MapeditorSession {
 
         if(currentMap != null && currentMap.info().id().equals(id)) {
             currentMap = null;
-            updateMapRender();
+            refreshMap();
         }
     }
 
@@ -197,7 +196,7 @@ public class BasicMapeditorSession implements MapeditorSession {
         }
 
         this.currentMap = newCurrent;
-        updateMapRender();
+        refreshMap();
     }
 
     @Override
@@ -206,6 +205,7 @@ public class BasicMapeditorSession implements MapeditorSession {
             Map<Key, ZombiesMap> newMaps = loadMaps();
             this.maps.clear();
             this.maps.putAll(newMaps);
+            refreshMap();
         }
         catch (IOException e) {
             LOGGER.warn("IOException when loading maps", e);
@@ -305,7 +305,7 @@ public class BasicMapeditorSession implements MapeditorSession {
         return newMaps;
     }
 
-    private void updateMapRender() {
+    private void refreshMap() {
         renderer.removeIf(key -> !(key.equals(CURSOR_KEY) || key.equals(OUTLINE_KEY) || key.equals(SELECTION_KEY)));
 
         if(currentMap == null) {
@@ -319,6 +319,7 @@ public class BasicMapeditorSession implements MapeditorSession {
 
         refreshRooms();
         refreshDoors();
+        refreshWindows();
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {
