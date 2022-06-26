@@ -16,6 +16,7 @@ import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -59,11 +60,11 @@ public class NewObjectGui extends LightweightGuiDescription {
 
             World world = playerEntity.world;
             List<String> blockData = new ArrayList<>(selected.volume());
-            for(Vec3I position : (Iterable<? extends Vec3I>) (selected::blockIterator)) {
+            for(Vec3I position : selected) {
+                //convert to world coordinate space
                 BlockState state = world.getBlockState(new BlockPos.Mutable(position.getX() + origin.getX(),
                         position.getY() + origin.getY(), position.getZ() + origin.getZ()));
-                blockData.add(state.toString());
-                System.out.println(position);
+                blockData.add(NbtHelper.fromBlockState(state).toString());
             }
 
             currentMap.windows().add(new WindowInfo(selected, blockData));

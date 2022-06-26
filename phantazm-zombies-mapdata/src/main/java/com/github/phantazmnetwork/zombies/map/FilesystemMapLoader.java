@@ -123,7 +123,7 @@ public class FilesystemMapLoader implements MapLoader {
         }
 
         for(DoorInfo door : data.doors()) {
-            ConfigBridges.write(paths.doors.resolve("door_" + door.id().value() + extension), MapProcessors
+            ConfigBridges.write(paths.doors.resolve(door.id().value() + extension), MapProcessors
                     .doorInfo().elementFromData(door), codec);
         }
 
@@ -134,13 +134,13 @@ public class FilesystemMapLoader implements MapLoader {
 
         int i = 0;
         for(WindowInfo window : data.windows()) {
-            ConfigBridges.write(paths.windows.resolve("window_" + i + extension),
+            ConfigBridges.write(paths.windows.resolve(i + extension),
                     MapProcessors.windowInfo().elementFromData(window), codec);
             i++;
         }
 
         for(RoundInfo round : data.rounds()) {
-            ConfigBridges.write(paths.rounds.resolve("round_" + round.round() + extension), MapProcessors
+            ConfigBridges.write(paths.rounds.resolve(round.round() + extension), MapProcessors
                     .roundInfo().elementFromData(round), codec);
         }
 

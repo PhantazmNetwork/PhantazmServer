@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NewDoorGui extends LightweightGuiDescription {
     @SuppressWarnings("PatternValidation")
@@ -59,7 +60,7 @@ public class NewDoorGui extends LightweightGuiDescription {
                 }
             }
 
-            ArrayList<Region3I> bounds = new ArrayList<>(1);
+            List<Region3I> bounds = new ArrayList<>(1);
             bounds.add(selected);
 
             DoorInfo newDoor = new DoorInfo(doorKey, bounds);
