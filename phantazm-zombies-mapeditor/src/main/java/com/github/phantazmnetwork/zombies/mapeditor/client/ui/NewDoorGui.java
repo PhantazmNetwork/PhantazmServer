@@ -63,7 +63,8 @@ public class NewDoorGui extends LightweightGuiDescription {
             ArrayList<RegionInfo> bounds = new ArrayList<>();
             bounds.add(selected);
 
-            DoorInfo newDoor = new DoorInfo(doorKey, 0, new ArrayList<>(), bounds);
+            DoorInfo newDoor = new DoorInfo(doorKey, new ArrayList<>(0),
+                    new ArrayList<>(0), new ArrayList<>(), bounds);
             session.setLastDoor(newDoor);
             currentMap.doors().add(newDoor);
             session.refreshDoors();

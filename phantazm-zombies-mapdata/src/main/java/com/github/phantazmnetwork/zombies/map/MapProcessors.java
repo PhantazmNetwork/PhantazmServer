@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.ConfigProcessorUtils;
+import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.commons.vector.VectorConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -19,6 +20,7 @@ import java.util.List;
 
 public final class MapProcessors {
     private static final String ID = "id";
+    private static final String TEXT = "text";
     private static final String DISPLAY_NAME = "displayName";
     private static final String DISPLAY_ITEM_TAG = "displayItemTag";
     private static final String ORIGIN = "origin";
@@ -26,7 +28,8 @@ public final class MapProcessors {
     private static final String PITCH = "pitch";
     private static final String YAW = "yaw";
     private static final String REGIONS = "regions";
-    private static final String COST = "cost";
+    private static final String HOLOGRAMS = "holograms";
+    private static final String COSTS = "costs";
     private static final String OPENS_TO = "opensTo";
     private static final String TRIGGER_LOCATION = "triggerLocation";
     private static final String ROOM_NAME = "roomName";
@@ -160,18 +163,20 @@ public final class MapProcessors {
         @Override
         public DoorInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = key.dataFromElement(element.getElementOrThrow(ID));
-            int cost = element.getNumberOrThrow(COST).intValue();
             List<Key> opensTo = keyList.dataFromElement(element.getElementOrThrow(OPENS_TO));
+            List<Integer> costs = integerList.dataFromElement(element.getElementOrThrow(COSTS));
+            List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow(HOLOGRAMS));
             List<RegionInfo> regions = regionInfoList.dataFromElement(element.getListOrThrow(REGIONS));
-            return new DoorInfo(id, cost, opensTo, regions);
+            return new DoorInfo(id, opensTo, costs, hologramInfos, regions);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(4);
+            ConfigNode node = new LinkedConfigNode(5);
             node.put(ID, key.elementFromData(doorInfo.id()));
-            node.put(COST, new ConfigPrimitive(doorInfo.cost()));
             node.put(OPENS_TO, keyList.elementFromData(doorInfo.opensTo()));
+            node.put(COSTS, integerList.elementFromData(doorInfo.costs()));
+            node.put(HOLOGRAMS, hologramInfoList.elementFromData(doorInfo.holograms()));
             node.put(REGIONS, regionInfoList.elementFromData(doorInfo.regions()));
             return node;
         }
@@ -324,6 +329,23 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<HologramInfo> hologramInfo = new ConfigProcessor<>() {
+        @Override
+        public HologramInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Component text = component.dataFromElement(element.getElementOrThrow(TEXT));
+            Vec3D position = VectorConfigProcessors.vec3D().dataFromElement(element.getElementOrThrow(POSITION));
+            return new HologramInfo(text, position);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(HologramInfo hologramInfo) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(2);
+            node.put(TEXT, component.elementFromData(hologramInfo.text()));
+            node.put(POSITION, VectorConfigProcessors.vec3D().elementFromData(hologramInfo.position()));
+            return node;
+        }
+    };
+
     private static final ConfigProcessor<SpawnType> spawnType = new ConfigProcessor<>() {
         @Override
         public SpawnType dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -391,6 +413,9 @@ public final class MapProcessors {
 
     private static final ConfigProcessor<List<RegionInfo>> regionInfoList = ConfigProcessorUtils
             .newListProcessor(regionInfo);
+
+    private static final ConfigProcessor<List<HologramInfo>> hologramInfoList = ConfigProcessorUtils
+            .newListProcessor(hologramInfo);
 
     private static final ConfigProcessor<List<WaveInfo>> waveInfoList = ConfigProcessorUtils.newListProcessor(waveInfo);
 

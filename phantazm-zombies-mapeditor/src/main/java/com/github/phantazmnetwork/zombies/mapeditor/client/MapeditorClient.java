@@ -1,15 +1,10 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
-import com.electronwill.nightconfig.toml.TomlParser;
-import com.electronwill.nightconfig.toml.TomlWriter;
 import com.github.phantazmnetwork.zombies.map.FilesystemMapLoader;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorScreen;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.NewObjectGui;
-import com.github.steanky.ethylene.codec.hjson.HjsonCodec;
-import com.github.steanky.ethylene.codec.json.JsonCodec;
-import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import me.x150.renderer.event.EventListener;
@@ -39,12 +34,14 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class MapeditorClient implements ClientModInitializer {
+    private static final String MAPEDITOR_PATH = "mapeditor";
+
     @Override
     public void onInitializeClient() {
         ObjectRenderer renderer = new Renderer();
 
         ConfigCodec codec = new YamlCodec();
-        Path defaultMapDirectory = FabricLoader.getInstance().getConfigDir().resolve("mapeditor");
+        Path defaultMapDirectory = FabricLoader.getInstance().getConfigDir().resolve(MAPEDITOR_PATH);
 
         Events.registerEventHandlerClass(renderer);
 
@@ -184,6 +181,8 @@ public class MapeditorClient implements ClientModInitializer {
 
                         i++;
                     }
+
+                    //should never fail to find the object, but in case we do, falling through is acceptable
                 }
             }
 

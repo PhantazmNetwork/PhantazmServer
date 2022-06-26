@@ -30,10 +30,6 @@ dependencies {
     implementation(project(":phantazm-commons"))
     implementation(project(":phantazm-zombies-mapdata"))
 
-    //TODO: remove unnecessary ethylene module dependencies when settling on a config format
-    implementation(libs.ethylene.toml)
-    implementation(libs.ethylene.json)
-    implementation(libs.ethylene.hjson)
     implementation(libs.ethylene.yaml)
 }
 

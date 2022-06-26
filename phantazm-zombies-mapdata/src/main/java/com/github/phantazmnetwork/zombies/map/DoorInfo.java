@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public record DoorInfo(@NotNull Key id,
-                       int cost,
                        @NotNull List<Key> opensTo,
+                       @NotNull List<Integer> costs,
+                       @NotNull List<HologramInfo> holograms,
                        @NotNull List<RegionInfo> regions) { }
