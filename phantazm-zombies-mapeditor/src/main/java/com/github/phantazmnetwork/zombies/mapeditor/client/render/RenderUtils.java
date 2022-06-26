@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.render;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.zombies.map.RegionInfo;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,18 +36,5 @@ public final class RenderUtils {
                 ObjectRenderer.DOUBLE_EPSILON, lengths.getZ() + ObjectRenderer.DOUBLE_EPSILON);
 
         return boundsArray;
-    }
-
-    public static @NotNull RegionInfo regionFromPoints(@NotNull Vec3I first, @NotNull Vec3I second,
-                                                       @NotNull Vec3I origin) {
-        int x = Math.min(first.getX(), second.getX()) - origin.getX();
-        int y = Math.min(first.getY(), second.getY()) - origin.getY();
-        int z = Math.min(first.getZ(), second.getZ()) - origin.getZ();
-
-        int dX = Math.abs(first.getX() - second.getX()) + 1;
-        int dY = Math.abs(first.getY() - second.getY()) + 1;
-        int dZ = Math.abs(first.getZ() - second.getZ()) + 1;
-
-        return new RegionInfo(Vec3I.of(x, y, z), Vec3I.of(dX, dY, dZ));
     }
 }

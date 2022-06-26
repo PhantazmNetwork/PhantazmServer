@@ -1,8 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
-import com.github.phantazmnetwork.zombies.map.RegionInfo;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
-import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
