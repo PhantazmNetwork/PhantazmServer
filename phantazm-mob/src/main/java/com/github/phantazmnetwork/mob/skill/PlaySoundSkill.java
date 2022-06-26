@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.api.config.VariantSerializable;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +12,7 @@ import java.util.Objects;
 
 public class PlaySoundSkill implements Skill, VariantSerializable {
 
-    public final static String SERIAL_NAME = "playSoundSkill";
+    public final static Key SERIAL_KEY = Key.key("phantazm", "play_sound_skill");
     
     private final TargetSelector<? extends Audience> audienceSelector;
 
@@ -51,7 +52,7 @@ public class PlaySoundSkill implements Skill, VariantSerializable {
     }
 
     @Override
-    public @NotNull String getSerialName() {
-        return SERIAL_NAME;
+    public @NotNull Key getSerialKey() {
+        return SERIAL_KEY;
     }
 }

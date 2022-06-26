@@ -9,6 +9,6 @@ import java.util.Optional;
 @FunctionalInterface
 public interface TargetSelector<TTarget> {
 
-    @NotNull Optional<TTarget> selectTarget(@NotNull PhantazmMob mob) throws ConfigProcessException;
+    @NotNull Optional<TTarget> selectTarget(@NotNull PhantazmMob mob);
 
 }

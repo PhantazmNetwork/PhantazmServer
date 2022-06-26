@@ -4,13 +4,14 @@ import com.github.phantazmnetwork.api.config.VariantSerializable;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 public record UseSkillGoal(@NotNull Skill skill, long period) implements GoalCreator, VariantSerializable {
 
-    public final static String SERIAL_NAME = "useSkillGoal";
+    public final static Key SERIAL_KEY = Key.key("phantazm", "use_skill_goal");
 
     public UseSkillGoal(@NotNull Skill skill, long period) {
         this.skill = Objects.requireNonNull(skill, "skill");
@@ -54,7 +55,7 @@ public record UseSkillGoal(@NotNull Skill skill, long period) implements GoalCre
     }
 
     @Override
-    public @NotNull String getSerialName() {
-        return SERIAL_NAME;
+    public @NotNull Key getSerialKey() {
+        return SERIAL_KEY;
     }
 }

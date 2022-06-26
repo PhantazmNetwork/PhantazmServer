@@ -18,13 +18,13 @@ import com.github.phantazmnetwork.mob.goal.UseSkillGoal;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.mob.target.NearestEntitySelector;
-import com.github.phantazmnetwork.mob.target.SerializableTargetSelector;
+import com.github.phantazmnetwork.mob.target.SerializableMappedSelector;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.config.MinestomDescriptorConfigProcessor;
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
@@ -100,19 +100,23 @@ final class MobTest {
                 ),
                 Attribute.MAX_HEALTH.defaultValue()
         );
+
+        ConfigProcessor<Key> keyProcessor = new KeyConfigProcessor();
         Map<String, ConfigProcessor<TargetSelector<? extends Audience>>> audienceProcessors = Map.of();
         ConfigProcessor<Skill> skillProcessor = new VariantConfigProcessor<>(
                 Map.of(
-                        PlaySoundSkill.SERIAL_NAME, new PlaySoundSkillConfigProcessor(
+                        PlaySoundSkill.SERIAL_KEY, new PlaySoundSkillConfigProcessor(
                                 audienceProcessors,
-                                new SoundConfigProcessor(new KeyConfigProcessor())
+                                new SoundConfigProcessor(keyProcessor)
                         )
-                )
+                ),
+                keyProcessor
         );
+        Key followNearestPlayer = Key.key("phantazm", "follow_nearest_player");
         ConfigProcessor<GoalCreator> goalProcessor = new VariantConfigProcessor<>(
                 Map.of(
-                        UseSkillGoal.SERIAL_NAME, new UseSkillGoalConfigProcessor(skillProcessor),
-                        "followNearestPlayer", new FollowEntityGoalConfigProcessor<>(new ConfigProcessor<TargetSelector<Player>>() {
+                        UseSkillGoal.SERIAL_KEY, new UseSkillGoalConfigProcessor(skillProcessor),
+                        followNearestPlayer, new FollowEntityGoalConfigProcessor<>(new ConfigProcessor<TargetSelector<Player>>() {
 
                             private final ConfigProcessor<? extends TargetSelector<Iterable<Player>>> innerProcessor = new NearestEntitySelectorConfigProcessor<NearestEntitySelector<Player>>() {
                                 @Override
@@ -136,23 +140,17 @@ final class MobTest {
                             };
 
                             @Override
-                            public TargetSelector<Player> dataFromElement(@NotNull ConfigElement element) {
-                                return new SerializableTargetSelector<>() {
+                            public TargetSelector<Player> dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                                TargetSelector<Iterable<Player>> innerSelector = innerProcessor.dataFromElement(element);
+                                return new SerializableMappedSelector<>(innerSelector) {
                                     @Override
-                                    public @NotNull String getSerialName() {
-                                        return "followNearestPlayer";
-                                    }
+                                    protected Player map(@NotNull Iterable<Player> players) {
+                                        Iterator<Player> playerIterator = players.iterator();
+                                        if (playerIterator.hasNext()) {
+                                            return playerIterator.next();
+                                        }
 
-                                    @Override
-                                    public @NotNull Optional<Player> selectTarget(@NotNull PhantazmMob mob) throws ConfigProcessException {
-                                        return innerProcessor.dataFromElement(element).selectTarget(mob).map(target -> {
-                                            Iterator<Player> iterator = target.iterator();
-                                            if (iterator.hasNext()) {
-                                                return iterator.next();
-                                            }
-
-                                            return null;
-                                        });
+                                        return null;
                                     }
                                 };
                             }
@@ -160,11 +158,19 @@ final class MobTest {
                             @SuppressWarnings("unchecked")
                             @Override
                             public @NotNull ConfigElement elementFromData(@NotNull TargetSelector<Player> playerTargetSelector) throws ConfigProcessException {
-                                ConfigProcessor<TargetSelector<Player>> genericProcessor = (ConfigProcessor<TargetSelector<Player>>) innerProcessor;
-                                return genericProcessor.elementFromData(playerTargetSelector);
+                                SerializableMappedSelector<Iterable<Player>, Player> mappedSelector = (SerializableMappedSelector<Iterable<Player>, Player>) playerTargetSelector;
+                                ConfigProcessor<TargetSelector<Iterable<Player>>> genericSelector = (ConfigProcessor<TargetSelector<Iterable<Player>>>) innerProcessor;
+                                ConfigElement element = genericSelector.elementFromData(mappedSelector.getDelegate());
+                                if (!(element instanceof ConfigNode node)) {
+                                    throw new ConfigProcessException("element is not node");
+                                }
+                                node.put("serialKey", keyProcessor.elementFromData(followNearestPlayer));
+
+                                return node;
                             }
                         })
-                )
+                ),
+                keyProcessor
         );
         ConfigProcessor<MobModel> modelProcessor = new MobModelConfigProcessor(
                 new MinestomDescriptorConfigProcessor(),

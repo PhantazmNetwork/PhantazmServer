@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.api.config.VariantSerializable;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +13,7 @@ import java.util.Objects;
 
 public record FollowEntityGoal<TEntity extends Entity>(@NotNull TargetSelector<TEntity> entitySelector) implements GoalCreator, VariantSerializable {
 
-    public final static String SERIAL_NAME = "followEntityGoal";
+    public final static Key SERIAL_KEY = Key.key("phantazm", "follow_entity_goal");
 
     public FollowEntityGoal(@NotNull TargetSelector<TEntity> entitySelector) {
         this.entitySelector = Objects.requireNonNull(entitySelector, "entitySelector");
@@ -53,7 +54,7 @@ public record FollowEntityGoal<TEntity extends Entity>(@NotNull TargetSelector<T
     }
 
     @Override
-    public @NotNull String getSerialName() {
-        return SERIAL_NAME;
+    public @NotNull Key getSerialKey() {
+        return SERIAL_KEY;
     }
 }

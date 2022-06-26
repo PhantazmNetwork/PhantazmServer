@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.mob.config.skill;
 
 import com.github.phantazmnetwork.api.config.VariantSerializable;
-import com.github.phantazmnetwork.mob.config.TargetSelectorConfigProcessorSelector;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -48,7 +47,7 @@ public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundS
         if (!(selector instanceof VariantSerializable serializable)) {
             throw new ConfigProcessException("cannot serialize target selector");
         }
-        node.put("audienceSelector", processors.get(serializable.getSerialName()).elementFromData(selector));
+        node.put("audienceSelector", processors.get(serializable.getSerialKey()).elementFromData(selector));
         node.put("sound", soundConfigProcessor.elementFromData(playSoundSkill.getSound()));
         node.put("followAudience", new ConfigPrimitive(playSoundSkill.shouldFollowAudience()));
 
