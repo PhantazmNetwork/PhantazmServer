@@ -134,7 +134,7 @@ public class FilesystemMapLoader implements MapLoader {
 
         int i = 0;
         for(WindowInfo window : data.windows()) {
-            ConfigBridges.write(paths.windows.resolve(window.room().value() + "_window_" + i + extension),
+            ConfigBridges.write(paths.windows.resolve("window_" + i + extension),
                     MapProcessors.windowInfo().elementFromData(window), codec);
             i++;
         }

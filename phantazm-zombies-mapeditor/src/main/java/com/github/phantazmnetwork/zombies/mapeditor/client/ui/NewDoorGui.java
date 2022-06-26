@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
@@ -40,8 +41,7 @@ public class NewDoorGui extends LightweightGuiDescription {
         root.add(add, 0, 2, 5, 1);
 
         ZombiesMap currentMap = session.getMap();
-        RegionInfo selected = RenderUtils.regionFromPoints(session.getFirstSelection(), session.getSecondSelection(),
-                currentMap.info().origin());
+        Region3I selected = session.getSelection();
         add.setOnClick(() -> {
             String value = doorId.getText();
             if(value.isEmpty()) {
@@ -59,7 +59,7 @@ public class NewDoorGui extends LightweightGuiDescription {
                 }
             }
 
-            ArrayList<RegionInfo> bounds = new ArrayList<>();
+            ArrayList<Region3I> bounds = new ArrayList<>(1);
             bounds.add(selected);
 
             DoorInfo newDoor = new DoorInfo(doorKey, new ArrayList<>(0),

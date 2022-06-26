@@ -2,6 +2,9 @@ package com.github.phantazmnetwork.commons.vector;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 public interface Region3I {
     @NotNull Vec3I getOrigin();
 
@@ -24,14 +27,14 @@ public interface Region3I {
     }
 
     static @NotNull Region3I normalized(@NotNull Vec3I first, @NotNull Vec3I lengths, @NotNull Vec3I relativeTo) {
-        Vec3I second = Vec3I.of(first.getX() + lengths.getX(), first.getY() + lengths.getY(), first.getZ()
-                + lengths.getZ());
+        Vec3I second = Vec3I.of(first.getX() + lengths.getX() - 1, first.getY() + lengths.getY() - 1, first
+                .getZ() + lengths.getZ() - 1);
         return encompassing(first, second, relativeTo);
     }
 
     static @NotNull Region3I normalized(@NotNull Vec3I first, @NotNull Vec3I lengths) {
-        Vec3I second = Vec3I.of(first.getX() + lengths.getX(), first.getY() + lengths.getY(), first.getZ()
-                + lengths.getZ());
+        Vec3I second = Vec3I.of(first.getX() + lengths.getX() - 1, first.getY() + lengths.getY() - 1, first
+                .getZ() + lengths.getZ() - 1);
         return encompassing(first, second, Vec3I.ORIGIN);
     }
 
@@ -61,7 +64,46 @@ public interface Region3I {
         return overlaps(first.getOrigin(), first.getLengths(), second.getOrigin(), second.getLengths());
     }
 
+    default int volume() {
+        Vec3I lengths = getLengths();
+        return lengths.getX() * lengths.getY() * lengths.getZ();
+    }
+
     default boolean overlaps(@NotNull Region3I other) {
         return overlaps(this, other);
+    }
+
+    default @NotNull Iterator<Vec3I> blockIterator() {
+        return new Iterator<>() {
+            private final Vec3I origin = Region3I.this.getOrigin();
+            private final Vec3I lengths = Region3I.this.getLengths();
+            private int x = origin.getX();
+            private int y = origin.getY();
+            private int z = origin.getZ();
+
+            @Override
+            public boolean hasNext() {
+                return z < (z + lengths.getZ());
+            }
+
+            @Override
+            public Vec3I next() {
+                int curX = x;
+                int curY = y;
+                int curZ = z;
+
+                if(x++ >= origin.getX() + lengths.getX()) {
+                    x = origin.getX();
+                    if((curY = y++) >= (origin.getY() + lengths.getY())) {
+                        y = origin.getY();
+                        if(z++ >= (origin.getZ() + lengths.getZ())) {
+                            throw new NoSuchElementException();
+                        }
+                    }
+                }
+
+                return Vec3I.of(curX, curY, curZ);
+            }
+        };
     }
 }

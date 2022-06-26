@@ -25,6 +25,8 @@ public final class TranslationKeys {
     public static final String GUI_MAPEDITOR_CURRENT_MAP = "gui.mapeditor.current_map";
     public static final String GUI_MAPEDITOR_NO_MAP = "gui.mapeditor.no_map";
     public static final String GUI_MAPEDITOR_FEEDBACK_MAP_NAME_EXISTS = "gui.mapeditor.feedback.map_name_exists";
+    public static final String GUI_MAPEDITOR_FEEDBACK_NO_OVERLAPPING_ROOM =
+            "gui.mapeditor.feedback.no_overlapping_room";
     public static final String GUI_MAPEDITOR_YES = "gui.mapeditor.yes";
     public static final String GUI_MAPEDITOR_NO = "gui.mapeditor.no";
     public static final String GUI_MAPEDITOR_DELETE_MAP_QUERY = "gui.mapeditor.delete_map_query";

@@ -1,6 +1,9 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
+import com.github.phantazmnetwork.commons.vector.Region3I;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
+import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
@@ -10,11 +13,17 @@ import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NewObjectGui extends LightweightGuiDescription {
     public NewObjectGui(@NotNull MapeditorSession session) {
@@ -39,11 +48,15 @@ public class NewObjectGui extends LightweightGuiDescription {
         newDoor.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewDoorGui(session))));
         newWindow.setOnClick(() -> {
             ZombiesMap currentMap = session.getMap();
-            RegionInfo selected = RenderUtils.regionFromPoints(session.getFirstSelection(), session
-                    .getSecondSelection(), currentMap.info().origin());
+            Vec3I origin = currentMap.info().origin();
+            Region3I selected = session.getSelection();
+            World world = MinecraftClient.getInstance().player.world;
 
-            for(RoomInfo roomInfo : currentMap.rooms()) {
-
+            List<String> blockData = new ArrayList<>(selected.volume());
+            for(Vec3I position : (Iterable<? extends Vec3I>) (selected::blockIterator)) {
+                BlockState state = world.getBlockState(new BlockPos.Mutable(position.getX() + origin.getX(),
+                        position.getY() + origin.getY(), position.getZ() + origin.getZ()));
+                System.out.println(position);
             }
         });
     }

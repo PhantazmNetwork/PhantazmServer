@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
+import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
@@ -28,6 +29,8 @@ public interface MapeditorSession {
     @NotNull Vec3I getFirstSelection();
 
     @NotNull Vec3I getSecondSelection();
+
+    @NotNull Region3I getSelection();
 
     boolean hasMap();
 

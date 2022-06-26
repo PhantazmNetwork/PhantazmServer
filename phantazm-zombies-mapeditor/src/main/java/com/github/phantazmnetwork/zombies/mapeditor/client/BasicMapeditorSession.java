@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
 import net.kyori.adventure.key.Key;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
@@ -134,6 +135,12 @@ public class BasicMapeditorSession implements MapeditorSession {
         }
 
         return Vec3I.of(secondSelected.getX(), secondSelected.getY(), secondSelected.getZ());
+    }
+
+    @Override
+    public @NotNull Region3I getSelection() {
+        return Region3I.encompassing(getFirstSelection(), getSecondSelection(), currentMap != null ? currentMap.info()
+                .origin() : Vec3I.ORIGIN);
     }
 
     @Override

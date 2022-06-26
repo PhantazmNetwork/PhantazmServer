@@ -205,7 +205,6 @@ public final class MapProcessors {
     private static final ConfigProcessor<WindowInfo> windowInfo = new ConfigProcessor<>() {
         @Override
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key room = key.dataFromElement(element.getElementOrThrow(ROOM_NAME));
             Region3I frameRegion = VectorConfigProcessors.region3I().dataFromElement(element
                     .getElementOrThrow(FRAME_REGION));
             List<String> repairBlocks = stringList.dataFromElement(element.getElementOrThrow(REPAIR_BLOCKS));
@@ -213,13 +212,12 @@ public final class MapProcessors {
             Key repairAllSound = key.dataFromElement(element.getElementOrThrow(REPAIR_ALL_SOUND));
             Key breakSound = key.dataFromElement(element.getElementOrThrow(BREAK_SOUND));
             Key breakAllSound = key.dataFromElement(element.getElementOrThrow(BREAK_ALL_SOUND));
-            return new WindowInfo(room, frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound);
+            return new WindowInfo(frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull WindowInfo windowData) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(7);
-            node.put(ROOM_NAME, key.elementFromData(windowData.room()));
+            ConfigNode node = new LinkedConfigNode(6);
             node.put(FRAME_REGION, VectorConfigProcessors.region3I().elementFromData(windowData.frameRegion()));
             node.put(REPAIR_BLOCKS, stringList.elementFromData(windowData.repairBlocks()));
             node.put(REPAIR_SOUND, key.elementFromData(windowData.repairSound()));

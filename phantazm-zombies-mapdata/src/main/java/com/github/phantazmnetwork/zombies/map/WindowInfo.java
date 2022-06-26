@@ -6,8 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record WindowInfo(@NotNull Key room,
-                         @NotNull Region3I frameRegion,
+public record WindowInfo(@NotNull Region3I frameRegion,
                          @NotNull List<String> repairBlocks,
                          @NotNull Key repairSound,
                          @NotNull Key repairAllSound,

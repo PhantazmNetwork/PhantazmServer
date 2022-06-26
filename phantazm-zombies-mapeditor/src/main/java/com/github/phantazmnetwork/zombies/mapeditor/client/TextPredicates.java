@@ -15,6 +15,7 @@ public final class TextPredicates {
     public static @NotNull Predicate<String> validKeyPredicate() {
         return string -> {
             try {
+                //TODO: when adventure 4.13 is released, use their supplied key validation methods
                 //noinspection PatternValidation
                 Key.key(Namespaces.PHANTAZM, string);
                 return true;
