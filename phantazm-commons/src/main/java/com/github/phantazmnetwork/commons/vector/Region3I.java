@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public interface Region3I {
+public interface Region3I extends Iterable<Vec3I> {
     @NotNull Vec3I getOrigin();
 
     @NotNull Vec3I getLengths();
@@ -73,7 +73,8 @@ public interface Region3I {
         return overlaps(this, other);
     }
 
-    default @NotNull Iterator<Vec3I> blockIterator() {
+    @Override
+    default @NotNull Iterator<Vec3I> iterator() {
         return new Iterator<>() {
             private final Vec3I origin = Region3I.this.getOrigin();
             private final Vec3I lengths = Region3I.this.getLengths();
@@ -83,7 +84,7 @@ public interface Region3I {
 
             @Override
             public boolean hasNext() {
-                return z < (z + lengths.getZ());
+                return z < (origin.getZ() + lengths.getZ());
             }
 
             @Override
@@ -92,11 +93,11 @@ public interface Region3I {
                 int curY = y;
                 int curZ = z;
 
-                if(x++ >= origin.getX() + lengths.getX()) {
-                    x = origin.getX();
-                    if((curY = y++) >= (origin.getY() + lengths.getY())) {
-                        y = origin.getY();
-                        if(z++ >= (origin.getZ() + lengths.getZ())) {
+                if(++x >= origin.getX() + lengths.getX()) {
+                    curX = x = origin.getX();
+                    if(++y >= (origin.getY() + lengths.getY())) {
+                        curY = y = origin.getY();
+                        if(++z > (origin.getZ() + lengths.getZ())) {
                             throw new NoSuchElementException();
                         }
                     }

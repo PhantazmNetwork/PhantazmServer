@@ -63,6 +63,7 @@ public class NewObjectGui extends LightweightGuiDescription {
                 BlockState state = world.getBlockState(new BlockPos.Mutable(position.getX() + origin.getX(),
                         position.getY() + origin.getY(), position.getZ() + origin.getZ()));
                 blockData.add(state.toString());
+                System.out.println(position);
             }
 
             currentMap.windows().add(new WindowInfo(selected, blockData));
