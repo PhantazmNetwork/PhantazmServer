@@ -2,10 +2,16 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.api.config.ItemStackConfigProcessor;
+import com.github.phantazmnetwork.api.config.KeyConfigProcessor;
+import com.github.phantazmnetwork.api.config.SoundConfigProcessor;
+import com.github.phantazmnetwork.api.config.VariantConfigProcessor;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
+import com.github.phantazmnetwork.mob.config.goal.UseSkillGoalConfigProcessor;
+import com.github.phantazmnetwork.mob.config.skill.PlaySoundSkillConfigProcessor;
 import com.github.phantazmnetwork.mob.goal.FollowEntityGoal;
+import com.github.phantazmnetwork.mob.goal.GoalCreator;
 import com.github.phantazmnetwork.mob.goal.UseSkillGoal;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.skill.Skill;
@@ -15,7 +21,10 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestom
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.config.MinestomDescriptorConfigProcessor;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -86,13 +95,26 @@ final class MobTest {
                         EquipmentSlot.CHESTPLATE, ItemStack.of(Material.LEATHER_CHESTPLATE)
                 )
         );
-        /*
+        Map<String, ConfigProcessor<TargetSelector<? extends Audience>>> audienceProcessors = Map.of();
+        ConfigProcessor<Skill> skillProcessor = new VariantConfigProcessor<>(
+                Map.of(
+                        PlaySoundSkill.SERIAL_NAME, new PlaySoundSkillConfigProcessor(
+                                audienceProcessors,
+                                new SoundConfigProcessor(new KeyConfigProcessor())
+                        )
+                )
+        );
+        ConfigProcessor<GoalCreator> goalProcessor = new VariantConfigProcessor<>(
+                Map.of(
+                        UseSkillGoal.SERIAL_NAME, new UseSkillGoalConfigProcessor(skillProcessor)
+                )
+        );
         ConfigProcessor<MobModel> modelProcessor = new MobModelConfigProcessor(
                 new MinestomDescriptorConfigProcessor(),
+                goalProcessor,
                 new ItemStackConfigProcessor(),
                 MiniMessage.miniMessage()
         );
-        */
 
         AtomicReference<PhantazmMob> mobReference = new AtomicReference<>();
         phantazm.addListener(ChatChannelSendEvent.class, event -> {

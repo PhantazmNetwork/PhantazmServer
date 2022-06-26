@@ -8,13 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class UseSkillGoal implements GoalCreator, VariantSerializable {
-    
+public record UseSkillGoal(@NotNull Skill skill, long period) implements GoalCreator, VariantSerializable {
+
     public final static String SERIAL_NAME = "useSkillGoal";
-
-    private final Skill skill;
-
-    private final long period;
 
     public UseSkillGoal(@NotNull Skill skill, long period) {
         this.skill = Objects.requireNonNull(skill, "skill");
@@ -24,7 +20,7 @@ public class UseSkillGoal implements GoalCreator, VariantSerializable {
     @Override
     public @NotNull NeuralGoal createGoal(@NotNull PhantazmMob mob) {
         return new NeuralGoal() {
-            
+
             private long lastUsage = System.currentTimeMillis();
 
             @Override

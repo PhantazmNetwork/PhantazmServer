@@ -31,7 +31,7 @@ public class FollowEntityGoalConfigProcessor<TEntity extends Entity> implements 
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull FollowEntityGoal<TEntity> followEntityGoal) throws ConfigProcessException {
         ConfigNode node = new LinkedConfigNode();
-        node.put("targetSelector", targetSelectorConfigProcessor.elementFromData(followEntityGoal.getEntitySelector()));
+        node.put("targetSelector", targetSelectorConfigProcessor.elementFromData(followEntityGoal.entitySelector()));
 
         return node;
     }

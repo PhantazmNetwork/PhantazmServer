@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 @FunctionalInterface
-public interface TargetSelector<TReturn> {
+public interface TargetSelector<TTarget> {
 
-    @NotNull Optional<TReturn> selectTarget(@NotNull PhantazmMob mob);
+    @NotNull Optional<TTarget> selectTarget(@NotNull PhantazmMob mob);
 
 }

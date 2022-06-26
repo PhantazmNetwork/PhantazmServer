@@ -10,18 +10,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class FollowEntityGoal<TEntity extends Entity> implements GoalCreator, VariantSerializable {
-    
+public record FollowEntityGoal<TEntity extends Entity>(@NotNull TargetSelector<TEntity> entitySelector) implements GoalCreator, VariantSerializable {
+
     public final static String SERIAL_NAME = "followEntityGoal";
 
-    private final TargetSelector<TEntity> entitySelector;
-
-    public FollowEntityGoal(@NotNull TargetSelector<TEntity> playerSelector) {
-        this.entitySelector = Objects.requireNonNull(playerSelector, "entitySelector");
-    }
-
-    public @NotNull TargetSelector<TEntity> getEntitySelector() {
-        return entitySelector;
+    public FollowEntityGoal(@NotNull TargetSelector<TEntity> entitySelector) {
+        this.entitySelector = Objects.requireNonNull(entitySelector, "entitySelector");
     }
 
     @Override
