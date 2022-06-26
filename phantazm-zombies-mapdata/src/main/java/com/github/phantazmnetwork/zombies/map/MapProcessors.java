@@ -13,6 +13,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,7 @@ import java.util.List;
 
 public final class MapProcessors {
     private static final String ID = "id";
+    private static final String NAME = "name";
     private static final String TEXT = "text";
     private static final String DISPLAY_NAME = "displayName";
     private static final String DISPLAY_ITEM_TAG = "displayItemTag";
@@ -68,7 +70,9 @@ public final class MapProcessors {
     private static final String ROLLS_PER_CHEST = "rollsPerChest";
     private static final String MILESTONE_ROUNDS = "milestoneRounds";
     private static final String DEFAULT_EQUIPMENT = "defaultEquipment";
-
+    private static final String SOURCE = "source";
+    private static final String VOLUME = "volume";
+    private static final String OPEN_SOUND = "openSound";
 
     private static final ConfigProcessor<MapInfo> mapInfo = new ConfigProcessor<>() {
         @Override
@@ -169,7 +173,8 @@ public final class MapProcessors {
             List<Integer> costs = integerList.dataFromElement(element.getElementOrThrow(COSTS));
             List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow(HOLOGRAMS));
             List<Region3I> regions = regionInfoList.dataFromElement(element.getListOrThrow(REGIONS));
-            return new DoorInfo(id, opensTo, costs, hologramInfos, regions);
+            Sound openSound = sound.dataFromElement(element.getElementOrThrow(OPEN_SOUND));
+            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound);
         }
 
         @Override
@@ -208,10 +213,10 @@ public final class MapProcessors {
             Region3I frameRegion = VectorConfigProcessors.region3I().dataFromElement(element
                     .getElementOrThrow(FRAME_REGION));
             List<String> repairBlocks = stringList.dataFromElement(element.getElementOrThrow(REPAIR_BLOCKS));
-            Key repairSound = key.dataFromElement(element.getElementOrThrow(REPAIR_SOUND));
-            Key repairAllSound = key.dataFromElement(element.getElementOrThrow(REPAIR_ALL_SOUND));
-            Key breakSound = key.dataFromElement(element.getElementOrThrow(BREAK_SOUND));
-            Key breakAllSound = key.dataFromElement(element.getElementOrThrow(BREAK_ALL_SOUND));
+            Sound repairSound = sound.dataFromElement(element.getElementOrThrow(REPAIR_SOUND));
+            Sound repairAllSound = sound.dataFromElement(element.getElementOrThrow(REPAIR_ALL_SOUND));
+            Sound breakSound = sound.dataFromElement(element.getElementOrThrow(BREAK_SOUND));
+            Sound breakAllSound = sound.dataFromElement(element.getElementOrThrow(BREAK_ALL_SOUND));
             return new WindowInfo(frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound);
         }
 
@@ -220,10 +225,10 @@ public final class MapProcessors {
             ConfigNode node = new LinkedConfigNode(6);
             node.put(FRAME_REGION, VectorConfigProcessors.region3I().elementFromData(windowData.frameRegion()));
             node.put(REPAIR_BLOCKS, stringList.elementFromData(windowData.repairBlocks()));
-            node.put(REPAIR_SOUND, key.elementFromData(windowData.repairSound()));
-            node.put(REPAIR_ALL_SOUND, key.elementFromData(windowData.repairAllSound()));
-            node.put(BREAK_SOUND, key.elementFromData(windowData.breakSound()));
-            node.put(BREAK_ALL_SOUND, key.elementFromData(windowData.breakAllSound()));
+            node.put(REPAIR_SOUND, sound.elementFromData(windowData.repairSound()));
+            node.put(REPAIR_ALL_SOUND, sound.elementFromData(windowData.repairAllSound()));
+            node.put(BREAK_SOUND, sound.elementFromData(windowData.breakSound()));
+            node.put(BREAK_ALL_SOUND, sound.elementFromData(windowData.breakAllSound()));
             return node;
         }
     };
@@ -392,10 +397,34 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<Sound> sound = new ConfigProcessor<>() {
+        @Override
+        public Sound dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Key name = key.dataFromElement(element.getElementOrThrow(NAME));
+            Sound.Source source = soundSource.dataFromElement(element.getElementOrThrow(SOURCE));
+            float volume = element.getNumberOrThrow(VOLUME).floatValue();
+            float pitch = element.getNumberOrThrow(PITCH).floatValue();
+            return Sound.sound(name, source, volume, pitch);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(Sound sound) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(4);
+            node.put(NAME, key.elementFromData(sound.name()));
+            node.put(SOURCE, soundSource.elementFromData(sound.source()));
+            node.put(VOLUME, new ConfigPrimitive(sound.volume()));
+            node.put(PITCH, new ConfigPrimitive(sound.pitch()));
+            return node;
+        }
+    };
+
     private static final ConfigProcessor<List<Key>> keyList = ConfigProcessorUtils.newListProcessor(key);
 
     private static final ConfigProcessor<List<Component>> componentList = ConfigProcessorUtils
             .newListProcessor(component);
+
+    private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessorUtils.newEnumProcessor(Sound.Source
+            .class);
 
     private static final ConfigProcessor<List<Region3I>> regionInfoList = ConfigProcessorUtils
             .newListProcessor(VectorConfigProcessors.region3I());

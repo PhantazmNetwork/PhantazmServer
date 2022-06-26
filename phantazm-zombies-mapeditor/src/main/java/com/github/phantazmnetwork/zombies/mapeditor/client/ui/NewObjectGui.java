@@ -15,6 +15,7 @@ import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -50,14 +51,22 @@ public class NewObjectGui extends LightweightGuiDescription {
             ZombiesMap currentMap = session.getMap();
             Vec3I origin = currentMap.info().origin();
             Region3I selected = session.getSelection();
-            World world = MinecraftClient.getInstance().player.world;
 
+            PlayerEntity playerEntity = MinecraftClient.getInstance().player;
+            if(playerEntity == null) {
+                return;
+            }
+
+            World world = playerEntity.world;
             List<String> blockData = new ArrayList<>(selected.volume());
             for(Vec3I position : (Iterable<? extends Vec3I>) (selected::blockIterator)) {
                 BlockState state = world.getBlockState(new BlockPos.Mutable(position.getX() + origin.getX(),
                         position.getY() + origin.getY(), position.getZ() + origin.getZ()));
-                System.out.println(position);
+                blockData.add(state.toString());
             }
+
+            currentMap.windows().add(new WindowInfo(selected, blockData));
+            session.refreshWindows();
         });
     }
 }

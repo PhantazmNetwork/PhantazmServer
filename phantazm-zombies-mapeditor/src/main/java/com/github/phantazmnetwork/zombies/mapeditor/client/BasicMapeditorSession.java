@@ -261,6 +261,21 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
+    public void refreshWindows() {
+        assertMap();
+
+
+        renderer.removeIf(key -> key.value().startsWith("window."));
+        int i = 0;
+        for(WindowInfo window : currentMap.windows()) {
+            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "window." + i++),
+                    ObjectRenderer.RenderType.FILLED, WINDOW_COLOR, true,
+                    false, RenderUtils.arrayFromRegion(window.frameRegion(), currentMap.info()
+                    .origin(), new Vec3d[2], 0)));
+        }
+    }
+
+    @Override
     public @Nullable RoomInfo lastRoom() {
         return lastRoom;
     }

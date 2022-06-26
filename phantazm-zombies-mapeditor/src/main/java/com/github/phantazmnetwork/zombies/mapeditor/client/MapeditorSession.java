@@ -58,6 +58,8 @@ public interface MapeditorSession {
 
     void refreshDoors();
 
+    void refreshWindows();
+
     @Nullable RoomInfo lastRoom();
 
     @Nullable DoorInfo lastDoor();
