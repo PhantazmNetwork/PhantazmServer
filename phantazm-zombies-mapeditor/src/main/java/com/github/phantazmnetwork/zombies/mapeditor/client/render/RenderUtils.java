@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.render;
 
+import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -11,23 +12,23 @@ public final class RenderUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static Vec3d @NotNull [] arrayFromRegions(@NotNull Collection<? extends RegionInfo> regions,
+    public static Vec3d @NotNull [] arrayFromRegions(@NotNull Collection<? extends Region3I> regions,
                                                      @NotNull Vec3I origin) {
         Vec3d[] boundsArray = new Vec3d[regions.size() * 2];
 
         int i = 0;
-        for(RegionInfo info : regions) {
-            arrayFromRegion(info, origin, boundsArray, i);
+        for(Region3I region : regions) {
+            arrayFromRegion(region, origin, boundsArray, i);
             i += 2;
         }
 
         return boundsArray;
     }
 
-    public static Vec3d @NotNull [] arrayFromRegion(@NotNull RegionInfo info, @NotNull Vec3I origin,
+    public static Vec3d @NotNull [] arrayFromRegion(@NotNull Region3I region, @NotNull Vec3I origin,
                                                     Vec3d @NotNull [] boundsArray, int offset) {
-        Vec3I infoOrigin = info.origin();
-        Vec3I lengths = info.lengths();
+        Vec3I infoOrigin = region.getOrigin();
+        Vec3I lengths = region.getLengths();
 
         boundsArray[offset] = new Vec3d(infoOrigin.getX() + origin.getX() - ObjectRenderer.EPSILON, infoOrigin
                 .getY() + origin.getY() - ObjectRenderer.EPSILON, infoOrigin.getZ() + origin.getZ() - ObjectRenderer

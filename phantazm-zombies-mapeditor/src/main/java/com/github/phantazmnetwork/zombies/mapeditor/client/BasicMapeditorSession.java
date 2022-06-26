@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.mapeditor.client;
 
 import com.github.phantazmnetwork.commons.FileUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
@@ -291,8 +292,8 @@ public class BasicMapeditorSession implements MapeditorSession {
 
         MapInfo info = currentMap.info();
         renderer.putObject(new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR,
-                true, true, RenderUtils.arrayFromRegion(new RegionInfo(info.origin(),
-                Vec3I.of(1, 1, 1)), Vec3I.ORIGIN, new Vec3d[2], 0)));
+                true, true, RenderUtils.arrayFromRegion(Region3I.normalized(info
+                .origin(), Vec3I.of(1, 1, 1)), Vec3I.ORIGIN, new Vec3d[2], 0)));
 
         refreshRooms();
         refreshDoors();

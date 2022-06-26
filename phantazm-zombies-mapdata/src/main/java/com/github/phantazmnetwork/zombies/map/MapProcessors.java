@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.ConfigProcessorUtils;
+import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.commons.vector.VectorConfigProcessors;
@@ -144,7 +145,7 @@ public final class MapProcessors {
         public RoomInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = key.dataFromElement(element.getElementOrThrow(ID));
             Component displayName = component.dataFromElement(element.getElementOrThrow(DISPLAY_NAME));
-            List<RegionInfo> regions = regionInfoList.dataFromElement(element.getElementOrThrow(REGIONS));
+            List<Region3I> regions = regionInfoList.dataFromElement(element.getElementOrThrow(REGIONS));
             System.out.println("dataFromElement: " + element);
             return new RoomInfo(id, displayName, regions);
         }
@@ -167,7 +168,7 @@ public final class MapProcessors {
             List<Key> opensTo = keyList.dataFromElement(element.getElementOrThrow(OPENS_TO));
             List<Integer> costs = integerList.dataFromElement(element.getElementOrThrow(COSTS));
             List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow(HOLOGRAMS));
-            List<RegionInfo> regions = regionInfoList.dataFromElement(element.getListOrThrow(REGIONS));
+            List<Region3I> regions = regionInfoList.dataFromElement(element.getListOrThrow(REGIONS));
             return new DoorInfo(id, opensTo, costs, hologramInfos, regions);
         }
 
@@ -205,7 +206,8 @@ public final class MapProcessors {
         @Override
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key room = key.dataFromElement(element.getElementOrThrow(ROOM_NAME));
-            RegionInfo frameRegion = regionInfo.dataFromElement(element.getElementOrThrow(FRAME_REGION));
+            Region3I frameRegion = VectorConfigProcessors.region3I().dataFromElement(element
+                    .getElementOrThrow(FRAME_REGION));
             List<String> repairBlocks = stringList.dataFromElement(element.getElementOrThrow(REPAIR_BLOCKS));
             Key repairSound = key.dataFromElement(element.getElementOrThrow(REPAIR_SOUND));
             Key repairAllSound = key.dataFromElement(element.getElementOrThrow(REPAIR_ALL_SOUND));
@@ -218,29 +220,12 @@ public final class MapProcessors {
         public @NotNull ConfigElement elementFromData(@NotNull WindowInfo windowData) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(7);
             node.put(ROOM_NAME, key.elementFromData(windowData.room()));
-            node.put(FRAME_REGION, regionInfo.elementFromData(windowData.frameRegion()));
+            node.put(FRAME_REGION, VectorConfigProcessors.region3I().elementFromData(windowData.frameRegion()));
             node.put(REPAIR_BLOCKS, stringList.elementFromData(windowData.repairBlocks()));
             node.put(REPAIR_SOUND, key.elementFromData(windowData.repairSound()));
             node.put(REPAIR_ALL_SOUND, key.elementFromData(windowData.repairAllSound()));
             node.put(BREAK_SOUND, key.elementFromData(windowData.breakSound()));
             node.put(BREAK_ALL_SOUND, key.elementFromData(windowData.breakAllSound()));
-            return node;
-        }
-    };
-
-    private static final ConfigProcessor<RegionInfo> regionInfo = new ConfigProcessor<>() {
-        @Override
-        public RegionInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow(ORIGIN));
-            Vec3I lengths = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow(LENGTHS));
-            return new RegionInfo(origin, lengths);
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(RegionInfo regionInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(2);
-            node.put(ORIGIN, VectorConfigProcessors.vec3I().elementFromData(regionInfo.origin()));
-            node.put(LENGTHS, VectorConfigProcessors.vec3I().elementFromData(regionInfo.lengths()));
             return node;
         }
     };
@@ -414,8 +399,8 @@ public final class MapProcessors {
     private static final ConfigProcessor<List<Component>> componentList = ConfigProcessorUtils
             .newListProcessor(component);
 
-    private static final ConfigProcessor<List<RegionInfo>> regionInfoList = ConfigProcessorUtils
-            .newListProcessor(regionInfo);
+    private static final ConfigProcessor<List<Region3I>> regionInfoList = ConfigProcessorUtils
+            .newListProcessor(VectorConfigProcessors.region3I());
 
     private static final ConfigProcessor<List<HologramInfo>> hologramInfoList = ConfigProcessorUtils
             .newListProcessor(hologramInfo);
@@ -493,10 +478,6 @@ public final class MapProcessors {
 
     public static @NotNull ConfigProcessor<SpawnType> spawnType() {
         return spawnType;
-    }
-
-    public static @NotNull ConfigProcessor<RegionInfo> regionInfo() {
-        return regionInfo;
     }
 
     public static @NotNull ConfigProcessor<RoundInfo> roundInfo() {

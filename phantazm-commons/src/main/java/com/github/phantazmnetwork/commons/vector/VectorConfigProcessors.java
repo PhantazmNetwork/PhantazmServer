@@ -12,6 +12,8 @@ public final class VectorConfigProcessors {
     private static final String X_COMPONENT_STRING = "x";
     private static final String Y_COMPONENT_STRING = "y";
     private static final String Z_COMPONENT_STRING = "z";
+    private static final String ORIGIN = "origin";
+    private static final String LENGTHS = "lengths";
 
     private static final ConfigProcessor<Vec3D> vec3D = new ConfigProcessor<>() {
         @Override
@@ -70,6 +72,23 @@ public final class VectorConfigProcessors {
         }
     };
 
+    private static final ConfigProcessor<Region3I> region3I = new ConfigProcessor<>() {
+        @Override
+        public Region3I dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Vec3I origin = vec3I.dataFromElement(element.getElementOrThrow(ORIGIN));
+            Vec3I lengths = vec3I.dataFromElement(element.getElementOrThrow(LENGTHS));
+            return Region3I.normalized(origin, lengths);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(Region3I region3I) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(2);
+            node.put(ORIGIN, vec3I.elementFromData(region3I.getOrigin()));
+            node.put(LENGTHS, vec3I.elementFromData(region3I.getLengths()));
+            return node;
+        }
+    };
+
     public static @NotNull ConfigProcessor<Vec3I> vec3I() {
         return vec3I;
     }
@@ -81,4 +100,6 @@ public final class VectorConfigProcessors {
     public static @NotNull ConfigProcessor<Vec3F> vec3F() {
         return vec3F;
     }
+
+    public static @NotNull ConfigProcessor<Region3I> region3I() { return region3I; }
 }
