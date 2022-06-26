@@ -63,7 +63,7 @@ public class NewRoomGui extends LightweightGuiDescription {
                 }
             }
 
-            ArrayList<RegionInfo> bounds = new ArrayList<>();
+            ArrayList<RegionInfo> bounds = new ArrayList<>(1);
             bounds.add(selected);
 
             RoomInfo newRoom = new RoomInfo(roomKey, Component.text(roomKey.value()), bounds);

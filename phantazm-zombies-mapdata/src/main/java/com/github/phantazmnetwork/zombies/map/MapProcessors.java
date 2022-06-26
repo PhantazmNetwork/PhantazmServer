@@ -33,6 +33,7 @@ public final class MapProcessors {
     private static final String OPENS_TO = "opensTo";
     private static final String TRIGGER_LOCATION = "triggerLocation";
     private static final String ROOM_NAME = "roomName";
+    private static final String REPAIR_BLOCKS = "repairBlocks";
     private static final String FRAME_REGION = "frameRegion";
     private static final String REPAIR_SOUND = "repairSound";
     private static final String REPAIR_ALL_SOUND = "repairAllSound";
@@ -205,18 +206,20 @@ public final class MapProcessors {
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key room = key.dataFromElement(element.getElementOrThrow(ROOM_NAME));
             RegionInfo frameRegion = regionInfo.dataFromElement(element.getElementOrThrow(FRAME_REGION));
+            List<String> repairBlocks = stringList.dataFromElement(element.getElementOrThrow(REPAIR_BLOCKS));
             Key repairSound = key.dataFromElement(element.getElementOrThrow(REPAIR_SOUND));
             Key repairAllSound = key.dataFromElement(element.getElementOrThrow(REPAIR_ALL_SOUND));
             Key breakSound = key.dataFromElement(element.getElementOrThrow(BREAK_SOUND));
             Key breakAllSound = key.dataFromElement(element.getElementOrThrow(BREAK_ALL_SOUND));
-            return new WindowInfo(room, frameRegion, repairSound, repairAllSound, breakSound, breakAllSound);
+            return new WindowInfo(room, frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull WindowInfo windowData) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(6);
+            ConfigNode node = new LinkedConfigNode(7);
             node.put(ROOM_NAME, key.elementFromData(windowData.room()));
             node.put(FRAME_REGION, regionInfo.elementFromData(windowData.frameRegion()));
+            node.put(REPAIR_BLOCKS, stringList.elementFromData(windowData.repairBlocks()));
             node.put(REPAIR_SOUND, key.elementFromData(windowData.repairSound()));
             node.put(REPAIR_ALL_SOUND, key.elementFromData(windowData.repairAllSound()));
             node.put(BREAK_SOUND, key.elementFromData(windowData.breakSound()));
@@ -439,6 +442,24 @@ public final class MapProcessors {
             return new ConfigPrimitive(integer);
         }
     });
+
+    private static final ConfigProcessor<List<String>> stringList = ConfigProcessorUtils.newListProcessor(
+            new ConfigProcessor<>() {
+                @Override
+                public String dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                    try {
+                        return element.asString();
+                    }
+                    catch (IllegalStateException e) {
+                        throw new ConfigProcessException(e);
+                    }
+                }
+
+                @Override
+                public @NotNull ConfigElement elementFromData(String string) {
+                    return new ConfigPrimitive(string);
+                }
+            });
 
     private MapProcessors() {
         throw new UnsupportedOperationException();

@@ -10,6 +10,7 @@ public final class TranslationKeys {
     public static final String GUI_MAPEDITOR_DISABLED = "gui.mapeditor.disabled";
     public static final String GUI_MAPEDITOR_NEW_MAP = "gui.mapeditor.new_map";
     public static final String GUI_MAPEDITOR_NEW_ROOM = "gui.mapeditor.new_room";
+    public static final String GUI_MAPEDITOR_NEW_WINDOW = "gui.mapeditor.new_window";
     public static final String GUI_MAPEDITOR_NEW_DOOR = "gui.mapeditor.new_door";
     public static final String GUI_MAPEDITOR_CREATING_MAP = "gui.mapeditor.creating_map";
     public static final String GUI_MAPEDITOR_SAVE = "gui.mapeditor.save";
