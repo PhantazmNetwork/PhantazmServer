@@ -9,6 +9,7 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.EntityMeta;
@@ -23,18 +24,23 @@ import java.util.*;
 public class MobModel {
 
     private final MinestomDescriptor descriptor;
+
     private final Iterable<Iterable<GoalCreator>> goalCreatorsGroups;
 
     private final Component displayName;
 
     private final Map<EquipmentSlot, ItemStack> equipment;
 
+    private final float maxHealth;
+
     public MobModel(@NotNull MinestomDescriptor descriptor, @NotNull Iterable<Iterable<GoalCreator>> goalCreatorsGroups,
-                    @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment) {
+                    @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment,
+                    float maxHealth) {
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.goalCreatorsGroups = Objects.requireNonNull(goalCreatorsGroups, "goalCreatorsGroups");
         this.displayName = displayName;
         this.equipment = Objects.requireNonNull(equipment, "equipment");
+        this.maxHealth = maxHealth;
     }
 
     public @NotNull MinestomDescriptor getDescriptor() {
@@ -66,6 +72,10 @@ public class MobModel {
         return Map.copyOf(equipment);
     }
 
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
     public @NotNull PhantazmMob spawn(@NotNull Spawner spawner, @NotNull Instance instance,
                                       @NotNull Point point) {
         PhantazmMob mob = new PhantazmMob(this, spawner.spawnEntity(instance, point, descriptor, this::onSpawn));
@@ -79,6 +89,7 @@ public class MobModel {
         if (displayName != null) {
             meta.setCustomName(displayName);
             meta.setCustomNameVisible(true);
+            entity.getAttribute(Attribute.MAX_HEALTH).setBaseValue(maxHealth);
         }
 
         for (Map.Entry<EquipmentSlot, ItemStack> entry : equipment.entrySet()) {

@@ -88,7 +88,9 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             equipment.put(equipmentSlot, itemStackConfigProcessor.dataFromElement(entry.getValue()));
         }
 
-        return new MobModel(descriptor, goalCreatorsGroups, displayName, equipment);
+        float maxHealth = element.getNumberOrThrow("maxHealth").floatValue();
+
+        return new MobModel(descriptor, goalCreatorsGroups, displayName, equipment, maxHealth);
     }
 
     @Override
@@ -115,11 +117,14 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             equipmentNode.put(entry.getKey().name().toUpperCase(), itemStackConfigProcessor.elementFromData(entry.getValue()));
         }
 
+        ConfigElement maxHealth = new ConfigPrimitive(model.getMaxHealth());
+
         ConfigNode element = new LinkedConfigNode();
         element.put("descriptor", descriptor);
         element.put("goalGroupCreators", goalCreatorsGroups);
         element.put("displayName", displayName);
         element.put("equipment", equipmentNode);
+        element.put("maxHealth", maxHealth);
 
         return element;
     }
