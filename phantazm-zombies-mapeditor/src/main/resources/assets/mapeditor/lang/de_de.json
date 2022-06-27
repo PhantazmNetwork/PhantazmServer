@@ -1,0 +1,35 @@
+{
+  "category.mapeditor.all": "Mapeditor",
+
+  "key.mapeditor.config": "Konfiguration",
+  "key.mapeditor.create": "Neues Objekt",
+
+  "gui.mapeditor.enabled": "An",
+  "gui.mapeditor.disabled": "Aus",
+
+  "gui.mapeditor.new_map": "Neue Map",
+  "gui.mapeditor.new_room": "Neuer Raum",
+  "gui.mapeditor.new_door": "Neue Tür",
+  "gui.mapeditor.new_window": "Neues Fenster",
+  "gui.mapeditor.new_shop": "Neuer Shop",
+  "gui.mapeditor.new_spawnpoint": "Neuer Spawnpunkt",
+
+  "gui.mapeditor.save": "Speichern",
+  "gui.mapeditor.load": "Laden",
+
+  "gui.mapeditor.delete_map": "Map löschen",
+
+  "gui.mapeditor.feedback.no_active_map": "Keine aktive Map!",
+  "gui.mapeditor.feedback.empty_map_name": "Leerer Map Name!",
+  "gui.mapeditor.feedback.no_selection": "Keine Auswahl vorhanden!",
+  "gui.mapeditor.feedback.map_name_exists": "Name existiert schon!",
+
+  "gui.mapeditor.yes": "Ja",
+  "gui.mapeditor.no": "Nein",
+  "gui.mapeditor.add": "Hinzufügen",
+
+  "gui.mapeditor.current_map": "Ausgewählte Map: %s",
+  "gui.mapeditor.no_map": "Keine Map ausgewählt",
+  "gui.mapeditor.delete_map_query": "Map löschen?",
+  "gui.mapeditor.display_settings": "Anzeigeeinstellungen"
+}
