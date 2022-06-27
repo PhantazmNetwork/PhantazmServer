@@ -134,7 +134,9 @@ public class FilesystemMapLoader implements MapLoader {
 
         int i = 0;
         for(WindowInfo window : data.windows()) {
-            ConfigBridges.write(paths.windows.resolve(i + extension),
+            Vec3I origin = window.frameRegion().getOrigin();
+            String positionString = origin.getX() + "_" + origin.getY() + "_" + origin.getZ();
+            ConfigBridges.write(paths.spawnpoints.resolve(positionString + "-" + i + extension),
                     MapProcessors.windowInfo().elementFromData(window), codec);
             i++;
         }
