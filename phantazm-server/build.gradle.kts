@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":phantazm-neuron-minestom"))
     implementation(project(":phantazm-zombies"))
 
-    implementation(libs.miniMessage)
+    implementation(libs.adventure.text.minimessage)
     implementation(libs.ethylene.toml)
 }
 
