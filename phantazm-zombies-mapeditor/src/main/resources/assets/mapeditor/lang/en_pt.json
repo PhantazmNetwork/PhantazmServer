@@ -12,7 +12,7 @@
   "gui.mapeditor.new_door": "New gateway",
   "gui.mapeditor.new_window": "New porthole",
   "gui.mapeditor.new_shop": "New merchant",
-  "gui.mapeditor.new_spawnpoint": "New spawnpoint",
+  "gui.mapeditor.new_spawnpoint": "New dock",
 
   "gui.mapeditor.save": "Write yer booty",
   "gui.mapeditor.load": "Load yer booty",

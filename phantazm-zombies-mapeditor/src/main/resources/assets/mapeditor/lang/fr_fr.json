@@ -1,0 +1,35 @@
+{
+  "category.mapeditor.all": "Éditeur des plans",
+
+  "key.mapeditor.config": "Config",
+  "key.mapeditor.create": "Nouveau objet",
+
+  "gui.mapeditor.enabled": "Activé",
+  "gui.mapeditor.disabled": "Desactivé",
+
+  "gui.mapeditor.new_map": "Nouveau plan",
+  "gui.mapeditor.new_room": "Nouvelle pièce",
+  "gui.mapeditor.new_door": "Nouvelle porte",
+  "gui.mapeditor.new_window": "Nouvelle fenêtre",
+  "gui.mapeditor.new_shop": "Nouveau magasin",
+  "gui.mapeditor.new_spawnpoint": "Nouveau spawnpoint",
+
+  "gui.mapeditor.save": "Sauver",
+  "gui.mapeditor.load": "Charger",
+
+  "gui.mapeditor.delete_map": "Supprimer le plan",
+
+  "gui.mapeditor.feedback.no_active_map": "Pas de plan activé!",
+  "gui.mapeditor.feedback.empty_map_name": "Pas de nom du plan!",
+  "gui.mapeditor.feedback.no_selection": "Pas de sélection!",
+  "gui.mapeditor.feedback.map_name_exists": "Ce nom existe!",
+
+  "gui.mapeditor.yes": "Oui",
+  "gui.mapeditor.no": "Non",
+  "gui.mapeditor.add": "Ajouter",
+
+  "gui.mapeditor.current_map": "En cours: %s",
+  "gui.mapeditor.no_map": "Pas de plan",
+  "gui.mapeditor.delete_map_query": "Supprimer le plan?",
+  "gui.mapeditor.display_settings": "Montrer les paramètres"
+}
