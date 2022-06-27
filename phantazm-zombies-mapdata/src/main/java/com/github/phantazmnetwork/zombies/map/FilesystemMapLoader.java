@@ -128,22 +128,21 @@ public class FilesystemMapLoader implements MapLoader {
         }
 
         for(ShopInfo shop : data.shops()) {
-            ConfigBridges.write(paths.shops.resolve(shop.id().value() + extension), MapProcessors.shopInfo()
-                    .elementFromData(shop), codec);
+            ConfigBridges.write(paths.shops.resolve(getPositionString(shop.triggerLocation()) + "-" + shop.id()
+                    .value() + extension), MapProcessors.shopInfo().elementFromData(shop), codec);
         }
 
         int i = 0;
         for(WindowInfo window : data.windows()) {
             Vec3I origin = window.frameRegion().getOrigin();
-            String positionString = origin.getX() + "_" + origin.getY() + "_" + origin.getZ();
-            ConfigBridges.write(paths.windows.resolve(positionString + "-" + i + extension),
+            ConfigBridges.write(paths.windows.resolve(getPositionString(origin) + "-" + i + extension),
                     MapProcessors.windowInfo().elementFromData(window), codec);
             i++;
         }
 
         for(RoundInfo round : data.rounds()) {
-            ConfigBridges.write(paths.rounds.resolve(round.round() + extension), MapProcessors
-                    .roundInfo().elementFromData(round), codec);
+            ConfigBridges.write(paths.rounds.resolve(round.round() + extension), MapProcessors.roundInfo()
+                    .elementFromData(round), codec);
         }
 
         for(SpawnruleInfo spawnrule : data.spawnrules()) {
@@ -153,11 +152,13 @@ public class FilesystemMapLoader implements MapLoader {
 
         int j = 0;
         for(SpawnpointInfo spawnpoint : data.spawnpoints()) {
-            Vec3I position = spawnpoint.position();
-            String positionString = position.getX() + "_" + position.getY() + "_" + position.getZ();
-            ConfigBridges.write(paths.spawnpoints.resolve(positionString + "-" + j + extension), MapProcessors
-                    .spawnpointInfo().elementFromData(spawnpoint), codec);
+            ConfigBridges.write(paths.spawnpoints.resolve(getPositionString(spawnpoint.position()) + "-" + j +
+                    extension), MapProcessors.spawnpointInfo().elementFromData(spawnpoint), codec);
             j++;
         }
+    }
+
+    private String getPositionString(Vec3I position) {
+        return position.getX() + "_" + position.getY() + "_" + position.getZ();
     }
 }
