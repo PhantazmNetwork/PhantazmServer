@@ -4,8 +4,8 @@
   "key.mapeditor.config": "Editin'",
   "key.mapeditor.create": "New treasure",
 
-  "gui.mapeditor.enabled": "Unearth treasure",
-  "gui.mapeditor.disabled": "Bury treasure",
+  "gui.mapeditor.enabled": "Unearthed treasure",
+  "gui.mapeditor.disabled": "Buried treasure",
 
   "gui.mapeditor.new_map": "New treasure map",
   "gui.mapeditor.new_room": "New quarters",
@@ -14,8 +14,8 @@
   "gui.mapeditor.new_shop": "New merchant",
   "gui.mapeditor.new_spawnpoint": "New dock",
 
-  "gui.mapeditor.save": "Write yer booty",
-  "gui.mapeditor.load": "Load yer booty",
+  "gui.mapeditor.save": "Bury",
+  "gui.mapeditor.load": "Unearth",
 
   "gui.mapeditor.delete_map": "Delete yer booty",
 
