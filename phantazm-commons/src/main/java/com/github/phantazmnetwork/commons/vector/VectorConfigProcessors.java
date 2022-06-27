@@ -26,7 +26,7 @@ public final class VectorConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3D vec3D) {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(3);
             node.put(X_COMPONENT_STRING, new ConfigPrimitive(vec3D.getX()));
             node.put(Y_COMPONENT_STRING, new ConfigPrimitive(vec3D.getY()));
             node.put(Z_COMPONENT_STRING, new ConfigPrimitive(vec3D.getZ()));
@@ -45,7 +45,7 @@ public final class VectorConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3I vec) {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(3);
             node.put(X_COMPONENT_STRING, new ConfigPrimitive(vec.getX()));
             node.put(Y_COMPONENT_STRING, new ConfigPrimitive(vec.getY()));
             node.put(Z_COMPONENT_STRING, new ConfigPrimitive(vec.getZ()));
@@ -64,7 +64,7 @@ public final class VectorConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3F vec) {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(3);
             node.put(X_COMPONENT_STRING, new ConfigPrimitive(vec.getX()));
             node.put(Y_COMPONENT_STRING, new ConfigPrimitive(vec.getY()));
             node.put(Z_COMPONENT_STRING, new ConfigPrimitive(vec.getZ()));

@@ -9,5 +9,4 @@ repositories {
 
 dependencies {
     implementation(project(":phantazm-commons"))
-    api(libs.adventure.text.minimessage)
 }
