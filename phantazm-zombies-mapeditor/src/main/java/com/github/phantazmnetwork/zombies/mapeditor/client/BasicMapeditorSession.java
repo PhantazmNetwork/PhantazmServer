@@ -205,9 +205,16 @@ public class BasicMapeditorSession implements MapeditorSession {
     @Override
     public void loadMapsFromDisk() {
         try {
+            Key oldId = null;
+            if(currentMap != null) {
+                oldId = currentMap.info().id();
+            }
+
             Map<Key, ZombiesMap> newMaps = loadMaps();
-            this.maps.clear();
-            this.maps.putAll(newMaps);
+            maps.clear();
+            maps.putAll(newMaps);
+            currentMap = maps.get(oldId);
+
             refreshMap();
         }
         catch (IOException e) {
