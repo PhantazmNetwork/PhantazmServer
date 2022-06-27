@@ -40,6 +40,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color DOOR_COLOR = new Color(189, 0, 255, 64);
     private static final Color WINDOW_COLOR = new Color(0, 251, 201, 64);
     private static final Color SPAWNPOINT_COLOR = new Color(252, 243, 1, 64);
+    private static final Color SHOP_COLOR = new Color(255, 72, 5, 64);
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
     private static final Key SELECTION_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection");
@@ -297,6 +298,20 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
+    public void refreshShops() {
+        assertMap();
+
+        renderer.removeIf(key -> key.value().startsWith("shop."));
+        int i = 0;
+        for(ShopInfo shopInfo : currentMap.shops()) {
+            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "shop." + i++),
+                    ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true, false,
+                    RenderUtils.arrayFromRegion(Region3I.normalized(shopInfo.triggerLocation(),
+                            Vec3I.of(1, 1, 1)), currentMap.info().origin(), new Vec3d[2], 0)));
+        }
+    }
+
+    @Override
     public @Nullable RoomInfo lastRoom() {
         return lastRoom;
     }
@@ -347,6 +362,7 @@ public class BasicMapeditorSession implements MapeditorSession {
         refreshDoors();
         refreshWindows();
         refreshSpawnpoints();
+        refreshShops();
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {

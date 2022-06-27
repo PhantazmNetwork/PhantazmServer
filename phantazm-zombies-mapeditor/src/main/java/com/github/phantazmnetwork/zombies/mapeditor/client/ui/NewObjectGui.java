@@ -37,12 +37,14 @@ public class NewObjectGui extends LightweightGuiDescription {
         WButton newDoor = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_DOOR));
         WButton newWindow = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_WINDOW));
         WButton newSpawnpoint = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_SPAWNPOINT));
+        WButton newShop = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_SHOP));
         WLabel feedback = new WLabel(new LiteralText(StringUtils.EMPTY));
 
         root.add(newRoom, 0, 0, 5, 1);
         root.add(newDoor, 0, 1, 5, 1);
         root.add(newWindow, 0, 2, 5, 1);
         root.add(newSpawnpoint, 0, 3, 5, 1);
+        root.add(newShop, 0, 4, 5, 1);
 
         root.add(feedback, 0, 5);
 
@@ -68,8 +70,10 @@ public class NewObjectGui extends LightweightGuiDescription {
 
             currentMap.windows().add(new WindowInfo(selected, blockData));
             session.refreshWindows();
+            ScreenUtils.closeCurrentScreen();
         });
         newSpawnpoint.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(
                 new NewSpawnpointGui(session))));
+        newShop.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewShopGui(session))));
     }
 }

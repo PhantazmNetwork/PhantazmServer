@@ -65,6 +65,8 @@ public interface MapeditorSession {
 
     void refreshSpawnpoints();
 
+    void refreshShops();
+
     @Nullable RoomInfo lastRoom();
 
     @Nullable DoorInfo lastDoor();
