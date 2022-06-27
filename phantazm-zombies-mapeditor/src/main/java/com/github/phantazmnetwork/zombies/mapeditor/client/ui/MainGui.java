@@ -53,6 +53,7 @@ public class MainGui extends LightweightGuiDescription {
         });
         WButton displaySettings = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_SETTINGS));
         WButton save = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_SAVE));
+        WButton load = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_LOAD));
 
         //...add them to root
         root.add(icon, 0, 0, 2, 2);
@@ -64,7 +65,8 @@ public class MainGui extends LightweightGuiDescription {
         root.add(deleteMap, 0, 5, 6, 1);
         root.add(listPanel, 6, 2, 6, 6);
         root.add(displaySettings, 0, 6, 6, 1);
-        root.add(save, 0, 7, 6, 1);
+        root.add(save, 0, 7, 3, 1);
+        root.add(load, 3, 7, 3, 1);
 
         //generic configuration
         updateMapeditorToggle(mapeditorToggle, session.isEnabled());
@@ -115,6 +117,7 @@ public class MainGui extends LightweightGuiDescription {
         });
 
         save.setOnClick(session::saveMaps);
+        load.setOnClick(session::loadMapsFromDisk);
     }
 
     private boolean hasMap(MapeditorSession session, WText feedback) {

@@ -14,6 +14,7 @@ public final class TranslationKeys {
     public static final String GUI_MAPEDITOR_NEW_DOOR = "gui.mapeditor.new_door";
     public static final String GUI_MAPEDITOR_CREATING_MAP = "gui.mapeditor.creating_map";
     public static final String GUI_MAPEDITOR_SAVE = "gui.mapeditor.save";
+    public static final String GUI_MAPEDITOR_LOAD = "gui.mapeditor.load";
     public static final String GUI_MAPEDITOR_EDIT_MAP = "gui.mapeditor.edit_map";
     public static final String GUI_MAPEDITOR_DELETE_MAP = "gui.mapeditor.delete_map";
     public static final String GUI_MAPEDITOR_DISPLAY_NAME = "gui.mapeditor.display.name";
