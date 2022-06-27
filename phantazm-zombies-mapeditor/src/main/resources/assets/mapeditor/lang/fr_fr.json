@@ -19,7 +19,7 @@
 
   "gui.mapeditor.delete_map": "Supprimer le plan",
 
-  "gui.mapeditor.feedback.no_active_map": "Pas de plan activé!",
+  "gui.mapeditor.feedback.no_active_map": "Pas de plan en cours!",
   "gui.mapeditor.feedback.empty_map_name": "Pas de nom du plan!",
   "gui.mapeditor.feedback.no_selection": "Pas de sélection!",
   "gui.mapeditor.feedback.map_name_exists": "Ce nom existe!",

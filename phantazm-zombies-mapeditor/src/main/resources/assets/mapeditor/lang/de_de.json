@@ -20,7 +20,7 @@
   "gui.mapeditor.delete_map": "Map löschen",
 
   "gui.mapeditor.feedback.no_active_map": "Keine aktive Map!",
-  "gui.mapeditor.feedback.empty_map_name": "Leerer Map Name!",
+  "gui.mapeditor.feedback.empty_map_name": "Eingabe für Mapname wird benötigt!",
   "gui.mapeditor.feedback.no_selection": "Keine Auswahl vorhanden!",
   "gui.mapeditor.feedback.map_name_exists": "Name existiert schon!",
 
