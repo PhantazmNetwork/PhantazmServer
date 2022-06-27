@@ -6,5 +6,5 @@ dependencies {
     api(project(":phantazm-neuron-minestom"))
     implementation(project(":phantazm-api"))
     implementation(project(":phantazm-commons"))
-    implementation(libs.miniMessage)
+    implementation(libs.adventure.text.minimessage)
 }
