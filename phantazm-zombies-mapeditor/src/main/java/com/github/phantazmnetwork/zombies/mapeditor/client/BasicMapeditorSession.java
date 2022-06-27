@@ -346,6 +346,7 @@ public class BasicMapeditorSession implements MapeditorSession {
         refreshRooms();
         refreshDoors();
         refreshWindows();
+        refreshSpawnpoints();
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {

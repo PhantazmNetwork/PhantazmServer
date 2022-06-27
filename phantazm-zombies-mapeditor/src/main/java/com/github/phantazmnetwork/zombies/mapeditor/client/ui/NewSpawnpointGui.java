@@ -46,8 +46,10 @@ public class NewSpawnpointGui extends LightweightGuiDescription {
 
             //noinspection PatternValidation
             Key spawnruleKey = Key.key(Namespaces.PHANTAZM, spawnruleName.getText());
+            Vec3I origin = currentMap.info().origin();
 
-            currentMap.spawnpoints().add(new SpawnpointInfo(firstSelected, spawnruleKey));
+            currentMap.spawnpoints().add(new SpawnpointInfo(Vec3I.of(firstSelected.getX() - origin.getX(),
+                    firstSelected.getY() - origin.getY(), firstSelected.getZ() - origin.getZ()), spawnruleKey));
             session.refreshSpawnpoints();
             ScreenUtils.closeCurrentScreen();
         });
