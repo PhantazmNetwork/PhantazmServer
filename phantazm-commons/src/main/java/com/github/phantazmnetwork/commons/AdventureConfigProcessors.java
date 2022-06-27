@@ -78,8 +78,7 @@ public final class AdventureConfigProcessors {
         }
     };
 
-    private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessorUtils.newEnumProcessor(Sound.Source
-            .class);
+    private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessor.enumProcessor(Sound.Source.class);
 
     public static @NotNull ConfigProcessor<Key> key() {
         return key;

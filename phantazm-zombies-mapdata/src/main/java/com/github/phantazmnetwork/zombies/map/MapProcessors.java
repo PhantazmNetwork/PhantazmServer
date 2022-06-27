@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
-import com.github.phantazmnetwork.commons.ConfigProcessorUtils;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
@@ -284,59 +283,24 @@ public final class MapProcessors {
         }
     };
 
-    private static final ConfigProcessor<List<Key>> keyList = ConfigProcessorUtils
-            .newListProcessor(AdventureConfigProcessors.key());
+    private static final ConfigProcessor<List<Key>> keyList = AdventureConfigProcessors.key().listProcessor();
 
-    private static final ConfigProcessor<List<Component>> componentList = ConfigProcessorUtils
-            .newListProcessor(AdventureConfigProcessors.component());
-    private static final ConfigProcessor<SpawnType> spawnType = ConfigProcessorUtils.newEnumProcessor(SpawnType.class);
+    private static final ConfigProcessor<List<Component>> componentList = AdventureConfigProcessors.component()
+            .listProcessor();
+    private static final ConfigProcessor<SpawnType> spawnType = ConfigProcessor.enumProcessor(SpawnType.class);
 
-    private static final ConfigProcessor<List<Region3I>> regionInfoList = ConfigProcessorUtils
-            .newListProcessor(VectorConfigProcessors.region3I());
+    private static final ConfigProcessor<List<Region3I>> regionInfoList = VectorConfigProcessors.region3I()
+            .listProcessor();
 
-    private static final ConfigProcessor<List<HologramInfo>> hologramInfoList = ConfigProcessorUtils
-            .newListProcessor(hologramInfo);
+    private static final ConfigProcessor<List<HologramInfo>> hologramInfoList = hologramInfo.listProcessor();
 
-    private static final ConfigProcessor<List<WaveInfo>> waveInfoList = ConfigProcessorUtils.newListProcessor(waveInfo);
+    private static final ConfigProcessor<List<WaveInfo>> waveInfoList = waveInfo.listProcessor();
 
-    private static final ConfigProcessor<List<SpawnInfo>> spawnInfoList = ConfigProcessorUtils
-            .newListProcessor(spawnInfo);
+    private static final ConfigProcessor<List<SpawnInfo>> spawnInfoList = spawnInfo.listProcessor();
 
-    private static final ConfigProcessor<List<Integer>> integerList = ConfigProcessorUtils.newListProcessor(
-            new ConfigProcessor<>() {
-        @Override
-        public Integer dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            try {
-                return element.asNumber().intValue();
-            }
-            catch (IllegalStateException e) {
-                throw new ConfigProcessException(e);
-            }
-        }
+    private static final ConfigProcessor<List<Integer>> integerList = ConfigProcessor.INTEGER.listProcessor();
 
-        @Override
-        public @NotNull ConfigElement elementFromData(Integer integer) {
-            return new ConfigPrimitive(integer);
-        }
-    });
-
-    private static final ConfigProcessor<List<String>> stringList = ConfigProcessorUtils.newListProcessor(
-            new ConfigProcessor<>() {
-                @Override
-                public String dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                    try {
-                        return element.asString();
-                    }
-                    catch (IllegalStateException e) {
-                        throw new ConfigProcessException(e);
-                    }
-                }
-
-                @Override
-                public @NotNull ConfigElement elementFromData(String string) {
-                    return new ConfigPrimitive(string);
-                }
-            });
+    private static final ConfigProcessor<List<String>> stringList = ConfigProcessor.STRING.listProcessor();
 
     private MapProcessors() {
         throw new UnsupportedOperationException();
