@@ -136,7 +136,7 @@ public class FilesystemMapLoader implements MapLoader {
         for(WindowInfo window : data.windows()) {
             Vec3I origin = window.frameRegion().getOrigin();
             String positionString = origin.getX() + "_" + origin.getY() + "_" + origin.getZ();
-            ConfigBridges.write(paths.spawnpoints.resolve(positionString + "-" + i + extension),
+            ConfigBridges.write(paths.windows.resolve(positionString + "-" + i + extension),
                     MapProcessors.windowInfo().elementFromData(window), codec);
             i++;
         }
