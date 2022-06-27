@@ -2,9 +2,7 @@ package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.zombies.map.RoomInfo;
-import com.github.phantazmnetwork.zombies.map.WindowInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
@@ -38,11 +36,13 @@ public class NewObjectGui extends LightweightGuiDescription {
         WButton newRoom = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_ROOM));
         WButton newDoor = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_DOOR));
         WButton newWindow = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_WINDOW));
+        WButton newSpawnpoint = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_SPAWNPOINT));
         WLabel feedback = new WLabel(new LiteralText(StringUtils.EMPTY));
 
         root.add(newRoom, 0, 0, 5, 1);
         root.add(newDoor, 0, 1, 5, 1);
         root.add(newWindow, 0, 2, 5, 1);
+        root.add(newSpawnpoint, 0, 3, 5, 1);
 
         root.add(feedback, 0, 5);
 
@@ -58,17 +58,18 @@ public class NewObjectGui extends LightweightGuiDescription {
                 return;
             }
 
-            World world = playerEntity.world;
             List<String> blockData = new ArrayList<>(selected.volume());
             for(Vec3I position : selected) {
                 //convert to world coordinate space
-                BlockState state = world.getBlockState(new BlockPos.Mutable(position.getX() + origin.getX(),
-                        position.getY() + origin.getY(), position.getZ() + origin.getZ()));
+                BlockState state = playerEntity.world.getBlockState(new BlockPos.Mutable(position.getX() + origin
+                        .getX(), position.getY() + origin.getY(), position.getZ() + origin.getZ()));
                 blockData.add(NbtHelper.fromBlockState(state).toString());
             }
 
             currentMap.windows().add(new WindowInfo(selected, blockData));
             session.refreshWindows();
         });
+        newSpawnpoint.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(
+                new NewSpawnpointGui(session))));
     }
 }

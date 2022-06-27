@@ -21,13 +21,9 @@ public final class AdventureConfigProcessors {
     private static final ConfigProcessor<Key> key = new ConfigProcessor<>() {
         @Override
         public Key dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            if(!element.isString()) {
-                throw new ConfigProcessException("Element must be a string");
-            }
-
             try {
                 //noinspection PatternValidation
-                return Key.key(element.asString());
+                return Key.key(ConfigProcessor.STRING.dataFromElement(element));
             }
             catch (InvalidKeyException keyException) {
                 throw new ConfigProcessException(keyException);
@@ -43,11 +39,7 @@ public final class AdventureConfigProcessors {
     private static final ConfigProcessor<Component> component = new ConfigProcessor<>() {
         @Override
         public Component dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            if(!element.isString()) {
-                throw new ConfigProcessException("Element is not a string");
-            }
-
-            return MiniMessage.miniMessage().deserialize(element.asString());
+            return MiniMessage.miniMessage().deserialize(ConfigProcessor.STRING.dataFromElement(element));
         }
 
         @Override

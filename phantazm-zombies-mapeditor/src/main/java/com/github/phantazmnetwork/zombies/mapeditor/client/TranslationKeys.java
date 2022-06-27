@@ -32,4 +32,6 @@ public final class TranslationKeys {
     public static final String GUI_MAPEDITOR_DELETE_MAP_QUERY = "gui.mapeditor.delete_map_query";
     public static final String GUI_MAPEDITOR_DISPLAY_SETTINGS = "gui.mapeditor.display_settings";
     public static final String GUI_MAPEDITOR_ADD = "gui.mapeditor.add";
+    public static final String GUI_MAPEDITOR_NEW_SPAWNPOINT = "gui.mapeditor.new_spawnpoint";
+    public static final String GUI_MAPEDITOR_IS_WINDOW = "gui.mapeditor.is_window";
 }

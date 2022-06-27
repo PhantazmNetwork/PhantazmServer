@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
+import com.github.phantazmnetwork.zombies.map.SpawnruleInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
@@ -54,13 +55,19 @@ public interface MapeditorSession {
 
     void setLastDoor(@Nullable DoorInfo door);
 
+    void setLastSpawnrule(@Nullable Key spawnruleId);
+
     void refreshRooms();
 
     void refreshDoors();
 
     void refreshWindows();
 
+    void refreshSpawnpoints();
+
     @Nullable RoomInfo lastRoom();
 
     @Nullable DoorInfo lastDoor();
+
+    @Nullable Key lastSpawnrule();
 }

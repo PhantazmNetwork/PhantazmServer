@@ -39,6 +39,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color ROOM_COLOR = new Color(255, 255, 255, 64);
     private static final Color DOOR_COLOR = new Color(189, 0, 255, 64);
     private static final Color WINDOW_COLOR = new Color(0, 251, 201, 64);
+    private static final Color SPAWNPOINT_COLOR = new Color(252, 243, 1, 64);
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
     private static final Key SELECTION_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection");
@@ -52,6 +53,7 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     private RoomInfo lastRoom;
     private DoorInfo lastDoor;
+    private Key lastSpawnrule;
     private boolean enabled;
 
     private Vec3i firstSelected;
@@ -235,6 +237,11 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
+    public void setLastSpawnrule(@Nullable Key spawnruleId) {
+        this.lastSpawnrule = spawnruleId;
+    }
+
+    @Override
     @SuppressWarnings("PatternValidation")
     public void refreshRooms() {
         assertMap();
@@ -276,6 +283,20 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
+    public void refreshSpawnpoints() {
+        assertMap();
+
+        renderer.removeIf(key -> key.value().startsWith("spawnpoint."));
+        int i = 0;
+        for(SpawnpointInfo spawnpointInfo : currentMap.spawnpoints()) {
+            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "spawnpoint." + i++),
+                    ObjectRenderer.RenderType.FILLED, SPAWNPOINT_COLOR, true, false,
+                    RenderUtils.arrayFromRegion(Region3I.normalized(spawnpointInfo.position(),
+                            Vec3I.of(1, 1, 1)), currentMap.info().origin(), new Vec3d[2], 0)));
+        }
+    }
+
+    @Override
     public @Nullable RoomInfo lastRoom() {
         return lastRoom;
     }
@@ -283,6 +304,11 @@ public class BasicMapeditorSession implements MapeditorSession {
     @Override
     public @Nullable DoorInfo lastDoor() {
         return lastDoor;
+    }
+
+    @Override
+    public @Nullable Key lastSpawnrule() {
+        return lastSpawnrule;
     }
 
     private Map<Key, ZombiesMap> loadMaps() throws IOException {

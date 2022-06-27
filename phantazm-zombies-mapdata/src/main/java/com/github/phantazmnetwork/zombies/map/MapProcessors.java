@@ -233,16 +233,14 @@ public final class MapProcessors {
         public SpawnpointInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Vec3I position = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("position"));
             Key spawnRule = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnRule"));
-            SpawnType type = spawnType.dataFromElement(element.getElementOrThrow("type"));
-            return new SpawnpointInfo(position, spawnRule, type);
+            return new SpawnpointInfo(position, spawnRule);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(SpawnpointInfo spawnpointInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(3);
+            ConfigNode node = new LinkedConfigNode(2);
             node.put("position", VectorConfigProcessors.vec3I().elementFromData(spawnpointInfo.position()));
             node.put("spawnRule", AdventureConfigProcessors.key().elementFromData(spawnpointInfo.spawnRule()));
-            node.put("type", spawnType.elementFromData(spawnpointInfo.type()));
             return node;
         }
     };
