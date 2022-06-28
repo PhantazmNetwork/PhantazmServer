@@ -47,11 +47,11 @@ public class MapeditorClient implements ClientModInitializer {
         ObjectRenderer renderer = new Renderer();
         Events.registerEventHandlerClass(renderer);
 
-        MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, new FilesystemMapLoader(
+        EditorSession editorSession = new BasicEditorSession(renderer, new FilesystemMapLoader(
                 defaultMapDirectory, codec), defaultMapDirectory);
-        mapeditorSession.loadMapsFromDisk();
+        editorSession.loadMapsFromDisk();
 
-        UseBlockCallback.EVENT.register(mapeditorSession::handleBlockUse);
+        UseBlockCallback.EVENT.register(editorSession::handleBlockUse);
 
         KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(TranslationKeys
                 .KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, TranslationKeys.CATEGORY_MAPEDITOR_ALL));
@@ -60,7 +60,7 @@ public class MapeditorClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(mapeditorBinding.wasPressed()) {
-                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(mapeditorSession)));
+                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(editorSession)));
             }
             else if(newObject.wasPressed()) {
                 ClientPlayerEntity player = client.player;
@@ -68,19 +68,19 @@ public class MapeditorClient implements ClientModInitializer {
                     return;
                 }
 
-                if(!mapeditorSession.hasMap()) {
+                if(!editorSession.hasMap()) {
                     player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP),
                             true);
                     return;
                 }
 
-                if(!mapeditorSession.hasSelection()) {
+                if(!editorSession.hasSelection()) {
                     player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION),
                             true);
                     return;
                 }
 
-                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewObjectGui(mapeditorSession)));
+                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewObjectGui(editorSession)));
             }
         });
     }

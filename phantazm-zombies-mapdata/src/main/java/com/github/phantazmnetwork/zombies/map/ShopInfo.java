@@ -5,4 +5,9 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 public record ShopInfo(@NotNull Key id,
-                       @NotNull Vec3I triggerLocation) { }
+                       @NotNull Vec3I triggerLocation,
+                       int cost) {
+    public ShopInfo(@NotNull Key id, @NotNull Vec3I triggerLocation) {
+        this(id, triggerLocation, 0);
+    }
+}

@@ -147,7 +147,8 @@ public final class MapProcessors {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Vec3I triggerLocation = VectorConfigProcessors.vec3I().dataFromElement(element
                     .getElementOrThrow("triggerLocation"));
-            return new ShopInfo(id, triggerLocation);
+            int cost = element.getNumberOrThrow("cost").intValue();
+            return new ShopInfo(id, triggerLocation, cost);
         }
 
         @Override
@@ -155,6 +156,7 @@ public final class MapProcessors {
             ConfigNode node = new LinkedConfigNode(2);
             node.put("id", AdventureConfigProcessors.key().elementFromData(shopInfo.id()));
             node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
+            node.putNumber("cost", shopInfo.cost());
             return node;
         }
     };

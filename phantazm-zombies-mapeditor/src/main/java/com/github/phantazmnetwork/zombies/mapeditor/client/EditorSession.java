@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public interface MapeditorSession {
+public interface EditorSession {
     @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
                                          @NotNull BlockHitResult blockHitResult);
 

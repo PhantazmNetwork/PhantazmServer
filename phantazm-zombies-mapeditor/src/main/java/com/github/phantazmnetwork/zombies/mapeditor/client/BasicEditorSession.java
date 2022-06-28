@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class BasicMapeditorSession implements MapeditorSession {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicMapeditorSession.class);
+public class BasicEditorSession implements EditorSession {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicEditorSession.class);
 
     private static final Color SELECTION_COLOR = new Color(0, 255, 0, 128);
     private static final Color CURSOR_COLOR = Color.RED;
@@ -68,7 +68,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     private final Map<Key, ZombiesMap> maps;
     private final Map<Key, ZombiesMap> unmodifiableMaps;
 
-    public BasicMapeditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
+    public BasicEditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
         this.mapFolder = Objects.requireNonNull(mapFolder, "mapFolder");
         this.loader = Objects.requireNonNull(loader, "loader");
