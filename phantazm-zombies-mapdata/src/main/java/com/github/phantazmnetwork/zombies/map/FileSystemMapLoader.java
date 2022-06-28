@@ -135,12 +135,11 @@ public class FileSystemMapLoader implements MapLoader {
                     .value() + extension), MapProcessors.shopInfo().elementFromData(shop), codec);
         }
 
-        int i = 0;
-        for(WindowInfo window : data.windows()) {
-            Vec3I origin = window.frameRegion().getOrigin();
-            ConfigBridges.write(paths.windows.resolve(getPositionString(origin) + "-" + i + extension),
-                    MapProcessors.windowInfo().elementFromData(window), codec);
-            i++;
+        List<WindowInfo> windows = data.windows();
+        for(int i = 0; i < windows.size(); i++) {
+            WindowInfo window = windows.get(i);
+            ConfigBridges.write(paths.windows.resolve(getPositionString(window.frameRegion().getOrigin()) + "-"
+                    + i + extension), MapProcessors.windowInfo().elementFromData(window), codec);
         }
 
         for(RoundInfo round : data.rounds()) {
@@ -153,11 +152,11 @@ public class FileSystemMapLoader implements MapLoader {
                     .spawnruleInfo().elementFromData(spawnrule), codec);
         }
 
-        int j = 0;
-        for(SpawnpointInfo spawnpoint : data.spawnpoints()) {
-            ConfigBridges.write(paths.spawnpoints.resolve(getPositionString(spawnpoint.position()) + "-" + j +
+        List<SpawnpointInfo> spawnpoints = data.spawnpoints();
+        for(int i = 0; i < spawnpoints.size(); i++) {
+            SpawnpointInfo spawnpoint = spawnpoints.get(i);
+            ConfigBridges.write(paths.spawnpoints.resolve(getPositionString(spawnpoint.position()) + "-" + i +
                     extension), MapProcessors.spawnpointInfo().elementFromData(spawnpoint), codec);
-            j++;
         }
     }
 
