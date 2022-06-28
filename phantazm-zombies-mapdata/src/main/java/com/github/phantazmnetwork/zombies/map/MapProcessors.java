@@ -130,7 +130,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(5);
+            ConfigNode node = new LinkedConfigNode(6);
             node.put("id", AdventureConfigProcessors.key().elementFromData(doorInfo.id()));
             node.put("opensTo", keyList.elementFromData(doorInfo.opensTo()));
             node.put("costs", integerList.elementFromData(doorInfo.costs()));
