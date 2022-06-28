@@ -18,6 +18,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +42,14 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color WINDOW_COLOR = new Color(0, 251, 201, 64);
     private static final Color SPAWNPOINT_COLOR = new Color(252, 243, 1, 64);
     private static final Color SHOP_COLOR = new Color(255, 72, 5, 64);
+
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
-    private static final Key SELECTION_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection");
-    private static final Key OUTLINE_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection_outline");
-    private static final Key CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_cursor");
-    private static final Key ORIGIN_KEY = Key.key(Namespaces.PHANTAZM, "map.origin");
+
+    private static final Key SELECTION_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.selection");
+    private static final Key OUTLINE_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.selection_outline");
+    private static final Key CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.cursor");
+    private static final Key ORIGIN_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.origin");
 
     private final ObjectRenderer renderer;
     private final Path mapFolder;
@@ -63,12 +66,14 @@ public class BasicMapeditorSession implements MapeditorSession {
     private ZombiesMap currentMap;
 
     private final Map<Key, ZombiesMap> maps;
+    private final Map<Key, ZombiesMap> unmodifiableMaps;
 
     public BasicMapeditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
         this.mapFolder = Objects.requireNonNull(mapFolder, "mapFolder");
-        this.maps = new HashMap<>();
         this.loader = Objects.requireNonNull(loader, "loader");
+        this.maps = new HashMap<>();
+        this.unmodifiableMaps = Collections.unmodifiableMap(maps);
     }
 
     @Override
@@ -178,6 +183,7 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     @Override
     public void removeMap(@NotNull Key id) {
+        Objects.requireNonNull(id, "id");
         maps.remove(id);
 
         if(currentMap != null && currentMap.info().id().equals(id)) {
@@ -187,18 +193,18 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
-    public @NotNull Map<Key, ZombiesMap> mapView() {
-        return Collections.unmodifiableMap(maps);
+    public @UnmodifiableView @NotNull Map<Key, ZombiesMap> mapView() {
+        return unmodifiableMaps;
     }
 
     @Override
     public void setCurrent(@NotNull Key id) {
         ZombiesMap newCurrent = maps.get(id);
         if(newCurrent == null) {
-            throw new IllegalArgumentException("A map with that ID does not exist");
+            throw new IllegalArgumentException("A map with id " + id + " does not exist");
         }
 
-        this.currentMap = newCurrent;
+        currentMap = newCurrent;
         refreshMap();
     }
 
@@ -278,7 +284,6 @@ public class BasicMapeditorSession implements MapeditorSession {
     @Override
     public void refreshWindows() {
         assertMap();
-
 
         renderer.removeIf(key -> key.value().startsWith("window."));
         int i = 0;

@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
+import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
@@ -47,8 +48,8 @@ public class NewObjectGui extends LightweightGuiDescription {
 
         root.add(feedback, 0, 5);
 
-        newRoom.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewRoomGui(session))));
-        newDoor.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewDoorGui(session))));
+        newRoom.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewRoomGui(session))));
+        newDoor.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewDoorGui(session))));
         newWindow.setOnClick(() -> {
             ZombiesMap currentMap = session.getMap();
             Vec3I origin = currentMap.info().origin();
@@ -71,8 +72,8 @@ public class NewObjectGui extends LightweightGuiDescription {
             session.refreshWindows();
             ScreenUtils.closeCurrentScreen();
         });
-        newSpawnpoint.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(
+        newSpawnpoint.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(
                 new NewSpawnpointGui(session))));
-        newShop.setOnClick(() -> MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewShopGui(session))));
+        newShop.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewShopGui(session))));
     }
 }

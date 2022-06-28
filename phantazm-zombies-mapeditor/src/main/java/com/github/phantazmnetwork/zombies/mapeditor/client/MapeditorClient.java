@@ -3,10 +3,10 @@ package com.github.phantazmnetwork.zombies.mapeditor.client;
 import com.github.phantazmnetwork.zombies.map.FilesystemMapLoader;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
-import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MapeditorScreen;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.NewObjectGui;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
+import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import me.x150.renderer.event.EventListener;
 import me.x150.renderer.event.EventType;
 import me.x150.renderer.event.Events;
@@ -41,11 +41,10 @@ public class MapeditorClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ObjectRenderer renderer = new Renderer();
-
         ConfigCodec codec = new YamlCodec();
         Path defaultMapDirectory = FabricLoader.getInstance().getConfigDir().resolve(MAPEDITOR_PATH);
 
+        ObjectRenderer renderer = new Renderer();
         Events.registerEventHandlerClass(renderer);
 
         MapeditorSession mapeditorSession = new BasicMapeditorSession(renderer, new FilesystemMapLoader(
@@ -61,7 +60,7 @@ public class MapeditorClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(mapeditorBinding.wasPressed()) {
-                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new MainGui(mapeditorSession)));
+                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(mapeditorSession)));
             }
             else if(newObject.wasPressed()) {
                 ClientPlayerEntity player = client.player;
@@ -81,13 +80,14 @@ public class MapeditorClient implements ClientModInitializer {
                     return;
                 }
 
-                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new NewObjectGui(mapeditorSession)));
+                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewObjectGui(mapeditorSession)));
             }
         });
     }
 
     private static class Renderer implements ObjectRenderer {
         private static final RenderObject[] EMPTY_RENDER_OBJECT_ARRAY = new RenderObject[0];
+
         private boolean enabled;
         private boolean renderThroughWalls = false;
         private final Map<Key, RenderObject> renderObjects = new HashMap<>();
@@ -111,6 +111,7 @@ public class MapeditorClient implements ClientModInitializer {
 
             for(ObjectRenderer.RenderObject object : baked) {
                 if(!object.shouldRender) {
+                    //don't render objects whose rendering is disabled
                     continue;
                 }
 
@@ -172,12 +173,19 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public void putObject(@NotNull RenderObject value) {
             Objects.requireNonNull(value, "value");
-            if(renderObjects.containsKey(value.key)) {
+
+            RenderObject oldObject = renderObjects.get(value.key);
+            if(oldObject != null) {
                 if(baked != null) {
                     //to avoid having to re-bake, we can find the object in the render array and update in-place
                     int i = 0;
                     for(RenderObject object : baked) {
                         if(object.key.equals(value.key)) {
+                            if(oldObject != value) {
+                                //update the object present in the map only if necessary
+                                renderObjects.put(value.key, value);
+                            }
+
                             baked[i] = value;
                             return;
                         }

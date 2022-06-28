@@ -43,7 +43,7 @@ public record MapInfo(@NotNull Key id,
                 0,
                 Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"New Map\"}}",
-                new ArrayList<>(),
+                new ArrayList<>(0),
                 Component.text(id.value()),
                 Vec3I.ORIGIN,
                 15,
@@ -60,8 +60,8 @@ public record MapInfo(@NotNull Key id,
                 false,
                 30,
                 5,
-                new ArrayList<>(),
-                new ArrayList<>()
+                new ArrayList<>(0),
+                new ArrayList<>(0)
         );
     }
 }

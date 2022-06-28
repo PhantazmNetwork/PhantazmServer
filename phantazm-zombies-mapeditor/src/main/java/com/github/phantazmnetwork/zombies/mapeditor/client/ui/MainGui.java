@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.zombies.mapeditor.client.Identifiers;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
+import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
@@ -103,12 +104,12 @@ public class MainGui extends LightweightGuiDescription {
             session.setCurrent(mapKey);
 
             ScreenUtils.closeCurrentScreen();
-            MinecraftClient.getInstance().setScreen(new MapeditorScreen(new MainGui(session)));
+            MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(session)));
         });
 
         deleteMap.setOnClick(() -> {
             if(hasMap(session, feedback)) {
-                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ConfirmationGui(new TranslatableText(
+                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new ConfirmationGui(new TranslatableText(
                         TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> session.removeMap(session.getMap().info()
                         .id()))));
             }

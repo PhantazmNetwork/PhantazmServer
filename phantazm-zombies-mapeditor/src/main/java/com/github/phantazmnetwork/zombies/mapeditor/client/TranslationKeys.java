@@ -1,5 +1,11 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
+import net.minecraft.text.TranslatableText;
+
+/**
+ * Contains resource keys for translatable text.
+ * @see TranslatableText
+ */
 public final class TranslationKeys {
     private TranslationKeys() { throw new UnsupportedOperationException(); }
 

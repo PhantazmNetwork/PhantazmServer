@@ -10,8 +10,16 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
+/**
+ * A general confirmation dialog, allowing the user to choose "yes" or "no", and displaying a specific query.
+ */
 public class ConfirmationGui extends LightweightGuiDescription {
     public ConfirmationGui(@NotNull Text message, @NotNull Runnable onConfirm) {
+        Objects.requireNonNull(message, "message");
+        Objects.requireNonNull(onConfirm, "onConfirm");
+
         WGridPanel root = new WGridPanel();
         setRootPanel(root);
 

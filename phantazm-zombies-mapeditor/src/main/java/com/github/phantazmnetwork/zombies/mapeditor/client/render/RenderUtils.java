@@ -6,6 +6,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public final class RenderUtils {
     private RenderUtils() {
@@ -14,6 +15,9 @@ public final class RenderUtils {
 
     public static Vec3d @NotNull [] arrayFromRegions(@NotNull Collection<? extends Region3I> regions,
                                                      @NotNull Vec3I origin) {
+        Objects.requireNonNull(regions, "regions");
+        Objects.requireNonNull(origin, "origin");
+
         Vec3d[] boundsArray = new Vec3d[regions.size() * 2];
 
         int i = 0;
@@ -27,6 +31,10 @@ public final class RenderUtils {
 
     public static Vec3d @NotNull [] arrayFromRegion(@NotNull Region3I region, @NotNull Vec3I origin,
                                                     Vec3d @NotNull [] boundsArray, int offset) {
+        Objects.requireNonNull(region, "region");
+        Objects.requireNonNull(origin, "origin");
+        Objects.requireNonNull(boundsArray, "boundsArray");
+
         Vec3I infoOrigin = region.getOrigin();
         Vec3I lengths = region.getLengths();
 
