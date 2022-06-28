@@ -6,6 +6,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public final class RenderUtils {
@@ -13,17 +14,15 @@ public final class RenderUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static Vec3d @NotNull [] arrayFromRegions(@NotNull Collection<? extends Region3I> regions,
+    public static Vec3d @NotNull [] arrayFromRegions(@NotNull List<? extends Region3I> regions,
                                                      @NotNull Vec3I origin) {
         Objects.requireNonNull(regions, "regions");
         Objects.requireNonNull(origin, "origin");
 
         Vec3d[] boundsArray = new Vec3d[regions.size() * 2];
 
-        int i = 0;
-        for(Region3I region : regions) {
-            arrayFromRegion(region, origin, boundsArray, i);
-            i += 2;
+        for(int i = 0; i < regions.size(); i++) {
+            arrayFromRegion(regions.get(i), origin, boundsArray, i * 2);
         }
 
         return boundsArray;
