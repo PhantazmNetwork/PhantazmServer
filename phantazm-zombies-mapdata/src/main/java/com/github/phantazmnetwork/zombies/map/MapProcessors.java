@@ -263,15 +263,18 @@ public final class MapProcessors {
         @Override
         public SpawnruleInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Key spawnType = AdventureConfigProcessors.key().dataFromElement(element
+                    .getElementOrThrow("spawnType"));
             List<Key> spawns = keyList.dataFromElement(element.getElementOrThrow("spawns"));
             boolean isBlacklist = element.getBooleanOrThrow("isBlacklist");
-            return new SpawnruleInfo(id, spawns, isBlacklist);
+            return new SpawnruleInfo(id, spawnType, spawns, isBlacklist);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(SpawnruleInfo spawnruleInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(3);
+            ConfigNode node = new LinkedConfigNode(4);
             node.put("id", AdventureConfigProcessors.key().elementFromData(spawnruleInfo.id()));
+            node.put("spawnType", AdventureConfigProcessors.key().elementFromData(spawnruleInfo.spawnType()));
             node.put("spawns", keyList.elementFromData(spawnruleInfo.spawns()));
             node.putBoolean("isBlacklist", spawnruleInfo.isBlacklist());
             return node;
@@ -301,7 +304,6 @@ public final class MapProcessors {
 
     private static final ConfigProcessor<List<Component>> componentList = AdventureConfigProcessors.component()
             .listProcessor();
-    private static final ConfigProcessor<SpawnType> spawnType = ConfigProcessor.enumProcessor(SpawnType.class);
 
     private static final ConfigProcessor<List<Region3I>> regionInfoList = VectorConfigProcessors.region3I()
             .listProcessor();
@@ -344,10 +346,6 @@ public final class MapProcessors {
 
     public static @NotNull ConfigProcessor<SpawnruleInfo> spawnruleInfo() {
         return spawnruleInfo;
-    }
-
-    public static @NotNull ConfigProcessor<SpawnType> spawnType() {
-        return spawnType;
     }
 
     public static @NotNull ConfigProcessor<RoundInfo> roundInfo() {

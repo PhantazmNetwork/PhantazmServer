@@ -15,19 +15,19 @@ public record WindowInfo(@NotNull Region3I frameRegion,
                          @NotNull Sound breakAllSound) {
     public static final Sound DEFAULT_REPAIR_SOUND = Sound.sound(
             Key.key("minecraft:block.wood.place"),
-            Sound.Source.PLAYER,
+            Sound.Source.BLOCK,
             2.0F,
             1.0F);
 
     public static final Sound DEFAULT_REPAIR_ALL_SOUND = Sound.sound(
             Key.key("minecraft:block.wooden_trapdoor.close"),
-            Sound.Source.PLAYER,
+            Sound.Source.BLOCK,
             2.0F,
             1.0F);
 
     public static final Sound DEFAULT_BREAK_SOUND = Sound.sound(
             Key.key("minecraft:block.wood.break"),
-            Sound.Source.HOSTILE,
+            Sound.Source.BLOCK,
             2.0F,
             0.8F);
 
