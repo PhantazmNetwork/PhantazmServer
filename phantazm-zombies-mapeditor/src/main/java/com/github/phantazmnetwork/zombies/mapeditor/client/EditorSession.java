@@ -13,6 +13,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Map;
 
@@ -43,7 +44,7 @@ public interface EditorSession {
 
     void removeMap(@NotNull Key id);
 
-    @NotNull Map<Key, ZombiesMap> mapView();
+    @UnmodifiableView @NotNull Map<Key, ZombiesMap> mapView();
 
     void setCurrent(@NotNull Key id);
 

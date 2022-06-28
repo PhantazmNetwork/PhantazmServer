@@ -19,16 +19,16 @@
 
   "gui.mapeditor.delete_map": "Map löschen",
 
-  "gui.mapeditor.feedback.no_active_map": "Keine aktive Map!",
-  "gui.mapeditor.feedback.empty_map_name": "Eingabe für Mapname wird benötigt!",
-  "gui.mapeditor.feedback.no_selection": "Keine Auswahl vorhanden!",
-  "gui.mapeditor.feedback.map_name_exists": "Name existiert schon!",
+  "gui.mapeditor.feedback.no_active_map": "Keine Map ausgewählt",
+  "gui.mapeditor.feedback.empty_map_name": "Ungültiger Map Name",
+  "gui.mapeditor.feedback.no_selection": "Keine Auswahl vorhanden",
+  "gui.mapeditor.feedback.map_name_exists": "Name existiert schon",
 
   "gui.mapeditor.yes": "Ja",
   "gui.mapeditor.no": "Nein",
   "gui.mapeditor.add": "Hinzufügen",
 
-  "gui.mapeditor.current_map": "Ausgewählte Map: %s",
+  "gui.mapeditor.current_map": "Aktuelle Map: %s",
   "gui.mapeditor.no_map": "Keine Map ausgewählt",
   "gui.mapeditor.delete_map_query": "Map löschen?",
   "gui.mapeditor.display_settings": "Anzeigeeinstellungen"
