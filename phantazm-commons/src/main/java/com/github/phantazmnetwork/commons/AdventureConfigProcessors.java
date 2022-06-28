@@ -31,8 +31,8 @@ public final class AdventureConfigProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(Key key) {
-            return new ConfigPrimitive(key.asString());
+        public @NotNull ConfigElement elementFromData(Key key) throws ConfigProcessException {
+            return ConfigProcessor.STRING.elementFromData(key.asString());
         }
     };
 
@@ -43,9 +43,9 @@ public final class AdventureConfigProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(Component component) {
+        public @NotNull ConfigElement elementFromData(Component component) throws ConfigProcessException {
             String string = MiniMessage.miniMessage().serialize(component);
-            return new ConfigPrimitive(string);
+            return ConfigProcessor.STRING.elementFromData(string);
         }
     };
 
@@ -64,8 +64,8 @@ public final class AdventureConfigProcessors {
             ConfigNode node = new LinkedConfigNode(4);
             node.put("name", key.elementFromData(sound.name()));
             node.put("source", soundSource.elementFromData(sound.source()));
-            node.put("volume", new ConfigPrimitive(sound.volume()));
-            node.put("pitch", new ConfigPrimitive(sound.pitch()));
+            node.putNumber("volume", sound.volume());
+            node.putNumber("pitch", sound.pitch());
             return node;
         }
     };

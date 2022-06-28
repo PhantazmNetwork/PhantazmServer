@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.server.config.loader;
 
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.server.config.server.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
@@ -18,7 +19,6 @@ import java.util.Objects;
 /**
  * {@link ConfigProcessor} used for {@link ServerConfig}s.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
     private final MiniMessage miniMessage;
@@ -79,21 +79,21 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull ServerConfig serverConfig) {
-        ConfigNode serverInfo = new LinkedConfigNode();
+    public @NotNull ConfigElement elementFromData(@NotNull ServerConfig serverConfig) throws ConfigProcessException {
+        ConfigNode serverInfo = new LinkedConfigNode(5);
         ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
-        serverInfo.put("serverIP", new ConfigPrimitive(serverInfoConfig.serverIP()));
-        serverInfo.put("port", new ConfigPrimitive(serverInfoConfig.port()));
-        serverInfo.put("optifineEnabled", new ConfigPrimitive(serverInfoConfig.optifineEnabled()));
-        serverInfo.put("authType", new ConfigPrimitive(serverInfoConfig.authType().name()));
-        serverInfo.put("velocitySecret", new ConfigPrimitive(serverInfoConfig.velocitySecret()));
+        serverInfo.putString("serverIP", serverInfoConfig.serverIP());
+        serverInfo.putNumber("port", serverInfoConfig.port());
+        serverInfo.putBoolean("optifineEnabled", serverInfoConfig.optifineEnabled());
+        serverInfo.putString("authType", serverInfoConfig.authType().name());
+        serverInfo.putString("velocitySecret", serverInfoConfig.velocitySecret());
 
-        ConfigNode pingList = new LinkedConfigNode();
+        ConfigNode pingList = new LinkedConfigNode(1);
         PingListConfig pingListConfig = serverConfig.pingListConfig();
-        String description = miniMessage.serialize(pingListConfig.description());
-        pingList.put("description", new ConfigPrimitive(description));
+        pingList.put("description", AdventureConfigProcessors.component().elementFromData(pingListConfig
+                .description()));
 
-        ConfigNode configNode = new LinkedConfigNode();
+        ConfigNode configNode = new LinkedConfigNode(2);
         configNode.put("serverInfo", serverInfo);
         configNode.put("pingList", pingList);
 

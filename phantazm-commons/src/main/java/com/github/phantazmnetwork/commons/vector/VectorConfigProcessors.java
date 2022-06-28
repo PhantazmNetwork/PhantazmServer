@@ -21,9 +21,9 @@ public final class VectorConfigProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3D vec3D) {
             ConfigNode node = new LinkedConfigNode(3);
-            node.put("x", new ConfigPrimitive(vec3D.getX()));
-            node.put("y", new ConfigPrimitive(vec3D.getY()));
-            node.put("z", new ConfigPrimitive(vec3D.getZ()));
+            node.putNumber("x", vec3D.getX());
+            node.putNumber("y", vec3D.getY());
+            node.putNumber("z", vec3D.getZ());
             return node;
         }
     };
@@ -40,9 +40,9 @@ public final class VectorConfigProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3I vec) {
             ConfigNode node = new LinkedConfigNode(3);
-            node.put("x", new ConfigPrimitive(vec.getX()));
-            node.put("y", new ConfigPrimitive(vec.getY()));
-            node.put("z", new ConfigPrimitive(vec.getZ()));
+            node.putNumber("x", vec.getX());
+            node.putNumber("y", vec.getY());
+            node.putNumber("z", vec.getZ());
             return node;
         }
     };
@@ -59,9 +59,9 @@ public final class VectorConfigProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3F vec) {
             ConfigNode node = new LinkedConfigNode(3);
-            node.put("x", new ConfigPrimitive(vec.getX()));
-            node.put("y", new ConfigPrimitive(vec.getY()));
-            node.put("z", new ConfigPrimitive(vec.getZ()));
+            node.putNumber("x", vec.getX());
+            node.putNumber("y", vec.getY());
+            node.putNumber("z", vec.getZ());
             return node;
         }
     };

@@ -20,7 +20,6 @@ import java.util.concurrent.RejectedExecutionException;
  * A simple, asynchronous {@link PathEngine} implementation. {@link PathOperation}s are completed using the provided
  * {@link ExecutorService}.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class BasicPathEngine implements PathEngine {
     private final ExecutorService executor;
 

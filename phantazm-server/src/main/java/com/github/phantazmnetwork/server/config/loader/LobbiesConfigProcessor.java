@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.server.config.loader;
 
 import com.github.phantazmnetwork.api.config.InstanceConfig;
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.lobby.LobbyConfig;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -23,7 +24,6 @@ import java.util.*;
 /**
  * {@link ConfigProcessor} used for {@link LobbiesConfig}s.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
     private final MiniMessage miniMessage;
@@ -76,39 +76,40 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull LobbiesConfig lobbiesConfig) {
+    public @NotNull ConfigElement elementFromData(@NotNull LobbiesConfig lobbiesConfig) throws ConfigProcessException {
         ConfigNode lobbiesNode = new LinkedConfigNode();
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             ConfigNode lobbyNode = new LinkedConfigNode();
 
             ConfigNode spawnPointNode = new LinkedConfigNode();
             Pos spawnPoint = lobby.getValue().instanceConfig().spawnPoint();
-            spawnPointNode.put("x", new ConfigPrimitive(spawnPoint.x()));
-            spawnPointNode.put("y", new ConfigPrimitive(spawnPoint.y()));
-            spawnPointNode.put("z", new ConfigPrimitive(spawnPoint.z()));
-            spawnPointNode.put("yaw", new ConfigPrimitive(spawnPoint.yaw()));
-            spawnPointNode.put("pitch", new ConfigPrimitive(spawnPoint.pitch()));
+            spawnPointNode.putNumber("x", spawnPoint.x());
+            spawnPointNode.putNumber("y", spawnPoint.y());
+            spawnPointNode.putNumber("z", spawnPoint.z());
+            spawnPointNode.putNumber("yaw", spawnPoint.yaw());
+            spawnPointNode.putNumber("pitch", spawnPoint.pitch());
 
             ConfigNode instanceConfigNode = new LinkedConfigNode();
             instanceConfigNode.put("spawnPoint", spawnPointNode);
 
-            Collection<ConfigElement> lobbyPathsList = new ArrayList<>(lobby.getValue().lobbyPaths().size());
+            ConfigList lobbyPathsList = new ArrayConfigList(lobby.getValue().lobbyPaths().size());
             for (String subPath : lobby.getValue().lobbyPaths()) {
-                lobbyPathsList.add(new ConfigPrimitive(subPath));
+                lobbyPathsList.addString(subPath);
             }
 
             lobbyNode.put("instanceConfig", instanceConfigNode);
-            lobbyNode.put("lobbyPaths", new ArrayConfigList(lobbyPathsList));
-            lobbyNode.put("maxPlayers", new ConfigPrimitive(lobby.getValue().maxPlayers()));
-            lobbyNode.put("maxLobbies", new ConfigPrimitive(lobby.getValue().maxLobbies()));
+            lobbyNode.put("lobbyPaths", lobbyPathsList);
+            lobbyNode.putNumber("maxPlayers", lobby.getValue().maxPlayers());
+            lobbyNode.putNumber("maxLobbies", lobby.getValue().maxLobbies());
 
             lobbiesNode.put(lobby.getKey(), lobbyNode);
         }
 
         ConfigNode configNode = new LinkedConfigNode();
-        configNode.put("instancesPath", new ConfigPrimitive(lobbiesConfig.instancesPath().toString()));
-        configNode.put("kickMessage", new ConfigPrimitive(miniMessage.serialize(lobbiesConfig.kickMessage())));
-        configNode.put("mainLobbyName", new ConfigPrimitive(lobbiesConfig.mainLobbyName()));
+        configNode.putString("instancesPath", lobbiesConfig.instancesPath().toString());
+        configNode.put("kickMessage", AdventureConfigProcessors.component().elementFromData(lobbiesConfig
+                .kickMessage()));
+        configNode.putString("mainLobbyName", lobbiesConfig.mainLobbyName());
         configNode.put("lobbies", lobbiesNode);
 
         return configNode;
