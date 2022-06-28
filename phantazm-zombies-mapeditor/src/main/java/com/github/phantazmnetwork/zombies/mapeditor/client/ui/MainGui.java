@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.map.MapProcessors;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.Identifiers;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
@@ -11,7 +10,6 @@ import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.*;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
-import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.LiteralText;

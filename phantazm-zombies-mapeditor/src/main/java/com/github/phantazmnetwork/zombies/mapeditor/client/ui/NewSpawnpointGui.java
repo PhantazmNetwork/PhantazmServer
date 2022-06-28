@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.zombies.map.*;
+import com.github.phantazmnetwork.zombies.map.SpawnpointInfo;
+import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;

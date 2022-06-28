@@ -7,7 +7,6 @@ import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;

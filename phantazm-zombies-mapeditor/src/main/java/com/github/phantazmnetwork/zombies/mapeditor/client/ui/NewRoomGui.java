@@ -7,7 +7,6 @@ import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
@@ -16,7 +15,6 @@ import io.github.cottonmc.cotton.gui.widget.data.Insets;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minecraft.text.TranslatableText;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 

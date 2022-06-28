@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
-import com.github.phantazmnetwork.zombies.map.SpawnruleInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,6 +24,7 @@ public interface MapeditorSession {
 
     boolean isEnabled();
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean hasSelection();
 
     @NotNull Vec3I getFirstSelection();
