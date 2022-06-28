@@ -153,7 +153,7 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(2);
+            ConfigNode node = new LinkedConfigNode(3);
             node.put("id", AdventureConfigProcessors.key().elementFromData(shopInfo.id()));
             node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
             node.putNumber("cost", shopInfo.cost());
