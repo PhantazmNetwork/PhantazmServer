@@ -258,7 +258,7 @@ public class BasicEditorSession implements EditorSession {
     @Override
     @SuppressWarnings("PatternValidation")
     public void refreshRooms() {
-        assertMap();
+        requireMap();
 
         for(RoomInfo room : currentMap.rooms()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
@@ -271,7 +271,7 @@ public class BasicEditorSession implements EditorSession {
     @SuppressWarnings("PatternValidation")
     @Override
     public void refreshDoors() {
-        assertMap();
+        requireMap();
 
         for(DoorInfo door : currentMap.doors()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "door." + door.id()
@@ -283,7 +283,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void refreshWindows() {
-        assertMap();
+        requireMap();
 
         renderer.removeIf(key -> key.value().startsWith("window."));
         int i = 0;
@@ -297,7 +297,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void refreshSpawnpoints() {
-        assertMap();
+        requireMap();
 
         renderer.removeIf(key -> key.value().startsWith("spawnpoint."));
         int i = 0;
@@ -311,7 +311,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void refreshShops() {
-        assertMap();
+        requireMap();
 
         renderer.removeIf(key -> key.value().startsWith("shop."));
         int i = 0;
@@ -392,7 +392,7 @@ public class BasicEditorSession implements EditorSession {
                 true, true, clickedVec.add(0.25, 0.25, 0.25), HALF));
     }
 
-    private void assertMap() {
+    private void requireMap() {
         if(currentMap == null) {
             throw new IllegalStateException("No map");
         }
