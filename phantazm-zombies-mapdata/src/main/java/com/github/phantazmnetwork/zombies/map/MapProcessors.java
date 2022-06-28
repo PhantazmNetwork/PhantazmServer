@@ -18,9 +18,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public final class MapProcessors {
-    private static final ConfigProcessor<MapInfo> mapInfo = new ConfigProcessor<>() {
+    private static final ConfigProcessor<MapSettingsInfo> mapInfo = new ConfigProcessor<>() {
         @Override
-        public MapInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+        public MapSettingsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("origin"));
             Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("spawn"));
@@ -53,14 +53,14 @@ public final class MapProcessors {
                     .getElementOrThrow("milestoneRounds"));
             List<Key> defaultEquipment = keyList.dataFromElement(element
                     .getElementOrThrow("defaultEquipment"));
-            return new MapInfo(id, origin, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
+            return new MapSettingsInfo(id, origin, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius,
                     canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(MapInfo mapConfig) throws ConfigProcessException {
+        public @NotNull ConfigElement elementFromData(MapSettingsInfo mapConfig) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(26);
             node.put("id", AdventureConfigProcessors.key().elementFromData(mapConfig.id()));
             node.put("origin", VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
@@ -320,7 +320,7 @@ public final class MapProcessors {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull ConfigProcessor<MapInfo> mapInfo() {
+    public static @NotNull ConfigProcessor<MapSettingsInfo> mapInfo() {
         return mapInfo;
     }
 

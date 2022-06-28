@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
@@ -36,15 +36,15 @@ public interface EditorSession {
 
     boolean hasMap();
 
-    @NotNull ZombiesMap getMap();
+    @NotNull MapInfo getMap();
 
-    void addMap(@NotNull Key id, @NotNull ZombiesMap map);
+    void addMap(@NotNull Key id, @NotNull MapInfo map);
 
     boolean containsMap(@NotNull Key id);
 
     void removeMap(@NotNull Key id);
 
-    @UnmodifiableView @NotNull Map<Key, ZombiesMap> mapView();
+    @UnmodifiableView @NotNull Map<Key, MapInfo> mapView();
 
     void setCurrent(@NotNull Key id);
 

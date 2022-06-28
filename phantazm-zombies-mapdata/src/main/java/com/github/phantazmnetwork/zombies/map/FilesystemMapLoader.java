@@ -50,13 +50,13 @@ public class FilesystemMapLoader implements MapLoader {
     }
 
     @Override
-    public @NotNull ZombiesMap load(@NotNull String mapName) throws IOException {
+    public @NotNull MapInfo load(@NotNull String mapName) throws IOException {
         Path mapDirectory = FileUtils.findFirstOrThrow(root, (path, attr) -> attr.isDirectory() && path
                 .endsWith(mapName), () -> "Unable to find map folder for " + mapName);
 
         Path mapInfoFile = mapDirectory.resolve(mapInfoName);
 
-        MapInfo mapInfo = ConfigBridges.read(mapInfoFile, codec, MapProcessors.mapInfo());
+        MapSettingsInfo mapSettingsInfo = ConfigBridges.read(mapInfoFile, codec, MapProcessors.mapInfo());
         FolderPaths paths = new FolderPaths(mapDirectory);
         List<RoomInfo> rooms = new ArrayList<>();
         List<DoorInfo> doors = new ArrayList<>();
@@ -89,16 +89,16 @@ public class FilesystemMapLoader implements MapLoader {
 
         rounds.sort(Comparator.comparingInt(RoundInfo::round));
 
-        return new ZombiesMap(mapInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints);
+        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints);
     }
 
     @Override
-    public void save(@NotNull ZombiesMap data) throws IOException {
+    public void save(@NotNull MapInfo data) throws IOException {
         Path mapDirectory = root.resolve(data.info().id().value());
         Files.createDirectories(mapDirectory);
 
-        MapInfo mapInfo = data.info();
-        ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapInfo), codec);
+        MapSettingsInfo mapSettingsInfo = data.info();
+        ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapSettingsInfo), codec);
 
         FolderPaths paths = new FolderPaths(mapDirectory);
 

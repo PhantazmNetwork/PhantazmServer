@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.ShopInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ public class NewShopGui extends NamedObjectGui {
 
         Objects.requireNonNull(session, "session");
 
-        ZombiesMap currentMap = session.getMap();
+        MapInfo currentMap = session.getMap();
         Vec3I firstSelected = session.getFirstSelection();
         buttonAdd.setOnClick(() -> {
             String value = textFieldName.getText();

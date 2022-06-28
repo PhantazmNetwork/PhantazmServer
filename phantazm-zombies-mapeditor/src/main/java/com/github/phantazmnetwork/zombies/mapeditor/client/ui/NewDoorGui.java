@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.commons.LogicUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public class NewDoorGui extends NamedObjectGui {
 
         Objects.requireNonNull(session, "session");
 
-        ZombiesMap currentMap = session.getMap();
+        MapInfo currentMap = session.getMap();
         Region3I selected = session.getSelection();
         buttonAdd.setOnClick(() -> {
             String value = textFieldName.getText();

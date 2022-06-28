@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.WindowInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
@@ -44,7 +44,7 @@ public class NewObjectGui extends SimplePanelGui {
         gridPanelRoot.add(newSpawnpoint, 0, 3, 5, 1);
         gridPanelRoot.add(newShop, 0, 4, 5, 1);
 
-        ZombiesMap currentMap = session.getMap();
+        MapInfo currentMap = session.getMap();
         Vec3I origin = currentMap.info().origin();
         Region3I selected = session.getSelection();
 

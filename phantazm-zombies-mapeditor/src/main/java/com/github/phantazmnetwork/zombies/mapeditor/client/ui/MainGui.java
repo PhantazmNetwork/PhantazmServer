@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.Identifiers;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
@@ -102,7 +102,7 @@ public class MainGui extends SimplePanelGui {
                 return;
             }
 
-            session.addMap(mapKey, new ZombiesMap(new MapInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
+            session.addMap(mapKey, new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
                     new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
                     new ArrayList<>()));
             session.setCurrent(mapKey);

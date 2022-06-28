@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.commons.LogicUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -29,7 +29,7 @@ public class NewRoomGui extends NamedObjectGui {
 
         Objects.requireNonNull(session, "session");
 
-        ZombiesMap currentMap = session.getMap();
+        MapInfo currentMap = session.getMap();
         Region3I selected = Region3I.encompassing(session.getFirstSelection(), session.getSecondSelection(), currentMap
                 .info().origin());
         buttonAdd.setOnClick(() -> {

@@ -63,10 +63,10 @@ public class BasicEditorSession implements EditorSession {
     private Vec3i firstSelected;
     private Vec3i secondSelected;
 
-    private ZombiesMap currentMap;
+    private MapInfo currentMap;
 
-    private final Map<Key, ZombiesMap> maps;
-    private final Map<Key, ZombiesMap> unmodifiableMaps;
+    private final Map<Key, MapInfo> maps;
+    private final Map<Key, MapInfo> unmodifiableMaps;
 
     public BasicEditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
@@ -156,7 +156,7 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public @NotNull ZombiesMap getMap() {
+    public @NotNull MapInfo getMap() {
         if(currentMap == null) {
             throw new IllegalStateException("No map");
         }
@@ -165,7 +165,7 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public void addMap(@NotNull Key id, @NotNull ZombiesMap map) {
+    public void addMap(@NotNull Key id, @NotNull MapInfo map) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(map, "map");
         if(maps.containsKey(id)) {
@@ -193,13 +193,13 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public @UnmodifiableView @NotNull Map<Key, ZombiesMap> mapView() {
+    public @UnmodifiableView @NotNull Map<Key, MapInfo> mapView() {
         return unmodifiableMaps;
     }
 
     @Override
     public void setCurrent(@NotNull Key id) {
-        ZombiesMap newCurrent = maps.get(id);
+        MapInfo newCurrent = maps.get(id);
         if(newCurrent == null) {
             throw new IllegalArgumentException("A map with id " + id + " does not exist");
         }
@@ -216,7 +216,7 @@ public class BasicEditorSession implements EditorSession {
                 oldId = currentMap.info().id();
             }
 
-            Map<Key, ZombiesMap> newMaps = loadMaps();
+            Map<Key, MapInfo> newMaps = loadMaps();
             maps.clear();
             maps.putAll(newMaps);
             currentMap = maps.get(oldId);
@@ -230,7 +230,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void saveMaps() {
-        for(ZombiesMap map : maps.values()) {
+        for(MapInfo map : maps.values()) {
             try {
                 loader.save(map);
             }
@@ -338,15 +338,15 @@ public class BasicEditorSession implements EditorSession {
         return lastSpawnrule;
     }
 
-    private Map<Key, ZombiesMap> loadMaps() throws IOException {
-        Map<Key, ZombiesMap> newMaps = new HashMap<>();
+    private Map<Key, MapInfo> loadMaps() throws IOException {
+        Map<Key, MapInfo> newMaps = new HashMap<>();
         FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory() && !path.equals(mapFolder),
                 mapFolder -> {
             LOGGER.info("Trying to load map from " + mapFolder);
             String name = mapFolder.getFileName().toString();
 
             try {
-                ZombiesMap map = loader.load(name);
+                MapInfo map = loader.load(name);
                 newMaps.put(map.info().id(), map);
                 LOGGER.info("Successfully loaded map " + name);
             }
@@ -365,7 +365,7 @@ public class BasicEditorSession implements EditorSession {
             return;
         }
 
-        MapInfo info = currentMap.info();
+        MapSettingsInfo info = currentMap.info();
         renderer.putObject(new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR,
                 true, true, RenderUtils.arrayFromRegion(Region3I.normalized(info
                 .origin(), Vec3I.of(1, 1, 1)), Vec3I.ORIGIN, new Vec3d[2], 0)));
