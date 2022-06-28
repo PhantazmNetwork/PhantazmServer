@@ -11,7 +11,7 @@ import java.io.File
 abstract class CopyLibs : DefaultTask() {
     //@Internal prevents Gradle from treating this property as an input and tracking its changes
     //this should always be an absolute path
-    var libraryDirectory : File = File(project.buildDir, "libs")
+    var libraryDirectory : File = File(project.buildDir, "libs/tree")
         @Internal get
         set(value) {
             field = if(value.isAbsolute) value else File(project.rootDir, value.path)
