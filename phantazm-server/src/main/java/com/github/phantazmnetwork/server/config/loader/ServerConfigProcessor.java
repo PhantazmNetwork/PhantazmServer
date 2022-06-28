@@ -20,16 +20,6 @@ import java.util.Objects;
  */
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
-    private final MiniMessage miniMessage;
-
-    /**
-     * Creates a processor for {@link ServerConfig}.
-     * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
-     */
-    public ServerConfigProcessor(@NotNull MiniMessage miniMessage) {
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
-    }
-
     @Override
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         ConfigNode serverInfo = element.getNodeOrThrow("serverInfo");
@@ -54,7 +44,8 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                 velocitySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
-        Component description = miniMessage.deserialize(pingList.getStringOrThrow("description"));
+        Component description = AdventureConfigProcessors.component().dataFromElement(pingList
+                .getElement("description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
         ConfigNode pathfinderNode = element.getNodeOrThrow("pathfinder");

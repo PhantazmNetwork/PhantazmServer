@@ -78,13 +78,18 @@ public interface Region3I extends Iterable<Vec3I> {
         return new Iterator<>() {
             private final Vec3I origin = Region3I.this.getOrigin();
             private final Vec3I lengths = Region3I.this.getLengths();
+
             private int x = origin.getX();
             private int y = origin.getY();
             private int z = origin.getZ();
 
+            private final int xEnd = origin.getX() + lengths.getX();
+            private final int yEnd = origin.getY() + lengths.getY();
+            private final int zEnd = origin.getZ() + lengths.getZ();
+
             @Override
             public boolean hasNext() {
-                return z < (origin.getZ() + lengths.getZ());
+                return z < zEnd;
             }
 
             @Override
@@ -93,11 +98,11 @@ public interface Region3I extends Iterable<Vec3I> {
                 int curY = y;
                 int curZ = z;
 
-                if(++x >= origin.getX() + lengths.getX()) {
+                if(++x >= xEnd) {
                     curX = x = origin.getX();
-                    if(++y >= (origin.getY() + lengths.getY())) {
+                    if(++y >= yEnd) {
                         curY = y = origin.getY();
-                        if(++z > (origin.getZ() + lengths.getZ())) {
+                        if(++z > zEnd) {
                             throw new NoSuchElementException();
                         }
                     }

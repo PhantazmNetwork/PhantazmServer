@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
-import com.github.phantazmnetwork.zombies.map.FilesystemMapLoader;
+import com.github.phantazmnetwork.zombies.map.FileSystemMapLoader;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.NewObjectGui;
@@ -24,7 +24,6 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.server.command.TeleportCommand;
 import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
@@ -48,7 +47,7 @@ public class MapeditorClient implements ClientModInitializer {
         ObjectRenderer renderer = new Renderer();
         Events.registerEventHandlerClass(renderer);
 
-        EditorSession editorSession = new BasicEditorSession(renderer, new FilesystemMapLoader(
+        EditorSession editorSession = new BasicEditorSession(renderer, new FileSystemMapLoader(
                 defaultMapDirectory, codec), defaultMapDirectory);
         editorSession.loadMapsFromDisk();
 

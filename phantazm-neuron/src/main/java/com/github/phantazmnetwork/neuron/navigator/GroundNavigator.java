@@ -158,7 +158,7 @@ public class GroundNavigator extends TrackingNavigator {
 
     private boolean tryPathfind(long time) {
         if(currentOperation == null) {
-            if(time - lastPathfind < recalculationDelay) {
+            if(time - lastPathfind < recalculationDelay || !agent.canPathfind()) {
                 return false;
             }
 

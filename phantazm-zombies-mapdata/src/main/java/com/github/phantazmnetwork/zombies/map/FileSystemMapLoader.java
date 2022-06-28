@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 
-public class FilesystemMapLoader implements MapLoader {
+public class FileSystemMapLoader implements MapLoader {
     private static final String ROOMS_PATH = "rooms";
     private static final String DOORS_PATH = "doors";
     private static final String SHOPS_PATH = "shops";
@@ -39,7 +39,7 @@ public class FilesystemMapLoader implements MapLoader {
     private final Path root;
     private final ConfigCodec codec;
 
-    public FilesystemMapLoader(@NotNull Path root, @NotNull ConfigCodec codec) {
+    public FileSystemMapLoader(@NotNull Path root, @NotNull ConfigCodec codec) {
         this.root = Objects.requireNonNull(root, "root");
         this.codec = Objects.requireNonNull(codec, "codec");
 

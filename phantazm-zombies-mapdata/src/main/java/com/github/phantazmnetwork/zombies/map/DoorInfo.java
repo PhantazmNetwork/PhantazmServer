@@ -15,7 +15,7 @@ public record DoorInfo(@NotNull Key id,
                        @NotNull List<Region3I> regions,
                        @NotNull Sound openSound) {
     public static final Sound DEFAULT_OPEN_SOUND = Sound.sound(Key.key("minecraft:block.wooden_door.open"),
-            Sound.Source.PLAYER,
+            Sound.Source.BLOCK,
             2.0F,
             1.0F);
 

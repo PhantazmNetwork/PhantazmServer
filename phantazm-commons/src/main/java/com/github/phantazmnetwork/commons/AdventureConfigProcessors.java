@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.commons;
 
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -30,8 +31,8 @@ public final class AdventureConfigProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(Key key) throws ConfigProcessException {
-            return ConfigProcessor.STRING.elementFromData(key.asString());
+        public @NotNull ConfigElement elementFromData(Key key) {
+            return new ConfigPrimitive(key.asString());
         }
     };
 
@@ -42,9 +43,9 @@ public final class AdventureConfigProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(Component component) throws ConfigProcessException {
+        public @NotNull ConfigElement elementFromData(Component component) {
             String string = MiniMessage.miniMessage().serialize(component);
-            return ConfigProcessor.STRING.elementFromData(string);
+            return new ConfigPrimitive(string);
         }
     };
 
