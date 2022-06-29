@@ -12,10 +12,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link ConfigProcessor} for {@link FollowEntityGoal}s.
+ * @param <TEntity> The goal's type of {@link Entity}
+ */
 public abstract class FollowEntityGoalConfigProcessor<TEntity extends Entity> implements ConfigProcessor<FollowEntityGoal<TEntity>> {
 
     private final ConfigProcessor<TargetSelector<TEntity>> selectorProcessor;
 
+    /**
+     * Creates a {@link FollowEntityGoalConfigProcessor}.
+     * @param selectorProcessor A {@link ConfigProcessor} for {@link TEntity} {@link TargetSelector}s
+     */
     public FollowEntityGoalConfigProcessor(@NotNull ConfigProcessor<TargetSelector<TEntity>> selectorProcessor) {
         this.selectorProcessor = Objects.requireNonNull(selectorProcessor, "selectorProcessor");
     }
@@ -34,6 +42,11 @@ public abstract class FollowEntityGoalConfigProcessor<TEntity extends Entity> im
         return node;
     }
 
+    /**
+     * Creates a {@link FollowEntityGoal} from a {@link TargetSelector}.
+     * @param selector The {@link TargetSelector} to use
+     * @return A new {@link FollowEntityGoal}
+     */
     protected abstract @NotNull FollowEntityGoal<TEntity> createGoal(@NotNull TargetSelector<TEntity> selector);
 
 }

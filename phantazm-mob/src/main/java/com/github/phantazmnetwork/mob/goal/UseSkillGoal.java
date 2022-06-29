@@ -10,13 +10,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link Goal} that periodically uses a {@link Skill}.
+ * @param skill The {@link Skill} to use
+ * @param period The period between uses
+ */
 public record UseSkillGoal(@NotNull Skill skill, long period) implements Goal {
 
+    /**
+     * The serial {@link Key} for {@link UseSkillGoal}s.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "goal.use_skill");
 
-    public UseSkillGoal(@NotNull Skill skill, long period) {
-        this.skill = Objects.requireNonNull(skill, "skill");
-        this.period = period;
+    /**
+     * Creates a {@link UseSkillGoal}.
+     * @param skill The {@link Skill} to use
+     * @param period The period between uses
+     */
+    public UseSkillGoal {
+        Objects.requireNonNull(skill, "skill");
     }
 
     @Override

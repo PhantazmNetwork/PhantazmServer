@@ -17,12 +17,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+/**
+ * Basic implementation of a {@link MobSpawner}.
+ */
 public class BasicMobSpawner implements MobSpawner {
 
     private final MobStore mobStore;
 
     private final Spawner neuralSpawner;
 
+    /**
+     * Creates a new {@link BasicMobSpawner}.
+     * @param mobStore The {@link MobStore} to register new {@link PhantazmMob}s to
+     * @param neuralSpawner The {@link Spawner} to spawn backing {@link NeuralEntity}s
+     */
     public BasicMobSpawner(@NotNull MobStore mobStore, @NotNull Spawner neuralSpawner) {
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.neuralSpawner = Objects.requireNonNull(neuralSpawner, "neuralSpawner");

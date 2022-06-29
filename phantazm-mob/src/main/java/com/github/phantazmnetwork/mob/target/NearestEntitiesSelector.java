@@ -10,12 +10,21 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.ToDoubleFunction;
 
+/**
+ * A {@link TargetSelector} that selects nearby {@link Entity}s.
+ * @param <TReturn> A mapped type of the target {@link Entity}
+ */
 public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector<Iterable<TReturn>> {
 
     private final double range;
 
     private final int targetLimit;
 
+    /**
+     * Creates a {@link NearestEntitiesSelector}.
+     * @param range The range of the selector
+     * @param targetLimit The maximum number of targets to select
+     */
     public NearestEntitiesSelector(double range, int targetLimit) {
         this.range = range;
         this.targetLimit = targetLimit;
@@ -67,16 +76,36 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
         };
     }
 
+    /**
+     * Gets the range of the selector.
+     * @return The range of the selector
+     */
     public double getRange() {
         return range;
     }
 
+    /**
+     * Gets the maximum number of targets to select.
+     * @return The maximum number of targets to select
+     */
     public int getTargetLimit() {
         return targetLimit;
     }
 
+    /**
+     * Maps a {@link Entity} to a target.
+     * @param entity The {@link Entity} to map
+     * @return The mapped target
+     */
     protected abstract @NotNull Optional<TReturn> mapTarget(@NotNull Entity entity);
 
+    /**
+     * Checks if a target is valid.
+     * @param mob The mob using the {@link NearestPlayersSelector}
+     * @param targetEntity The target {@link Entity}
+     * @param target The mapped target
+     * @return Whether the target is valid
+     */
     protected abstract boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity,
                                              @NotNull TReturn target);
 

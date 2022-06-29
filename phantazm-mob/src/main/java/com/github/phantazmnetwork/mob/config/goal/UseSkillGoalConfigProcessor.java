@@ -12,10 +12,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link ConfigProcessor} for {@link UseSkillGoal}s.
+ */
 public class UseSkillGoalConfigProcessor implements ConfigProcessor<UseSkillGoal> {
 
     private final ConfigProcessor<Skill> skillProcessor;
 
+    /**
+     * Creates a new {@link UseSkillGoalConfigProcessor}.
+     * @param skillProcessor A {@link ConfigProcessor} for {@link Skill}s
+     */
     public UseSkillGoalConfigProcessor(@NotNull ConfigProcessor<Skill> skillProcessor) {
         this.skillProcessor = Objects.requireNonNull(skillProcessor, "skillProcessor");
     }

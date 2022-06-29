@@ -5,8 +5,16 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoa
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Creates {@link NeuralGoal}s from an associated {@link PhantazmMob}.
+ */
 public interface Goal extends Keyed {
 
+    /**
+     * Creates a new {@link NeuralGoal}.
+     * @param mob The {@link Goal}'s user
+     * @return A new {@link NeuralGoal}
+     */
     @NotNull NeuralGoal createGoal(@NotNull PhantazmMob mob);
 
 }

@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.config.ItemStackConfigProcessors;
 import com.github.phantazmnetwork.api.config.VariantConfigProcessor;
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
@@ -53,6 +52,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * Main entrypoint for PhantazmMob related features.
+ */
 public final class Mob {
 
     private Mob() {
@@ -61,7 +63,7 @@ public final class Mob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Mob.class);
 
-    private final static ConfigProcessor<MobModel> MODEL_PROCESSOR;
+    private static final ConfigProcessor<MobModel> MODEL_PROCESSOR;
 
     private static MobSpawner mobSpawner;
 
@@ -112,7 +114,6 @@ public final class Mob {
                 descriptorProcessor,
                 goalProcessor,
                 skillProcessor,
-                AdventureConfigProcessors.component(true),
                 ItemStackConfigProcessors.snbt()
         );
     }
@@ -167,14 +168,26 @@ public final class Mob {
         LOGGER.info("Loaded {} mob files.", models.size());
     }
 
+    /**
+     * Gets a {@link ConfigProcessor} for {@link MobModel}s.
+     * @return A {@link ConfigProcessor} for {@link MobModel}s.
+     */
     public static @NotNull ConfigProcessor<MobModel> getModelProcessor() {
         return MODEL_PROCESSOR;
     }
 
+    /**
+     * Gets the global {@link MobSpawner}.
+     * @return The global {@link MobSpawner}.
+     */
     public static @NotNull MobSpawner getMobSpawner() {
         return requireInitialized(mobSpawner);
     }
 
+    /**
+     * Gets the loaded {@link MobModel}s.
+     * @return The loaded {@link MobModel}s
+     */
     public static @NotNull @Unmodifiable Map<Key, MobModel> getModels() {
         return requireInitialized(models);
     }

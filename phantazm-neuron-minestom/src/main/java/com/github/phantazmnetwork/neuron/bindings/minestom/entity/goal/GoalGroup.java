@@ -5,12 +5,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Represents a group of {@link NeuralGoal}s.
+ * Only one {@link NeuralGoal} can be active at a time in a group.
+ */
 public class GoalGroup implements Tickable {
 
     private final Iterable<NeuralGoal> goals;
 
     private NeuralGoal activeGroup;
 
+    /**
+     * Creates a {@link GoalGroup}.
+     * @param goals The {@link NeuralGoal}s in the group
+     */
     public GoalGroup(@NotNull Iterable<NeuralGoal> goals) {
         this.goals = Objects.requireNonNull(goals, "goals");
     }
@@ -28,7 +36,6 @@ public class GoalGroup implements Tickable {
             activeGroup.tick(time);
         }
     }
-
 
     private void chooseGroup() {
         for (NeuralGoal goal : goals) {

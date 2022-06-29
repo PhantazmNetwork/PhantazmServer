@@ -9,6 +9,10 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A {@link ConfigProcessor} for {@link NearestEntitiesSelector}s.
+ * @param <TSelector> The type of {@link NearestEntitiesSelector} to process
+ */
 public abstract class NearestEntitiesSelectorConfigProcessor<TSelector extends NearestEntitiesSelector<?>> implements ConfigProcessor<TSelector> {
     @Override
     public @NotNull TSelector dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -28,6 +32,12 @@ public abstract class NearestEntitiesSelectorConfigProcessor<TSelector extends N
         return element;
     }
 
+    /**
+     * Creates a {@link TSelector}.
+     * @param range The range of the selector
+     * @param targetLimit The maximum number of targets to select
+     * @return A new {@link TSelector}
+     */
     protected abstract @NotNull TSelector createSelector(double range, int targetLimit);
 
 }

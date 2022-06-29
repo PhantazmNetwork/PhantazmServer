@@ -12,18 +12,25 @@ import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
 import java.io.StringReader;
 
+/**
+ * {@link ConfigProcessor}s that process {@link ItemStack}s.
+ */
 public class ItemStackConfigProcessors {
 
+    private ItemStackConfigProcessors() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates a new {@link ConfigProcessor} for {@link ItemStack}s based on String NBT format.
+     * @return A new {@link ConfigProcessor} for {@link ItemStack}s based on String NBT format
+     */
     public static @NotNull ConfigProcessor<ItemStack> snbt() {
-        return new ConfigProcessor<ItemStack>() {
+        return new ConfigProcessor<>() {
             @SuppressWarnings("UnstableApiUsage")
             @Override
             public ItemStack dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                if (!element.isString()) {
-                    throw new ConfigProcessException("element is not string");
-                }
-
-                String nbtString = element.asString();
+                String nbtString = ConfigProcessor.STRING.dataFromElement(element);
                 NBTCompound itemCompound;
                 try {
                     itemCompound = (NBTCompound) new SNBTParser(new StringReader(nbtString)).parse();
@@ -36,7 +43,7 @@ public class ItemStackConfigProcessors {
 
             @SuppressWarnings("UnstableApiUsage")
             @Override
-            public @NotNull ConfigElement elementFromData(ItemStack itemStack) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull ItemStack itemStack) throws ConfigProcessException {
                 return new ConfigPrimitive(itemStack.toItemNBT().toSNBT());
             }
         };

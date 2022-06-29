@@ -9,10 +9,21 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * A {@link TargetSelector} that selects nearby players.
+ */
 public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
 
+    /**
+     * The serial {@link Key} for {@link NearestPlayersSelector}s.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "selector.nearest_players");
 
+    /**
+     * Creates a {@link NearestPlayersSelector}.
+     * @param range The range of the selector
+     * @param targetLimit The maximum number of targets to select
+     */
     public NearestPlayersSelector(double range, int targetLimit) {
         super(range, targetLimit);
     }

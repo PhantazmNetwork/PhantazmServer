@@ -10,13 +10,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link Goal} that makes a {@link PhantazmMob} follow {@link Entity}s
+ * @param <TEntity> The type of {@link Entity} to follow
+ */
 public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
 
     private final @NotNull TargetSelector<TEntity> selectorCreator;
 
-
-    public FollowEntityGoal(@NotNull TargetSelector<TEntity> selectorCreator) {
-        this.selectorCreator = Objects.requireNonNull(selectorCreator, "selectorCreator");
+    /**
+     * Creates a {@link FollowEntityGoal}.
+     * @param selector The {@link TargetSelector} used to select {@link Entity}s
+     */
+    public FollowEntityGoal(@NotNull TargetSelector<TEntity> selector) {
+        this.selectorCreator = Objects.requireNonNull(selector, "selector");
     }
 
     @Override
@@ -55,6 +62,10 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
         };
     }
 
+    /**
+     * Gets the {@link TargetSelector} used to select {@link Entity}s.
+     * @return The {@link TargetSelector} used to select {@link Entity}s
+     */
     public @NotNull TargetSelector<TEntity> getSelector() {
         return selectorCreator;
     }

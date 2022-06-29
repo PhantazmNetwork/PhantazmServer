@@ -71,13 +71,22 @@ public final class NeuralEntity extends LivingEntity implements Agent {
         super.update(time);
     }
 
-    protected void aiTick(long time) {
+    /**
+     * Tick to process AI logic.
+     * @param time The time of the tick
+     */
+    private void aiTick(long time) {
         for (GoalGroup group : goalGroups) {
             group.tick(time);
         }
     }
 
+    /**
+     * Adds a {@link GoalGroup} to this entity.
+     * @param group The {@link GoalGroup} to add
+     */
     public void addGoalGroup(@NotNull GoalGroup group) {
+        Objects.requireNonNull(group, "group");
         goalGroups.add(group);
     }
 

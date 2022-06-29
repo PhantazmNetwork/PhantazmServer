@@ -13,8 +13,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public final class AdventureConfigProcessors {
     private AdventureConfigProcessors() {
         throw new UnsupportedOperationException();
@@ -42,39 +40,17 @@ public final class AdventureConfigProcessors {
         }
     };
 
-    private static class ComponentConfigProcessor implements ConfigProcessor<Component> {
-
-        private final MiniMessage miniMessage;
-
-        private final boolean optional;
-
-        public ComponentConfigProcessor(@NotNull MiniMessage miniMessage, boolean optional) {
-            this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
-            this.optional = optional;
-        }
-
+    private static final ConfigProcessor<Component> component = new ConfigProcessor<Component>() {
         @Override
         public Component dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            if (optional && element.isNull()) {
-                return null;
-            }
-            if(!element.isString()) {
-                throw new ConfigProcessException("Element is not a string");
-            }
-
-            return miniMessage.deserialize(element.asString());
+            return MiniMessage.miniMessage().deserialize(ConfigProcessor.STRING.dataFromElement(element));
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(Component component) {
-            String string = miniMessage.serialize(component);
-            return new ConfigPrimitive(string);
+        public @NotNull ConfigElement elementFromData(@NotNull Component component) throws ConfigProcessException {
+            return ConfigProcessor.STRING.elementFromData(MiniMessage.miniMessage().serialize(component));
         }
     };
-
-    private static final ConfigProcessor<Component> component = component(MiniMessage.miniMessage(), false);
-
-    private static final ConfigProcessor<Component> optionalComponent = component(MiniMessage.miniMessage(), true);
 
     private static final ConfigProcessor<Sound> sound = new ConfigProcessor<>() {
         @Override
@@ -105,14 +81,6 @@ public final class AdventureConfigProcessors {
 
     public static @NotNull ConfigProcessor<Component> component() {
         return component;
-    }
-
-    public static @NotNull ConfigProcessor<Component> component(boolean optional) {
-        return optional ? optionalComponent : component();
-    }
-
-    public static @NotNull ConfigProcessor<Component> component(@NotNull MiniMessage miniMessage, boolean optional) {
-        return new ComponentConfigProcessor(miniMessage, optional);
     }
 
     public static @NotNull ConfigProcessor<Sound> sound() {

@@ -7,8 +7,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * A {@link TargetSelector} that selects itself.
+ */
 public class SelfSelector implements TargetSelector<PhantazmMob> {
 
+    /**
+     * The serial {@link Key} for {@link SelfSelector}s.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "selector.self");
 
     @Override

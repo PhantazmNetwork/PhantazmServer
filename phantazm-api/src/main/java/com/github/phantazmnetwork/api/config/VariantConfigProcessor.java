@@ -13,12 +13,21 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * A {@link ConfigProcessor} which processes {@link TValue}s.
+ * This can be used to process inheritance and identifies variants based on {@link Keyed#key()}.
+ * @param <TValue> The type of {@link TValue} to process
+ */
 public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProcessor<TValue> {
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
     private final Map<Key, ConfigProcessor<? extends TValue>> subProcessors;
 
+    /**
+     * Creates a new {@link VariantConfigProcessor}.
+     * @param subProcessors A map of {@link Key}s to {@link ConfigProcessor}s to delegate processing to
+     */
     public VariantConfigProcessor(@NotNull Map<Key, ConfigProcessor<? extends TValue>> subProcessors) {
         this.subProcessors = Objects.requireNonNull(subProcessors, "subProcessors");
     }

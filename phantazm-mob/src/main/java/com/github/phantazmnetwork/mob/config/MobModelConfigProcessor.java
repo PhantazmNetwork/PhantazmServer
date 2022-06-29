@@ -21,11 +21,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+/**
+ * A {@link ConfigProcessor} for {@link MobModel}s.
+ */
 public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
     private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR = ConfigProcessor.enumProcessor(EquipmentSlot.class);
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+
+    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
 
     private final ConfigProcessor<MinestomDescriptor> descriptorProcessor;
 
@@ -33,22 +38,23 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
     private final ConfigProcessor<Skill> skillProcessor;
 
-    private final ConfigProcessor<Component> componentProcessor;
-
     private final ConfigProcessor<ItemStack> itemStackProcessor;
 
+    /**
+     * Creates a new {@link MobModelConfigProcessor}.
+     * @param descriptorProcessor A {@link ConfigProcessor} for {@link MinestomDescriptor}s
+     * @param goalProcessor A {@link ConfigProcessor} for {@link Goal}s
+     * @param skillProcessor A {@link ConfigProcessor} for {@link Skill}s
+     * @param itemStackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
+     */
     public MobModelConfigProcessor(@NotNull ConfigProcessor<MinestomDescriptor> descriptorProcessor,
                                    @NotNull ConfigProcessor<Goal> goalProcessor,
                                    @NotNull ConfigProcessor<Skill> skillProcessor,
-                                   @NotNull ConfigProcessor<Component> componentProcessor,
                                    @NotNull ConfigProcessor<ItemStack> itemStackProcessor) {
         this.descriptorProcessor = Objects.requireNonNull(descriptorProcessor, "descriptorProcessor");
-        this.goalProcessor = Objects.requireNonNull(goalProcessor,
-                "goalCreatorConfigProcessor");
+        this.goalProcessor = Objects.requireNonNull(goalProcessor, "goalProcessor");
         this.skillProcessor = Objects.requireNonNull(skillProcessor, "skillProcessor");
-        this.componentProcessor = Objects.requireNonNull(componentProcessor, "componentProcessor");
-        this.itemStackProcessor = Objects.requireNonNull(itemStackProcessor,
-                "itemStackConfigProcessor");
+        this.itemStackProcessor = Objects.requireNonNull(itemStackProcessor, "itemStackProcessor");
     }
 
     @Override
@@ -88,7 +94,14 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             triggers.put(triggerKey, List.copyOf(skills));
         }
 
-        Component displayName = componentProcessor.dataFromElement(element.getElementOrThrow("displayName"));
+        Component displayName;
+        ConfigElement displayNameElement = element.getElementOrDefault(() -> new ConfigPrimitive(null), "displayName");
+        if (element.isNull()) {
+            displayName = null;
+        }
+        else {
+            displayName = COMPONENT_PROCESSOR.dataFromElement(displayNameElement);
+        }
 
         ConfigNode equipmentNode = element.getNodeOrThrow("equipment");
         Map<EquipmentSlot, ItemStack> equipment = new HashMap<>(equipmentNode.size());
@@ -134,7 +147,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Optional<Component> displayName = model.getDisplayName();
         ConfigElement displayNameElement;
         if (displayName.isPresent()) {
-            displayNameElement = componentProcessor.elementFromData(displayName.get());
+            displayNameElement = COMPONENT_PROCESSOR.elementFromData(displayName.get());
         }
         else {
             displayNameElement = new ConfigPrimitive(null);

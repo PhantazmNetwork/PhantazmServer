@@ -30,6 +30,9 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDescriptor {
 
+    /**
+     * The unique key for {@link GroundMinestomDescriptor}s.
+     */
     Key KEY = Key.key(Namespaces.PHANTAZM, "descriptor.ground");
 
     @Override

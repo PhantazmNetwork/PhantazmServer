@@ -11,8 +11,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link Skill} that plays a {@link Sound}.
+ */
 public class PlaySoundSkill implements Skill {
 
+    /**
+     * The serial {@link Key} for {@link PlaySoundSkill}s.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "skill.play_sound");
     
     private final TargetSelector<? extends Audience> selectorCreator;
@@ -21,21 +27,39 @@ public class PlaySoundSkill implements Skill {
 
     private final boolean followAudience;
 
-    public PlaySoundSkill(@NotNull TargetSelector<? extends Audience> selectorCreator, @NotNull Sound sound,
+    /**
+     * Creates a {@link PlaySoundSkill}.
+     * @param selector The {@link TargetSelector} used to select {@link Audience}s
+     * @param sound The {@link Sound} to play
+     * @param followAudience Whether the {@link Sound} should follow the {@link Audience}
+     */
+    public PlaySoundSkill(@NotNull TargetSelector<? extends Audience> selector, @NotNull Sound sound,
                           boolean followAudience) {
-        this.selectorCreator = Objects.requireNonNull(selectorCreator, "selectorCreator");
+        this.selectorCreator = Objects.requireNonNull(selector, "selectorCreator");
         this.sound = Objects.requireNonNull(sound, "sound");
         this.followAudience = followAudience;
     }
 
-    public @NotNull TargetSelector<? extends Audience> getSelectorCreator() {
+    /**
+     * Gets the {@link TargetSelector} used to select {@link Audience}s.
+     * @return The {@link TargetSelector} used to select {@link Audience}s
+     */
+    public @NotNull TargetSelector<? extends Audience> getSelector() {
         return selectorCreator;
     }
 
+    /**
+     * Gets the {@link Sound} to play.
+     * @return The {@link Sound} to play
+     */
     public @NotNull Sound getSound() {
         return sound;
     }
 
+    /**
+     * Gets whether the {@link Sound} should follow the {@link Audience}.
+     * @return Whether the {@link Sound} should follow the {@link Audience}
+     */
     public boolean shouldFollowAudience() {
         return followAudience;
     }

@@ -15,12 +15,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link ConfigProcessor} for {@link PlaySoundSkill}s.
+ */
 public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundSkill> {
 
     private static final ConfigProcessor<Sound> SOUND_PROCESSOR = AdventureConfigProcessors.sound();
 
     private final ConfigProcessor<TargetSelector<? extends Audience>> selectorProcessor;
 
+    /**
+     * Creates a new {@link PlaySoundSkillConfigProcessor}.
+     * @param selectorProcessor A {@link ConfigProcessor} for audience {@link TargetSelector}s
+     */
     public PlaySoundSkillConfigProcessor(@NotNull ConfigProcessor<TargetSelector<? extends Audience>> selectorProcessor) {
         this.selectorProcessor = Objects.requireNonNull(selectorProcessor, "selectorProcessor");
     }
@@ -39,7 +46,7 @@ public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundS
     public @NotNull ConfigElement elementFromData(@NotNull PlaySoundSkill playSoundSkill) throws ConfigProcessException {
         ConfigNode node = new LinkedConfigNode(3);
 
-        TargetSelector<? extends Audience> selector = playSoundSkill.getSelectorCreator();
+        TargetSelector<? extends Audience> selector = playSoundSkill.getSelector();
         node.put("audienceSelector", selectorProcessor.elementFromData(selector));
         node.put("sound", SOUND_PROCESSOR.elementFromData(playSoundSkill.getSound()));
         node.put("followAudience", new ConfigPrimitive(playSoundSkill.shouldFollowAudience()));

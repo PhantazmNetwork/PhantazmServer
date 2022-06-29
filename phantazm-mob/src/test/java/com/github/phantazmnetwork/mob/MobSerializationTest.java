@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.mob;
 
 import com.github.phantazmnetwork.api.config.ItemStackConfigProcessors;
 import com.github.phantazmnetwork.api.config.VariantConfigProcessor;
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
 import com.github.phantazmnetwork.mob.config.goal.FollowEntityGoalConfigProcessor;
@@ -126,7 +125,6 @@ public class MobSerializationTest {
                 descriptorProcessor,
                 goalProcessor,
                 skillProcessor,
-                AdventureConfigProcessors.component(true),
                 ItemStackConfigProcessors.snbt()
         );
 
