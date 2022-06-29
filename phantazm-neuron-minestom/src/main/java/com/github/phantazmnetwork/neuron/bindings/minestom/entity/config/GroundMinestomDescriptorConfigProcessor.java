@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -78,12 +77,12 @@ public class GroundMinestomDescriptorConfigProcessor implements ConfigProcessor<
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull GroundMinestomDescriptor groundMinestomDescriptor) throws ConfigProcessException {
         ConfigNode node = new LinkedConfigNode();
-        node.put("id", new ConfigPrimitive(groundMinestomDescriptor.getID()));
+        node.putString("id", groundMinestomDescriptor.getID());
         node.put("calculator", calculatorProcessor.elementFromData(groundMinestomDescriptor.getCalculator()));
         node.put("entityType", KEY_PROCESSOR.elementFromData(groundMinestomDescriptor.getEntityType().namespace()));
-        node.put("jumpHeight", new ConfigPrimitive(groundMinestomDescriptor.getJumpHeight()));
-        node.put("fallTolerance", new ConfigPrimitive(groundMinestomDescriptor.getFallTolerance()));
-        node.put("stepHeight", new ConfigPrimitive(groundMinestomDescriptor.getStepHeight()));
+        node.putNumber("jumpHeight", groundMinestomDescriptor.getJumpHeight());
+        node.putNumber("fallTolerance", groundMinestomDescriptor.getFallTolerance());
+        node.putNumber("stepHeight", groundMinestomDescriptor.getStepHeight());
 
         return node;
     }

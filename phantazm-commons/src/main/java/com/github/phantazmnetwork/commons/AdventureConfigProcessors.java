@@ -48,7 +48,7 @@ public final class AdventureConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Component component) throws ConfigProcessException {
-            return ConfigProcessor.STRING.elementFromData(MiniMessage.miniMessage().serialize(component));
+            return new ConfigPrimitive(MiniMessage.miniMessage().serialize(component));
         }
     };
 

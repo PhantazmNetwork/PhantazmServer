@@ -162,8 +162,6 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             equipmentNode.put(slotElement.asString(), itemStackProcessor.elementFromData(entry.getValue()));
         }
 
-        ConfigElement maxHealth = new ConfigPrimitive(model.getMaxHealth());
-
         ConfigNode element = new LinkedConfigNode(7);
         element.put("key", key);
         element.put("descriptor", descriptor);
@@ -171,7 +169,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         element.put("triggers", triggers);
         element.put("displayName", displayNameElement);
         element.put("equipment", equipmentNode);
-        element.put("maxHealth", maxHealth);
+        element.putNumber("maxHealth", model.getMaxHealth());
 
         return element;
     }

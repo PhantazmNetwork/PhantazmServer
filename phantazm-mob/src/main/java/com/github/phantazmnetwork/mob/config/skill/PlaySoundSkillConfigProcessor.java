@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -49,7 +48,7 @@ public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundS
         TargetSelector<? extends Audience> selector = playSoundSkill.getSelector();
         node.put("audienceSelector", selectorProcessor.elementFromData(selector));
         node.put("sound", SOUND_PROCESSOR.elementFromData(playSoundSkill.getSound()));
-        node.put("followAudience", new ConfigPrimitive(playSoundSkill.shouldFollowAudience()));
+        node.putBoolean("followAudience", playSoundSkill.shouldFollowAudience());
 
         return node;
     }
