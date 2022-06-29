@@ -53,11 +53,10 @@ public final class Configuration {
         handler = new BasicConfigHandler();
 
         ConfigCodec codec = new TomlCodec();
-        MiniMessage miniMessage = MiniMessage.miniMessage();
         handler.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(), ServerConfig
                 .DEFAULT, SERVER_CONFIG_PATH, codec));
-        handler.registerLoader(LOBBIES_CONFIG_KEY, new SyncFileConfigLoader<>(new LobbiesConfigProcessor(
-                miniMessage), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));
+        handler.registerLoader(LOBBIES_CONFIG_KEY, new SyncFileConfigLoader<>(new LobbiesConfigProcessor(),
+                LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));
     }
 
     /**

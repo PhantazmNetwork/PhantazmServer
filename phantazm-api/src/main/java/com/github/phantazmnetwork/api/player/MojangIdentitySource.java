@@ -21,7 +21,6 @@ import java.util.concurrent.Executor;
  * @apiNote Currently, this utilizes {@link MojangUtils} utility methods and does not perform any caching of its own,
  * aside from that utilized by MojangUtils itself.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class MojangIdentitySource implements IdentitySource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MojangIdentitySource.class);
     private static final String NAME_KEY = "name";
