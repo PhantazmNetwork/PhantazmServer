@@ -169,10 +169,10 @@ public class MapeditorClient implements ClientModInitializer {
         }
 
         @Override
-        public void forEach(@NotNull Consumer<? super RenderObject> object) {
-            Objects.requireNonNull(object, "object");
+        public void forEach(@NotNull Consumer<? super RenderObject> consumer) {
+            Objects.requireNonNull(consumer, "object");
             for(RenderObject sample : values) {
-                object.accept(sample);
+                consumer.accept(sample);
             }
         }
 
