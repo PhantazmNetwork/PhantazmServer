@@ -11,25 +11,30 @@ import java.io.File
 abstract class CopyLibs : DefaultTask() {
     //@Internal prevents Gradle from treating this property as an input and tracking its changes
     //this should always be an absolute path
-    var libraryDirectory : File = File(project.buildDir, "libs")
+    var libraryDirectory : File? = null
         @Internal get
         set(value) {
-            field = if(value.isAbsolute) value else File(project.rootDir, value.path)
+            if (value != null) {
+                field = if(value.isAbsolute) value else File(project.rootDir, value.path)
+            }
+            else field = null
         }
 
     //use @Input on String property instead of @DirectoryInput on DirectoryProperty so Gradle doesn't re-run the task
     //every time a file inside our folder changes
-    val libraryDirectoryPath : String
-        @Input get() = libraryDirectory.path
+    val libraryDirectoryPath : String?
+        @Optional @Input get() = libraryDirectory?.path
 
     var targetConfiguration : Configuration = project.configurations["runtimeClasspath"]
         @InputFiles get
 
     val artifactOutputs : FileCollection
-        @OutputFiles get() = project.files(getArtifacts(libraryDirectory, targetConfiguration.resolvedConfiguration
-            .resolvedArtifacts).map {
+        @OutputFiles get() = project.files(libraryDirectory?.let {
+            getArtifacts(
+                it, targetConfiguration.resolvedConfiguration.resolvedArtifacts).map {
                 it.second
-            })
+            }
+        })
 
     private fun getArtifacts(base: File, artifacts: Iterable<ResolvedArtifact>) :
             Iterable<Pair<ResolvedArtifact, File>> {
@@ -47,28 +52,29 @@ abstract class CopyLibs : DefaultTask() {
     fun copyLibs() {
         val resolvedArtifacts = targetConfiguration.resolvedConfiguration.resolvedArtifacts
 
-        getArtifacts(libraryDirectory, resolvedArtifacts).forEach {
-            val artifactLastModified = it.first.file.lastModified()
-            val targetLastModified = it.second.lastModified()
+        libraryDirectory?.let {
+            getArtifacts(it, resolvedArtifacts).forEach {
+                val artifactLastModified = it.first.file.lastModified()
+                val targetLastModified = it.second.lastModified()
 
-            if(artifactLastModified != targetLastModified) {
-                logger.info("Copying artifact ${it.first.file} to ${it.second}.")
-                it.first.file.copyTo(it.second, true)
-                it.second.setLastModified(artifactLastModified)
+                if(artifactLastModified != targetLastModified) {
+                    logger.info("Copying artifact ${it.first.file} to ${it.second}.")
+                    it.first.file.copyTo(it.second, true)
+                    it.second.setLastModified(artifactLastModified)
+                }
             }
         }
 
-        libraryDirectory.walkTopDown().filter {
+        libraryDirectory?.walkTopDown()?.filter {
             it.isFile
-        }.forEach {
-            val relative = it.relativeTo(libraryDirectory)
-            val relativeParent = relative.parentFile
+        }?.forEach {
+            val relative = libraryDirectory?.let { it1 -> it.relativeTo(it1) }
+            val relativeParent = relative?.parentFile
 
             if(relativeParent == null) {
                 logger.info("Deleting $it because its artifact group cannot be determined.")
                 it.delete()
-            }
-            else {
+            } else {
                 val artifactFileGroup = relativeParent.toPath().joinToString(".")
                 val artifactFileName = relative.nameWithoutExtension
 

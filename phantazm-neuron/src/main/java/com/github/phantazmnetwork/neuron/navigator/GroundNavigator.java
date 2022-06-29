@@ -65,6 +65,10 @@ public class GroundNavigator extends TrackingNavigator {
     public void tick(long time) {
         if(destinationSupplier != null) {
             Vec3I newDestination = destinationSupplier.get();
+            if(newDestination == null) {
+                reset(time);
+                return;
+            }
 
             boolean destinationChange = false;
             if(!newDestination.equals(currentDestination)) {

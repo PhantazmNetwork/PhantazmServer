@@ -79,7 +79,7 @@ public interface Vec3I extends Comparable<Vec3I> {
      * @param z2 second z-component
      * @return the squared distance between the point {@code first} and the point {@code second}
      */
-    static int squaredDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
+    static double squaredDistance(int x1, int y1, int z1, int x2, int y2, int z2) {
         int dX = x1 - x2;
         int dY = y1 - y2;
         int dZ = z1 - z2;

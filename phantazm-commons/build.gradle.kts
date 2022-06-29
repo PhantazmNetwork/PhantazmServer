@@ -4,4 +4,6 @@ plugins {
 
 dependencies {
     api(libs.fastutil)
+    api(libs.ethylene.core)
+    api(libs.adventure.text.minimessage)
 }
