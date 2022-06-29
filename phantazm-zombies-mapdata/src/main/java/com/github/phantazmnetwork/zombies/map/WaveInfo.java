@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Defines a wave.
  */
-public record WaveInfo(int delayTicks, @NotNull List<SpawnInfo> spawns) {
+public record WaveInfo(long delayTicks, @NotNull List<SpawnInfo> spawns) {
     /**
      * Creates a new instance of this record.
      * @param delayTicks the number of ticks until this wave triggers, measured from the start of the round (if this is

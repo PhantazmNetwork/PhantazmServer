@@ -11,14 +11,14 @@ import java.util.NoSuchElementException;
  */
 public interface Region3I extends Iterable<Vec3I> {
     /**
-     * The "origin" vector of this region. This is the corner closest to &lt;-∞, -∞, -∞&gt;.
+     * The "origin" vector of this region. This is the corner closest to ⟨-∞, -∞, -∞⟩.
      * @return the origin vector for this region
      */
     @NotNull Vec3I getOrigin();
 
     /**
      * The "length" vectors for this region. These are always positive or zero, and when added to the origin vector
-     * produce the maximum corner for this region (the corner closest to &lt;∞, ∞, ∞&gt;).
+     * produce the maximum corner for this region (the corner closest to ⟨∞, ∞, ∞⟩).
      * @return the length vectors for this region
      */
     @NotNull Vec3I getLengths();
@@ -26,7 +26,7 @@ public interface Region3I extends Iterable<Vec3I> {
 
     /**
      * Produces a new Region3I that encompasses both of the given vectors, whose coordinates will be considered relative
-     * to the origin &lt;0, 0, 0&gt;.
+     * to the origin ⟨0, 0, 0⟩.
      * @param first the fist vector to encompass
      * @param second the second vector to encompass
      * @return a new Region3I encompassing both vectors
@@ -73,7 +73,7 @@ public interface Region3I extends Iterable<Vec3I> {
     /**
      * Produces a new Region3I from "normalizing" the given origin and lengths vectors. The lengths may be negative, in
      * which case the new origin vector will differ from the original, but the result will still represent the same
-     * bounding box. Vectors are considered relative to the origin &lt;0, 0, 0&gt;.
+     * bounding box. Vectors are considered relative to the origin ⟨0, 0, 0⟩.
      * @param origin the origin vector
      * @param lengths the lengths vector (components may be negative)
      * @return a new Region3I with non-negative lengths, representing the same bounding box
@@ -86,7 +86,7 @@ public interface Region3I extends Iterable<Vec3I> {
 
     /**
      * Check if two bounding boxes overlap each other. All lengths should be non-negative, all origins should represent
-     * the corner closest to &lt;-∞, -∞, -∞&gt; for their respective bounding box.
+     * the corner closest to ⟨-∞, -∞, -∞⟩ for their respective bounding box.
      * @param oX1 the X-component of the origin vector of the first bounding box
      * @param oY1 the Y-component of the origin vector of the first bounding box
      * @param oZ1 the Z-component of the origin vector of the first bounding box
@@ -118,7 +118,7 @@ public interface Region3I extends Iterable<Vec3I> {
 
     /**
      * Checks if two bounding boxes overlap each other. All lengths should be non-negative, all origins should represent
-     * the corner closest to &lt;-∞, -∞, -∞&gt; for their respective bounding box.
+     * the corner closest to ⟨-∞, -∞, -∞⟩ for their respective bounding box.
      * @param firstOrigin the origin of the first bounding box
      * @param firstLengths the lengths for the first bounding box
      * @param secondOrigin the origin of the second bounding box
