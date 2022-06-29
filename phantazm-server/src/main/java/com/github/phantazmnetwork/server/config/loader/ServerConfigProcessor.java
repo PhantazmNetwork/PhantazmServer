@@ -20,6 +20,8 @@ import java.util.Objects;
  */
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
+    private final static ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+
     @Override
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         ConfigNode serverInfo = element.getNodeOrThrow("serverInfo");
@@ -44,8 +46,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                 velocitySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
-        Component description = AdventureConfigProcessors.component().dataFromElement(pingList
-                .getElement("description"));
+        Component description = COMPONENT_PROCESSOR.dataFromElement(pingList.getElementOrThrow("description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
         ConfigNode pathfinderNode = element.getNodeOrThrow("pathfinder");
@@ -80,8 +81,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
         ConfigNode pingList = new LinkedConfigNode(1);
         PingListConfig pingListConfig = serverConfig.pingListConfig();
-        pingList.put("description", AdventureConfigProcessors.component().elementFromData(pingListConfig
-                .description()));
+        pingList.put("description", COMPONENT_PROCESSOR.elementFromData(pingListConfig.description()));
 
         ConfigNode configNode = new LinkedConfigNode(2);
         configNode.put("serverInfo", serverInfo);
