@@ -28,7 +28,7 @@ public class MinestomDescriptorConfigProcessor implements ConfigProcessor<Minest
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull MinestomDescriptor descriptor) throws ConfigProcessException {
         if (descriptor instanceof GroundMinestomDescriptor) {
-            ConfigNode node = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(2);
             node.put("entityType", new ConfigPrimitive(descriptor.getEntityType().namespace().asString()));
             node.put("ID", new ConfigPrimitive(descriptor.getID()));
             return node;

@@ -30,7 +30,7 @@ public class UseSkillGoalConfigProcessor implements ConfigProcessor<UseSkillGoal
 
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull UseSkillGoal useSkillGoal) throws ConfigProcessException {
-        ConfigNode configNode = new LinkedConfigNode();
+        ConfigNode configNode = new LinkedConfigNode(2);
         configNode.put("skill", skillProcessor.elementFromData(useSkillGoal.skill()));
         configNode.put("period", new ConfigPrimitive(useSkillGoal.period()));
 

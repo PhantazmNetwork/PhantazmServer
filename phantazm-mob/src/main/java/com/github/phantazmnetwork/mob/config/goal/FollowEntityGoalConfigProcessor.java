@@ -12,29 +12,28 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class FollowEntityGoalConfigProcessor<TEntity extends Entity> implements ConfigProcessor<FollowEntityGoal<TEntity>> {
+public abstract class FollowEntityGoalConfigProcessor<TEntity extends Entity> implements ConfigProcessor<FollowEntityGoal<TEntity>> {
 
-    private final ConfigProcessor<? extends TargetSelector<TEntity>> targetSelectorConfigProcessor;
+    private final ConfigProcessor<TargetSelector<TEntity>> selectorProcessor;
 
-    public FollowEntityGoalConfigProcessor(@NotNull ConfigProcessor<? extends TargetSelector<TEntity>> targetSelectorConfigProcessor) {
-        this.targetSelectorConfigProcessor = Objects.requireNonNull(targetSelectorConfigProcessor,
-                "targetSelectorConfigProcessor");
+    public FollowEntityGoalConfigProcessor(@NotNull ConfigProcessor<TargetSelector<TEntity>> selectorProcessor) {
+        this.selectorProcessor = Objects.requireNonNull(selectorProcessor, "selectorProcessor");
     }
 
     @Override
     public FollowEntityGoal<TEntity> dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-        TargetSelector<TEntity> targetSelector = targetSelectorConfigProcessor
-                .dataFromElement(element.getElement("targetSelector"));
-        return new FollowEntityGoal<>(targetSelector);
+        TargetSelector<TEntity> targetSelector = selectorProcessor.dataFromElement(element.getElement("selector"));
+        return createGoal(targetSelector);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull FollowEntityGoal<TEntity> followEntityGoal) throws ConfigProcessException {
-        ConfigNode node = new LinkedConfigNode();
-        ConfigProcessor<TargetSelector<TEntity>> genericProcessor = (ConfigProcessor<TargetSelector<TEntity>>) targetSelectorConfigProcessor;
-        node.put("targetSelector", genericProcessor.elementFromData(followEntityGoal.entitySelector()));
+        ConfigNode node = new LinkedConfigNode(1);
+        node.put("selector", selectorProcessor.elementFromData(followEntityGoal.getSelector()));
 
         return node;
     }
+
+    protected abstract @NotNull FollowEntityGoal<TEntity> createGoal(@NotNull TargetSelector<TEntity> selector);
+
 }

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.mob.config.skill;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -13,27 +13,23 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundSkill> {
 
-    private final Map<String, ConfigProcessor<TargetSelector<? extends Audience>>> processors;
+    private static final ConfigProcessor<Sound> SOUND_PROCESSOR = AdventureConfigProcessors.sound();
 
-    private final ConfigProcessor<Sound> soundConfigProcessor;
+    private final ConfigProcessor<TargetSelector<? extends Audience>> selectorProcessor;
 
-    public PlaySoundSkillConfigProcessor(@NotNull Map<String, ConfigProcessor<TargetSelector<? extends Audience>>> processors,
-                                         @NotNull ConfigProcessor<Sound> soundConfigProcessor) {
-        this.processors = Objects.requireNonNull(processors, "processors");
-        this.soundConfigProcessor = Objects.requireNonNull(soundConfigProcessor, "soundConfigProcessor");
+    public PlaySoundSkillConfigProcessor(@NotNull ConfigProcessor<TargetSelector<? extends Audience>> selectorProcessor) {
+        this.selectorProcessor = Objects.requireNonNull(selectorProcessor, "selectorProcessor");
     }
 
     @Override
     public PlaySoundSkill dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         ConfigElement selectorElement = element.getElementOrThrow("audienceSelector");
-        ConfigProcessor<TargetSelector<? extends Audience>> selectorProcessor = processors.get(selectorElement.getStringOrThrow("serialName"));
         TargetSelector<? extends Audience> selector = selectorProcessor.dataFromElement(selectorElement);
-        Sound sound = soundConfigProcessor.dataFromElement(element.getElementOrThrow("sound"));
+        Sound sound = SOUND_PROCESSOR.dataFromElement(element.getElementOrThrow("sound"));
         boolean followAudience = element.getBooleanOrThrow("followAudience");
 
         return new PlaySoundSkill(selector, sound, followAudience);
@@ -41,16 +37,14 @@ public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundS
 
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull PlaySoundSkill playSoundSkill) throws ConfigProcessException {
-        ConfigNode node = new LinkedConfigNode();
+        ConfigNode node = new LinkedConfigNode(3);
 
-        TargetSelector<? extends Audience> selector = playSoundSkill.getAudienceSelector();
-        if (!(selector instanceof VariantSerializable serializable)) {
-            throw new ConfigProcessException("cannot serialize target selector");
-        }
-        node.put("audienceSelector", processors.get(serializable.getSerialKey()).elementFromData(selector));
-        node.put("sound", soundConfigProcessor.elementFromData(playSoundSkill.getSound()));
+        TargetSelector<? extends Audience> selector = playSoundSkill.getSelectorCreator();
+        node.put("audienceSelector", selectorProcessor.elementFromData(selector));
+        node.put("sound", SOUND_PROCESSOR.elementFromData(playSoundSkill.getSound()));
         node.put("followAudience", new ConfigPrimitive(playSoundSkill.shouldFollowAudience()));
 
         return node;
     }
+
 }

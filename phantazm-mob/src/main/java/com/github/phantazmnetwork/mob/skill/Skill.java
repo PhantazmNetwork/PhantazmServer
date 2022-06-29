@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.mob.skill;
 
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-@FunctionalInterface
-public interface Skill {
+public interface Skill extends Keyed {
 
-    void use(@NotNull PhantazmMob sender);
+    @NotNull SkillInstance createSkill(@NotNull PhantazmMob mob);
 
 }

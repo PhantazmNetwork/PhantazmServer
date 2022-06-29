@@ -18,6 +18,7 @@ dependencies {
 
     implementation(libs.adventure.text.minimessage)
     implementation(libs.ethylene.toml)
+    implementation(libs.ethylene.yaml)
 }
 
 tasks.getByName<CopyLibs>("copyLibs") {

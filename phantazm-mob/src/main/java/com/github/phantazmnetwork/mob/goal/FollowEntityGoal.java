@@ -1,26 +1,28 @@
 package com.github.phantazmnetwork.mob.goal;
 
 import com.github.phantazmnetwork.api.VecUtils;
-import com.github.phantazmnetwork.api.config.VariantSerializable;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.mob.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record FollowEntityGoal<TEntity extends Entity>(@NotNull TargetSelector<TEntity> entitySelector) implements GoalCreator, VariantSerializable {
+public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
 
-    public final static Key SERIAL_KEY = Key.key("phantazm", "follow_entity_goal");
+    private final @NotNull TargetSelector<TEntity> selectorCreator;
 
-    public FollowEntityGoal(@NotNull TargetSelector<TEntity> entitySelector) {
-        this.entitySelector = Objects.requireNonNull(entitySelector, "entitySelector");
+
+    public FollowEntityGoal(@NotNull TargetSelector<TEntity> selectorCreator) {
+        this.selectorCreator = Objects.requireNonNull(selectorCreator, "selectorCreator");
     }
 
     @Override
     public @NotNull NeuralGoal createGoal(@NotNull PhantazmMob mob) {
+        TargetSelectorInstance<TEntity> selector = selectorCreator.createSelector(mob);
+
         return new NeuralGoal() {
             @Override
             public boolean shouldStart() {
@@ -30,7 +32,7 @@ public record FollowEntityGoal<TEntity extends Entity>(@NotNull TargetSelector<T
             @Override
             public void start() {
                 mob.entity().getNavigator().setDestination(() -> {
-                    return entitySelector.selectTarget(mob)
+                    return selector.selectTarget()
                             .map(player -> VecUtils.toBlockInt(player.getPosition()))
                             .orElse(null);
                 });
@@ -53,8 +55,8 @@ public record FollowEntityGoal<TEntity extends Entity>(@NotNull TargetSelector<T
         };
     }
 
-    @Override
-    public @NotNull Key getSerialKey() {
-        return SERIAL_KEY;
+    public @NotNull TargetSelector<TEntity> getSelector() {
+        return selectorCreator;
     }
+
 }

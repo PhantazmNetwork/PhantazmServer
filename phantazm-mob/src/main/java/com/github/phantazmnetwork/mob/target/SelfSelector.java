@@ -1,23 +1,23 @@
 package com.github.phantazmnetwork.mob.target;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public class SelfSelector implements TargetSelector<PhantazmMob>, VariantSerializable {
+public class SelfSelector implements TargetSelector<PhantazmMob> {
 
-    public final static Key SERIAL_KEY = Key.key("phantazm", "self_selector");
+    public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "selector.self");
 
     @Override
-    public @NotNull Optional<PhantazmMob> selectTarget(@NotNull PhantazmMob mob) {
-        return Optional.of(mob);
+    public @NotNull TargetSelectorInstance<PhantazmMob> createSelector(@NotNull PhantazmMob mob) {
+        return () -> Optional.of(mob);
     }
 
     @Override
-    public @NotNull Key getSerialKey() {
+    public @NotNull Key key() {
         return SERIAL_KEY;
     }
 }

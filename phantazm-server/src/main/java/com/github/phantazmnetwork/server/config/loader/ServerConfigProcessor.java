@@ -18,17 +18,16 @@ import java.util.Objects;
 /**
  * {@link ConfigProcessor} used for {@link ServerConfig}s.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
-    private final MiniMessage miniMessage;
+    private final ConfigProcessor<Component> componentProcessor;
 
     /**
      * Creates a processor for {@link ServerConfig}.
-     * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
+     * @param componentProcessor A {@link ConfigProcessor} for {@link Component}s
      */
-    public ServerConfigProcessor(@NotNull MiniMessage miniMessage) {
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+    public ServerConfigProcessor(@NotNull ConfigProcessor<Component> componentProcessor) {
+        this.componentProcessor = Objects.requireNonNull(componentProcessor, "componentProcessor");
     }
 
     @Override
@@ -55,7 +54,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                 velocitySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
-        Component description = miniMessage.deserialize(pingList.getStringOrThrow("description"));
+        Component description = componentProcessor.dataFromElement(pingList.getElementOrThrow("description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
         ConfigNode pathfinderNode = element.getNodeOrThrow("pathfinder");
@@ -79,8 +78,8 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull ServerConfig serverConfig) {
-        ConfigNode serverInfo = new LinkedConfigNode();
+    public @NotNull ConfigElement elementFromData(@NotNull ServerConfig serverConfig) throws ConfigProcessException {
+        ConfigNode serverInfo = new LinkedConfigNode(5);
         ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
         serverInfo.put("serverIP", new ConfigPrimitive(serverInfoConfig.serverIP()));
         serverInfo.put("port", new ConfigPrimitive(serverInfoConfig.port()));
@@ -88,12 +87,12 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         serverInfo.put("authType", new ConfigPrimitive(serverInfoConfig.authType().name()));
         serverInfo.put("velocitySecret", new ConfigPrimitive(serverInfoConfig.velocitySecret()));
 
-        ConfigNode pingList = new LinkedConfigNode();
+        ConfigNode pingList = new LinkedConfigNode(1);
         PingListConfig pingListConfig = serverConfig.pingListConfig();
-        String description = miniMessage.serialize(pingListConfig.description());
+        ConfigElement description = componentProcessor.elementFromData(pingListConfig.description());
         pingList.put("description", new ConfigPrimitive(description));
 
-        ConfigNode configNode = new LinkedConfigNode();
+        ConfigNode configNode = new LinkedConfigNode(2);
         configNode.put("serverInfo", serverInfo);
         configNode.put("pingList", pingList);
 

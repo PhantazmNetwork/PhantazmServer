@@ -25,21 +25,21 @@ import java.util.*;
  */
 public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
-    private final MiniMessage miniMessage;
+    private final ConfigProcessor<Component> componentProcessor;
 
     /**
      * Creates a processor for {@link LobbiesConfig}s.
-     * @param miniMessage A {@link MiniMessage} instance used to parse {@link Component}s
+     * @param componentProcessor A {@link ConfigProcessor} for {@link Component}s
      */
-    public LobbiesConfigProcessor(@NotNull MiniMessage miniMessage) {
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+    public LobbiesConfigProcessor(@NotNull ConfigProcessor<Component> componentProcessor) {
+        this.componentProcessor = Objects.requireNonNull(componentProcessor, "componentProcessor");
     }
 
     @Override
     public @NotNull LobbiesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         try {
             Path instancesPath = Path.of(element.getStringOrThrow("instancesPath"));
-            Component kickMessage = miniMessage.deserialize(element.getStringOrThrow("kickMessage"));
+            Component kickMessage = componentProcessor.dataFromElement(element.getElementOrThrow("kickMessage"));
             String mainLobbyName = element.getStringOrThrow("mainLobbyName");
 
             ConfigNode lobbiesNode = element.getNodeOrThrow("lobbies");
@@ -75,12 +75,12 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull LobbiesConfig lobbiesConfig) {
-        ConfigNode lobbiesNode = new LinkedConfigNode();
+    public @NotNull ConfigElement elementFromData(@NotNull LobbiesConfig lobbiesConfig) throws ConfigProcessException {
+        ConfigNode lobbiesNode = new LinkedConfigNode(lobbiesConfig.lobbies().entrySet().size());
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
-            ConfigNode lobbyNode = new LinkedConfigNode();
+            ConfigNode lobbyNode = new LinkedConfigNode(4);
 
-            ConfigNode spawnPointNode = new LinkedConfigNode();
+            ConfigNode spawnPointNode = new LinkedConfigNode(5);
             Pos spawnPoint = lobby.getValue().instanceConfig().spawnPoint();
             spawnPointNode.put("x", new ConfigPrimitive(spawnPoint.x()));
             spawnPointNode.put("y", new ConfigPrimitive(spawnPoint.y()));
@@ -88,7 +88,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             spawnPointNode.put("yaw", new ConfigPrimitive(spawnPoint.yaw()));
             spawnPointNode.put("pitch", new ConfigPrimitive(spawnPoint.pitch()));
 
-            ConfigNode instanceConfigNode = new LinkedConfigNode();
+            ConfigNode instanceConfigNode = new LinkedConfigNode(1);
             instanceConfigNode.put("spawnPoint", spawnPointNode);
 
             Collection<ConfigElement> lobbyPathsList = new ArrayList<>(lobby.getValue().lobbyPaths().size());
@@ -104,9 +104,9 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             lobbiesNode.put(lobby.getKey(), lobbyNode);
         }
 
-        ConfigNode configNode = new LinkedConfigNode();
+        ConfigNode configNode = new LinkedConfigNode(4);
         configNode.put("instancesPath", new ConfigPrimitive(lobbiesConfig.instancesPath().toString()));
-        configNode.put("kickMessage", new ConfigPrimitive(miniMessage.serialize(lobbiesConfig.kickMessage())));
+        configNode.put("kickMessage", new ConfigPrimitive(componentProcessor.elementFromData(lobbiesConfig.kickMessage())));
         configNode.put("mainLobbyName", new ConfigPrimitive(lobbiesConfig.mainLobbyName()));
         configNode.put("lobbies", lobbiesNode);
 

@@ -1,7 +1,8 @@
 package com.github.phantazmnetwork.mob.config;
 
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.mob.MobModel;
-import com.github.phantazmnetwork.mob.goal.GoalCreator;
+import com.github.phantazmnetwork.mob.goal.Goal;
 import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -12,8 +13,8 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -22,107 +23,140 @@ import java.util.*;
 
 public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
-    private final static Map<String, EquipmentSlot> EQUIPMENT_SLOT_MAP = new HashMap<>(EquipmentSlot.values().length);
+    private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR = ConfigProcessor.enumProcessor(EquipmentSlot.class);
+
+    private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
     private final ConfigProcessor<MinestomDescriptor> descriptorProcessor;
 
-    private final ConfigProcessor<GoalCreator> goalCreatorConfigProcessor;
+    private final ConfigProcessor<Goal> goalProcessor;
 
-    private final ConfigProcessor<ItemStack> itemStackConfigProcessor;
+    private final ConfigProcessor<Skill> skillProcessor;
 
-    private final MiniMessage miniMessage;
+    private final ConfigProcessor<Component> componentProcessor;
 
-    static {
-        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            EQUIPMENT_SLOT_MAP.put(equipmentSlot.name().toUpperCase(), equipmentSlot);
-        }
-    }
+    private final ConfigProcessor<ItemStack> itemStackProcessor;
 
     public MobModelConfigProcessor(@NotNull ConfigProcessor<MinestomDescriptor> descriptorProcessor,
-                                   @NotNull ConfigProcessor<GoalCreator> goalCreatorConfigProcessor,
-                                   @NotNull ConfigProcessor<ItemStack> itemStackConfigProcessor,
-                                   @NotNull MiniMessage miniMessage) {
+                                   @NotNull ConfigProcessor<Goal> goalProcessor,
+                                   @NotNull ConfigProcessor<Skill> skillProcessor,
+                                   @NotNull ConfigProcessor<Component> componentProcessor,
+                                   @NotNull ConfigProcessor<ItemStack> itemStackProcessor) {
         this.descriptorProcessor = Objects.requireNonNull(descriptorProcessor, "descriptorProcessor");
-        this.goalCreatorConfigProcessor = Objects.requireNonNull(goalCreatorConfigProcessor,
+        this.goalProcessor = Objects.requireNonNull(goalProcessor,
                 "goalCreatorConfigProcessor");
-        this.itemStackConfigProcessor = Objects.requireNonNull(itemStackConfigProcessor,
+        this.skillProcessor = Objects.requireNonNull(skillProcessor, "skillProcessor");
+        this.componentProcessor = Objects.requireNonNull(componentProcessor, "componentProcessor");
+        this.itemStackProcessor = Objects.requireNonNull(itemStackProcessor,
                 "itemStackConfigProcessor");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
     }
 
     @Override
     public @NotNull MobModel dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+        Key key = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("key"));
+
         MinestomDescriptor descriptor = descriptorProcessor.dataFromElement(element.getElement("descriptor"));
 
-        ConfigList goalCreatorsGroupsList = element.getListOrThrow("goalCreators");
-        Collection<Iterable<GoalCreator>> goalCreatorsGroups = new ArrayList<>(goalCreatorsGroupsList.size());
-        for (ConfigElement goalCreatorsElement : goalCreatorsGroupsList) {
-            if (!goalCreatorsElement.isList()) {
-                throw new ConfigProcessException("goal creators are not a list");
+        ConfigList goalGroupsList = element.getListOrThrow("goalGroups");
+        Collection<Collection<Goal>> goalGroups = new ArrayList<>(goalGroupsList.size());
+        for (ConfigElement goalGroupElement : goalGroupsList) {
+            if (!goalGroupElement.isList()) {
+                throw new ConfigProcessException("goal groups are not a list");
             }
 
-            ConfigList goalCreatorsList = goalCreatorsElement.asList();
-            Collection<GoalCreator> goalCreators = new ArrayList<>(goalCreatorsList.size());
-            for (ConfigElement goalCreatorElement : goalCreatorsList) {
-                goalCreators.add(goalCreatorConfigProcessor.dataFromElement(goalCreatorElement));
+            ConfigList goalsList = goalGroupElement.asList();
+            Collection<Goal> goals = new ArrayList<>(goalsList.size());
+            for (ConfigElement goalElement : goalsList) {
+                goals.add(goalProcessor.dataFromElement(goalElement));
             }
 
-            goalCreatorsGroups.add(goalCreators);
+            goalGroups.add(List.copyOf(goals));
         }
 
-        String displayNameString = element.getStringOrDefault((String) null, "displayName");
-        Component displayName = displayNameString == null ? null : miniMessage.deserialize(displayNameString);
+        ConfigList triggersList = element.getListOrThrow("triggers");
+        Map<Key, Collection<Skill>> triggers = new HashMap<>(triggersList.size());
+        for (ConfigElement triggerElement : triggersList) {
+            Key triggerKey = KEY_PROCESSOR.dataFromElement(triggerElement.getElementOrThrow("key"));
+
+            ConfigList skillsList = triggerElement.getListOrThrow("skills");
+            Collection<Skill> skills = new ArrayList<>(skillsList.size());
+            for (ConfigElement skillElement : skillsList) {
+                Skill skillInstance = skillProcessor.dataFromElement(skillElement);
+                skills.add(skillInstance);
+            }
+
+            triggers.put(triggerKey, List.copyOf(skills));
+        }
+
+        Component displayName = componentProcessor.dataFromElement(element.getElementOrThrow("displayName"));
 
         ConfigNode equipmentNode = element.getNodeOrThrow("equipment");
         Map<EquipmentSlot, ItemStack> equipment = new HashMap<>(equipmentNode.size());
         for (Map.Entry<String, ConfigElement> entry : equipmentNode.entrySet()) {
-            EquipmentSlot equipmentSlot = EQUIPMENT_SLOT_MAP.get(entry.getKey().toUpperCase());
-            if (equipmentSlot == null) {
-                throw new ConfigProcessException("unknown equipment slot");
-            }
-
-            if (!entry.getValue().isString()) {
-                throw new ConfigProcessException("equipment value is not string");
-            }
-
-            equipment.put(equipmentSlot, itemStackConfigProcessor.dataFromElement(entry.getValue()));
+            EquipmentSlot equipmentSlot = EQUIPMENT_SLOT_PROCESSOR.dataFromElement(new ConfigPrimitive(entry.getKey().toUpperCase()));
+            equipment.put(equipmentSlot, itemStackProcessor.dataFromElement(entry.getValue()));
         }
 
         float maxHealth = element.getNumberOrThrow("maxHealth").floatValue();
 
-        return new MobModel(descriptor, goalCreatorsGroups, displayName, equipment, maxHealth);
+        return new MobModel(key, descriptor, goalGroups, triggers, displayName, equipment, maxHealth);
     }
 
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull MobModel model) throws ConfigProcessException {
+        ConfigElement key = KEY_PROCESSOR.elementFromData(model.key());
+
         ConfigElement descriptor = descriptorProcessor.elementFromData(model.getDescriptor());
 
-        ConfigList goalCreatorsGroups = new ArrayConfigList();
-        for (Iterable<GoalCreator> creators : model.getGoalCreatorsGroups()) {
-            ConfigList goalCreatorsList = new ArrayConfigList();
-            for (GoalCreator creator : creators) {
-                goalCreatorsList.add(goalCreatorConfigProcessor.elementFromData(creator));
+        ConfigList goalGroupsList = new ArrayConfigList(model.getGoalGroups().size());
+        for (Collection<Goal> group : model.getGoalGroups()) {
+            ConfigList goalGroupList = new ArrayConfigList(group.size());
+            for (Goal goal : group) {
+                goalGroupList.add(goalProcessor.elementFromData(goal));
             }
 
-            goalCreatorsGroups.add(goalCreatorsList);
+            goalGroupsList.add(goalGroupList);
         }
 
-        ConfigElement displayName = model.getDisplayName()
-                .map(miniMessage::serialize)
-                .map(ConfigPrimitive::new)
-                .orElseGet(() -> new ConfigPrimitive(null));
+        ConfigList triggers = new ArrayConfigList(model.getTriggers().size());
+        for (Map.Entry<Key, Collection<Skill>> trigger : model.getTriggers().entrySet()) {
+            ConfigList skillList = new ArrayConfigList(trigger.getValue().size());
+            for (Skill skill : trigger.getValue()) {
+                skillList.add(skillProcessor.elementFromData(skill));
+            }
 
-        ConfigNode equipmentNode = new LinkedConfigNode();
+            ConfigNode node = new LinkedConfigNode(2);
+            node.put("key", KEY_PROCESSOR.elementFromData(trigger.getKey()));
+            node.put("skills", skillList);
+            triggers.add(node);
+        }
+
+        Optional<Component> displayName = model.getDisplayName();
+        ConfigElement displayNameElement;
+        if (displayName.isPresent()) {
+            displayNameElement = componentProcessor.elementFromData(displayName.get());
+        }
+        else {
+            displayNameElement = new ConfigPrimitive(null);
+        }
+
+        ConfigNode equipmentNode = new LinkedConfigNode(model.getEquipment().entrySet().size());
         for (Map.Entry<EquipmentSlot, ItemStack> entry : model.getEquipment().entrySet()) {
-            equipmentNode.put(entry.getKey().name().toUpperCase(), itemStackConfigProcessor.elementFromData(entry.getValue()));
+            ConfigElement slotElement = EQUIPMENT_SLOT_PROCESSOR.elementFromData(entry.getKey());
+            if (!slotElement.isString()) {
+                throw new ConfigProcessException("equipment slot processor did not create a string");
+            }
+            equipmentNode.put(slotElement.asString(), itemStackProcessor.elementFromData(entry.getValue()));
         }
 
         ConfigElement maxHealth = new ConfigPrimitive(model.getMaxHealth());
 
-        ConfigNode element = new LinkedConfigNode();
+        ConfigNode element = new LinkedConfigNode(7);
+        element.put("key", key);
         element.put("descriptor", descriptor);
-        element.put("goalGroupCreators", goalCreatorsGroups);
-        element.put("displayName", displayName);
+        element.put("goalGroups", goalGroupsList);
+        element.put("triggers", triggers);
+        element.put("displayName", displayNameElement);
         element.put("equipment", equipmentNode);
         element.put("maxHealth", maxHealth);
 

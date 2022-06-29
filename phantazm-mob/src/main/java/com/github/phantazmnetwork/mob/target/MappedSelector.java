@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.mob.target;
 
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> {
 
@@ -20,8 +19,14 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
     }
 
     @Override
-    public @NotNull Optional<TTo> selectTarget(@NotNull PhantazmMob mob) {
-        return delegate.selectTarget(mob).map(this::map);
+    public @NotNull Key key() {
+        return delegate.key();
+    }
+
+    @Override
+    public @NotNull TargetSelectorInstance<TTo> createSelector(@NotNull PhantazmMob mob) {
+        TargetSelectorInstance<TFrom> delegateSelector = delegate.createSelector(mob);
+        return () -> delegateSelector.selectTarget().map(this::map);
     }
 
     protected abstract TTo map(@NotNull TFrom from);

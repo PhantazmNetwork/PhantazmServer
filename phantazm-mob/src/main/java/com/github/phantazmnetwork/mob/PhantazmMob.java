@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record PhantazmMob(@NotNull MobModel model, @NotNull NeuralEntity entity) {
+public record PhantazmMob(@NotNull MobModel model,
+                          @NotNull NeuralEntity entity) {
 
     public PhantazmMob {
         Objects.requireNonNull(model, "model");

@@ -1,54 +1,36 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
-import com.github.phantazmnetwork.api.config.ItemStackConfigProcessor;
-import com.github.phantazmnetwork.api.config.KeyConfigProcessor;
-import com.github.phantazmnetwork.api.config.SoundConfigProcessor;
-import com.github.phantazmnetwork.api.config.VariantConfigProcessor;
+import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
-import com.github.phantazmnetwork.mob.config.goal.FollowEntityGoalConfigProcessor;
-import com.github.phantazmnetwork.mob.config.goal.UseSkillGoalConfigProcessor;
-import com.github.phantazmnetwork.mob.config.skill.PlaySoundSkillConfigProcessor;
-import com.github.phantazmnetwork.mob.config.target.NearestEntitySelectorConfigProcessor;
-import com.github.phantazmnetwork.mob.goal.FollowEntityGoal;
-import com.github.phantazmnetwork.mob.goal.GoalCreator;
+import com.github.phantazmnetwork.mob.goal.FollowPlayerGoal;
 import com.github.phantazmnetwork.mob.goal.UseSkillGoal;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
-import com.github.phantazmnetwork.mob.skill.Skill;
-import com.github.phantazmnetwork.mob.target.NearestEntitySelector;
-import com.github.phantazmnetwork.mob.target.SerializableMappedSelector;
+import com.github.phantazmnetwork.mob.target.FirstTargetSelector;
+import com.github.phantazmnetwork.mob.target.NearestPlayersSelector;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
-import com.github.phantazmnetwork.mob.trigger.TriggerKeys;
+import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.config.MinestomDescriptorConfigProcessor;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.attribute.Attribute;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 final class MobTest {
 
@@ -56,55 +38,28 @@ final class MobTest {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> phantazm, @NotNull Spawner spawner) {
-        TargetSelector<Iterable<Player>> underlyingSelector = new NearestEntitySelector<>(100.0, 1) {
-            @Override
-            protected @NotNull Optional<Player> mapTarget(@NotNull Entity entity) {
-                if (entity instanceof Player targetPlayer) {
-                    return Optional.of(targetPlayer);
-                }
-
-                return Optional.empty();
-            }
-
-            @Override
-            protected boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity,
-                                            @NotNull Player target) {
-                return true;
-            }
-        };
-        TargetSelector<Player> playerSelector = targetingMob -> {
-            Optional<Iterable<Player>> targetOptional = underlyingSelector.selectTarget(targetingMob);
-            if (targetOptional.isPresent()) {
-                Iterator<Player> target = targetOptional.get().iterator();
-                if (target.hasNext()) {
-                    return Optional.of(target.next());
-                }
-            }
-
-            return Optional.empty();
-        };
-
-        Skill testSkill = new PlaySoundSkill(playerSelector, Sound.sound(
-                Key.key("entity.elder_guardian.curse"),
-                Sound.Source.MASTER,
-                1.0F,
-                1.0F
-        ), true);
+    static void initialize(@NotNull EventNode<Event> phantazm) {
+        TargetSelector<Player> playerSelector = new FirstTargetSelector<>(new NearestPlayersSelector(20.0F, 1));
         MobModel model = new MobModel(
+                Key.key(Namespaces.PHANTAZM, "mob.test"),
                 GroundMinestomDescriptor.of(EntityType.ZOMBIE, "test"),
                 List.of(
-                        Collections.singleton(new FollowEntityGoal<>(playerSelector)),
-                        Collections.singleton(new UseSkillGoal(testSkill, 5000L))
+                        Collections.singleton(new FollowPlayerGoal(playerSelector)),
+                        Collections.singleton(new UseSkillGoal(new PlaySoundSkill(playerSelector, Sound.sound(
+                                Key.key("entity.elder_guardian.curse"),
+                                Sound.Source.MASTER,
+                                1.0F,
+                                1.0F
+                        ), true), 5000L))
                 ),
                 Map.of(
-                        TriggerKeys.DAMAGE_TRIGGER,
-                        Collections.singleton(sender -> {
-                            Instance instance = sender.entity().getInstance();
-                            if (instance != null) {
-                                instance.sendMessage(Component.text("Ow!", NamedTextColor.RED));
-                            }
-                        })
+                        MobTriggers.DAMAGE_TRIGGER.key(),
+                        Collections.singleton(new PlaySoundSkill(playerSelector, Sound.sound(
+                                Key.key("entity.arrow.hit_player"),
+                                Sound.Source.MASTER,
+                                1.0F,
+                                1.0F
+                        ), true))
                 ),
                 Component.text("Test Mob"),
                 Map.of(
@@ -113,86 +68,7 @@ final class MobTest {
                 Attribute.MAX_HEALTH.defaultValue()
         );
 
-        ConfigProcessor<Key> keyProcessor = new KeyConfigProcessor();
-        Map<String, ConfigProcessor<TargetSelector<? extends Audience>>> audienceProcessors = Map.of();
-        ConfigProcessor<Skill> skillProcessor = new VariantConfigProcessor<>(
-                Map.of(
-                        PlaySoundSkill.SERIAL_KEY, new PlaySoundSkillConfigProcessor(
-                                audienceProcessors,
-                                new SoundConfigProcessor(keyProcessor)
-                        )
-                ),
-                keyProcessor
-        );
-        Key followNearestPlayer = Key.key("phantazm", "follow_nearest_player");
-        ConfigProcessor<GoalCreator> goalProcessor = new VariantConfigProcessor<>(
-                Map.of(
-                        UseSkillGoal.SERIAL_KEY, new UseSkillGoalConfigProcessor(skillProcessor),
-                        followNearestPlayer, new FollowEntityGoalConfigProcessor<>(new ConfigProcessor<TargetSelector<Player>>() {
-
-                            private final ConfigProcessor<? extends TargetSelector<Iterable<Player>>> innerProcessor = new NearestEntitySelectorConfigProcessor<NearestEntitySelector<Player>>() {
-                                @Override
-                                protected @NotNull NearestEntitySelector<Player> createSelector(double range, int targetLimit) {
-                                    return new NearestEntitySelector<>(range, targetLimit) {
-                                        @Override
-                                        protected @NotNull Optional<Player> mapTarget(@NotNull Entity entity) {
-                                            if (entity instanceof Player player) {
-                                                return Optional.of(player);
-                                            }
-
-                                            return Optional.empty();
-                                        }
-
-                                        @Override
-                                        protected boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity, @NotNull Player target) {
-                                            return false;
-                                        }
-                                    };
-                                }
-                            };
-
-                            @Override
-                            public TargetSelector<Player> dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                                TargetSelector<Iterable<Player>> innerSelector = innerProcessor.dataFromElement(element);
-                                return new SerializableMappedSelector<>(innerSelector) {
-                                    @Override
-                                    protected Player map(@NotNull Iterable<Player> players) {
-                                        Iterator<Player> playerIterator = players.iterator();
-                                        if (playerIterator.hasNext()) {
-                                            return playerIterator.next();
-                                        }
-
-                                        return null;
-                                    }
-                                };
-                            }
-
-                            @SuppressWarnings("unchecked")
-                            @Override
-                            public @NotNull ConfigElement elementFromData(@NotNull TargetSelector<Player> playerTargetSelector) throws ConfigProcessException {
-                                SerializableMappedSelector<Iterable<Player>, Player> mappedSelector = (SerializableMappedSelector<Iterable<Player>, Player>) playerTargetSelector;
-                                ConfigProcessor<TargetSelector<Iterable<Player>>> genericSelector = (ConfigProcessor<TargetSelector<Iterable<Player>>>) innerProcessor;
-                                ConfigElement element = genericSelector.elementFromData(mappedSelector.getDelegate());
-                                if (!(element instanceof ConfigNode node)) {
-                                    throw new ConfigProcessException("element is not node");
-                                }
-                                node.put("serialKey", keyProcessor.elementFromData(followNearestPlayer));
-
-                                return node;
-                            }
-                        })
-                ),
-                keyProcessor
-        );
-        ConfigProcessor<MobModel> modelProcessor = new MobModelConfigProcessor(
-                new MinestomDescriptorConfigProcessor(),
-                goalProcessor,
-                new ItemStackConfigProcessor(),
-                MiniMessage.miniMessage()
-        );
-
-        Map<UUID, PhantazmMob> uuidToMob = new HashMap<>();
-        AtomicReference<PhantazmMob> mobReference = new AtomicReference<>();
+        Wrapper<PhantazmMob> mobReference = Wrapper.ofNull();
         phantazm.addListener(ChatChannelSendEvent.class, event -> {
             String msg = event.getInput();
             Player player = event.getPlayer();
@@ -200,27 +76,16 @@ final class MobTest {
 
             if (instance != null) {
                 switch (msg) {
-                    case "spawnmob":
-                        PhantazmMob mob = model.spawn(spawner, instance, player.getPosition());
+                    case "spawnmob" -> {
+                        PhantazmMob mob = Mob.getMobSpawner().spawn(instance, player.getPosition(), model);
                         mobReference.set(mob);
-                        uuidToMob.put(mob.entity().getUuid(), mob);
+                    }
+                    case "26th letter" -> {
+                        mobReference.get().entity().damage(DamageType.GRAVITY, 1.0F);
+                    }
                 }
             }
         });
-
-        for (Map.Entry<Key, Class<? extends EntityEvent>> entry : TriggerKeys.TRIGGER_EVENT_MAP.entrySet()) {
-            phantazm.addListener(entry.getValue(), event -> {
-                PhantazmMob mob = uuidToMob.get(event.getEntity().getUuid());
-                if (mob != null) {
-                    Iterable<Skill> skills = mob.model().getTriggers().get(entry.getKey());
-                    if (skills != null) {
-                        for (Skill skill : skills) {
-                            skill.use(mob);
-                        }
-                    }
-                }
-            });
-        }
     }
 
 }

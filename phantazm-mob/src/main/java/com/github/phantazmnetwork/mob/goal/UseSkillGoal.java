@@ -1,7 +1,8 @@
 package com.github.phantazmnetwork.mob.goal;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.mob.skill.SkillInstance;
 import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.kyori.adventure.key.Key;
@@ -9,9 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record UseSkillGoal(@NotNull Skill skill, long period) implements GoalCreator, VariantSerializable {
+public record UseSkillGoal(@NotNull Skill skill, long period) implements Goal {
 
-    public final static Key SERIAL_KEY = Key.key("phantazm", "use_skill_goal");
+    public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "goal.use_skill");
 
     public UseSkillGoal(@NotNull Skill skill, long period) {
         this.skill = Objects.requireNonNull(skill, "skill");
@@ -21,6 +22,8 @@ public record UseSkillGoal(@NotNull Skill skill, long period) implements GoalCre
     @Override
     public @NotNull NeuralGoal createGoal(@NotNull PhantazmMob mob) {
         return new NeuralGoal() {
+
+            private final SkillInstance skillInstance = skill().createSkill(mob);
 
             private long lastUsage = System.currentTimeMillis();
 
@@ -47,7 +50,7 @@ public record UseSkillGoal(@NotNull Skill skill, long period) implements GoalCre
             @Override
             public void tick(long time) {
                 if (time - lastUsage >= period) {
-                    skill.use(mob);
+                    skillInstance.use();
                     lastUsage = time;
                 }
             }
@@ -55,7 +58,7 @@ public record UseSkillGoal(@NotNull Skill skill, long period) implements GoalCre
     }
 
     @Override
-    public @NotNull Key getSerialKey() {
+    public @NotNull Key key() {
         return SERIAL_KEY;
     }
 }

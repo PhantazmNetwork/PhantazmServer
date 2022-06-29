@@ -1,7 +1,8 @@
 package com.github.phantazmnetwork.mob.skill;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.mob.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
@@ -10,25 +11,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class PlaySoundSkill implements Skill, VariantSerializable {
+public class PlaySoundSkill implements Skill {
 
-    public final static Key SERIAL_KEY = Key.key("phantazm", "play_sound_skill");
+    public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "skill.play_sound");
     
-    private final TargetSelector<? extends Audience> audienceSelector;
+    private final TargetSelector<? extends Audience> selectorCreator;
 
     private final Sound sound;
 
     private final boolean followAudience;
 
-    public PlaySoundSkill(@NotNull TargetSelector<? extends Audience> audienceSelector, @NotNull Sound sound,
+    public PlaySoundSkill(@NotNull TargetSelector<? extends Audience> selectorCreator, @NotNull Sound sound,
                           boolean followAudience) {
-        this.audienceSelector = Objects.requireNonNull(audienceSelector, "audienceSelector");
+        this.selectorCreator = Objects.requireNonNull(selectorCreator, "selectorCreator");
         this.sound = Objects.requireNonNull(sound, "sound");
         this.followAudience = followAudience;
     }
 
-    public @NotNull TargetSelector<? extends Audience> getAudienceSelector() {
-        return audienceSelector;
+    public @NotNull TargetSelector<? extends Audience> getSelectorCreator() {
+        return selectorCreator;
     }
 
     public @NotNull Sound getSound() {
@@ -40,19 +41,21 @@ public class PlaySoundSkill implements Skill, VariantSerializable {
     }
 
     @Override
-    public void use(@NotNull PhantazmMob sender) {
-        audienceSelector.selectTarget(sender).ifPresent(audience -> {
-            if (followAudience) {
-                audience.playSound(sound, Sound.Emitter.self());
-            }
-            else {
-                audience.playSound(sound);
-            }
-        });
+    public @NotNull SkillInstance createSkill(@NotNull PhantazmMob sender) {
+        TargetSelectorInstance<? extends Audience> selector = selectorCreator.createSelector(sender);
+        return () -> {
+            selector.selectTarget().ifPresent(audience -> {
+                if (followAudience) {
+                    audience.playSound(sound, Sound.Emitter.self());
+                } else {
+                    audience.playSound(sound);
+                }
+            });
+        };
     }
 
     @Override
-    public @NotNull Key getSerialKey() {
+    public @NotNull Key key() {
         return SERIAL_KEY;
     }
 }

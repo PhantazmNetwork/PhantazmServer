@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.server;
 
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.server.config.loader.LobbiesConfigProcessor;
 import com.github.phantazmnetwork.server.config.loader.ServerConfigProcessor;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
@@ -53,11 +54,10 @@ public final class Configuration {
         handler = new BasicConfigHandler();
 
         ConfigCodec codec = new TomlCodec();
-        MiniMessage miniMessage = MiniMessage.miniMessage();
         handler.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(
-                miniMessage), ServerConfig.DEFAULT, SERVER_CONFIG_PATH, codec));
+                AdventureConfigProcessors.component()), ServerConfig.DEFAULT, SERVER_CONFIG_PATH, codec));
         handler.registerLoader(LOBBIES_CONFIG_KEY, new SyncFileConfigLoader<>(new LobbiesConfigProcessor(
-                miniMessage), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));
+                AdventureConfigProcessors.component()), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));
     }
 
     /**
