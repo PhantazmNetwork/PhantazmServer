@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.api.inventory;
 
+import com.github.phantazmnetwork.commons.Namespaces;
 import net.kyori.adventure.key.Key;
 import org.junit.jupiter.api.Test;
 
@@ -8,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 public class InventoryProfileSwitcherTest {
 
-    private final Key firstKey = Key.key("phantazm", "ade229bf");
+    private final Key firstKey = Key.key(Namespaces.PHANTAZM, "ade229bf");
 
-    private final Key secondKey = Key.key("phantazm", "s1lly_w33d_m4n");
+    private final Key secondKey = Key.key(Namespaces.PHANTAZM, "s1lly_w33d_m4n");
 
     @Test
     public void testDuplicateRegistration() {

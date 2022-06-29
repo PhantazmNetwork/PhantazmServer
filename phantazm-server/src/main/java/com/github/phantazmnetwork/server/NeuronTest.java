@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
@@ -35,14 +34,13 @@ final class NeuronTest {
             if(instance != null) {
                 switch (msg) {
                     case "T" -> spawner.spawnEntity(instance, player.getPosition().add(5, 0, 0), testDescriptor,
-                            NeuralEntity::new, neuralEntity -> {
+                            neuralEntity -> {
                         //neuralEntity.setGravity(0, 0.2);
                         neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
                             }).setTarget(player);
                     case "TT" -> {
                         for(int i = 0; i < 500; i++) {
-                            spawner.spawnEntity(instance, player.getPosition(), testDescriptor, NeuralEntity::new)
-                                    .setTarget(player);
+                            spawner.spawnEntity(instance, player.getPosition(), testDescriptor).setTarget(player);
                         }
                     }
                     case "Z" -> {
@@ -71,7 +69,7 @@ final class NeuronTest {
                 return;
             }
 
-            event.getPlayer().teleport(new Pos(0, 100, 0));
+            event.getPlayer().teleport(new Pos(0, 100, 0)).join();
             event.getPlayer().setGameMode(GameMode.CREATIVE);
             event.getPlayer().setFlying(true);
             Pos start = event.getPlayer().getPosition().sub(0, 1, 0);

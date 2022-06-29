@@ -12,11 +12,13 @@ repositories {
 
 dependencies {
     implementation(project(":phantazm-api"))
+    implementation(project(":phantazm-mob"))
     implementation(project(":phantazm-neuron-minestom"))
     implementation(project(":phantazm-zombies"))
 
     implementation(libs.adventure.text.minimessage)
     implementation(libs.ethylene.toml)
+    implementation(libs.ethylene.yaml)
 }
 
 tasks.getByName<CopyLibs>("copyLibs") {

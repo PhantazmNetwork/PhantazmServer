@@ -24,12 +24,15 @@ import java.util.*;
  * {@link ConfigProcessor} used for {@link LobbiesConfig}s.
  */
 public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
+
+    private final static ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+
+
     @Override
     public @NotNull LobbiesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         try {
             Path instancesPath = Path.of(element.getStringOrThrow("instancesPath"));
-            Component kickMessage = AdventureConfigProcessors.component().dataFromElement(element
-                    .getElementOrThrow("kickMessage"));
+            Component kickMessage = COMPONENT_PROCESSOR.dataFromElement(element.getElementOrThrow("kickMessage"));
             String mainLobbyName = element.getStringOrThrow("mainLobbyName");
 
             ConfigNode lobbiesNode = element.getNodeOrThrow("lobbies");
@@ -66,9 +69,9 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull LobbiesConfig lobbiesConfig) throws ConfigProcessException {
-        ConfigNode lobbiesNode = new LinkedConfigNode();
+        ConfigNode lobbiesNode = new LinkedConfigNode(lobbiesConfig.lobbies().entrySet().size());
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
-            ConfigNode lobbyNode = new LinkedConfigNode();
+            ConfigNode lobbyNode = new LinkedConfigNode(4);
 
             ConfigNode spawnPointNode = new LinkedConfigNode(5);
             Pos spawnPoint = lobby.getValue().instanceConfig().spawnPoint();
@@ -78,7 +81,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             spawnPointNode.putNumber("yaw", spawnPoint.yaw());
             spawnPointNode.putNumber("pitch", spawnPoint.pitch());
 
-            ConfigNode instanceConfigNode = new LinkedConfigNode();
+            ConfigNode instanceConfigNode = new LinkedConfigNode(1);
             instanceConfigNode.put("spawnPoint", spawnPointNode);
 
             ConfigList lobbyPathsList = new ArrayConfigList(lobby.getValue().lobbyPaths().size());
@@ -94,7 +97,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             lobbiesNode.put(lobby.getKey(), lobbyNode);
         }
 
-        ConfigNode configNode = new LinkedConfigNode();
+        ConfigNode configNode = new LinkedConfigNode(4);
         configNode.putString("instancesPath", lobbiesConfig.instancesPath().toString());
         configNode.put("kickMessage", AdventureConfigProcessors.component().elementFromData(lobbiesConfig
                 .kickMessage()));
