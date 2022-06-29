@@ -3,9 +3,11 @@ package com.github.phantazmnetwork.server;
 import com.github.phantazmnetwork.api.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.api.player.MojangIdentitySource;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
+import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
+import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.minestom.server.MinecraftServer;
@@ -19,6 +21,7 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -87,6 +90,8 @@ public final class PhantazmServer {
         Chat.initialize(global);
         Neuron.initialize(global, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner(), phantazm);
+        Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
+        MobTest.initialize(phantazm);
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {

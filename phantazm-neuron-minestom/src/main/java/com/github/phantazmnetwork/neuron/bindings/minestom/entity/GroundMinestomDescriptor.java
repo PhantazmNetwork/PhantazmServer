@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.api.VecUtils;
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
@@ -11,6 +12,7 @@ import com.github.phantazmnetwork.neuron.navigator.NavigationTracker;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Vec;
@@ -27,6 +29,12 @@ import java.util.concurrent.ThreadLocalRandom;
  * @see MinestomDescriptor
  */
 public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDescriptor {
+
+    /**
+     * The unique key for {@link GroundMinestomDescriptor}s.
+     */
+    Key KEY = Key.key(Namespaces.PHANTAZM, "descriptor.ground");
+
     @Override
     default float getJumpHeight() {
         return 1F;
@@ -35,6 +43,11 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
     @Override
     default float getFallTolerance() {
         return 3F;
+    }
+
+    @Override
+    default @NotNull Key key() {
+        return KEY;
     }
 
     /**

@@ -23,6 +23,7 @@ public final class FileUtils {
      * A {@link Consumer}-like interface that can throw an {@link IOException}.
      * @param <TType> the type of object to accept
      */
+    @FunctionalInterface
     public interface IOConsumer<TType> {
         /**
          * Accepts the given object.
