@@ -40,7 +40,7 @@ public record WindowInfo(@NotNull Region3I frameRegion,
      */
     public static final Sound DEFAULT_BREAK_SOUND = Sound.sound(
             Key.key("minecraft:block.wood.break"),
-            Sound.Source.BLOCK,
+            Sound.Source.HOSTILE,
             2.0F,
             0.8F);
 

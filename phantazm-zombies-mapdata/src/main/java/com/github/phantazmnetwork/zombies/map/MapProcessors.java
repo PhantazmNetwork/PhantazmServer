@@ -46,12 +46,12 @@ public final class MapProcessors {
             int startingCoins = element.getNumberOrThrow("startingCoins").intValue();
             int repairCoins = element.getNumberOrThrow("repairCoins").intValue();
             double windowRepairRadius = element.getNumberOrThrow("windowRepairRadius").doubleValue();
-            int windowRepairTicks = element.getNumberOrThrow("windowRepairTicks").intValue();
-            int corpseDeathTicks = element.getNumberOrThrow("corpseDeathTicks").intValue();
+            long windowRepairTicks = element.getNumberOrThrow("windowRepairTicks").longValue();
+            long corpseDeathTicks = element.getNumberOrThrow("corpseDeathTicks").longValue();
             double reviveRadius = element.getNumberOrThrow("reviveRadius").doubleValue();
             boolean canWallshoot = element.getBooleanOrThrow("canWallshoot");
             boolean perksLostOnDeath = element.getBooleanOrThrow("perksLostOnDeath");
-            int baseReviveTicks = element.getNumberOrThrow("baseReviveTicks").intValue();
+            long baseReviveTicks = element.getNumberOrThrow("baseReviveTicks").longValue();
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             List<Integer> milestoneRounds = integerList.dataFromElement(element
                     .getElementOrThrow("milestoneRounds"));
@@ -215,7 +215,7 @@ public final class MapProcessors {
     private static final ConfigProcessor<WaveInfo> waveInfo = new ConfigProcessor<>() {
         @Override
         public WaveInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            int delayTicks = element.getNumberOrThrow("delayTicks").intValue();
+            long delayTicks = element.getNumberOrThrow("delayTicks").longValue();
             List<SpawnInfo> spawns = spawnInfoList.dataFromElement(element.getListOrThrow("spawns"));
             return new WaveInfo(delayTicks, spawns);
         }
