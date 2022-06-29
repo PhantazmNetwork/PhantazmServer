@@ -30,6 +30,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Basic implementation of {@link EditorSession}.
+ */
 public class BasicEditorSession implements EditorSession {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicEditorSession.class);
 
@@ -68,6 +71,12 @@ public class BasicEditorSession implements EditorSession {
     private final Map<Key, MapInfo> maps;
     private final Map<Key, MapInfo> unmodifiableMaps;
 
+    /**
+     * Constructs a new instance of this class using the provided parameters.
+     * @param renderer the {@link ObjectRenderer} used to render map objects
+     * @param loader the {@link MapLoader} used to save or load map data
+     * @param mapFolder the {@link Path} which contains saved map data
+     */
     public BasicEditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
         this.mapFolder = Objects.requireNonNull(mapFolder, "mapFolder");

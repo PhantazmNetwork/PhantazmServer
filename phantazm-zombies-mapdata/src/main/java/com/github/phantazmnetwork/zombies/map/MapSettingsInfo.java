@@ -81,6 +81,12 @@ public record MapSettingsInfo(@NotNull Key id,
         Objects.requireNonNull(defaultEquipment, "defaultEquipment");
     }
 
+    /**
+     * Constructs a new instance of this record, with default values.
+     * @param id the id of this map
+     * @param origin the origin of this map; this is the point from which all other coordinates are relative to unless
+     *               otherwise specified
+     */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
         this(
                 id,
