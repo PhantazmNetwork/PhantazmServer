@@ -8,4 +8,5 @@ repositories {
 
 dependencies {
     implementation(project(":phantazm-api"))
+    implementation(project(":phantazm-zombies-mapdata"))
 }

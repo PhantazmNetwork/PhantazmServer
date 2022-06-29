@@ -9,5 +9,11 @@ if(localSettings.exists()) {
     apply(localSettings)
 }
 
-//add settings from phantazm-zombies-mapeditor too
-apply("./phantazm-zombies-mapeditor/settings.gradle.kts")
+//necessary for phantazm-zombies-mapeditor module which contains a Fabric mod
+pluginManagement {
+    repositories {
+        maven("https://maven.fabricmc.net/")
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}

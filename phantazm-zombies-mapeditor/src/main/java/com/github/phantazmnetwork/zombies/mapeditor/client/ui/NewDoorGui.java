@@ -1,55 +1,41 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
+import com.github.phantazmnetwork.commons.LogicUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
-import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
-import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
-import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
-import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
-import io.github.cottonmc.cotton.gui.widget.WButton;
-import io.github.cottonmc.cotton.gui.widget.WGridPanel;
-import io.github.cottonmc.cotton.gui.widget.WTextField;
-import io.github.cottonmc.cotton.gui.widget.data.Insets;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
+import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import net.kyori.adventure.key.Key;
-import net.minecraft.text.TranslatableText;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class NewDoorGui extends LightweightGuiDescription {
+/**
+ * GUI class used to create {@link DoorInfo}.
+ */
+public class NewDoorGui extends NamedObjectGui {
+    /**
+     * Constructs a new instance of this GUI. The user may create a new door, or add regions to an existing door.
+     * @param session the current {@link EditorSession}
+     */
     @SuppressWarnings("PatternValidation")
-    public NewDoorGui(@NotNull MapeditorSession session) {
-        WGridPanel root = new WGridPanel();
-        setRootPanel(root);
+    public NewDoorGui(@NotNull EditorSession session) {
+        super(LogicUtils.nullCoalesce(session.lastDoor(), door -> door.id().value()));
 
-        root.setSize(100, 150);
-        root.setInsets(Insets.ROOT_PANEL);
+        Objects.requireNonNull(session, "session");
 
-        WTextField doorId = new WTextField();
-        WButton add = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ADD));
-
-        DoorInfo lastDoor = session.lastDoor();
-        doorId.setMaxLength(512);
-        doorId.setText(lastDoor == null ? StringUtils.EMPTY : lastDoor.id().value());
-        doorId.setTextPredicate(TextPredicates.validKeyPredicate());
-
-        root.add(doorId, 0, 0, 5, 1);
-        root.add(add, 0, 2, 5, 1);
-
-        ZombiesMap currentMap = session.getMap();
+        MapInfo currentMap = session.getMap();
         Region3I selected = session.getSelection();
-        add.setOnClick(() -> {
-            String value = doorId.getText();
+        buttonAdd.setOnClick(() -> {
+            String value = textFieldName.getText();
             if(value.isEmpty()) {
                 return;
             }
 
-            Key doorKey = Key.key(Namespaces.PHANTAZM, doorId.getText());
+            Key doorKey = Key.key(Namespaces.PHANTAZM, value);
             for(DoorInfo doorInfo : currentMap.doors()) {
                 if(doorInfo.id().equals(doorKey)) {
                     doorInfo.regions().add(selected);
@@ -64,9 +50,10 @@ public class NewDoorGui extends LightweightGuiDescription {
             bounds.add(selected);
 
             DoorInfo newDoor = new DoorInfo(doorKey, bounds);
-            session.setLastDoor(newDoor);
             currentMap.doors().add(newDoor);
+
             session.refreshDoors();
+            session.setLastDoor(newDoor);
             ScreenUtils.closeCurrentScreen();
         });
     }

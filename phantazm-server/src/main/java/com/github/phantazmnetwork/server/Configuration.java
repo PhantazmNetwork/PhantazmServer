@@ -54,10 +54,10 @@ public final class Configuration {
         handler = new BasicConfigHandler();
 
         ConfigCodec codec = new TomlCodec();
-        handler.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(
-                AdventureConfigProcessors.component()), ServerConfig.DEFAULT, SERVER_CONFIG_PATH, codec));
-        handler.registerLoader(LOBBIES_CONFIG_KEY, new SyncFileConfigLoader<>(new LobbiesConfigProcessor(
-                AdventureConfigProcessors.component()), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));
+        handler.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(AdventureConfigProcessors.component()),
+                ServerConfig.DEFAULT, SERVER_CONFIG_PATH, codec));
+        handler.registerLoader(LOBBIES_CONFIG_KEY, new SyncFileConfigLoader<>(new LobbiesConfigProcessor(),
+                LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));
     }
 
     /**

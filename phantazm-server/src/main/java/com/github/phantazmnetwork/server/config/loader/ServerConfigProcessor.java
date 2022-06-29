@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.server.config.loader;
 
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.server.config.server.*;
 import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -20,15 +20,7 @@ import java.util.Objects;
  */
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
-    private final ConfigProcessor<Component> componentProcessor;
-
-    /**
-     * Creates a processor for {@link ServerConfig}.
-     * @param componentProcessor A {@link ConfigProcessor} for {@link Component}s
-     */
-    public ServerConfigProcessor(@NotNull ConfigProcessor<Component> componentProcessor) {
-        this.componentProcessor = Objects.requireNonNull(componentProcessor, "componentProcessor");
-    }
+    private final static ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
 
     @Override
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -54,7 +46,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                 velocitySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
-        Component description = componentProcessor.dataFromElement(pingList.getElementOrThrow("description"));
+        Component description = COMPONENT_PROCESSOR.dataFromElement(pingList.getElementOrThrow("description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
         ConfigNode pathfinderNode = element.getNodeOrThrow("pathfinder");
@@ -81,16 +73,15 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
     public @NotNull ConfigElement elementFromData(@NotNull ServerConfig serverConfig) throws ConfigProcessException {
         ConfigNode serverInfo = new LinkedConfigNode(5);
         ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
-        serverInfo.put("serverIP", new ConfigPrimitive(serverInfoConfig.serverIP()));
-        serverInfo.put("port", new ConfigPrimitive(serverInfoConfig.port()));
-        serverInfo.put("optifineEnabled", new ConfigPrimitive(serverInfoConfig.optifineEnabled()));
-        serverInfo.put("authType", new ConfigPrimitive(serverInfoConfig.authType().name()));
-        serverInfo.put("velocitySecret", new ConfigPrimitive(serverInfoConfig.velocitySecret()));
+        serverInfo.putString("serverIP", serverInfoConfig.serverIP());
+        serverInfo.putNumber("port", serverInfoConfig.port());
+        serverInfo.putBoolean("optifineEnabled", serverInfoConfig.optifineEnabled());
+        serverInfo.putString("authType", serverInfoConfig.authType().name());
+        serverInfo.putString("velocitySecret", serverInfoConfig.velocitySecret());
 
         ConfigNode pingList = new LinkedConfigNode(1);
         PingListConfig pingListConfig = serverConfig.pingListConfig();
-        ConfigElement description = componentProcessor.elementFromData(pingListConfig.description());
-        pingList.put("description", new ConfigPrimitive(description));
+        pingList.put("description", COMPONENT_PROCESSOR.elementFromData(pingListConfig.description()));
 
         ConfigNode configNode = new LinkedConfigNode(2);
         configNode.put("serverInfo", serverInfo);

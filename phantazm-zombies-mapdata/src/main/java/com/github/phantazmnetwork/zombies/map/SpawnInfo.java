@@ -3,5 +3,19 @@ package com.github.phantazmnetwork.zombies.map;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
+/**
+ * Defines a particular type and amount of mobs to spawn.
+ */
 public record SpawnInfo(@NotNull Key id,
-                        int amount) { }
+                        int amount) {
+    /**
+     * Creates a new instance of this record.
+     * @param id the id of the mob to spawn
+     * @param amount the amount of mobs to spawn
+     */
+    public SpawnInfo {
+        Objects.requireNonNull(id, "id");
+    }
+}

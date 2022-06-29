@@ -1,58 +1,44 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
+import com.github.phantazmnetwork.commons.LogicUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
-import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
-import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
-import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
-import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
-import io.github.cottonmc.cotton.gui.widget.WButton;
-import io.github.cottonmc.cotton.gui.widget.WGridPanel;
-import io.github.cottonmc.cotton.gui.widget.WTextField;
-import io.github.cottonmc.cotton.gui.widget.data.Insets;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
+import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.minecraft.text.TranslatableText;
-
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class NewRoomGui extends LightweightGuiDescription {
+/**
+ * General UI for creating a new room.
+ */
+public class NewRoomGui extends NamedObjectGui {
+    /**
+     * Constructs a new instance of this GUI, which allows the user to either create a new room or add regions to an
+     * existing room.
+     * @param session the current {@link EditorSession}
+     */
     @SuppressWarnings("PatternValidation")
-    public NewRoomGui(@NotNull MapeditorSession session) {
-        WGridPanel root = new WGridPanel();
-        setRootPanel(root);
+    public NewRoomGui(@NotNull EditorSession session) {
+        super(LogicUtils.nullCoalesce(session.lastRoom(), room -> room.id().value()));
 
-        root.setSize(100, 150);
-        root.setInsets(Insets.ROOT_PANEL);
+        Objects.requireNonNull(session, "session");
 
-        WTextField roomId = new WTextField();
-        WButton add = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ADD));
-
-        RoomInfo lastRoom = session.lastRoom();
-        roomId.setMaxLength(512);
-        roomId.setText(lastRoom == null ? StringUtils.EMPTY : lastRoom.id().value());
-        roomId.setTextPredicate(TextPredicates.validKeyPredicate());
-
-        root.add(roomId, 0, 0, 5, 1);
-        root.add(add, 0, 2, 5, 1);
-
-        ZombiesMap currentMap = session.getMap();
+        MapInfo currentMap = session.getMap();
         Region3I selected = Region3I.encompassing(session.getFirstSelection(), session.getSecondSelection(), currentMap
                 .info().origin());
-        add.setOnClick(() -> {
-            String value = roomId.getText();
+        buttonAdd.setOnClick(() -> {
+            String value = textFieldName.getText();
             if(value.isEmpty()) {
                 return;
             }
 
-            Key roomKey = Key.key(Namespaces.PHANTAZM, roomId.getText());
+            Key roomKey = Key.key(Namespaces.PHANTAZM, value);
             for(RoomInfo roomInfo : currentMap.rooms()) {
                 if(roomInfo.id().equals(roomKey)) {
                     roomInfo.regions().add(selected);

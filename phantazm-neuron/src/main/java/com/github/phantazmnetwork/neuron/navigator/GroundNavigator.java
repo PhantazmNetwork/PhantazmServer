@@ -65,6 +65,10 @@ public class GroundNavigator extends TrackingNavigator {
     public void tick(long time) {
         if(destinationSupplier != null) {
             Vec3I newDestination = destinationSupplier.get();
+            if(newDestination == null) {
+                reset(time);
+                return;
+            }
 
             boolean destinationChange = false;
             if(!newDestination.equals(currentDestination)) {
@@ -158,7 +162,7 @@ public class GroundNavigator extends TrackingNavigator {
 
     private boolean tryPathfind(long time) {
         if(currentOperation == null) {
-            if(time - lastPathfind < recalculationDelay) {
+            if(time - lastPathfind < recalculationDelay || !agent.canPathfind()) {
                 return false;
             }
 

@@ -18,6 +18,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +30,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class BasicMapeditorSession implements MapeditorSession {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicMapeditorSession.class);
+/**
+ * Basic implementation of {@link EditorSession}.
+ */
+public class BasicEditorSession implements EditorSession {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicEditorSession.class);
 
     private static final Color SELECTION_COLOR = new Color(0, 255, 0, 128);
     private static final Color CURSOR_COLOR = Color.RED;
@@ -39,12 +43,16 @@ public class BasicMapeditorSession implements MapeditorSession {
     private static final Color ROOM_COLOR = new Color(255, 255, 255, 64);
     private static final Color DOOR_COLOR = new Color(189, 0, 255, 64);
     private static final Color WINDOW_COLOR = new Color(0, 251, 201, 64);
+    private static final Color SPAWNPOINT_COLOR = new Color(252, 243, 1, 64);
+    private static final Color SHOP_COLOR = new Color(255, 72, 5, 64);
+
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
-    private static final Key SELECTION_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection");
-    private static final Key OUTLINE_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_selection_outline");
-    private static final Key CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor_cursor");
-    private static final Key ORIGIN_KEY = Key.key(Namespaces.PHANTAZM, "map.origin");
+
+    private static final Key SELECTION_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.selection");
+    private static final Key OUTLINE_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.selection_outline");
+    private static final Key CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.cursor");
+    private static final Key ORIGIN_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.origin");
 
     private final ObjectRenderer renderer;
     private final Path mapFolder;
@@ -52,20 +60,29 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     private RoomInfo lastRoom;
     private DoorInfo lastDoor;
+    private Key lastSpawnrule;
     private boolean enabled;
 
     private Vec3i firstSelected;
     private Vec3i secondSelected;
 
-    private ZombiesMap currentMap;
+    private MapInfo currentMap;
 
-    private final Map<Key, ZombiesMap> maps;
+    private final Map<Key, MapInfo> maps;
+    private final Map<Key, MapInfo> unmodifiableMaps;
 
-    public BasicMapeditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
+    /**
+     * Constructs a new instance of this class using the provided parameters.
+     * @param renderer the {@link ObjectRenderer} used to render map objects
+     * @param loader the {@link MapLoader} used to save or load map data
+     * @param mapFolder the {@link Path} which contains saved map data
+     */
+    public BasicEditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
         this.renderer = Objects.requireNonNull(renderer, "renderer");
         this.mapFolder = Objects.requireNonNull(mapFolder, "mapFolder");
-        this.maps = new HashMap<>();
         this.loader = Objects.requireNonNull(loader, "loader");
+        this.maps = new HashMap<>();
+        this.unmodifiableMaps = Collections.unmodifiableMap(maps);
     }
 
     @Override
@@ -106,6 +123,11 @@ public class BasicMapeditorSession implements MapeditorSession {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         this.renderer.setEnabled(enabled);
+
+        if(!enabled) {
+            firstSelected = null;
+            secondSelected = null;
+        }
     }
 
     @Override
@@ -148,7 +170,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
-    public @NotNull ZombiesMap getMap() {
+    public @NotNull MapInfo getMap() {
         if(currentMap == null) {
             throw new IllegalStateException("No map");
         }
@@ -157,9 +179,10 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
-    public void addMap(@NotNull Key id, @NotNull ZombiesMap map) {
-        Objects.requireNonNull(id, "id");
+    public void addMap(@NotNull MapInfo map) {
         Objects.requireNonNull(map, "map");
+
+        Key id = map.info().id();
         if(maps.containsKey(id)) {
             throw new IllegalArgumentException("A map with id " + id + " already exists");
         }
@@ -175,6 +198,7 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     @Override
     public void removeMap(@NotNull Key id) {
+        Objects.requireNonNull(id, "id");
         maps.remove(id);
 
         if(currentMap != null && currentMap.info().id().equals(id)) {
@@ -184,27 +208,36 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
-    public @NotNull Map<Key, ZombiesMap> mapView() {
-        return Collections.unmodifiableMap(maps);
+    public @UnmodifiableView @NotNull Map<Key, MapInfo> mapView() {
+        return unmodifiableMaps;
     }
 
     @Override
     public void setCurrent(@NotNull Key id) {
-        ZombiesMap newCurrent = maps.get(id);
+        Objects.requireNonNull(id, "id");
+
+        MapInfo newCurrent = maps.get(id);
         if(newCurrent == null) {
-            throw new IllegalArgumentException("A map with that ID does not exist");
+            throw new IllegalArgumentException("A map with id " + id + " does not exist");
         }
 
-        this.currentMap = newCurrent;
+        currentMap = newCurrent;
         refreshMap();
     }
 
     @Override
     public void loadMapsFromDisk() {
         try {
-            Map<Key, ZombiesMap> newMaps = loadMaps();
-            this.maps.clear();
-            this.maps.putAll(newMaps);
+            Key oldId = null;
+            if(currentMap != null) {
+                oldId = currentMap.info().id();
+            }
+
+            Map<Key, MapInfo> newMaps = loadMaps();
+            maps.clear();
+            maps.putAll(newMaps);
+            currentMap = maps.get(oldId);
+
             refreshMap();
         }
         catch (IOException e) {
@@ -213,8 +246,8 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
-    public void saveMaps() {
-        for(ZombiesMap map : maps.values()) {
+    public void saveMapsToDisk() {
+        for(MapInfo map : maps.values()) {
             try {
                 loader.save(map);
             }
@@ -235,9 +268,14 @@ public class BasicMapeditorSession implements MapeditorSession {
     }
 
     @Override
+    public void setLastSpawnrule(@Nullable Key spawnruleId) {
+        this.lastSpawnrule = spawnruleId;
+    }
+
+    @Override
     @SuppressWarnings("PatternValidation")
     public void refreshRooms() {
-        assertMap();
+        requireMap();
 
         for(RoomInfo room : currentMap.rooms()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
@@ -250,7 +288,7 @@ public class BasicMapeditorSession implements MapeditorSession {
     @SuppressWarnings("PatternValidation")
     @Override
     public void refreshDoors() {
-        assertMap();
+        requireMap();
 
         for(DoorInfo door : currentMap.doors()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "door." + door.id()
@@ -262,8 +300,7 @@ public class BasicMapeditorSession implements MapeditorSession {
 
     @Override
     public void refreshWindows() {
-        assertMap();
-
+        requireMap();
 
         renderer.removeIf(key -> key.value().startsWith("window."));
         int i = 0;
@@ -272,6 +309,34 @@ public class BasicMapeditorSession implements MapeditorSession {
                     ObjectRenderer.RenderType.FILLED, WINDOW_COLOR, true,
                     false, RenderUtils.arrayFromRegion(window.frameRegion(), currentMap.info()
                     .origin(), new Vec3d[2], 0)));
+        }
+    }
+
+    @Override
+    public void refreshSpawnpoints() {
+        requireMap();
+
+        renderer.removeIf(key -> key.value().startsWith("spawnpoint."));
+        int i = 0;
+        for(SpawnpointInfo spawnpointInfo : currentMap.spawnpoints()) {
+            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "spawnpoint." + i++),
+                    ObjectRenderer.RenderType.FILLED, SPAWNPOINT_COLOR, true, false,
+                    RenderUtils.arrayFromRegion(Region3I.normalized(spawnpointInfo.position(),
+                            Vec3I.of(1, 1, 1)), currentMap.info().origin(), new Vec3d[2], 0)));
+        }
+    }
+
+    @Override
+    public void refreshShops() {
+        requireMap();
+
+        renderer.removeIf(key -> key.value().startsWith("shop."));
+        int i = 0;
+        for(ShopInfo shopInfo : currentMap.shops()) {
+            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "shop." + i++),
+                    ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true, false,
+                    RenderUtils.arrayFromRegion(Region3I.normalized(shopInfo.triggerLocation(),
+                            Vec3I.of(1, 1, 1)), currentMap.info().origin(), new Vec3d[2], 0)));
         }
     }
 
@@ -285,15 +350,20 @@ public class BasicMapeditorSession implements MapeditorSession {
         return lastDoor;
     }
 
-    private Map<Key, ZombiesMap> loadMaps() throws IOException {
-        Map<Key, ZombiesMap> newMaps = new HashMap<>();
+    @Override
+    public @Nullable Key lastSpawnrule() {
+        return lastSpawnrule;
+    }
+
+    private Map<Key, MapInfo> loadMaps() throws IOException {
+        Map<Key, MapInfo> newMaps = new HashMap<>();
         FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory() && !path.equals(mapFolder),
                 mapFolder -> {
             LOGGER.info("Trying to load map from " + mapFolder);
             String name = mapFolder.getFileName().toString();
 
             try {
-                ZombiesMap map = loader.load(name);
+                MapInfo map = loader.load(name);
                 newMaps.put(map.info().id(), map);
                 LOGGER.info("Successfully loaded map " + name);
             }
@@ -312,7 +382,7 @@ public class BasicMapeditorSession implements MapeditorSession {
             return;
         }
 
-        MapInfo info = currentMap.info();
+        MapSettingsInfo info = currentMap.info();
         renderer.putObject(new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR,
                 true, true, RenderUtils.arrayFromRegion(Region3I.normalized(info
                 .origin(), Vec3I.of(1, 1, 1)), Vec3I.ORIGIN, new Vec3d[2], 0)));
@@ -320,6 +390,8 @@ public class BasicMapeditorSession implements MapeditorSession {
         refreshRooms();
         refreshDoors();
         refreshWindows();
+        refreshSpawnpoints();
+        refreshShops();
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {
@@ -337,7 +409,7 @@ public class BasicMapeditorSession implements MapeditorSession {
                 true, true, clickedVec.add(0.25, 0.25, 0.25), HALF));
     }
 
-    private void assertMap() {
+    private void requireMap() {
         if(currentMap == null) {
             throw new IllegalStateException("No map");
         }

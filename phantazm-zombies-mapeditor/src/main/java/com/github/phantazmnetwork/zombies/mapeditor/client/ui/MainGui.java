@@ -1,17 +1,14 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.map.MapProcessors;
-import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.Identifiers;
-import com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
-import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
+import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.widget.*;
-import io.github.cottonmc.cotton.gui.widget.data.Insets;
-import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.LiteralText;
@@ -21,15 +18,21 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class MainGui extends LightweightGuiDescription {
+/**
+ * The main configuration GUI for the Zombies Map Editor.
+ */
+public class MainGui extends SimplePanelGui {
+    /**
+     * Creates a new instance of the main GUI, using the provided {@link EditorSession}.
+     * @param session the current session
+     */
     @SuppressWarnings("PatternValidation")
-    public MainGui(@NotNull MapeditorSession session) {
-        WGridPanel root = new WGridPanel();
-        setRootPanel(root);
+    public MainGui(@NotNull EditorSession session) {
+        super(220, 150);
 
-        root.setSize(220, 150);
-        root.setInsets(Insets.ROOT_PANEL);
+        Objects.requireNonNull(session, "session");
 
         //pre-initialization
         List<Key> mapNames = session.mapView().values().stream().map(map -> map.info().id()).toList();
@@ -51,20 +54,23 @@ public class MainGui extends LightweightGuiDescription {
                 updateCurrentMap(session, currentMap);
             });
         });
-        WButton displaySettings = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_SETTINGS));
+        //TODO: implement display settings at a later date
+        //WButton displaySettings = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_SETTINGS));
         WButton save = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_SAVE));
+        WButton load = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_LOAD));
 
         //...add them to root
-        root.add(icon, 0, 0, 2, 2);
-        root.add(mapeditorToggle, 3, 0);
-        root.add(currentMap, 3, 1, 8, 1);
-        root.add(mapNameBox, 0, 2, 6, 1);
-        root.add(feedback, 0, 3, 6, 1);
-        root.add(newMap, 0, 4, 6, 1);
-        root.add(deleteMap, 0, 5, 6, 1);
-        root.add(listPanel, 6, 2, 6, 6);
-        root.add(displaySettings, 0, 6, 6, 1);
-        root.add(save, 0, 7, 6, 1);
+        gridPanelRoot.add(icon, 0, 0, 2, 2);
+        gridPanelRoot.add(mapeditorToggle, 3, 0);
+        gridPanelRoot.add(currentMap, 3, 1, 8, 1);
+        gridPanelRoot.add(mapNameBox, 0, 2, 6, 1);
+        gridPanelRoot.add(feedback, 0, 3, 6, 1);
+        gridPanelRoot.add(newMap, 0, 4, 6, 1);
+        gridPanelRoot.add(deleteMap, 0, 5, 6, 1);
+        gridPanelRoot.add(listPanel, 6, 2, 6, 6);
+        //gridPanelRoot.add(displaySettings, 0, 6, 6, 1);
+        gridPanelRoot.add(save, 0, 7, 3, 1);
+        gridPanelRoot.add(load, 3, 7, 3, 1);
 
         //generic configuration
         updateMapeditorToggle(mapeditorToggle, session.isEnabled());
@@ -97,27 +103,28 @@ public class MainGui extends LightweightGuiDescription {
                 return;
             }
 
-            session.addMap(mapKey, new ZombiesMap(new MapInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
+            session.addMap(new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
                     new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
                     new ArrayList<>()));
             session.setCurrent(mapKey);
 
             ScreenUtils.closeCurrentScreen();
-            MinecraftClient.getInstance().setScreen(new MapeditorScreen(new MainGui(session)));
+            MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(session)));
         });
 
         deleteMap.setOnClick(() -> {
-            if(hasMap(session, feedback)) {
-                MinecraftClient.getInstance().setScreen(new MapeditorScreen(new ConfirmationGui(new TranslatableText(
+            if(requireMap(session, feedback)) {
+                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new ConfirmationGui(new TranslatableText(
                         TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> session.removeMap(session.getMap().info()
                         .id()))));
             }
         });
 
-        save.setOnClick(session::saveMaps);
+        save.setOnClick(session::saveMapsToDisk);
+        load.setOnClick(session::loadMapsFromDisk);
     }
 
-    private boolean hasMap(MapeditorSession session, WText feedback) {
+    private boolean requireMap(EditorSession session, WText feedback) {
         if(!session.hasMap()) {
             feedback.setText(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP));
             return false;
@@ -132,7 +139,7 @@ public class MainGui extends LightweightGuiDescription {
                 new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISABLED));
     }
 
-    private void updateCurrentMap(MapeditorSession session, WText currentMap) {
+    private void updateCurrentMap(EditorSession session, WText currentMap) {
         currentMap.setText(session.hasMap() ? new TranslatableText(TranslationKeys.GUI_MAPEDITOR_CURRENT_MAP, session
                 .getMap().info().id().value()) : new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
     }

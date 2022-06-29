@@ -86,18 +86,6 @@ public interface Vec3I extends Comparable<Vec3I> {
         return dX * dX + dY * dY + dZ * dZ;
     }
 
-    default double squaredDistance(int x, int y, int z) {
-        return squaredDistance(getX(), getY(), getZ(), x, y, z);
-    }
-
-    default double squaredDistance(@NotNull Vec3I other) {
-        return squaredDistance(getX(), getY(), getZ(), other.getX(), other.getY(), other.getZ());
-    }
-
-    static double distance(int x1, int y1, int z1, int x2, int y2, int z2) {
-        return Math.sqrt(squaredDistance(x1, y1, z1, x2, y2, z2));
-    }
-
     /**
      * Determines if two points are equal.
      * @param x1 first x-component
@@ -110,21 +98,5 @@ public interface Vec3I extends Comparable<Vec3I> {
      */
     static boolean equals(int x1, int y1, int z1, int x2, int y2, int z2) {
         return x1 == x2 && y1 == y2 && z1 == z2;
-    }
-
-    static double magnitudeSquared(int x1, int y1, int z1) {
-        return x1 * x1 + y1 * y1 + z1 * z1;
-    }
-
-    default double magnitudeSquared() {
-        return magnitudeSquared(getX(), getY(), getZ());
-    }
-
-    static double magnitude(int x1, int y1, int z1) {
-        return Math.sqrt(magnitudeSquared(x1, y1, z1));
-    }
-
-    default double magnitude() {
-        return magnitude(getX(), getY(), getZ());
     }
 }

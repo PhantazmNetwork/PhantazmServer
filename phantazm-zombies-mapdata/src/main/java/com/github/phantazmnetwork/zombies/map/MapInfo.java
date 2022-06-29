@@ -1,67 +1,40 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public record MapInfo(@NotNull Key id,
-                      @NotNull Vec3I origin,
-                      @NotNull Vec3I spawn,
-                      float pitch,
-                      float yaw,
-                      @NotNull Component displayName,
-                      @NotNull String displayItemSnbt,
-                      @NotNull List<Component> introMessages,
-                      @NotNull Component scoreboardHeader,
-                      @NotNull Vec3I leaderboardPosition,
-                      int leaderboardLength,
-                      int worldTime,
-                      int maxPlayers,
-                      int minPlayers,
-                      int startingCoins,
-                      int repairCoins,
-                      double windowRepairRadius,
-                      int windowRepairTicks,
-                      int corpseDeathTicks,
-                      double reviveRadius,
-                      boolean canWallshoot,
-                      boolean perksLostOnDeath,
-                      int baseReviveTicks,
-                      int rollsPerChest,
-                      @NotNull List<Integer> milestoneRounds,
-                      @NotNull List<Key> defaultEquipment) {
-    public MapInfo(@NotNull Key id, @NotNull Vec3I origin) {
-        this(
-                id,
-                origin,
-                Vec3I.ORIGIN,
-                0,
-                0,
-                Component.text(id.value()),
-                "{id:\"stone\",Count:1,tag:{Name:\"New Map\"}}",
-                new ArrayList<>(),
-                Component.text(id.value()),
-                Vec3I.ORIGIN,
-                15,
-                0,
-                4,
-                1,
-                0,
-                20,
-                3,
-                20,
-                500,
-                2,
-                false,
-                false,
-                30,
-                5,
-                new ArrayList<>(),
-                new ArrayList<>()
-        );
+/**
+ * Represents a Zombies map.
+ */
+public record MapInfo(@NotNull MapSettingsInfo info,
+                      @NotNull List<RoomInfo> rooms,
+                      @NotNull List<DoorInfo> doors,
+                      @NotNull List<ShopInfo> shops,
+                      @NotNull List<WindowInfo> windows,
+                      @NotNull List<RoundInfo> rounds,
+                      @NotNull List<SpawnruleInfo> spawnrules,
+                      @NotNull List<SpawnpointInfo> spawnpoints) {
+    /**
+     * Constructs a new instances of this record.
+     * @param info the info defining the general parameters for this map
+     * @param rooms this map's rooms
+     * @param doors this map's doors
+     * @param shops this map's shops
+     * @param windows this map's windows
+     * @param rounds this map's rounds
+     * @param spawnrules this map's spawnrules
+     * @param spawnpoints this map's spawnpoints
+     */
+    public MapInfo {
+        Objects.requireNonNull(info, "info");
+        Objects.requireNonNull(rooms, "rooms");
+        Objects.requireNonNull(doors, "doors");
+        Objects.requireNonNull(shops, "shops");
+        Objects.requireNonNull(windows, "windows");
+        Objects.requireNonNull(rounds, "rounds");
+        Objects.requireNonNull(spawnrules, "spawnrules");
+        Objects.requireNonNull(spawnpoints, "spawnpoints");
     }
 }
