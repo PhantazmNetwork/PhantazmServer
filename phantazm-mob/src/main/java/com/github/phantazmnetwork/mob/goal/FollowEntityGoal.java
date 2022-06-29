@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.mob.goal;
 
-import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.mob.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
+import com.github.phantazmnetwork.mob.target.TargetSelectorInstance;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -38,9 +38,10 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
 
             @Override
             public void start() {
+                MinestomDescriptor descriptor = (MinestomDescriptor) mob.entity().getDescriptor();
                 mob.entity().getNavigator().setDestination(() -> {
                     return selector.selectTarget()
-                            .map(player -> VecUtils.toBlockInt(player.getPosition()))
+                            .map(descriptor::computeTargetPosition)
                             .orElse(null);
                 });
             }

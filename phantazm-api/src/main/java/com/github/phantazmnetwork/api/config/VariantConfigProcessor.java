@@ -10,8 +10,8 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * A {@link ConfigProcessor} which processes {@link TValue}s.
@@ -22,21 +22,22 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
-    private final Map<Key, ConfigProcessor<? extends TValue>> subProcessors;
+    private final Function<Key, ConfigProcessor<? extends TValue>> subProcessors;
 
     /**
      * Creates a new {@link VariantConfigProcessor}.
-     * @param subProcessors A map of {@link Key}s to {@link ConfigProcessor}s to delegate processing to
+     * @param subprocessorProvider A {@link Function} that provides {@link ConfigProcessor} based on a {@link Key},
+     *                             or null if no such {@link ConfigProcessor} is available
      */
-    public VariantConfigProcessor(@NotNull Map<Key, ConfigProcessor<? extends TValue>> subProcessors) {
-        this.subProcessors = Objects.requireNonNull(subProcessors, "subProcessors");
+    public VariantConfigProcessor(@NotNull Function<Key, ConfigProcessor<? extends TValue>> subprocessorProvider) {
+        this.subProcessors = Objects.requireNonNull(subprocessorProvider, "subProcessors");
     }
 
     @Override
     public @NotNull TValue dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         ConfigElement serialKeyElement = element.getElementOrThrow("serialKey");
         Key key = KEY_PROCESSOR.dataFromElement(serialKeyElement);
-        ConfigProcessor<? extends TValue> processor = subProcessors.get(key);
+        ConfigProcessor<? extends TValue> processor = subProcessors.apply(key);
         if (processor == null) {
             throw new ConfigProcessException("no subprocessor");
         }
@@ -47,7 +48,7 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull TValue data) throws ConfigProcessException {
-        ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>) subProcessors.get(data.key());
+        ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>) subProcessors.apply(data.key());
         if (processor == null) {
             throw new ConfigProcessException("no subprocessor");
         }

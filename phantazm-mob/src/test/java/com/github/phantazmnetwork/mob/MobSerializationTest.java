@@ -84,7 +84,7 @@ public class MobSerializationTest {
         ConfigProcessor<Calculator> calculatorProcessor = new CalculatorConfigProcessor();
         ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(Map.of(
                 GroundMinestomDescriptor.KEY, new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
-        ));
+        )::get);
         ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor = new NearestEntitiesSelectorConfigProcessor<NearestEntitiesSelector<Player>>() {
             @Override
             protected @NotNull NearestEntitiesSelector<Player> createSelector(double range, int targetLimit) {
@@ -99,13 +99,13 @@ public class MobSerializationTest {
         };
         ConfigProcessor<TargetSelector<? extends Audience>> audienceSelectorProcessor = new VariantConfigProcessor<>(Map.of(
                 NearestPlayersSelector.SERIAL_KEY, nearestPlayerSelector
-        ));
+        )::get);
         ConfigProcessor<Skill> skillProcessor = new VariantConfigProcessor<>(Map.of(
                 PlaySoundSkill.SERIAL_KEY, new PlaySoundSkillConfigProcessor(audienceSelectorProcessor)
-        ));
+        )::get);
         ConfigProcessor<TargetSelector<Player>> playerSelectorProcessor = new VariantConfigProcessor<>(Map.of(
                 NearestPlayersSelector.SERIAL_KEY, nearestPlayerSelector
-        ));
+        )::get);
         ConfigProcessor<FollowEntityGoal<Player>> followPlayerGoalProcessor = new FollowEntityGoalConfigProcessor<>(playerSelectorProcessor) {
             @Override
             protected @NotNull FollowEntityGoal<Player> createGoal(@NotNull TargetSelector<Player> selector) {
@@ -120,7 +120,7 @@ public class MobSerializationTest {
         ConfigProcessor<Goal> goalProcessor = new VariantConfigProcessor<>(Map.of(
                 UseSkillGoal.SERIAL_KEY, new UseSkillGoalConfigProcessor(skillProcessor),
                 FollowPlayerGoal.SERIAL_KEY, followPlayerGoalProcessor
-        ));
+        )::get);
         ConfigProcessor<MobModel> modelProcessor = new MobModelConfigProcessor(
                 descriptorProcessor,
                 goalProcessor,

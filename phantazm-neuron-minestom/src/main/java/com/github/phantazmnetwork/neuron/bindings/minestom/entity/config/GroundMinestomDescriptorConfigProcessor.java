@@ -76,7 +76,7 @@ public class GroundMinestomDescriptorConfigProcessor implements ConfigProcessor<
 
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull GroundMinestomDescriptor groundMinestomDescriptor) throws ConfigProcessException {
-        ConfigNode node = new LinkedConfigNode();
+        ConfigNode node = new LinkedConfigNode(6);
         node.putString("id", groundMinestomDescriptor.getID());
         node.put("calculator", calculatorProcessor.elementFromData(groundMinestomDescriptor.getCalculator()));
         node.put("entityType", KEY_PROCESSOR.elementFromData(groundMinestomDescriptor.getEntityType().namespace()));
