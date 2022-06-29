@@ -41,5 +41,5 @@ public final class TranslationKeys {
     public static final String GUI_MAPEDITOR_CURRENT_MAP = "gui.mapeditor.current_map";
     public static final String GUI_MAPEDITOR_NO_MAP = "gui.mapeditor.no_map";
     public static final String GUI_MAPEDITOR_DELETE_MAP_QUERY = "gui.mapeditor.delete_map_query";
-    public static final String GUI_MAPEDITOR_DISPLAY_SETTINGS = "gui.mapeditor.display_settings";
+    //public static final String GUI_MAPEDITOR_DISPLAY_SETTINGS = "gui.mapeditor.display_settings";
 }

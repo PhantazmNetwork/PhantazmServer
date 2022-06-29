@@ -37,6 +37,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class MapeditorClient implements ClientModInitializer {
+    /**
+     * The path string, relative to the Fabric configuration dir, which points to the editor folder.
+     */
     private static final String MAPEDITOR_PATH = "mapeditor";
 
     @Override

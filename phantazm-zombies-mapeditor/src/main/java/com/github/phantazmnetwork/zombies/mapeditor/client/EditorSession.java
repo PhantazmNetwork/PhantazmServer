@@ -17,6 +17,10 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Map;
 
+/**
+ * Represents an ongoing map editing session. Encapsulates some form of rendering maps visually, switching between
+ * active maps, and getting basic feedback from the player (such as what blocks they have selected).
+ */
 public interface EditorSession {
     @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
                                          @NotNull BlockHitResult blockHitResult);

@@ -54,7 +54,8 @@ public class MainGui extends SimplePanelGui {
                 updateCurrentMap(session, currentMap);
             });
         });
-        WButton displaySettings = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_SETTINGS));
+        //TODO: implement display settings at a later date
+        //WButton displaySettings = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DISPLAY_SETTINGS));
         WButton save = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_SAVE));
         WButton load = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_LOAD));
 
@@ -67,7 +68,7 @@ public class MainGui extends SimplePanelGui {
         gridPanelRoot.add(newMap, 0, 4, 6, 1);
         gridPanelRoot.add(deleteMap, 0, 5, 6, 1);
         gridPanelRoot.add(listPanel, 6, 2, 6, 6);
-        gridPanelRoot.add(displaySettings, 0, 6, 6, 1);
+        //gridPanelRoot.add(displaySettings, 0, 6, 6, 1);
         gridPanelRoot.add(save, 0, 7, 3, 1);
         gridPanelRoot.add(load, 3, 7, 3, 1);
 

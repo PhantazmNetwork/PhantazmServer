@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
+import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.data.Insets;
