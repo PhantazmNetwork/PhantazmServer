@@ -128,5 +128,7 @@ public final class TranslationKeys {
      * Shown in the confirmation dialog when attempting to delete a map, asking the player if they really want to do so.
      */
     public static final String GUI_MAPEDITOR_DELETE_MAP_QUERY = "gui.mapeditor.delete_map_query";
+
+    //TODO: remove when adding display settings
     //public static final String GUI_MAPEDITOR_DISPLAY_SETTINGS = "gui.mapeditor.display_settings";
 }

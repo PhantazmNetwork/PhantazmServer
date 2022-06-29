@@ -170,9 +170,10 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public void addMap(@NotNull Key id, @NotNull MapInfo map) {
-        Objects.requireNonNull(id, "id");
+    public void addMap(@NotNull MapInfo map) {
         Objects.requireNonNull(map, "map");
+
+        Key id = map.info().id();
         if(maps.containsKey(id)) {
             throw new IllegalArgumentException("A map with id " + id + " already exists");
         }
@@ -236,7 +237,7 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public void saveMaps() {
+    public void saveMapsToDisk() {
         for(MapInfo map : maps.values()) {
             try {
                 loader.save(map);

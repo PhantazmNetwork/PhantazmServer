@@ -103,7 +103,7 @@ public class MainGui extends SimplePanelGui {
                 return;
             }
 
-            session.addMap(mapKey, new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
+            session.addMap(new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
                     new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
                     new ArrayList<>()));
             session.setCurrent(mapKey);
@@ -120,7 +120,7 @@ public class MainGui extends SimplePanelGui {
             }
         });
 
-        save.setOnClick(session::saveMaps);
+        save.setOnClick(session::saveMapsToDisk);
         load.setOnClick(session::loadMapsFromDisk);
     }
 

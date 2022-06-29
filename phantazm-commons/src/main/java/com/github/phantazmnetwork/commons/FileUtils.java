@@ -77,13 +77,13 @@ public final class FileUtils {
         }
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    public static boolean deleteRecursivelyIfExists(@NotNull Path directory) throws IOException {
+    /**
+     * Recursively deletes all files in the given directory, if it exists.
+     * @param directory the directory to recursively delete files in
+     * @throws IOException if an IO error occurs
+     */
+    public static void deleteRecursivelyIfExists(@NotNull Path directory) throws IOException {
         Objects.requireNonNull(directory, "directory");
-
-        if(!Files.exists(directory)) {
-            return false;
-        }
 
         Files.walkFileTree(directory, new SimpleFileVisitor<>() {
             @Override
@@ -98,7 +98,5 @@ public final class FileUtils {
                 return FileVisitResult.CONTINUE;
             }
         });
-
-        return true;
     }
 }
