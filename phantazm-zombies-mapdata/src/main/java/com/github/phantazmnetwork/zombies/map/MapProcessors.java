@@ -17,6 +17,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * Contains static {@link ConfigProcessor} instances used for serializing or deserializing various map-related data
+ * objects.
+ */
 public final class MapProcessors {
     private static final ConfigProcessor<MapSettingsInfo> mapInfo = new ConfigProcessor<>() {
         @Override
@@ -211,13 +215,15 @@ public final class MapProcessors {
     private static final ConfigProcessor<WaveInfo> waveInfo = new ConfigProcessor<>() {
         @Override
         public WaveInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            int delayTicks = element.getNumberOrThrow("delayTicks").intValue();
             List<SpawnInfo> spawns = spawnInfoList.dataFromElement(element.getListOrThrow("spawns"));
-            return new WaveInfo(spawns);
+            return new WaveInfo(delayTicks, spawns);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(WaveInfo waveInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(1);
+            ConfigNode node = new LinkedConfigNode(2);
+            node.putNumber("delayTicks", waveInfo.delayTicks());
             node.put("spawns", spawnInfoList.elementFromData(waveInfo.spawns()));
             return node;
         }
@@ -322,40 +328,80 @@ public final class MapProcessors {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link MapSettingsInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link MapSettingsInfo} objects
+     */
     public static @NotNull ConfigProcessor<MapSettingsInfo> mapInfo() {
         return mapInfo;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link RoomInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link RoomInfo} objects
+     */
     public static @NotNull ConfigProcessor<RoomInfo> roomInfo() {
         return roomInfo;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link DoorInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link DoorInfo} objects
+     */
     public static @NotNull ConfigProcessor<DoorInfo> doorInfo() {
         return doorInfo;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link ShopInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link ShopInfo} objects
+     */
     public static @NotNull ConfigProcessor<ShopInfo> shopInfo() { return shopInfo; }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link WindowInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link WindowInfo} objects
+     */
     public static @NotNull ConfigProcessor<WindowInfo> windowInfo() {
         return windowInfo;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link SpawnpointInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link SpawnpointInfo} objects
+     */
     public static @NotNull ConfigProcessor<SpawnpointInfo> spawnpointInfo() {
         return spawnpointInfo;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link SpawnruleInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link SpawnruleInfo} objects
+     */
     public static @NotNull ConfigProcessor<SpawnruleInfo> spawnruleInfo() {
         return spawnruleInfo;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link RoundInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link RoundInfo} objects
+     */
     public static @NotNull ConfigProcessor<RoundInfo> roundInfo() {
         return roundInfo;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link WaveInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link WaveInfo} objects
+     */
     public static @NotNull ConfigProcessor<WaveInfo> waveInfo() {
         return waveInfo;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link SpawnInfo} objects.
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link SpawnInfo} objects
+     */
     public static @NotNull ConfigProcessor<SpawnInfo> spawnInfo() {
         return spawnInfo;
     }

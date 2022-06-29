@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 
+/**
+ * A {@link MapLoader} implementation that loads maps from a filesystem.
+ */
 public class FileSystemMapLoader implements MapLoader {
     private static final String ROOMS_PATH = "rooms";
     private static final String DOORS_PATH = "doors";
@@ -27,7 +30,7 @@ public class FileSystemMapLoader implements MapLoader {
 
     private record FolderPaths(Path rooms, Path doors, Path shops, Path windows, Path rounds, Path spawnrules,
                                Path spawnpoints) {
-        FolderPaths(Path root) {
+        private FolderPaths(Path root) {
             this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH), root
                     .resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH), root
                     .resolve(SPAWNPOINTS_PATH));
@@ -39,6 +42,12 @@ public class FileSystemMapLoader implements MapLoader {
     private final Path root;
     private final ConfigCodec codec;
 
+    /**
+     * Constructs a new instance of this class from the provided root path and using the provided {@link ConfigCodec} to
+     * serialize/deserialize map data files.
+     * @param root the root path from which to search for map information
+     * @param codec the codec used to serialize/deserialize map data files
+     */
     public FileSystemMapLoader(@NotNull Path root, @NotNull ConfigCodec codec) {
         this.root = Objects.requireNonNull(root, "root");
         this.codec = Objects.requireNonNull(codec, "codec");
@@ -98,7 +107,8 @@ public class FileSystemMapLoader implements MapLoader {
         Files.createDirectories(mapDirectory);
 
         MapSettingsInfo mapSettingsInfo = data.info();
-        ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapSettingsInfo), codec);
+        ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapSettingsInfo),
+                codec);
 
         FolderPaths paths = new FolderPaths(mapDirectory);
 

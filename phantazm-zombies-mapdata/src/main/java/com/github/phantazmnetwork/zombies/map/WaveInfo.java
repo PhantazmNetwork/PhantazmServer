@@ -4,4 +4,4 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record WaveInfo(@NotNull List<SpawnInfo> spawns) { }
+public record WaveInfo(int delayTicks, @NotNull List<SpawnInfo> spawns) { }
