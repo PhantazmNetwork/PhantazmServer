@@ -114,6 +114,11 @@ public class BasicEditorSession implements EditorSession {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         this.renderer.setEnabled(enabled);
+
+        if(!enabled) {
+            firstSelected = null;
+            secondSelected = null;
+        }
     }
 
     @Override
@@ -199,6 +204,8 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void setCurrent(@NotNull Key id) {
+        Objects.requireNonNull(id, "id");
+
         MapInfo newCurrent = maps.get(id);
         if(newCurrent == null) {
             throw new IllegalArgumentException("A map with id " + id + " does not exist");

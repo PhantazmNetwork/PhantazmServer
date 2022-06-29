@@ -7,6 +7,10 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Contains static {@link ConfigProcessor} implementations designed for serializing and deserializing classes in the
+ * {@code vector} package.
+ */
 public final class VectorConfigProcessors {
     private static final ConfigProcessor<Vec3D> vec3D = new ConfigProcessor<>() {
         @Override
@@ -82,17 +86,33 @@ public final class VectorConfigProcessors {
         }
     };
 
+    /**
+     * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Vec3I} instances.
+     * @return the ConfigProcessor used to serialize/deserialize Vec3I instances
+     */
     public static @NotNull ConfigProcessor<Vec3I> vec3I() {
         return vec3I;
     }
 
+    /**
+     * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Vec3D} instances.
+     * @return the ConfigProcessor used to serialize/deserialize Vec3D instances
+     */
     public static @NotNull ConfigProcessor<Vec3D> vec3D() {
         return vec3D;
     }
 
+    /**
+     * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Vec3F} instances.
+     * @return the ConfigProcessor used to serialize/deserialize Vec3F instances
+     */
     public static @NotNull ConfigProcessor<Vec3F> vec3F() {
         return vec3F;
     }
 
+    /**
+     * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Region3I} instances.
+     * @return the ConfigProcessor used to serialize/deserialize Region3I instances
+     */
     public static @NotNull ConfigProcessor<Region3I> region3I() { return region3I; }
 }

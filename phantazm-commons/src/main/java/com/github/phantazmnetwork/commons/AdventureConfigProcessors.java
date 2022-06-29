@@ -13,6 +13,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Contains static {@link ConfigProcessor} implementations used to serialize/deserialize certain objects from the
+ * Adventure api ({@code net.kyori.adventure}).
+ */
 public final class AdventureConfigProcessors {
     private AdventureConfigProcessors() {
         throw new UnsupportedOperationException();
@@ -72,18 +76,34 @@ public final class AdventureConfigProcessors {
 
     private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessor.enumProcessor(Sound.Source.class);
 
+    /**
+     * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link Key} objects.
+     * @return the ConfigProcessor used to serialize/deserialize Key instances
+     */
     public static @NotNull ConfigProcessor<Key> key() {
         return key;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link Component} objects.
+     * @return the ConfigProcessor used to serialize/deserialize Component instances
+     */
     public static @NotNull ConfigProcessor<Component> component() {
         return component;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link Sound} objects.
+     * @return the ConfigProcessor used to serialize/deserialize Sound instances
+     */
     public static @NotNull ConfigProcessor<Sound> sound() {
         return sound;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link Sound.Source} objects.
+     * @return the ConfigProcessor used to serialize/deserialize Sound.Source instances
+     */
     public static @NotNull ConfigProcessor<Sound.Source> soundSource() {
         return soundSource;
     }

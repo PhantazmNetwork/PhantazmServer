@@ -22,18 +22,55 @@ import java.util.Map;
  * active maps, and getting basic feedback from the player (such as what blocks they have selected).
  */
 public interface EditorSession {
+    /**
+     * Called whenever the player interacts with a block.
+     * @param player the player
+     * @param world the world the player is in
+     * @param hand the {@link Hand} used for this interaction
+     * @param blockHitResult the {@link BlockHitResult} for this interaction
+     * @return the desired {@link ActionResult}
+     */
     @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
                                          @NotNull BlockHitResult blockHitResult);
 
+    /**
+     * "Enables" or "disables" the mapeditor. When the editor is enabled, map objects will be visually rendered, and the
+     * EditorSession API can be used to modify or create maps. When the editor is disabled, modifications can be made,
+     * but player interaction with this session is disabled, and nothing is rendered visually.
+     * @param enabled true to enable the editor, false otherwise
+     */
     void setEnabled(boolean enabled);
 
+    /**
+     * Queries if the editor is enabled or not.
+     * @return true if the editor is enabled, false otherwise
+     */
     boolean isEnabled();
 
+    /**
+     * Checks if the editor currently has a selection. The editor has a selection if it is enabled and the player has
+     * right-clicked at least one block with a stick.
+     * @return true if a selection has been made, false otherwise
+     */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean hasSelection();
 
+    /**
+     * Gets the first selected block, which is the <i>last</i> block the player right-clicked. If there is no selection,
+     * an {@link IllegalArgumentException} will be thrown.
+     * @return a {@link Vec3I} representing the last block right-clicked in world coordinate space
+     * @throws IllegalStateException if there is no selection
+     * @see EditorSession#hasSelection()
+     */
     @NotNull Vec3I getFirstSelection();
 
+    /**
+     * Gets the second selected block, which is the <i>second-last</i> block the player right-clicked. If there is no
+     * selection, an {@link IllegalArgumentException} will be thrown.
+     * @return a {@link Vec3I} representing the second-last block right-clicked in world coordinate space
+     * @throws IllegalStateException if there is no selection
+     * @see EditorSession#hasSelection()
+     */
     @NotNull Vec3I getSecondSelection();
 
     @NotNull Region3I getSelection();

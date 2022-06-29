@@ -15,7 +15,7 @@ public final class LogicUtils {
     }
 
     /**
-     * If the input object {@code in} is null, returns null. Otherwise, calls the mapping function with its value and
+     * If the input object {@code in} is null, returns null. Otherwise, calls the mapping function with {@code in} and
      * returns the result of that function.
      * @param in the input object
      * @param mapper the mapping function
