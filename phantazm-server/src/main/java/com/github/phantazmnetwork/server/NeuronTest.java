@@ -24,7 +24,7 @@ final class NeuronTest {
 
     static void initialize(@NotNull EventNode<Event> global, @NotNull Spawner spawner,
                            @NotNull EventNode<Event> phantazm) {
-        GroundMinestomDescriptor testDescriptor = GroundMinestomDescriptor.of(EntityType.PHANTOM, "phantom");
+        GroundMinestomDescriptor testDescriptor = GroundMinestomDescriptor.of(EntityType.ZOMBIE, "phantom");
 
         phantazm.addListener(ChatChannelSendEvent.class, event -> {
             String msg = event.getInput();
