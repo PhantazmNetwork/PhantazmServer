@@ -63,7 +63,7 @@ public class MobTriggers {
     private static <TEvent extends Event> @NotNull MobTrigger<TEvent> trigger(@Subst("interact") @NotNull String name,
                                                                               @NotNull Class<TEvent> eventClass,
                                                                               @NotNull Function<TEvent, Entity> entityGetter) {
-        return new MobTrigger<>(Key.key(Namespaces.PHANTAZM), eventClass, entityGetter);
+        return new MobTrigger<>(Key.key(Namespaces.PHANTAZM, name), eventClass, entityGetter);
     }
 
     private static <TEvent extends EntityEvent> @NotNull MobTrigger<TEvent> regularTrigger(@Subst("damage") @NotNull String name,
