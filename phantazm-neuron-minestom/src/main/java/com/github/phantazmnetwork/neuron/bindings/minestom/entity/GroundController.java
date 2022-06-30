@@ -103,26 +103,24 @@ public class GroundController implements Controller {
             }
         }
 
-        if(!entity.hasVelocity()) {
-            if(entity.isOnGround()) {
-                PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
-                Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
+        if(entity.isOnGround()) {
+            PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
+            Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-                if(entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
-                    Vec3I currentPos = current.getPosition();
-                    double nodeDiff = exactTargetY - (currentPos.getY() + current.getYOffset());
-                    if(nodeDiff > step) {
-                        entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer
-                                .TICK_PER_SECOND));
-                        jumping = true;
-                    } else if(nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
-                        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
-                        return;
-                    }
+            if(entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
+                Vec3I currentPos = current.getPosition();
+                double nodeDiff = exactTargetY - (currentPos.getY() + current.getYOffset());
+                if(nodeDiff > step) {
+                    entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer
+                            .TICK_PER_SECOND));
+                    jumping = true;
+                } else if(nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
+                    entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
+                    return;
                 }
-
-                entity.refreshPosition(pos);
             }
+
+            entity.refreshPosition(pos);
         }
     }
 
