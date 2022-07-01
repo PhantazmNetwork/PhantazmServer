@@ -62,6 +62,10 @@ public class MobStore {
         uuidToTriggers.put(uuid, createTriggerInstances(mob));
     }
 
+    public PhantazmMob getMob(@NotNull UUID uuid) {
+        return uuidToMob.get(uuid);
+    }
+
     private @NotNull Map<Key, Collection<SkillInstance>> createTriggerInstances(@NotNull PhantazmMob mob) {
         Map<Key, Collection<SkillInstance>> triggerInstances = new HashMap<>(mob.model().getTriggers().size());
         for (Map.Entry<Key, Collection<Skill>> entry : mob.model().getTriggers().entrySet()) {

@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.mob.target;
 
+import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;

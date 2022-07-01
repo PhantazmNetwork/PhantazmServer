@@ -92,6 +92,7 @@ public final class PhantazmServer {
         NeuronTest.initialize(global, Neuron.getSpawner(), phantazm);
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
         MobTest.initialize(phantazm);
+        GunTest.initialize(global, phantazm, viewProvider);
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {

@@ -8,7 +8,6 @@ import java.util.Objects;
 /**
  * Basic implementation of an {@link InventoryObject}.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class BasicInventoryObject implements InventoryObject {
 
     private final ItemStack itemStack;

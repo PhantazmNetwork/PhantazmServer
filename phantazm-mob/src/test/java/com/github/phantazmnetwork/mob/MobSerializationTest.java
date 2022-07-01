@@ -83,7 +83,7 @@ public class MobSerializationTest {
 
         ConfigProcessor<Calculator> calculatorProcessor = new CalculatorConfigProcessor();
         ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(Map.of(
-                GroundMinestomDescriptor.KEY, new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
+                GroundMinestomDescriptor.SERIAL_KEY, new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
         )::get);
         ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor = new NearestEntitiesSelectorConfigProcessor<NearestEntitiesSelector<Player>>() {
             @Override
@@ -111,7 +111,7 @@ public class MobSerializationTest {
             protected @NotNull FollowEntityGoal<Player> createGoal(@NotNull TargetSelector<Player> selector) {
                 return new FollowEntityGoal<>(selector) {
                     @Override
-                    public @NotNull Key key() {
+                    public @NotNull Key getSerialKey() {
                         return FollowPlayerGoal.SERIAL_KEY;
                     }
                 };

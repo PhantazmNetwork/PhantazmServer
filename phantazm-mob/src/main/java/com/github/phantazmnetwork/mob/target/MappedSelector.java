@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.mob.target;
 
+import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -32,8 +33,8 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
     }
 
     @Override
-    public @NotNull Key key() {
-        return delegate.key();
+    public @NotNull Key getSerialKey() {
+        return delegate.getSerialKey();
     }
 
     @Override

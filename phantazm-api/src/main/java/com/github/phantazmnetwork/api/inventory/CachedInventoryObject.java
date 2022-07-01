@@ -13,11 +13,11 @@ public abstract class CachedInventoryObject implements InventoryObject {
 
     private ItemStack cache = null;
 
-    private boolean dirty = false;
+    private boolean dirty = true;
 
     @Override
     public @NotNull ItemStack getItemStack() {
-        if (!dirty) {
+        if (!shouldRedraw()) {
             return cache;
         }
 

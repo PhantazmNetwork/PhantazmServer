@@ -31,9 +31,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDescriptor {
 
     /**
-     * The unique key for {@link GroundMinestomDescriptor}s.
+     * The unique serial key for {@link GroundMinestomDescriptor}s.
      */
-    Key KEY = Key.key(Namespaces.PHANTAZM, "descriptor.ground");
+    Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "descriptor.ground");
 
     @Override
     default float getJumpHeight() {
@@ -46,8 +46,8 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
     }
 
     @Override
-    default @NotNull Key key() {
-        return KEY;
+    default @NotNull Key getSerialKey() {
+        return SERIAL_KEY;
     }
 
     /**

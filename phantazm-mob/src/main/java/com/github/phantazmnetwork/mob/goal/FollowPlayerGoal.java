@@ -26,7 +26,7 @@ public class FollowPlayerGoal extends FollowEntityGoal<Player> {
     }
 
     @Override
-    public @NotNull Key key() {
+    public @NotNull Key getSerialKey() {
         return SERIAL_KEY;
     }
 }

@@ -7,7 +7,6 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -15,10 +14,10 @@ import java.util.function.Function;
 
 /**
  * A {@link ConfigProcessor} which processes {@link TValue}s.
- * This can be used to process inheritance and identifies variants based on {@link Keyed#key()}.
+ * This can be used to process inheritance and identifies variants based on {@link VariantSerializable#getSerialKey()}.
  * @param <TValue> The type of {@link TValue} to process
  */
-public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProcessor<TValue> {
+public class VariantConfigProcessor<TValue extends VariantSerializable> implements ConfigProcessor<TValue> {
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
@@ -48,13 +47,13 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull TValue data) throws ConfigProcessException {
-        ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>) subProcessors.apply(data.key());
+        ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>) subProcessors.apply(data.getSerialKey());
         if (processor == null) {
             throw new ConfigProcessException("no subprocessor");
         }
 
         ConfigNode node = new LinkedConfigNode(2);
-        node.put("serialKey", KEY_PROCESSOR.elementFromData(data.key()));
+        node.put("serialKey", KEY_PROCESSOR.elementFromData(data.getSerialKey()));
         node.put("data", processor.elementFromData(data));
 
         return node;

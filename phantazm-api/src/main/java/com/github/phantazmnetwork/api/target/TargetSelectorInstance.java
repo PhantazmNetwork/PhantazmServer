@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.mob.target;
+package com.github.phantazmnetwork.api.target;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.mob.goal;
 
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
-import com.github.phantazmnetwork.mob.target.TargetSelectorInstance;
+import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.minestom.server.entity.Entity;

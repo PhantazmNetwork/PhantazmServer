@@ -43,7 +43,7 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
     }
 
     @Override
-    public @NotNull Key key() {
+    public @NotNull Key getSerialKey() {
         return SERIAL_KEY;
     }
 }
