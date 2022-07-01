@@ -63,7 +63,7 @@ final class NeuronTest {
                     case "V" -> {
                         Set<Entity> entities = instance.getEntities();
                         for(Entity entity : entities) {
-                            entity.setVelocity(new Vec(10, 0, 10));
+                            entity.setVelocity(new Vec(10, 0, 0));
                         }
                     }
                 }

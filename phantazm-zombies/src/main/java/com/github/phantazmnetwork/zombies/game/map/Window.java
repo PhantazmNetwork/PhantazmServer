@@ -48,7 +48,8 @@ public class Window extends MapObject<WindowInfo> {
                 NBTCompound compound = (NBTCompound) new SNBTParser(new StringReader(blockString)).parse();
                 String id = compound.getString("Name");
                 if(id == null) {
-                    LOGGER.warn("Malformed block SNBT " + compound + ", no Name tag found for window at ~" + center);
+                    LOGGER.warn("Malformed block SNBT " + compound + ", no Name tag found in block data for window " +
+                            "at ~" + center);
                     return;
                 }
 
@@ -66,11 +67,12 @@ public class Window extends MapObject<WindowInfo> {
 
                     for(Map.Entry<String, NBT> entry : properties.getEntries()) {
                         NBT nbt = entry.getValue();
-                        if(nbt.getValue() instanceof String value) {
+                        Object objectValue = nbt.getValue();
+                        if(objectValue instanceof String value) {
                             stringMap.put(entry.getKey(), value);
                         }
                         else {
-                            LOGGER.warn("Unexpected NBT value type " + nbt.getValue().getClass().getTypeName() +
+                            LOGGER.warn("Unexpected NBT value type " + objectValue.getClass().getTypeName() +
                                     "; needs to be convertable to String, in window at ~" + center);
                         }
                     }
