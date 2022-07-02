@@ -17,10 +17,7 @@ import com.github.phantazmnetwork.zombies.equipment.gun.GunLevel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunModel;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.shot.BasicShotEndSelector;
-import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.DamageShotHandler;
-import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.FeedbackShotHandler;
-import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.KnockbackShotHandler;
-import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.SoundShotHandler;
+import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.LinearTargetSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
@@ -142,23 +139,6 @@ final class GunTest {
                                     new LinearTargetSelector(new BasicShotEndSelector(120)),
                                     List.of(
                                             new PlaySoundEffect(Sound.sound(
-                                                    Key.key("entity.iron_golem.hurt"),
-                                                    Sound.Source.PLAYER,
-                                                    1.0F,
-                                                    2.0F
-                                            )),
-                                            new ParticleTrailEffect(
-                                                    Particle.CRIT,
-                                                    false,
-                                                    0.0F,
-                                                    0.0F,
-                                                    0.0F,
-                                                    0.0F,
-                                                    1,
-                                                    4
-                                            )),
-                                    List.of(
-                                            new PlaySoundEffect(Sound.sound(
                                                     Key.key("entity.horse.gallop"),
                                                     Sound.Source.PLAYER,
                                                     1.0F,
@@ -174,6 +154,22 @@ final class GunTest {
                                     ),
                                     Collections.singletonList(new SendMessageEffect(Component.text("You're out of ammo.", NamedTextColor.RED))),
                                     List.of(
+                                            new GunEffectShotHandler(new PlaySoundEffect(Sound.sound(
+                                                    Key.key("entity.iron_golem.hurt"),
+                                                    Sound.Source.PLAYER,
+                                                    1.0F,
+                                                    2.0F
+                                            ))),
+                                            new GunEffectShotHandler(new ParticleTrailEffect(
+                                                    Particle.CRIT,
+                                                    false,
+                                                    0.0F,
+                                                    0.0F,
+                                                    0.0F,
+                                                    0.0F,
+                                                    1,
+                                                    4
+                                            )),
                                             new DamageShotHandler(3.0F, 5.0F),
                                             new KnockbackShotHandler(5.0D, 5.0D),
                                             new FeedbackShotHandler(

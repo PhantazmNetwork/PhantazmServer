@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shot.handler;
 
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.shot.GunShot;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -23,13 +24,18 @@ public class SoundShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull Player attacker, @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull Player attacker, @NotNull GunShot shot) {
         if (!shot.getRegularTargets().isEmpty()) {
             attacker.playSound(sound, Sound.Emitter.self());
         }
         else if (!shot.getHeadshotTargets().isEmpty()) {
             attacker.playSound(headshotSound, Sound.Emitter.self());
         }
+    }
+
+    @Override
+    public void tick(long time) {
+
     }
 
     @Override

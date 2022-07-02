@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shot.handler;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.shot.GunShot;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
@@ -25,7 +26,7 @@ public class KnockbackShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull Player attacker, @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull Player attacker, @NotNull GunShot shot) {
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
         for (Pair<PhantazmMob, Vec> target : shot.getRegularTargets()) {
             Entity entity = target.left().entity();
@@ -37,6 +38,11 @@ public class KnockbackShotHandler implements ShotHandler {
             Vec knockbackVec = target.right().sub(start).normalize().mul(headshotKnockback);
             entity.setVelocity(entity.getVelocity().add(knockbackVec));
         }
+    }
+
+    @Override
+    public void tick(long time) {
+
     }
 
     @Override

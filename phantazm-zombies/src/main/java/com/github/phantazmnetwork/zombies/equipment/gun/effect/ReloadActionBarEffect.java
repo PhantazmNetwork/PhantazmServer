@@ -28,6 +28,11 @@ public abstract class ReloadActionBarEffect implements GunEffect {
         }
     }
 
+    @Override
+    public void tick(long time) {
+
+    }
+
     protected abstract @NotNull Component getComponent(float progress);
 
 }

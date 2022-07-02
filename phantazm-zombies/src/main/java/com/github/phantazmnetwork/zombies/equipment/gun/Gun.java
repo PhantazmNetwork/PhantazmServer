@@ -75,10 +75,6 @@ public class Gun extends CachedInventoryObject implements Equipment, Keyed, Upgr
                 processHit(player, hit);
             });
         });
-
-        for (GunEffect effect : getLevel().shootEffects()) {
-            effect.accept(this);
-        }
     }
 
     protected boolean shouldShoot() {
@@ -95,7 +91,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Keyed, Upgr
 
     protected void processHit(@NotNull Player player, @NotNull GunShot hit) {
         for (ShotHandler handler : getLevel().shotHandlers()) {
-            handler.handle(player, hit);
+            handler.handle(this, player, hit);
         }
     }
 
@@ -200,6 +196,15 @@ public class Gun extends CachedInventoryObject implements Equipment, Keyed, Upgr
             modifyState(builder -> builder.setQueuedShots(postQueuedShots));
         }
 
+        for (ShotHandler handler : getLevel().shotHandlers()) {
+            handler.tick(time);
+        }
+        for (GunEffect effect : getLevel().reloadEffects()) {
+            effect.tick(time);
+        }
+        for (GunEffect effect : getLevel().emptyClipEffects()) {
+            effect.tick(time);
+        }
         for (GunEffect effect : getLevel().tickEffects()) {
             effect.accept(this);
         }

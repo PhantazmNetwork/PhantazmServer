@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shot.handler;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.shot.GunShot;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
@@ -26,13 +27,18 @@ public class FeedbackShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull Player attacker, @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull Player attacker, @NotNull GunShot shot) {
         for (Pair<PhantazmMob, Vec> ignored : shot.getRegularTargets()) {
             attacker.sendMessage(message);
         }
         for (Pair<PhantazmMob, Vec> ignored : shot.getHeadshotTargets()) {
             attacker.sendMessage(headshotMessage);
         }
+    }
+
+    @Override
+    public void tick(long time) {
+
     }
 
     @Override

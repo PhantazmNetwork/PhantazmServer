@@ -25,6 +25,11 @@ public class SendMessageEffect implements GunEffect {
     }
 
     @Override
+    public void tick(long time) {
+
+    }
+
+    @Override
     public @NotNull Key getSerialKey() {
         return SERIAL_KEY;
     }

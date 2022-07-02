@@ -12,7 +12,6 @@ import java.util.Collection;
 
 public record GunLevel(@NotNull ItemStack stack,
                        @NotNull TargetSelector<? extends GunShot> selector,
-                       @NotNull Collection<GunEffect> shootEffects,
                        @NotNull Collection<GunEffect> reloadEffects,
                        @NotNull Collection<GunEffect> tickEffects,
                        @NotNull Collection<GunEffect> emptyClipEffects,

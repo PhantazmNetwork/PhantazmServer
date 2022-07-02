@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shot.handler;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.shot.GunShot;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
@@ -24,13 +25,18 @@ public class DamageShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull Player attacker, @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull Player attacker, @NotNull GunShot shot) {
         for (Pair<PhantazmMob, Vec> target : shot.getRegularTargets()) {
             target.left().entity().damage(DamageType.fromPlayer(attacker), damage);
         }
         for (Pair<PhantazmMob, Vec> target : shot.getHeadshotTargets()) {
             target.left().entity().damage(DamageType.fromPlayer(attacker), headshotDamage);
         }
+    }
+
+    @Override
+    public void tick(long time) {
+
     }
 
     @Override
