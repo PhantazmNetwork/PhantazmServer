@@ -41,6 +41,20 @@ public interface Vec3F extends Comparable<Vec3F> {
     }
 
     /**
+     * Computes the hashcode of a float triplet.
+     * @param x the x-component
+     * @param y the y-component
+     * @param z the z-component
+     * @return the hash of the three integers
+     */
+    static int hash(float x, float y, float z) {
+        int h = 7;
+        h = 31 * h + Float.floatToIntBits(x);
+        h = 31 * h + Float.floatToIntBits(y);
+        return 31 * h + Float.floatToIntBits(z);
+    }
+
+    /**
      * Creates a new Vec3F from casting each {@code double} component to a float.
      * @param x the x-component of the new vector
      * @param y the y-component of the new vector

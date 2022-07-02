@@ -41,6 +41,20 @@ public interface Vec3D extends Comparable<Vec3D> {
     }
 
     /**
+     * Computes the hashcode of a double triplet.
+     * @param x the x-component
+     * @param y the y-component
+     * @param z the z-component
+     * @return the hash of the three integers
+     */
+    static int hash(double x, double y, double z) {
+        int h = 7;
+        h = 31 * h + Double.hashCode(x);
+        h = 31 * h + Double.hashCode(y);
+        return 31 * h + Double.hashCode(z);
+    }
+
+    /**
      * <p>Computes the <i>squared distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This uses the standard
      * distance formula for two 3-dimensional points, but omits the square root for performance.</p>
      * @param x1 first x-component
