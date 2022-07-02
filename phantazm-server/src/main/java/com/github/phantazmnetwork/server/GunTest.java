@@ -42,7 +42,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.metadata.PlayerHeadMeta;
-import net.minestom.server.particle.Particle;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -160,7 +159,10 @@ final class GunTest {
                                                     1.0F,
                                                     2.0F
                                             ))),
-                                            new GunEffectShotHandler(new ParticleTrailEffect(
+                                            new GuardianBeamShotHandler(
+                                                    false,
+                                                    50L
+                                            )/*new ParticleTrailEffect(
                                                     Particle.CRIT,
                                                     false,
                                                     0.0F,
@@ -169,7 +171,7 @@ final class GunTest {
                                                     0.0F,
                                                     1,
                                                     4
-                                            )),
+                                            )*/,
                                             new DamageShotHandler(3.0F, 5.0F),
                                             new KnockbackShotHandler(5.0D, 5.0D),
                                             new FeedbackShotHandler(
