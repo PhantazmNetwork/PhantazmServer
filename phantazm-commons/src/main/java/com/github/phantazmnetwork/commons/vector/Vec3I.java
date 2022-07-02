@@ -2,8 +2,6 @@ package com.github.phantazmnetwork.commons.vector;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 /**
  * <p>Represents an <i>immutable</i> 3D integer vector (point). Contains some utility methods for working with
  * vectors/points.</p>

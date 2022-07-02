@@ -5,7 +5,13 @@ import com.github.phantazmnetwork.commons.vector.Vec3IBase;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventListener;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.PreBlockChangeEvent;
+import net.minestom.server.event.player.PlayerChunkLoadEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -13,11 +19,13 @@ import net.minestom.server.network.packet.server.play.BlockChangePacket;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 public class InstanceClientBlockTracker implements ClientBlockTracker {
     private final Instance instance;
     private final Long2ObjectMap<ObjectOpenHashSet<PositionedBlock>> clientBlocks;
+    private final Object syncRoot = new Object();
 
     private static class PositionedBlock extends Vec3IBase {
         private Block block;
@@ -44,39 +52,112 @@ public class InstanceClientBlockTracker implements ClientBlockTracker {
         }
     }
 
-    public InstanceClientBlockTracker(@NotNull Instance instance) {
+    public InstanceClientBlockTracker(@NotNull Instance instance, @NotNull EventNode<Event> globalNode) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.clientBlocks = new Long2ObjectOpenHashMap<>();
+
+        globalNode.addListener(EventListener.builder(PlayerChunkLoadEvent.class).expireWhen(event -> !instance
+                .isRegistered()).handler(this::onPlayerChunkLoad).build());
+        globalNode.addListener(EventListener.builder(PreBlockChangeEvent.class).expireWhen(event -> !instance
+                .isRegistered()).handler(this::onPreBlockChange).build());
     }
 
     @Override
-    public void setClientBlock(@NotNull Instance instance, @NotNull Block type, int x, int y, int z) {
+    public void setClientBlock(@NotNull Block type, int x, int y, int z) {
         int cx = ChunkUtils.getChunkCoordinate(x);
         int cz = ChunkUtils.getChunkCoordinate(z);
         long index = ChunkUtils.getChunkIndex(cx, cz);
 
-        ObjectOpenHashSet<PositionedBlock> positionedBlocks = clientBlocks.get(index);
-        if(positionedBlocks == null) {
-            clientBlocks.put(index, positionedBlocks = new ObjectOpenHashSet<>(6));
-        }
+        synchronized (syncRoot) {
+            ObjectOpenHashSet<PositionedBlock> positionedBlocks = clientBlocks.get(index);
+            if(positionedBlocks == null) {
+                clientBlocks.put(index, positionedBlocks = new ObjectOpenHashSet<>(6));
+            }
 
-        Vec3I pos = Vec3I.of(x, y, z);
-        PositionedBlock block = positionedBlocks.get(pos);
-        if(block == null) {
-            positionedBlocks.add(new PositionedBlock(type, pos));
-        }
-        else {
-            block.block = type;
-        }
+            Vec3I pos = Vec3I.of(x, y, z);
+            PositionedBlock block = positionedBlocks.get(pos);
+            if(block == null) {
+                positionedBlocks.add(new PositionedBlock(type, pos));
+            }
+            else {
+                block.block = type;
+            }
 
-        Chunk chunk = instance.getChunk(cx, cz);
-        if(chunk != null) {
-            chunk.sendPacketToViewers(new BlockChangePacket(new Pos(x, y, z), type));
+            Chunk chunk = instance.getChunk(cx, cz);
+            if(chunk != null) {
+                chunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), type));
+            }
         }
     }
 
     @Override
-    public void replaceClientBlock(@NotNull Instance instance, @NotNull Block type, int x, int y, int z) {
+    public void removeClientBlock(int x, int y, int z) {
+        int cx = ChunkUtils.getChunkCoordinate(x);
+        int cz = ChunkUtils.getChunkCoordinate(z);
+        long index = ChunkUtils.getChunkIndex(cx, cz);
 
+        synchronized (syncRoot) {
+            ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+
+            if(blocks != null) {
+                //not sus, equals/hashCode is comparable between all Vec3I
+                //noinspection SuspiciousMethodCalls
+                blocks.remove(Vec3I.of(x, y, z));
+                Block serverBlock = instance.getBlock(x, y, z);
+
+                Chunk chunk = instance.getChunk(cx, cz);
+                if(chunk != null) {
+                    //make sure player gets the actual block
+                    chunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
+                }
+            }
+        }
+    }
+
+    private void onPreBlockChange(@NotNull PreBlockChangeEvent event) {
+        if(event.getInstance() == instance) {
+            Point blockPos = event.blockPosition();
+            int cx = ChunkUtils.getChunkCoordinate(blockPos.blockX());
+            int cz = ChunkUtils.getChunkCoordinate(blockPos.blockZ());
+            long index = ChunkUtils.getChunkIndex(cx, cz);
+
+            synchronized (syncRoot) {
+                ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+
+                if(blocks != null) {
+                    PositionedBlock positionedBlock = blocks.get(VecUtils.toBlockInt(blockPos));
+
+                    if(positionedBlock != null) {
+                        event.setSyncClient(false);
+                    }
+                }
+            }
+        }
+    }
+
+    private void onPlayerChunkLoad(@NotNull PlayerChunkLoadEvent event) {
+        if(event.getInstance() == instance) {
+            int cx = event.getChunkX();
+            int cz = event.getChunkZ();
+
+            BlockChangePacket[] packets = null;
+            long index = ChunkUtils.getChunkIndex(cx, cz);
+            synchronized (syncRoot) {
+                ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+
+                if(blocks != null) {
+                    Iterator<PositionedBlock> blockIterator = blocks.iterator();
+                    packets = new BlockChangePacket[blocks.size()];
+                    for(int i = 0; i < packets.length; i++) {
+                        PositionedBlock block = blockIterator.next();
+                        packets[i] = new BlockChangePacket(VecUtils.toPoint(block.position), block.block);
+                    }
+                }
+            }
+
+            if(packets != null) {
+                event.getPlayer().sendPackets(packets);
+            }
+        }
     }
 }
