@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.api.ClientBlockTracker;
+import com.github.phantazmnetwork.api.ClientBlockHandler;
+import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
@@ -8,7 +9,6 @@ import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.PacketUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -27,7 +27,7 @@ public class Window extends MapObject<WindowInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
     private static final Block DEFAULT_PADDING = Block.OAK_SLAB;
 
-    private final ClientBlockTracker clientBlockTracker;
+    private final ClientBlockHandler clientBlockHandler;
     private final Vec3I worldMin;
     private final Vec3D center;
     private final int volume;
@@ -41,10 +41,10 @@ public class Window extends MapObject<WindowInfo> {
      * @param data the data defining the configurable parameters of this window
      * @param mapOrigin the origin of the map
      */
-    public Window(@NotNull Instance instance, @NotNull ClientBlockTracker clientBlockTracker, @NotNull WindowInfo data,
+    public Window(@NotNull Instance instance, @NotNull ClientBlockHandler clientBlockHandler, @NotNull WindowInfo data,
                   @NotNull Vec3I mapOrigin) {
         super(data, mapOrigin, instance);
-        this.clientBlockTracker = Objects.requireNonNull(clientBlockTracker, "clientBlockTracker");
+        this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
         Region3I frame = data.frameRegion();
         Vec3I min = frame.getOrigin();
         Vec3I lengths = frame.getLengths();
@@ -163,9 +163,8 @@ public class Window extends MapObject<WindowInfo> {
 
             for(int i = index - 1; i >= newIndex; i--) {
                 Vec3I breakLocation = indexToCoordinate(i);
-                instance.setBlock(breakLocation.getX(), breakLocation.getY(), breakLocation.getZ(), Block.AIR);
-                clientBlockTracker.setClientBlock(Block.BARRIER, breakLocation.getX(), breakLocation.getY(),
-                        breakLocation.getZ());
+                instance.setBlock(VecUtils.toPoint(breakLocation), Block.AIR);
+                clientBlockHandler.setClientBlock(Block.BARRIER, breakLocation);
             }
         }
         else {
@@ -175,8 +174,8 @@ public class Window extends MapObject<WindowInfo> {
 
             for(int i = index; i < newIndex; i++) {
                 Vec3I repairLocation = indexToCoordinate(i);
-                instance.setBlock(repairLocation.getX(), repairLocation.getY(), repairLocation.getZ(), repairBlocks
-                        .get(i));
+                instance.setBlock(VecUtils.toPoint(repairLocation), repairBlocks.get(i));
+                clientBlockHandler.removeClientBlock(repairLocation);
             }
         }
 

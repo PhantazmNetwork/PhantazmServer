@@ -1,8 +1,7 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.ClientBlockTracker;
-import com.github.phantazmnetwork.api.InstanceClientBlockTracker;
-import net.minestom.server.MinecraftServer;
+import com.github.phantazmnetwork.api.ClientBlockHandler;
+import com.github.phantazmnetwork.api.InstanceClientBlockHandler;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
@@ -20,7 +19,7 @@ final class ZombiesTest {
         global.addListener(PlayerLoginEvent.class, event -> {
             Instance spawnInstance = event.getSpawningInstance();
             if(spawnInstance != null) {
-                ClientBlockTracker tracker = new InstanceClientBlockTracker(spawnInstance, global);
+                ClientBlockHandler tracker = new InstanceClientBlockHandler(spawnInstance, global);
                 tracker.setClientBlock(Block.BARRIER, 1, 100, 1);
             }
         });

@@ -10,8 +10,8 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.instance.BlockChangeEvent;
 import net.minestom.server.event.instance.PreBlockChangeEvent;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerChunkLoadEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -20,11 +20,13 @@ import net.minestom.server.network.packet.server.play.BlockChangePacket;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class InstanceClientBlockTracker implements ClientBlockTracker {
-    private final Instance instance;
+public class InstanceClientBlockHandler implements ClientBlockHandler {
+    private final Reference<Instance> instance;
     private final Long2ObjectMap<ObjectOpenHashSet<PositionedBlock>> clientBlocks;
 
     private static class PositionedBlock extends Vec3IBase {
@@ -52,18 +54,34 @@ public class InstanceClientBlockTracker implements ClientBlockTracker {
         }
     }
 
-    public InstanceClientBlockTracker(@NotNull Instance instance, @NotNull EventNode<Event> globalNode) {
-        this.instance = Objects.requireNonNull(instance, "instance");
+    /**
+     * <p>Constructs a new instance of this class bound to the provided {@link Instance}. This will add a few necessary
+     * listeners to the given {@link EventNode}.</p>
+     *
+     * <p>The lifetime of this object is free to exceed that of the Instance; no strong reference to it is retained.</p>
+     * @param instance the instance this handler is bound to
+     * @param globalNode the node to add block event listeners to
+     */
+    public InstanceClientBlockHandler(@NotNull Instance instance, @NotNull EventNode<Event> globalNode) {
+        //weakref likely not strictly necessary to prevent memory leaks, but could help instance objects be GC'd sooner
+        this.instance = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.clientBlocks = new Long2ObjectOpenHashMap<>();
 
         globalNode.addListener(EventListener.builder(PlayerChunkLoadEvent.class).filter(event -> event.getInstance() ==
                 instance).expireWhen(event -> !instance.isRegistered()).handler(this::onPlayerChunkLoad).build());
         globalNode.addListener(EventListener.builder(PreBlockChangeEvent.class).filter(event -> event.getInstance() ==
                 instance).expireWhen(event -> !instance.isRegistered()).handler(this::onPreBlockChange).build());
+        globalNode.addListener(EventListener.builder(PlayerBlockBreakEvent.class).filter(event -> event.getInstance() ==
+                instance).expireWhen(event -> !instance.isRegistered()).handler(this::onPlayerBlockBreak).build());
     }
 
     @Override
     public void setClientBlock(@NotNull Block type, int x, int y, int z) {
+        Instance instance = this.instance.get();
+        if(instance == null) {
+            return;
+        }
+
         int cx = ChunkUtils.getChunkCoordinate(x);
         int cz = ChunkUtils.getChunkCoordinate(z);
         long index = ChunkUtils.getChunkIndex(cx, cz);
@@ -92,6 +110,11 @@ public class InstanceClientBlockTracker implements ClientBlockTracker {
 
     @Override
     public void removeClientBlock(int x, int y, int z) {
+        Instance instance = this.instance.get();
+        if(instance == null) {
+            return;
+        }
+
         int cx = ChunkUtils.getChunkCoordinate(x);
         int cz = ChunkUtils.getChunkCoordinate(z);
         long index = ChunkUtils.getChunkIndex(cx, cz);
@@ -103,15 +126,29 @@ public class InstanceClientBlockTracker implements ClientBlockTracker {
                 //not sus, equals/hashCode is comparable between all Vec3I
                 //noinspection SuspiciousMethodCalls
                 if(blocks.remove(Vec3I.of(x, y, z))) {
-                    //only re-sync with the client if the blocks should actually change
-                    Block serverBlock = instance.getBlock(x, y, z);
-
                     Chunk chunk = instance.getChunk(cx, cz);
+
                     if(chunk != null) {
+                        Block serverBlock = chunk.getBlock(x, y, z);
+
                         //make sure player gets the actual block
                         chunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
                     }
                 }
+            }
+        }
+    }
+
+    private void onPlayerBlockBreak(PlayerBlockBreakEvent event) {
+        Point blockPosition = event.getBlockPosition();
+        long index = ChunkUtils.getChunkIndex(blockPosition);
+        synchronized (clientBlocks) {
+            ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+
+            if(blocks != null) {
+                //remove the client block; no need to send something else as it will be updated soon
+                //noinspection SuspiciousMethodCalls
+                blocks.remove(VecUtils.toBlockInt(blockPosition));
             }
         }
     }

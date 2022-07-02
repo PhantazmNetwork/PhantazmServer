@@ -2,6 +2,9 @@ package com.github.phantazmnetwork.commons.vector;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Contains standard methods common to all {@link Vec3I} implementations.
+ */
 public abstract class Vec3IBase implements Vec3I {
     @Override
     public int hashCode() {
