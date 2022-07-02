@@ -80,10 +80,3 @@ If you have an idea for a new feature, or change to an existing one, you can mak
 ## License
 
 [GNU General Public License v3](LICENSE)
-
-
-
-
-
-
-
