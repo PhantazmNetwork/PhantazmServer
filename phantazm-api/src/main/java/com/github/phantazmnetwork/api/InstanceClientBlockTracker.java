@@ -5,12 +5,10 @@ import com.github.phantazmnetwork.commons.vector.Vec3IBase;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.instance.PreBlockChangeEvent;
 import net.minestom.server.event.player.PlayerChunkLoadEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -58,8 +56,6 @@ public class InstanceClientBlockTracker implements ClientBlockTracker {
 
         globalNode.addListener(EventListener.builder(PlayerChunkLoadEvent.class).expireWhen(event -> !instance
                 .isRegistered()).handler(this::onPlayerChunkLoad).build());
-        globalNode.addListener(EventListener.builder(PreBlockChangeEvent.class).expireWhen(event -> !instance
-                .isRegistered()).handler(this::onPreBlockChange).build());
     }
 
     @Override
@@ -102,40 +98,21 @@ public class InstanceClientBlockTracker implements ClientBlockTracker {
             if(blocks != null) {
                 //not sus, equals/hashCode is comparable between all Vec3I
                 //noinspection SuspiciousMethodCalls
-                blocks.remove(Vec3I.of(x, y, z));
-                Block serverBlock = instance.getBlock(x, y, z);
+                if(blocks.remove(Vec3I.of(x, y, z))) {
+                    //only re-sync with the client if the blocks should actually change
+                    Block serverBlock = instance.getBlock(x, y, z);
 
-                Chunk chunk = instance.getChunk(cx, cz);
-                if(chunk != null) {
-                    //make sure player gets the actual block
-                    chunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
-                }
-            }
-        }
-    }
-
-    private void onPreBlockChange(@NotNull PreBlockChangeEvent event) {
-        if(event.getInstance() == instance) {
-            Point blockPos = event.blockPosition();
-            int cx = ChunkUtils.getChunkCoordinate(blockPos.blockX());
-            int cz = ChunkUtils.getChunkCoordinate(blockPos.blockZ());
-            long index = ChunkUtils.getChunkIndex(cx, cz);
-
-            synchronized (syncRoot) {
-                ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
-
-                if(blocks != null) {
-                    PositionedBlock positionedBlock = blocks.get(VecUtils.toBlockInt(blockPos));
-
-                    if(positionedBlock != null) {
-                        event.setSyncClient(false);
+                    Chunk chunk = instance.getChunk(cx, cz);
+                    if(chunk != null) {
+                        //make sure player gets the actual block
+                        chunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
                     }
                 }
             }
         }
     }
 
-    private void onPlayerChunkLoad(@NotNull PlayerChunkLoadEvent event) {
+    private void onPlayerChunkLoad(PlayerChunkLoadEvent event) {
         if(event.getInstance() == instance) {
             int cx = event.getChunkX();
             int cz = event.getChunkZ();

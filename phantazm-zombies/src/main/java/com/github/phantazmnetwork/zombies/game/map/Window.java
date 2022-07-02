@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
+import com.github.phantazmnetwork.api.ClientBlockTracker;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
@@ -26,6 +27,7 @@ public class Window extends MapObject<WindowInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
     private static final Block DEFAULT_PADDING = Block.OAK_SLAB;
 
+    private final ClientBlockTracker clientBlockTracker;
     private final Vec3I worldMin;
     private final Vec3D center;
     private final int volume;
@@ -39,8 +41,10 @@ public class Window extends MapObject<WindowInfo> {
      * @param data the data defining the configurable parameters of this window
      * @param mapOrigin the origin of the map
      */
-    public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull Vec3I mapOrigin) {
+    public Window(@NotNull Instance instance, @NotNull ClientBlockTracker clientBlockTracker, @NotNull WindowInfo data,
+                  @NotNull Vec3I mapOrigin) {
         super(data, mapOrigin, instance);
+        this.clientBlockTracker = Objects.requireNonNull(clientBlockTracker, "clientBlockTracker");
         Region3I frame = data.frameRegion();
         Vec3I min = frame.getOrigin();
         Vec3I lengths = frame.getLengths();
@@ -160,6 +164,8 @@ public class Window extends MapObject<WindowInfo> {
             for(int i = index - 1; i >= newIndex; i--) {
                 Vec3I breakLocation = indexToCoordinate(i);
                 instance.setBlock(breakLocation.getX(), breakLocation.getY(), breakLocation.getZ(), Block.AIR);
+                clientBlockTracker.setClientBlock(Block.BARRIER, breakLocation.getX(), breakLocation.getY(),
+                        breakLocation.getZ());
             }
         }
         else {
@@ -169,6 +175,8 @@ public class Window extends MapObject<WindowInfo> {
 
             for(int i = index; i < newIndex; i++) {
                 Vec3I repairLocation = indexToCoordinate(i);
+                clientBlockTracker.removeClientBlock(repairLocation.getX(), repairLocation.getY(), repairLocation
+                        .getZ());
                 instance.setBlock(repairLocation.getX(), repairLocation.getY(), repairLocation.getZ(), repairBlocks
                         .get(i));
             }
