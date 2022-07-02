@@ -175,8 +175,6 @@ public class Window extends MapObject<WindowInfo> {
 
             for(int i = index; i < newIndex; i++) {
                 Vec3I repairLocation = indexToCoordinate(i);
-                clientBlockTracker.removeClientBlock(repairLocation.getX(), repairLocation.getY(), repairLocation
-                        .getZ());
                 instance.setBlock(repairLocation.getX(), repairLocation.getY(), repairLocation.getZ(), repairBlocks
                         .get(i));
             }
