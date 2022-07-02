@@ -27,6 +27,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
     private final static ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
 
+
     @Override
     public @NotNull LobbiesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         try {

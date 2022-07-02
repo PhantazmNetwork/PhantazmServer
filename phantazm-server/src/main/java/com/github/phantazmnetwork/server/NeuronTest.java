@@ -5,10 +5,8 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestom
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.EntityCreature;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.Player;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.*;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
@@ -16,6 +14,8 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 final class NeuronTest {
     private NeuronTest() {
@@ -59,6 +59,12 @@ final class NeuronTest {
 
                         global.addListener(PlayerMoveEvent.class, moveEvent -> creature.getNavigator().setPathTo(
                                 moveEvent.getPlayer().getPosition()));
+                    }
+                    case "V" -> {
+                        Set<Entity> entities = instance.getEntities();
+                        for(Entity entity : entities) {
+                            entity.setVelocity(new Vec(10, 0, 10));
+                        }
                     }
                 }
             }
