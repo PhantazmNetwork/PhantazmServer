@@ -21,7 +21,7 @@ public abstract class Vec3FBase implements Vec3F {
             return true;
         }
 
-        if(obj instanceof Vec3I other) {
+        if(obj instanceof Vec3F other) {
             return Vec3F.equals(getX(), getY(), getZ(), other.getX(), other.getY(), other.getZ());
         }
 
