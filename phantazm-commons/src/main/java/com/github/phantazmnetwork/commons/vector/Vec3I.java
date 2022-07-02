@@ -2,6 +2,8 @@ package com.github.phantazmnetwork.commons.vector;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * <p>Represents an <i>immutable</i> 3D integer vector (point). Contains some utility methods for working with
  * vectors/points.</p>
@@ -66,6 +68,41 @@ public interface Vec3I extends Comparable<Vec3I> {
         }
 
         return new BasicVec3I(x, y, z);
+    }
+
+    /**
+     * Computes the hashcode of an integer triplet.
+     * @param x the x-component
+     * @param y the y-component
+     * @param z the z-component
+     * @return the hash of the three integers
+     */
+    static int hash(int x, int y, int z) {
+        int h = 7;
+        h = 31 * h + x;
+        h = 31 * h + y;
+        return 31 * h + z;
+    }
+
+    /**
+     * Compares two Vec3I instances, first by x-value, then y-value, then z-value. This comparison function is
+     * consistent with equals.
+     * @param first the first vector
+     * @param second the second vector
+     * @return -1 if first &lt; second, 0 if first == second, 1 if first &gt; second
+     */
+    static int compare(@NotNull Vec3I first, @NotNull Vec3I second) {
+        int xCompare = Integer.compare(first.getX(), second.getX());
+        if (xCompare == 0) {
+            int yCompare = Integer.compare(first.getY(), second.getY());
+            if (yCompare == 0) {
+                return Integer.compare(first.getZ(), second.getZ());
+            }
+
+            return yCompare;
+        }
+
+        return xCompare;
     }
 
     /**

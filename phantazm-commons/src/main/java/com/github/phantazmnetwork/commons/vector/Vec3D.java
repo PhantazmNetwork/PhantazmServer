@@ -59,6 +59,21 @@ public interface Vec3D extends Comparable<Vec3D> {
     }
 
     /**
+     * <p>Computes the <i>distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This uses the standard distance
+     * formula for two 3-dimensional points.</p>
+     * @param x1 first x-component
+     * @param y1 first y-component
+     * @param z1 first z-component
+     * @param x2 second x-component
+     * @param y2 second y-component
+     * @param z2 second z-component
+     * @return the squared distance between the point {@code first} and the point {@code second}
+     */
+    static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
+        return Math.sqrt(squaredDistance(x1, y1, z1, x2, y2, z2));
+    }
+
+    /**
      * Determines if two points are equal.
      * @param x1 first x-component
      * @param y1 first y-component

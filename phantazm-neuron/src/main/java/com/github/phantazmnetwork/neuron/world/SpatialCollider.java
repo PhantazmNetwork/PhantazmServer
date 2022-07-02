@@ -10,7 +10,6 @@ import java.util.function.Predicate;
 /**
  * A standard {@link Collider} implementation based off of a {@link Space} instance.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class SpatialCollider implements Collider {
     @FunctionalInterface
     private interface DoubleBiPredicate {

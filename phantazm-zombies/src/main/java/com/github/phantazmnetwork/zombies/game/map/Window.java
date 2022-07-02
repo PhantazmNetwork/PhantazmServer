@@ -4,8 +4,10 @@ import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.WindowInfo;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.PacketUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -17,6 +19,9 @@ import org.slf4j.LoggerFactory;
 import java.io.StringReader;
 import java.util.*;
 
+/**
+ * Represents a window in-game. May be repaired or broken.
+ */
 public class Window extends MapObject<WindowInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
     private static final Block DEFAULT_PADDING = Block.OAK_SLAB;
@@ -25,24 +30,33 @@ public class Window extends MapObject<WindowInfo> {
     private final Vec3D center;
     private final int volume;
     private final ArrayList<Block> repairBlocks;
-    private final Block brokenBlock;
 
     private int index;
 
-    public Window(@NotNull WindowInfo data, @NotNull Vec3I origin, @NotNull Block brokenBlock) {
-        super(data, origin);
+    /**
+     * Creates a new (fully-repaired) window.
+     * @param instance the instance in which the window is present
+     * @param data the data defining the configurable parameters of this window
+     * @param mapOrigin the origin of the map
+     */
+    public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull Vec3I mapOrigin) {
+        super(data, mapOrigin, instance);
         Region3I frame = data.frameRegion();
         Vec3I min = frame.getOrigin();
         Vec3I lengths = frame.getLengths();
 
-        worldMin = Vec3I.of(origin.getX() + min.getX(), origin.getY() + min.getY(), origin.getZ() + min.getZ());
+        worldMin = Vec3I.of(mapOrigin.getX() + min.getX(), mapOrigin.getY() + min.getY(), mapOrigin.getZ() +
+                min.getZ());
         center = Vec3D.of(worldMin.getX() + ((double)lengths.getX() / 2D), worldMin.getY() +
                 ((double)lengths.getY() / 2D), worldMin.getZ() + ((double)lengths.getZ() / 2D));
         volume = frame.volume();
 
+        if(volume == 0) {
+            LOGGER.warn("Zero-volume window at ~" + center);
+        }
+
         List<String> repairBlockSnbts = data.repairBlocks();
         repairBlocks = new ArrayList<>(repairBlockSnbts.size());
-        this.brokenBlock = Objects.requireNonNull(brokenBlock, "brokenBlock");
         for(String blockString : repairBlockSnbts) {
             try {
                 NBTCompound compound = (NBTCompound) new SNBTParser(new StringReader(blockString)).parse();
@@ -115,13 +129,24 @@ public class Window extends MapObject<WindowInfo> {
     }
 
     /**
+     * Checks if the given {@link Point} is within the distance {@code range} specifies to the center of this window.
+     * @param point the point to check
+     * @param range the distance this point should be considered "in range" of this window
+     * @return true if the point is in range, false otherwise
+     */
+    public boolean isInRange(@NotNull Point point, double range) {
+        Objects.requireNonNull(point, "point");
+        return Vec3D.distance(point.x(), point.y(), point.z(), center.getX(), center.getY(), center.getZ()) < range;
+    }
+
+    /**
      * Updates the window index, playing the appropriate effects depending on if the index increased (repair) or
-     * decreased (break).
-     * @param instance the instance this window is in
+     * decreased (break). Setting {@code newIndex} equal to this window's volume will fully repair it. Setting
+     * {@code newIndex} equal to 0 will fully break it.
      * @param newIndex the new break index
      * @throws IndexOutOfBoundsException if newIndex is &lt; 0 or &gt; volume
      */
-    public void updateIndex(@NotNull Instance instance, int newIndex) {
+    public void updateIndex(int newIndex) {
         Objects.checkIndex(newIndex, volume + 1);
         if(newIndex == index) {
             return; //no change
@@ -134,7 +159,7 @@ public class Window extends MapObject<WindowInfo> {
 
             for(int i = index - 1; i >= newIndex; i--) {
                 Vec3I breakLocation = indexToCoordinate(i);
-                instance.setBlock(breakLocation.getX(), breakLocation.getY(), breakLocation.getZ(), brokenBlock);
+                instance.setBlock(breakLocation.getX(), breakLocation.getY(), breakLocation.getZ(), Block.AIR);
             }
         }
         else {
@@ -142,7 +167,7 @@ public class Window extends MapObject<WindowInfo> {
             instance.playSound(newIndex == volume ? data.repairAllSound() : data.repairSound(), center.getX(),
                     center.getY(), center.getZ());
 
-            for(int i = index; i <= newIndex; i++) {
+            for(int i = index; i < newIndex; i++) {
                 Vec3I repairLocation = indexToCoordinate(i);
                 instance.setBlock(repairLocation.getX(), repairLocation.getY(), repairLocation.getZ(), repairBlocks
                         .get(i));
@@ -156,8 +181,16 @@ public class Window extends MapObject<WindowInfo> {
      * Checks if this window is fully repaired or not. Equivalent to {@code getRepairIndex() == getVolume()}.
      * @return true if this window has been fully repaired, false otherwise
      */
-    public boolean isRepaired() {
+    public boolean isFullyRepaired() {
         return index == volume;
+    }
+
+    /**
+     * Checks if this window is fully broken or not. Equivalent to {@code getRepairIndex() == 0}.
+     * @return true if this window has been fully repaired, false otherwise
+     */
+    public boolean isFullyBroken() {
+        return index == 0;
     }
 
     /**
@@ -189,6 +222,13 @@ public class Window extends MapObject<WindowInfo> {
     private Vec3I indexToCoordinate(int index) {
         Vec3I lengths = data.frameRegion().getLengths();
 
-        return Vec3I.ORIGIN;
+        int xWidth = lengths.getX();
+        int xyArea = xWidth * lengths.getY();
+
+        int x = index % xWidth;
+        int y = index / xWidth;
+        int z = index / xyArea;
+
+        return Vec3I.of(x + worldMin.getX(), y + worldMin.getY(), z + worldMin.getZ());
     }
 }
