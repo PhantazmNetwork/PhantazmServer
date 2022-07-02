@@ -4,18 +4,23 @@ import com.github.phantazmnetwork.api.inventory.CachedInventoryObject;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.MobStore;
+import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.Upgradable;
+import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
+import com.github.phantazmnetwork.zombies.equipment.gun.shot.GunShot;
+import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.ShotHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.state.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class Gun extends CachedInventoryObject implements Keyed, Upgradable {
+public class Gun extends CachedInventoryObject implements Equipment, Keyed, Upgradable {
 
     private final PlayerView playerView;
 
@@ -23,7 +28,7 @@ public class Gun extends CachedInventoryObject implements Keyed, Upgradable {
 
     private final MobStore store;
 
-    private TargetSelectorInstance<? extends GunHit> selector;
+    private TargetSelectorInstance<? extends GunShot> selector;
 
     private GunState state;
 
@@ -39,57 +44,104 @@ public class Gun extends CachedInventoryObject implements Keyed, Upgradable {
 
         GunLevel level = getLevel();
         this.selector = level.selector().createSelector(store, playerView);
-        this.state = new GunState(level.shootSpeed(), level.reloadSpeed(), level.maxAmmo(), level.maxClip(), false);
+        this.state = new GunState(level.shootSpeed(), level.reloadSpeed(), level.maxAmmo(), level.maxClip(),
+                false, 0);
     }
 
     public void shoot() {
-        if (canShoot()) {
-            modifyState(builder -> {
-                builder.setTicksSinceLastShot(0L);
-                builder.setAmmo(builder.getAmmo() - 1);
-                builder.setClip(builder.getClip() - 1);
-            });
-            if (state.clip() == 0) {
-                if (state.ammo() > 0) {
-                    reload();
-                } else {
-                    for (Consumer<Gun> effect : getLevel().emptyClipEffects()) {
-                        effect.accept(this);
-                    }
-                }
-            }
-            playerView.getPlayer().ifPresent(player -> {
-                selector.selectTarget().ifPresent(hit -> {
-
-                });
-            });
-
-            for (Consumer<Gun> effect : getLevel().shootEffects()) {
-                effect.accept(this);
-            }
+        if (shouldShoot()) {
+            modifyState(state -> state.setQueuedShots(getLevel().shots() - 1));
+            internalShoot();
         }
     }
 
-    public boolean canShoot() {
-        return state.ammo() > 0 && state.ticksSinceLastShot() >= getLevel().shootSpeed() && canReload();
+    protected void internalShoot() {
+        modifyState(builder -> {
+            builder.setTicksSinceLastShot(0L);
+            builder.setAmmo(builder.getAmmo() - 1);
+            builder.setClip(builder.getClip() - 1);
+        });
+        if (state.clip() == 0) {
+            if (state.ammo() > 0) {
+                reload();
+            } else {
+                for (GunEffect effect : getLevel().emptyClipEffects()) {
+                    effect.accept(this);
+                }
+            }
+        }
+        playerView.getPlayer().ifPresent(player -> {
+            selector.selectTarget().ifPresent(hit -> {
+                processHit(player, hit);
+            });
+        });
+
+        for (GunEffect effect : getLevel().shootEffects()) {
+            effect.accept(this);
+        }
+    }
+
+    protected boolean shouldShoot() {
+        return !isShooting() && canFire() && state.queuedShots() == 0;
+    }
+
+    protected boolean canFire() {
+        return state.ammo() > 0 && canReload();
+    }
+
+    public boolean isShooting() {
+        return state.ticksSinceLastShot() < getLevel().shootSpeed();
+    }
+
+    protected void processHit(@NotNull Player player, @NotNull GunShot hit) {
+        for (ShotHandler handler : getLevel().shotHandlers()) {
+            handler.handle(player, hit);
+        }
     }
 
     public void reload() {
-        if (canReload()) {
+        if (shouldReload()) {
             modifyState(builder -> builder.setTicksSinceLastReload(0L));
             reloadComplete = false;
-            for (Consumer<Gun> reloadEffect : getLevel().reloadEffects()) {
+            for (GunEffect reloadEffect : getLevel().reloadEffects()) {
                 reloadEffect.accept(this);
             }
         }
     }
 
+    protected boolean shouldReload() {
+        return canReload() && state.clip() != getLevel().maxClip();
+    }
+
+    protected boolean canReload() {
+        return !isReloading() && state.ammo() > 0;
+    }
+
+    public boolean isReloading() {
+        return state.ticksSinceLastReload() < getLevel().reloadSpeed();
+    }
+
+    public void refill() {
+        modifyState(builder -> {
+            builder.setAmmo(getLevel().maxAmmo());
+            builder.setClip(getLevel().maxClip());
+            builder.setTicksSinceLastReload(getLevel().reloadSpeed());
+        });
+    }
+
+    @Override
     public void setSelected(boolean selected) {
         modifyState(builder -> builder.setMainEquipment(selected));
     }
 
-    public boolean canReload() {
-        return state.ticksSinceLastReload() >= getLevel().reloadSpeed() && state.ammo() > 0;
+    @Override
+    public void rightClick() {
+        shoot();
+    }
+
+    @Override
+    public void leftClick() {
+        reload();
     }
 
     public @NotNull PlayerView getOwner() {
@@ -130,12 +182,25 @@ public class Gun extends CachedInventoryObject implements Keyed, Upgradable {
                 builder.setTicksSinceLastReload(builder.getTicksSinceLastReload() + 1);
             }
             else if (!reloadComplete && builder.getTicksSinceLastReload() == getLevel().reloadSpeed()) {
-                builder.setClip(getLevel().maxClip());
+                builder.setClip(Math.min(getLevel().maxClip(), getState().ammo()));
                 reloadComplete = true;
             }
         });
 
-        for (Consumer<Gun> effect : getLevel().tickEffects()) {
+        if (state.queuedShots() > 0) {
+            int postQueuedShots;
+            if (canFire()) {
+                internalShoot();
+                postQueuedShots = state.queuedShots() - 1;
+            }
+            else {
+                postQueuedShots = 0;
+            }
+
+            modifyState(builder -> builder.setQueuedShots(postQueuedShots));
+        }
+
+        for (GunEffect effect : getLevel().tickEffects()) {
             effect.accept(this);
         }
 

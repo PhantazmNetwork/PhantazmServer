@@ -112,7 +112,9 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
         float maxHealth = element.getNumberOrThrow("maxHealth").floatValue();
 
-        return new MobModel(key, descriptor, goalGroups, triggers, displayName, equipment, maxHealth);
+        float speed = element.getNumberOrThrow("speed").floatValue();
+
+        return new MobModel(key, descriptor, goalGroups, triggers, displayName, equipment, maxHealth, speed);
     }
 
     @Override
@@ -170,6 +172,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         element.put("displayName", displayNameElement);
         element.put("equipment", equipmentNode);
         element.putNumber("maxHealth", model.getMaxHealth());
+        element.putNumber("speed", model.getSpeed());
 
         return element;
     }

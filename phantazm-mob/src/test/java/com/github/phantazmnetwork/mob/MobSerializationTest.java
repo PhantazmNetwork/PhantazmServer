@@ -78,7 +78,8 @@ public class MobSerializationTest {
                 Map.of(
                         EquipmentSlot.CHESTPLATE, ItemStack.of(Material.LEATHER_CHESTPLATE)
                 ),
-                Attribute.MAX_HEALTH.defaultValue()
+                Attribute.MAX_HEALTH.defaultValue(),
+                Attribute.MOVEMENT_SPEED.defaultValue()
         );
 
         ConfigProcessor<Calculator> calculatorProcessor = new CalculatorConfigProcessor();

@@ -33,6 +33,8 @@ public class MobModel implements Keyed {
 
     private final float maxHealth;
 
+    private final float speed;
+
     /**
      * Creates a new mob model.
      * @param key The unique {@link Key} used to identify the mob
@@ -46,7 +48,7 @@ public class MobModel implements Keyed {
     public MobModel(@NotNull Key key, @NotNull MinestomDescriptor descriptor,
                     @NotNull Collection<Collection<Goal>> goalGroups,
                     @NotNull Map<Key, Collection<Skill>> triggers, @Nullable Component displayName,
-                    @NotNull Map<EquipmentSlot, ItemStack> equipment, float maxHealth) {
+                    @NotNull Map<EquipmentSlot, ItemStack> equipment, float maxHealth, float speed) {
         this.key = Objects.requireNonNull(key, "key");
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.goalGroups = List.copyOf(Objects.requireNonNull(goalGroups, "goalGroups"));
@@ -54,6 +56,7 @@ public class MobModel implements Keyed {
         this.displayName = displayName;
         this.equipment = Map.copyOf(Objects.requireNonNull(equipment, "equipment"));
         this.maxHealth = maxHealth;
+        this.speed = speed;
     }
 
     /**
@@ -113,4 +116,7 @@ public class MobModel implements Keyed {
         return maxHealth;
     }
 
+    public float getSpeed() {
+        return speed;
+    }
 }

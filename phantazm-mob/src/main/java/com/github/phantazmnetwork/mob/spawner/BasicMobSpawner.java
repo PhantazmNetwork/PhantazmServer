@@ -42,6 +42,7 @@ public class BasicMobSpawner implements MobSpawner {
         setDisplayName(neuralEntity, model);
         setEquipment(neuralEntity, model);
         setMaxHealth(neuralEntity, model);
+        setSpeed(neuralEntity, model);
 
         PhantazmMob mob = new PhantazmMob(model, neuralEntity);
         addGoals(mob);
@@ -66,6 +67,10 @@ public class BasicMobSpawner implements MobSpawner {
     private void setMaxHealth(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
         neuralEntity.getAttribute(Attribute.MAX_HEALTH).setBaseValue(model.getMaxHealth());
         neuralEntity.setHealth(model.getMaxHealth());
+    }
+
+    private void setSpeed(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
+        neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(model.getSpeed());
     }
 
     private void addGoals(@NotNull PhantazmMob mob) {

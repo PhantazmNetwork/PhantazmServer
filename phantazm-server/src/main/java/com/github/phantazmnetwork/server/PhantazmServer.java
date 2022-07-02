@@ -91,7 +91,6 @@ public final class PhantazmServer {
         Neuron.initialize(global, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner(), phantazm);
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
-        MobTest.initialize(phantazm);
         GunTest.initialize(global, phantazm, viewProvider);
     }
 

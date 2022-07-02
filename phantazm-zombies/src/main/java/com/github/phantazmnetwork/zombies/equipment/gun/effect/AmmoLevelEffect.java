@@ -1,11 +1,13 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Consumer;
+public class AmmoLevelEffect implements GunEffect {
 
-public class AmmoLevelEffect implements Consumer<Gun> {
+    public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.level.ammo");
 
     private boolean currentlyActive = false;
 
@@ -23,5 +25,10 @@ public class AmmoLevelEffect implements Consumer<Gun> {
             });
             currentlyActive = false;
         }
+    }
+
+    @Override
+    public @NotNull Key getSerialKey() {
+        return SERIAL_KEY;
     }
 }

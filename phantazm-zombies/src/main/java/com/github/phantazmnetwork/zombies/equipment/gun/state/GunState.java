@@ -6,7 +6,8 @@ public record GunState(long ticksSinceLastShot,
                        long ticksSinceLastReload,
                        int ammo,
                        int clip,
-                       boolean isMainEquipment) {
+                       boolean isMainEquipment,
+                       int queuedShots) {
 
     public @NotNull GunState.Builder toBuilder() {
         return new Builder()
@@ -14,7 +15,8 @@ public record GunState(long ticksSinceLastShot,
                 .setTicksSinceLastReload(ticksSinceLastReload)
                 .setAmmo(ammo)
                 .setClip(clip)
-                .setMainEquipment(isMainEquipment);
+                .setMainEquipment(isMainEquipment)
+                .setQueuedShots(queuedShots);
     }
 
     public static class Builder {
@@ -28,6 +30,8 @@ public record GunState(long ticksSinceLastShot,
         private int clip;
 
         private boolean isMainEquipment;
+
+        private int queuedShots;
 
         public long getTicksSinceLastShot() {
             return ticksSinceLastShot;
@@ -75,8 +79,17 @@ public record GunState(long ticksSinceLastShot,
             return this;
         }
 
+        public int getQueuedShots() {
+            return queuedShots;
+        }
+
+        public @NotNull Builder setQueuedShots(int queuedShots) {
+            this.queuedShots = queuedShots;
+            return this;
+        }
+
         public @NotNull GunState build() {
-            return new GunState(ticksSinceLastShot, ticksSinceLastReload, ammo, clip, isMainEquipment);
+            return new GunState(ticksSinceLastShot, ticksSinceLastReload, ammo, clip, isMainEquipment, queuedShots);
         }
 
     }

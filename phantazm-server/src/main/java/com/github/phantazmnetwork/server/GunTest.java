@@ -6,17 +6,21 @@ import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.MobModel;
+import com.github.phantazmnetwork.mob.goal.FollowPlayerGoal;
 import com.github.phantazmnetwork.mob.target.FirstTargetSelector;
 import com.github.phantazmnetwork.mob.target.NearestPlayersSelector;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
+import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunLevel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunModel;
-import com.github.phantazmnetwork.zombies.equipment.gun.effect.AmmoLevelEffect;
-import com.github.phantazmnetwork.zombies.equipment.gun.effect.PlaySoundEffect;
-import com.github.phantazmnetwork.zombies.equipment.gun.effect.ShootExpEffect;
-import com.github.phantazmnetwork.zombies.equipment.gun.effect.StaticReloadActionBarEffect;
+import com.github.phantazmnetwork.zombies.equipment.gun.effect.*;
+import com.github.phantazmnetwork.zombies.equipment.gun.shot.BasicShotEndSelector;
+import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.DamageShotHandler;
+import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.FeedbackShotHandler;
+import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.KnockbackShotHandler;
+import com.github.phantazmnetwork.zombies.equipment.gun.shot.handler.SoundShotHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.LinearTargetSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
@@ -25,6 +29,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
@@ -40,6 +45,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.metadata.PlayerHeadMeta;
+import net.minestom.server.particle.Particle;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -72,8 +78,8 @@ final class GunTest {
             InventoryProfile profile = profileSwitchers.get(event.getPlayer().getUuid()).getCurrentProfile();
             if (profile.hasInventoryObject(event.getPlayer().getHeldSlot())) {
                 InventoryObject object = profile.getInventoryObject(event.getPlayer().getHeldSlot());
-                if (object instanceof Gun gun) {
-                    gun.shoot();
+                if (object instanceof Equipment equipment) {
+                    equipment.rightClick();
                 }
             }
         });
@@ -81,14 +87,14 @@ final class GunTest {
             InventoryProfile profile = profileSwitchers.get(event.getPlayer().getUuid()).getCurrentProfile();
             if (profile.hasInventoryObject(event.getPlayer().getHeldSlot())) {
                 InventoryObject oldObject = profile.getInventoryObject(event.getPlayer().getHeldSlot());
-                if (oldObject instanceof Gun gun) {
-                    gun.setSelected(false);
+                if (oldObject instanceof Equipment equipment) {
+                    equipment.setSelected(false);
                 }
             }
             if (profile.hasInventoryObject(event.getSlot())) {
                 InventoryObject newObject = profile.getInventoryObject(event.getSlot());
-                if (newObject instanceof Gun gun) {
-                    gun.setSelected(true);
+                if (newObject instanceof Equipment equipment) {
+                    equipment.setSelected(true);
                 }
             }
         });
@@ -98,8 +104,8 @@ final class GunTest {
                 for (int slot = 0; slot < 9; slot++) {
                     if (profile.hasInventoryObject(slot)) {
                         InventoryObject object = profile.getInventoryObject(slot);
-                        if (object instanceof Gun gun) {
-                            gun.reload();
+                        if (object instanceof Equipment equipment) {
+                            equipment.leftClick();
                         }
                     }
                 }
@@ -133,13 +139,24 @@ final class GunTest {
                                     ItemStack.builder(Material.WOODEN_HOE)
                                             .displayName(Component.text("Pistol", NamedTextColor.GOLD))
                                             .build(),
-                                    new LinearTargetSelector(),
-                                    Collections.singleton(new PlaySoundEffect(Sound.sound(
-                                            Key.key("entity.iron_golem.hurt"),
-                                            Sound.Source.PLAYER,
-                                            1.0F,
-                                            2.0F
-                                    ))),
+                                    new LinearTargetSelector(new BasicShotEndSelector(120)),
+                                    List.of(
+                                            new PlaySoundEffect(Sound.sound(
+                                                    Key.key("entity.iron_golem.hurt"),
+                                                    Sound.Source.PLAYER,
+                                                    1.0F,
+                                                    2.0F
+                                            )),
+                                            new ParticleTrailEffect(
+                                                    Particle.CRIT,
+                                                    false,
+                                                    0.0F,
+                                                    0.0F,
+                                                    0.0F,
+                                                    0.0F,
+                                                    1,
+                                                    4
+                                            )),
                                     List.of(
                                             new PlaySoundEffect(Sound.sound(
                                                     Key.key("entity.horse.gallop"),
@@ -149,19 +166,45 @@ final class GunTest {
                                             ))
                                     ),
                                     List.of(
-                                            new StaticReloadActionBarEffect(Component.text("RELOADING", NamedTextColor.RED, TextDecoration.BOLD)),
+                                            new GradientReloadActionBarEffect(Component.text("RELOADING",
+                                                    null, TextDecoration.BOLD), NamedTextColor.RED,
+                                                    NamedTextColor.GREEN),
                                             new AmmoLevelEffect(),
                                             new ShootExpEffect()
                                     ),
-                                    Collections.emptyList(),
+                                    Collections.singletonList(new SendMessageEffect(Component.text("You're out of ammo.", NamedTextColor.RED))),
+                                    List.of(
+                                            new DamageShotHandler(3.0F, 5.0F),
+                                            new KnockbackShotHandler(5.0D, 5.0D),
+                                            new FeedbackShotHandler(
+                                                    Component.text("Regular Hit", NamedTextColor.GOLD),
+                                                    Component.text("Critical Hit", NamedTextColor.GOLD,
+                                                            TextDecoration.BOLD)
+                                            ),
+                                            new SoundShotHandler(
+                                                    Sound.sound(
+                                                            Key.key("entity.arrow.hit_player"),
+                                                            Sound.Source.PLAYER,
+                                                            1.0F,
+                                                            2.0F
+                                                    ),
+                                                    Sound.sound(
+                                                            Key.key("entity.arrow.hit_player"),
+                                                            Sound.Source.PLAYER,
+                                                            1.0F,
+                                                            1.5F
+                                                    )
+                                            )
+                                    ),
                                     List.of(
                                             new ClipStackMapper(),
                                             new ReloadStackMapper()
                                     ),
                                     10L,
                                     30L,
-                                    30,
-                                    10
+                                    36,
+                                    12,
+                                    3
                             )
                     );
                     GunModel model = new GunModel() {
@@ -193,15 +236,26 @@ final class GunTest {
                     MobModel mobModel = new MobModel(
                             Key.key(Namespaces.PHANTAZM, "mob.test.zombie"),
                             GroundMinestomDescriptor.of(EntityType.ZOMBIE, "test"),
-                            List.of(List.of()),//Collections.singleton(Collections.singleton(new FollowPlayerGoal(playerSelector))),
+                            Collections.singleton(Collections.singleton(new FollowPlayerGoal(playerSelector))),
                             Collections.emptyMap(),
                             Component.text("VeryAverage", NamedTextColor.RED),
                             Map.of(
                                     EquipmentSlot.HELMET, head
                             ),
-                            20.0F
+                            Attribute.MAX_HEALTH.defaultValue(),
+                            Attribute.MOVEMENT_SPEED.defaultValue() / 3.0F
                     );
                     Mob.getMobSpawner().spawn(instance, event.getPlayer().getPosition(), mobModel);
+                }
+                case "max ammo" -> {
+                    Player player = event.getPlayer();
+                    InventoryProfile profile = profileSwitchers.get(player.getUuid()).getCurrentProfile();
+                    if (profile.hasInventoryObject(player.getHeldSlot())) {
+                        InventoryObject object = profile.getInventoryObject(player.getHeldSlot());
+                        if (object instanceof Gun gun) {
+                            gun.refill();
+                        }
+                    }
                 }
             }
         });
