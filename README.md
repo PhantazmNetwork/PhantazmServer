@@ -47,9 +47,9 @@ First, come up with an appropriate secret. You can use a password manager, or a 
 
 **Warning**: The secret is stored, in plaintext, in both the server and proxy configuration files. This is, regrettably, something we can't do much about. Make sure access to your backend servers is properly secured.
 
-Next, set the `velocitySecret` field in `./run/server-1/server-config.toml`, and the `forwarding-secret` field in `./run/velocity/server-config.toml`, to the same string (your secret).
+Next, set the `velocitySecret` field in `./run/server-1/server-config.toml`, and the `forwarding-secret` field in `./run/velocity/velocity.toml`, to the same string (your secret).
 
-The proxy will (by default) bind to `0.0.0.0:25565` and the server to `0.0.0.0:25567`, so you can connect through the proxy by adding the `LOCALHOST` server address in your Minecraft client.
+The proxy will (by default) bind to `0.0.0.0:25565` and the server to `0.0.0.0:25567`, so you can connect through the proxy by adding the `localhost` server address in your Minecraft client.
 
 If you're using IntelliJ, you can launch this testing server using the `Run server` run configuration, or the server and proxy at once using the `Run server + Velocity` configuration.
 
