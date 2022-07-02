@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,6 +61,11 @@ public class ChatCommand extends Command {
             }
 
             sender.sendMessage(Component.text(stringBuilder.toString(), NamedTextColor.RED));
+        });
+        channelArgument.setSuggestionCallback((sender, context, suggestion) -> {
+            for (String name : channelFinders.keySet()) {
+                suggestion.addEntry(new SuggestionEntry(name));
+            }
         });
 
         addConditionalSyntax((sender, commandString) -> {
