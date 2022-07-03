@@ -27,9 +27,10 @@ final class ZombiesTest {
                 ClientBlockHandler tracker = new InstanceClientBlockHandler(spawnInstance, global);
                 tracker.setClientBlock(Block.BARRIER, 1, 100, 1);
 
-                Hologram hologram = new InstanceHologram(spawnInstance, Vec3D.of(1, 101, 1), 0);
+                Hologram hologram = new InstanceHologram(Vec3D.of(1, 101, 1), 0);
                 hologram.add(Component.text("Angery"));
                 hologram.add(Component.text("Vegetals"));
+                hologram.setInstance(spawnInstance);
             }
         });
 

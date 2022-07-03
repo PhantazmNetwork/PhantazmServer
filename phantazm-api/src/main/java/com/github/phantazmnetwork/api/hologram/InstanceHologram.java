@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.api.hologram;
 
-import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -15,17 +14,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Instance-wide Hologram implementation.
+ */
 public class InstanceHologram extends AbstractList<Component> implements Hologram {
     private static final double MESSAGE_HEIGHT = 0.25;
 
-    private final Instance instance;
+    private Instance instance;
+
     private final List<Entity> armorStands;
     private final List<Component> components;
-    private final Vec3D location;
+    private Vec3D location;
     private final double gap;
 
-    public InstanceHologram(@NotNull Instance instance, @NotNull Vec3D location, double gap) {
-        this.instance = Objects.requireNonNull(instance, "instance");
+    /**
+     * Creates a new instance of this class, whose holograms will be rendered at the given location.
+     * @param location the location to render holograms
+     * @param gap the distance between separate hologram messages
+     */
+    public InstanceHologram(@NotNull Vec3D location, double gap) {
         this.location = Objects.requireNonNull(location, "location");
         armorStands = new ArrayList<>();
         components = new ArrayList<>();
@@ -38,10 +45,29 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     @Override
+    public void setLocation(@NotNull Vec3D location) {
+        Objects.requireNonNull(location, "location");
+        if(!location.equals(this.location)) {
+            this.location = location;
+            updateArmorStands();
+        }
+    }
+
+    @Override
+    public void setInstance(@NotNull Instance instance) {
+        Objects.requireNonNull(instance, "instance");
+        if(this.instance != instance) {
+            this.instance = instance;
+            updateArmorStands();
+        }
+    }
+
+    @Override
     public @NotNull Component remove(int index) {
         armorStands.remove(index).remove();
+        Component component = components.remove(index);
         updateArmorStands();
-        return components.remove(index);
+        return component;
     }
 
     @Override
@@ -57,6 +83,15 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     @Override
+    public void clear() {
+        for(Entity entity : armorStands) {
+            entity.remove();
+        }
+        armorStands.clear();
+        components.clear();
+    }
+
+    @Override
     public @NotNull Component get(int index) {
         return components.get(index);
     }
@@ -67,13 +102,23 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     private void updateArmorStands() {
+        if(instance == null) {
+            return;
+        }
+
         int armorStandsCount = armorStands.size();
         double totalHeight = gap * (armorStandsCount - 1) + armorStandsCount * MESSAGE_HEIGHT;
         double topCornerHeight = location.getY() + totalHeight / 2;
 
         for(int i = 0; i < armorStandsCount; i++) {
-            armorStands.get(i).teleport(new Pos(location.getX(), topCornerHeight - (i * (gap + MESSAGE_HEIGHT)),
-                    location.getZ()));
+            Entity armorStand = armorStands.get(i);
+            Pos pos = new Pos(location.getX(), topCornerHeight - (i * (gap + MESSAGE_HEIGHT)), location.getZ());
+            if(armorStand.getInstance() == instance) {
+                armorStand.teleport(pos);
+            }
+            else {
+                armorStand.setInstance(instance, pos);
+            }
         }
     }
 
@@ -87,7 +132,6 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         meta.setCustomNameVisible(true);
         meta.setInvisible(true);
         meta.setCustomName(display);
-        stand.setInstance(instance, VecUtils.toPoint(location));
 
         return stand;
     }
