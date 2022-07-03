@@ -1,13 +1,17 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
+import com.github.phantazmnetwork.api.hologram.Hologram;
+import com.github.phantazmnetwork.api.hologram.InstanceHologram;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
+import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,6 +19,7 @@ public class Door extends MapObject<DoorInfo> {
     private final Block fillBlock;
     private final Region3I enclosing;
     private final Vec3D center;
+    private final List<Hologram> holograms;
 
     private boolean isOpen;
 
@@ -38,6 +43,18 @@ public class Door extends MapObject<DoorInfo> {
         Region3I[] regionArray = regions.toArray(new Region3I[0]);
         enclosing = Region3I.enclosing(regionArray);
         center = enclosing.getCenter();
+
+        List<HologramInfo> hologramInfo = data.holograms();
+        holograms = new ArrayList<>(hologramInfo.size());
+
+        for(HologramInfo info : hologramInfo) {
+            Vec3D offset = info.position();
+            Hologram hologram = new InstanceHologram(Vec3D.of(center.getX() + offset.getX(), center.getY() +
+                    offset.getY(), center.getZ() + offset.getZ()), 0.1);
+            hologram.addAll(info.text());
+            hologram.setInstance(instance);
+            holograms.add(hologram);
+        }
     }
 
     /**
@@ -61,6 +78,12 @@ public class Door extends MapObject<DoorInfo> {
                             .getZ() + origin.getZ(), fillBlock);
                 }
             }
+
+            for(Hologram hologram : holograms) {
+                hologram.clear();
+            }
+
+            holograms.clear();
         }
     }
 
