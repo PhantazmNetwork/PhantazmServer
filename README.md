@@ -64,7 +64,7 @@ You can also run the server and proxy from the command line as follows: \
 
 ## Contributing
 
-See the contributions document for more detailed information. Pull requests are welcome!
+See the [contributions document](https://github.com/PhantazmNetwork/.github/blob/main/CONTRIBUTING.md) for more detailed information. Pull requests are welcome!
 
 If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 
