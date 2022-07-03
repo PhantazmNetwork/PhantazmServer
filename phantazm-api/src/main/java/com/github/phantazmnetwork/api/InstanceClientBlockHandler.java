@@ -13,9 +13,13 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.PreBlockChangeEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerChunkLoadEvent;
+import net.minestom.server.event.player.PrePlayerStartDiggingEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.listener.PlayerDiggingListener;
+import net.minestom.server.network.PacketProcessor;
+import net.minestom.server.network.packet.client.play.ClientPlayerDiggingPacket;
 import net.minestom.server.network.packet.server.play.BlockChangePacket;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +29,9 @@ import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Objects;
 
+/**
+ * Supports instance-wide client blocks.
+ */
 public class InstanceClientBlockHandler implements ClientBlockHandler {
     private final Reference<Instance> instance;
     private final Long2ObjectMap<ObjectOpenHashSet<PositionedBlock>> clientBlocks;
@@ -73,6 +80,9 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                 instance).expireWhen(event -> !instance.isRegistered()).handler(this::onPreBlockChange).build());
         globalNode.addListener(EventListener.builder(PlayerBlockBreakEvent.class).filter(event -> event.getInstance() ==
                 instance).expireWhen(event -> !instance.isRegistered()).handler(this::onPlayerBlockBreak).build());
+        globalNode.addListener(EventListener.builder(PrePlayerStartDiggingEvent.class).filter(event -> event
+                .getInstance() == instance).expireWhen(event -> !instance.isRegistered())
+                .handler(this::onPrePlayerStartDigging).build());
     }
 
     @Override
@@ -134,6 +144,22 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                         //make sure player gets the actual block
                         chunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
                     }
+                }
+            }
+        }
+    }
+
+    private void onPrePlayerStartDigging(PrePlayerStartDiggingEvent event) {
+        Point blockPosition = event.getBlockPosition();
+        long index = ChunkUtils.getChunkIndex(blockPosition);
+        synchronized (clientBlocks) {
+            ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+
+            if(blocks != null) {
+                PositionedBlock block = blocks.get(VecUtils.toBlockInt(blockPosition));
+
+                if(block != null) {
+                    event.setResult(new PlayerDiggingListener.DiggingResult(block.block, false));
                 }
             }
         }

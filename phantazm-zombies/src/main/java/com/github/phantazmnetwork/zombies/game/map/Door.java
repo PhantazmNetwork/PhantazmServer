@@ -49,9 +49,9 @@ public class Door extends MapObject<DoorInfo> {
     }
 
     /**
-     * Permanently opens this door, removing its blocks. If the door is already open, calling this will have no effect.
+     * Permanently opens this door, removing its blocks. If the door is already open, this method will do nothing.
      */
-    public void openDoor() {
+    public void open() {
         if(!isOpen) {
             isOpen = true;
 
