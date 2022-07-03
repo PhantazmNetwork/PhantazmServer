@@ -23,6 +23,74 @@ public interface Region3I extends Iterable<Vec3I> {
      */
     @NotNull Vec3I getLengths();
 
+    /**
+     * Returns the "max" vector of this region. This is the sum of the origin and lengths vector.
+     * @return the max vector of this region
+     */
+    default @NotNull Vec3I getMax() {
+        Vec3I origin = getOrigin();
+        Vec3I lengths = getLengths();
+        return Vec3I.of(origin.getX() + lengths.getX(), origin.getY() + lengths.getY(), origin.getZ() + lengths
+                .getZ());
+    }
+
+    /**
+     * Returns the exact center of this region as a double vector.
+     * @return the center of this region
+     */
+    default @NotNull Vec3D getCenter() {
+        Vec3I origin = getOrigin();
+        Vec3I lengths = getLengths();
+
+        return Vec3D.of(origin.getX() + ((double)lengths.getX() / 2D), origin.getY() +
+                ((double)lengths.getY() / 2D), origin.getZ() + ((double)lengths.getZ() / 2D));
+    }
+
+    /**
+     * Computes the smallest possible Region3I that can enclose all the given regions.
+     * @param regions the regions a new Region3I must enclose
+     * @return a new Region3I that must enclose all regions
+     * @throws IllegalArgumentException if regions is empty
+     * @throws NullPointerException if regions is null or contains a null element
+     */
+    static @NotNull Region3I enclosing(Region3I @NotNull ... regions) {
+        if(regions.length == 0) {
+            throw new IllegalArgumentException("Must provide at least one region");
+        }
+
+        Region3I first = regions[0];
+        //shortcut
+        if(regions.length == 1) {
+            return first;
+        }
+
+        Vec3I firstOrigin = first.getOrigin();
+        Vec3I firstMax = first.getMax();
+
+        int minX = firstOrigin.getX();
+        int minY = firstOrigin.getY();
+        int minZ = firstOrigin.getZ();
+
+        int maxX = firstMax.getX();
+        int maxY = firstMax.getY();
+        int maxZ = firstMax.getZ();
+
+        for(int i = 1; i < regions.length; i++) {
+            Region3I sample = regions[i];
+            Vec3I sampleOrigin = sample.getOrigin();
+            Vec3I sampleMax = sample.getMax();
+
+            minX = Math.min(minX, sampleOrigin.getX());
+            minY = Math.min(minY, sampleOrigin.getY());
+            minZ = Math.min(minZ, sampleOrigin.getZ());
+
+            maxX = Math.max(maxX, sampleMax.getX());
+            maxY = Math.max(maxY, sampleMax.getY());
+            maxZ = Math.max(maxZ, sampleMax.getZ());
+        }
+
+        return new BasicRegion3I(Vec3I.of(minX, minY, minZ), Vec3I.of(maxX - minX, maxY - minY, maxZ - minZ));
+    }
 
     /**
      * Produces a new Region3I that encompasses both of the given vectors, whose coordinates will be considered relative

@@ -21,7 +21,9 @@ import java.io.StringReader;
 import java.util.*;
 
 /**
- * Represents a window in-game. May be repaired or broken.
+ * Represents a window in-game. May be repaired or broken. Broken window blocks are replaced by air on the server-side,
+ * but are considered barriers by clients.
+ * @see ClientBlockHandler
  */
 public class Window extends MapObject<WindowInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
@@ -39,24 +41,25 @@ public class Window extends MapObject<WindowInfo> {
      * Creates a new (fully-repaired) window.
      * @param instance the instance in which the window is present
      * @param data the data defining the configurable parameters of this window
-     * @param mapOrigin the origin of the map
+     * @param origin the origin of the map
+     * @param clientBlockHandler the {@link ClientBlockHandler} used to set client-only barrier blocks
      */
-    public Window(@NotNull Instance instance, @NotNull ClientBlockHandler clientBlockHandler, @NotNull WindowInfo data,
-                  @NotNull Vec3I mapOrigin) {
-        super(data, mapOrigin, instance);
+    public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull Vec3I origin,
+                  @NotNull ClientBlockHandler clientBlockHandler) {
+        super(data, origin, instance);
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
         Region3I frame = data.frameRegion();
         Vec3I min = frame.getOrigin();
         Vec3I lengths = frame.getLengths();
 
-        worldMin = Vec3I.of(mapOrigin.getX() + min.getX(), mapOrigin.getY() + min.getY(), mapOrigin.getZ() +
+        worldMin = Vec3I.of(origin.getX() + min.getX(), origin.getY() + min.getY(), origin.getZ() +
                 min.getZ());
         center = Vec3D.of(worldMin.getX() + ((double)lengths.getX() / 2D), worldMin.getY() +
                 ((double)lengths.getY() / 2D), worldMin.getZ() + ((double)lengths.getZ() / 2D));
         volume = frame.volume();
 
         if(volume == 0) {
-            LOGGER.warn("Zero-volume window at ~" + center);
+            throw new IllegalArgumentException("Zero-volume window");
         }
 
         List<String> repairBlockSnbts = data.repairBlocks();
