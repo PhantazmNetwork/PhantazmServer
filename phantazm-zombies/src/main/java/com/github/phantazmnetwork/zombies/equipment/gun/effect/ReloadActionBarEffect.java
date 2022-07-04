@@ -49,7 +49,7 @@ public class ReloadActionBarEffect implements GunEffect {
     }
 
     @Override
-    public void accept(@NotNull GunState state) {
+    public void apply(@NotNull GunState state) {
         if (reloadTester.isReloading(state)) {
             if (state.isMainEquipment()) {
                 float progress = (float) state.ticksSinceLastReload() / stats.reloadSpeed();

@@ -37,7 +37,7 @@ public class SendMessageEffect implements GunEffect {
     }
 
     @Override
-    public void accept(@NotNull GunState state) {
+    public void apply(@NotNull GunState state) {
         playerView.getPlayer().ifPresent(player -> player.sendMessage(data.message()));
     }
 

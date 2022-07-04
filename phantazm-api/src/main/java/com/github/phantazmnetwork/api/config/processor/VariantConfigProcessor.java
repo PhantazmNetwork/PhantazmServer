@@ -43,7 +43,16 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
         }
 
         ConfigElement serialData = element.getElement("serialData");
-        return processor.dataFromElement(Objects.requireNonNullElse(serialData, element));
+        if (serialData == null || serialData.isNull()) {
+            return processor.dataFromElement(element);
+        }
+        else if (serialData.isNode()) {
+            element.asNode().putAll(serialData.asNode());
+            return processor.dataFromElement(element);
+        }
+        else {
+            return processor.dataFromElement(serialData);
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -46,6 +46,7 @@ public class BasicMobSpawner implements MobSpawner {
         setDisplayName(neuralEntity, model);
         setEquipment(neuralEntity, model);
         setAttributes(neuralEntity, model);
+        setHealth(neuralEntity, model);
 
         PhantazmMob mob = new PhantazmMob(model, neuralEntity);
         addGoals(mob);
@@ -74,6 +75,10 @@ public class BasicMobSpawner implements MobSpawner {
                 neuralEntity.getAttribute(attribute).setBaseValue(entry.getFloatValue());
             }
         }
+    }
+
+    private void setHealth(@NotNull NeuralEntity entity, @NotNull MobModel model) {
+        entity.setHealth(entity.getAttributeValue(Attribute.MAX_HEALTH));
     }
 
 

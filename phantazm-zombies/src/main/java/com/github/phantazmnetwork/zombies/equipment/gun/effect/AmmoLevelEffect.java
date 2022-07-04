@@ -33,7 +33,7 @@ public class AmmoLevelEffect implements GunEffect {
     }
 
     @Override
-    public void accept(@NotNull GunState state) {
+    public void apply(@NotNull GunState state) {
         if (state.isMainEquipment()) {
             currentlyActive = true;
             playerView.getPlayer().ifPresent(player -> {

@@ -36,7 +36,7 @@ public class PlaySoundEffect implements GunEffect {
     }
 
     @Override
-    public void accept(@NotNull GunState state) {
+    public void apply(@NotNull GunState state) {
         playerView.getPlayer().ifPresent(player -> player.playSound(data.sound(), Sound.Emitter.self()));
     }
 

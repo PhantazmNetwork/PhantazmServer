@@ -21,6 +21,7 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 
@@ -53,7 +54,7 @@ public class ProjectileFirer implements Firer {
 
     }
 
-    private record AliveProjectile(@NotNull WeakReference<EntityProjectile> projectile, long time) {
+    private record AliveProjectile(@NotNull Reference<EntityProjectile> projectile, long time) {
 
         private AliveProjectile {
             Objects.requireNonNull(projectile, "projectile");

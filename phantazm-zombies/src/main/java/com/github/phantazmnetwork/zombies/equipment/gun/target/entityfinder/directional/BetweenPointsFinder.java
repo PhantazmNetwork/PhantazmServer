@@ -3,11 +3,10 @@ package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.dir
 import com.github.phantazmnetwork.commons.Namespaces;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,12 +37,8 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
     @Override
     public @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Pos start,
                                                     @NotNull Point end) {
-        Collection<Entity> entities = new ArrayList<>(instance.getEntities()); // TODO: optimize
-
-        Point diff = end.sub(start);
-        BoundingBox boundingBox = new BoundingBox(Math.abs(diff.x()), Math.abs(diff.y()), Math.abs(diff.z()));
-        Point src = new Vec((start.x() + end.x()) / 2, Math.min(start.y(), end.y()), (start.z() + end.z()) / 2);
-        entities.removeIf(entity -> !boundingBox.intersectEntity(src, entity));
+        Collection<Entity> entities = new ArrayList<>(instance.getEntities().size());
+        instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.ENTITIES, entities::add);
 
         return entities;
     }

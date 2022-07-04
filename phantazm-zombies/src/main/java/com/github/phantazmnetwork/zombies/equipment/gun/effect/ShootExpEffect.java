@@ -37,7 +37,7 @@ public class ShootExpEffect implements GunEffect {
     }
 
     @Override
-    public void accept(@NotNull GunState state) {
+    public void apply(@NotNull GunState state) {
         if (state.isMainEquipment()) {
             float exp = state.ammo() > 0 ? (float) state.ticksSinceLastShot() / stats.shootSpeed() : 0F;
             playerView.getPlayer().ifPresent(player -> player.setExp(exp));

@@ -18,6 +18,7 @@ import net.minestom.server.network.packet.server.play.DestroyEntitiesPacket;
 import net.minestom.server.network.packet.server.play.SpawnLivingEntityPacket;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 
@@ -34,7 +35,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
         }
     }
 
-    private record Beam(@NotNull WeakReference<Instance> instance, @NotNull Entity guardian, @NotNull Entity armorStand,
+    private record Beam(@NotNull Reference<Instance> instance, @NotNull Entity guardian, @NotNull Entity armorStand,
                         long time) {
 
     }

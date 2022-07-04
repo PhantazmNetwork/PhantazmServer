@@ -5,6 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface GunEffect extends GunTickEffect {
 
-    void accept(@NotNull GunState state);
+    void apply(@NotNull GunState state);
 
 }

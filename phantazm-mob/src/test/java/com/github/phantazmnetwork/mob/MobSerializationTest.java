@@ -29,6 +29,7 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -78,8 +79,12 @@ public class MobSerializationTest {
                 Map.of(
                         EquipmentSlot.CHESTPLATE, ItemStack.of(Material.LEATHER_CHESTPLATE)
                 ),
-                Attribute.MAX_HEALTH.defaultValue(),
-                Attribute.MOVEMENT_SPEED.defaultValue()
+                new Object2FloatOpenHashMap<>(2) {
+                    {
+                        put(Attribute.MAX_HEALTH.key(), Attribute.MAX_HEALTH.defaultValue());
+                        put(Attribute.MOVEMENT_SPEED.key(), Attribute.MOVEMENT_SPEED.defaultValue());
+                    }
+                }
         );
 
         ConfigProcessor<Calculator> calculatorProcessor = new CalculatorConfigProcessor();

@@ -30,7 +30,7 @@ public class GunEffectShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull GunState state, @NotNull Player attacker, @NotNull Collection<PhantazmMob> previousHits, @NotNull GunShot shot) {
-        effect.accept(state);
+        effect.apply(state);
     }
 
 }

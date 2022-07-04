@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.api;
 
-import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -14,15 +14,17 @@ public class RayUtils {
         throw new UnsupportedOperationException();
     }
 
-    @SuppressWarnings("DuplicatedCode")
-    public static @NotNull Optional<Vec> rayTrace(@NotNull BoundingBox boundingBox, @NotNull Point boundingBoxPosition,
+    @SuppressWarnings({"DuplicatedCode", "UnstableApiUsage"})
+    public static @NotNull Optional<Vec> rayTrace(@NotNull Shape shape, @NotNull Point boundingBoxPosition,
                                                   @NotNull Pos start) {
-        double minX = boundingBox.minX() + boundingBoxPosition.x();
-        double minY = boundingBox.minY() + boundingBoxPosition.y();
-        double minZ = boundingBox.minZ() + boundingBoxPosition.z();
-        double maxX = boundingBox.maxX() + boundingBoxPosition.x();
-        double maxY = boundingBox.maxY() + boundingBoxPosition.y();
-        double maxZ = boundingBox.maxZ() + boundingBoxPosition.z();
+        Point shapeStart = shape.relativeStart();
+        Point shapeEnd = shape.relativeEnd();
+        double minX = shapeStart.x() + boundingBoxPosition.x();
+        double minY = shapeStart.y() + boundingBoxPosition.y();
+        double minZ = shapeStart.z() + boundingBoxPosition.z();
+        double maxX = shapeEnd.x() + boundingBoxPosition.x();
+        double maxY = shapeEnd.y() + boundingBoxPosition.y();
+        double maxZ = shapeEnd.z() + boundingBoxPosition.z();
 
         double startX = start.x();
         double startY = start.y();

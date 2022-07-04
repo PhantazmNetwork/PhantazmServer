@@ -55,7 +55,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
                 reload();
             } else {
                 for (GunEffect effect : getLevel().emptyClipEffects()) {
-                    effect.accept(state);
+                    effect.apply(state);
                 }
             }
         }
@@ -71,7 +71,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             modifyState(builder -> builder.setTicksSinceLastReload(0L));
             reloadComplete = false;
             for (GunEffect reloadEffect : getLevel().reloadEffects()) {
-                reloadEffect.accept(state);
+                reloadEffect.apply(state);
             }
         }
     }
@@ -166,7 +166,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
                 effect.tick(state, time);
             }
             for (GunEffect effect : gunLevel.tickEffects()) {
-                effect.accept(state);
+                effect.apply(state);
             }
         }
 

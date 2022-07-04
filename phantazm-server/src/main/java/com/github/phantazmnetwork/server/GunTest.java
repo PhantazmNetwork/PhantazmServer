@@ -45,6 +45,7 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.StaticTarg
 import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
+import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -228,7 +229,7 @@ final class GunTest {
                     );
 
                     ProjectileFirer projectileFirer = new ProjectileFirer(new ProjectileFirer.Data(endpointSelectorKey,
-                            targetFinderKey, shotHandlerKeys, EntityType.FIREBALL, 1.0, 0, 60L),
+                            targetFinderKey, shotHandlerKeys, EntityType.PANDA, 1.0, 0, 60L),
                             view, endpointSelector, targetFinder, shotHandlers);
                     global.addListener(ProjectileCollideWithBlockEvent.class, projectileFirer::onProjectileCollision);
                     global.addListener(ProjectileCollideWithEntityEvent.class, projectileFirer::onProjectileCollision);
@@ -264,7 +265,7 @@ final class GunTest {
                                     stats,
                                     shootTester,
                                     reloadTester,
-                                    spread,
+                                    projectileFirer,
                                     List.of(
                                             new PlaySoundEffect(new PlaySoundEffect.Data(Sound.sound(
                                                     Key.key("entity.horse.gallop"),
@@ -314,8 +315,13 @@ final class GunTest {
                             Map.of(
                                     EquipmentSlot.HELMET, head
                             ),
-                            Attribute.MAX_HEALTH.defaultValue(),
-                            Attribute.MOVEMENT_SPEED.defaultValue() / 3.0F
+                            new Object2FloatOpenHashMap<>(2) {
+                                {
+                                    put(Attribute.MAX_HEALTH.key(), Attribute.MAX_HEALTH.defaultValue());
+                                    put(Attribute.MOVEMENT_SPEED.key(),
+                                            Attribute.MOVEMENT_SPEED.defaultValue() / 3.0F);
+                                }
+                            }
                     );
                     Mob.getMobSpawner().spawn(instance, event.getPlayer().getPosition(), mobModel);
                 }
