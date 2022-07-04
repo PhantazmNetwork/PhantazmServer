@@ -9,6 +9,8 @@ public interface ShootTester {
 
     boolean canFire(@NotNull GunState state);
 
+    boolean isFiring(@NotNull GunState state);
+
     boolean isShooting(@NotNull GunState state);
 
     @NotNull Keyed getData();

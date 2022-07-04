@@ -16,6 +16,7 @@ public record GunLevel(@NotNull ItemStack stack,
                        @NotNull ShootTester shootTester,
                        @NotNull ReloadTester reloadTester,
                        @NotNull Firer firer,
+                       @NotNull Collection<GunEffect> shootEffects,
                        @NotNull Collection<GunEffect> reloadEffects,
                        @NotNull Collection<GunEffect> tickEffects,
                        @NotNull Collection<GunEffect> emptyClipEffects,
@@ -27,6 +28,7 @@ public record GunLevel(@NotNull ItemStack stack,
         Objects.requireNonNull(shootTester, "shootTester");
         Objects.requireNonNull(reloadTester, "reloadTester");
         Objects.requireNonNull(firer, "firer");
+        Objects.requireNonNull(shootEffects, "shootEffects");
         Objects.requireNonNull(reloadEffects, "reloadEffects");
         Objects.requireNonNull(tickEffects, "tickEffects");
         Objects.requireNonNull(emptyClipEffects, "emptyClipEffects");

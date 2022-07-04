@@ -4,5 +4,6 @@ public record GunStats(long shootSpeed,
                        long reloadSpeed,
                        int maxAmmo,
                        int maxClip,
-                       int shots) {
+                       int shots,
+                       long shotInterval) {
 }

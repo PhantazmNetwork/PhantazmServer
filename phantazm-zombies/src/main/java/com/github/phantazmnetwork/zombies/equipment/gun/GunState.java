@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun;
 import org.jetbrains.annotations.NotNull;
 
 public record GunState(long ticksSinceLastShot,
+                       long ticksSinceLastFire,
                        long ticksSinceLastReload,
                        int ammo,
                        int clip,
@@ -12,6 +13,7 @@ public record GunState(long ticksSinceLastShot,
     public @NotNull GunState.Builder toBuilder() {
         return new Builder()
                 .setTicksSinceLastShot(ticksSinceLastShot)
+                .setTicksSinceLastFire(ticksSinceLastFire)
                 .setTicksSinceLastReload(ticksSinceLastReload)
                 .setAmmo(ammo)
                 .setClip(clip)
@@ -22,6 +24,8 @@ public record GunState(long ticksSinceLastShot,
     public static class Builder {
 
         private long ticksSinceLastShot;
+
+        private long ticksSinceLastFire;
 
         private long ticksSinceLastReload;
 
@@ -39,6 +43,15 @@ public record GunState(long ticksSinceLastShot,
 
         public @NotNull Builder setTicksSinceLastShot(long ticksSinceLastShot) {
             this.ticksSinceLastShot = ticksSinceLastShot;
+            return this;
+        }
+
+        public long getTicksSinceLastFire() {
+            return ticksSinceLastFire;
+        }
+
+        public @NotNull Builder setTicksSinceLastFire(long ticksSinceLastFire) {
+            this.ticksSinceLastFire = ticksSinceLastFire;
             return this;
         }
 
@@ -89,7 +102,8 @@ public record GunState(long ticksSinceLastShot,
         }
 
         public @NotNull GunState build() {
-            return new GunState(ticksSinceLastShot, ticksSinceLastReload, ammo, clip, isMainEquipment, queuedShots);
+            return new GunState(ticksSinceLastShot, ticksSinceLastFire, ticksSinceLastReload, ammo, clip,
+                    isMainEquipment, queuedShots);
         }
 
     }

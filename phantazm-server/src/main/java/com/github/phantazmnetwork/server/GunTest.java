@@ -164,17 +164,17 @@ final class GunTest {
                     ShotEndpointSelector endpointSelector = new BasicShotEndpointSelector(new BasicShotEndpointSelector.Data(blockIterationKey,
                             100), view, blockIteration);
                     Key entityFinderKey = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.test");
-                    DirectionalEntityFinder directionalEntityFinder = new BetweenPointsFinder(new BetweenPointsFinder.Data());
+                    DirectionalEntityFinder directionalEntityFinder = new AroundEndFinder(new AroundEndFinder.Data(3F));
                     Key headshotTesterKey = Key.key(Namespaces.PHANTAZM, "gun.headshot_tester.test");
                     HeadshotTester headshotTester = new StaticHeadshotTester(new StaticHeadshotTester.Data(false));
                     Key targetTesterKey = Key.key(Namespaces.PHANTAZM, "gun.target_tester.test");
-                    TargetTester targetTester = new RayTraceTargetTester(new RayTraceTargetTester.Data());
+                    TargetTester targetTester = new StaticTargetTester(new StaticTargetTester.Data());
                     Key targetFinderKey = Key.key(Namespaces.PHANTAZM, "gun.target_finder.test");
                     TargetFinder targetFinder = new BasicTargetFinder(new BasicTargetFinder.Data(entityFinderKey,
-                            targetTesterKey, headshotTesterKey, false, 2),
+                            targetTesterKey, headshotTesterKey, true, 1),
                             Mob.getMobStore(), directionalEntityFinder, targetTester, headshotTester);
                     Key statsKey = Key.key(Namespaces.PHANTAZM, "gun.stats.test");
-                    GunStats stats = new GunStats(10L, 30L, 36, 12, 1);
+                    GunStats stats = new GunStats(20L, 20L, 40, 20, 20, 3L);
                     Key actionBarChooserKey = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.test");
                     ReloadActionBarChooser actionBarChooser = new GradientActionBarChooser(new GradientActionBarChooser.Data(Component.text("RELOADING",
                             null, TextDecoration.BOLD), NamedTextColor.RED, NamedTextColor.GREEN));
@@ -187,7 +187,6 @@ final class GunTest {
                     ShotHandler damage = new DamageShotHandler(new DamageShotHandler.Data(3.0F, 5.0F));
 
                     Collection<Key> shotHandlerKeys = List.of(
-                            Key.key(Namespaces.PHANTAZM, "gun.effect.play_sound.test"),
                             Key.key(Namespaces.PHANTAZM, "gun.shot_handler.particle.test"),
                             damageShotHandlerKey,
                             Key.key(Namespaces.PHANTAZM, "gun.shot_handler.feedback.test"),
@@ -195,11 +194,6 @@ final class GunTest {
                             Key.key(Namespaces.PHANTAZM, "gun.shot_handler.chain.test")
                     );
                     Collection<ShotHandler> shotHandlers = List.of(
-                            new GunEffectShotHandler(new PlaySoundEffect(new PlaySoundEffect.Data(Sound.sound(Key.key("entity.iron_golem.hurt"),
-                                    Sound.Source.PLAYER,
-                                    1.0F,
-                                    2.0F
-                            )), view)),
                             damage,
                             new KnockbackShotHandler(new KnockbackShotHandler.Data(5.0D, 5.0D)),
                             new FeedbackShotHandler(new FeedbackShotHandler.Data(
@@ -221,33 +215,33 @@ final class GunTest {
                                             1.5F
                                     )
                             )),
-                            new ParticleTrailShotHandler(new ParticleTrailShotHandler.Data(
-                                    Particle.CRIT,
-                                    false,
-                                    0.0F,
-                                    0.0F,
-                                    0.0F,
-                                    0.0F,
-                                    1,
-                                    4
-                            ))
+                            new ExplosionShotHandler(new ExplosionShotHandler.Data(3F))
                     );
 
                     ProjectileFirer projectileFirer = new ProjectileFirer(new ProjectileFirer.Data(endpointSelectorKey,
-                            targetFinderKey, shotHandlerKeys, EntityType.FIREBALL, 1.0, 0, true,
+                            targetFinderKey, shotHandlerKeys, EntityType.TROPICAL_FISH, 1.0, 0, true,
                             60L),
                             view, endpointSelector, targetFinder, shotHandlers);
                     global.addListener(ProjectileCollideWithBlockEvent.class, projectileFirer::onProjectileCollision);
                     global.addListener(ProjectileCollideWithEntityEvent.class, projectileFirer::onProjectileCollision);
 
                     // swap out as necessary
-                    TargetTester staticTargetTester = new StaticTargetTester(new StaticTargetTester.Data());
+                    TargetTester rayTrace = new RayTraceTargetTester(new RayTraceTargetTester.Data());
+                    DirectionalEntityFinder betweenPoints = new BetweenPointsFinder(new BetweenPointsFinder.Data());
                     HeadshotTester eyeHeight = new EyeHeightHeadshotTester(new EyeHeightHeadshotTester.Data());
-                    DirectionalEntityFinder aroundEnd = new AroundEndFinder(new AroundEndFinder.Data(3F));
                     Key hitScanKey = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan.test");
                     Firer hitScan = new HitScanFirer(new HitScanFirer.Data(endpointSelectorKey, targetFinderKey,
                             shotHandlerKeys), view, endpointSelector, targetFinder, shotHandlers);
-                    ShotHandler explosion = new ExplosionShotHandler(new ExplosionShotHandler.Data(3F));
+                    ShotHandler particle = new ParticleTrailShotHandler(new ParticleTrailShotHandler.Data(
+                            Particle.CRIT,
+                            false,
+                            0.0F,
+                            0.0F,
+                            0.0F,
+                            0.0F,
+                            1,
+                            4
+                    ));
                     Key subFinderKey = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.positional.test");
                     PositionalEntityFinder subFinder = new NearbyPhantazmMobFinder(new NearbyPhantazmMobFinder.Data(3),
                             Mob.getMobStore());
@@ -272,6 +266,11 @@ final class GunTest {
                                     shootTester,
                                     reloadTester,
                                     projectileFirer,
+                                    List.of(new PlaySoundEffect(new PlaySoundEffect.Data(Sound.sound(Key.key("entity.iron_golem.hurt"),
+                                            Sound.Source.PLAYER,
+                                            1.0F,
+                                            2.0F
+                                    )), view)),
                                     List.of(
                                             new PlaySoundEffect(new PlaySoundEffect.Data(Sound.sound(
                                                     Key.key("entity.horse.gallop"),

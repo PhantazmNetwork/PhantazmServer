@@ -41,7 +41,12 @@ public class StateShootTester implements ShootTester {
 
     @Override
     public boolean canFire(@NotNull GunState state) {
-        return state.ammo() > 0 && reloadTester.canReload(state);
+        return !isFiring(state) && state.ammo() > 0 && reloadTester.canReload(state);
+    }
+
+    @Override
+    public boolean isFiring(@NotNull GunState state) {
+        return state.ticksSinceLastFire() < stats.shotInterval();
     }
 
     @Override

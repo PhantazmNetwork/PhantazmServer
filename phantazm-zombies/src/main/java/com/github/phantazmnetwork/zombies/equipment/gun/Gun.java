@@ -33,20 +33,23 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         this.level = 0;
 
         GunStats stats = getLevel().stats();
-        this.state = new GunState(stats.shootSpeed(), stats.reloadSpeed(), stats.maxAmmo(), stats.maxClip(),
-                false, 0);
+        this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats.reloadSpeed(), stats.maxAmmo(),
+                stats.maxClip(), false, 0);
     }
 
     public void shoot() {
         if (getLevel().shootTester().shouldShoot(state)) {
-            modifyState(state -> state.setQueuedShots(getLevel().stats().shots() - 1));
+            modifyState(state -> {
+                state.setQueuedShots(getLevel().stats().shots() - 1);
+                state.setTicksSinceLastShot(0L);
+            });
             internalShoot();
         }
     }
 
     protected void internalShoot() {
         modifyState(builder -> {
-            builder.setTicksSinceLastShot(0L);
+            builder.setTicksSinceLastFire(0L);
             builder.setAmmo(builder.getAmmo() - 1);
             builder.setClip(builder.getClip() - 1);
         });
@@ -64,6 +67,9 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             Pos start = player.getPosition().add(0, player.getEyeHeight(), 0);
             getLevel().firer().fire(state, start, new HashSet<>());
         });
+        for (GunEffect effect : getLevel().shootEffects()) {
+            effect.apply(state);
+        }
     }
 
     public void reload() {
@@ -133,6 +139,9 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             if (getLevel().shootTester().isShooting(state)) {
                 builder.setTicksSinceLastShot(builder.getTicksSinceLastShot() + 1);
             }
+            if (getLevel().shootTester().isFiring(state)) {
+                builder.setTicksSinceLastFire(builder.getTicksSinceLastFire() + 1);
+            }
             if (getLevel().reloadTester().isReloading(state)) {
                 builder.setTicksSinceLastReload(builder.getTicksSinceLastReload() + 1);
             }
@@ -143,22 +152,23 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         });
 
         if (state.queuedShots() > 0) {
-            int postQueuedShots;
             if (getLevel().shootTester().canFire(state)) {
                 internalShoot();
-                postQueuedShots = state.queuedShots() - 1;
+                modifyState(builder -> builder.setQueuedShots(state.queuedShots() - 1));
             }
-            else {
-                postQueuedShots = 0;
+            else if (!getLevel().shootTester().isFiring(state)) {
+                modifyState(builder -> builder.setQueuedShots(0));
             }
 
-            modifyState(builder -> builder.setQueuedShots(postQueuedShots));
         }
 
         // previous levels must still be ticked if they are expecting to clear queues, etc.
         for (int i = 0; i <= level; i++) {
             GunLevel gunLevel = model.levels().get(i);
             gunLevel.firer().tick(state, time);
+            for (GunEffect effect : gunLevel.shootEffects()) {
+                effect.tick(state, time);
+            }
             for (GunEffect effect : gunLevel.reloadEffects()) {
                 effect.tick(state, time);
             }
