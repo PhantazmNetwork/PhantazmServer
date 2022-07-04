@@ -1,56 +1,37 @@
 package com.github.phantazmnetwork.commons.vector;
 
-import org.jetbrains.annotations.NotNull;
-
 /**
- * Standard implementation of Vec3F. Not a part of the public API. Instances are compared lexicographically, first by
- * {@code x} value, then {@code y} value, then {@code z} value. This object's {@link Vec3F#compareTo(Object)} method is
- * <i>consistent</i> with {@link Object#equals(Object)}.
+ * Standard implementation of Vec3F. Not a part of the public API.
  */
-record BasicVec3F(float getX, float getY, float getZ) implements Vec3F {
+class BasicVec3F extends Vec3FBase {
+    private final float x;
+    private final float y;
+    private final float z;
+
     /**
-     * Creates a new instance of this record. {@link Vec3F#of(float, float, float)} should be used in preference to this
-     * constructor.
-     * @param getX the x-component
-     * @param getY the y-component
-     * @param getZ the z-component
+     * Creates a new instance of this class from the given float triplet.
+     * @param x the x-coordinate
+     * @param y the y-coordinate
+     * @param z the z-coordinate
      */
-    BasicVec3F {}
-
-    @Override
-    public int compareTo(@NotNull Vec3F o) {
-        int xCompare = Float.compare(getX, o.getX());
-        if (xCompare == 0) {
-            int yCompare = Float.compare(getY, o.getY());
-            if (yCompare == 0) {
-                return Float.compare(getZ, o.getZ());
-            }
-
-            return yCompare;
-        }
-
-        return xCompare;
+    BasicVec3F(float x, float y, float z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     @Override
-    public String toString() {
-        return "Vec3F[x=" + getX + ", y=" + getY + ", z=" + getZ + "]";
+    public float getX() {
+        return x;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == null) {
-            return false;
-        }
+    public float getY() {
+        return y;
+    }
 
-        if(obj == this) {
-            return true;
-        }
-
-        if(obj instanceof Vec3F other) {
-            return getX == other.getX() && getY == other.getY() && getZ == other.getZ();
-        }
-
-        return false;
+    @Override
+    public float getZ() {
+        return z;
     }
 }

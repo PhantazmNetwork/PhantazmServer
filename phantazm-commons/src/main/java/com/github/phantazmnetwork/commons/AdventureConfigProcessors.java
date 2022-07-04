@@ -40,7 +40,7 @@ public final class AdventureConfigProcessors {
         }
     };
 
-    private static final ConfigProcessor<Component> component = new ConfigProcessor<Component>() {
+    private static final ConfigProcessor<Component> component = new ConfigProcessor<>() {
         @Override
         public Component dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             return MiniMessage.miniMessage().deserialize(ConfigProcessor.STRING.dataFromElement(element));

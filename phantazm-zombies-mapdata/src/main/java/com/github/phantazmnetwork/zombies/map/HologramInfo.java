@@ -4,13 +4,14 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * Represents a hologram (typically, text displayed using an invisible armorstand with interaction and gravity
  * disabled).
  */
-public record HologramInfo(@NotNull Component text,
+public record HologramInfo(@NotNull List<Component> text,
                            @NotNull Vec3D position) {
     /**
      * Creates a new instance of this record.

@@ -290,8 +290,7 @@ public final class MapProcessors {
     private static final ConfigProcessor<HologramInfo> hologramInfo = new ConfigProcessor<>() {
         @Override
         public HologramInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Component text = AdventureConfigProcessors.component().dataFromElement(element
-                    .getElementOrThrow("text"));
+            List<Component> text = componentList.dataFromElement(element.getElementOrThrow("text"));
             Vec3D position = VectorConfigProcessors.vec3D().dataFromElement(element
                     .getElementOrThrow("position"));
             return new HologramInfo(text, position);
@@ -300,7 +299,7 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(HologramInfo hologramInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
-            node.put("text", AdventureConfigProcessors.component().elementFromData(hologramInfo.text()));
+            node.put("text", componentList.elementFromData(hologramInfo.text()));
             node.put("position", VectorConfigProcessors.vec3D().elementFromData(hologramInfo.position()));
             return node;
         }

@@ -80,8 +80,8 @@ public final class VectorConfigProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(Region3I region3I) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
-            node.put("origin", vec3I.elementFromData(region3I.getOrigin()));
-            node.put("lengths", vec3I.elementFromData(region3I.getLengths()));
+            node.put("origin", vec3I.elementFromData(region3I.origin()));
+            node.put("lengths", vec3I.elementFromData(region3I.lengths()));
             return node;
         }
     };

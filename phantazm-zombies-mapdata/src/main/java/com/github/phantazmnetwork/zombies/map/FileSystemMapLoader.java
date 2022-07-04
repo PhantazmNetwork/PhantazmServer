@@ -148,7 +148,7 @@ public class FileSystemMapLoader implements MapLoader {
         List<WindowInfo> windows = data.windows();
         for(int i = 0; i < windows.size(); i++) {
             WindowInfo window = windows.get(i);
-            ConfigBridges.write(paths.windows.resolve(getPositionString(window.frameRegion().getOrigin()) + "-"
+            ConfigBridges.write(paths.windows.resolve(getPositionString(window.frameRegion().origin()) + "-"
                     + i + extension), MapProcessors.windowInfo().elementFromData(window), codec);
         }
 

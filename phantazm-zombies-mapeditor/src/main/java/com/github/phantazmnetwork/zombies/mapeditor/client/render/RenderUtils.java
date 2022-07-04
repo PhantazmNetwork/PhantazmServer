@@ -52,8 +52,8 @@ public final class RenderUtils {
         Objects.requireNonNull(origin, "origin");
         Objects.requireNonNull(boundsArray, "boundsArray");
 
-        Vec3I infoOrigin = region.getOrigin();
-        Vec3I lengths = region.getLengths();
+        Vec3I infoOrigin = region.origin();
+        Vec3I lengths = region.lengths();
 
         boundsArray[offset] = new Vec3d(infoOrigin.getX() + origin.getX() - ObjectRenderer.EPSILON, infoOrigin
                 .getY() + origin.getY() - ObjectRenderer.EPSILON, infoOrigin.getZ() + origin.getZ() - ObjectRenderer

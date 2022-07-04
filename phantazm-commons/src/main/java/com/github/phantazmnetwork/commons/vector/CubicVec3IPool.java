@@ -4,14 +4,14 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * <p>A "cubical" cache of immutable Vec3I instances. Cached values are stored in an array, which is populated with
- * {@link BasicVec3I} instances in the constructor.</p>
+ * {@link ImmutableVec3I} instances in the constructor.</p>
  *
  * <p>Since an array is initialized with capacity sufficient to hold all possible values for any given width, it is
  * important to avoid allocating a very large pool, as there will be a significant portion of wasted memory in many
  * cases.</p>
  *
  * <p>{@link CubicVec3IPool#fromCache(int, int, int)} is inherently thread-safe.</p>
- * @see BasicVec3I
+ * @see ImmutableVec3I
  */
 class CubicVec3IPool implements Vec3IPool {
     private final Vec3I[] cache;
@@ -47,7 +47,7 @@ class CubicVec3IPool implements Vec3IPool {
         for(int i = 0; i < cacheWidth; i++) {
             for(int j = 0; j < cacheWidth; j++) {
                 for(int k = 0; k < cacheWidth; k++) {
-                    cache[pos++] = new BasicVec3I(i - halfWidth, j - halfWidth, k - halfWidth);
+                    cache[pos++] = new ImmutableVec3I(i - halfWidth, j - halfWidth, k - halfWidth);
                 }
             }
         }
