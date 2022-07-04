@@ -9,6 +9,7 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public record GunLevel(@NotNull ItemStack stack,
                        @NotNull GunStats stats,
@@ -19,4 +20,17 @@ public record GunLevel(@NotNull ItemStack stack,
                        @NotNull Collection<GunEffect> tickEffects,
                        @NotNull Collection<GunEffect> emptyClipEffects,
                        @NotNull Collection<GunStackMapper> gunStackMappers) {
+
+    public GunLevel {
+        Objects.requireNonNull(stack, "stack");
+        Objects.requireNonNull(stats, "stats");
+        Objects.requireNonNull(shootTester, "shootTester");
+        Objects.requireNonNull(reloadTester, "reloadTester");
+        Objects.requireNonNull(firer, "firer");
+        Objects.requireNonNull(reloadEffects, "reloadEffects");
+        Objects.requireNonNull(tickEffects, "tickEffects");
+        Objects.requireNonNull(emptyClipEffects, "emptyClipEffects");
+        Objects.requireNonNull(gunStackMappers, "gunStackMappers");
+    }
+
 }

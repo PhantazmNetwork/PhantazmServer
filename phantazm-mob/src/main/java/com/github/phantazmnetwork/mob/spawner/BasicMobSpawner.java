@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EquipmentSlot;
@@ -15,7 +16,10 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Basic implementation of a {@link MobSpawner}.
@@ -41,8 +45,7 @@ public class BasicMobSpawner implements MobSpawner {
         NeuralEntity neuralEntity = neuralSpawner.spawnEntity(instance, point, model.getDescriptor());
         setDisplayName(neuralEntity, model);
         setEquipment(neuralEntity, model);
-        setMaxHealth(neuralEntity, model);
-        setSpeed(neuralEntity, model);
+        setAttributes(neuralEntity, model);
 
         PhantazmMob mob = new PhantazmMob(model, neuralEntity);
         addGoals(mob);
@@ -64,14 +67,15 @@ public class BasicMobSpawner implements MobSpawner {
         }
     }
 
-    private void setMaxHealth(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
-        neuralEntity.getAttribute(Attribute.MAX_HEALTH).setBaseValue(model.getMaxHealth());
-        neuralEntity.setHealth(model.getMaxHealth());
+    private void setAttributes(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
+        for (Object2FloatArrayMap.Entry<String> entry : model.getAttributes().object2FloatEntrySet()) {
+            Attribute attribute = Attribute.fromKey(entry.getKey());
+            if (attribute != null) {
+                neuralEntity.getAttribute(attribute).setBaseValue(entry.getFloatValue());
+            }
+        }
     }
 
-    private void setSpeed(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
-        neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(model.getSpeed());
-    }
 
     private void addGoals(@NotNull PhantazmMob mob) {
         for (Collection<Goal> group : mob.model().getGoalGroups()) {

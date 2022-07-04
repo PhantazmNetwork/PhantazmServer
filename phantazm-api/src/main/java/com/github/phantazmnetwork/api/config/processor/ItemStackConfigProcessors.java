@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.api.config;
+package com.github.phantazmnetwork.api.config.processor;
 
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;

@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.config.ItemStackConfigProcessors;
-import com.github.phantazmnetwork.api.config.VariantConfigProcessor;
+import com.github.phantazmnetwork.api.config.processor.ItemStackConfigProcessors;
+import com.github.phantazmnetwork.api.config.processor.VariantConfigProcessor;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;

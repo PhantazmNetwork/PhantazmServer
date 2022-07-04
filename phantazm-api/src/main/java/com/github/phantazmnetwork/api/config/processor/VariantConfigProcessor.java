@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.api.config;
+package com.github.phantazmnetwork.api.config.processor;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -42,11 +42,8 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
             throw new ConfigProcessException("no subprocessor for key " + key);
         }
 
-        if (element.isNode()) {
-            return processor.dataFromElement(element);
-        }
-
-        return processor.dataFromElement(element.getElementOrThrow("data"));
+        ConfigElement serialData = element.getElement("serialData");
+        return processor.dataFromElement(Objects.requireNonNullElse(serialData, element));
     }
 
     @SuppressWarnings("unchecked")
@@ -65,7 +62,7 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
         else {
             ConfigNode node = new LinkedConfigNode(2);
             node.put("serialKey", KEY_PROCESSOR.elementFromData(data.key()));
-            node.put("data", element);
+            node.put("serialData", element);
 
             return node;
         }

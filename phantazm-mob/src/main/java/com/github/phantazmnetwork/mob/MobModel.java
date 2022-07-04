@@ -3,6 +3,8 @@ package com.github.phantazmnetwork.mob;
 import com.github.phantazmnetwork.mob.goal.Goal;
 import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatMaps;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
@@ -31,9 +33,7 @@ public class MobModel implements Keyed {
 
     private final Map<EquipmentSlot, ItemStack> equipment;
 
-    private final float maxHealth;
-
-    private final float speed;
+    private final Object2FloatMap<String> attributes;
 
     /**
      * Creates a new mob model.
@@ -48,15 +48,14 @@ public class MobModel implements Keyed {
     public MobModel(@NotNull Key key, @NotNull MinestomDescriptor descriptor,
                     @NotNull Collection<Collection<Goal>> goalGroups,
                     @NotNull Map<Key, Collection<Skill>> triggers, @Nullable Component displayName,
-                    @NotNull Map<EquipmentSlot, ItemStack> equipment, float maxHealth, float speed) {
+                    @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
         this.key = Objects.requireNonNull(key, "key");
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.goalGroups = List.copyOf(Objects.requireNonNull(goalGroups, "goalGroups"));
         this.triggers = Map.copyOf(Objects.requireNonNull(triggers, "triggers"));
         this.displayName = displayName;
         this.equipment = Map.copyOf(Objects.requireNonNull(equipment, "equipment"));
-        this.maxHealth = maxHealth;
-        this.speed = speed;
+        this.attributes = Object2FloatMaps.unmodifiable(Objects.requireNonNull(attributes, "attributes"));
     }
 
     /**
@@ -108,15 +107,7 @@ public class MobModel implements Keyed {
         return equipment;
     }
 
-    /**
-     * Gets the mob's maximum health.
-     * @return The mob's maximum health
-     */
-    public float getMaxHealth() {
-        return maxHealth;
-    }
-
-    public float getSpeed() {
-        return speed;
+    public @NotNull @Unmodifiable Object2FloatMap<String> getAttributes() {
+        return attributes;
     }
 }

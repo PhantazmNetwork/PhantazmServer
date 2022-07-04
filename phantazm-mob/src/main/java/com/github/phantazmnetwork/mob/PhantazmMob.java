@@ -24,6 +24,6 @@ public record PhantazmMob(@NotNull MobModel model, @NotNull NeuralEntity entity)
 
     @Override
     public int hashCode() {
-        return entity.hashCode();
+        return entity.getUuid().hashCode();
     }
 }

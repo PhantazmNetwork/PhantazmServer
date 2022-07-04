@@ -63,7 +63,7 @@ public class MobStore {
     }
 
     public PhantazmMob getMob(@NotNull UUID uuid) {
-        return uuidToMob.get(uuid);
+        return uuidToMob.get(Objects.requireNonNull(uuid, "uuid"));
     }
 
     private @NotNull Map<Key, Collection<SkillInstance>> createTriggerInstances(@NotNull PhantazmMob mob) {
