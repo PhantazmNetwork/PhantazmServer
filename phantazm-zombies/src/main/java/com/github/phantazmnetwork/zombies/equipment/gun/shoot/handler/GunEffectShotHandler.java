@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
@@ -24,7 +24,7 @@ public class GunEffectShotHandler implements ShotHandler {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return effect.getData();
     }
 

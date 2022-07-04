@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint;
 
 import com.github.phantazmnetwork.api.RayUtils;
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.Namespaces;
 import net.kyori.adventure.key.Key;
@@ -18,12 +18,12 @@ import java.util.Optional;
 
 public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
-    public record Data(int maxDistance) implements VariantSerializable {
+    public record Data(int maxDistance) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "selector.shot.end.basic");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -66,7 +66,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

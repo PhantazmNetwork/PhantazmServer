@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
@@ -22,12 +22,12 @@ import java.util.*;
 public class ChainShotHandler implements ShotHandler {
 
     public record Data(@NotNull Key finderKey, @NotNull Key firerKey, boolean ignorePreviousHits, int fireAttempts)
-            implements VariantSerializable {
+            implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.shot_handler.chain");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -79,6 +79,9 @@ public class ChainShotHandler implements ShotHandler {
                 if (previousHits.size() > initialSize && --attempts <= 0) {
                     return;
                 }
+                for (PhantazmMob mob : previousHits) {
+                    previousUUIDs.add(mob.entity().getUuid());
+                }
             }
         }
     }
@@ -88,7 +91,7 @@ public class ChainShotHandler implements ShotHandler {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.headshot;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import net.kyori.adventure.key.Key;
@@ -12,12 +12,12 @@ import java.util.Objects;
 
 public class StaticHeadshotTester implements HeadshotTester {
 
-    public record Data(boolean shouldHeadshot) implements VariantSerializable {
+    public record Data(boolean shouldHeadshot) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.headshot_tester.static");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -34,7 +34,7 @@ public class StaticHeadshotTester implements HeadshotTester {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

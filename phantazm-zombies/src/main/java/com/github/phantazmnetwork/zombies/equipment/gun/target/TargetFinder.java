@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import net.minestom.server.coordinate.Point;
@@ -25,6 +25,6 @@ public interface TargetFinder {
     @NotNull Result findTarget(@NotNull Player player, @NotNull Pos start, @NotNull Point end,
                                @NotNull Collection<PhantazmMob> previousHits);
 
-    @NotNull VariantSerializable getData();
+    @NotNull Keyed getData();
 
 }

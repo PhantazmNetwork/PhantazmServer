@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.PhysicalDescriptor;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A {@link PhysicalDescriptor} extension designed for {@link Agent}s which are Minestom {@link Entity}s.
  */
-public interface MinestomDescriptor extends PhysicalDescriptor, VariantSerializable {
+public interface MinestomDescriptor extends PhysicalDescriptor, Keyed {
     @Override
     default float getWidth() {
         return (float) getEntityType().width();

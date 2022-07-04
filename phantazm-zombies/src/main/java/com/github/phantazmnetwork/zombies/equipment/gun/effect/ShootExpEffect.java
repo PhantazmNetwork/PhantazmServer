@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
@@ -12,12 +12,12 @@ import java.util.Objects;
 
 public class ShootExpEffect implements GunEffect {
 
-    public record Data(@NotNull Key gunStatsKey) implements VariantSerializable {
+    public record Data(@NotNull Key gunStatsKey) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.exp.shoot");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -55,7 +55,7 @@ public class ShootExpEffect implements GunEffect {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 

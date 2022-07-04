@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +11,6 @@ public interface ShotEndpointSelector {
 
     @NotNull Optional<Point> getEnd(@NotNull Pos start);
 
-    @NotNull VariantSerializable getData();
+    @NotNull Keyed getData();
 
 }

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.MobStore;
 import net.kyori.adventure.key.Key;
@@ -14,13 +14,13 @@ import java.util.Objects;
 
 public class NearbyPhantazmMobFinder implements PositionalEntityFinder {
 
-    public record Data(double range) implements VariantSerializable {
+    public record Data(double range) implements Keyed {
 
         public static final Key SERIAL_KEY
                 = Key.key(Namespaces.PHANTAZM,"gun.target.entity_finder.positional.nearby_phantazm_mob");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -43,7 +43,7 @@ public class NearbyPhantazmMobFinder implements PositionalEntityFinder {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

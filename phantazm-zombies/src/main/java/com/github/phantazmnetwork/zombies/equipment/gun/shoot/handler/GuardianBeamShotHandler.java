@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -24,12 +24,12 @@ import java.util.*;
 // TODO: verify if we need packets
 public class GuardianBeamShotHandler implements ShotHandler {
 
-    public record Data(@NotNull EntityType entityType, long beamTime) implements VariantSerializable {
+    public record Data(@NotNull EntityType entityType, long beamTime) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.guardian_beam");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -94,7 +94,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
@@ -15,7 +15,7 @@ import java.util.Objects;
 
 public class SoundShotHandler implements ShotHandler {
 
-    public record Data(@NotNull Sound sound, @NotNull Sound headshotSound) implements VariantSerializable {
+    public record Data(@NotNull Sound sound, @NotNull Sound headshotSound) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.sound");
 
@@ -25,7 +25,7 @@ public class SoundShotHandler implements ShotHandler {
         }
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -52,7 +52,7 @@ public class SoundShotHandler implements ShotHandler {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

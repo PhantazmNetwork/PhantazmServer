@@ -28,6 +28,7 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.ShotEndpo
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.HitScanFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.ProjectileFirer;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.SpreadFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.BasicTargetFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.TargetFinder;
@@ -164,7 +165,7 @@ final class GunTest {
                     TargetTester targetTester = new RayTraceTargetTester(new RayTraceTargetTester.Data());
                     Key targetFinderKey = Key.key(Namespaces.PHANTAZM, "gun.target_finder.test");
                     TargetFinder targetFinder = new BasicTargetFinder(new BasicTargetFinder.Data(entityFinderKey,
-                            targetTesterKey, headshotTesterKey, true),
+                            targetTesterKey, headshotTesterKey, true, 2),
                             Mob.getMobStore(), directionalEntityFinder, targetTester, headshotTester);
                     Key statsKey = Key.key(Namespaces.PHANTAZM, "gun.stats.test");
                     GunStats stats = new GunStats(10L, 30L, 36, 12, 1);
@@ -179,20 +180,13 @@ final class GunTest {
                     Key damageShotHandlerKey = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.damage.test");
                     ShotHandler damage = new DamageShotHandler(new DamageShotHandler.Data(3.0F, 5.0F));
 
-                    Key subFinderKey = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.positional.test");
-                    PositionalEntityFinder subFinder = new NearbyPhantazmMobFinder(new NearbyPhantazmMobFinder.Data(3),
-                            Mob.getMobStore());
-                    Key subFirerKey = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan.test");
-                    Firer subFirer = new HitScanFirer(new HitScanFirer.Data(endpointSelectorKey, targetFinderKey,
-                            Collections.singleton(damageShotHandlerKey)), view, endpointSelector, targetFinder,
-                            Collections.singleton(damage));
-
                     Collection<Key> shotHandlerKeys = List.of(
                             Key.key(Namespaces.PHANTAZM, "gun.effect.play_sound.test"),
-                            Key.key(Namespaces.PHANTAZM, "gun.shot_handler.explosion.test"),
+                            Key.key(Namespaces.PHANTAZM, "gun.shot_handler.particle.test"),
                             damageShotHandlerKey,
                             Key.key(Namespaces.PHANTAZM, "gun.shot_handler.feedback.test"),
-                            Key.key(Namespaces.PHANTAZM, "gun.shot_handler.sound.test")
+                            Key.key(Namespaces.PHANTAZM, "gun.shot_handler.sound.test"),
+                            Key.key(Namespaces.PHANTAZM, "gun.shot_handler.chain.test")
                     );
                     Collection<ShotHandler> shotHandlers = List.of(
                             new GunEffectShotHandler(new PlaySoundEffect(new PlaySoundEffect.Data(Sound.sound(Key.key("entity.iron_golem.hurt"),
@@ -200,7 +194,6 @@ final class GunTest {
                                     1.0F,
                                     2.0F
                             )), view)),
-                            new ExplosionShotHandler(new ExplosionShotHandler.Data(3F)),
                             damage,
                             new KnockbackShotHandler(new KnockbackShotHandler.Data(5.0D, 5.0D)),
                             new FeedbackShotHandler(new FeedbackShotHandler.Data(
@@ -222,8 +215,16 @@ final class GunTest {
                                             1.5F
                                     )
                             )),
-                            new ChainShotHandler(new ChainShotHandler.Data(subFinderKey, subFirerKey, 3),
-                                    subFinder, subFirer)
+                            new ParticleTrailShotHandler(new ParticleTrailShotHandler.Data(
+                                    Particle.CRIT,
+                                    false,
+                                    0.0F,
+                                    0.0F,
+                                    0.0F,
+                                    0.0F,
+                                    1,
+                                    4
+                            ))
                     );
 
                     ProjectileFirer projectileFirer = new ProjectileFirer(new ProjectileFirer.Data(endpointSelectorKey,
@@ -236,18 +237,24 @@ final class GunTest {
                     TargetTester staticTargetTester = new StaticTargetTester(new StaticTargetTester.Data());
                     HeadshotTester eyeHeight = new EyeHeightHeadshotTester(new EyeHeightHeadshotTester.Data());
                     DirectionalEntityFinder aroundEnd = new AroundEndFinder(new AroundEndFinder.Data(3F));
+                    Key hitScanKey = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan.test");
                     Firer hitScan = new HitScanFirer(new HitScanFirer.Data(endpointSelectorKey, targetFinderKey,
                             shotHandlerKeys), view, endpointSelector, targetFinder, shotHandlers);
-                    ShotHandler particle = new GunEffectShotHandler(new ParticleTrailEffect(new ParticleTrailEffect.Data(
-                            Particle.CRIT,
-                            false,
-                            0.0F,
-                            0.0F,
-                            0.0F,
-                            0.0F,
-                            1,
-                            4
-                    ), view));
+                    ShotHandler explosion = new ExplosionShotHandler(new ExplosionShotHandler.Data(3F));
+                    Key subFinderKey = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.positional.test");
+                    PositionalEntityFinder subFinder = new NearbyPhantazmMobFinder(new NearbyPhantazmMobFinder.Data(3),
+                            Mob.getMobStore());
+                    Key subFirerKey = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan.test");
+                    Firer subFirer = new HitScanFirer(new HitScanFirer.Data(endpointSelectorKey, targetFinderKey,
+                            Collections.singleton(damageShotHandlerKey)), view, endpointSelector, targetFinder,
+                            Collections.singleton(damage));
+                    ShotHandler chain = new ChainShotHandler(new ChainShotHandler.Data(subFinderKey, subFirerKey,
+                            true, 3),
+                            subFinder, subFirer);
+
+                    // don't use nCopies bc of repetition, but for the sake of being concise
+                    Firer spread = new SpreadFirer(new SpreadFirer.Data(Collections.nCopies(4, hitScanKey),
+                            (float) Math.toRadians(15.0)), new Random(), Collections.nCopies(4, hitScan));
 
                     List<GunLevel> levels = Collections.singletonList(
                             new GunLevel(
@@ -257,7 +264,7 @@ final class GunTest {
                                     stats,
                                     shootTester,
                                     reloadTester,
-                                    hitScan,
+                                    spread,
                                     List.of(
                                             new PlaySoundEffect(new PlaySoundEffect.Data(Sound.sound(
                                                     Key.key("entity.horse.gallop"),

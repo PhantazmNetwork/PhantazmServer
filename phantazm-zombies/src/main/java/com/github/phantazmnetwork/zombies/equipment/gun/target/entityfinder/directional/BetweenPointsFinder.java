@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
 import com.github.phantazmnetwork.commons.Namespaces;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -17,13 +17,13 @@ import java.util.Objects;
 
 public class BetweenPointsFinder implements DirectionalEntityFinder {
 
-    public record Data() implements VariantSerializable {
+    public record Data() implements Keyed {
 
         public static final Key SERIAL_KEY
                 = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.between_points");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -49,7 +49,7 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

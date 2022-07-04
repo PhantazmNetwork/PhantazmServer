@@ -24,7 +24,7 @@ public class SelfSelector implements TargetSelector<PhantazmMob> {
     }
 
     @Override
-    public @NotNull Key getSerialKey() {
+    public @NotNull Key key() {
         return SERIAL_KEY;
     }
 }

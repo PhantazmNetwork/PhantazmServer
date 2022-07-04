@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
@@ -22,12 +22,12 @@ import java.util.Optional;
 public class HitScanFirer implements Firer {
 
     public record Data(@NotNull Key endSelectorKey, @NotNull Key targetFinderKey,
-                       @NotNull Collection<Key> shotHandlerKeys) implements VariantSerializable {
+                       @NotNull Collection<Key> shotHandlerKeys) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -68,7 +68,7 @@ public class HitScanFirer implements Firer {
                 previousHits.add(hit.mob());
             }
             for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(state, player, previousHits, new GunShot(end, target.regular(),
+                shotHandler.handle(state, player, previousHits, new GunShot(start, end, target.regular(),
                         target.headshot()));
             }
         });
@@ -82,7 +82,7 @@ public class HitScanFirer implements Firer {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

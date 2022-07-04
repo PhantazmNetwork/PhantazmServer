@@ -1,13 +1,13 @@
 package com.github.phantazmnetwork.zombies.equipment.gun;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
 
-public record GunModel(@NotNull List<GunLevel> levels, @NotNull Key serialKey) implements VariantSerializable {
+public record GunModel(@NotNull List<GunLevel> levels, @NotNull Key serialKey) implements Keyed {
 
     public GunModel {
         Objects.requireNonNull(levels, "levels");
@@ -15,7 +15,7 @@ public record GunModel(@NotNull List<GunLevel> levels, @NotNull Key serialKey) i
     }
 
     @Override
-    public @NotNull Key getSerialKey() {
+    public @NotNull Key key() {
         return serialKey;
     }
 }

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import net.kyori.adventure.key.Key;
@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class GradientActionBarChooser implements ReloadActionBarChooser {
 
-    public record Data(@NotNull Component component, @NotNull RGBLike from, @NotNull RGBLike to) implements VariantSerializable {
+    public record Data(@NotNull Component component, @NotNull RGBLike from, @NotNull RGBLike to) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.gradient");
 
@@ -25,7 +25,7 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
         }
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -42,7 +42,7 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

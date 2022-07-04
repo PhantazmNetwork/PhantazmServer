@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
@@ -14,13 +14,13 @@ import java.util.Objects;
 
 public class AroundEndFinder implements DirectionalEntityFinder {
 
-    public record Data(double range) implements VariantSerializable {
+    public record Data(double range) implements Keyed {
 
         public static final Key SERIAL_KEY
                 = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.around_end");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -38,7 +38,7 @@ public class AroundEndFinder implements DirectionalEntityFinder {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 }

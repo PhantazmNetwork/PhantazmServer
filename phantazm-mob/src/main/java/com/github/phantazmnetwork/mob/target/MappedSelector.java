@@ -33,8 +33,8 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
     }
 
     @Override
-    public @NotNull Key getSerialKey() {
-        return delegate.getSerialKey();
+    public @NotNull Key key() {
+        return delegate.key();
     }
 
     @Override

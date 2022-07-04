@@ -112,7 +112,7 @@ public class MobSerializationTest {
             protected @NotNull FollowEntityGoal<Player> createGoal(@NotNull TargetSelector<Player> selector) {
                 return new FollowEntityGoal<>(selector) {
                     @Override
-                    public @NotNull Key getSerialKey() {
+                    public @NotNull Key key() {
                         return FollowPlayerGoal.SERIAL_KEY;
                     }
                 };

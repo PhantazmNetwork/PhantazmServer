@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
@@ -17,12 +17,12 @@ public class ReloadActionBarEffect implements GunEffect {
 
     public record Data(@NotNull Key statsKey,
                        @NotNull Key reloadTesterKey,
-                       @NotNull Key reloadActionBarChooserKey) implements VariantSerializable {
+                       @NotNull Key reloadActionBarChooserKey) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.action_bar.reload");
 
         @Override
-        public @NotNull Key getSerialKey() {
+        public @NotNull Key key() {
             return SERIAL_KEY;
         }
     }
@@ -74,7 +74,7 @@ public class ReloadActionBarEffect implements GunEffect {
     }
 
     @Override
-    public @NotNull VariantSerializable getData() {
+    public @NotNull Keyed getData() {
         return data;
     }
 

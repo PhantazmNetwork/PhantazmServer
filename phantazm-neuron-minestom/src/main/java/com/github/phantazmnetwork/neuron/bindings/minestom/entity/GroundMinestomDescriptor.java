@@ -46,7 +46,7 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
     }
 
     @Override
-    default @NotNull Key getSerialKey() {
+    default @NotNull Key key() {
         return SERIAL_KEY;
     }
 

@@ -1,14 +1,14 @@
 package com.github.phantazmnetwork.mob.goal;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Creates {@link NeuralGoal}s from an associated {@link PhantazmMob}.
  */
-public interface Goal extends VariantSerializable {
+public interface Goal extends Keyed {
 
     /**
      * Creates a new {@link NeuralGoal}.

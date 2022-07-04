@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
@@ -12,6 +12,6 @@ public interface PositionalEntityFinder {
 
     @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Point start);
 
-    @NotNull VariantSerializable getData();
+    @NotNull Keyed getData();
 
 }

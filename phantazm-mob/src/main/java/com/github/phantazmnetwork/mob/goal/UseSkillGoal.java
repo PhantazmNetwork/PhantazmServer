@@ -70,7 +70,7 @@ public record UseSkillGoal(@NotNull Skill skill, long period) implements Goal {
     }
 
     @Override
-    public @NotNull Key getSerialKey() {
+    public @NotNull Key key() {
         return SERIAL_KEY;
     }
 }

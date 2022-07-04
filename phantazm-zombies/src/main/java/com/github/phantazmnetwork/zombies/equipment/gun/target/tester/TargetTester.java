@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.tester;
 
-import com.github.phantazmnetwork.api.config.VariantSerializable;
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -13,6 +13,6 @@ public interface TargetTester {
 
     @NotNull Optional<Vec> getHitLocation(@NotNull Player player, @NotNull PhantazmMob mob, @NotNull Pos start);
 
-    @NotNull VariantSerializable getData();
+    @NotNull Keyed getData();
 
 }
