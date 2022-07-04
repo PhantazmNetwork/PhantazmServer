@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
@@ -14,6 +15,7 @@ import net.minestom.server.event.instance.PreBlockChangeEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerChunkLoadEvent;
 import net.minestom.server.event.player.PrePlayerStartDiggingEvent;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -26,6 +28,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Supports instance-wide client blocks.
@@ -72,14 +75,19 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         this.instance = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.clientBlocks = new Long2ObjectOpenHashMap<>();
 
-        globalNode.addListener(EventListener.builder(PlayerChunkLoadEvent.class).filter(event -> event.getInstance() ==
-                instance).expireWhen(event -> !instance.isRegistered()).handler(this::onPlayerChunkLoad).build());
-        globalNode.addListener(EventListener.builder(PreBlockChangeEvent.class).filter(event -> event.getInstance() ==
-                instance).expireWhen(event -> !instance.isRegistered()).handler(this::onPreBlockChange).build());
-        globalNode.addListener(EventListener.builder(PlayerBlockBreakEvent.class).filter(event -> event.getInstance() ==
-                instance).expireWhen(event -> !instance.isRegistered()).handler(this::onPlayerBlockBreak).build());
-        globalNode.addListener(EventListener.builder(PrePlayerStartDiggingEvent.class).filter(event -> event
-                .getInstance() == instance).expireWhen(event -> !instance.isRegistered())
+        Predicate<InstanceEvent> filter = event -> event.getInstance() == this.instance.get();
+        Predicate<Object> expire = ignored -> {
+            Instance current = this.instance.get();
+            return current == null || !instance.isRegistered();
+        };
+
+        globalNode.addListener(EventListener.builder(PlayerChunkLoadEvent.class).filter(filter).expireWhen(expire)
+                .handler(this::onPlayerChunkLoad).build());
+        globalNode.addListener(EventListener.builder(PreBlockChangeEvent.class).filter(filter).expireWhen(expire)
+                .handler(this::onPreBlockChange).build());
+        globalNode.addListener(EventListener.builder(PlayerBlockBreakEvent.class).filter(filter).expireWhen(expire)
+                .handler(this::onPlayerBlockBreak).build());
+        globalNode.addListener(EventListener.builder(PrePlayerStartDiggingEvent.class).filter(filter).expireWhen(expire)
                 .handler(this::onPrePlayerStartDigging).build());
     }
 
@@ -157,6 +165,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                 PositionedBlock block = blocks.get(VecUtils.toBlockInt(blockPosition));
 
                 if(block != null) {
+                    if(event.getResult().success()) {
+                        return; //don't change
+                    }
+
                     event.setResult(new PlayerDiggingListener.DiggingResult(block.block, false));
                 }
             }

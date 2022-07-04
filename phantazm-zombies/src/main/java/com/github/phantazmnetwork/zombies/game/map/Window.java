@@ -50,12 +50,10 @@ public class Window extends MapObject<WindowInfo> {
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
         Region3I frame = data.frameRegion();
         Vec3I min = frame.getOrigin();
-        Vec3I lengths = frame.getLengths();
 
         worldMin = Vec3I.of(origin.getX() + min.getX(), origin.getY() + min.getY(), origin.getZ() +
                 min.getZ());
-        center = Vec3D.of(worldMin.getX() + ((double)lengths.getX() / 2D), worldMin.getY() +
-                ((double)lengths.getY() / 2D), worldMin.getZ() + ((double)lengths.getZ() / 2D));
+        center = frame.getCenter();
         volume = frame.volume();
 
         if(volume == 0) {
