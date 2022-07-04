@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.commons.vector;
 
 /**
- * Standard implementation of Vec3I. Not a part of the public API.
+ * Standard, immutable implementation of Vec3I. Not a part of the public API.
  */
-class BasicVec3I extends Vec3IBase {
+class ImmutableVec3I extends Vec3IBase {
     private final int x;
     private final int y;
     private final int z;
@@ -14,7 +14,7 @@ class BasicVec3I extends Vec3IBase {
      * @param y the y-coordinate
      * @param z the z-coordinate
      */
-    BasicVec3I(int x, int y, int z) {
+    ImmutableVec3I(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;

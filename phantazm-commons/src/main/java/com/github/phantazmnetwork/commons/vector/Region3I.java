@@ -7,31 +7,28 @@ import java.util.NoSuchElementException;
 
 /**
  * Represents a 3-dimensional bounding box with integer lengths. This class implements {@link Iterable}; when iterated,
- * it returns a value for each integer vector its bounds enclose.
+ * it returns a value for each integer vector its bounds enclose. The returned vectors may be mutable, for performance.
  */
 public interface Region3I extends Iterable<Vec3I> {
     /**
      * The "origin" vector of this region. This is the corner closest to ⟨-∞, -∞, -∞⟩.
      * @return the origin vector for this region
      */
-    @NotNull Vec3I getOrigin();
+    @NotNull Vec3I origin();
 
     /**
      * The "length" vectors for this region. These are always positive or zero, and when added to the origin vector
      * produce the maximum corner for this region (the corner closest to ⟨∞, ∞, ∞⟩).
      * @return the length vectors for this region
      */
-    @NotNull Vec3I getLengths();
+    @NotNull Vec3I lengths();
 
     /**
      * Returns the "max" vector of this region. This is the sum of the origin and lengths vector.
      * @return the max vector of this region
      */
     default @NotNull Vec3I getMax() {
-        Vec3I origin = getOrigin();
-        Vec3I lengths = getLengths();
-        return Vec3I.of(origin.getX() + lengths.getX(), origin.getY() + lengths.getY(), origin.getZ() + lengths
-                .getZ());
+        return origin().add(lengths());
     }
 
     /**
@@ -39,8 +36,8 @@ public interface Region3I extends Iterable<Vec3I> {
      * @return the center of this region
      */
     default @NotNull Vec3D getCenter() {
-        Vec3I origin = getOrigin();
-        Vec3I lengths = getLengths();
+        Vec3I origin = origin();
+        Vec3I lengths = lengths();
 
         return Vec3D.of(origin.getX() + ((double)lengths.getX() / 2D), origin.getY() +
                 ((double)lengths.getY() / 2D), origin.getZ() + ((double)lengths.getZ() / 2D));
@@ -64,7 +61,7 @@ public interface Region3I extends Iterable<Vec3I> {
             return first;
         }
 
-        Vec3I firstOrigin = first.getOrigin();
+        Vec3I firstOrigin = first.origin();
         Vec3I firstMax = first.getMax();
 
         int minX = firstOrigin.getX();
@@ -77,7 +74,7 @@ public interface Region3I extends Iterable<Vec3I> {
 
         for(int i = 1; i < regions.length; i++) {
             Region3I sample = regions[i];
-            Vec3I sampleOrigin = sample.getOrigin();
+            Vec3I sampleOrigin = sample.origin();
             Vec3I sampleMax = sample.getMax();
 
             minX = Math.min(minX, sampleOrigin.getX());
@@ -133,9 +130,7 @@ public interface Region3I extends Iterable<Vec3I> {
      * @return a new Region3I with non-negative lengths, representing the same bounding box
      */
     static @NotNull Region3I normalized(@NotNull Vec3I origin, @NotNull Vec3I lengths, @NotNull Vec3I relativeTo) {
-        Vec3I second = Vec3I.of(origin.getX() + lengths.getX() - 1, origin.getY() + lengths.getY() - 1, origin
-                .getZ() + lengths.getZ() - 1);
-        return encompassing(origin, second, relativeTo);
+        return encompassing(origin, origin.add(lengths).sub(1, 1, 1), relativeTo);
     }
 
     /**
@@ -147,9 +142,7 @@ public interface Region3I extends Iterable<Vec3I> {
      * @return a new Region3I with non-negative lengths, representing the same bounding box
      */
     static @NotNull Region3I normalized(@NotNull Vec3I origin, @NotNull Vec3I lengths) {
-        Vec3I second = Vec3I.of(origin.getX() + lengths.getX() - 1, origin.getY() + lengths.getY() - 1, origin
-                .getZ() + lengths.getZ() - 1);
-        return encompassing(origin, second, Vec3I.ORIGIN);
+        return encompassing(origin, origin.add(lengths).sub(1, 1, 1), Vec3I.ORIGIN);
     }
 
     /**
@@ -207,7 +200,7 @@ public interface Region3I extends Iterable<Vec3I> {
      * @return true if the bounding boxes overlap, false otherwise
      */
     static boolean overlaps(@NotNull Region3I first, @NotNull Region3I second) {
-        return overlaps(first.getOrigin(), first.getLengths(), second.getOrigin(), second.getLengths());
+        return overlaps(first.origin(), first.lengths(), second.origin(), second.lengths());
     }
 
     /**
@@ -215,7 +208,7 @@ public interface Region3I extends Iterable<Vec3I> {
      * @return the volume of this bounding box
      */
     default int volume() {
-        Vec3I lengths = getLengths();
+        Vec3I lengths = lengths();
         return lengths.getX() * lengths.getY() * lengths.getZ();
     }
 
@@ -230,8 +223,8 @@ public interface Region3I extends Iterable<Vec3I> {
 
     @Override
     default @NotNull Iterator<Vec3I> iterator() {
-        Vec3I origin = getOrigin();
-        Vec3I lengths = getLengths();
+        Vec3I origin = origin();
+        Vec3I lengths = lengths();
 
         return new Iterator<>() {
             private int x = origin.getX();
@@ -241,6 +234,8 @@ public interface Region3I extends Iterable<Vec3I> {
             private final int xEnd = origin.getX() + lengths.getX();
             private final int yEnd = origin.getY() + lengths.getY();
             private final int zEnd = origin.getZ() + lengths.getZ();
+
+            private final Vec3I local = Vec3I.threadLocal();
 
             @Override
             public boolean hasNext() {
@@ -263,7 +258,8 @@ public interface Region3I extends Iterable<Vec3I> {
                     }
                 }
 
-                return Vec3I.of(curX, curY, curZ);
+                local.set(curX, curY, curZ);
+                return local;
             }
         };
     }

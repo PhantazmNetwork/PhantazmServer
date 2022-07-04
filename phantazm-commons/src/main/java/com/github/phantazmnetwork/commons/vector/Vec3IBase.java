@@ -3,12 +3,12 @@ package com.github.phantazmnetwork.commons.vector;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Contains standard methods common to all {@link Vec3I} implementations.
+ * Contains standard methods common to {@link Vec3I} implementations.
  */
 public abstract class Vec3IBase implements Vec3I {
     @Override
     public int hashCode() {
-        return Vec3I.hash(getX(), getY(), getZ());
+        return Vec3I.hashCode(getX(), getY(), getZ());
     }
 
     @Override
@@ -35,16 +35,11 @@ public abstract class Vec3IBase implements Vec3I {
 
     @Override
     public int compareTo(@NotNull Vec3I o) {
-        int xCompare = Integer.compare(getX(), o.getX());
-        if (xCompare == 0) {
-            int yCompare = Integer.compare(getY(), o.getY());
-            if (yCompare == 0) {
-                return Integer.compare(getZ(), o.getZ());
-            }
+        return Vec3I.compare(getX(), getY(), getZ(), o.getX(), o.getY(), o.getZ());
+    }
 
-            return yCompare;
-        }
-
-        return xCompare;
+    @Override
+    public @NotNull Vec3I op(int x, int y, int z) {
+        return Vec3I.of(x, y, z);
     }
 }

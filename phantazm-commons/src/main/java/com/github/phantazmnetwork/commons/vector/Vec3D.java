@@ -41,6 +41,29 @@ public interface Vec3D extends Comparable<Vec3D> {
     }
 
     /**
+     * Creates a new, immutable Vec3D from the provided integer vector.
+     * @param vec the integer vector
+     * @return a new double vector
+     */
+    static @NotNull Vec3D of(@NotNull Vec3I vec) {
+        return of(vec.getX(), vec.getY(), vec.getZ());
+    }
+
+    /**
+     * Determines if two points are equal.
+     * @param x1 first x-component
+     * @param y1 first y-component
+     * @param z1 first z-component
+     * @param x2 second x-component
+     * @param y2 second y-component
+     * @param z2 second z-component
+     * @return true if the two points are the same, false otherwise
+     */
+    static boolean equals(double x1, double y1, double z1, double x2, double y2, double z2) {
+        return x1 == x2 && y1 == y2 && z1 == z2;
+    }
+
+    /**
      * Computes the hashcode of a double triplet.
      * @param x the x-component
      * @param y the y-component
@@ -85,19 +108,5 @@ public interface Vec3D extends Comparable<Vec3D> {
      */
     static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
         return Math.sqrt(squaredDistance(x1, y1, z1, x2, y2, z2));
-    }
-
-    /**
-     * Determines if two points are equal.
-     * @param x1 first x-component
-     * @param y1 first y-component
-     * @param z1 first z-component
-     * @param x2 second x-component
-     * @param y2 second y-component
-     * @param z2 second z-component
-     * @return true if the two points are the same, false otherwise
-     */
-    static boolean equals(double x1, double y1, double z1, double x2, double y2, double z2) {
-        return x1 == x2 && y1 == y2 && z1 == z2;
     }
 }

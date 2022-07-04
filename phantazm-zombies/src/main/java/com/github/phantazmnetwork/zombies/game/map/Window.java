@@ -49,7 +49,7 @@ public class Window extends MapObject<WindowInfo> {
         super(data, origin, instance);
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
         Region3I frame = data.frameRegion();
-        Vec3I min = frame.getOrigin();
+        Vec3I min = frame.origin();
 
         worldMin = Vec3I.of(origin.getX() + min.getX(), origin.getY() + min.getY(), origin.getZ() +
                 min.getZ());
@@ -226,7 +226,7 @@ public class Window extends MapObject<WindowInfo> {
     }
 
     private Vec3I indexToCoordinate(int index) {
-        Vec3I lengths = data.frameRegion().getLengths();
+        Vec3I lengths = data.frameRegion().lengths();
 
         int xWidth = lengths.getX();
         int xyArea = xWidth * lengths.getY();
@@ -235,6 +235,6 @@ public class Window extends MapObject<WindowInfo> {
         int y = index / xWidth;
         int z = index / xyArea;
 
-        return Vec3I.of(x + worldMin.getX(), y + worldMin.getY(), z + worldMin.getZ());
+        return worldMin.add(x, y, z);
     }
 }

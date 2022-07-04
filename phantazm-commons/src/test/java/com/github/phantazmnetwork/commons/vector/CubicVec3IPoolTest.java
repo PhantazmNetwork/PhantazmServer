@@ -32,14 +32,14 @@ class CubicVec3IPoolTest {
         for(int i = -4; i < 4; i++) {
             for(int j = -4; j < 4; j++) {
                 for(int k = -4; k < 4; k++) {
-                    assertEquals(new BasicVec3I(i, j, k), pool.fromCache(i, j, k));
+                    assertEquals(new ImmutableVec3I(i, j, k), pool.fromCache(i, j, k));
                 }
             }
         }
 
         Vec3IPool tinyPool = new CubicVec3IPool(2);
-        assertEquals(new BasicVec3I(0, 0, 0), tinyPool.fromCache(0, 0, 0));
-        assertEquals(new BasicVec3I(-1, -1, -1), tinyPool.fromCache(-1, -1, -1));
+        assertEquals(new ImmutableVec3I(0, 0, 0), tinyPool.fromCache(0, 0, 0));
+        assertEquals(new ImmutableVec3I(-1, -1, -1), tinyPool.fromCache(-1, -1, -1));
     }
 
     @Test
