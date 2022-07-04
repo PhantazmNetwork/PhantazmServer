@@ -46,7 +46,7 @@ public class SpreadFirer implements Firer {
             else {
                 Vec direction = start.direction();
                 double yaw = Math.atan2(direction.z(), direction.x());
-                double noYMagnitude = Math.sqrt(direction.x() * direction.x() + direction.z() + direction.z());
+                double noYMagnitude = Math.sqrt(direction.x() * direction.x() + direction.z() * direction.z());
                 double pitch = Math.atan2(direction.y(), noYMagnitude);
 
                 yaw += data.angleVariance() * (2 * random.nextDouble() - 1);

@@ -165,7 +165,7 @@ final class GunTest {
                     TargetTester targetTester = new RayTraceTargetTester(new RayTraceTargetTester.Data());
                     Key targetFinderKey = Key.key(Namespaces.PHANTAZM, "gun.target_finder.test");
                     TargetFinder targetFinder = new BasicTargetFinder(new BasicTargetFinder.Data(entityFinderKey,
-                            targetTesterKey, headshotTesterKey, true, 2),
+                            targetTesterKey, headshotTesterKey, false, 2),
                             Mob.getMobStore(), directionalEntityFinder, targetTester, headshotTester);
                     Key statsKey = Key.key(Namespaces.PHANTAZM, "gun.stats.test");
                     GunStats stats = new GunStats(10L, 30L, 36, 12, 1);

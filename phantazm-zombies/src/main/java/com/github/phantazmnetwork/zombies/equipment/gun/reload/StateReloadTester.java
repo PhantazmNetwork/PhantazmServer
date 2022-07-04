@@ -32,7 +32,7 @@ public class StateReloadTester implements ReloadTester {
 
     @Override
     public boolean shouldReload(@NotNull GunState state) {
-        return canReload(state) && state.clip() != stats.maxClip();
+        return canReload(state) && state.clip() != stats.maxClip() && state.clip() != state.ammo();
     }
 
     @Override
