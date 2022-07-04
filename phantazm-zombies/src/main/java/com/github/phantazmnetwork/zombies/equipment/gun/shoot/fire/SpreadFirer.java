@@ -39,23 +39,25 @@ public class SpreadFirer implements Firer {
 
     @Override
     public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<PhantazmMob> previousHits) {
-        for (Firer subFirer : subFirers) {
-            if (data.angleVariance() == 0) {
+        if (data.angleVariance() == 0) {
+            for (Firer subFirer : subFirers) {
                 subFirer.fire(state, start, previousHits);
             }
-            else {
-                Vec direction = start.direction();
-                double yaw = Math.atan2(direction.z(), direction.x());
-                double noYMagnitude = Math.sqrt(direction.x() * direction.x() + direction.z() * direction.z());
-                double pitch = Math.atan2(direction.y(), noYMagnitude);
+            return;
+        }
 
-                yaw += data.angleVariance() * (2 * random.nextDouble() - 1);
-                pitch += data.angleVariance() * (2 * random.nextDouble() - 1);
+        Vec direction = start.direction();
+        double yaw = Math.atan2(direction.z(), direction.x());
+        double noYMagnitude = Math.sqrt(direction.x() * direction.x() + direction.z() * direction.z());
+        double pitch = Math.atan2(direction.y(), noYMagnitude);
 
-                Vec newDirection = new Vec(Math.cos(yaw) * Math.cos(pitch), Math.sin(pitch),
-                        Math.sin(yaw) * Math.cos(pitch));
-                subFirer.fire(state, start.withDirection(newDirection), previousHits);
-            }
+        for (Firer subFirer : subFirers) {
+            double newYaw = yaw + data.angleVariance() * (2 * random.nextDouble() - 1);
+            double newPitch = pitch + data.angleVariance() * (2 * random.nextDouble() - 1);
+
+            Vec newDirection = new Vec(Math.cos(newYaw) * Math.cos(newPitch), Math.sin(newPitch),
+                    Math.sin(newYaw) * Math.cos(newPitch));
+            subFirer.fire(state, start.withDirection(newDirection), previousHits);
         }
     }
 

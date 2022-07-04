@@ -11,7 +11,6 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.collision.Shape;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -19,7 +18,6 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.instance.block.Block;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,10 +74,7 @@ public final class PhantazmServer {
         }
 
         try {
-            Block.GRASS.registry();
             startServer(node, minecraftServer, serverConfig);
-            Shape shape = Block.GRASS.registry().collisionShape();
-            System.out.println();
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);

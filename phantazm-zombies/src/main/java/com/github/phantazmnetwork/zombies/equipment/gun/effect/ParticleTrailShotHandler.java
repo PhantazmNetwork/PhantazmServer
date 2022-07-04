@@ -57,7 +57,7 @@ public class ParticleTrailShotHandler implements ShotHandler {
         }
 
         Pos start = shot.start();
-        Vec direction = start.direction();
+        Vec direction = Vec.fromPoint(shot.end().sub(start)).normalize();
         for (int i = 0; i < data.trailCount(); i++) {
             start = start.add(direction);
 

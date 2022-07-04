@@ -33,6 +33,7 @@ public class ProjectileFirer implements Firer {
                        @NotNull EntityType entityType,
                        double power,
                        double spread,
+                       boolean hasGravity,
                        long maxAliveTime) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan");
@@ -97,8 +98,7 @@ public class ProjectileFirer implements Firer {
 
             endSelector.getEnd(start).ifPresent(end -> {
                 EntityProjectile projectile = new EntityProjectile(player, data.entityType());
-                projectile.setGravity(0, 0);
-                projectile.setNoGravity(true);
+                projectile.setNoGravity(!data.hasGravity());
                 projectile.setInstance(instance, start).thenRun(() -> {
                     projectile.shoot(end, data.power(), data.spread());
                 });

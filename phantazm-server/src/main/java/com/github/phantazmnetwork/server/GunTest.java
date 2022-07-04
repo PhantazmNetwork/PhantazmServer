@@ -234,7 +234,8 @@ final class GunTest {
                     );
 
                     ProjectileFirer projectileFirer = new ProjectileFirer(new ProjectileFirer.Data(endpointSelectorKey,
-                            targetFinderKey, shotHandlerKeys, EntityType.PANDA, 1.0, 0, 60L),
+                            targetFinderKey, shotHandlerKeys, EntityType.FIREBALL, 1.0, 0, true,
+                            60L),
                             view, endpointSelector, targetFinder, shotHandlers);
                     global.addListener(ProjectileCollideWithBlockEvent.class, projectileFirer::onProjectileCollision);
                     global.addListener(ProjectileCollideWithEntityEvent.class, projectileFirer::onProjectileCollision);
