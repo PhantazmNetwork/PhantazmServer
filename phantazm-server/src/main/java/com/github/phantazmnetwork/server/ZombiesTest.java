@@ -41,9 +41,7 @@ final class ZombiesTest {
             }
         });
 
-        global.addListener(PlayerPacketEvent.class, event -> {
-            System.out.println(event.getPacket());
-        });
+        global.addListener(PlayerPacketEvent.class, event -> System.out.println(event.getPacket()));
 
         global.addListener(PlayerUseItemEvent.class, event -> {
             Player player = event.getPlayer();
@@ -57,6 +55,7 @@ final class ZombiesTest {
 
             InterpolationUtils.interpolateLine(VecUtils.toDouble(start), VecUtils.toDouble(end), action -> {
                 instance.setBlock(action.getX(), action.getY(), action.getZ(), Block.AMETHYST_BLOCK);
+                return false;
             });
         });
     }

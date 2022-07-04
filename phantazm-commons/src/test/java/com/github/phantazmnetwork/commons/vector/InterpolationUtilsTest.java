@@ -13,8 +13,10 @@ class InterpolationUtilsTest {
     @Test
     void straightLine() {
         List<Vec3I> blockIntersections = new ArrayList<>(3);
-        InterpolationUtils.interpolateLine(Vec3D.of(0.5, 0.5, 0.5), Vec3D.of(2.5, 0.5, 0.5), vec ->
-                blockIntersections.add(vec.immutable()));
+        InterpolationUtils.interpolateLine(Vec3D.of(0.5, 0.5, 0.5), Vec3D.of(2.5, 0.5, 0.5), vec -> {
+            blockIntersections.add(vec.immutable());
+            return false;
+        });
 
         assertEquals(3, blockIntersections.size());
         for(int i = 0; i < 3; i++) {
@@ -36,8 +38,10 @@ class InterpolationUtilsTest {
     void gottaGoFast() {
         long start = System.currentTimeMillis();
         AtomicInteger count = new AtomicInteger();
-        InterpolationUtils.interpolateLine(Vec3D.of(0.5, 0.5, 0.5), Vec3D.of(100000, 1000000, 100000), vec -> {
+        InterpolationUtils.interpolateLine(Vec3D.of(0.5, 0.5, 0.5), Vec3D.of(100000, 1000000, 100000),
+                vec -> {
             count.getAndIncrement();
+            return false;
         });
         System.out.println(System.currentTimeMillis() - start + "ms to iterate " + count.get() + " elements");
     }

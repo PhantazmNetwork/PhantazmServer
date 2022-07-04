@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public final class InterpolationUtils {
     private InterpolationUtils() {
@@ -19,12 +20,15 @@ public final class InterpolationUtils {
      * <p>The vectors supplied to the consumer are actually the same, thread-local vector, mutated every iteration. If
      * it is necessary to store the results of this iteration, new (mutable or immutable) instances must be created
      * using {@link Vec3I#mutableCopy()} or {@link Vec3I#immutable()}.</p>
+     *
+     * <p>This method is suitable for performing ray-intersection checks. As soon as the given Predicate returns true,
+     * or the ending vector is reached, whichever comes first, iteration will stop.</p>
      * @param start the starting vector
      * @param end the ending vector
-     * @param action the consumer which accepts Vec3I instances
+     * @param action the predicate which accepts Vec3I instances
      */
     public static void interpolateLine(@NotNull Vec3D start, @NotNull Vec3D end,
-                                       @NotNull Consumer<? super Vec3I> action) {
+                                       @NotNull Predicate<? super Vec3I> action) {
         Objects.requireNonNull(action, "action");
 
         double dx = end.getX() - start.getX();
@@ -64,22 +68,31 @@ public final class InterpolationUtils {
 
                 if(cx && cy) {
                     local.set(px, by, bz);
-                    action.accept(local);
+                    if(action.test(local)) {
+                        break;
+                    }
                 }
 
                 if(cy && cz) {
                     local.set(bx, py, bz);
-                    action.accept(local);
+                    if(action.test(local)) {
+                        break;
+                    }
                 }
 
                 if(cz && cx) {
                     local.set(bx, by, pz);
-                    action.accept(local);
+                    if(action.test(local)) {
+                        break;
+                    }
                 }
             }
 
             local.set(px = bx, py = by, pz = bz);
-            action.accept(local);
+            if(action.test(local)) {
+                break;
+            }
+
             hasPrevious = true;
 
             x += xi;
