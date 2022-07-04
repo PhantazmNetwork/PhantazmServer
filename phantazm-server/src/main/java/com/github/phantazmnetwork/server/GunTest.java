@@ -24,6 +24,8 @@ import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.ReloadA
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.ShootTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.StateShootTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.BasicShotEndpointSelector;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.BlockIteration;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.RayTraceBlockIteration;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.HitScanFirer;
@@ -156,8 +158,11 @@ final class GunTest {
                 case "guntest" -> {
                     PlayerView view = viewProvider.fromPlayer(event.getPlayer());
 
+                    Key blockIterationKey = Key.key(Namespaces.PHANTAZM, "gun.block_iteration.test");
+                    BlockIteration blockIteration = new RayTraceBlockIteration(new RayTraceBlockIteration.Data());
                     Key endpointSelectorKey = Key.key(Namespaces.PHANTAZM, "gun.endpoint_selector.test");
-                    ShotEndpointSelector endpointSelector = new BasicShotEndpointSelector(new BasicShotEndpointSelector.Data(100), view);
+                    ShotEndpointSelector endpointSelector = new BasicShotEndpointSelector(new BasicShotEndpointSelector.Data(blockIterationKey,
+                            100), view, blockIteration);
                     Key entityFinderKey = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.test");
                     DirectionalEntityFinder directionalEntityFinder = new BetweenPointsFinder(new BetweenPointsFinder.Data());
                     Key headshotTesterKey = Key.key(Namespaces.PHANTAZM, "gun.headshot_tester.test");

@@ -6,6 +6,8 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class RayUtils {
@@ -93,6 +95,26 @@ public class RayUtils {
 
         double multiplier = minMultiplier < 0D ? maxMultiplier : minMultiplier;
         return Optional.of(direction.mul(multiplier).add(start));
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static @NotNull Optional<Vec> getIntersectionPosition(@NotNull Shape shape, @NotNull Point blockLocation,
+                                                                  @NotNull Pos start) {
+        return RayUtils.rayTrace(shape, blockLocation, start).map(trace -> {
+            if (shape.childBounds().isEmpty()) {
+                return trace;
+            }
+
+            List<Vec> traces = new ArrayList<>(shape.childBounds().size() + 1);
+            traces.add(trace);
+
+            for (Shape child : shape.childBounds()) {
+                RayUtils.rayTrace(child, blockLocation, start).ifPresent(traces::add);
+            }
+
+            PointUtils.sortPointsByDistance(start, traces);
+            return traces.get(0);
+        });
     }
 
 }
