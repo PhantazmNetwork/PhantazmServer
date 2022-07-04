@@ -160,6 +160,10 @@ public interface Vec3I extends Comparable<Vec3I> {
         return false;
     }
 
+    /**
+     * Returns an immutable copy of this vector if it is mutable. Otherwise, returns the same vector.
+     * @return an immutable copy of this vector if it is mutable, otherwise the same vector
+     */
     default @NotNull Vec3I immutable() {
         if(isMutable()) {
             return Vec3I.of(getX(), getY(), getZ());
