@@ -1,47 +1,62 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
+import com.github.phantazmnetwork.api.config.VariantSerializable;
+import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
+import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
+import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class ShootExpEffect implements GunEffect {
 
-    public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.exp.shoot");
+    public record Data(@NotNull Key gunStatsKey) implements VariantSerializable {
+
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.exp.shoot");
+
+        @Override
+        public @NotNull Key getSerialKey() {
+            return SERIAL_KEY;
+        }
+    }
 
     private boolean currentlyActive = false;
 
-    @Override
-    public void accept(@NotNull Gun gun) {
-        if (gun.getState().isMainEquipment()) {
-            currentlyActive = true;
-            gun.getOwner().getPlayer().ifPresent(player -> {
-                float exp;
-                if (gun.getState().ammo() > 0) {
-                    exp = (float) gun.getState().ticksSinceLastShot() / gun.getLevel().shootSpeed();
-                }
-                else {
-                    exp = 0F;
-                }
+    private final Data data;
 
-                player.setExp(exp);
-            });
+    private final PlayerView playerView;
+
+    private final GunStats stats;
+
+    public ShootExpEffect(@NotNull Data data, @NotNull PlayerView playerView, @NotNull GunStats stats) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.stats = Objects.requireNonNull(stats, "stats");
+    }
+
+    @Override
+    public void accept(@NotNull GunState state) {
+        if (state.isMainEquipment()) {
+            float exp = state.ammo() > 0 ? (float) state.ticksSinceLastShot() / stats.shootSpeed() : 0F;
+            playerView.getPlayer().ifPresent(player -> player.setExp(exp));
+            currentlyActive = true;
         }
         else if (currentlyActive) {
-            gun.getOwner().getPlayer().ifPresent(player -> {
-                player.setExp(0);
-            });
+            playerView.getPlayer().ifPresent(player -> player.setExp(0));
             currentlyActive = false;
         }
     }
 
     @Override
-    public void tick(long time) {
+    public void tick(@NotNull GunState state, long time) {
 
     }
 
     @Override
-    public @NotNull Key getSerialKey() {
-        return SERIAL_KEY;
+    public @NotNull VariantSerializable getData() {
+        return data;
     }
+
 }

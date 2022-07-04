@@ -41,6 +41,10 @@ public class VariantConfigProcessor<TValue extends VariantSerializable> implemen
             throw new ConfigProcessException("no subprocessor");
         }
 
+        if (element instanceof ConfigNode node) {
+            return processor.dataFromElement(node);
+        }
+
         return processor.dataFromElement(element.getElementOrThrow("data"));
     }
 
@@ -52,10 +56,17 @@ public class VariantConfigProcessor<TValue extends VariantSerializable> implemen
             throw new ConfigProcessException("no subprocessor");
         }
 
-        ConfigNode node = new LinkedConfigNode(2);
-        node.put("serialKey", KEY_PROCESSOR.elementFromData(data.getSerialKey()));
-        node.put("data", processor.elementFromData(data));
+        ConfigElement element = processor.elementFromData(data);
+        if (element instanceof ConfigNode node) {
+            node.put("serialKey", KEY_PROCESSOR.elementFromData(data.getSerialKey()));
+            return element;
+        }
+        else {
+            ConfigNode node = new LinkedConfigNode(2);
+            node.put("serialKey", KEY_PROCESSOR.elementFromData(data.getSerialKey()));
+            node.put("data", element);
 
-        return node;
+            return node;
+        }
     }
 }

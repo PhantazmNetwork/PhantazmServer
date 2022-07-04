@@ -1,26 +1,66 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
+import com.github.phantazmnetwork.api.config.VariantSerializable;
+import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
+import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
+import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.ReloadActionBarChooser;
+import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class ReloadActionBarEffect implements GunEffect {
+import java.util.Objects;
+
+public class ReloadActionBarEffect implements GunEffect {
+
+    public record Data(@NotNull Key statsKey,
+                       @NotNull Key reloadTesterKey,
+                       @NotNull Key reloadActionBarChooserKey) implements VariantSerializable {
+
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.action_bar.reload");
+
+        @Override
+        public @NotNull Key getSerialKey() {
+            return SERIAL_KEY;
+        }
+    }
+
+    private final Data data;
+
+    private final PlayerView playerView;
+
+    private final GunStats stats;
+
+    private final ReloadTester reloadTester;
+
+    private final ReloadActionBarChooser chooser;
 
     private boolean active = false;
 
+    public ReloadActionBarEffect(@NotNull Data data, @NotNull PlayerView playerView, @NotNull GunStats stats,
+                                 @NotNull ReloadTester reloadTester, @NotNull ReloadActionBarChooser chooser) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.stats = Objects.requireNonNull(stats, "stats");
+        this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
+        this.chooser = Objects.requireNonNull(chooser, "chooser");
+    }
+
     @Override
-    public void accept(@NotNull Gun gun) {
-        if (gun.isReloading()) {
-            if (gun.getState().isMainEquipment()) {
-                float progress = (float) gun.getState().ticksSinceLastReload() / gun.getLevel().reloadSpeed();
-                gun.getOwner().getPlayer().ifPresent(player -> {
-                    player.sendActionBar(getComponent(progress));
+    public void accept(@NotNull GunState state) {
+        if (reloadTester.isReloading(state)) {
+            if (state.isMainEquipment()) {
+                float progress = (float) state.ticksSinceLastReload() / stats.reloadSpeed();
+                playerView.getPlayer().ifPresent(player -> {
+                    player.sendActionBar(chooser.choose(state, player, progress));
                 });
             }
             active = true;
         } else if (active) {
-            if (gun.getState().isMainEquipment()) {
-                gun.getOwner().getPlayer().ifPresent(player -> {
+            if (state.isMainEquipment()) {
+                playerView.getPlayer().ifPresent(player -> {
                     player.sendActionBar(Component.empty());
                 });
             }
@@ -29,10 +69,13 @@ public abstract class ReloadActionBarEffect implements GunEffect {
     }
 
     @Override
-    public void tick(long time) {
+    public void tick(@NotNull GunState state, long time) {
 
     }
 
-    protected abstract @NotNull Component getComponent(float progress);
+    @Override
+    public @NotNull VariantSerializable getData() {
+        return data;
+    }
 
 }

@@ -22,4 +22,8 @@ public record PhantazmMob(@NotNull MobModel model, @NotNull NeuralEntity entity)
         Objects.requireNonNull(entity, "entity");
     }
 
+    @Override
+    public int hashCode() {
+        return entity.hashCode();
+    }
 }
