@@ -97,6 +97,10 @@ public interface Vec3I extends Comparable<Vec3I> {
         return new MutableVec3I(x, y, z);
     }
 
+    static @NotNull Vec3I mutable() {
+        return new MutableVec3I(0, 0, 0);
+    }
+
     /**
      * Returns the mutable thread-local Vec3I instance. This can be used to enable safe, performant optimization when
      * iterating many vectors; instead of creating a new vector every iteration, the iterator can update the vector's
