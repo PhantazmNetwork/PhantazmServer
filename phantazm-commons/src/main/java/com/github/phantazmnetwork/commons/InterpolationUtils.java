@@ -24,7 +24,7 @@ public final class InterpolationUtils {
      * or the ending vector is reached, whichever comes first, iteration will stop.</p>
      * @param start the starting vector
      * @param end the ending vector
-     * @param action the predicate which accepts Vec3I instances
+     * @param action the predicate which accepts Vec3I instances; iteration stops when this returns true
      */
     public static void interpolateLine(@NotNull Vec3D start, @NotNull Vec3D end,
                                        @NotNull Predicate<? super Vec3I> action) {
@@ -69,11 +69,30 @@ public final class InterpolationUtils {
                 boolean cy = ny != py;
                 boolean cz = nz != pz;
 
-                //if all axes change at once, we have two block intersections
+                //if all axes change at once, we have two block intersections to check
                 if(cx && cy && cz) {
+                    double oxy = offset(xym, nx, x, y);
+                    double oyz = offset(yzm, ny, y, z);
+                    double ozx = offset(zxm, nz, z, x);
 
+                    boolean loxy = oxy <= Math.abs(ny);
+                    boolean loyz = oyz <= Math.abs(nz);
+                    boolean lozx = ozx <= Math.abs(nx);
+
+                    int a = loxy ? nx : px;
+                    int b = loyz ? ny : py;
+                    int c = lozx ? nz : pz;
+
+                    int d = loxy ? px : nx;
+                    int e = loyz ? py : ny;
+                    int f = lozx ? pz : nz;
+
+                    if(action.test(local.set(a, b, c)) || action.test(local.set(d, e, f))) {
+                        break;
+                    }
                 }
                 else {
+                    //will sample at most 1 block here
                     if(check(action, local, cx, cy, xym, nx, x, y, ny, nx, py, pz, px, ny, pz)) {
                         break;
                     }
@@ -116,6 +135,10 @@ public final class InterpolationUtils {
     }
 
     private static boolean cmp(double m, int nh, double h, double v, int nv) {
-        return Math.abs(m * (nh - h) + v) <= Math.abs(nv);
+        return offset(m, nh, h, v) <= Math.abs(nv);
+    }
+
+    private static double offset(double m, int nh, double h, double v) {
+        return Math.abs(m * (nh - h) + v);
     }
 }
