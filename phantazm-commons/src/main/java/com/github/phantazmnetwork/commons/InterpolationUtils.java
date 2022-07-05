@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public final class InterpolationUtils {
@@ -55,41 +54,41 @@ public final class InterpolationUtils {
 
         boolean hasPrevious = false;
 
+        double xym = dy / dx;
+        double yzm = dz / dy;
+        double zxm = dx / dz;
+
         Vec3I local = Vec3I.threadLocal();
         for(int i = 0; i <= steps; i++) {
-            int bx = (int) Math.floor(x);
-            int by = (int) Math.floor(y);
-            int bz = (int) Math.floor(z);
+            int nx = (int) Math.floor(x);
+            int ny = (int) Math.floor(y);
+            int nz = (int) Math.floor(z);
 
             if(hasPrevious) {
-                boolean cx = bx != px;
-                boolean cy = by != py;
-                boolean cz = bz != pz;
+                boolean cx = nx != px;
+                boolean cy = ny != py;
+                boolean cz = nz != pz;
 
-                if(cx && cy) {
-                    local.set(px, by, bz);
-                    if(action.test(local)) {
+                //if all axes change at once, we have two block intersections
+                if(cx && cy && cz) {
+
+                }
+                else {
+                    if(check(action, local, cx, cy, xym, nx, x, y, ny, nx, py, pz, px, ny, pz)) {
                         break;
                     }
-                }
 
-                if(cy && cz) {
-                    local.set(bx, py, bz);
-                    if(action.test(local)) {
+                    if(check(action, local, cy, cz, yzm, ny, y, z, nz, px, ny, pz, px, py, nz)) {
                         break;
                     }
-                }
 
-                if(cz && cx) {
-                    local.set(bx, by, pz);
-                    if(action.test(local)) {
+                    if(check(action, local, cz, cx, zxm, nz, z, x, nx, px, py, nz, nx, py, pz)) {
                         break;
                     }
                 }
             }
 
-            local.set(px = bx, py = by, pz = bz);
-            if(action.test(local)) {
+            if(action.test(local.set(px = nx, py = ny, pz = nz))) { //test the next block
                 break;
             }
 
@@ -99,5 +98,24 @@ public final class InterpolationUtils {
             y += yi;
             z += zi;
         }
+    }
+
+    private static boolean check(Predicate<? super Vec3I> p, Vec3I l, boolean ch, boolean cv,
+                                 double m, int nh, double h, double v, int nv,
+                                 int a, int b, int c,
+                                 int d, int e, int f) {
+        if(ch && cv) {
+            if(cmp(m, nh, h, v, nv)) {
+                return p.test(l.set(a, b, c));
+            }
+
+            return p.test(l.set(d, e, f));
+        }
+
+        return false;
+    }
+
+    private static boolean cmp(double m, int nh, double h, double v, int nv) {
+        return Math.abs(m * (nh - h) + v) <= Math.abs(nv);
     }
 }

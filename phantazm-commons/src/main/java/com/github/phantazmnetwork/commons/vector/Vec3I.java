@@ -62,6 +62,7 @@ public interface Vec3I extends Comparable<Vec3I> {
      * @param y the new value of the y-component
      * @param z the new value of the z-component
      * @throws UnsupportedOperationException if this vector is immutable
+     * @return this vector, for chaining
      */
     default @NotNull Vec3I set(int x, int y, int z) {
         throw new UnsupportedOperationException();

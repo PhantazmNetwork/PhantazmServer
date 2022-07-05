@@ -1,10 +1,13 @@
 package com.github.phantazmnetwork.commons.vector;
 
 import com.github.phantazmnetwork.commons.InterpolationUtils;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashBigSet;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,14 +38,12 @@ class InterpolationUtilsTest {
     }
 
     @Test
-    void gottaGoFast() {
-        long start = System.currentTimeMillis();
-        AtomicInteger count = new AtomicInteger();
-        InterpolationUtils.interpolateLine(Vec3D.of(0.5, 0.5, 0.5), Vec3D.of(100000, 1000000, 100000),
+    void hugeLineNoDuplicates() {
+        Set<Vec3I> vecs = new ObjectOpenHashSet<>();
+        InterpolationUtils.interpolateLine(Vec3D.of(15.5, 12.54, 87.5), Vec3D.of(100, 543, 123),
                 vec -> {
-            count.getAndIncrement();
+            assertTrue(vecs.add(vec.immutable()), vec.toString());
             return false;
         });
-        System.out.println(System.currentTimeMillis() - start + "ms to iterate " + count.get() + " elements");
     }
 }
