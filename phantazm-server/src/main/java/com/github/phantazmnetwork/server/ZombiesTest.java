@@ -7,6 +7,8 @@ import com.github.phantazmnetwork.api.hologram.Hologram;
 import com.github.phantazmnetwork.api.hologram.InstanceHologram;
 import com.github.phantazmnetwork.commons.InterpolationUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
+import com.github.steanky.ethylene.codec.yaml.YamlCodec;
+import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Point;
@@ -20,6 +22,11 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.common.FlowStyle;
 
 final class ZombiesTest {
     private ZombiesTest() {
@@ -40,8 +47,6 @@ final class ZombiesTest {
                 hologram.setInstance(spawnInstance);
             }
         });
-
-        global.addListener(PlayerPacketEvent.class, event -> System.out.println(event.getPacket()));
 
         global.addListener(PlayerUseItemEvent.class, event -> {
             Player player = event.getPlayer();

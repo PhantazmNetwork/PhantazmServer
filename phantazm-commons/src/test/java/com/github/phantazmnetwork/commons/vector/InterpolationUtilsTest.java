@@ -40,7 +40,7 @@ class InterpolationUtilsTest {
     @Test
     void hugeLineNoDuplicates() {
         Set<Vec3I> vecs = new ObjectOpenHashSet<>();
-        InterpolationUtils.interpolateLine(Vec3D.of(15.5, 12.54, 87.5), Vec3D.of(100, 543, 123),
+        InterpolationUtils.interpolateLine(Vec3D.of(15.5, 12.54, 87.5), Vec3D.of(10150, 543, 123),
                 vec -> {
             assertTrue(vecs.add(vec.immutable()), vec.toString());
             return false;

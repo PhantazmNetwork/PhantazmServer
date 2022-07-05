@@ -58,6 +58,10 @@ public final class InterpolationUtils {
         double yzm = dz / dy;
         double zxm = dx / dz;
 
+        double xzm = dz / dx;
+        double yxm = dx / dy;
+        double zym = dy / dz;
+
         Vec3I local = Vec3I.threadLocal();
         for(int i = 0; i <= steps; i++) {
             int nx = (int) Math.floor(x);
@@ -71,21 +75,21 @@ public final class InterpolationUtils {
 
                 //if all axes change at once, we have two block intersections to check
                 if(cx && cy && cz) {
-                    double oxy = offset(xym, nx, x, y);
-                    double oyz = offset(yzm, ny, y, z);
-                    double ozx = offset(zxm, nz, z, x);
+                    boolean lxy = cmp(xym, nx, x, y, ny);
+                    boolean lyz = cmp(yzm, ny, y, z, nz);
+                    boolean lzx = cmp(zxm, nz, z, x, nx);
 
-                    boolean loxy = oxy <= Math.abs(ny);
-                    boolean loyz = oyz <= Math.abs(nz);
-                    boolean lozx = ozx <= Math.abs(nx);
+                    boolean lxz = cmp(xzm, nx, x, z, nz);
+                    boolean lyx = cmp(yxm, ny, y, x, nx);
+                    boolean lzy = cmp(zym, nz, z, y, ny);
 
-                    int a = loxy ? nx : px;
-                    int b = loyz ? ny : py;
-                    int c = lozx ? nz : pz;
+                    int a = lxy ? nx : px;
+                    int b = lyz ? ny : py;
+                    int c = lzx ? nz : pz;
 
-                    int d = loxy ? px : nx;
-                    int e = loyz ? py : ny;
-                    int f = lozx ? pz : nz;
+                    int d = lxz ? nx : px;
+                    int e = lyx ? ny : py;
+                    int f = lzy ? nz : pz;
 
                     if(action.test(local.set(a, b, c)) || action.test(local.set(d, e, f))) {
                         break;
