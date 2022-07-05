@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
 
-import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
@@ -10,14 +10,18 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.ShotHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.TargetFinder;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class HitScanFirer implements Firer {
 
@@ -30,6 +34,37 @@ public class HitScanFirer implements Firer {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
+        Objects.requireNonNull(requested, "requested");
+
+        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                Key endSelectorKey = keyProcessor.dataFromElement(element.getElementOrThrow("endSelectorKey"));
+                Key targetFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetFinderKey"));
+                Collection<Key> shotHandlerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlerKeys"));
+
+                requested.add(endSelectorKey);
+                requested.add(targetFinderKey);
+                requested.addAll(shotHandlerKeys);
+
+                return new Data(endSelectorKey, targetFinderKey, shotHandlerKeys);
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(3);
+                node.put("endSelectorKey", keyProcessor.elementFromData(data.endSelectorKey()));
+                node.put("targetFinderKey", keyProcessor.elementFromData(data.targetFinderKey()));
+                node.put("shotHandlerKeys", collectionProcessor.elementFromData(data.shotHandlerKeys()));
+                return node;
+            }
+        };
     }
 
     private final Data data;

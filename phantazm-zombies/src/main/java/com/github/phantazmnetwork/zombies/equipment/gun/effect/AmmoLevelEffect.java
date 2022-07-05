@@ -1,10 +1,14 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -19,6 +23,21 @@ public class AmmoLevelEffect implements GunEffect {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                return new Data();
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
+                return new LinkedConfigNode(0);
+            }
+        };
     }
 
     private final Data data;

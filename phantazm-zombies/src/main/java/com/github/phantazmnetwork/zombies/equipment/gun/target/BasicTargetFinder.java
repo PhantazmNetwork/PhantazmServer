@@ -1,11 +1,17 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target;
 
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.DirectionalEntityFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.HeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTester;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
@@ -34,6 +40,42 @@ public class BasicTargetFinder implements TargetFinder {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
+        Objects.requireNonNull(requested, "requested");
+
+        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                Key finderKey = keyProcessor.dataFromElement(element.getElementOrThrow("finderKey"));
+                Key targetTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetTesterKey"));
+                Key headshotTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("headshotTesterKey"));
+
+                requested.add(finderKey);
+                requested.add(targetTesterKey);
+                requested.add(headshotTesterKey);
+
+                boolean ignorePreviousHits = element.getBooleanOrThrow("ignorePreviousHits");
+                int maxTargets = element.getNumberOrThrow("maxTargets").intValue();
+
+                return new Data(finderKey, targetTesterKey, headshotTesterKey, ignorePreviousHits, maxTargets);
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(5);
+                node.put("finderKey", keyProcessor.elementFromData(data.finderKey()));
+                node.put("targetTesterKey", keyProcessor.elementFromData(data.targetTesterKey()));
+                node.put("headshotTesterKey", keyProcessor.elementFromData(data.headshotTesterKey()));
+                node.putBoolean("ignorePreviousHits", data.ignorePreviousHits());
+                node.putNumber("maxTargets", data.maxTargets());
+
+                return node;
+            }
+        };
     }
 
     private final Data data;

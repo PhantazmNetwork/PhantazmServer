@@ -1,14 +1,21 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
+import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class ShootExpEffect implements GunEffect {
 
@@ -20,6 +27,25 @@ public class ShootExpEffect implements GunEffect {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
+        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                Key gunStatsKey = keyProcessor.dataFromElement(element.getElementOrThrow("gunStatsKey"));
+                return new Data(gunStatsKey);
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(1);
+                node.put("gunStatsKey", keyProcessor.elementFromData(data.gunStatsKey()));
+                return node;
+            }
+        };
     }
 
     private boolean currentlyActive = false;

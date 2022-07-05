@@ -1,7 +1,8 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
 
-import net.kyori.adventure.key.Keyed;
+import com.github.phantazmnetwork.api.config.processor.MinestomConfigProcessors;
 import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
@@ -10,7 +11,13 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.ShotHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.TargetFinder;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityProjectile;
@@ -42,6 +49,51 @@ public class ProjectileFirer implements Firer {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
+        Objects.requireNonNull(requested, "requested");
+
+        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
+        ConfigProcessor<EntityType> entityTypeProcessor = MinestomConfigProcessors.entityType();
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                Key endSelectorKey = keyProcessor.dataFromElement(element.getElementOrThrow("endSelector"));
+                Key targetFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetFinder"));
+                Collection<Key> shotHandlerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlers"));
+
+                requested.add(endSelectorKey);
+                requested.add(targetFinderKey);
+                requested.addAll(shotHandlerKeys);
+
+                EntityType entityType = entityTypeProcessor.dataFromElement(element.getElementOrThrow("entityType"));
+                double power = element.getNumberOrThrow("power").doubleValue();
+                double spread = element.getNumberOrThrow("spread").doubleValue();
+                boolean hasGravity = element.getBooleanOrThrow("hasGravity");
+                long maxAliveTime = element.getNumberOrThrow("maxAliveTime").longValue();
+
+                return new Data(endSelectorKey, targetFinderKey, shotHandlerKeys, entityType, power, spread, hasGravity,
+                        maxAliveTime);
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(8);
+                node.put("endSelector", keyProcessor.elementFromData(data.endSelectorKey()));
+                node.put("targetFinder", keyProcessor.elementFromData(data.targetFinderKey()));
+                node.put("shotHandlers", collectionProcessor.elementFromData(data.shotHandlerKeys()));
+                node.put("entityType", entityTypeProcessor.elementFromData(data.entityType()));
+                node.putNumber("power", data.power());
+                node.putNumber("spread", data.spread());
+                node.putBoolean("hasGravity", data.hasGravity());
+                node.putNumber("maxAliveTime", data.maxAliveTime());
+
+                return node;
+            }
+        };
     }
 
     private record FiredShot(@NotNull GunState state, @NotNull Pos start,

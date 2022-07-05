@@ -10,7 +10,9 @@ import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.util.RGBLike;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -73,6 +75,24 @@ public final class AdventureConfigProcessors {
         }
     };
 
+    private static final ConfigProcessor<RGBLike> rgbLike = new ConfigProcessor<>() {
+        @Override
+        public @NotNull RGBLike dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String hex = ConfigProcessor.STRING.dataFromElement(element);
+            TextColor color = TextColor.fromHexString(hex);
+            if (color == null) {
+                throw new ConfigProcessException("Invalid hex: " + hex);
+            }
+
+            return color;
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(@NotNull RGBLike rgbLike) throws ConfigProcessException {
+            return new ConfigPrimitive(TextColor.color(rgbLike).asHexString());
+        }
+    };
+
     private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessor.enumProcessor(Sound.Source.class);
 
     /**
@@ -106,4 +126,9 @@ public final class AdventureConfigProcessors {
     public static @NotNull ConfigProcessor<Sound.Source> soundSource() {
         return soundSource;
     }
+
+    public static @NotNull ConfigProcessor<RGBLike> rgbLike() {
+        return rgbLike;
+    }
+
 }

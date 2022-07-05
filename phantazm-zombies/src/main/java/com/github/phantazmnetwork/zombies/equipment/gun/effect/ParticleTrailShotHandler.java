@@ -1,10 +1,16 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
+import com.github.phantazmnetwork.api.config.processor.MinestomConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.ShotHandler;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
@@ -40,6 +46,41 @@ public class ParticleTrailShotHandler implements ShotHandler {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor() {
+        ConfigProcessor<Particle> particleProcessor = MinestomConfigProcessors.particle();
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                Particle particle = particleProcessor.dataFromElement(element.getElementOrThrow("particle"));
+                boolean distance = element.getBooleanOrThrow("distance");
+                float offsetX = element.getNumberOrThrow("offsetX").floatValue();
+                float offsetY = element.getNumberOrThrow("offsetY").floatValue();
+                float offsetZ = element.getNumberOrThrow("offsetZ").floatValue();
+                float particleData = element.getNumberOrThrow("particleData").floatValue();
+                int count = element.getNumberOrThrow("count").intValue();
+                int trailCount = element.getNumberOrThrow("trailCount").intValue();
+
+                return new Data(particle, distance, offsetX, offsetY, offsetZ, particleData, count, trailCount);
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(8);
+                node.put("particle", particleProcessor.elementFromData(data.particle()));
+                node.putBoolean("distance", data.distance());
+                node.putNumber("offsetX", data.offsetX());
+                node.putNumber("offsetY", data.offsetY());
+                node.putNumber("offsetZ", data.offsetZ());
+                node.putNumber("particleData", data.particleData());
+                node.putNumber("count", data.count());
+                node.putNumber("trailCount", data.trailCount());
+
+                return node;
+            }
+        };
     }
 
     private final Data data;

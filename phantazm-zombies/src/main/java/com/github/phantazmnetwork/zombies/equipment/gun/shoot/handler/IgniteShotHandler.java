@@ -5,6 +5,11 @@ import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.entity.Player;
@@ -23,6 +28,26 @@ public class IgniteShotHandler implements ShotHandler {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                int duration = element.getNumberOrThrow("duration").intValue();
+                int headshotDuration = element.getNumberOrThrow("headshotDuration").intValue();
+                return new Data(duration, headshotDuration);
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(2);
+                node.putNumber("duration", data.duration());
+                node.putNumber("headshotDuration", data.headshotDuration());
+                return node;
+            }
+        };
     }
 
     private final Data data;

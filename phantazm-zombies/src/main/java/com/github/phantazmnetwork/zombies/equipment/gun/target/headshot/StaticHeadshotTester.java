@@ -1,9 +1,14 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.headshot;
 
-import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +25,24 @@ public class StaticHeadshotTester implements HeadshotTester {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                return new Data(element.getBooleanOrThrow("shouldHeadshot"));
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
+                ConfigNode node = new LinkedConfigNode(1);
+                node.putBoolean("shouldHeadshot", data.shouldHeadshot());
+
+                return node;
+            }
+        };
     }
 
     private final Data data;

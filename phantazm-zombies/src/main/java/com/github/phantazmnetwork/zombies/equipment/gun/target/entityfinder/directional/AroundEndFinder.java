@@ -1,8 +1,13 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional;
 
-import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -23,6 +28,24 @@ public class AroundEndFinder implements DirectionalEntityFinder {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                return new Data(element.getNumberOrThrow("range").doubleValue());
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
+                ConfigNode node = new LinkedConfigNode(1);
+                node.putNumber("range", data.range());
+
+                return node;
+            }
+        };
     }
 
     private final Data data;

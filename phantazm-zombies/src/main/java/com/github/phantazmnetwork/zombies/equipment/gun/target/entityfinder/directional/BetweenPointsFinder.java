@@ -1,6 +1,9 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional;
 
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
@@ -25,6 +28,21 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) {
+                return new Data();
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
+                return new LinkedConfigNode(0);
+            }
+        };
     }
 
     private final Data data;

@@ -1,14 +1,21 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
 
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Random;
@@ -23,6 +30,34 @@ public class SpreadFirer implements Firer {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
+        Objects.requireNonNull(requested, "requested");
+
+        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                Collection<Key> subFirerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("subFirerKeys"));
+                float angleVariance = element.getNumberOrThrow("angleVariance").floatValue();
+
+                requested.addAll(subFirerKeys);
+
+                return new Data(subFirerKeys, angleVariance);
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(2);
+                node.put("subFirerKeys", collectionProcessor.elementFromData(data.subFirerKeys()));
+                node.putNumber("angleVariance", data.angleVariance());
+
+                return node;
+            }
+        };
     }
 
     private final Data data;

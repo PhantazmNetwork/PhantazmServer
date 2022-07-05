@@ -1,10 +1,13 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.tester;
 
 import com.github.phantazmnetwork.api.RayUtils;
-import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -25,6 +28,21 @@ public class RayTraceTargetTester implements TargetTester {
             return SERIAL_KEY;
         }
 
+    }
+
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return new ConfigProcessor<>() {
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) {
+                return new Data();
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
+                return new LinkedConfigNode(0);
+            }
+        };
     }
 
     private final Data data;
