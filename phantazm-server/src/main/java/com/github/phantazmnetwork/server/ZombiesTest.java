@@ -10,6 +10,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -46,8 +47,9 @@ final class ZombiesTest {
                 return;
             }
 
-            Point start = player.getPosition().add(0, player.getEyeHeight(), 0);
-            Point end = start.add(player.getPosition().direction().mul(1000));
+            Vec direction = player.getPosition().direction();
+            Point start = player.getPosition().add(0, player.getEyeHeight(), 0).add(direction.mul(2));
+            Point end = start.add(direction.mul(1000));
 
             InterpolationUtils.interpolateLine(VecUtils.toDouble(start), VecUtils.toDouble(end), action -> {
                 instance.setBlock(action.getX(), action.getY(), action.getZ(), Block.AMETHYST_BLOCK);

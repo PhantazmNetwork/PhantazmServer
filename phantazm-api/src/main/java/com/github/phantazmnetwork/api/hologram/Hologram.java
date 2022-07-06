@@ -29,4 +29,9 @@ public interface Hologram extends List<Component> {
      * @param instance the new instance
      */
     void setInstance(@NotNull Instance instance);
+
+    /**
+     * Trims internal lists to size.
+     */
+    void trimToSize();
 }

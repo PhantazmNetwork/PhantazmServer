@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+/**
+ * Contains useful interpolation algorithms.
+ */
 public final class InterpolationUtils {
     private InterpolationUtils() {
         throw new UnsupportedOperationException();
@@ -164,7 +167,8 @@ public final class InterpolationUtils {
                 }
             }
 
-            if(action.test(local.set(px = nx, py = ny, pz = nz))) { //test the next block
+            //test the next block
+            if(action.test(local.set(px = nx, py = ny, pz = nz))) {
                 break;
             }
 

@@ -15,11 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Represents a door. May be opened once.
+ */
 public class Door extends MapObject<DoorInfo> {
     private final Block fillBlock;
     private final Region3I enclosing;
     private final Vec3D center;
-    private final List<Hologram> holograms;
+    private final ArrayList<Hologram> holograms;
 
     private boolean isOpen;
 
@@ -81,9 +84,11 @@ public class Door extends MapObject<DoorInfo> {
 
             for(Hologram hologram : holograms) {
                 hologram.clear();
+                hologram.trimToSize();
             }
 
             holograms.clear();
+            holograms.trimToSize();
         }
     }
 

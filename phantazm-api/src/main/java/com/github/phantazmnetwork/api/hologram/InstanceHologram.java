@@ -22,8 +22,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     private Instance instance;
 
-    private final List<Entity> armorStands;
-    private final List<Component> components;
+    private final ArrayList<Entity> armorStands;
+    private final ArrayList<Component> components;
     private Vec3D location;
     private final double gap;
 
@@ -60,6 +60,12 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
             this.instance = instance;
             updateArmorStands();
         }
+    }
+
+    @Override
+    public void trimToSize() {
+        armorStands.trimToSize();
+        components.trimToSize();
     }
 
     @Override
