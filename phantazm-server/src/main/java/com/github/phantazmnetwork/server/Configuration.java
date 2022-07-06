@@ -48,11 +48,11 @@ public final class Configuration {
     /**
      * Initializes server configuration features. Should only be called once from {@link PhantazmServer#main(String[])}.
      */
-    static void initialize(String @NotNull[] args) {
+    static void initialize() {
         handler = new BasicConfigHandler();
 
         ConfigCodec codec = new TomlCodec();
-        handler.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(args),
+        handler.registerLoader(SERVER_CONFIG_KEY, new SyncFileConfigLoader<>(new ServerConfigProcessor(),
                 ServerConfig.DEFAULT, SERVER_CONFIG_PATH, codec));
         handler.registerLoader(LOBBIES_CONFIG_KEY, new SyncFileConfigLoader<>(new LobbiesConfigProcessor(),
                 LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, codec));

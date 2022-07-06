@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.api.player.MojangIdentitySource;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
+import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
@@ -38,6 +39,8 @@ public final class PhantazmServer {
      */
     public static final EventNode<Event> PHANTAZM_NODE = EventNode.all("phantazm");
 
+    private static final String UNSAFE_ARGUMENT = "unsafe";
+
     /**
      * Starting point for the server.
      * @param args Do you even know java?
@@ -49,11 +52,45 @@ public final class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         try {
             LOGGER.info("Loading server configuration data.");
-            Configuration.initialize(args);
+            Configuration.initialize();
             ConfigHandler handler = Configuration.getHandler();
             handler.writeDefaultsAndGet();
 
             serverConfig = handler.getData(Configuration.SERVER_CONFIG_KEY);
+            ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
+            if(isUnsafe(args)) {
+                LOGGER.warn("""
+                                                                                                                              
+                                          ██░░██                                     
+                                        ██░░░░░░██                                  
+                                      ██░░░░░░░░░░██                                    
+                                      ██░░░░░░░░░░██                                    
+                                    ██░░░░░░░░░░░░░░██                                  
+                                  ██░░░░░░██████░░░░░░██                                
+                                  ██░░░░░░██████░░░░░░██                                
+                                ██░░░░░░░░██████░░░░░░░░██                              
+                                ██░░░░░░░░██████░░░░░░░░██                              
+                              ██░░░░░░░░░░██████░░░░░░░░░░██                            
+                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██                          
+                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██                          
+                          ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██                        
+                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██                        
+                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██                      
+                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██                      
+                      ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██                    
+                      ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██                    
+                        ██████████████████████████████████████████                      
+                    """);
+                LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value (an empty " +
+                        "string). Only use this option when running in a development environment.");
+            }
+            else if(serverInfoConfig.authType() == AuthType.VELOCITY
+                    && serverInfoConfig.velocitySecret().equals(ServerInfoConfig.DEFAULT_VELOCITY_SECRET)) {
+                LOGGER.error("When using AuthType.VELOCITY, velocitySecret must be set to a value " +
+                        "other than the default for security reasons");
+                return;
+            }
+
             lobbiesConfig = handler.getData(Configuration.LOBBIES_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         }
@@ -79,6 +116,16 @@ public final class PhantazmServer {
         catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
         }
+    }
+
+    private static boolean isUnsafe(String[] args) {
+        for(String arg : args) {
+            if(arg.equals(UNSAFE_ARGUMENT)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void initializeFeatures(EventNode<Event> global, EventNode<Event> phantazm, ServerConfig serverConfig,
