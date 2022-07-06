@@ -1,9 +1,5 @@
 package com.github.phantazmnetwork.server;
 
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.toml.TomlFormat;
-import com.electronwill.nightconfig.toml.TomlParser;
-import com.electronwill.nightconfig.toml.TomlWriter;
 import com.github.phantazmnetwork.api.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.api.player.MojangIdentitySource;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
@@ -11,10 +7,8 @@ import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
-import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
-import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
@@ -24,12 +18,15 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -99,17 +96,10 @@ public final class PhantazmServer {
         Neuron.initialize(global, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner(), phantazm);
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
-        TomlWriter writer = new TomlWriter();
-        writer.setIndent("");
-        writer.setWriteStringLiteralPredicate(string -> string.contains("\"") && !string.contains("'"));
-        ConfigCodec equipmentCodec = new TomlCodec(new TomlParser(), writer) {
-            @Override
-            protected @NotNull <TOut> Output<TOut> makeEncodeMap() {
-                Config config = TomlFormat.newConfig(LinkedHashMap::new);
-                return new Output<>(config, config::add);
-            }
-        };
-        EquipmentFeature.initialize(Path.of("./equipment/"), equipmentCodec);
+        EquipmentFeature.initialize(Path.of("./equipment/"), new YamlCodec(() -> new Load(LoadSettings.builder().build()),
+                () -> new Dump(DumpSettings.builder()
+                        .setDefaultFlowStyle(FlowStyle.BLOCK)
+                        .build())));
         GunTest.initialize(global, phantazm, viewProvider);
         ZombiesTest.initialize(global);
     }

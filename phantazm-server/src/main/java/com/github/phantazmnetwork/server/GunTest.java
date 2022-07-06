@@ -1,13 +1,11 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
-import com.github.phantazmnetwork.api.config.processor.ItemStackConfigProcessors;
 import com.github.phantazmnetwork.api.inventory.*;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.config.ComplexData;
-import com.github.phantazmnetwork.commons.config.ComplexDataConfigProcessor;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.goal.FollowPlayerGoal;
 import com.github.phantazmnetwork.mob.target.FirstTargetSelector;
@@ -17,31 +15,21 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestom
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.gun.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelData;
-import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelDataConfigProcessor;
-import com.github.phantazmnetwork.zombies.equipment.gun.effect.*;
+import com.github.phantazmnetwork.zombies.equipment.gun.effect.PlaySoundEffect;
+import com.github.phantazmnetwork.zombies.equipment.gun.effect.ReloadActionBarEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.StateReloadTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.GradientActionBarChooser;
-import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.StaticActionBarChooser;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.StateShootTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.BasicShotEndpointSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.RayTraceBlockIteration;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.WallshotBlockIteration;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.HitScanFirer;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.ProjectileFirer;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.SpreadFirer;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.BasicTargetFinder;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.AroundEndFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.BetweenPointsFinder;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional.NearbyEntityFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.EyeHeightHeadshotTester;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.StaticHeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.RayTraceIntersectionFinder;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmTargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
-import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
@@ -74,6 +62,11 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.metadata.PlayerHeadMeta;
 import org.jetbrains.annotations.NotNull;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -161,13 +154,7 @@ final class GunTest {
                 case "guntest" -> {
                     PlayerView view = viewProvider.fromPlayer(event.getPlayer());
                     Key gunKey = Key.key(Namespaces.PHANTAZM, "test_gun");
-                    List<ComplexData> levelData = EquipmentFeature.getGunLevelMap().get(gunKey);
-                    List<GunLevel> levels = new ArrayList<>(levelData.size());
-                    for (ComplexData complexData : levelData) {
-                        levels.add(Scratch.createGunLevel(global, Mob.getMobStore(), view, new Random(), complexData));
-                    }
-
-                    Gun gun = new Gun(view, new GunModel(levels, gunKey));
+                    Gun gun = EquipmentFeature.createGun(gunKey, global, Mob.getMobStore(), view, new Random());
 
                     profileSwitchers.get(event.getPlayer().getUuid()).getCurrentProfile().setInventoryObject(0, gun);
                     event.getPlayer().getInventory().setItemStack(0, gun.getItemStack());
@@ -242,46 +229,10 @@ final class GunTest {
                 return node;
             }
         });
-        subprocessors.put(AmmoLevelEffect.Data.SERIAL_KEY, AmmoLevelEffect.processor());
-        subprocessors.put(PlaySoundEffect.Data.SERIAL_KEY, PlaySoundEffect.processor());
-        subprocessors.put(ReloadActionBarEffect.Data.SERIAL_KEY, ReloadActionBarEffect.processor());
-        subprocessors.put(SendMessageEffect.Data.SERIAL_KEY, SendMessageEffect.processor());
-        subprocessors.put(ShootExpEffect.Data.SERIAL_KEY, ShootExpEffect.processor());
-        subprocessors.put(GradientActionBarChooser.Data.SERIAL_KEY, GradientActionBarChooser.processor());
-        subprocessors.put(StaticActionBarChooser.Data.SERIAL_KEY, StaticActionBarChooser.processor());
-        subprocessors.put(StateReloadTester.Data.SERIAL_KEY, StateReloadTester.processor());
-        subprocessors.put(BasicShotEndpointSelector.Data.SERIAL_KEY, BasicShotEndpointSelector.processor());
-        subprocessors.put(RayTraceBlockIteration.Data.SERIAL_KEY, RayTraceBlockIteration.processor());
-        subprocessors.put(WallshotBlockIteration.Data.SERIAL_KEY, WallshotBlockIteration.processor());
-        subprocessors.put(HitScanFirer.Data.SERIAL_KEY, HitScanFirer.processor());
-        subprocessors.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.processor());
-        subprocessors.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.processor());
-        subprocessors.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.processor());
-        subprocessors.put(DamageShotHandler.Data.SERIAL_KEY, DamageShotHandler.processor());
-        subprocessors.put(ExplosionShotHandler.Data.SERIAL_KEY, ExplosionShotHandler.processor());
-        subprocessors.put(FeedbackShotHandler.Data.SERIAL_KEY, FeedbackShotHandler.processor());
-        subprocessors.put(GuardianBeamShotHandler.Data.SERIAL_KEY, GuardianBeamShotHandler.processor());
-        subprocessors.put(IgniteShotHandler.Data.SERIAL_KEY, IgniteShotHandler.processor());
-        subprocessors.put(KnockbackShotHandler.Data.SERIAL_KEY, KnockbackShotHandler.processor());
-        subprocessors.put(ParticleTrailShotHandler.Data.SERIAL_KEY, ParticleTrailShotHandler.processor());
-        subprocessors.put(PotionShotHandler.Data.SERIAL_KEY, PotionShotHandler.processor());
-        subprocessors.put(SoundShotHandler.Data.SERIAL_KEY, SoundShotHandler.processor());
-        subprocessors.put(StateShootTester.Data.SERIAL_KEY, StateShootTester.processor());
-        subprocessors.put(AroundEndFinder.Data.SERIAL_KEY, AroundEndFinder.processor());
-        subprocessors.put(BetweenPointsFinder.Data.SERIAL_KEY, BetweenPointsFinder.processor());
-        subprocessors.put(NearbyEntityFinder.Data.SERIAL_KEY, NearbyEntityFinder.processor());
-        subprocessors.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, EyeHeightHeadshotTester.processor());
-        subprocessors.put(StaticHeadshotTester.Data.SERIAL_KEY, StaticHeadshotTester.processor());
-        subprocessors.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, RayTraceIntersectionFinder.processor());
-        subprocessors.put(StaticIntersectionFinder.Data.SERIAL_KEY, StaticIntersectionFinder.processor());
-        subprocessors.put(BasicTargetFinder.Data.SERIAL_KEY, BasicTargetFinder.processor());
-        subprocessors.put(ClipStackMapper.Data.SERIAL_KEY, ClipStackMapper.processor());
-        subprocessors.put(ReloadStackMapper.Data.SERIAL_KEY, ReloadStackMapper.processor());
-        subprocessors.put(GunLevelData.SERIAL_KEY, new GunLevelDataConfigProcessor(ItemStackConfigProcessors.snbt()));
-        ComplexDataConfigProcessor cfg = new ComplexDataConfigProcessor(subprocessors);
+        ConfigProcessor<ComplexData> cfg = EquipmentFeature.createGunLevelProcessor();
 
         Key sStatsKey = Key.key(Namespaces.PHANTAZM, "stats");
-        GunStats sStats = new GunStats(10L, 30L, 300, 10, 1, 69L);
+        GunStats sStats = new GunStats(10L, 30L, 300, 10, 1, 0L);
         Key sReloadTesterKey = Key.key(Namespaces.PHANTAZM, "reload_tester");
         StateReloadTester.Data sReloadTester = new StateReloadTester.Data(sStatsKey);
         Key sShootTesterKey = Key.key(Namespaces.PHANTAZM, "shoot_tester");
@@ -351,10 +302,13 @@ final class GunTest {
         theMap.put(sReloadActionBarEffectKey, sReloadActionBarEffect);
         theMap.put(sClipStackMapperKey, sClipStackMapper);
 
-        ConfigCodec codec = new YamlCodec();
+        ConfigCodec codec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
+                () -> new Dump(DumpSettings.builder()
+                        .setDefaultFlowStyle(FlowStyle.BLOCK)
+                        .build()));
 
         try {
-            ConfigBridges.write(Path.of("./gun.toml"), codec, cfg, new ComplexData(gunLevelKey, theMap));
+            ConfigBridges.write(Path.of("./gun.yaml"), codec, cfg, new ComplexData(gunLevelKey, theMap));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
