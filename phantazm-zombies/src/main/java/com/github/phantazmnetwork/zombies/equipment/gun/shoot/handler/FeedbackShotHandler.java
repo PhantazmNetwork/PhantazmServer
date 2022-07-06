@@ -24,7 +24,7 @@ public class FeedbackShotHandler implements ShotHandler {
 
     public record Data(@NotNull Component message, @NotNull Component headshotMessage) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.feedback");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.feedback");
 
         @Override
         public @NotNull Key key() {

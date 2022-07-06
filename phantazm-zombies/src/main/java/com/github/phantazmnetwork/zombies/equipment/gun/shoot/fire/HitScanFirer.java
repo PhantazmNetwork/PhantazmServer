@@ -36,11 +36,10 @@ public class HitScanFirer implements Firer {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
+
         return new ConfigProcessor<>() {
 
             @Override
@@ -48,10 +47,6 @@ public class HitScanFirer implements Firer {
                 Key endSelectorKey = keyProcessor.dataFromElement(element.getElementOrThrow("endSelectorKey"));
                 Key targetFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetFinderKey"));
                 Collection<Key> shotHandlerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlerKeys"));
-
-                requested.add(endSelectorKey);
-                requested.add(targetFinderKey);
-                requested.addAll(shotHandlerKeys);
 
                 return new Data(endSelectorKey, targetFinderKey, shotHandlerKeys);
             }

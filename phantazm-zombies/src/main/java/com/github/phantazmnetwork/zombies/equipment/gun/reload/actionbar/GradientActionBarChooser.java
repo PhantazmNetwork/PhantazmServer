@@ -20,12 +20,12 @@ import java.util.Objects;
 
 public class GradientActionBarChooser implements ReloadActionBarChooser {
 
-    public record Data(@NotNull Component component, @NotNull RGBLike from, @NotNull RGBLike to) implements Keyed {
+    public record Data(@NotNull Component message, @NotNull RGBLike from, @NotNull RGBLike to) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.gradient");
 
         public Data {
-            Objects.requireNonNull(component, "component");
+            Objects.requireNonNull(message, "message");
             Objects.requireNonNull(from, "from");
             Objects.requireNonNull(to, "to");
         }
@@ -54,7 +54,7 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(3);
-                node.put("message", componentProcessor.elementFromData(data.component()));
+                node.put("message", componentProcessor.elementFromData(data.message()));
                 node.put("from", rgbLikeProcessor.elementFromData(data.from()));
                 node.put("to", rgbLikeProcessor.elementFromData(data.to()));
 
@@ -71,7 +71,7 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
 
     @Override
     public @NotNull Component choose(@NotNull GunState state, @NotNull Player player, float progress) {
-        return data.component().color(TextColor.lerp(progress, data.from(), data.to()));
+        return data.message().color(TextColor.lerp(progress, data.from(), data.to()));
     }
 
     @Override

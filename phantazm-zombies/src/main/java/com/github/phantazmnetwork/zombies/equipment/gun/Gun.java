@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.equipment.gun;
 
 import com.github.phantazmnetwork.api.inventory.CachedInventoryObject;
 import com.github.phantazmnetwork.api.player.PlayerView;
-import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.Upgradable;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
@@ -27,7 +26,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
     private boolean reloadComplete = false;
 
-    public Gun(@NotNull PlayerView playerView, @NotNull GunModel model, @NotNull MobStore store) {
+    public Gun(@NotNull PlayerView playerView, @NotNull GunModel model) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.model = Objects.requireNonNull(model, "model");
         this.level = 0;

@@ -15,11 +15,10 @@ import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class ShootExpEffect implements GunEffect {
 
-    public record Data(@NotNull Key gunStatsKey) implements Keyed {
+    public record Data(@NotNull Key statsKey) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.exp.shoot");
 
@@ -29,8 +28,9 @@ public class ShootExpEffect implements GunEffect {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+
         return new ConfigProcessor<>() {
 
             @Override
@@ -42,7 +42,7 @@ public class ShootExpEffect implements GunEffect {
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(1);
-                node.put("gunStatsKey", keyProcessor.elementFromData(data.gunStatsKey()));
+                node.put("gunStatsKey", keyProcessor.elementFromData(data.statsKey()));
                 return node;
             }
         };
@@ -65,7 +65,7 @@ public class ShootExpEffect implements GunEffect {
     @Override
     public void apply(@NotNull GunState state) {
         if (state.isMainEquipment()) {
-            float exp = state.ammo() > 0 ? (float) state.ticksSinceLastShot() / stats.shootSpeed() : 0F;
+            float exp = state.ammo() > 0 ? (float) state.ticksSinceLastShot() / stats.shootSpeed() : 0F; // TODO: fix for fire speed
             playerView.getPlayer().ifPresent(player -> player.setExp(exp));
             currentlyActive = true;
         }

@@ -32,19 +32,16 @@ public class SpreadFirer implements Firer {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
+
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Collection<Key> subFirerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("subFirerKeys"));
                 float angleVariance = element.getNumberOrThrow("angleVariance").floatValue();
-
-                requested.addAll(subFirerKeys);
 
                 return new Data(subFirerKeys, angleVariance);
             }

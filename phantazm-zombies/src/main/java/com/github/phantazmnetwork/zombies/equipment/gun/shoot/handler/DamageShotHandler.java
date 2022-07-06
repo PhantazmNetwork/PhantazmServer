@@ -23,7 +23,7 @@ public class DamageShotHandler implements ShotHandler {
 
     public record Data(float damage, float headshotDamage) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.damage");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.damage");
 
         @Override
         public @NotNull Key key() {

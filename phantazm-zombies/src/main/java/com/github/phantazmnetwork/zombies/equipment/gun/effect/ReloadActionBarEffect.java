@@ -18,7 +18,6 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class ReloadActionBarEffect implements GunEffect {
 
@@ -34,10 +33,9 @@ public class ReloadActionBarEffect implements GunEffect {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+
         return new ConfigProcessor<>() {
 
             @Override
@@ -45,9 +43,6 @@ public class ReloadActionBarEffect implements GunEffect {
                 Key statsKey = keyProcessor.dataFromElement(element.getElementOrThrow("statsKey"));
                 Key reloadTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("reloadTesterKey"));
                 Key reloadActionBarChooserKey = keyProcessor.dataFromElement(element.getElementOrThrow("reloadActionBarChooserKey"));
-                requested.add(statsKey);
-                requested.add(reloadTesterKey);
-                requested.add(reloadActionBarChooserKey);
 
                 return new Data(statsKey, reloadTesterKey, reloadActionBarChooserKey);
             }

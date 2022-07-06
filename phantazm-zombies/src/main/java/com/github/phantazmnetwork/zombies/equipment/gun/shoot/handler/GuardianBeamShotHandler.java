@@ -32,7 +32,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
     public record Data(@NotNull EntityType entityType, long beamTime) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.guardian_beam");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.guardian_beam");
 
         @Override
         public @NotNull Key key() {

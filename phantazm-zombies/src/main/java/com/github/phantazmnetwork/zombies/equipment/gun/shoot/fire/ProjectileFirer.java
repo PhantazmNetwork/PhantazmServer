@@ -43,7 +43,7 @@ public class ProjectileFirer implements Firer {
                        boolean hasGravity,
                        long maxAliveTime) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.projectile");
 
         @Override
         public @NotNull Key key() {
@@ -51,12 +51,11 @@ public class ProjectileFirer implements Firer {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
         ConfigProcessor<EntityType> entityTypeProcessor = MinestomConfigProcessors.entityType();
+
         return new ConfigProcessor<>() {
 
             @Override
@@ -64,11 +63,6 @@ public class ProjectileFirer implements Firer {
                 Key endSelectorKey = keyProcessor.dataFromElement(element.getElementOrThrow("endSelector"));
                 Key targetFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetFinder"));
                 Collection<Key> shotHandlerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlers"));
-
-                requested.add(endSelectorKey);
-                requested.add(targetFinderKey);
-                requested.addAll(shotHandlerKeys);
-
                 EntityType entityType = entityTypeProcessor.dataFromElement(element.getElementOrThrow("entityType"));
                 double power = element.getNumberOrThrow("power").doubleValue();
                 double spread = element.getNumberOrThrow("spread").doubleValue();

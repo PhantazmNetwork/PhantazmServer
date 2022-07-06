@@ -1,11 +1,10 @@
-package com.github.phantazmnetwork.zombies.equipment.gun.effect;
+package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
 import com.github.phantazmnetwork.api.config.processor.MinestomConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.ShotHandler;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -28,13 +27,13 @@ import java.util.Objects;
 public class ParticleTrailShotHandler implements ShotHandler {
 
     public record Data(@NotNull Particle particle,
-                                          boolean distance,
-                                          float offsetX,
-                                          float offsetY,
-                                          float offsetZ,
-                                          float particleData,
-                                          int count,
-                                          int trailCount) implements Keyed {
+                       boolean distance,
+                       float offsetX,
+                       float offsetY,
+                       float offsetZ,
+                       float particleData,
+                       int count,
+                       int trailCount) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.particle_trail");
 

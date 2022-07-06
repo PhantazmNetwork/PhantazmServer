@@ -25,11 +25,16 @@ public final class AdventureConfigProcessors {
     }
 
     private static final ConfigProcessor<Key> key = new ConfigProcessor<>() {
+        @SuppressWarnings("PatternValidation")
         @Override
         public Key dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             try {
-                //noinspection PatternValidation
-                return Key.key(ConfigProcessor.STRING.dataFromElement(element));
+                String string = ConfigProcessor.STRING.dataFromElement(element);
+                if (string.contains(":")) {
+                    return Key.key(string);
+                } else {
+                    return Key.key(Namespaces.PHANTAZM, string);
+                }
             }
             catch (InvalidKeyException keyException) {
                 throw new ConfigProcessException(keyException);
@@ -38,6 +43,9 @@ public final class AdventureConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(Key key) {
+            if (key.namespace().equals(Namespaces.PHANTAZM)) {
+                return new ConfigPrimitive(key.value());
+            }
             return new ConfigPrimitive(key.asString());
         }
     };

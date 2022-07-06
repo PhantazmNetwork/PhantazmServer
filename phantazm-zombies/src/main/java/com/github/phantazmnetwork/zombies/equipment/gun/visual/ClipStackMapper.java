@@ -14,7 +14,6 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Objects;
 
 public class ClipStackMapper implements GunStackMapper {
@@ -29,17 +28,14 @@ public class ClipStackMapper implements GunStackMapper {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key reloadTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("reloadTesterKey"));
-
-                requested.add(reloadTesterKey);
 
                 return new Data(reloadTesterKey);
             }

@@ -23,7 +23,7 @@ public class SoundShotHandler implements ShotHandler {
 
     public record Data(@NotNull Sound sound, @NotNull Sound headshotSound) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.sound");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.sound");
 
         public Data {
             Objects.requireNonNull(sound, "sound");

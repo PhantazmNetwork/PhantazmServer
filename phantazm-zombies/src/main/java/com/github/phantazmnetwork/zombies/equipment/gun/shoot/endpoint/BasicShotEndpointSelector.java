@@ -19,13 +19,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
     public record Data(@NotNull Key blockIterationKey, int maxDistance) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "selector.shot.end.basic");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.end_selector.basic");
 
         @Override
         public @NotNull Key key() {
@@ -33,18 +32,16 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key blockIterationKey = keyProcessor.dataFromElement(element.getElementOrThrow("blockIterationKey"));
-                requested.add(blockIterationKey);
-
                 int maxDistance = element.getNumberOrThrow("maxDistance").intValue();
+
                 return new Data(blockIterationKey, maxDistance);
             }
 

@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.equipment.gun;
+package com.github.phantazmnetwork.zombies.equipment.gun.data;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import net.kyori.adventure.key.Key;
@@ -9,16 +9,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Objects;
 
-public record GunLevelData(@NotNull ItemStack stack,
-                           @NotNull GunStats stats,
-                           @NotNull Keyed shootTester,
-                           @NotNull Keyed reloadTester,
-                           @NotNull Keyed firer,
-                           @NotNull Collection<Keyed> shootEffects,
-                           @NotNull Collection<Keyed> reloadEffects,
-                           @NotNull Collection<Keyed> tickEffects,
-                           @NotNull Collection<Keyed> emptyClipEffects,
-                           @NotNull Collection<Keyed> gunStackMappers) implements Keyed {
+public record GunLevelData(int order, // TODO: key based upgrades
+                           @NotNull ItemStack stack,
+                           @NotNull Key stats,
+                           @NotNull Key shootTester,
+                           @NotNull Key reloadTester,
+                           @NotNull Key firer,
+                           @NotNull Collection<Key> shootEffects,
+                           @NotNull Collection<Key> reloadEffects,
+                           @NotNull Collection<Key> tickEffects,
+                           @NotNull Collection<Key> emptyClipEffects,
+                           @NotNull Collection<Key> gunStackMappers) implements Keyed {
 
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.level");
 

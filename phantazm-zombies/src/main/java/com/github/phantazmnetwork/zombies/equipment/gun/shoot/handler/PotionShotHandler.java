@@ -24,7 +24,7 @@ public class PotionShotHandler implements ShotHandler {
 
     public record Data(@NotNull Potion potion, @NotNull Potion headshotPotion) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.potion");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.potion");
 
         @Override
         public @NotNull Key key() {

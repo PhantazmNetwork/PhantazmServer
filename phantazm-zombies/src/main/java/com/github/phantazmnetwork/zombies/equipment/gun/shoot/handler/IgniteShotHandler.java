@@ -22,7 +22,7 @@ public class IgniteShotHandler implements ShotHandler {
 
     public record Data(int duration, int headshotDuration) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.ignite");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.ignite");
 
         @Override
         public @NotNull Key key() {

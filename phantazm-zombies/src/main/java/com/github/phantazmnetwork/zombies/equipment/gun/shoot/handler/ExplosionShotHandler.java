@@ -27,7 +27,7 @@ public class ExplosionShotHandler implements ShotHandler {
 
     public record Data(float radius) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shoot_handler.explosion");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.explosion");
 
         @Override
         public @NotNull Key key() {

@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
@@ -34,7 +35,7 @@ public class BasicTargetFinder implements TargetFinder {
                        boolean ignorePreviousHits, int maxTargets)
             implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key("gun.target_finder.basic");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.target_finder.basic");
 
         @Override
         public @NotNull Key key() {
@@ -42,9 +43,7 @@ public class BasicTargetFinder implements TargetFinder {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         return new ConfigProcessor<>() {
 
@@ -53,11 +52,6 @@ public class BasicTargetFinder implements TargetFinder {
                 Key finderKey = keyProcessor.dataFromElement(element.getElementOrThrow("finderKey"));
                 Key targetTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetTesterKey"));
                 Key headshotTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("headshotTesterKey"));
-
-                requested.add(finderKey);
-                requested.add(targetTesterKey);
-                requested.add(headshotTesterKey);
-
                 boolean ignorePreviousHits = element.getBooleanOrThrow("ignorePreviousHits");
                 int maxTargets = element.getNumberOrThrow("maxTargets").intValue();
 

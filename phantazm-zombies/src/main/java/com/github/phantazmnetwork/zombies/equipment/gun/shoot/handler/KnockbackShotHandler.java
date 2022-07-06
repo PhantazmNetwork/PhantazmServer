@@ -25,7 +25,7 @@ public class KnockbackShotHandler implements ShotHandler {
 
     public record Data(double knockback, double headshotKnockback) implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.hit_handler.knockback");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.knockback");
 
         @Override
         public @NotNull Key key() {

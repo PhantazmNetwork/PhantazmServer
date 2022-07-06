@@ -14,7 +14,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Objects;
 
 public class StateShootTester implements ShootTester {
@@ -29,19 +28,15 @@ public class StateShootTester implements ShootTester {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key statsKey = keyProcessor.dataFromElement(element.getElementOrThrow("statsKey"));
                 Key reloadTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("reloadTesterKey"));
-
-                requested.add(statsKey);
-                requested.add(reloadTesterKey);
 
                 return new Data(statsKey, reloadTesterKey);
             }

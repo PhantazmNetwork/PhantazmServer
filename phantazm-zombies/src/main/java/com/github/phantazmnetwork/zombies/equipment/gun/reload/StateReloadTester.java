@@ -14,7 +14,6 @@ import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class StateReloadTester implements ReloadTester {
 
@@ -28,17 +27,14 @@ public class StateReloadTester implements ReloadTester {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key statsKey = keyProcessor.dataFromElement(element.getElementOrThrow("statsKey"));
-                requested.add(statsKey);
-
                 return new Data(statsKey);
             }
 

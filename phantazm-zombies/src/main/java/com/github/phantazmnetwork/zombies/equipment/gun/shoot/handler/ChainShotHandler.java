@@ -38,19 +38,15 @@ public class ChainShotHandler implements ShotHandler {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull Collection<Key> requested) {
-        Objects.requireNonNull(requested, "requested");
-
+    public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key finderKey = keyProcessor.dataFromElement(element.getElementOrThrow("finderKey"));
                 Key firerKey = keyProcessor.dataFromElement(element.getElementOrThrow("firerKey"));
-
-                requested.add(finderKey);
-                requested.add(firerKey);
 
                 boolean ignorePreviousHits = element.getBooleanOrThrow("ignorePreviousHits");
                 int fireAttempts = element.getNumberOrThrow("fireAttempts").intValue();
