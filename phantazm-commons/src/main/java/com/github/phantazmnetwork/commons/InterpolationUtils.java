@@ -14,7 +14,8 @@ public final class InterpolationUtils {
 
     /**
      * <p>Uses a DDA (Digital Differential Analyzer) interpolation algorithm to iterate every Vec3I block position from
-     * the starting to the ending vector.</p>
+     * the starting to the ending vector. All blocks iterated form the set of all full blocks that intersect with the
+     * line formed from the starting vector to the ending vector.</p>
      *
      * <p>The vectors supplied to the consumer are actually the same, thread-local vector, mutated every iteration. If
      * it is necessary to store the results of this iteration, new (mutable or immutable) instances must be created
@@ -58,10 +59,6 @@ public final class InterpolationUtils {
         double yzm = dz / dy;
         double zxm = dx / dz;
 
-        double xzm = dz / dx;
-        double yxm = dx / dy;
-        double zym = dy / dz;
-
         Vec3I local = Vec3I.threadLocal();
         for(int i = 0; i <= steps; i++) {
             int nx = (int) Math.floor(x);
@@ -73,24 +70,80 @@ public final class InterpolationUtils {
                 boolean cy = ny != py;
                 boolean cz = nz != pz;
 
-                //if all axes change at once, we have two block intersections to check
                 if(cx && cy && cz) {
+                    //if all axes change at once, there are two blocks to check this iteration
+                    //it's necessary to use a painfully complex algorithm here
+
                     boolean lxy = cmp(xym, nx, x, y, ny);
                     boolean lyz = cmp(yzm, ny, y, z, nz);
                     boolean lzx = cmp(zxm, nz, z, x, nx);
 
-                    boolean lxz = cmp(xzm, nx, x, z, nz);
-                    boolean lyx = cmp(yxm, ny, y, x, nx);
-                    boolean lzy = cmp(zym, nz, z, y, ny);
+                    //(a, b, c) = first block to check
+                    //(d, e, f) = second block to check
+                    int a;
+                    int b;
+                    int c;
 
-                    int a = lxy ? nx : px;
-                    int b = lyz ? ny : py;
-                    int c = lzx ? nz : pz;
+                    int d;
+                    int e;
+                    int f;
 
-                    int d = lxz ? nx : px;
-                    int e = lyx ? ny : py;
-                    int f = lzy ? nz : pz;
+                    if(lxy) {
+                        d = nx;
 
+                        if(lyz) {
+                            a = nx;
+                            b = py;
+                            c = pz;
+
+                            e = ny;
+                            f = pz;
+                        }
+                        else {
+                            e = py;
+                            f = nz;
+
+                            b = py;
+
+                            if(lzx) {
+                                a = px;
+                                c = nz;
+                            }
+                            else {
+                                a = nx;
+                                c = pz;
+                            }
+                        }
+                    }
+                    else {
+                        a = px;
+
+                        if(lyz) {
+                            b = ny;
+                            c = pz;
+
+                            e = ny;
+
+                            if(lzx) {
+                                d = px;
+                                f = nz;
+                            }
+                            else {
+                                d = nx;
+                                f = pz;
+                            }
+                        }
+                        else {
+                            d = px;
+                            e = ny;
+                            f = nz;
+
+                            b = py;
+                            c = nz;
+                        }
+                    }
+
+                    //test both blocks
                     if(action.test(local.set(a, b, c)) || action.test(local.set(d, e, f))) {
                         break;
                     }
