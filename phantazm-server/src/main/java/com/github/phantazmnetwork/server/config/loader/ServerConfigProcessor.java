@@ -8,8 +8,9 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -19,8 +20,16 @@ import java.util.Objects;
  * {@link ConfigProcessor} used for {@link ServerConfig}s.
  */
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerConfigProcessor.class);
+    private static final String UNSAFE_ARGUMENT = "unsafe";
 
     private final static ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+
+    private final String[] args;
+
+    public ServerConfigProcessor(String @NotNull[] args) {
+        this.args = Objects.requireNonNull(args, "args");
+    }
 
     @Override
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -37,7 +46,33 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
                 .toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid AuthType, must " +
                 "be one of the following: " + Arrays.toString(AuthType.values())));
         String velocitySecret = serverInfo.getStringOrThrow("velocitySecret");
-        if(authType == AuthType.VELOCITY && velocitySecret.equals(ServerInfoConfig.DEFAULT_VELOCITY_SECRET)) {
+        if(isUnsafe(args)) {
+            LOGGER.warn("""
+                                                                                                                              
+                                          ██░░██                                     
+                                        ██░░░░░░██                                  
+                                      ██░░░░░░░░░░██                                    
+                                      ██░░░░░░░░░░██                                    
+                                    ██░░░░░░░░░░░░░░██                                  
+                                  ██░░░░░░██████░░░░░░██                                
+                                  ██░░░░░░██████░░░░░░██                                
+                                ██░░░░░░░░██████░░░░░░░░██                              
+                                ██░░░░░░░░██████░░░░░░░░██                              
+                              ██░░░░░░░░░░██████░░░░░░░░░░██                            
+                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██                          
+                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██                          
+                          ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██                        
+                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██                        
+                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██                      
+                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██                      
+                      ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██                    
+                      ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██                    
+                        ██████████████████████████████████████████                      
+                    """);
+            LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value (an empty " +
+                    "string). Only use this option when running in a development environment.");
+        }
+        else if(authType == AuthType.VELOCITY && velocitySecret.equals(ServerInfoConfig.DEFAULT_VELOCITY_SECRET)) {
             throw new ConfigProcessException("When using AuthType.VELOCITY, velocitySecret must be set to a value " +
                     "other than the default for security reasons");
         }
@@ -88,5 +123,15 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         configNode.put("pingList", pingList);
 
         return configNode;
+    }
+
+    private static boolean isUnsafe(String[] args) {
+        for(String arg : args) {
+            if(arg.equals(UNSAFE_ARGUMENT)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

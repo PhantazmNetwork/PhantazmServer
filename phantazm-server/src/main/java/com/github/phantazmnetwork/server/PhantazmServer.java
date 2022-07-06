@@ -49,7 +49,7 @@ public final class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         try {
             LOGGER.info("Loading server configuration data.");
-            Configuration.initialize();
+            Configuration.initialize(args);
             ConfigHandler handler = Configuration.getHandler();
             handler.writeDefaultsAndGet();
 
