@@ -84,8 +84,14 @@ final class EquipmentFeature {
     }
 
     static void initialize(@NotNull Path equipmentPath, @NotNull ConfigCodec codec) {
-        PathMatcher matcher = equipmentPath.getFileSystem()
-                .getPathMatcher("glob:**." + codec.getPreferredExtension());
+        String ending;
+        if (codec.getPreferredExtensions().isEmpty()) {
+            ending = "";
+        }
+        else {
+            ending = "." + codec.getPreferredExtensions().get(0);
+        }
+        PathMatcher matcher = equipmentPath.getFileSystem().getPathMatcher("glob:**" + ending);
 
         Path guns = equipmentPath.resolve("guns");
         try {
@@ -106,7 +112,14 @@ final class EquipmentFeature {
                     continue;
                 }
 
-                Path infoPath = gunDirectory.resolve("info." + codec.getPreferredExtension());
+                String infoFileName;
+                if (codec.getPreferredExtensions().isEmpty()) {
+                    infoFileName = "info";
+                }
+                else {
+                    infoFileName = "info." + codec.getPreferredExtensions().get(0);
+                }
+                Path infoPath = gunDirectory.resolve(infoFileName);
                 if (!Files.isRegularFile(infoPath)) {
                     LOGGER.warn("No info file at {}.", infoPath);
                     continue;

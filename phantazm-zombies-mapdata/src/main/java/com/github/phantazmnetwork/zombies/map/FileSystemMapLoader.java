@@ -52,10 +52,27 @@ public class FileSystemMapLoader implements MapLoader {
         this.root = Objects.requireNonNull(root, "root");
         this.codec = Objects.requireNonNull(codec, "codec");
 
-        String preferredExtension = codec.getPreferredExtension();
-        this.configPredicate = (path, attr) -> attr.isRegularFile() && path.getFileName().toString()
-                .endsWith(preferredExtension);
-        this.mapInfoName = "info." + preferredExtension;
+        List<String> preferredExtensions = codec.getPreferredExtensions();
+        if (preferredExtensions.isEmpty()) {
+            this.configPredicate = (path, attrs) -> true;
+            this.mapInfoName = "info";
+        }
+        else {
+            this.configPredicate = (path, attr) -> {
+                if (!attr.isRegularFile()) {
+                    return false;
+                }
+
+                for (String extension : preferredExtensions) {
+                    if (path.getFileName().toString().endsWith(extension)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            };
+            this.mapInfoName = "info." + preferredExtensions.get(0);
+        }
     }
 
     @Override
@@ -128,7 +145,7 @@ public class FileSystemMapLoader implements MapLoader {
         Files.createDirectories(paths.spawnrules);
         Files.createDirectories(paths.spawnpoints);
 
-        String extension = "." + codec.getPreferredExtension();
+        String extension = codec.getPreferredExtensions().isEmpty() ? "" : codec.getPreferredExtensions().get(0);
 
         for(RoomInfo room : data.rooms()) {
             ConfigBridges.write(paths.rooms.resolve(room.id().value() + extension), codec, MapProcessors

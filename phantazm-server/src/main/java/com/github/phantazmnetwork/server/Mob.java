@@ -145,7 +145,13 @@ public final class Mob {
 
         Map<Key, MobModel> loadedModels = new HashMap<>();
         try (Stream<Path> paths = Files.list(mobPath)) {
-            PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + codec.getPreferredExtension());
+            String ending;
+            if (codec.getPreferredExtensions().isEmpty()) {
+                ending = "";
+            } else {
+                ending = "." + codec.getPreferredExtensions().iterator().next();
+            }
+            PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
             paths.forEach(path -> {
                 if (matcher.matches(path) && Files.isRegularFile(path)) {
                     try {
