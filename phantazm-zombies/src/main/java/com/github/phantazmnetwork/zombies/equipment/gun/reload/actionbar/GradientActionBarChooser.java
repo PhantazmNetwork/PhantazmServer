@@ -74,8 +74,4 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
         return data.message().color(TextColor.lerp(progress, data.from(), data.to()));
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

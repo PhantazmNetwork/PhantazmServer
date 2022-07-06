@@ -76,8 +76,4 @@ public class PotionShotHandler implements ShotHandler {
 
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

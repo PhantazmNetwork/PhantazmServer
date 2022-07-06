@@ -70,8 +70,4 @@ public class AroundEndFinder implements DirectionalEntityFinder {
         return livingEntities;
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

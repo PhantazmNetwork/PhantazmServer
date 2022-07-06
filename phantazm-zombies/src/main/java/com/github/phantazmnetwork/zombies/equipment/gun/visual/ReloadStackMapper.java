@@ -87,9 +87,4 @@ public class ReloadStackMapper implements GunStackMapper {
         return intermediate;
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }

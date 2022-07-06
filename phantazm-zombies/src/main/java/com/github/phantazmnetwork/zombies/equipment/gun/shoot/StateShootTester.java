@@ -93,9 +93,4 @@ public class StateShootTester implements ShootTester {
         return state.ticksSinceLastShot() < stats.shootSpeed();
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }

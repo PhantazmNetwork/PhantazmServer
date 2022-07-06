@@ -90,9 +90,4 @@ public class WallshotBlockIteration implements BlockIteration {
         return Optional.empty();
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }

@@ -22,11 +22,13 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.BasicTargetFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.AroundEndFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.BetweenPointsFinder;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional.NearbyPhantazmMobFinder;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional.NearbyEntityFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.EyeHeightHeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.StaticHeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.RayTraceIntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmTargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
@@ -171,7 +173,7 @@ final class EquipmentFeature {
     }
 
     private static @NotNull ConfigProcessor<ComplexData> createGunLevelProcessor() {
-        Map<Key, ConfigProcessor<? extends Keyed>> gunProcessors = new HashMap<>(37);
+        Map<Key, ConfigProcessor<? extends Keyed>> gunProcessors = new HashMap<>(38);
         gunProcessors.put(GunStats.SERIAL_KEY, GunStats.processor());
         gunProcessors.put(GunLevelData.SERIAL_KEY, new GunLevelDataConfigProcessor(ItemStackConfigProcessors.snbt()));
         gunProcessors.put(AmmoLevelEffect.Data.SERIAL_KEY, AmmoLevelEffect.processor());
@@ -201,12 +203,14 @@ final class EquipmentFeature {
         gunProcessors.put(StateShootTester.Data.SERIAL_KEY, StateShootTester.processor());
         gunProcessors.put(AroundEndFinder.Data.SERIAL_KEY, AroundEndFinder.processor());
         gunProcessors.put(BetweenPointsFinder.Data.SERIAL_KEY, BetweenPointsFinder.processor());
-        gunProcessors.put(NearbyPhantazmMobFinder.Data.SERIAL_KEY, NearbyPhantazmMobFinder.processor());
+        gunProcessors.put(NearbyEntityFinder.Data.SERIAL_KEY, NearbyEntityFinder.processor());
+        gunProcessors.put(PhantazmTargetTester.Data.SERIAL_KEY, PhantazmTargetTester.processor());
         gunProcessors.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, EyeHeightHeadshotTester.processor());
         gunProcessors.put(StaticHeadshotTester.Data.SERIAL_KEY, StaticHeadshotTester.processor());
         gunProcessors.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, RayTraceIntersectionFinder.processor());
         gunProcessors.put(StaticIntersectionFinder.Data.SERIAL_KEY, StaticIntersectionFinder.processor());
         gunProcessors.put(BasicTargetFinder.Data.SERIAL_KEY, BasicTargetFinder.processor());
+        gunProcessors.put(DistanceTargetLimiter.Data.SERIAL_KEY, DistanceTargetLimiter.processor());
         gunProcessors.put(ClipStackMapper.Data.SERIAL_KEY, ClipStackMapper.processor());
         gunProcessors.put(ReloadStackMapper.Data.SERIAL_KEY, ReloadStackMapper.processor());
         return new ComplexDataConfigProcessor(gunProcessors);

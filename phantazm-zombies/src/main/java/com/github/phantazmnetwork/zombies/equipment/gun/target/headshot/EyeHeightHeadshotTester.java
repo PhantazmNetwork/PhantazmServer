@@ -51,9 +51,4 @@ public class EyeHeightHeadshotTester implements HeadshotTester {
         return intersection.y() >= entity.getPosition().y() + entity.getEyeHeight();
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }

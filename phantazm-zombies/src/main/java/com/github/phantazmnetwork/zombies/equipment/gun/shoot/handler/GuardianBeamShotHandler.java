@@ -118,9 +118,4 @@ public class GuardianBeamShotHandler implements ShotHandler {
         }
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }

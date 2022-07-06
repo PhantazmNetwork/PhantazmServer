@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfind
 
 import com.github.phantazmnetwork.api.RayUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
@@ -55,8 +54,4 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
         return RayUtils.rayTrace(entity.getBoundingBox(), entity.getPosition(), start);
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

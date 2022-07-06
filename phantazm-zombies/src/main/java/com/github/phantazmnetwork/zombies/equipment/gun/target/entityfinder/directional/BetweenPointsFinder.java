@@ -61,8 +61,4 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
         return entities;
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.MobStore;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -17,12 +16,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Objects;
 
-public class NearbyPhantazmMobFinder implements PositionalEntityFinder {
+public class NearbyEntityFinder implements PositionalEntityFinder {
 
     public record Data(double range) implements Keyed {
 
         public static final Key SERIAL_KEY
-                = Key.key(Namespaces.PHANTAZM,"gun.target.entity_finder.positional.nearby_phantazm_mob");
+                = Key.key(Namespaces.PHANTAZM,"gun.target.entity_finder.positional.nearby_entity");
 
         @Override
         public @NotNull Key key() {
@@ -50,23 +49,13 @@ public class NearbyPhantazmMobFinder implements PositionalEntityFinder {
 
     private final Data data;
 
-    private final MobStore mobStore;
-
-    public NearbyPhantazmMobFinder(@NotNull Data data, @NotNull MobStore mobStore) {
+    public NearbyEntityFinder(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
     public @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Point start) {
-        Collection<Entity> entities = instance.getNearbyEntities(start, data.range());
-        entities.removeIf(entity -> mobStore.getMob(entity.getUuid()) == null);
-
-        return entities;
+        return instance.getNearbyEntities(start, data.range());
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

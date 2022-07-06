@@ -103,8 +103,4 @@ public class SpreadFirer implements Firer {
         }
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

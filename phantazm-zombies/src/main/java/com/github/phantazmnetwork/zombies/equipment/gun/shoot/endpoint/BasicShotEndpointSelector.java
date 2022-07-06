@@ -91,8 +91,4 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
         });
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

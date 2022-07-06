@@ -1,9 +1,5 @@
 package com.github.phantazmnetwork.server;
 
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.toml.TomlFormat;
-import com.electronwill.nightconfig.toml.TomlParser;
-import com.electronwill.nightconfig.toml.TomlWriter;
 import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.api.config.processor.ItemStackConfigProcessors;
 import com.github.phantazmnetwork.api.inventory.*;
@@ -37,15 +33,16 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.BasicTargetFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.AroundEndFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.BetweenPointsFinder;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional.NearbyPhantazmMobFinder;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional.NearbyEntityFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.EyeHeightHeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.StaticHeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.RayTraceIntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmTargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
-import com.github.steanky.ethylene.codec.toml.TomlCodec;
+import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
@@ -272,7 +269,7 @@ final class GunTest {
         subprocessors.put(StateShootTester.Data.SERIAL_KEY, StateShootTester.processor());
         subprocessors.put(AroundEndFinder.Data.SERIAL_KEY, AroundEndFinder.processor());
         subprocessors.put(BetweenPointsFinder.Data.SERIAL_KEY, BetweenPointsFinder.processor());
-        subprocessors.put(NearbyPhantazmMobFinder.Data.SERIAL_KEY, NearbyPhantazmMobFinder.processor());
+        subprocessors.put(NearbyEntityFinder.Data.SERIAL_KEY, NearbyEntityFinder.processor());
         subprocessors.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, EyeHeightHeadshotTester.processor());
         subprocessors.put(StaticHeadshotTester.Data.SERIAL_KEY, StaticHeadshotTester.processor());
         subprocessors.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, RayTraceIntersectionFinder.processor());
@@ -295,6 +292,8 @@ final class GunTest {
         BasicShotEndpointSelector.Data sEndSelector = new BasicShotEndpointSelector.Data(sBlockIterationKey, 100);
         Key sEntityFinderKey = Key.key(Namespaces.PHANTAZM, "entity_finder");
         BetweenPointsFinder.Data sEntityFinder = new BetweenPointsFinder.Data();
+        Key sTargetTesterKey = Key.key(Namespaces.PHANTAZM, "target_tester");
+        PhantazmTargetTester.Data sTargetTester = new PhantazmTargetTester.Data(true);
         Key sIntersectionFinderKey = Key.key(Namespaces.PHANTAZM, "intersection_finder");
         RayTraceIntersectionFinder.Data sIntersectionFinder = new RayTraceIntersectionFinder.Data();
         Key sHeadshotTesterKey = Key.key(Namespaces.PHANTAZM, "headshot_tester");
@@ -302,8 +301,8 @@ final class GunTest {
         Key sTargetLimiterKey = Key.key(Namespaces.PHANTAZM, "target_limiter");
         DistanceTargetLimiter.Data sTargetLimiter = new DistanceTargetLimiter.Data(1, true);
         Key sTargetFinderKey = Key.key(Namespaces.PHANTAZM, "target_finder");
-        BasicTargetFinder.Data sTargetFinder = new BasicTargetFinder.Data(sEntityFinderKey, sIntersectionFinderKey,
-                sHeadshotTesterKey, sTargetLimiterKey, true);
+        BasicTargetFinder.Data sTargetFinder = new BasicTargetFinder.Data(sEntityFinderKey, sTargetTesterKey,
+                sIntersectionFinderKey, sHeadshotTesterKey, sTargetLimiterKey);
         Key sFirerKey = Key.key(Namespaces.PHANTAZM, "firer");
         HitScanFirer.Data sFirer = new HitScanFirer.Data(sEndSelectorKey, sTargetFinderKey, Collections.emptyList());
         Key gunLevelKey = Key.key(Namespaces.PHANTAZM, "gun_level");
@@ -341,25 +340,18 @@ final class GunTest {
         theMap.put(sBlockIterationKey, sBlockIteration);
         theMap.put(sEndSelectorKey, sEndSelector);
         theMap.put(sEntityFinderKey, sEntityFinder);
+        theMap.put(sTargetTesterKey, sTargetTester);
         theMap.put(sIntersectionFinderKey, sIntersectionFinder);
         theMap.put(sHeadshotTesterKey, sHeadshotTester);
         theMap.put(sTargetFinderKey, sTargetFinder);
+        theMap.put(sTargetLimiterKey, sTargetLimiter);
         theMap.put(sFirerKey, sFirer);
         theMap.put(sSoundKey, sSound);
         theMap.put(sActionBarChooserKey, sActionBarChooser);
         theMap.put(sReloadActionBarEffectKey, sReloadActionBarEffect);
         theMap.put(sClipStackMapperKey, sClipStackMapper);
 
-        TomlWriter tomlWriter = new TomlWriter();
-        tomlWriter.setIndent("");
-        tomlWriter.setWriteStringLiteralPredicate(string -> string.contains("\"") && !string.contains("\u0027"));
-        ConfigCodec codec = new TomlCodec(new TomlParser(), tomlWriter) {
-            @Override
-            protected @NotNull <TOut> Output<TOut> makeEncodeMap() {
-                Config config = TomlFormat.newConfig(LinkedHashMap::new);
-                return new Output<>(config, config::add);
-            }
-        };
+        ConfigCodec codec = new YamlCodec();
 
         try {
             ConfigBridges.write(Path.of("./gun.toml"), codec, cfg, new ComplexData(gunLevelKey, theMap));

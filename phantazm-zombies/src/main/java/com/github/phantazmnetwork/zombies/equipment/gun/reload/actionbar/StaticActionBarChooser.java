@@ -62,8 +62,4 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
         return data.message();
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

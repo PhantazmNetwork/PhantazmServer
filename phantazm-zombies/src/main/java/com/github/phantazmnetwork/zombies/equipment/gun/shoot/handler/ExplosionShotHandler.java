@@ -77,8 +77,4 @@ public class ExplosionShotHandler implements ShotHandler {
 
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

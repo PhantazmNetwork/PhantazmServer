@@ -153,9 +153,8 @@ public class ProjectileFirer implements Firer {
             endSelector.getEnd(start).ifPresent(end -> {
                 EntityProjectile projectile = new EntityProjectile(player, data.entityType());
                 projectile.setNoGravity(!data.hasGravity());
-                projectile.setInstance(instance, start).thenRun(() -> {
-                    projectile.shoot(end, data.power(), data.spread());
-                });
+                projectile.setInstance(instance, start).thenRun(() ->
+                        projectile.shoot(end, data.power(), data.spread()));
 
                 firedShots.put(projectile.getUuid(), new FiredShot(state, start, previousHits));
                 removalQueue.add(new AliveProjectile(new WeakReference<>(projectile), System.currentTimeMillis()));
@@ -215,8 +214,8 @@ public class ProjectileFirer implements Firer {
     private void onProjectileCollision(@NotNull FiredShot firedShot, @NotNull EntityProjectile projectile,
                                        @NotNull Point collision) {
         if (projectile.getShooter() instanceof Player player && player.getUuid().equals(playerView.getUUID())) {
-            TargetFinder.Result target = targetFinder.findTarget(player, firedShot.start(),
-                    collision, firedShot.previousHits());
+            TargetFinder.Result target = targetFinder.findTarget(player, firedShot.start(), collision,
+                    firedShot.previousHits());
             for (GunHit hit : target.regular()) {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
@@ -224,18 +223,13 @@ public class ProjectileFirer implements Firer {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
             for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(firedShot.state(), player, firedShot.previousHits(),
-                        new GunShot(firedShot.start(), collision, target.regular(), target.headshot()));
+                GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
+                shotHandler.handle(firedShot.state(), player, firedShot.previousHits(), shot);
             }
         }
 
         projectile.remove();
         removalQueue.removeIf(aliveProjectile -> aliveProjectile.projectile().refersTo(projectile));
-    }
-
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
     }
 
 }

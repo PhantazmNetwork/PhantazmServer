@@ -121,8 +121,4 @@ public class HitScanFirer implements Firer {
         }
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

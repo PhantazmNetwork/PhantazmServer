@@ -80,9 +80,4 @@ public class StateReloadTester implements ReloadTester {
         return state.ticksSinceLastReload() < stats.reloadSpeed();
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }

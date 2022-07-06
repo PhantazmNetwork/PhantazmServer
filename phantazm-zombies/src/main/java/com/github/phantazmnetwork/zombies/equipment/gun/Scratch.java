@@ -26,15 +26,18 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.TargetFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.AroundEndFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.BetweenPointsFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.DirectionalEntityFinder;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional.NearbyPhantazmMobFinder;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional.NearbyEntityFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional.PositionalEntityFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.EyeHeightHeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.HeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.StaticHeadshotTester;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.IntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.RayTraceIntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.IntersectionFinder;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.TargetLimiter;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmTargetTester;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
@@ -52,7 +55,7 @@ import java.util.Random;
 
 public class Scratch {
 
-    public static @NotNull GunLevel createGunLevel(@NotNull EventNode<Event> node, @NotNull MobStore mobStore,
+    public static @NotNull GunLevel createGunLevel(@NotNull EventNode<Event> node, @NotNull MobStore store,
                                                    @NotNull PlayerView playerView, @NotNull Random random,
                                                    @NotNull ComplexData complexData) {
         Factory<GunStats, GunStats> gunStats = (provider, data) -> data; // this is a little weird
@@ -157,8 +160,10 @@ public class Scratch {
                 = (provider, data) -> new AroundEndFinder(data);
         Factory<BetweenPointsFinder.Data, BetweenPointsFinder> betweenPointsFinder
                 = (provider, data) -> new BetweenPointsFinder(data);
-        Factory<NearbyPhantazmMobFinder.Data, NearbyPhantazmMobFinder> nearbyPhantazmMobFinder
-                = (provider, data) -> new NearbyPhantazmMobFinder(data, mobStore);
+        Factory<NearbyEntityFinder.Data, NearbyEntityFinder> nearbyEntityFinder
+                = (provider, data) -> new NearbyEntityFinder(data);
+        Factory<PhantazmTargetTester.Data, PhantazmTargetTester> phantazmTargetTester
+                = (provider, data) -> new PhantazmTargetTester(data, store);
         Factory<EyeHeightHeadshotTester.Data, EyeHeightHeadshotTester> eyeHeightHeadshotTester
                 = (provider, data) -> new EyeHeightHeadshotTester(data);
         Factory<StaticHeadshotTester.Data, StaticHeadshotTester> staticHeadshotTester
@@ -168,12 +173,15 @@ public class Scratch {
         Factory<StaticIntersectionFinder.Data, StaticIntersectionFinder> staticTargetTester
                 = (provider, data) -> new StaticIntersectionFinder(data);
         Factory<BasicTargetFinder.Data, BasicTargetFinder> basicTargetFinder = (provider, data) -> {
-            DirectionalEntityFinder finder = provider.getDependency(data.finderKey());
-            IntersectionFinder intersectionFinder = provider.getDependency(data.targetTesterKey());
+            DirectionalEntityFinder finder = provider.getDependency(data.entityFinderKey());
+            TargetTester targetTester = provider.getDependency(data.targetTesterKey());
+            IntersectionFinder intersectionFinder = provider.getDependency(data.intersectionFinderKey());
             HeadshotTester headshotTester = provider.getDependency(data.headshotTesterKey());
             TargetLimiter targetLimiter = provider.getDependency(data.targetLimiterKey());
-            return new BasicTargetFinder(data, mobStore, finder, intersectionFinder, headshotTester, targetLimiter);
+            return new BasicTargetFinder(data, finder, targetTester, intersectionFinder, headshotTester, targetLimiter);
         };
+        Factory<DistanceTargetLimiter.Data, DistanceTargetLimiter> distanceTargetLimiter
+                = (provider, data) -> new DistanceTargetLimiter(data);
         Factory<ClipStackMapper.Data, ClipStackMapper> clipStackMapper = (provider, data) -> {
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
             return new ClipStackMapper(data, reloadTester);
@@ -183,7 +191,7 @@ public class Scratch {
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
             return new ReloadStackMapper(data, stats, reloadTester);
         };
-        Map<Key, Factory<?, ?>> factories = new HashMap<>(37);
+        Map<Key, Factory<?, ?>> factories = new HashMap<>(38);
         factories.put(GunStats.SERIAL_KEY, gunStats);
         factories.put(GunLevelData.SERIAL_KEY, gunLevel);
         factories.put(AmmoLevelEffect.Data.SERIAL_KEY, ammoLevelEffect);
@@ -213,12 +221,14 @@ public class Scratch {
         factories.put(StateShootTester.Data.SERIAL_KEY, stateShootTester);
         factories.put(AroundEndFinder.Data.SERIAL_KEY, aroundEndFinder);
         factories.put(BetweenPointsFinder.Data.SERIAL_KEY, betweenPointsFinder);
-        factories.put(NearbyPhantazmMobFinder.Data.SERIAL_KEY, nearbyPhantazmMobFinder);
+        factories.put(NearbyEntityFinder.Data.SERIAL_KEY, nearbyEntityFinder);
+        factories.put(PhantazmTargetTester.Data.SERIAL_KEY, phantazmTargetTester);
         factories.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, eyeHeightHeadshotTester);
         factories.put(StaticHeadshotTester.Data.SERIAL_KEY, staticHeadshotTester);
         factories.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, rayTraceTargetTester);
         factories.put(StaticIntersectionFinder.Data.SERIAL_KEY, staticTargetTester);
         factories.put(BasicTargetFinder.Data.SERIAL_KEY, basicTargetFinder);
+        factories.put(DistanceTargetLimiter.Data.SERIAL_KEY, distanceTargetLimiter);
         factories.put(ClipStackMapper.Data.SERIAL_KEY, clipStackMapper);
         factories.put(ReloadStackMapper.Data.SERIAL_KEY, reloadStackMapper);
 

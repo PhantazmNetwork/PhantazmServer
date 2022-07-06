@@ -59,8 +59,4 @@ public class StaticIntersectionFinder implements IntersectionFinder {
         return Optional.of(new Vec(centerX, centerY, centerZ));
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.reload;
 
-import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +10,5 @@ public interface ReloadTester {
     boolean canReload(@NotNull GunState state);
 
     boolean isReloading(@NotNull GunState state);
-
-    @NotNull Keyed getData();
 
 }

@@ -44,7 +44,7 @@ public class ChainShotHandler implements ShotHandler {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key finderKey = keyProcessor.dataFromElement(element.getElementOrThrow("finderKey"));
+                Key finderKey = keyProcessor.dataFromElement(element.getElementOrThrow("entityFinderKey"));
                 Key firerKey = keyProcessor.dataFromElement(element.getElementOrThrow("firerKey"));
 
                 boolean ignorePreviousHits = element.getBooleanOrThrow("ignorePreviousHits");
@@ -57,7 +57,7 @@ public class ChainShotHandler implements ShotHandler {
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(4);
-                node.put("finderKey", keyProcessor.elementFromData(data.finderKey()));
+                node.put("entityFinderKey", keyProcessor.elementFromData(data.finderKey()));
                 node.put("firerKey", keyProcessor.elementFromData(data.firerKey()));
                 node.putBoolean("ignorePreviousHits", data.ignorePreviousHits());
                 node.putNumber("fireAttempts", data.fireAttempts());
@@ -130,8 +130,4 @@ public class ChainShotHandler implements ShotHandler {
         firer.tick(state, time);
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

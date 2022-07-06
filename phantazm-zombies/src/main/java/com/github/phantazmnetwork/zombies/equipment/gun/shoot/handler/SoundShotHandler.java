@@ -86,8 +86,4 @@ public class SoundShotHandler implements ShotHandler {
 
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
 }

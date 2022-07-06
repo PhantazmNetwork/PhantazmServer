@@ -76,9 +76,4 @@ public class ClipStackMapper implements GunStackMapper {
         return intermediate;
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }

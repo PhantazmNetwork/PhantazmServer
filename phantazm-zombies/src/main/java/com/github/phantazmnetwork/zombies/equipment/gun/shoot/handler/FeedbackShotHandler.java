@@ -82,10 +82,5 @@ public class FeedbackShotHandler implements ShotHandler {
 
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 
 }

@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target;
 
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -24,7 +23,5 @@ public interface TargetFinder {
 
     @NotNull Result findTarget(@NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
                                @NotNull Collection<UUID> previousHits);
-
-    @NotNull Keyed getData();
 
 }

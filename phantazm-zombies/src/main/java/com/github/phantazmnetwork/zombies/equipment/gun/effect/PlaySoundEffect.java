@@ -70,9 +70,4 @@ public class PlaySoundEffect implements GunEffect {
 
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }

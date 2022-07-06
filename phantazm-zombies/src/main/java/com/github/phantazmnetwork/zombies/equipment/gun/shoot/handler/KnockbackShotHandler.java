@@ -78,9 +78,4 @@ public class KnockbackShotHandler implements ShotHandler {
 
     }
 
-    @Override
-    public @NotNull Keyed getData() {
-        return data;
-    }
-
 }
