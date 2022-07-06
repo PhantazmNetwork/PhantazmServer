@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.headshot;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -10,7 +9,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -52,7 +51,7 @@ public class StaticHeadshotTester implements HeadshotTester {
     }
 
     @Override
-    public boolean isHeadshot(@NotNull Player player, @NotNull PhantazmMob mob, @NotNull Point intersection) {
+    public boolean isHeadshot(@NotNull Entity shooter, @NotNull Entity entity, @NotNull Point intersection) {
         return data.shouldHeadshot();
     }
 

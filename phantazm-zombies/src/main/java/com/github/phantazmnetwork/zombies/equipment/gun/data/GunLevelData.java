@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 public record GunLevelData(int order, // TODO: key based upgrades
                            @NotNull ItemStack stack,
@@ -22,6 +23,20 @@ public record GunLevelData(int order, // TODO: key based upgrades
                            @NotNull Collection<Key> gunStackMappers) implements Keyed {
 
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.level");
+
+    public static @NotNull BiConsumer<GunLevelData, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.stats());
+            keys.add(data.shootTester());
+            keys.add(data.reloadTester());
+            keys.add(data.firer());
+            keys.addAll(data.shootEffects());
+            keys.addAll(data.reloadEffects());
+            keys.addAll(data.tickEffects());
+            keys.addAll(data.emptyClipEffects());
+            keys.addAll(data.gunStackMappers());
+        };
+    }
 
     public GunLevelData {
         Objects.requireNonNull(stack, "stack");

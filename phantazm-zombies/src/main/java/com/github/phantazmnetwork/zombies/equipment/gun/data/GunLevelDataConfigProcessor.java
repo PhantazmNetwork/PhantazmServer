@@ -1,7 +1,6 @@
-package com.github.phantazmnetwork.zombies.equipment.gun;
+package com.github.phantazmnetwork.zombies.equipment.gun.data;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
-import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelData;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;

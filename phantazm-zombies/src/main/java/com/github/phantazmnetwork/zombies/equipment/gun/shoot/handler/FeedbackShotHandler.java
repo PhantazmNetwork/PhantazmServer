@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
+import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
@@ -14,11 +14,12 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.UUID;
 
 public class FeedbackShotHandler implements ShotHandler {
 
@@ -57,18 +58,23 @@ public class FeedbackShotHandler implements ShotHandler {
 
     private final Data data;
 
-    public FeedbackShotHandler(@NotNull Data data) {
+    private final PlayerView playerView;
+
+    public FeedbackShotHandler(@NotNull Data data, @NotNull PlayerView playerView) {
         this.data = Objects.requireNonNull(data, "data");
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Player attacker, @NotNull Collection<PhantazmMob> previousHits, @NotNull GunShot shot) {
-        for (GunHit ignored : shot.regularTargets()) {
-            attacker.sendMessage(data.message());
-        }
-        for (GunHit ignored : shot.headshotTargets()) {
-            attacker.sendMessage(data.headshotMessage());
-        }
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        playerView.getPlayer().ifPresent(player -> {
+            for (GunHit ignored : shot.regularTargets()) {
+                player.sendMessage(data.message());
+            }
+            for (GunHit ignored : shot.headshotTargets()) {
+                player.sendMessage(data.headshotMessage());
+            }
+        });
     }
 
     @Override

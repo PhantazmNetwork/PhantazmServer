@@ -14,7 +14,9 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 public class ShootExpEffect implements GunEffect {
 
@@ -45,6 +47,12 @@ public class ShootExpEffect implements GunEffect {
                 node.put("gunStatsKey", keyProcessor.elementFromData(data.statsKey()));
                 return node;
             }
+        };
+    }
+
+    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.statsKey());
         };
     }
 

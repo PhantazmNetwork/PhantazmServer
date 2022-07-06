@@ -1,7 +1,6 @@
-package com.github.phantazmnetwork.zombies.equipment.gun.target.tester;
+package com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -11,17 +10,17 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
 
-public class StaticTargetTester implements TargetTester {
+public class StaticIntersectionFinder implements IntersectionFinder {
 
     public record Data() implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.target_tester.static");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.intersection_finder.static");
 
         @Override
         public @NotNull Key key() {
@@ -46,14 +45,13 @@ public class StaticTargetTester implements TargetTester {
 
     private final Data data;
 
-    public StaticTargetTester(@NotNull Data data) {
+    public StaticIntersectionFinder(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
-    public @NotNull Optional<Vec> getHitLocation(@NotNull Player player, @NotNull PhantazmMob mob,
-                                                 @NotNull Pos start) {
-        BoundingBox boundingBox = mob.entity().getBoundingBox();
+    public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start) {
+        BoundingBox boundingBox = entity.getBoundingBox();
         double centerX = (boundingBox.minX() + boundingBox.maxX()) / 2;
         double centerY = (boundingBox.minY() + boundingBox.maxY()) / 2;
         double centerZ = (boundingBox.minZ() + boundingBox.maxZ()) / 2;

@@ -11,9 +11,11 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -55,9 +57,17 @@ public class AroundEndFinder implements DirectionalEntityFinder {
     }
 
     @Override
-    public @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Pos start,
-                                                    @NotNull Point end) {
-        return instance.getNearbyEntities(end, data.range());
+    public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
+                                                          @NotNull Point end) {
+        Collection<Entity> entities = instance.getNearbyEntities(end, data.range());
+        Collection<LivingEntity> livingEntities = new ArrayList<>(entities.size());
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity livingEntity) {
+                livingEntities.add(livingEntity);
+            }
+        }
+
+        return livingEntities;
     }
 
     @Override

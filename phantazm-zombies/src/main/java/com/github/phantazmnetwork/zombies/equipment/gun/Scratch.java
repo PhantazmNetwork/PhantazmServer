@@ -31,13 +31,18 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.posi
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.EyeHeightHeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.HeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.StaticHeadshotTester;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.RayTraceTargetTester;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.StaticTargetTester;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTester;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.RayTraceIntersectionFinder;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.IntersectionFinder;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.TargetLimiter;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
+import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -47,8 +52,9 @@ import java.util.Random;
 
 public class Scratch {
 
-    public static @NotNull GunLevel createGunLevel(@NotNull MobStore mobStore, @NotNull PlayerView playerView,
-                                                   @NotNull Random random, @NotNull ComplexData complexData) {
+    public static @NotNull GunLevel createGunLevel(@NotNull EventNode<Event> node, @NotNull MobStore mobStore,
+                                                   @NotNull PlayerView playerView, @NotNull Random random,
+                                                   @NotNull ComplexData complexData) {
         Factory<GunStats, GunStats> gunStats = (provider, data) -> data; // this is a little weird
         Factory<GunLevelData, GunLevel> gunLevel = (provider, data) -> {
             GunStats stats = provider.getDependency(data.stats());
@@ -90,7 +96,7 @@ public class Scratch {
         };
         Factory<BasicShotEndpointSelector.Data, BasicShotEndpointSelector> basicShotEndpointSelector = (provider, data) -> {
             BlockIteration blockIteration = provider.getDependency(data.blockIterationKey());
-            return new BasicShotEndpointSelector(data, playerView, blockIteration);
+            return new BasicShotEndpointSelector(data, playerView::getPlayer, blockIteration);
         };
         Factory<RayTraceBlockIteration.Data, RayTraceBlockIteration> rayTraceBlockIteration
                 = (provider, data) -> new RayTraceBlockIteration(data);
@@ -101,14 +107,18 @@ public class Scratch {
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
             Collection<ShotHandler> shotHandlers = provider.getDependency(data.shotHandlerKeys());
 
-            return new HitScanFirer(data, playerView, endSelector, targetFinder, shotHandlers);
+            return new HitScanFirer(data, playerView::getPlayer, endSelector, targetFinder, shotHandlers);
         };
         Factory<ProjectileFirer.Data, ProjectileFirer> projectileFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
             Collection<ShotHandler> shotHandlers = provider.getDependency(data.shotHandlerKeys());
 
-            return new ProjectileFirer(data, playerView, endSelector, targetFinder, shotHandlers);
+            ProjectileFirer firer = new ProjectileFirer(data, playerView, endSelector, targetFinder, shotHandlers);
+            node.addListener(ProjectileCollideWithBlockEvent.class, firer::onProjectileCollision);
+            node.addListener(ProjectileCollideWithEntityEvent.class, firer::onProjectileCollision);
+
+            return firer;
         };
         Factory<SpreadFirer.Data, SpreadFirer> spreadFirer = (provider, data) -> {
             Collection<Firer> subFirers = provider.getDependency(data.subFirerKeys());
@@ -125,7 +135,7 @@ public class Scratch {
         Factory<ExplosionShotHandler.Data, ExplosionShotHandler> explosionShotHandler
                 = (provider, data) -> new ExplosionShotHandler(data);
         Factory<FeedbackShotHandler.Data, FeedbackShotHandler> feedbackShotHandler
-                = (provider, data) -> new FeedbackShotHandler(data);
+                = (provider, data) -> new FeedbackShotHandler(data, playerView);
         Factory<GuardianBeamShotHandler.Data, GuardianBeamShotHandler> guardianBeamShotHandler
                 = (provider, data) -> new GuardianBeamShotHandler(data);
         Factory<IgniteShotHandler.Data, IgniteShotHandler> igniteShotHandler
@@ -137,7 +147,7 @@ public class Scratch {
         Factory<PotionShotHandler.Data, PotionShotHandler> potionShotHandler
                 = (provider, data) -> new PotionShotHandler(data);
         Factory<SoundShotHandler.Data, SoundShotHandler> soundShotHandler
-                = (provider, data) -> new SoundShotHandler(data);
+                = (provider, data) -> new SoundShotHandler(data, playerView);
         Factory<StateShootTester.Data, StateShootTester> stateShootTester = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
@@ -153,15 +163,16 @@ public class Scratch {
                 = (provider, data) -> new EyeHeightHeadshotTester(data);
         Factory<StaticHeadshotTester.Data, StaticHeadshotTester> staticHeadshotTester
                 = (provider, data) -> new StaticHeadshotTester(data);
-        Factory<RayTraceTargetTester.Data, RayTraceTargetTester> rayTraceTargetTester
-                = (provider, data) -> new RayTraceTargetTester(data);
-        Factory<StaticTargetTester.Data, StaticTargetTester> staticTargetTester
-                = (provider, data) -> new StaticTargetTester(data);
+        Factory<RayTraceIntersectionFinder.Data, RayTraceIntersectionFinder> rayTraceTargetTester
+                = (provider, data) -> new RayTraceIntersectionFinder(data);
+        Factory<StaticIntersectionFinder.Data, StaticIntersectionFinder> staticTargetTester
+                = (provider, data) -> new StaticIntersectionFinder(data);
         Factory<BasicTargetFinder.Data, BasicTargetFinder> basicTargetFinder = (provider, data) -> {
             DirectionalEntityFinder finder = provider.getDependency(data.finderKey());
-            TargetTester targetTester = provider.getDependency(data.targetTesterKey());
+            IntersectionFinder intersectionFinder = provider.getDependency(data.targetTesterKey());
             HeadshotTester headshotTester = provider.getDependency(data.headshotTesterKey());
-            return new BasicTargetFinder(data, mobStore, finder, targetTester, headshotTester);
+            TargetLimiter targetLimiter = provider.getDependency(data.targetLimiterKey());
+            return new BasicTargetFinder(data, mobStore, finder, intersectionFinder, headshotTester, targetLimiter);
         };
         Factory<ClipStackMapper.Data, ClipStackMapper> clipStackMapper = (provider, data) -> {
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
@@ -205,8 +216,8 @@ public class Scratch {
         factories.put(NearbyPhantazmMobFinder.Data.SERIAL_KEY, nearbyPhantazmMobFinder);
         factories.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, eyeHeightHeadshotTester);
         factories.put(StaticHeadshotTester.Data.SERIAL_KEY, staticHeadshotTester);
-        factories.put(RayTraceTargetTester.Data.SERIAL_KEY, rayTraceTargetTester);
-        factories.put(StaticTargetTester.Data.SERIAL_KEY, staticTargetTester);
+        factories.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, rayTraceTargetTester);
+        factories.put(StaticIntersectionFinder.Data.SERIAL_KEY, staticTargetTester);
         factories.put(BasicTargetFinder.Data.SERIAL_KEY, basicTargetFinder);
         factories.put(ClipStackMapper.Data.SERIAL_KEY, clipStackMapper);
         factories.put(ReloadStackMapper.Data.SERIAL_KEY, reloadStackMapper);

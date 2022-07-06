@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
@@ -12,12 +11,13 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.UUID;
 
 public class DamageShotHandler implements ShotHandler {
 
@@ -58,12 +58,12 @@ public class DamageShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Player attacker, @NotNull Collection<PhantazmMob> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
-            target.mob().entity().damage(DamageType.fromPlayer(attacker), data.damage());
+            target.entity().damage(DamageType.fromEntity(attacker), data.damage());
         }
         for (GunHit target : shot.headshotTargets()) {
-            target.mob().entity().damage(DamageType.fromPlayer(attacker), data.headshotDamage());
+            target.entity().damage(DamageType.fromEntity(attacker), data.headshotDamage());
         }
     }
 

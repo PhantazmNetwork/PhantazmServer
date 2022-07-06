@@ -17,7 +17,9 @@ import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 public class ReloadActionBarEffect implements GunEffect {
 
@@ -56,6 +58,14 @@ public class ReloadActionBarEffect implements GunEffect {
 
                 return node;
             }
+        };
+    }
+
+    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.statsKey());
+            keys.add(data.reloadTesterKey());
+            keys.add(data.reloadActionBarChooserKey());
         };
     }
 

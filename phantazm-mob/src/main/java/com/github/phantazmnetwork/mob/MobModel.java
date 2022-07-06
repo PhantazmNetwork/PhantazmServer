@@ -43,7 +43,7 @@ public class MobModel implements Keyed {
      * @param triggers {@link Skill}s associated with triggers
      * @param displayName {@link Skill} The mob's display name, or null if it should not have one
      * @param equipment The mob's equipment
-     * @param maxHealth The mob's maximum health
+     * @param attributes The mob's attributes
      */
     public MobModel(@NotNull Key key, @NotNull MinestomDescriptor descriptor,
                     @NotNull Collection<Collection<Goal>> goalGroups,

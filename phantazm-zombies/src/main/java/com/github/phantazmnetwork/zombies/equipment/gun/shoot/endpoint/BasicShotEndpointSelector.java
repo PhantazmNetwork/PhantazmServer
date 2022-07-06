@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint;
 
-import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -12,13 +11,17 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.block.BlockIterator;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
@@ -55,23 +58,29 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
         };
     }
 
+    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.blockIterationKey());
+        };
+    }
+
     private final Data data;
 
-    private final PlayerView playerView;
+    private final Supplier<Optional<? extends Entity>> entitySupplier;
 
     private final BlockIteration blockIteration;
 
-    public BasicShotEndpointSelector(@NotNull Data data, @NotNull PlayerView playerView,
+    public BasicShotEndpointSelector(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
                                      @NotNull BlockIteration blockIteration) {
         this.data = Objects.requireNonNull(data, "data");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.entitySupplier = Objects.requireNonNull(entitySupplier, "playerView");
         this.blockIteration = Objects.requireNonNull(blockIteration, "blockIteration");
     }
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull Optional<Point> getEnd(@NotNull Pos start) {
-        return playerView.getPlayer().map(player -> {
+        return entitySupplier.get().map(player -> {
             Instance instance = player.getInstance();
             if (instance == null) {
                 return null;

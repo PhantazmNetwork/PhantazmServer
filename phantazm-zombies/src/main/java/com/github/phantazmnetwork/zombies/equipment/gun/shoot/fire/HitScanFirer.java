@@ -1,9 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
 
-import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
@@ -19,9 +17,12 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class HitScanFirer implements Firer {
 
@@ -62,9 +63,17 @@ public class HitScanFirer implements Firer {
         };
     }
 
+    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.endSelectorKey());
+            keys.add(data.targetFinderKey());
+            keys.addAll(data.shotHandlerKeys());
+        };
+    }
+
     private final Data data;
 
-    private final PlayerView playerView;
+    private final Supplier<Optional<? extends Entity>> entitySupplier;
 
     private final ShotEndpointSelector endSelector;
 
@@ -72,18 +81,19 @@ public class HitScanFirer implements Firer {
 
     private final Collection<ShotHandler> shotHandlers;
 
-    public HitScanFirer(@NotNull Data data, @NotNull PlayerView playerView, @NotNull ShotEndpointSelector endSelector,
-                        @NotNull TargetFinder targetFinder, @NotNull Collection<ShotHandler> shotHandlers) {
+    public HitScanFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+                        @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
+                        @NotNull Collection<ShotHandler> shotHandlers) {
         this.data = Objects.requireNonNull(data, "data");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
         this.shotHandlers = Objects.requireNonNull(shotHandlers, "shotHandlers");
     }
 
     @Override
-    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<PhantazmMob> previousHits) {
-        playerView.getPlayer().ifPresent(player -> {
+    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits) {
+        entitySupplier.get().ifPresent(player -> {
             Optional<Point> endOptional = endSelector.getEnd(start);
             if (endOptional.isEmpty()) {
                 return;
@@ -92,10 +102,10 @@ public class HitScanFirer implements Firer {
 
             TargetFinder.Result target = targetFinder.findTarget(player, start, end, previousHits);
             for (GunHit hit : target.regular()) {
-                previousHits.add(hit.mob());
+                previousHits.add(hit.entity().getUuid());
             }
             for (GunHit hit : target.headshot()) {
-                previousHits.add(hit.mob());
+                previousHits.add(hit.entity().getUuid());
             }
             for (ShotHandler shotHandler : shotHandlers) {
                 shotHandler.handle(state, player, previousHits, new GunShot(start, end, target.regular(),

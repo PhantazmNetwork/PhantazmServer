@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
+import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -13,11 +13,12 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.UUID;
 
 public class SoundShotHandler implements ShotHandler {
 
@@ -61,18 +62,23 @@ public class SoundShotHandler implements ShotHandler {
 
     private final Data data;
 
-    public SoundShotHandler(@NotNull Data data) {
+    private final PlayerView playerView;
+
+    public SoundShotHandler(@NotNull Data data, @NotNull PlayerView playerView) {
         this.data = Objects.requireNonNull(data, "data");
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Player attacker, @NotNull Collection<PhantazmMob> previousHits, @NotNull GunShot shot) {
-        if (!shot.regularTargets().isEmpty()) {
-            attacker.playSound(data.sound(), Sound.Emitter.self());
-        }
-        else if (!shot.headshotTargets().isEmpty()) {
-            attacker.playSound(data.headshotSound(), Sound.Emitter.self());
-        }
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        playerView.getPlayer().ifPresent(player -> {
+            if (!shot.regularTargets().isEmpty()) {
+                player.playSound(data.sound(), Sound.Emitter.self());
+            }
+            else if (!shot.headshotTargets().isEmpty()) {
+                player.playSound(data.headshotSound(), Sound.Emitter.self());
+            }
+        });
     }
 
     @Override

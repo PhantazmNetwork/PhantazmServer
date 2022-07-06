@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
@@ -19,11 +18,11 @@ import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class ChainShotHandler implements ShotHandler {
 
@@ -68,6 +67,13 @@ public class ChainShotHandler implements ShotHandler {
         };
     }
 
+    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.finderKey());
+            keys.add(data.firerKey());
+        };
+    }
+
     private final Data data;
 
     private final PositionalEntityFinder finder;
@@ -81,7 +87,7 @@ public class ChainShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Player attacker, @NotNull Collection<PhantazmMob> previousHits,
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
                        @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
@@ -96,7 +102,7 @@ public class ChainShotHandler implements ShotHandler {
 
         Set<UUID> previousUUIDs = new HashSet<>(combinedSize);
         for (GunHit hit : combinedHits) {
-            previousUUIDs.add(hit.mob().entity().getUuid());
+            previousUUIDs.add(hit.entity().getUuid());
         }
 
         for (GunHit hit : combinedHits) {
@@ -115,9 +121,7 @@ public class ChainShotHandler implements ShotHandler {
                 if (previousHits.size() > initialSize && --attempts <= 0) {
                     return;
                 }
-                for (PhantazmMob mob : previousHits) {
-                    previousUUIDs.add(mob.entity().getUuid());
-                }
+                previousUUIDs.addAll(previousHits);
             }
         }
     }

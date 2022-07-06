@@ -12,7 +12,7 @@ import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +55,7 @@ public class RayTraceBlockIteration implements BlockIteration {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public @NotNull Optional<Vec> findEnd(@NotNull Instance instance, @NotNull Player player, @NotNull Pos start,
+    public @NotNull Optional<Vec> findEnd(@NotNull Instance instance, @NotNull Entity shooter, @NotNull Pos start,
                                           @NotNull Iterator<Point> it) {
         Point blockLocation = null;
         Block block = null;

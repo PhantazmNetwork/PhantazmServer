@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.api.config.processor.MinestomConfigProcessors;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
@@ -31,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class ProjectileFirer implements Firer {
 
@@ -90,8 +90,16 @@ public class ProjectileFirer implements Firer {
         };
     }
 
+    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.endSelectorKey());
+            keys.add(data.targetFinderKey());
+            keys.addAll(data.shotHandlerKeys());
+        };
+    }
+
     private record FiredShot(@NotNull GunState state, @NotNull Pos start,
-                             @NotNull Collection<PhantazmMob> previousHits) {
+                             @NotNull Collection<UUID> previousHits) {
 
         private FiredShot {
             Objects.requireNonNull(state, "state");
@@ -135,7 +143,7 @@ public class ProjectileFirer implements Firer {
     }
 
     @Override
-    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<PhantazmMob> previousHits) {
+    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits) {
         playerView.getPlayer().ifPresent(player -> {
             Instance instance = player.getInstance();
             if (instance == null) {
@@ -210,10 +218,10 @@ public class ProjectileFirer implements Firer {
             TargetFinder.Result target = targetFinder.findTarget(player, firedShot.start(),
                     collision, firedShot.previousHits());
             for (GunHit hit : target.regular()) {
-                firedShot.previousHits().add(hit.mob());
+                firedShot.previousHits().add(hit.entity().getUuid());
             }
             for (GunHit hit : target.headshot()) {
-                firedShot.previousHits().add(hit.mob());
+                firedShot.previousHits().add(hit.entity().getUuid());
             }
             for (ShotHandler shotHandler : shotHandlers) {
                 shotHandler.handle(firedShot.state(), player, firedShot.previousHits(),

@@ -1,15 +1,15 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target;
 
-import net.kyori.adventure.key.Keyed;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.UUID;
 
 public interface TargetFinder {
 
@@ -22,8 +22,8 @@ public interface TargetFinder {
 
     }
 
-    @NotNull Result findTarget(@NotNull Player player, @NotNull Pos start, @NotNull Point end,
-                               @NotNull Collection<PhantazmMob> previousHits);
+    @NotNull Result findTarget(@NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
+                               @NotNull Collection<UUID> previousHits);
 
     @NotNull Keyed getData();
 

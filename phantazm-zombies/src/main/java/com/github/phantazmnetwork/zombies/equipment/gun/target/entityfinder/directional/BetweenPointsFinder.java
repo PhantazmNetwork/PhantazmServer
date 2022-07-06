@@ -8,7 +8,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -53,10 +53,10 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Pos start,
-                                                    @NotNull Point end) {
-        Collection<Entity> entities = new ArrayList<>(instance.getEntities().size());
-        instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.ENTITIES, entities::add);
+    public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
+                                                          @NotNull Point end) {
+        Collection<LivingEntity> entities = new ArrayList<>(instance.getEntities().size());
+        instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, entities::add);
 
         return entities;
     }

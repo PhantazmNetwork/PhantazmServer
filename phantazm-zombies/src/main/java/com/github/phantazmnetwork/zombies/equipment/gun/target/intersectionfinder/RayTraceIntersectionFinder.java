@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.equipment.gun.target.tester;
+package com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder;
 
 import com.github.phantazmnetwork.api.RayUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
@@ -11,17 +11,16 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
 
-public class RayTraceTargetTester implements TargetTester {
+public class RayTraceIntersectionFinder implements IntersectionFinder {
 
     public record Data() implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.target_tester.ray_trace");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.intersection_finder.ray_trace");
 
         @Override
         public @NotNull Key key() {
@@ -47,14 +46,12 @@ public class RayTraceTargetTester implements TargetTester {
 
     private final Data data;
 
-    public RayTraceTargetTester(@NotNull Data data) {
+    public RayTraceIntersectionFinder(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
-    public @NotNull Optional<Vec> getHitLocation(@NotNull Player player, @NotNull PhantazmMob mob,
-                                                 @NotNull Pos start) {
-        Entity entity = mob.entity();
+    public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start) {
         return RayUtils.rayTrace(entity.getBoundingBox(), entity.getPosition(), start);
     }
 

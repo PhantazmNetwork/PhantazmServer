@@ -15,7 +15,9 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 public class ReloadStackMapper implements GunStackMapper {
 
@@ -50,6 +52,13 @@ public class ReloadStackMapper implements GunStackMapper {
 
                 return node;
             }
+        };
+    }
+
+    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.statsKey());
+            keys.add(data.reloadTesterKey());
         };
     }
 

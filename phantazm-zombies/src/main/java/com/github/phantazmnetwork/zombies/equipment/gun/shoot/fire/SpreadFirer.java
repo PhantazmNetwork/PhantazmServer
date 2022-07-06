@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -15,10 +14,8 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public class SpreadFirer implements Firer {
 
@@ -57,6 +54,12 @@ public class SpreadFirer implements Firer {
         };
     }
 
+    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.addAll(data.subFirerKeys());
+        };
+    }
+
     private final Data data;
 
     private final Random random;
@@ -70,7 +73,7 @@ public class SpreadFirer implements Firer {
     }
 
     @Override
-    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<PhantazmMob> previousHits) {
+    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits) {
         if (data.angleVariance() == 0) {
             for (Firer subFirer : subFirers) {
                 subFirer.fire(state, start, previousHits);

@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -14,7 +13,6 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.monster.GuardianMeta;
 import net.minestom.server.instance.Instance;
@@ -75,7 +73,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Player attacker, @NotNull Collection<PhantazmMob> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
