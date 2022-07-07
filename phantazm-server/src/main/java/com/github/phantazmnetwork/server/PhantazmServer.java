@@ -45,6 +45,8 @@ public final class PhantazmServer {
     /**
      * Starting point for the server.
      * @param args Do you even know java?
+     *             I don't know java.
+     *             At all.
      */
     public static void main(String[] args) {
         MinecraftServer minecraftServer = MinecraftServer.init();
@@ -82,8 +84,8 @@ public final class PhantazmServer {
                       ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
                         ██████████████████████████████████████████
                     """);
-                LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value (an empty " +
-                        "string). Only use this option when running in a development environment.");
+                LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value " +
+                        "\"default\". Only use this option when running in a secure development environment.");
             }
             else if(serverInfoConfig.authType() == AuthType.VELOCITY
                     && serverInfoConfig.velocitySecret().equals(ServerInfoConfig.DEFAULT_VELOCITY_SECRET)) {

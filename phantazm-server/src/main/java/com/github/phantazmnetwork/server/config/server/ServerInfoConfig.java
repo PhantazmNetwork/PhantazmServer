@@ -39,9 +39,9 @@ public record ServerInfoConfig(@NotNull String serverIP,
 
     /**
      * The default Velocity secret. This is used so the config file gets filled in, but the empty string should NEVER
-     * be used as an actual secret during testing or production.
+     * be used as an actual secret during production.
      */
-    public static final String DEFAULT_VELOCITY_SECRET = "";
+    public static final String DEFAULT_VELOCITY_SECRET = "default";
 
     /**
      * The default ServerInfoConfig instance.

@@ -3,7 +3,7 @@
     port = 25567
     optifineEnabled = true
     authType = "BUNGEE"
-    velocitySecret = ""
+    velocitySecret = "default"
 
 [pingList]
     description = "A Phantazm Server"
