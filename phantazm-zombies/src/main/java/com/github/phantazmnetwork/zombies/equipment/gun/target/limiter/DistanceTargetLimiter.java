@@ -26,6 +26,12 @@ public class DistanceTargetLimiter implements TargetLimiter {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.target_limiter.distance");
 
+        public Data {
+            if (targetLimit < 0) {
+                throw new IllegalArgumentException("targetLimit must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -37,6 +43,9 @@ public class DistanceTargetLimiter implements TargetLimiter {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 int targetLimit = element.getNumberOrThrow("targetLimit").intValue();
+                if (targetLimit < 0) {
+                    throw new ConfigProcessException("targetLimit must be greater than or equal to 0");
+                }
                 boolean prioritizeClosest = element.getBooleanOrThrow("prioritizeClosest");
 
                 return new Data(targetLimit, prioritizeClosest);

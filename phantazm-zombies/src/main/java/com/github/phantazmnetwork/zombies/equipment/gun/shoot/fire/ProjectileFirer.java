@@ -45,6 +45,19 @@ public class ProjectileFirer implements Firer {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.projectile");
 
+        public Data {
+            Objects.requireNonNull(endSelectorKey, "endSelectorKey");
+            Objects.requireNonNull(targetFinderKey, "targetFinderKey");
+            Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
+            for (Key key : shotHandlerKeys) {
+                Objects.requireNonNull(key, "shotHandlerKey key");
+            }
+            Objects.requireNonNull(entityType, "entityType");
+            if (maxAliveTime < 0) {
+                throw new IllegalArgumentException("maxAliveTime must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -68,6 +81,9 @@ public class ProjectileFirer implements Firer {
                 double spread = element.getNumberOrThrow("spread").doubleValue();
                 boolean hasGravity = element.getBooleanOrThrow("hasGravity");
                 long maxAliveTime = element.getNumberOrThrow("maxAliveTime").longValue();
+                if (maxAliveTime < 0) {
+                    throw new ConfigProcessException("maxAliveTime must be greater than or equal to 0");
+                }
 
                 return new Data(endSelectorKey, targetFinderKey, shotHandlerKeys, entityType, power, spread, hasGravity,
                         maxAliveTime);

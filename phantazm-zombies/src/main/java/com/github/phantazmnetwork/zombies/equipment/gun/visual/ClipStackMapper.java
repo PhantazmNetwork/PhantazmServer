@@ -24,6 +24,10 @@ public class ClipStackMapper implements GunStackMapper {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.stack_mapper.clip.stack_count");
 
+        public Data {
+            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

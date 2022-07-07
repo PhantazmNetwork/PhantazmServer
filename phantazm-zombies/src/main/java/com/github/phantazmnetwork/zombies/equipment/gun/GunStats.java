@@ -25,11 +25,29 @@ public record GunStats(long shootSpeed,
             @Override
             public @NotNull GunStats dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 long shootSpeed = element.getNumberOrThrow("shootSpeed").longValue();
+                if (shootSpeed < 0) {
+                    throw new ConfigProcessException("shootSpeed must be greater than or equal to 0");
+                }
                 long reloadSpeed = element.getNumberOrThrow("reloadSpeed").longValue();
+                if (reloadSpeed < 0) {
+                    throw new ConfigProcessException("reloadSpeed must be greater than or equal to 0");
+                }
                 int maxAmmo = element.getNumberOrThrow("maxAmmo").intValue();
+                if (maxAmmo < 0) {
+                    throw new ConfigProcessException("maxAmmo must be greater than or equal to 0");
+                }
                 int maxClip = element.getNumberOrThrow("maxClip").intValue();
+                if (maxClip < 0) {
+                    throw new ConfigProcessException("maxClip must be greater than or equal to 0");
+                }
                 int shots = element.getNumberOrThrow("shots").intValue();
+                if (shots < 0) {
+                    throw new ConfigProcessException("shots must be greater than or equal to 0");
+                }
                 long shotInterval = element.getNumberOrThrow("shotInterval").longValue();
+                if (shotInterval < 0) {
+                    throw new ConfigProcessException("shotInterval must be greater than or equal to 0");
+                }
 
                 return new GunStats(shootSpeed, reloadSpeed, maxAmmo, maxClip, shots, shotInterval);
             }
@@ -47,6 +65,27 @@ public record GunStats(long shootSpeed,
                 return node;
             }
         };
+    }
+
+    public GunStats {
+        if (shootSpeed < 0) {
+            throw new IllegalArgumentException("shootSpeed must be greater than or equal to 0");
+        }
+        if (reloadSpeed < 0) {
+            throw new IllegalArgumentException("reloadSpeed must be greater than or equal to 0");
+        }
+        if (maxAmmo < 0) {
+            throw new IllegalArgumentException("maxAmmo must be greater than or equal to 0");
+        }
+        if (maxClip < 0) {
+            throw new IllegalArgumentException("maxClip must be greater than or equal to 0");
+        }
+        if (shots < 0) {
+            throw new IllegalArgumentException("shots must be greater than or equal to 0");
+        }
+        if (shotInterval < 0) {
+            throw new IllegalArgumentException("shotInterval must be greater than or equal to 0");
+        }
     }
 
     @Override

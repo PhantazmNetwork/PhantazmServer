@@ -29,6 +29,12 @@ public class ReloadActionBarEffect implements GunEffect {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.action_bar.reload");
 
+        public Data {
+            Objects.requireNonNull(statsKey, "statsKey");
+            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
+            Objects.requireNonNull(reloadActionBarChooserKey, "reloadActionBarChooserKey");
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

@@ -32,6 +32,13 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.guardian_beam");
 
+        public Data {
+            Objects.requireNonNull(entityType, "entityType");
+            if (beamTime < 0) {
+                throw new IllegalArgumentException("beamTime must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -45,12 +52,15 @@ public class GuardianBeamShotHandler implements ShotHandler {
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 boolean isElder = element.getBooleanOrThrow("isElder");
                 long beamTime = element.getNumberOrThrow("beamTime").longValue();
+                if (beamTime < 0) {
+                    throw new ConfigProcessException("beamTime must be greater than or equal to 0");
+                }
 
                 return new Data(isElder ? EntityType.ELDER_GUARDIAN : EntityType.GUARDIAN, beamTime);
             }
 
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
                 ConfigNode node = new LinkedConfigNode(1);
                 node.putBoolean("isElder", data.entityType() == EntityType.ELDER_GUARDIAN);
                 node.putNumber("beamTime", data.beamTime());

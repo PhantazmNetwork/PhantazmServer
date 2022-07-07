@@ -26,6 +26,15 @@ public class KnockbackShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.knockback");
 
+        public Data {
+            if (knockback < 0) {
+                throw new IllegalArgumentException("knockback must be greater than or equal to 0");
+            }
+            if (headshotKnockback < 0) {
+                throw new IllegalArgumentException("headshotKnockback must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -38,15 +47,23 @@ public class KnockbackShotHandler implements ShotHandler {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 double knockback = element.getNumberOrThrow("knockback").doubleValue();
+                if (knockback < 0) {
+                    throw new ConfigProcessException("knockback must be greater than or equal to 0");
+                }
                 double headshotKnockback = element.getNumberOrThrow("headshotKnockback").doubleValue();
+                if (headshotKnockback < 0) {
+                    throw new ConfigProcessException("headshotKnockback must be greater than or equal to 0");
+                }
+
                 return new Data(knockback, headshotKnockback);
             }
 
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.putNumber("knockback", data.knockback());
                 node.putNumber("headshotKnockback", data.headshotKnockback());
+
                 return node;
             }
         };

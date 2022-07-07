@@ -23,6 +23,10 @@ public class StateReloadTester implements ReloadTester {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.reload_tester.state");
 
+        public Data {
+            Objects.requireNonNull(statsKey, "statsKey");
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -51,9 +55,7 @@ public class StateReloadTester implements ReloadTester {
     }
 
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.statsKey());
-        };
+        return (data, keys) -> keys.add(data.statsKey());
     }
 
     private final Data data;

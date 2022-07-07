@@ -31,6 +31,15 @@ public class HitScanFirer implements Firer {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan");
 
+        public Data {
+            Objects.requireNonNull(endSelectorKey, "endSelectorKey");
+            Objects.requireNonNull(targetFinderKey, "targetFinderKey");
+            Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
+            for (Key key : shotHandlerKeys) {
+                Objects.requireNonNull(key, "shotHandlerKeys element");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

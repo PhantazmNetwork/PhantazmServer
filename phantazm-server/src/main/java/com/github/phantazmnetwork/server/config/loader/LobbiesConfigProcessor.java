@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
-    private final static ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
 
     @Override
     public @NotNull LobbiesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {

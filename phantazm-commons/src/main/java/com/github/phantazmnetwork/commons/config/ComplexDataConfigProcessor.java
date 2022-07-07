@@ -17,7 +17,7 @@ import java.util.Objects;
 
 public class ComplexDataConfigProcessor implements ConfigProcessor<ComplexData> {
 
-    private final static ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+    private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
     private final Map<Key, ConfigProcessor<? extends Keyed>> subProcessors;
 

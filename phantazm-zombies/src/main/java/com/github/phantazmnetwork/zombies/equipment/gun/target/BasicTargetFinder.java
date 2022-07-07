@@ -35,6 +35,14 @@ public class BasicTargetFinder implements TargetFinder {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.target_finder.basic");
 
+        public Data {
+            Objects.requireNonNull(entityFinderKey, "entityFinderKey");
+            Objects.requireNonNull(targetTesterKey, "targetTesterKey");
+            Objects.requireNonNull(intersectionFinderKey, "intersectionFinderKey");
+            Objects.requireNonNull(headshotTesterKey, "headshotTesterKey");
+            Objects.requireNonNull(targetLimiterKey, "targetLimiterKey");
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

@@ -39,6 +39,9 @@ public class ParticleTrailShotHandler implements ShotHandler {
 
         public Data {
             Objects.requireNonNull(particle, "particle");
+            if (trailCount < 0) {
+                throw new IllegalArgumentException("trailCount must be greater than or equal to 0");
+            }
         }
 
         @Override
@@ -61,6 +64,9 @@ public class ParticleTrailShotHandler implements ShotHandler {
                 float particleData = element.getNumberOrThrow("particleData").floatValue();
                 int count = element.getNumberOrThrow("count").intValue();
                 int trailCount = element.getNumberOrThrow("trailCount").intValue();
+                if (trailCount < 0) {
+                    throw new ConfigProcessException("trailCount must be greater than or equal to 0");
+                }
 
                 return new Data(particle, distance, offsetX, offsetY, offsetZ, particleData, count, trailCount);
             }

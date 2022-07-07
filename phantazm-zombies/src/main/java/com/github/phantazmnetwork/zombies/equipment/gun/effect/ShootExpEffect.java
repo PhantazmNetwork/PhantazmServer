@@ -24,6 +24,10 @@ public class ShootExpEffect implements GunEffect {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.exp.shoot");
 
+        public Data {
+            Objects.requireNonNull(statsKey, "statsKey");
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -51,9 +55,7 @@ public class ShootExpEffect implements GunEffect {
     }
 
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.statsKey());
-        };
+        return (data, keys) -> keys.add(data.statsKey());
     }
 
     private boolean currentlyActive = false;

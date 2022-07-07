@@ -31,6 +31,14 @@ public class ChainShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.shot_handler.chain");
 
+        public Data {
+            Objects.requireNonNull(finderKey, "finderKey");
+            Objects.requireNonNull(firerKey, "firerKey");
+            if (fireAttempts < 0) {
+                throw new IllegalArgumentException("fireAttempts must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -46,10 +54,11 @@ public class ChainShotHandler implements ShotHandler {
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key finderKey = keyProcessor.dataFromElement(element.getElementOrThrow("entityFinderKey"));
                 Key firerKey = keyProcessor.dataFromElement(element.getElementOrThrow("firerKey"));
-
                 boolean ignorePreviousHits = element.getBooleanOrThrow("ignorePreviousHits");
                 int fireAttempts = element.getNumberOrThrow("fireAttempts").intValue();
-
+                if (fireAttempts < 0) {
+                    throw new ConfigProcessException("fireAttempts must be greater than or equal to 0");
+                }
 
                 return new Data(finderKey, firerKey, ignorePreviousHits, fireAttempts);
             }

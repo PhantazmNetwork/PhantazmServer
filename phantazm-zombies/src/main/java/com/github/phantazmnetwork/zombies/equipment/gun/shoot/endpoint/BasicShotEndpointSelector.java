@@ -29,6 +29,13 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.end_selector.basic");
 
+        public Data {
+            Objects.requireNonNull(blockIterationKey, "blockIterationKey");
+            if (maxDistance < 0) {
+                throw new IllegalArgumentException("maxDistance must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -44,6 +51,9 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key blockIterationKey = keyProcessor.dataFromElement(element.getElementOrThrow("blockIterationKey"));
                 int maxDistance = element.getNumberOrThrow("maxDistance").intValue();
+                if (maxDistance < 0) {
+                    throw new ConfigProcessException("maxDistance must be greater than or equal to 0");
+                }
 
                 return new Data(blockIterationKey, maxDistance);
             }

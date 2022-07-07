@@ -24,6 +24,11 @@ public class StateShootTester implements ShootTester {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shoot_tester.state");
 
+        public Data {
+            Objects.requireNonNull(statsKey, "statsKey");
+            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

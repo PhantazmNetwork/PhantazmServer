@@ -16,9 +16,9 @@ import java.util.Objects;
 
 public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData> {
 
-    private final static ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+    private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
-    private final static ConfigProcessor<Collection<Key>> KEY_COLLECTION_PROCESSOR
+    private static final ConfigProcessor<Collection<Key>> KEY_COLLECTION_PROCESSOR
             = KEY_PROCESSOR.collectionProcessor(ArrayList::new);
 
     private final ConfigProcessor<ItemStack> stackProcessor;
@@ -30,6 +30,9 @@ public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData
     @Override
     public @NotNull GunLevelData dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         int order = element.getNumberOrThrow("order").intValue();
+        if (order < 0) {
+            throw new ConfigProcessException("order must be greater than or equal to 0");
+        }
         ItemStack stack = stackProcessor.dataFromElement(element.getElementOrThrow("stack"));
         Key stats = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("stats"));
         Key shootTester = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("shootTester"));

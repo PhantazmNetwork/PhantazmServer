@@ -29,6 +29,12 @@ public class ExplosionShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.explosion");
 
+        public Data {
+            if (radius < 0) {
+                throw new IllegalArgumentException("radius must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -41,11 +47,15 @@ public class ExplosionShotHandler implements ShotHandler {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 float radius = element.getNumberOrThrow("radius").floatValue();
+                if (radius < 0) {
+                    throw new ConfigProcessException("radius must be greater than or equal to 0");
+                }
+
                 return new Data(radius);
             }
 
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
                 ConfigNode node = new LinkedConfigNode(1);
                 node.putNumber("radius", data.radius());
                 return node;

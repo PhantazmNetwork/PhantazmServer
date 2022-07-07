@@ -25,6 +25,11 @@ public class ReloadStackMapper implements GunStackMapper {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.stack_mapper.reload.durability");
 
+        public Data {
+            Objects.requireNonNull(statsKey, "statsKey");
+            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

@@ -23,6 +23,13 @@ public class SpreadFirer implements Firer {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.firer.spread");
 
+        public Data {
+            Objects.requireNonNull(subFirerKeys, "subFirerKeys");
+            if (angleVariance < 0) {
+                throw new IllegalArgumentException("angleVariance must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -39,6 +46,9 @@ public class SpreadFirer implements Firer {
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Collection<Key> subFirerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("subFirerKeys"));
                 float angleVariance = element.getNumberOrThrow("angleVariance").floatValue();
+                if (angleVariance < 0) {
+                    throw new ConfigProcessException("angleVariance must be greater than or equal to 0");
+                }
 
                 return new Data(subFirerKeys, angleVariance);
             }
@@ -55,9 +65,7 @@ public class SpreadFirer implements Firer {
     }
 
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.addAll(data.subFirerKeys());
-        };
+        return (data, keys) -> keys.addAll(data.subFirerKeys());
     }
 
     private final Data data;

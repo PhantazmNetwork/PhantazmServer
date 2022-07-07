@@ -39,6 +39,9 @@ public record GunLevelData(int order, // TODO: key based upgrades
     }
 
     public GunLevelData {
+        if (order() < 0) {
+            throw new IllegalArgumentException("order must be greater than or equal to 0");
+        }
         Objects.requireNonNull(stack, "stack");
         Objects.requireNonNull(stats, "stats");
         Objects.requireNonNull(shootTester, "shootTester");

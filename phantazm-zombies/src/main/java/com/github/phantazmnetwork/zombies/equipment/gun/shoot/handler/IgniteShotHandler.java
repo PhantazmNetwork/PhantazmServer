@@ -24,6 +24,15 @@ public class IgniteShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.ignite");
 
+        public Data {
+            if (duration < 0) {
+                throw new IllegalArgumentException("duration must be greater than or equal to 0");
+            }
+            if (headshotDuration < 0) {
+                throw new IllegalArgumentException("headshotDuration must be greater than or equal to 0");
+            }
+        }
+
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -36,7 +45,14 @@ public class IgniteShotHandler implements ShotHandler {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 int duration = element.getNumberOrThrow("duration").intValue();
+                if (duration < 0) {
+                    throw new ConfigProcessException("duration must be greater than or equal to 0");
+                }
                 int headshotDuration = element.getNumberOrThrow("headshotDuration").intValue();
+                if (headshotDuration < 0) {
+                    throw new ConfigProcessException("headshotDuration must be greater than or equal to 0");
+                }
+
                 return new Data(duration, headshotDuration);
             }
 
