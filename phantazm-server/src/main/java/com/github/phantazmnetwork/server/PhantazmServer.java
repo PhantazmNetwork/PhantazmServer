@@ -87,10 +87,12 @@ public final class PhantazmServer {
                 LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value " +
                         "\"default\". Only use this option when running in a secure development environment.");
             }
-            else if(serverInfoConfig.authType() == AuthType.VELOCITY
+            else if((serverInfoConfig.authType() == AuthType.VELOCITY || serverInfoConfig.authType() == AuthType.BUNGEE)
                     && serverInfoConfig.velocitySecret().equals(ServerInfoConfig.DEFAULT_VELOCITY_SECRET)) {
-                LOGGER.error("When using AuthType.VELOCITY, velocitySecret must be set to a value " +
-                        "other than the default for security reasons");
+                LOGGER.error("When using AuthType.VELOCITY or AuthType.BUNGEE, velocitySecret must be set to a value " +
+                        "other than the default for security reasons.");
+                LOGGER.error("If you are running in a development environment, you can use the 'unsafe' program " +
+                        "argument to force the server to start regardless.");
                 return;
             }
 

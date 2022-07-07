@@ -45,7 +45,9 @@ You should use the latest Java 17 build to run Phantazm. The server supports Min
 
 The proxy and server use BungeeCord with BungeeGuard handshakes to communicate by default. This requires the use of a shared secret (string). This string is used to authenticate the proxy and ensure that no players can connect directly to the underlying server.
 
-When running locally-hosted development builds, you can launch the server in "unsafe" mode (by specifying the `unsafe` program argument). This will disable the check that would normally prevent it from running while using the default secret. This allows you to fire up Phantazm instances for local testing without needing to configure a shared secret first.
+When running locally-hosted development builds, you can launch the server in "unsafe" mode (by specifying the `unsafe` program argument). This will disable the check that would normally prevent the server from running while using the default secret. This allows you to fire up Phantazm instances for local testing without needing to configure a unique shared secret first.
+
+When launching Phantazm through IntelliJ (such as by using the `Run server` or `Run server + Velocity` run configurations), `unsafe` mode is **enabled**, so you don't have to do anything extra.
 
 **Warning**: Make sure your locally-hosted development server & proxy are not visible from the Internet if you're launching in unsafe mode!
 
