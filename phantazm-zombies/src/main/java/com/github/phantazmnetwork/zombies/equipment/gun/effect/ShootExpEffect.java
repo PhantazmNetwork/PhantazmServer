@@ -41,14 +41,14 @@ public class ShootExpEffect implements GunEffect {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key gunStatsKey = keyProcessor.dataFromElement(element.getElementOrThrow("gunStatsKey"));
-                return new Data(gunStatsKey);
+                Key statsKey = keyProcessor.dataFromElement(element.getElementOrThrow("statsKey"));
+                return new Data(statsKey);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(1);
-                node.put("gunStatsKey", keyProcessor.elementFromData(data.statsKey()));
+                node.put("statsKey", keyProcessor.elementFromData(data.statsKey()));
                 return node;
             }
         };
