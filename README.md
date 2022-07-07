@@ -45,7 +45,7 @@ You should use the latest Java 17 build to run Phantazm.
 
 The proxy and server use the BungeeCord protocol to communicate by default. This requires the use of a shared secret (string). This string is used to authenticate the proxy and ensure that no players can connect directly to the underlying server.
 
-When running locally-hosted development builds, the secret is just an empty string, and the server is launched in so-called "unsafe" mode (by specifying the `unsafe` program argument). This will disable the check that would normally prevent you from running the server while using the default secret. This allows you to fire up Phantazm instances for local testing without needing to configure a shared secret first.
+When running locally-hosted development builds, you can launch the server in "unsafe" mode (by specifying the `unsafe` program argument). This will disable the check that would normally prevent it from running while using the default secret. This allows you to fire up Phantazm instances for local testing without needing to configure a shared secret first.
 
 **Warning**: Make sure your locally-hosted development server & proxy are not visible from the Internet if you're launching in unsafe mode!
 
@@ -64,7 +64,7 @@ Next, set the `velocitySecret` field in `./run/server-1/server-config.toml`, and
 
 The proxy will (by default) bind to `0.0.0.0:25565` and the server to `0.0.0.0:25567`, so you can connect through the proxy by adding the `localhost` server address in your Minecraft client.
 
-If you're using IntelliJ, you can launch this testing server using the `Run server` run configuration, or the server and proxy at once using the `Run server + Velocity` configuration.
+If you're using IntelliJ, you can launch this testing server using the `Run server` run configuration (the server will use unsafe mode), or the server and proxy at once using the `Run server + Velocity` configuration.
 
 You can also run the server and proxy from the command line as follows: \
 `java -jar ./run/server-1/server.jar` \
