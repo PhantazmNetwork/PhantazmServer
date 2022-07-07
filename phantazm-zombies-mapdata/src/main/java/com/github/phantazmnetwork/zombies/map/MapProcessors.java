@@ -15,7 +15,9 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Contains static {@link ConfigProcessor} instances used for serializing or deserializing various map-related data
@@ -271,7 +273,7 @@ public final class MapProcessors {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Key spawnType = AdventureConfigProcessors.key().dataFromElement(element
                     .getElementOrThrow("spawnType"));
-            List<Key> spawns = keyList.dataFromElement(element.getElementOrThrow("spawns"));
+            Set<Key> spawns = keySet.dataFromElement(element.getElementOrThrow("spawns"));
             boolean isBlacklist = element.getBooleanOrThrow("isBlacklist");
             return new SpawnruleInfo(id, spawnType, spawns, isBlacklist);
         }
@@ -281,7 +283,7 @@ public final class MapProcessors {
             ConfigNode node = new LinkedConfigNode(4);
             node.put("id", AdventureConfigProcessors.key().elementFromData(spawnruleInfo.id()));
             node.put("spawnType", AdventureConfigProcessors.key().elementFromData(spawnruleInfo.spawnType()));
-            node.put("spawns", keyList.elementFromData(spawnruleInfo.spawns()));
+            node.put("spawns", keySet.elementFromData(spawnruleInfo.spawns()));
             node.putBoolean("isBlacklist", spawnruleInfo.isBlacklist());
             return node;
         }
@@ -306,6 +308,9 @@ public final class MapProcessors {
     };
 
     private static final ConfigProcessor<List<Key>> keyList = AdventureConfigProcessors.key().listProcessor();
+
+    private static final ConfigProcessor<Set<Key>> keySet = AdventureConfigProcessors.key()
+            .collectionProcessor(HashSet::new);
 
     private static final ConfigProcessor<List<Component>> componentList = AdventureConfigProcessors.component()
             .listProcessor();

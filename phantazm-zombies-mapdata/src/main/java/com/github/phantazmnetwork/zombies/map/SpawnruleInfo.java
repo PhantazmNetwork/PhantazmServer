@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Defines a spawnrule, which acts as a whitelist/blacklist filter for determining whether a mob may spawn at a
@@ -12,7 +13,7 @@ import java.util.Objects;
  */
 public record SpawnruleInfo(@NotNull Key id,
                             @NotNull Key spawnType,
-                            @NotNull List<Key> spawns,
+                            @NotNull Set<Key> spawns,
                             boolean isBlacklist) {
     /**
      * Creates a new instance of this record.

@@ -91,8 +91,8 @@ public class Window extends MapObject<WindowInfo> {
                             stringMap.put(entry.getKey(), value);
                         }
                         else {
-                            LOGGER.warn("Unexpected NBT value type " + objectValue.getClass().getTypeName() +
-                                    "; needs to be convertable to String, in window at ~" + center);
+                            LOGGER.warn("Unexpected NBT value type " + objectValue.getClass().getTypeName() + "; " +
+                                    "needs to be convertable to String, in window at ~" + center);
                         }
                     }
 
