@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -16,9 +17,7 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class SoundShotHandler implements ShotHandler {
@@ -80,13 +79,21 @@ public class SoundShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
+                       @NotNull GunShot shot) {
         audienceProvider.provideAudience().ifPresent(audience -> {
-            if (!shot.regularTargets().isEmpty()) {
-                audience.playSound(data.sound(), Sound.Emitter.self());
+            Set<UUID> played = Collections.newSetFromMap(new IdentityHashMap<>(shot.regularTargets().size()));
+            for (GunHit hit : shot.regularTargets()) {
+                if (played.add(hit.entity().getUuid())) {
+                    audience.playSound(data.sound(), hit.entity());
+                }
             }
-            else if (!shot.headshotTargets().isEmpty()) {
-                audience.playSound(data.headshotSound(), Sound.Emitter.self());
+
+            played.clear();
+            for (GunHit hit : shot.headshotTargets()) {
+                if (played.add(hit.entity().getUuid())) {
+                    audience.playSound(data.headshotSound(), hit.entity());
+                }
             }
         });
     }
