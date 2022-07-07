@@ -31,9 +31,6 @@ public class ParticleTrailShotHandler implements ShotHandler {
 
         public Data {
             Objects.requireNonNull(particle, "particle");
-            if (trailCount < 0) {
-                throw new IllegalArgumentException("trailCount must be greater than or equal to 0");
-            }
         }
 
         @Override

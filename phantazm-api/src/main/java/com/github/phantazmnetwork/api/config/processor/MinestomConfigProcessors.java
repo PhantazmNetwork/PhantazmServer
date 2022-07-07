@@ -8,10 +8,15 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.particle.Particle;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.registry.ProtocolObject;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+import java.util.function.Function;
 
 public class MinestomConfigProcessors {
 
@@ -19,46 +24,41 @@ public class MinestomConfigProcessors {
         throw new UnsupportedOperationException();
     }
 
-    private static final ConfigProcessor<EntityType> ENTITY_TYPE = new ConfigProcessor<>() {
+    @SuppressWarnings("ClassCanBeRecord")
+    private static class ProtocolObjectConfigProcessor<TObject extends ProtocolObject> implements ConfigProcessor<TObject> {
 
-        private final ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
-        @Override
-        public @NotNull EntityType dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key key = keyProcessor.dataFromElement(element);
-            NamespaceID namespace = NamespaceID.from(key);
+        private final Function<NamespaceID, TObject> registryLookup;
 
-            return EntityType.fromNamespaceId(namespace);
+        public ProtocolObjectConfigProcessor(@NotNull Function<NamespaceID, TObject> registryLookup) {
+            this.registryLookup = Objects.requireNonNull(registryLookup, "registryLookup");
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(@NotNull EntityType entityType) throws ConfigProcessException {
-            return keyProcessor.elementFromData(entityType.namespace());
-        }
-    };
+        public @NotNull TObject dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Key key = KEY_PROCESSOR.dataFromElement(element);
+            NamespaceID namespaceID = NamespaceID.from(key);
 
-    private static final ConfigProcessor<PotionEffect> POTION_EFFECT = new ConfigProcessor<>() {
-
-        private final ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
-
-        @Override
-        public @NotNull PotionEffect dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key key = keyProcessor.dataFromElement(element);
-            NamespaceID namespace = NamespaceID.from(key);
-
-            PotionEffect potionEffect = PotionEffect.fromNamespaceId(namespace);
-            if (potionEffect == null) {
-                throw new ConfigProcessException("PotionEffect not found: " + namespace);
+            TObject object = registryLookup.apply(namespaceID);
+            if (object == null) {
+                throw new ConfigProcessException("Unknown protocol object: " + key);
             }
 
-            return potionEffect;
+            return object;
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(@NotNull PotionEffect potion) throws ConfigProcessException {
-            return keyProcessor.elementFromData(potion.namespace());
+        public @NotNull ConfigElement elementFromData(@NotNull TObject object) throws ConfigProcessException {
+            return KEY_PROCESSOR.elementFromData(object.namespace());
         }
-    };
+    }
+
+    private static final ConfigProcessor<EntityType> ENTITY_TYPE = new ProtocolObjectConfigProcessor<>(EntityType::fromNamespaceId);
+
+    private static final ConfigProcessor<Particle> PARTICLE = new ProtocolObjectConfigProcessor<>(Particle::fromNamespaceId);
+
+    private static final ConfigProcessor<PotionEffect> POTION_EFFECT = new ProtocolObjectConfigProcessor<>(PotionEffect::fromNamespaceId);
 
     private static final ConfigProcessor<Potion> POTION = new ConfigProcessor<>() {
 
@@ -84,6 +84,10 @@ public class MinestomConfigProcessors {
 
     public static @NotNull ConfigProcessor<EntityType> entityType() {
         return ENTITY_TYPE;
+    }
+
+    public static @NotNull ConfigProcessor<Particle> particle() {
+        return PARTICLE;
     }
 
     public static @NotNull ConfigProcessor<PotionEffect> potionEffect() {

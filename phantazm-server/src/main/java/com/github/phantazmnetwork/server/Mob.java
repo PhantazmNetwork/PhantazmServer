@@ -149,7 +149,7 @@ public final class Mob {
             if (codec.getPreferredExtensions().isEmpty()) {
                 ending = "";
             } else {
-                ending = "." + codec.getPreferredExtensions().iterator().next();
+                ending = "." + codec.getPreferredExtensions().get(0);
             }
             PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
             paths.forEach(path -> {

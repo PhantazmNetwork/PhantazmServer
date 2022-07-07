@@ -26,12 +26,6 @@ public class AroundEndFinder implements DirectionalEntityFinder {
         public static final Key SERIAL_KEY
                 = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.around_end");
 
-        public Data {
-            if (range < 0) {
-                throw new IllegalArgumentException("range must be greater than or equal to 0");
-            }
-        }
-
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

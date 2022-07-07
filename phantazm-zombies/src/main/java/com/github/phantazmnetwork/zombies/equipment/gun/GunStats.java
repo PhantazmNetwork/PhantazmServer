@@ -67,27 +67,6 @@ public record GunStats(long shootSpeed,
         };
     }
 
-    public GunStats {
-        if (shootSpeed < 0) {
-            throw new IllegalArgumentException("shootSpeed must be greater than or equal to 0");
-        }
-        if (reloadSpeed < 0) {
-            throw new IllegalArgumentException("reloadSpeed must be greater than or equal to 0");
-        }
-        if (maxAmmo < 0) {
-            throw new IllegalArgumentException("maxAmmo must be greater than or equal to 0");
-        }
-        if (maxClip < 0) {
-            throw new IllegalArgumentException("maxClip must be greater than or equal to 0");
-        }
-        if (shots < 0) {
-            throw new IllegalArgumentException("shots must be greater than or equal to 0");
-        }
-        if (shotInterval < 0) {
-            throw new IllegalArgumentException("shotInterval must be greater than or equal to 0");
-        }
-    }
-
     @Override
     public @NotNull Key key() {
         return SERIAL_KEY;

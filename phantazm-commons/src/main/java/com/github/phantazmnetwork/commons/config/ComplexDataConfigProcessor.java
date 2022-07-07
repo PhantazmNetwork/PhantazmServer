@@ -63,23 +63,23 @@ public class ComplexDataConfigProcessor implements ConfigProcessor<ComplexData> 
         for (Map.Entry<Key, Keyed> entry : data.objects().entrySet()) {
             ConfigElement name = KEY_PROCESSOR.elementFromData(entry.getKey());
             if (!name.isString()) {
-                throw new ConfigProcessException("key processor must return a string");
+                throw new ConfigProcessException("Key processor must return a string");
             }
 
             Keyed object = entry.getValue();
             Key objectKey = object.key();
 
-            ConfigProcessor<?> processor = subProcessors.get(objectKey);
+            ConfigProcessor<? extends Keyed> processor = subProcessors.get(objectKey);
             if (processor == null) {
                 throw new ConfigProcessException("No subprocessor found for key " + objectKey);
             }
 
             ConfigElement element = dependencyElementFromData(processor, entry.getValue());
             if (!element.isNode()) {
-                throw new ConfigProcessException("subprocessor must return a node");
+                throw new ConfigProcessException("Subprocessor must return a node");
             }
 
-            ConfigNode dependencyNode = new LinkedConfigNode();
+            ConfigNode dependencyNode = new LinkedConfigNode(element.asNode().size() + 1);
             dependencyNode.put("serialKey", KEY_PROCESSOR.elementFromData(objectKey));
             dependencyNode.putAll(element.asNode());
 
@@ -90,8 +90,14 @@ public class ComplexDataConfigProcessor implements ConfigProcessor<ComplexData> 
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> @NotNull ConfigElement dependencyElementFromData(@NotNull ConfigProcessor<T> configProcessor, Keyed data) throws ConfigProcessException {
-        return configProcessor.elementFromData((T) data);
+    private static <T extends Keyed> @NotNull ConfigElement dependencyElementFromData(@NotNull ConfigProcessor<T> configProcessor,
+                                                                                      @NotNull Keyed data) throws ConfigProcessException {
+        try {
+            return configProcessor.elementFromData((T) data);
+        }
+        catch (ClassCastException e) {
+            throw new ConfigProcessException("Mismatched data type for serial key" + data.key(), e);
+        }
     }
 
 }

@@ -23,12 +23,6 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
         public static final Key SERIAL_KEY
                 = Key.key(Namespaces.PHANTAZM,"gun.target.entity_finder.positional.nearby_entity");
 
-        public Data {
-            if (range < 0) {
-                throw new IllegalArgumentException("range must be greater than or equal to 0");
-            }
-        }
-
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;
@@ -41,10 +35,6 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 double range = element.getNumberOrThrow("range").doubleValue();
-                if (range < 0) {
-                    throw new ConfigProcessException("range must be greater than or equal to 0");
-                }
-
                 return new Data(range);
             }
 

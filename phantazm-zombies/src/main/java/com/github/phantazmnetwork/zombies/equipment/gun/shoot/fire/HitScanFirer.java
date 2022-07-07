@@ -48,7 +48,7 @@ public class HitScanFirer implements Firer {
 
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
-        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
+        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
 
         return new ConfigProcessor<>() {
 

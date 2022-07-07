@@ -219,7 +219,7 @@ final class GunTest {
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull GunStats stats) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode();
+                ConfigNode node = new LinkedConfigNode(6);
                 node.putNumber("shootSpeed", stats.shootSpeed());
                 node.putNumber("reloadSpeed", stats.reloadSpeed());
                 node.putNumber("maxAmmo", stats.maxAmmo());

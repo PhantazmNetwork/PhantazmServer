@@ -31,7 +31,7 @@ public class DustParticleData implements ParticleData {
                 RGBLike rgb = rgbProcessor.dataFromElement(element.getElementOrThrow("color"));
                 float size = element.getNumberOrThrow("size").floatValue();
                 if (size < 0.01F || size > 4.0F) {
-                    throw new ConfigProcessException("size must be between 0.01 and 4.0");
+                    throw new ConfigProcessException("Size must be between 0.01 and 4.0");
                 }
 
                 return new DustParticleData(rgb, size);
@@ -63,10 +63,6 @@ public class DustParticleData implements ParticleData {
         this.red = color.red() / 255.0F;
         this.green = color.green() / 255.0F;
         this.blue = color.blue() / 255.0F;
-
-        if (size < 0.01F || size > 4F) {
-            throw new IllegalArgumentException("size must be between 0.01 and 4");
-        }
         this.size = size;
     }
 

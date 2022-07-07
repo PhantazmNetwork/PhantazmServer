@@ -55,7 +55,7 @@ public class MobStore {
 
         UUID uuid = mob.entity().getUuid();
         if (uuidToMob.containsKey(uuid)) {
-            throw new IllegalArgumentException("mob with uuid " + uuid + " already registered");
+            throw new IllegalArgumentException("Mob with uuid " + uuid + " already registered");
         }
 
         uuidToMob.put(uuid, mob);

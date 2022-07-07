@@ -39,7 +39,7 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
         Key key = KEY_PROCESSOR.dataFromElement(serialKeyElement);
         ConfigProcessor<? extends TValue> processor = subProcessors.apply(key);
         if (processor == null) {
-            throw new ConfigProcessException("no subprocessor for key " + key);
+            throw new ConfigProcessException("No subprocessor for key " + key);
         }
 
         ConfigElement serialData = element.getElement("serialData");
@@ -60,7 +60,7 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
     public @NotNull ConfigElement elementFromData(@NotNull TValue data) throws ConfigProcessException {
         ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>) subProcessors.apply(data.key());
         if (processor == null) {
-            throw new ConfigProcessException("no subprocessor for key " + data.key());
+            throw new ConfigProcessException("No subprocessor for key " + data.key());
         }
 
         ConfigElement element = processor.elementFromData(data);

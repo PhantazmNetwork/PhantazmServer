@@ -25,9 +25,6 @@ public class SpreadFirer implements Firer {
 
         public Data {
             Objects.requireNonNull(subFirerKeys, "subFirerKeys");
-            if (angleVariance < 0) {
-                throw new IllegalArgumentException("angleVariance must be greater than or equal to 0");
-            }
         }
 
         @Override
@@ -38,7 +35,7 @@ public class SpreadFirer implements Firer {
 
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
-        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
+        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
 
         return new ConfigProcessor<>() {
 

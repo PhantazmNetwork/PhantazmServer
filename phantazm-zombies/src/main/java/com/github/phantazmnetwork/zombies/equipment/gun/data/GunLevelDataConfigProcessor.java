@@ -10,7 +10,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -19,7 +18,7 @@ public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
     private static final ConfigProcessor<Collection<Key>> KEY_COLLECTION_PROCESSOR
-            = KEY_PROCESSOR.collectionProcessor(ArrayList::new);
+            = KEY_PROCESSOR.collectionProcessor();
 
     private final ConfigProcessor<ItemStack> stackProcessor;
 

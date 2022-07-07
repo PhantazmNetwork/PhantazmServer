@@ -24,15 +24,6 @@ public class IgniteShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.ignite");
 
-        public Data {
-            if (duration < 0) {
-                throw new IllegalArgumentException("duration must be greater than or equal to 0");
-            }
-            if (headshotDuration < 0) {
-                throw new IllegalArgumentException("headshotDuration must be greater than or equal to 0");
-            }
-        }
-
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

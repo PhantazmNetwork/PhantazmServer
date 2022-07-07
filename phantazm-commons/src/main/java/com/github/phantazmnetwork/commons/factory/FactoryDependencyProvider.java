@@ -17,13 +17,19 @@ public class FactoryDependencyProvider implements DependencyProvider {
     private final Map<Key, Factory<?, ?>> factories;
 
     public FactoryDependencyProvider(@NotNull Map<Key, Keyed> loadedData, @NotNull Map<Key, Factory<?, ?>> factories) {
-        this.loadedData = Objects.requireNonNull(loadedData, "loadedData");
-        this.factories = Objects.requireNonNull(factories, "factories");
+        this.loadedData = Map.copyOf(Objects.requireNonNull(loadedData, "loadedData"));
+        this.factories = Map.copyOf(Objects.requireNonNull(factories, "factories"));
+        for (Key key : loadedData.keySet()) {
+            if (!factories.containsKey(key)) {
+                throw new IllegalArgumentException("No factory found for key " + key);
+            }
+        }
         this.loadedObjects = new HashMap<>(loadedData.size());
     }
 
     @SuppressWarnings("unchecked")
     public <T> @NotNull T getDependency(@NotNull Key key) {
+        Objects.requireNonNull(key, "key");
         Object object = loadedObjects.get(key);
         if (object == null) { // computeIfAbsent results in a CME
             Keyed data = loadedData.get(key);
@@ -39,4 +45,8 @@ public class FactoryDependencyProvider implements DependencyProvider {
         return (T) object;
     }
 
+    @Override
+    public boolean hasDependency(@NotNull Key key) {
+        return loadedData.containsKey(key);
+    }
 }

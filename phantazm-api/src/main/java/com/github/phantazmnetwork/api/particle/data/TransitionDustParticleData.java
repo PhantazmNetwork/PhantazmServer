@@ -73,9 +73,6 @@ public class TransitionDustParticleData implements ParticleData {
         this.toRed = to.red() / 255.0F;
         this.toGreen = to.green() / 255.0F;
         this.toBlue = to.blue() / 255.0F;
-        if (size < 0.01F || size > 4F) {
-            throw new IllegalArgumentException("size must be between 0.01 and 4");
-        }
         this.size = size;
     }
 

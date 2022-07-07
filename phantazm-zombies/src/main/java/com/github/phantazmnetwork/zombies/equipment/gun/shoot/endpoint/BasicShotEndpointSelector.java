@@ -31,9 +31,6 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
         public Data {
             Objects.requireNonNull(blockIterationKey, "blockIterationKey");
-            if (maxDistance < 0) {
-                throw new IllegalArgumentException("maxDistance must be greater than or equal to 0");
-            }
         }
 
         @Override

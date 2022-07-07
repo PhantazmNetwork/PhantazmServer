@@ -29,12 +29,6 @@ public class ExplosionShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.explosion");
 
-        public Data {
-            if (radius < 0) {
-                throw new IllegalArgumentException("radius must be greater than or equal to 0");
-            }
-        }
-
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

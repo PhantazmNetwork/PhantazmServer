@@ -1,8 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.audience;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
@@ -28,18 +26,7 @@ public class EntityInstanceAudienceProvider implements AudienceProvider {
     }
 
     public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) {
-                return new Data();
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return new LinkedConfigNode(0);
-            }
-        };
+        return ConfigProcessor.emptyProcessor(Data::new);
     }
 
     private final Supplier<Optional<? extends Entity>> entitySupplier;

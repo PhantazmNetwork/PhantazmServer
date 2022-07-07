@@ -73,7 +73,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Collection<Collection<Goal>> goalGroups = new ArrayList<>(goalGroupsList.size());
         for (ConfigElement goalGroupElement : goalGroupsList) {
             if (!goalGroupElement.isList()) {
-                throw new ConfigProcessException("goal groups are not a list");
+                throw new ConfigProcessException("Goal groups are not a list");
             }
 
             ConfigList goalsList = goalGroupElement.asList();
@@ -164,7 +164,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         for (Map.Entry<EquipmentSlot, ItemStack> entry : model.getEquipment().entrySet()) {
             ConfigElement slotElement = EQUIPMENT_SLOT_PROCESSOR.elementFromData(entry.getKey());
             if (!slotElement.isString()) {
-                throw new ConfigProcessException("equipment slot processor did not create a string");
+                throw new ConfigProcessException("Equipment slot processor did not create a string");
             }
             equipmentNode.put(slotElement.asString(), itemStackProcessor.elementFromData(entry.getValue()));
         }

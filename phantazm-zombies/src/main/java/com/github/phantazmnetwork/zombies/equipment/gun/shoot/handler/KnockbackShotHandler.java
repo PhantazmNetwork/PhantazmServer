@@ -26,15 +26,6 @@ public class KnockbackShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.knockback");
 
-        public Data {
-            if (knockback < 0) {
-                throw new IllegalArgumentException("knockback must be greater than or equal to 0");
-            }
-            if (headshotKnockback < 0) {
-                throw new IllegalArgumentException("headshotKnockback must be greater than or equal to 0");
-            }
-        }
-
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

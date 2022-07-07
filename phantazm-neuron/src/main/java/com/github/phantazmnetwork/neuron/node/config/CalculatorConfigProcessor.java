@@ -31,6 +31,6 @@ public class CalculatorConfigProcessor implements ConfigProcessor<Calculator> {
             return CALCULATOR_TYPE_PROCESSOR.elementFromData(CalculatorType.SQUARED_DISTANCE);
         }
 
-        throw new ConfigProcessException("unknown calculator");
+        throw new ConfigProcessException("Unknown calculator");
     }
 }

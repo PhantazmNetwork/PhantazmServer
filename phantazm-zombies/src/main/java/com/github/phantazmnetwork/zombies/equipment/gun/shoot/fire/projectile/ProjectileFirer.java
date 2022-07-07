@@ -56,9 +56,6 @@ public class ProjectileFirer implements Firer {
                 Objects.requireNonNull(key, "shotHandlerKey key");
             }
             Objects.requireNonNull(entityType, "entityType");
-            if (maxAliveTime < 0) {
-                throw new IllegalArgumentException("maxAliveTime must be greater than or equal to 0");
-            }
         }
 
         @Override
@@ -69,7 +66,7 @@ public class ProjectileFirer implements Firer {
 
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
-        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor(ArrayList::new);
+        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
         ConfigProcessor<EntityType> entityTypeProcessor = MinestomConfigProcessors.entityType();
 
         return new ConfigProcessor<>() {

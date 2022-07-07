@@ -113,12 +113,9 @@ final class EquipmentFeature {
         Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> dependencyAdders = createDependencyAdders();
 
         gunLevelMap = new HashMap<>();
-        try (Stream<Path> gunDirectories = Files.list(guns)) {
+        try (Stream<Path> gunDirectories = Files.find(guns, 1,
+                (path, attributes) -> attributes.isDirectory())) {
             gunIteration: for (Path gunDirectory : (Iterable<? extends Path>) gunDirectories::iterator) {
-                if (!Files.isDirectory(gunDirectory)) {
-                    continue;
-                }
-
                 String infoFileName;
                 if (codec.getPreferredExtensions().isEmpty()) {
                     infoFileName = "info";
@@ -142,12 +139,9 @@ final class EquipmentFeature {
 
                 Int2ObjectMap<ComplexData> levelDataMap = new Int2ObjectOpenHashMap<>();
                 Path levelsPath = gunDirectory.resolve("levels");
-                try (Stream<Path> levelDirectories = Files.list(levelsPath)) {
+                try (Stream<Path> levelDirectories = Files.find(levelsPath, 1,
+                        (path, attributes) -> attributes.isRegularFile() && matcher.matches(path))) {
                     for (Path levelFile : (Iterable<? extends Path>) levelDirectories::iterator) {
-                        if (!(Files.isRegularFile(levelFile) && matcher.matches(levelFile))) {
-                            continue;
-                        }
-
                         try {
                             ComplexData data = ConfigBridges.read(levelFile, codec, gunLevelProcessor);
 
@@ -309,11 +303,11 @@ final class EquipmentFeature {
             ShootTester shootTester = provider.getDependency(data.shootTester());
             ReloadTester reloadTester = provider.getDependency(data.reloadTester());
             Firer firer = provider.getDependency(data.firer());
-            Collection<GunEffect> shootEffects = provider.getDependency(data.shootEffects());
-            Collection<GunEffect> reloadEffects = provider.getDependency(data.reloadEffects());
-            Collection<GunEffect> tickEffects = provider.getDependency(data.tickEffects());
-            Collection<GunEffect> noAmmoEffects = provider.getDependency(data.noAmmoEffects());
-            Collection<GunStackMapper> gunStackMappers = provider.getDependency(data.gunStackMappers());
+            Collection<GunEffect> shootEffects = provider.getDependencies(data.shootEffects());
+            Collection<GunEffect> reloadEffects = provider.getDependencies(data.reloadEffects());
+            Collection<GunEffect> tickEffects = provider.getDependencies(data.tickEffects());
+            Collection<GunEffect> noAmmoEffects = provider.getDependencies(data.noAmmoEffects());
+            Collection<GunStackMapper> gunStackMappers = provider.getDependencies(data.gunStackMappers());
 
             return new GunLevel(data.stack(), stats, shootTester, reloadTester, firer, shootEffects,
                     reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
@@ -359,7 +353,7 @@ final class EquipmentFeature {
         Factory<HitScanFirer.Data, HitScanFirer> hitScanFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
-            Collection<ShotHandler> shotHandlers = provider.getDependency(data.shotHandlerKeys());
+            Collection<ShotHandler> shotHandlers = provider.getDependencies(data.shotHandlerKeys());
 
             return new HitScanFirer(playerView::getPlayer, endSelector, targetFinder, shotHandlers);
         };
@@ -369,7 +363,7 @@ final class EquipmentFeature {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
             ProjectileCollisionFilter collisionFilter = provider.getDependency(data.collisionFilterKey());
-            Collection<ShotHandler> shotHandlers = provider.getDependency(data.shotHandlerKeys());
+            Collection<ShotHandler> shotHandlers = provider.getDependencies(data.shotHandlerKeys());
 
             ProjectileFirer firer = new ProjectileFirer(data, playerView::getPlayer, playerView.getUUID(), endSelector,
                     targetFinder, collisionFilter, shotHandlers);
@@ -379,7 +373,7 @@ final class EquipmentFeature {
             return firer;
         };
         Factory<SpreadFirer.Data, SpreadFirer> spreadFirer = (provider, data) -> {
-            Collection<Firer> subFirers = provider.getDependency(data.subFirerKeys());
+            Collection<Firer> subFirers = provider.getDependencies(data.subFirerKeys());
             return new SpreadFirer(data, random, subFirers);
         };
         Factory<ChainShotHandler.Data, ChainShotHandler> chainShotHandler = (provider, data) -> {

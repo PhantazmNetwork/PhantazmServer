@@ -25,15 +25,6 @@ public class DamageShotHandler implements ShotHandler {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.damage");
 
-        public Data {
-            if (damage < 0) {
-                throw new IllegalArgumentException("damage must be greater than or equal to 0");
-            }
-            if (headshotDamage < 0) {
-                throw new IllegalArgumentException("headshotDamage must be greater than or equal to 0");
-            }
-        }
-
         @Override
         public @NotNull Key key() {
             return SERIAL_KEY;

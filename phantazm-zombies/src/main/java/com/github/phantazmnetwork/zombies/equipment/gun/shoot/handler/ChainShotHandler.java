@@ -34,9 +34,6 @@ public class ChainShotHandler implements ShotHandler {
         public Data {
             Objects.requireNonNull(finderKey, "finderKey");
             Objects.requireNonNull(firerKey, "firerKey");
-            if (fireAttempts < 0) {
-                throw new IllegalArgumentException("fireAttempts must be greater than or equal to 0");
-            }
         }
 
         @Override
