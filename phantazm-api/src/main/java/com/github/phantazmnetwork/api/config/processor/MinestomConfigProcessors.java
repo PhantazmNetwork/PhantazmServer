@@ -8,7 +8,6 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.particle.Particle;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.utils.NamespaceID;
@@ -19,29 +18,6 @@ public class MinestomConfigProcessors {
     private MinestomConfigProcessors() {
         throw new UnsupportedOperationException();
     }
-
-    private static final ConfigProcessor<Particle> PARTICLE = new ConfigProcessor<>() {
-
-        private final ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
-
-        @Override
-        public @NotNull Particle dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key key = keyProcessor.dataFromElement(element);
-            NamespaceID namespace = NamespaceID.from(key);
-
-            Particle particle = Particle.fromNamespaceId(namespace);
-            if (particle == null) {
-                throw new ConfigProcessException("Particle not found: " + namespace);
-            }
-
-            return particle;
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(@NotNull Particle particle) throws ConfigProcessException {
-            return keyProcessor.elementFromData(particle.namespace());
-        }
-    };
 
     private static final ConfigProcessor<EntityType> ENTITY_TYPE = new ConfigProcessor<>() {
 
@@ -105,10 +81,6 @@ public class MinestomConfigProcessors {
             return node;
         }
     };
-
-    public static @NotNull ConfigProcessor<Particle> particle() {
-        return PARTICLE;
-    }
 
     public static @NotNull ConfigProcessor<EntityType> entityType() {
         return ENTITY_TYPE;

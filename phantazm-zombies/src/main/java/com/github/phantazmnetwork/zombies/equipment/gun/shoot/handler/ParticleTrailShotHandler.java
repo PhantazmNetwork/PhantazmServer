@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.api.config.processor.MinestomConfigProcessors;
+import com.github.phantazmnetwork.api.particle.ParticleWrapper;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
@@ -16,7 +16,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.ServerPacket;
-import net.minestom.server.particle.Particle;
 import net.minestom.server.particle.ParticleCreator;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,14 +25,7 @@ import java.util.UUID;
 
 public class ParticleTrailShotHandler implements ShotHandler {
 
-    public record Data(@NotNull Particle particle,
-                       boolean distance,
-                       float offsetX,
-                       float offsetY,
-                       float offsetZ,
-                       float particleData,
-                       int count,
-                       int trailCount) implements Keyed {
+    public record Data(@NotNull ParticleWrapper particle, int trailCount) implements Keyed {
 
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.particle_trail");
 
@@ -50,37 +42,25 @@ public class ParticleTrailShotHandler implements ShotHandler {
         }
     }
 
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Particle> particleProcessor = MinestomConfigProcessors.particle();
+    public static @NotNull ConfigProcessor<Data> processor(@NotNull ConfigProcessor<ParticleWrapper> particleProcessor) {
+
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Particle particle = particleProcessor.dataFromElement(element.getElementOrThrow("particle"));
-                boolean distance = element.getBooleanOrThrow("distance");
-                float offsetX = element.getNumberOrThrow("offsetX").floatValue();
-                float offsetY = element.getNumberOrThrow("offsetY").floatValue();
-                float offsetZ = element.getNumberOrThrow("offsetZ").floatValue();
-                float particleData = element.getNumberOrThrow("particleData").floatValue();
-                int count = element.getNumberOrThrow("count").intValue();
+                ParticleWrapper particle = particleProcessor.dataFromElement(element.getElementOrThrow("particle"));
                 int trailCount = element.getNumberOrThrow("trailCount").intValue();
                 if (trailCount < 0) {
                     throw new ConfigProcessException("trailCount must be greater than or equal to 0");
                 }
 
-                return new Data(particle, distance, offsetX, offsetY, offsetZ, particleData, count, trailCount);
+                return new Data(particle, trailCount);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(8);
+                ConfigNode node = new LinkedConfigNode(2);
                 node.put("particle", particleProcessor.elementFromData(data.particle()));
-                node.putBoolean("distance", data.distance());
-                node.putNumber("offsetX", data.offsetX());
-                node.putNumber("offsetY", data.offsetY());
-                node.putNumber("offsetZ", data.offsetZ());
-                node.putNumber("particleData", data.particleData());
-                node.putNumber("count", data.count());
                 node.putNumber("trailCount", data.trailCount());
 
                 return node;
@@ -102,14 +82,15 @@ public class ParticleTrailShotHandler implements ShotHandler {
             return;
         }
 
+        ParticleWrapper particle = data.particle();
         Pos start = shot.start();
         Vec direction = Vec.fromPoint(shot.end().sub(start)).normalize();
         for (int i = 0; i < data.trailCount(); i++) {
             start = start.add(direction);
 
-            ServerPacket packet = ParticleCreator.createParticlePacket(data.particle(), data.distance(),
-                    start.x(), start.y(), start.z(), data.offsetX(), data.offsetY(), data.offsetZ(),
-                    data.particleData(), data.count(), null);
+            ServerPacket packet = ParticleCreator.createParticlePacket(particle.particle(), particle.distance(),
+                    start.x(), start.y(), start.z(), particle.offsetX(), particle.offsetY(), particle.offsetZ(),
+                    particle.particleData(), particle.particleCount(), particle.data()::write);
             instance.sendGroupedPacket(packet);
         }
     }

@@ -1,6 +1,8 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.config.processor.ItemStackConfigProcessors;
+import com.github.phantazmnetwork.api.particle.ParticleWrapper;
+import com.github.phantazmnetwork.api.particle.data.ParticleData;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.config.ComplexData;
 import com.github.phantazmnetwork.commons.config.ComplexDataConfigProcessor;
@@ -245,7 +247,9 @@ final class EquipmentFeature {
         gunProcessors.put(GuardianBeamShotHandler.Data.SERIAL_KEY, GuardianBeamShotHandler.processor());
         gunProcessors.put(IgniteShotHandler.Data.SERIAL_KEY, IgniteShotHandler.processor());
         gunProcessors.put(KnockbackShotHandler.Data.SERIAL_KEY, KnockbackShotHandler.processor());
-        gunProcessors.put(ParticleTrailShotHandler.Data.SERIAL_KEY, ParticleTrailShotHandler.processor());
+        gunProcessors.put(ParticleTrailShotHandler.Data.SERIAL_KEY, ParticleTrailShotHandler.processor(
+                ParticleWrapper.processor(ParticleData.processor(ItemStackConfigProcessors.snbt()))
+        ));
         gunProcessors.put(PotionShotHandler.Data.SERIAL_KEY, PotionShotHandler.processor());
         gunProcessors.put(SoundShotHandler.Data.SERIAL_KEY, SoundShotHandler.processor());
         gunProcessors.put(StateShootTester.Data.SERIAL_KEY, StateShootTester.processor());
