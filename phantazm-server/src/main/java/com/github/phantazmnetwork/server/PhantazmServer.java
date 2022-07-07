@@ -116,7 +116,7 @@ public final class PhantazmServer {
             case MOJANG -> MojangAuth.init();
             case BUNGEE -> {
                 BungeeCordProxy.enable();
-                BungeeCordProxy.setBungeeGuardTokens(Set.of(serverConfig.serverInfoConfig().velocitySecret()));
+                BungeeCordProxy.setBungeeGuardTokens(Set.of(infoConfig.velocitySecret()));
             }
             case VELOCITY -> VelocityProxy.enable(infoConfig.velocitySecret());
         }
