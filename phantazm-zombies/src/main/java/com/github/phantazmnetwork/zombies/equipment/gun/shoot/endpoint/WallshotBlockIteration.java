@@ -60,18 +60,20 @@ public class WallshotBlockIteration implements BlockIteration {
             block = instance.getBlock(blockLocation);
 
             if (wallshot) {
+                instance.setBlock(blockLocation, Block.REDSTONE_BLOCK);
                 continue;
             }
 
             Shape shape = block.registry().collisionShape();
             if (!shape.relativeEnd().isZero()) {
                 Optional<Vec> intersection = RayUtils.getIntersectionPosition(shape, blockLocation, start);
-
                 if (intersection.isPresent()) {
-                    return intersection;
-                }
+                    if (shape.relativeEnd().equals(Vec.ONE)) {
+                        return intersection;
+                    }
 
-                wallshot = true;
+                    wallshot = true;
+                }
             }
         }
 
