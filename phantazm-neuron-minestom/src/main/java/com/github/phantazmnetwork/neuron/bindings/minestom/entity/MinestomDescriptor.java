@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
+import net.kyori.adventure.key.Keyed;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.PhysicalDescriptor;
@@ -8,7 +9,6 @@ import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;

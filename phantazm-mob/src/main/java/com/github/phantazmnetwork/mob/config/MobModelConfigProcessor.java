@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.mob.config;
 
+import com.github.phantazmnetwork.api.config.processor.AttributeMapConfigProcessor;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.goal.Goal;
@@ -13,6 +14,7 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.EquipmentSlot;
@@ -26,11 +28,15 @@ import java.util.*;
  */
 public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
-    private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR = ConfigProcessor.enumProcessor(EquipmentSlot.class);
+    private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR
+            = ConfigProcessor.enumProcessor(EquipmentSlot.class);
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
     private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+
+    private static final ConfigProcessor<Object2FloatMap<String>> ATTRIBUTE_MAP_PROCESSOR
+            = AttributeMapConfigProcessor.processor();
 
     private final ConfigProcessor<MinestomDescriptor> descriptorProcessor;
 
@@ -67,7 +73,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Collection<Collection<Goal>> goalGroups = new ArrayList<>(goalGroupsList.size());
         for (ConfigElement goalGroupElement : goalGroupsList) {
             if (!goalGroupElement.isList()) {
-                throw new ConfigProcessException("goal groups are not a list");
+                throw new ConfigProcessException("Goal groups are not a list");
             }
 
             ConfigList goalsList = goalGroupElement.asList();
@@ -110,9 +116,10 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             equipment.put(equipmentSlot, itemStackProcessor.dataFromElement(entry.getValue()));
         }
 
-        float maxHealth = element.getNumberOrThrow("maxHealth").floatValue();
+        Object2FloatMap<String> attributes
+                = ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
 
-        return new MobModel(key, descriptor, goalGroups, triggers, displayName, equipment, maxHealth);
+        return new MobModel(key, descriptor, goalGroups, triggers, displayName, equipment, attributes);
     }
 
     @Override
@@ -157,10 +164,12 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         for (Map.Entry<EquipmentSlot, ItemStack> entry : model.getEquipment().entrySet()) {
             ConfigElement slotElement = EQUIPMENT_SLOT_PROCESSOR.elementFromData(entry.getKey());
             if (!slotElement.isString()) {
-                throw new ConfigProcessException("equipment slot processor did not create a string");
+                throw new ConfigProcessException("Equipment slot processor did not create a string");
             }
             equipmentNode.put(slotElement.asString(), itemStackProcessor.elementFromData(entry.getValue()));
         }
+
+        ConfigElement attributes = ATTRIBUTE_MAP_PROCESSOR.elementFromData(model.getAttributes());
 
         ConfigNode element = new LinkedConfigNode(7);
         element.put("key", key);
@@ -169,7 +178,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         element.put("triggers", triggers);
         element.put("displayName", displayNameElement);
         element.put("equipment", equipmentNode);
-        element.putNumber("maxHealth", model.getMaxHealth());
+        element.put("attributes", attributes);
 
         return element;
     }

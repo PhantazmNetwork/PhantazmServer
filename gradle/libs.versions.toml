@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.11.0"
 
-ethylene = "0.10.0"
+ethylene = "0.11.1"
 
 junit-jupiter = "5.9.0-M1"
 
@@ -33,7 +33,7 @@ libgui = { module = "io.github.cottonmc:LibGui", version = "5.4.1+1.18.2" }
 
 minecraft = { module = "com.mojang:minecraft", version = "1.18.2" }
 
-minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "daa1b9d02d" }
+minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "0c277e735e" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
 

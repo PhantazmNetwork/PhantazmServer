@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.mob.target;
 
+import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
@@ -35,7 +36,7 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
         return () -> {
             Instance instance = mob.entity().getInstance();
             if (instance == null) {
-                throw new IllegalStateException("instance unset");
+                throw new IllegalStateException("Instance unset");
             }
 
             Collection<Entity> entities = instance.getNearbyEntities(mob.entity().getPosition(), range);

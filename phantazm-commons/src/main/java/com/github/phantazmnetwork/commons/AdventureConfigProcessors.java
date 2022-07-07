@@ -10,7 +10,9 @@ import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.util.RGBLike;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -23,11 +25,16 @@ public final class AdventureConfigProcessors {
     }
 
     private static final ConfigProcessor<Key> key = new ConfigProcessor<>() {
+        @SuppressWarnings("PatternValidation")
         @Override
         public Key dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             try {
-                //noinspection PatternValidation
-                return Key.key(ConfigProcessor.STRING.dataFromElement(element));
+                String string = ConfigProcessor.STRING.dataFromElement(element);
+                if (string.contains(":")) {
+                    return Key.key(string);
+                } else {
+                    return Key.key(Namespaces.PHANTAZM, string);
+                }
             }
             catch (InvalidKeyException keyException) {
                 throw new ConfigProcessException(keyException);
@@ -36,6 +43,9 @@ public final class AdventureConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(Key key) {
+            if (key.namespace().equals(Namespaces.PHANTAZM)) {
+                return new ConfigPrimitive(key.value());
+            }
             return new ConfigPrimitive(key.asString());
         }
     };
@@ -73,6 +83,24 @@ public final class AdventureConfigProcessors {
         }
     };
 
+    private static final ConfigProcessor<RGBLike> rgbLike = new ConfigProcessor<>() {
+        @Override
+        public @NotNull RGBLike dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String hex = ConfigProcessor.STRING.dataFromElement(element);
+            TextColor color = TextColor.fromHexString(hex);
+            if (color == null) {
+                throw new ConfigProcessException("Invalid hex: " + hex);
+            }
+
+            return color;
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(@NotNull RGBLike rgbLike) throws ConfigProcessException {
+            return new ConfigPrimitive(TextColor.color(rgbLike).asHexString());
+        }
+    };
+
     private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessor.enumProcessor(Sound.Source.class);
 
     /**
@@ -106,4 +134,9 @@ public final class AdventureConfigProcessors {
     public static @NotNull ConfigProcessor<Sound.Source> soundSource() {
         return soundSource;
     }
+
+    public static @NotNull ConfigProcessor<RGBLike> rgbLike() {
+        return rgbLike;
+    }
+
 }

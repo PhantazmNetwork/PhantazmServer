@@ -1,7 +1,8 @@
 package com.github.phantazmnetwork.mob.target;
 
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import net.kyori.adventure.key.Keyed;
+import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
+import com.github.phantazmnetwork.mob.PhantazmMob;
 import org.jetbrains.annotations.NotNull;
 
 /**

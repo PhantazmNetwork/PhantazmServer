@@ -7,5 +7,5 @@ dependencies {
     implementation(project(":phantazm-api"))
     implementation(project(":phantazm-commons"))
     implementation(libs.adventure.text.minimessage)
-    testImplementation(libs.ethylene.yaml)
+    testImplementation(libs.ethylene.core)
 }

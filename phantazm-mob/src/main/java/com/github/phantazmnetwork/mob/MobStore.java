@@ -55,11 +55,15 @@ public class MobStore {
 
         UUID uuid = mob.entity().getUuid();
         if (uuidToMob.containsKey(uuid)) {
-            throw new IllegalArgumentException("mob with uuid " + uuid + " already registered");
+            throw new IllegalArgumentException("Mob with uuid " + uuid + " already registered");
         }
 
         uuidToMob.put(uuid, mob);
         uuidToTriggers.put(uuid, createTriggerInstances(mob));
+    }
+
+    public PhantazmMob getMob(@NotNull UUID uuid) {
+        return uuidToMob.get(Objects.requireNonNull(uuid, "uuid"));
     }
 
     private @NotNull Map<Key, Collection<SkillInstance>> createTriggerInstances(@NotNull PhantazmMob mob) {

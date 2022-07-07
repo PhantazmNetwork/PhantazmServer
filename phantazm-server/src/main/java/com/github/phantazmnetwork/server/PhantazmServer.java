@@ -11,7 +11,6 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -19,17 +18,13 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.listener.AnimationListener;
-import net.minestom.server.listener.BlockPlacementListener;
-import net.minestom.server.listener.EntityActionListener;
-import net.minestom.server.listener.UseItemListener;
-import net.minestom.server.listener.manager.PacketListenerConsumer;
-import net.minestom.server.network.packet.client.play.ClientAnimationPacket;
-import net.minestom.server.network.packet.client.play.ClientEntityActionPacket;
-import net.minestom.server.network.packet.client.play.ClientPlayerBlockPlacementPacket;
-import net.minestom.server.network.packet.client.play.ClientUseItemPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.nio.file.Path;
 import java.util.concurrent.ForkJoinPool;
@@ -101,7 +96,11 @@ public final class PhantazmServer {
         Neuron.initialize(global, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner(), phantazm);
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
-        MobTest.initialize(phantazm);
+        EquipmentFeature.initialize(Path.of("./equipment/"), new YamlCodec(() -> new Load(LoadSettings.builder().build()),
+                () -> new Dump(DumpSettings.builder()
+                        .setDefaultFlowStyle(FlowStyle.BLOCK)
+                        .build())));
+        GunTest.initialize(global, phantazm, viewProvider);
         ZombiesTest.initialize(global);
     }
 

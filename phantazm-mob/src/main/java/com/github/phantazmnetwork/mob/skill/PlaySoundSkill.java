@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.mob.skill;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.mob.target.TargetSelectorInstance;
+import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;

@@ -33,10 +33,10 @@ public class CachedInventoryObjectTest {
             }
 
         };
-        inventoryObject.peekStack();
+
+        assertSame(itemStack1, inventoryObject.getItemStack());
 
         inventoryObject.setDirty();
-
         assertSame(itemStack2, inventoryObject.getItemStack());
     }
 

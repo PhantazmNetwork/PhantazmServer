@@ -20,7 +20,7 @@ import java.util.Objects;
  */
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
-    private final static ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
 
     @Override
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {

@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.config.ItemStackConfigProcessors;
-import com.github.phantazmnetwork.api.config.VariantConfigProcessor;
+import com.github.phantazmnetwork.api.config.processor.ItemStackConfigProcessors;
+import com.github.phantazmnetwork.api.config.processor.VariantConfigProcessor;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
@@ -65,6 +65,8 @@ public final class Mob {
 
     private static final ConfigProcessor<MobModel> MODEL_PROCESSOR;
 
+    private static final MobStore MOB_STORE = new MobStore();
+
     private static MobSpawner mobSpawner;
 
     private static Map<Key, MobModel> models;
@@ -72,7 +74,7 @@ public final class Mob {
     static {
         ConfigProcessor<Calculator> calculatorProcessor = new CalculatorConfigProcessor();
         ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(Map.of(
-                GroundMinestomDescriptor.KEY, new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
+                GroundMinestomDescriptor.SERIAL_KEY, new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
         )::get);
         ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor = new NearestEntitiesSelectorConfigProcessor<NearestEntitiesSelector<Player>>() {
             @Override
@@ -122,12 +124,11 @@ public final class Mob {
     static void initialize(@NotNull EventNode<Event> global, @NotNull Spawner spawner,
                            @NotNull Collection<MobTrigger<?>> triggers, @NotNull Path mobPath,
                            @NotNull ConfigCodec codec) {
-        MobStore mobStore = new MobStore();
-        mobSpawner = new BasicMobSpawner(mobStore, spawner);
+        mobSpawner = new BasicMobSpawner(MOB_STORE, spawner);
 
-        global.addListener(EntityDeathEvent.class, mobStore::onMobDeath);
+        global.addListener(EntityDeathEvent.class, MOB_STORE::onMobDeath);
         for (MobTrigger<?> trigger : triggers) {
-            registerTrigger(global, mobStore, trigger);
+            registerTrigger(global, MOB_STORE, trigger);
         }
 
         loadModels(mobPath, codec);
@@ -144,7 +145,13 @@ public final class Mob {
 
         Map<Key, MobModel> loadedModels = new HashMap<>();
         try (Stream<Path> paths = Files.list(mobPath)) {
-            PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + codec.getPreferredExtension());
+            String ending;
+            if (codec.getPreferredExtensions().isEmpty()) {
+                ending = "";
+            } else {
+                ending = "." + codec.getPreferredExtensions().get(0);
+            }
+            PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
             paths.forEach(path -> {
                 if (matcher.matches(path) && Files.isRegularFile(path)) {
                     try {
@@ -174,6 +181,10 @@ public final class Mob {
      */
     public static @NotNull ConfigProcessor<MobModel> getModelProcessor() {
         return MODEL_PROCESSOR;
+    }
+
+    public static MobStore getMobStore() {
+        return MOB_STORE;
     }
 
     /**
