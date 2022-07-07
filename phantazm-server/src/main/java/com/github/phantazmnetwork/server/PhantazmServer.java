@@ -27,6 +27,7 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -113,7 +114,10 @@ public final class PhantazmServer {
 
         switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
-            case BUNGEE -> BungeeCordProxy.enable();
+            case BUNGEE -> {
+                BungeeCordProxy.enable();
+                BungeeCordProxy.setBungeeGuardTokens(Set.of(serverConfig.serverInfoConfig().velocitySecret()));
+            }
             case VELOCITY -> VelocityProxy.enable(infoConfig.velocitySecret());
         }
 

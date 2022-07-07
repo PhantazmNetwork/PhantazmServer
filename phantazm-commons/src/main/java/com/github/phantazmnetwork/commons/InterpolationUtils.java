@@ -64,9 +64,9 @@ public final class InterpolationUtils {
 
         Vec3I local = Vec3I.threadLocal();
         for(int i = 0; i <= steps; i++) {
-            int nx = (int) Math.floor(x);
-            int ny = (int) Math.floor(y);
-            int nz = (int) Math.floor(z);
+            int nx = (int) Math.round(x);
+            int ny = (int) Math.round(y);
+            int nz = (int) Math.round(z);
 
             if(hasPrevious) {
                 boolean cx = nx != px;
