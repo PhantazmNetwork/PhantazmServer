@@ -142,6 +142,13 @@ public final class Mob {
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
         LOGGER.info("Loading mob files...");
 
+        try {
+            Files.createDirectories(mobPath);
+        }
+        catch (IOException e) {
+            LOGGER.warn("Failed to create directory {}", mobPath);
+        }
+
         Map<Key, MobModel> loadedModels = new HashMap<>();
         try (Stream<Path> paths = Files.list(mobPath)) {
             PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + codec.getPreferredExtension());
