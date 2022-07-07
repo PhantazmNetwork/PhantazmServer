@@ -1,4 +1,4 @@
-instancesPath = ".\\lobbies"
+instancesPath = "./lobbies"
 kickMessage = "<red>Couldn't find where to send you!"
 mainLobbyName = "main"
 

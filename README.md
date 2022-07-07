@@ -39,11 +39,11 @@ Generally, you'll want to build from the `master` branch, unless you're testing 
 
 ## Usage
 
-You should use the latest Java 17 build to run Phantazm. The server supports Minecraft client versions 1.7 through 1.18.
+You should use the latest Java 17 build to run Phantazm. The server supports Minecraft client versions 1.7-1.18.
 
 ### For development
 
-The proxy and server use the BungeeCord protocol to communicate by default. While this protocol is fully supported by the proxy, it is *not* supported by Minestom in that no authentication checks are performed on incoming connections (so it is not actually secure). However, Velocity "modern forwarding" *is* supported and *does* secure the backend server, but it only works for sufficiently updated clients (1.12+).
+The proxy and server use BungeeCord with BungeeGuard handshakes to communicate by default. This requires the use of a shared secret (string). This string is used to authenticate the proxy and ensure that no players can connect directly to the underlying server.
 
 When running locally-hosted development builds, you can launch the server in "unsafe" mode (by specifying the `unsafe` program argument). This will disable the check that would normally prevent it from running while using the default secret. This allows you to fire up Phantazm instances for local testing without needing to configure a shared secret first.
 

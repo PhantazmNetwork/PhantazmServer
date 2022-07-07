@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -150,7 +151,10 @@ public final class PhantazmServer {
 
         switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
-            case BUNGEE -> BungeeCordProxy.enable();
+            case BUNGEE -> {
+                BungeeCordProxy.enable();
+                BungeeCordProxy.setBungeeGuardTokens(Set.of(infoConfig.velocitySecret()));
+            }
             case VELOCITY -> VelocityProxy.enable(infoConfig.velocitySecret());
         }
 

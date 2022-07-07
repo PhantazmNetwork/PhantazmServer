@@ -6,7 +6,7 @@
     velocitySecret = ""
 
 [pingList]
-    description = "A Minecraft Server"
+    description = "A Phantazm Server"
 
 [pathfinder]
     threads = 4
