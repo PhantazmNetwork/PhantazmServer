@@ -67,14 +67,11 @@ public class ReloadStackMapper implements GunStackMapper {
         };
     }
 
-    private final Data data;
-
     private final GunStats stats;
 
     private final ReloadTester reloadTester;
 
-    public ReloadStackMapper(@NotNull Data data, @NotNull GunStats stats, @NotNull ReloadTester reloadTester) {
-        this.data = Objects.requireNonNull(data, "data");
+    public ReloadStackMapper(@NotNull GunStats stats, @NotNull ReloadTester reloadTester) {
         this.stats = Objects.requireNonNull(stats, "stats");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
     }

@@ -39,14 +39,11 @@ public class AmmoLevelEffect implements GunEffect {
         };
     }
 
-    private final Data data;
-
     private final PlayerView playerView;
 
     private boolean currentlyActive = false;
 
-    public AmmoLevelEffect(@NotNull Data data, @NotNull PlayerView playerView) {
-        this.data = data;
+    public AmmoLevelEffect(@NotNull PlayerView playerView) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
     }
 

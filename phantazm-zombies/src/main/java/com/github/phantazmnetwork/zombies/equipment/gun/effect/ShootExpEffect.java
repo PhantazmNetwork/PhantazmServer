@@ -60,14 +60,11 @@ public class ShootExpEffect implements GunEffect {
 
     private boolean currentlyActive = false;
 
-    private final Data data;
-
     private final PlayerView playerView;
 
     private final GunStats stats;
 
-    public ShootExpEffect(@NotNull Data data, @NotNull PlayerView playerView, @NotNull GunStats stats) {
-        this.data = Objects.requireNonNull(data, "data");
+    public ShootExpEffect(@NotNull PlayerView playerView, @NotNull GunStats stats) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.stats = Objects.requireNonNull(stats, "stats");
     }

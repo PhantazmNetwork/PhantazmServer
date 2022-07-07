@@ -1,20 +1,23 @@
-package com.github.phantazmnetwork.zombies.equipment.gun.target.headshot;
+package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile;
 
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.mob.MobStore;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-public class EyeHeightHeadshotTester implements HeadshotTester {
+import java.util.Objects;
+
+public class PhantazmProjectileCollisionFilter implements ProjectileCollisionFilter {
 
     public record Data() implements Keyed {
 
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.headshot_tester.eye_height");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,
+                "gun.firer.projectile.collision_filter.phantazm");
 
         @Override
         public @NotNull Key key() {
@@ -24,7 +27,6 @@ public class EyeHeightHeadshotTester implements HeadshotTester {
 
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
-
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) {
                 return new Data();
@@ -37,9 +39,15 @@ public class EyeHeightHeadshotTester implements HeadshotTester {
         };
     }
 
+    private final MobStore mobStore;
+
+    public PhantazmProjectileCollisionFilter(@NotNull MobStore mobStore) {
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+    }
+
     @Override
-    public boolean isHeadshot(@NotNull Entity shooter, @NotNull Entity entity, @NotNull Point intersection) {
-        return intersection.y() >= entity.getPosition().y() + entity.getEyeHeight();
+    public boolean shouldExplode(@NotNull Entity cause) {
+        return mobStore.getMob(cause.getUuid()) != null;
     }
 
 }

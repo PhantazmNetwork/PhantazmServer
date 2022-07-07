@@ -62,13 +62,10 @@ public class ClipStackMapper implements GunStackMapper {
         };
     }
 
-    private final Data data;
-
     private final ReloadTester reloadTester;
 
-    public ClipStackMapper(@NotNull Data data, @NotNull ReloadTester reloadTester) {
+    public ClipStackMapper(@NotNull ReloadTester reloadTester) {
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
-        this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override

@@ -18,7 +18,6 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Optional;
 
 public class WallshotBlockIteration implements BlockIteration {
@@ -46,12 +45,6 @@ public class WallshotBlockIteration implements BlockIteration {
                 return new LinkedConfigNode(0);
             }
         };
-    }
-
-    private final Data data;
-
-    public WallshotBlockIteration(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override

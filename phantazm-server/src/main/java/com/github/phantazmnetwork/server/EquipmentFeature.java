@@ -26,7 +26,9 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.StateShootTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.HitScanFirer;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.ProjectileFirer;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.PhantazmProjectileCollisionFilter;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.ProjectileCollisionFilter;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.ProjectileFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.SpreadFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.BasicTargetFinder;
@@ -228,6 +230,7 @@ final class EquipmentFeature {
         gunProcessors.put(RayTraceBlockIteration.Data.SERIAL_KEY, RayTraceBlockIteration.processor());
         gunProcessors.put(WallshotBlockIteration.Data.SERIAL_KEY, WallshotBlockIteration.processor());
         gunProcessors.put(HitScanFirer.Data.SERIAL_KEY, HitScanFirer.processor());
+        gunProcessors.put(PhantazmProjectileCollisionFilter.Data.SERIAL_KEY, PhantazmProjectileCollisionFilter.processor());
         gunProcessors.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.processor());
         gunProcessors.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.processor());
         gunProcessors.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.processor());
@@ -305,20 +308,20 @@ final class EquipmentFeature {
                     reloadEffects, tickEffects, emptyClipEffects, gunStackMappers);
         };
         Factory<AmmoLevelEffect.Data, AmmoLevelEffect> ammoLevelEffect
-                = (provider, data) -> new AmmoLevelEffect(data, playerView);
+                = (provider, data) -> new AmmoLevelEffect(playerView);
         Factory<PlaySoundEffect.Data, PlaySoundEffect> playSoundEffect
                 = (provider, data) -> new PlaySoundEffect(data, playerView);
         Factory<ReloadActionBarEffect.Data, ReloadActionBarEffect> reloadActionBarEffect = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
             ReloadActionBarChooser chooser = provider.getDependency(data.reloadActionBarChooserKey());
-            return new ReloadActionBarEffect(data, playerView, stats, reloadTester, chooser);
+            return new ReloadActionBarEffect(playerView, stats, reloadTester, chooser);
         };
         Factory<SendMessageEffect.Data, SendMessageEffect> sendMessageEffect
                 = (provider, data) -> new SendMessageEffect(data, playerView);
         Factory<ShootExpEffect.Data, ShootExpEffect> shootExpEffect = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
-            return new ShootExpEffect(data, playerView, stats);
+            return new ShootExpEffect(playerView, stats);
         };
         Factory<GradientActionBarChooser.Data, GradientActionBarChooser> gradientActionBarChooser
                 = (provider, data) -> new GradientActionBarChooser(data);
@@ -326,29 +329,33 @@ final class EquipmentFeature {
                 = (provider, data) -> new StaticActionBarChooser(data);
         Factory<StateReloadTester.Data, StateReloadTester> stateReloadTester = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
-            return new StateReloadTester(data, stats);
+            return new StateReloadTester(stats);
         };
         Factory<BasicShotEndpointSelector.Data, BasicShotEndpointSelector> basicShotEndpointSelector = (provider, data) -> {
             BlockIteration blockIteration = provider.getDependency(data.blockIterationKey());
             return new BasicShotEndpointSelector(data, playerView::getPlayer, blockIteration);
         };
         Factory<RayTraceBlockIteration.Data, RayTraceBlockIteration> rayTraceBlockIteration
-                = (provider, data) -> new RayTraceBlockIteration(data);
+                = (provider, data) -> new RayTraceBlockIteration();
         Factory<WallshotBlockIteration.Data, WallshotBlockIteration> wallshotBlockIteration
-                = (provider, data) -> new WallshotBlockIteration(data);
+                = (provider, data) -> new WallshotBlockIteration();
         Factory<HitScanFirer.Data, HitScanFirer> hitScanFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
             Collection<ShotHandler> shotHandlers = provider.getDependency(data.shotHandlerKeys());
 
-            return new HitScanFirer(data, playerView::getPlayer, endSelector, targetFinder, shotHandlers);
+            return new HitScanFirer(playerView::getPlayer, endSelector, targetFinder, shotHandlers);
         };
+        Factory<PhantazmProjectileCollisionFilter.Data, PhantazmProjectileCollisionFilter> phantazmProjectileCollisionFilter
+                = (provider, data) -> new PhantazmProjectileCollisionFilter(store);
         Factory<ProjectileFirer.Data, ProjectileFirer> projectileFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
+            ProjectileCollisionFilter collisionFilter = provider.getDependency(data.collisionFilterKey());
             Collection<ShotHandler> shotHandlers = provider.getDependency(data.shotHandlerKeys());
 
-            ProjectileFirer firer = new ProjectileFirer(data, playerView, endSelector, targetFinder, shotHandlers);
+            ProjectileFirer firer = new ProjectileFirer(data, playerView::getPlayer, playerView.getUUID(), endSelector,
+                    targetFinder, collisionFilter, shotHandlers);
             node.addListener(ProjectileCollideWithBlockEvent.class, firer::onProjectileCollision);
             node.addListener(ProjectileCollideWithEntityEvent.class, firer::onProjectileCollision);
 
@@ -385,43 +392,43 @@ final class EquipmentFeature {
         Factory<StateShootTester.Data, StateShootTester> stateShootTester = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
-            return new StateShootTester(data, stats, reloadTester);
+            return new StateShootTester(stats, reloadTester);
         };
-        Factory<AroundEndFinder.Data, AroundEndFinder> aroundEndFinder
-                = (provider, data) -> new AroundEndFinder(data);
+        Factory<AroundEndFinder.Data, AroundEndFinder> aroundEndFinder = (provider, data) -> new AroundEndFinder(data);
         Factory<BetweenPointsFinder.Data, BetweenPointsFinder> betweenPointsFinder
-                = (provider, data) -> new BetweenPointsFinder(data);
+                = (provider, data) -> new BetweenPointsFinder();
         Factory<NearbyEntityFinder.Data, NearbyEntityFinder> nearbyEntityFinder
                 = (provider, data) -> new NearbyEntityFinder(data);
         Factory<PhantazmTargetTester.Data, PhantazmTargetTester> phantazmTargetTester
                 = (provider, data) -> new PhantazmTargetTester(data, store);
         Factory<EyeHeightHeadshotTester.Data, EyeHeightHeadshotTester> eyeHeightHeadshotTester
-                = (provider, data) -> new EyeHeightHeadshotTester(data);
+                = (provider, data) -> new EyeHeightHeadshotTester();
         Factory<StaticHeadshotTester.Data, StaticHeadshotTester> staticHeadshotTester
                 = (provider, data) -> new StaticHeadshotTester(data);
         Factory<RayTraceIntersectionFinder.Data, RayTraceIntersectionFinder> rayTraceTargetTester
-                = (provider, data) -> new RayTraceIntersectionFinder(data);
+                = (provider, data) -> new RayTraceIntersectionFinder();
         Factory<StaticIntersectionFinder.Data, StaticIntersectionFinder> staticTargetTester
-                = (provider, data) -> new StaticIntersectionFinder(data);
+                = (provider, data) -> new StaticIntersectionFinder();
         Factory<BasicTargetFinder.Data, BasicTargetFinder> basicTargetFinder = (provider, data) -> {
             DirectionalEntityFinder finder = provider.getDependency(data.entityFinderKey());
             TargetTester targetTester = provider.getDependency(data.targetTesterKey());
             IntersectionFinder intersectionFinder = provider.getDependency(data.intersectionFinderKey());
             HeadshotTester headshotTester = provider.getDependency(data.headshotTesterKey());
             TargetLimiter targetLimiter = provider.getDependency(data.targetLimiterKey());
-            return new BasicTargetFinder(data, finder, targetTester, intersectionFinder, headshotTester, targetLimiter);
+            return new BasicTargetFinder(finder, targetTester, intersectionFinder, headshotTester, targetLimiter);
         };
         Factory<DistanceTargetLimiter.Data, DistanceTargetLimiter> distanceTargetLimiter
                 = (provider, data) -> new DistanceTargetLimiter(data);
         Factory<ClipStackMapper.Data, ClipStackMapper> clipStackMapper = (provider, data) -> {
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
-            return new ClipStackMapper(data, reloadTester);
+            return new ClipStackMapper(reloadTester);
         };
         Factory<ReloadStackMapper.Data, ReloadStackMapper> reloadStackMapper = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
-            return new ReloadStackMapper(data, stats, reloadTester);
+            return new ReloadStackMapper(stats, reloadTester);
         };
+
         Map<Key, Factory<?, ?>> factories = new HashMap<>(38);
         factories.put(GunStats.SERIAL_KEY, gunStats);
         factories.put(GunLevelData.SERIAL_KEY, gunLevel);
@@ -437,6 +444,7 @@ final class EquipmentFeature {
         factories.put(RayTraceBlockIteration.Data.SERIAL_KEY, rayTraceBlockIteration);
         factories.put(WallshotBlockIteration.Data.SERIAL_KEY, wallshotBlockIteration);
         factories.put(HitScanFirer.Data.SERIAL_KEY, hitScanFirer);
+        factories.put(PhantazmProjectileCollisionFilter.Data.SERIAL_KEY, phantazmProjectileCollisionFilter);
         factories.put(ProjectileFirer.Data.SERIAL_KEY, projectileFirer);
         factories.put(SpreadFirer.Data.SERIAL_KEY, spreadFirer);
         factories.put(ChainShotHandler.Data.SERIAL_KEY, chainShotHandler);
@@ -470,14 +478,6 @@ final class EquipmentFeature {
         }
 
         return new Gun(playerView, new GunModel(gunLevels, key));
-    }
-
-    private static <TObject> @NotNull TObject requireInitialized(TObject object) {
-        if (object == null) {
-            throw new IllegalStateException("EquipmentFeature has not been initialized yet");
-        }
-
-        return object;
     }
 
 }

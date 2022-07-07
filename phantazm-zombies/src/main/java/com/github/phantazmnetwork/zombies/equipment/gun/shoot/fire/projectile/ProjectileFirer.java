@@ -1,13 +1,13 @@
-package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
+package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile;
 
 import com.github.phantazmnetwork.api.config.processor.MinestomConfigProcessors;
-import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.ShotHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.TargetFinder;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -19,9 +19,9 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityProjectile;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.instance.Instance;
@@ -31,11 +31,13 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class ProjectileFirer implements Firer {
 
     public record Data(@NotNull Key endSelectorKey,
                        @NotNull Key targetFinderKey,
+                       @NotNull Key collisionFilterKey,
                        @NotNull Collection<Key> shotHandlerKeys,
                        @NotNull EntityType entityType,
                        double power,
@@ -48,6 +50,7 @@ public class ProjectileFirer implements Firer {
         public Data {
             Objects.requireNonNull(endSelectorKey, "endSelectorKey");
             Objects.requireNonNull(targetFinderKey, "targetFinderKey");
+            Objects.requireNonNull(collisionFilterKey, "collisionFilterKey");
             Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
             for (Key key : shotHandlerKeys) {
                 Objects.requireNonNull(key, "shotHandlerKey key");
@@ -75,6 +78,7 @@ public class ProjectileFirer implements Firer {
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key endSelectorKey = keyProcessor.dataFromElement(element.getElementOrThrow("endSelector"));
                 Key targetFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetFinder"));
+                Key collisionFilterKey = keyProcessor.dataFromElement(element.getElementOrThrow("collisionFilter"));
                 Collection<Key> shotHandlerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlers"));
                 EntityType entityType = entityTypeProcessor.dataFromElement(element.getElementOrThrow("entityType"));
                 double power = element.getNumberOrThrow("power").doubleValue();
@@ -85,16 +89,17 @@ public class ProjectileFirer implements Firer {
                     throw new ConfigProcessException("maxAliveTime must be greater than or equal to 0");
                 }
 
-                return new Data(endSelectorKey, targetFinderKey, shotHandlerKeys, entityType, power, spread, hasGravity,
-                        maxAliveTime);
+                return new Data(endSelectorKey, targetFinderKey, collisionFilterKey, shotHandlerKeys, entityType, power,
+                        spread, hasGravity, maxAliveTime);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(8);
+                ConfigNode node = new LinkedConfigNode(9);
                 node.put("endSelector", keyProcessor.elementFromData(data.endSelectorKey()));
                 node.put("targetFinder", keyProcessor.elementFromData(data.targetFinderKey()));
                 node.put("shotHandlers", collectionProcessor.elementFromData(data.shotHandlerKeys()));
+                node.put("collisionFilter", keyProcessor.elementFromData(data.collisionFilterKey()));
                 node.put("entityType", entityTypeProcessor.elementFromData(data.entityType()));
                 node.putNumber("power", data.power());
                 node.putNumber("spread", data.spread());
@@ -110,6 +115,7 @@ public class ProjectileFirer implements Firer {
         return (data, keys) -> {
             keys.add(data.endSelectorKey());
             keys.add(data.targetFinderKey());
+            keys.add(data.collisionFilterKey());
             keys.addAll(data.shotHandlerKeys());
         };
     }
@@ -140,34 +146,43 @@ public class ProjectileFirer implements Firer {
 
     private final Data data;
 
-    private final PlayerView playerView;
+    private final Supplier<Optional<? extends Entity>> entitySupplier;
+
+    private final UUID shooterUUID;
 
     private final ShotEndpointSelector endSelector;
 
     private final TargetFinder targetFinder;
 
+    private final ProjectileCollisionFilter collisionFilter;
+
     private final Collection<ShotHandler> shotHandlers;
 
-    public ProjectileFirer(@NotNull Data data, @NotNull PlayerView playerView,
-                           @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
-                           @NotNull Collection<ShotHandler> shotHandlers) {
+    public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+                           @NotNull UUID shooterUUID, @NotNull ShotEndpointSelector endSelector,
+                           @NotNull TargetFinder targetFinder, @NotNull ProjectileCollisionFilter collisionFilter, @NotNull Collection<ShotHandler> shotHandlers) {
         this.data = Objects.requireNonNull(data, "data");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
+        this.shooterUUID = Objects.requireNonNull(shooterUUID, "shooterUUID");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
+        this.collisionFilter = Objects.requireNonNull(collisionFilter, "collisionFilter");
         this.shotHandlers = Objects.requireNonNull(shotHandlers, "shotHandlers");
+        for (ShotHandler shotHandler : shotHandlers) {
+            Objects.requireNonNull(shotHandler, "shotHandlers shotHandler");
+        }
     }
 
     @Override
     public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits) {
-        playerView.getPlayer().ifPresent(player -> {
-            Instance instance = player.getInstance();
+        entitySupplier.get().ifPresent(entity -> {
+            Instance instance = entity.getInstance();
             if (instance == null) {
                 return;
             }
 
             endSelector.getEnd(start).ifPresent(end -> {
-                EntityProjectile projectile = new EntityProjectile(player, data.entityType());
+                EntityProjectile projectile = new EntityProjectile(entity, data.entityType());
                 projectile.setNoGravity(!data.hasGravity());
                 projectile.setInstance(instance, start).thenRun(() ->
                         projectile.shoot(end, data.power(), data.spread()));
@@ -215,7 +230,8 @@ public class ProjectileFirer implements Firer {
     }
 
     public void onProjectileCollision(@NotNull ProjectileCollideWithEntityEvent event) {
-        if (!(event.getEntity() instanceof EntityProjectile projectile) || event.getTarget() instanceof Player) {
+        if (!(event.getEntity() instanceof EntityProjectile projectile
+                && collisionFilter.shouldExplode(event.getTarget()))) {
             return;
         }
 
@@ -229,8 +245,9 @@ public class ProjectileFirer implements Firer {
 
     private void onProjectileCollision(@NotNull FiredShot firedShot, @NotNull EntityProjectile projectile,
                                        @NotNull Point collision) {
-        if (projectile.getShooter() instanceof Player player && player.getUuid().equals(playerView.getUUID())) {
-            TargetFinder.Result target = targetFinder.findTarget(player, firedShot.start(), collision,
+        Entity shooter = projectile.getShooter();
+        if (shooter != null && shooter.getUuid().equals(shooterUUID)) {
+            TargetFinder.Result target = targetFinder.findTarget(shooter, firedShot.start(), collision,
                     firedShot.previousHits());
             for (GunHit hit : target.regular()) {
                 firedShot.previousHits().add(hit.entity().getUuid());
@@ -240,7 +257,7 @@ public class ProjectileFirer implements Firer {
             }
             for (ShotHandler shotHandler : shotHandlers) {
                 GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
-                shotHandler.handle(firedShot.state(), player, firedShot.previousHits(), shot);
+                shotHandler.handle(firedShot.state(), shooter, firedShot.previousHits(), shot);
             }
         }
 

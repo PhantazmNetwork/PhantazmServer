@@ -58,12 +58,9 @@ public class StateReloadTester implements ReloadTester {
         return (data, keys) -> keys.add(data.statsKey());
     }
 
-    private final Data data;
-
     private final GunStats stats;
 
-    public StateReloadTester(@NotNull Data data, @NotNull GunStats stats) {
-        this.data = Objects.requireNonNull(data, "data");
+    public StateReloadTester(@NotNull GunStats stats) {
         this.stats = Objects.requireNonNull(stats, "stats");
     }
 

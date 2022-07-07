@@ -75,8 +75,6 @@ public class ReloadActionBarEffect implements GunEffect {
         };
     }
 
-    private final Data data;
-
     private final PlayerView playerView;
 
     private final GunStats stats;
@@ -87,9 +85,8 @@ public class ReloadActionBarEffect implements GunEffect {
 
     private boolean active = false;
 
-    public ReloadActionBarEffect(@NotNull Data data, @NotNull PlayerView playerView, @NotNull GunStats stats,
+    public ReloadActionBarEffect(@NotNull PlayerView playerView, @NotNull GunStats stats,
                                  @NotNull ReloadTester reloadTester, @NotNull ReloadActionBarChooser chooser) {
-        this.data = Objects.requireNonNull(data, "data");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.stats = Objects.requireNonNull(stats, "stats");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");

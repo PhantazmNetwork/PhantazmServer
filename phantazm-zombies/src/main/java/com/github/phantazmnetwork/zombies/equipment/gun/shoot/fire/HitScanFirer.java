@@ -67,6 +67,7 @@ public class HitScanFirer implements Firer {
                 node.put("endSelectorKey", keyProcessor.elementFromData(data.endSelectorKey()));
                 node.put("targetFinderKey", keyProcessor.elementFromData(data.targetFinderKey()));
                 node.put("shotHandlerKeys", collectionProcessor.elementFromData(data.shotHandlerKeys()));
+
                 return node;
             }
         };
@@ -80,8 +81,6 @@ public class HitScanFirer implements Firer {
         };
     }
 
-    private final Data data;
-
     private final Supplier<Optional<? extends Entity>> entitySupplier;
 
     private final ShotEndpointSelector endSelector;
@@ -90,10 +89,9 @@ public class HitScanFirer implements Firer {
 
     private final Collection<ShotHandler> shotHandlers;
 
-    public HitScanFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+    public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
                         @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
                         @NotNull Collection<ShotHandler> shotHandlers) {
-        this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");

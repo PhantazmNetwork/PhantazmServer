@@ -18,7 +18,6 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Optional;
 
 public class RayTraceBlockIteration implements BlockIteration {
@@ -46,12 +45,6 @@ public class RayTraceBlockIteration implements BlockIteration {
                 return new LinkedConfigNode(0);
             }
         };
-    }
-
-    private final Data data;
-
-    public RayTraceBlockIteration(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
     }
 
     @SuppressWarnings("UnstableApiUsage")

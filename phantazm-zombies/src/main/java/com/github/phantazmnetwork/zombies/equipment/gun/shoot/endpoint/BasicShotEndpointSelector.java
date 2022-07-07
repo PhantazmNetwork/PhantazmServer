@@ -87,7 +87,6 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
         this.blockIteration = Objects.requireNonNull(blockIteration, "blockIteration");
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull Optional<Point> getEnd(@NotNull Pos start) {
         return entitySupplier.get().map(player -> {

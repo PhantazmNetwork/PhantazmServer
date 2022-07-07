@@ -66,14 +66,11 @@ public class StateShootTester implements ShootTester {
         };
     }
 
-    private final Data data;
-
     private final GunStats stats;
 
     private final ReloadTester reloadTester;
 
-    public StateShootTester(@NotNull Data data, @NotNull GunStats stats, @NotNull ReloadTester reloadTester) {
-        this.data = Objects.requireNonNull(data, "data");
+    public StateShootTester(@NotNull GunStats stats, @NotNull ReloadTester reloadTester) {
         this.stats = Objects.requireNonNull(stats, "stats");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
     }

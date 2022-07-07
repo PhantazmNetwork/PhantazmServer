@@ -87,8 +87,6 @@ public class BasicTargetFinder implements TargetFinder {
         };
     }
 
-    private final Data data;
-
     private final DirectionalEntityFinder entityFinder;
 
     private final TargetTester targetTester;
@@ -99,10 +97,9 @@ public class BasicTargetFinder implements TargetFinder {
 
     private final TargetLimiter targetLimiter;
 
-    public BasicTargetFinder(@NotNull Data data, @NotNull DirectionalEntityFinder entityFinder,
-                             @NotNull TargetTester targetTester, @NotNull IntersectionFinder intersectionFinder,
-                             @NotNull HeadshotTester headshotTester, @NotNull TargetLimiter targetLimiter) {
-        this.data = Objects.requireNonNull(data, "data");
+    public BasicTargetFinder(@NotNull DirectionalEntityFinder entityFinder, @NotNull TargetTester targetTester,
+                             @NotNull IntersectionFinder intersectionFinder, @NotNull HeadshotTester headshotTester,
+                             @NotNull TargetLimiter targetLimiter) {
         this.entityFinder = Objects.requireNonNull(entityFinder, "entityFinder");
         this.targetTester = Objects.requireNonNull(targetTester, "targetTester");
         this.intersectionFinder = Objects.requireNonNull(intersectionFinder, "intersectionFinder");

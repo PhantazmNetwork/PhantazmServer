@@ -12,7 +12,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class RayTraceIntersectionFinder implements IntersectionFinder {
@@ -41,12 +40,6 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
                 return new LinkedConfigNode(0);
             }
         };
-    }
-
-    private final Data data;
-
-    public RayTraceIntersectionFinder(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override

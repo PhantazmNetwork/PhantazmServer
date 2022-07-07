@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
 
 public class BetweenPointsFinder implements DirectionalEntityFinder {
 
@@ -43,12 +42,6 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
                 return new LinkedConfigNode(0);
             }
         };
-    }
-
-    private final Data data;
-
-    public BetweenPointsFinder(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
     }
 
     @SuppressWarnings("UnstableApiUsage")
