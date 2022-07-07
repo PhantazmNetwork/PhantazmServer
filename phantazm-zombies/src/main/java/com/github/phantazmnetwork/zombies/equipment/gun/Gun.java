@@ -56,7 +56,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             if (state.ammo() > 0) {
                 reload();
             } else {
-                for (GunEffect effect : getLevel().emptyClipEffects()) {
+                for (GunEffect effect : getLevel().noAmmoEffects()) {
                     effect.apply(state);
                 }
             }
@@ -171,7 +171,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             for (GunEffect effect : gunLevel.reloadEffects()) {
                 effect.tick(state, time);
             }
-            for (GunEffect effect : gunLevel.emptyClipEffects()) {
+            for (GunEffect effect : gunLevel.noAmmoEffects()) {
                 effect.tick(state, time);
             }
             for (GunEffect effect : gunLevel.tickEffects()) {

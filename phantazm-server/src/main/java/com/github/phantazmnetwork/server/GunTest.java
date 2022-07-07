@@ -14,6 +14,7 @@ import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.gun.*;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelData;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.PlaySoundEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.ReloadActionBarEffect;
@@ -257,13 +258,15 @@ final class GunTest {
         Key sFirerKey = Key.key(Namespaces.PHANTAZM, "firer");
         HitScanFirer.Data sFirer = new HitScanFirer.Data(sEndSelectorKey, sTargetFinderKey, Collections.emptyList());
         Key gunLevelKey = Key.key(Namespaces.PHANTAZM, "gun_level");
+        Key sSoundEffectAudienceProviderKey = Key.key(Namespaces.PHANTAZM, "sound_effect_audience_provider");
+        EntityInstanceAudienceProvider.Data sSoundEffectAudienceProvider = new EntityInstanceAudienceProvider.Data();
         Key sSoundKey = Key.key(Namespaces.PHANTAZM, "sound_effect");
-        PlaySoundEffect.Data sSound = new PlaySoundEffect.Data(Sound.sound(
-                Key.key("entity.iron_golem.hurt"),
-                Sound.Source.PLAYER,
-                1.0F,
-                2.0F
-        ));
+        PlaySoundEffect.Data sSound = new PlaySoundEffect.Data(sSoundEffectAudienceProviderKey,
+                Sound.sound(
+                        Key.key("entity.iron_golem.hurt"),
+                        Sound.Source.PLAYER,
+                        1.0F,
+                        2.0F));
         Key sActionBarChooserKey = Key.key(Namespaces.PHANTAZM, "action_bar_chooser");
         GradientActionBarChooser.Data sActionBarChooser = new GradientActionBarChooser.Data(Component.text("RELOADING",
                 null, TextDecoration.BOLD), NamedTextColor.RED, NamedTextColor.GREEN);
@@ -286,6 +289,7 @@ final class GunTest {
                 List.of(sClipStackMapperKey)
         ));
         theMap.put(sStatsKey, sStats);
+        theMap.put(sSoundEffectAudienceProviderKey, sSoundEffectAudienceProvider);
         theMap.put(sReloadTesterKey, sReloadTester);
         theMap.put(sShootTesterKey, sShootTester);
         theMap.put(sBlockIterationKey, sBlockIteration);

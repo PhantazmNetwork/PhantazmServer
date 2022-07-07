@@ -11,6 +11,9 @@ import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunLevel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunModel;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityAudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelDataConfigProcessor;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunData;
@@ -218,6 +221,8 @@ final class EquipmentFeature {
         Map<Key, ConfigProcessor<? extends Keyed>> gunProcessors = new HashMap<>(38);
         gunProcessors.put(GunStats.SERIAL_KEY, GunStats.processor());
         gunProcessors.put(GunLevelData.SERIAL_KEY, new GunLevelDataConfigProcessor(ItemStackConfigProcessors.snbt()));
+        gunProcessors.put(EntityInstanceAudienceProvider.Data.SERIAL_KEY, EntityInstanceAudienceProvider.processor());
+        gunProcessors.put(EntityAudienceProvider.Data.SERIAL_KEY, EntityAudienceProvider.processor());
         gunProcessors.put(AmmoLevelEffect.Data.SERIAL_KEY, AmmoLevelEffect.processor());
         gunProcessors.put(PlaySoundEffect.Data.SERIAL_KEY, PlaySoundEffect.processor());
         gunProcessors.put(ReloadActionBarEffect.Data.SERIAL_KEY, ReloadActionBarEffect.processor());
@@ -262,6 +267,7 @@ final class EquipmentFeature {
     private static @NotNull Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> createDependencyAdders() {
         Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> dependencyAdders = new HashMap<>(13);
         dependencyAdders.put(GunLevelData.SERIAL_KEY, GunLevelData.dependencyConsumer());
+        dependencyAdders.put(PlaySoundEffect.Data.SERIAL_KEY, PlaySoundEffect.dependencyConsumer());
         dependencyAdders.put(ReloadActionBarEffect.Data.SERIAL_KEY, ReloadActionBarEffect.dependencyConsumer());
         dependencyAdders.put(ShootExpEffect.Data.SERIAL_KEY, ShootExpEffect.dependencyConsumer());
         dependencyAdders.put(StateReloadTester.Data.SERIAL_KEY, StateReloadTester.dependencyConsumer());
@@ -271,6 +277,7 @@ final class EquipmentFeature {
         dependencyAdders.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.dependencyConsumer());
         dependencyAdders.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.dependencyConsumer());
         dependencyAdders.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.dependencyConsumer());
+        dependencyAdders.put(SoundShotHandler.Data.SERIAL_KEY, SoundShotHandler.dependencyConsumer());
         dependencyAdders.put(BasicTargetFinder.Data.SERIAL_KEY, BasicTargetFinder.dependencyConsumer());
         dependencyAdders.put(ClipStackMapper.Data.SERIAL_KEY, ClipStackMapper.dependencyConsumer());
         dependencyAdders.put(ReloadStackMapper.Data.SERIAL_KEY, ReloadStackMapper.dependencyConsumer());
@@ -301,16 +308,22 @@ final class EquipmentFeature {
             Collection<GunEffect> shootEffects = provider.getDependency(data.shootEffects());
             Collection<GunEffect> reloadEffects = provider.getDependency(data.reloadEffects());
             Collection<GunEffect> tickEffects = provider.getDependency(data.tickEffects());
-            Collection<GunEffect> emptyClipEffects = provider.getDependency(data.emptyClipEffects());
+            Collection<GunEffect> noAmmoEffects = provider.getDependency(data.noAmmoEffects());
             Collection<GunStackMapper> gunStackMappers = provider.getDependency(data.gunStackMappers());
 
             return new GunLevel(data.stack(), stats, shootTester, reloadTester, firer, shootEffects,
-                    reloadEffects, tickEffects, emptyClipEffects, gunStackMappers);
+                    reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
         };
+        Factory<EntityInstanceAudienceProvider.Data, EntityInstanceAudienceProvider> entityInstanceAudienceProvider
+                = (provider, data) -> new EntityInstanceAudienceProvider(playerView::getPlayer);
+        Factory<EntityAudienceProvider.Data, EntityAudienceProvider> playerAudienceProvider
+                = (provider, data) -> new EntityAudienceProvider(playerView::getPlayer);
         Factory<AmmoLevelEffect.Data, AmmoLevelEffect> ammoLevelEffect
                 = (provider, data) -> new AmmoLevelEffect(playerView);
-        Factory<PlaySoundEffect.Data, PlaySoundEffect> playSoundEffect
-                = (provider, data) -> new PlaySoundEffect(data, playerView);
+        Factory<PlaySoundEffect.Data, PlaySoundEffect> playSoundEffect = (provider, data) -> {
+            AudienceProvider audienceProvider = provider.getDependency(data.audienceProviderKey());
+            return new PlaySoundEffect(data, audienceProvider);
+        };
         Factory<ReloadActionBarEffect.Data, ReloadActionBarEffect> reloadActionBarEffect = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
@@ -388,7 +401,10 @@ final class EquipmentFeature {
         Factory<PotionShotHandler.Data, PotionShotHandler> potionShotHandler
                 = (provider, data) -> new PotionShotHandler(data);
         Factory<SoundShotHandler.Data, SoundShotHandler> soundShotHandler
-                = (provider, data) -> new SoundShotHandler(data, playerView);
+                = (provider, data) -> {
+            AudienceProvider audienceProvider = provider.getDependency(data.audienceProviderKey());
+            return new SoundShotHandler(data, audienceProvider);
+        };
         Factory<StateShootTester.Data, StateShootTester> stateShootTester = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
@@ -432,6 +448,8 @@ final class EquipmentFeature {
         Map<Key, Factory<?, ?>> factories = new HashMap<>(38);
         factories.put(GunStats.SERIAL_KEY, gunStats);
         factories.put(GunLevelData.SERIAL_KEY, gunLevel);
+        factories.put(EntityInstanceAudienceProvider.Data.SERIAL_KEY, entityInstanceAudienceProvider);
+        factories.put(EntityAudienceProvider.Data.SERIAL_KEY, playerAudienceProvider);
         factories.put(AmmoLevelEffect.Data.SERIAL_KEY, ammoLevelEffect);
         factories.put(PlaySoundEffect.Data.SERIAL_KEY, playSoundEffect);
         factories.put(ReloadActionBarEffect.Data.SERIAL_KEY, reloadActionBarEffect);

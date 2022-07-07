@@ -41,11 +41,11 @@ public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData
         Collection<Key> shootEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("shootEffects"));
         Collection<Key> reloadEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("reloadEffects"));
         Collection<Key> tickEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("tickEffects"));
-        Collection<Key> emptyClipEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("emptyClipEffects"));
+        Collection<Key> noAmmoEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("noAmmoEffects"));
         Collection<Key> gunStackMappers = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("gunStackMappers"));
 
         return new GunLevelData(order, stack, stats, shootTester, reloadTester, firer, shootEffects, reloadEffects,
-                tickEffects, emptyClipEffects, gunStackMappers);
+                tickEffects, noAmmoEffects, gunStackMappers);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData
         node.put("shootEffects", KEY_COLLECTION_PROCESSOR.elementFromData(gunLevelData.shootEffects()));
         node.put("reloadEffects", KEY_COLLECTION_PROCESSOR.elementFromData(gunLevelData.reloadEffects()));
         node.put("tickEffects", KEY_COLLECTION_PROCESSOR.elementFromData(gunLevelData.tickEffects()));
-        node.put("emptyClipEffects", KEY_COLLECTION_PROCESSOR.elementFromData(gunLevelData.emptyClipEffects()));
+        node.put("noAmmoEffects", KEY_COLLECTION_PROCESSOR.elementFromData(gunLevelData.noAmmoEffects()));
         node.put("gunStackMappers", KEY_COLLECTION_PROCESSOR.elementFromData(gunLevelData.gunStackMappers()));
 
         return node;

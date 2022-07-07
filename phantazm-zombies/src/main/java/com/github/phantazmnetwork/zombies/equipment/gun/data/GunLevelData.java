@@ -19,7 +19,7 @@ public record GunLevelData(int order, // TODO: key based upgrades
                            @NotNull Collection<Key> shootEffects,
                            @NotNull Collection<Key> reloadEffects,
                            @NotNull Collection<Key> tickEffects,
-                           @NotNull Collection<Key> emptyClipEffects,
+                           @NotNull Collection<Key> noAmmoEffects,
                            @NotNull Collection<Key> gunStackMappers) implements Keyed {
 
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.level");
@@ -33,7 +33,7 @@ public record GunLevelData(int order, // TODO: key based upgrades
             keys.addAll(data.shootEffects());
             keys.addAll(data.reloadEffects());
             keys.addAll(data.tickEffects());
-            keys.addAll(data.emptyClipEffects());
+            keys.addAll(data.noAmmoEffects());
             keys.addAll(data.gunStackMappers());
         };
     }
@@ -50,7 +50,7 @@ public record GunLevelData(int order, // TODO: key based upgrades
         Objects.requireNonNull(shootEffects, "shootEffects");
         Objects.requireNonNull(reloadEffects, "reloadEffects");
         Objects.requireNonNull(tickEffects, "tickEffects");
-        Objects.requireNonNull(emptyClipEffects, "emptyClipEffects");
+        Objects.requireNonNull(noAmmoEffects, "noAmmoEffects");
         Objects.requireNonNull(gunStackMappers, "gunStackMappers");
     }
 

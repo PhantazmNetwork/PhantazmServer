@@ -19,7 +19,7 @@ public record GunLevel(@NotNull ItemStack stack,
                        @NotNull Collection<GunEffect> shootEffects,
                        @NotNull Collection<GunEffect> reloadEffects,
                        @NotNull Collection<GunEffect> tickEffects,
-                       @NotNull Collection<GunEffect> emptyClipEffects,
+                       @NotNull Collection<GunEffect> noAmmoEffects,
                        @NotNull Collection<GunStackMapper> gunStackMappers) {
 
     public GunLevel {
@@ -31,7 +31,7 @@ public record GunLevel(@NotNull ItemStack stack,
         Objects.requireNonNull(shootEffects, "shootEffects");
         Objects.requireNonNull(reloadEffects, "reloadEffects");
         Objects.requireNonNull(tickEffects, "tickEffects");
-        Objects.requireNonNull(emptyClipEffects, "emptyClipEffects");
+        Objects.requireNonNull(noAmmoEffects, "noAmmoEffects");
         Objects.requireNonNull(gunStackMappers, "gunStackMappers");
     }
 
