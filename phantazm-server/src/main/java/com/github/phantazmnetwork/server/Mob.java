@@ -76,7 +76,7 @@ public final class Mob {
         ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(Map.of(
                 GroundMinestomDescriptor.SERIAL_KEY, new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
         )::get);
-        ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor = new NearestEntitiesSelectorConfigProcessor<NearestEntitiesSelector<Player>>() {
+        ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor = new NearestEntitiesSelectorConfigProcessor<>() {
             @Override
             protected @NotNull NearestEntitiesSelector<Player> createSelector(double range, int targetLimit) {
                 return new NearestPlayersSelector(range, targetLimit);
@@ -135,9 +135,8 @@ public final class Mob {
     }
 
     private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node, @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
-        node.addListener(trigger.eventClass(), event -> {
-            mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key());
-        });
+        node.addListener(trigger.eventClass(), event ->
+                mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
     }
 
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {

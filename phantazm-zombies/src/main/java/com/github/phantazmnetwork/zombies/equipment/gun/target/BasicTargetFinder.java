@@ -119,9 +119,8 @@ public class BasicTargetFinder implements TargetFinder {
         List<Pair<? extends LivingEntity, Vec>> locations = new ArrayList<>(nearbyEntities.size());
         for (LivingEntity entity : nearbyEntities) {
             if (targetTester.useTarget(entity, previousHits)) {
-                intersectionFinder.getHitLocation(entity, start).ifPresent(intersection -> {
-                    locations.add(Pair.of(entity, intersection));
-                });
+                intersectionFinder.getHitLocation(entity, start).ifPresent(intersection ->
+                        locations.add(Pair.of(entity, intersection)));
             }
         }
         List<Pair<? extends LivingEntity, Vec>> adjustedLocations = targetLimiter.limitTargets(start, locations);

@@ -9,5 +9,5 @@ public final class Namespaces {
     /**
      * The global namespace for Phantazm.
      */
-    public static String PHANTAZM = "phantazm";
+    public static final String PHANTAZM = "phantazm";
 }

@@ -7,8 +7,6 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
@@ -17,8 +15,10 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.ToDoubleFunction;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 public class DistanceTargetLimiter implements TargetLimiter {
 
@@ -66,16 +66,8 @@ public class DistanceTargetLimiter implements TargetLimiter {
     public @NotNull List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Pos start,
                                                                          @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
         List<Pair<? extends Entity, Vec>> targetsCopy = new ArrayList<>(targets);
-        Comparator<Pair<? extends Entity, Vec>> comparator = Comparator.comparingDouble(new ToDoubleFunction<>() {
-
-            private final Object2DoubleMap<UUID> distanceMap = new Object2DoubleOpenHashMap<>(targets.size());
-
-            @Override
-            public double applyAsDouble(Pair<? extends Entity, Vec> value) {
-                return distanceMap.computeIfAbsent(value.left().getUuid(),
-                        unused -> value.right().distanceSquared(start));
-            }
-        });
+        Comparator<Pair<? extends Entity, Vec>> comparator
+                = Comparator.comparingDouble(pair -> start.distanceSquared(pair.value()));
         if (!data.prioritizeClosest()) {
             comparator = comparator.reversed();
         }

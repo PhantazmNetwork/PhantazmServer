@@ -66,9 +66,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
     }
 
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.blockIterationKey());
-        };
+        return (data, keys) -> keys.add(data.blockIterationKey());
     }
 
     private final Data data;

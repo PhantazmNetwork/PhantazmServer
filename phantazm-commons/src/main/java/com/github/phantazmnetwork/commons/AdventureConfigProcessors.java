@@ -57,7 +57,7 @@ public final class AdventureConfigProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(@NotNull Component component) throws ConfigProcessException {
+        public @NotNull ConfigElement elementFromData(@NotNull Component component) {
             return new ConfigPrimitive(MiniMessage.miniMessage().serialize(component));
         }
     };
@@ -96,7 +96,7 @@ public final class AdventureConfigProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(@NotNull RGBLike rgbLike) throws ConfigProcessException {
+        public @NotNull ConfigElement elementFromData(@NotNull RGBLike rgbLike) {
             return new ConfigPrimitive(TextColor.color(rgbLike).asHexString());
         }
     };

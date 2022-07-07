@@ -57,9 +57,7 @@ public class ClipStackMapper implements GunStackMapper {
     }
 
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.reloadTesterKey());
-        };
+        return (data, keys) -> keys.add(data.reloadTesterKey());
     }
 
     private final ReloadTester reloadTester;

@@ -39,7 +39,7 @@ public class PhantazmTargetTester implements TargetTester {
             }
 
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
                 ConfigNode node = new LinkedConfigNode(1);
                 node.putBoolean("ignorePreviousHits", data.ignorePreviousHits());
 

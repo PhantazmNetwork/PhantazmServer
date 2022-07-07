@@ -48,7 +48,7 @@ public class IgniteShotHandler implements ShotHandler {
             }
 
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.putNumber("duration", data.duration());
                 node.putNumber("headshotDuration", data.headshotDuration());

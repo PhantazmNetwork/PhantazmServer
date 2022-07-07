@@ -97,14 +97,10 @@ public class ReloadActionBarEffect implements GunEffect {
     public void apply(@NotNull GunState state) {
         if (reloadTester.isReloading(state) && state.isMainEquipment()) {
             float progress = (float) state.ticksSinceLastReload() / stats.reloadSpeed();
-            playerView.getPlayer().ifPresent(player -> {
-                player.sendActionBar(chooser.choose(state, player, progress));
-            });
+            playerView.getPlayer().ifPresent(player -> player.sendActionBar(chooser.choose(state, player, progress)));
             active = true;
         } else if (active) {
-            playerView.getPlayer().ifPresent(player -> {
-                player.sendActionBar(Component.empty());
-            });
+            playerView.getPlayer().ifPresent(player -> player.sendActionBar(Component.empty()));
             active = false;
         }
     }

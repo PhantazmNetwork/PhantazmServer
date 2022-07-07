@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -112,7 +113,7 @@ public class RayUtils {
                 RayUtils.rayTrace(child, blockLocation, start).ifPresent(traces::add);
             }
 
-            PointUtils.sortPointsByDistance(start, traces);
+            traces.sort(Comparator.comparingDouble(start::distanceSquared));
             return traces.get(0);
         });
     }

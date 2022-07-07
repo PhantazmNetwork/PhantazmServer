@@ -13,7 +13,8 @@ import com.github.phantazmnetwork.mob.target.NearestPlayersSelector;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
-import com.github.phantazmnetwork.zombies.equipment.gun.*;
+import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
+import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelData;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.PlaySoundEffect;
@@ -32,12 +33,8 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.DistanceT
 import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmTargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
-import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import net.kyori.adventure.key.Key;
@@ -202,34 +199,6 @@ final class GunTest {
             }
         });
 
-        Map<Key, ConfigProcessor<? extends Keyed>> subprocessors = new HashMap<>();
-        subprocessors.put(GunStats.SERIAL_KEY, new ConfigProcessor<GunStats>() {
-
-            @Override
-            public @NotNull GunStats dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                long shootSpeed = element.getNumberOrThrow("shootSpeed").longValue();
-                long reloadSpeed = element.getNumberOrThrow("reloadSpeed").longValue();
-                int maxAmmo = element.getNumberOrThrow("maxAmmo").intValue();
-                int maxClip = element.getNumberOrThrow("maxClip").intValue();
-                int shots = element.getNumberOrThrow("shots").intValue();
-                long shotInterval = element.getNumberOrThrow("shotInterval").longValue();
-
-                return new GunStats(shootSpeed, reloadSpeed, maxAmmo, maxClip, shots, shotInterval);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull GunStats stats) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(6);
-                node.putNumber("shootSpeed", stats.shootSpeed());
-                node.putNumber("reloadSpeed", stats.reloadSpeed());
-                node.putNumber("maxAmmo", stats.maxAmmo());
-                node.putNumber("maxClip", stats.maxClip());
-                node.putNumber("shots", stats.shots());
-                node.putNumber("shotInterval", stats.shotInterval());
-
-                return node;
-            }
-        });
         ConfigProcessor<ComplexData> cfg = EquipmentFeature.createGunLevelProcessor();
 
         Key sStatsKey = Key.key(Namespaces.PHANTAZM, "stats");
