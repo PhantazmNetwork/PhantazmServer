@@ -142,36 +142,36 @@ public final class Mob {
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
         LOGGER.info("Loading mob files...");
 
+        Map<Key, MobModel> loadedModels = new HashMap<>();
         try {
             Files.createDirectories(mobPath);
+
+            try (Stream<Path> paths = Files.list(mobPath)) {
+                PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + codec.getPreferredExtension());
+                paths.forEach(path -> {
+                    if (matcher.matches(path) && Files.isRegularFile(path)) {
+                        try {
+                            MobModel model = ConfigBridges.read(path, codec, getModelProcessor());
+                            if (loadedModels.containsKey(model.key())) {
+                                LOGGER.warn("Duplicate key ({}), skipping...", model.key());
+                            }
+                            else {
+                                loadedModels.put(model.key(), model);
+                            }
+                        } catch (IOException e) {
+                            LOGGER.warn("Could not load mob file", e);
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                LOGGER.warn("Could not list files in mob directory", e);
+            }
         }
         catch (IOException e) {
             LOGGER.warn("Failed to create directory {}", mobPath);
         }
 
-        Map<Key, MobModel> loadedModels = new HashMap<>();
-        try (Stream<Path> paths = Files.list(mobPath)) {
-            PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + codec.getPreferredExtension());
-            paths.forEach(path -> {
-                if (matcher.matches(path) && Files.isRegularFile(path)) {
-                    try {
-                        MobModel model = ConfigBridges.read(path, codec, getModelProcessor());
-                        if (loadedModels.containsKey(model.key())) {
-                            LOGGER.warn("Duplicate key ({}), skipping...", model.key());
-                        }
-                        else {
-                            loadedModels.put(model.key(), model);
-                        }
-                    } catch (IOException e) {
-                        LOGGER.warn("Could not load mob file", e);
-                    }
-                }
-            });
-        } catch (IOException e) {
-            LOGGER.warn("Could not list files in mob directory", e);
-        }
         models = Map.copyOf(loadedModels);
-
         LOGGER.info("Loaded {} mob files.", models.size());
     }
 
