@@ -30,6 +30,10 @@ pluginManager.withPlugin("java") {
     dependencies.addProvider("testRuntimeOnly", libs.findLibrary("junit.jupiter.engine").get())
 }
 
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }

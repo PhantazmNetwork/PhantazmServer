@@ -3,10 +3,10 @@
     port = 25567
     optifineEnabled = true
     authType = "BUNGEE"
-    velocitySecret = ""
+    proxySecret = "default"
 
 [pingList]
-    description = "A Minecraft Server"
+    description = "A Phantazm Server"
 
 [pathfinder]
     threads = 4

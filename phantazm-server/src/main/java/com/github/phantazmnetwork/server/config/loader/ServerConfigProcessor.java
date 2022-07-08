@@ -8,12 +8,10 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
 
 /**
  * {@link ConfigProcessor} used for {@link ServerConfig}s.
@@ -36,14 +34,10 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType")
                 .toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid AuthType, must " +
                 "be one of the following: " + Arrays.toString(AuthType.values())));
-        String velocitySecret = serverInfo.getStringOrThrow("velocitySecret");
-        if(authType == AuthType.VELOCITY && velocitySecret.equals(ServerInfoConfig.DEFAULT_VELOCITY_SECRET)) {
-            throw new ConfigProcessException("When using AuthType.VELOCITY, velocitySecret must be set to a value " +
-                    "other than the default for security reasons");
-        }
+        String proxySecret = serverInfo.getStringOrThrow("proxySecret");
 
         ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverAddress, port, optifineEnabled, authType,
-                velocitySecret);
+                proxySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
         Component description = COMPONENT_PROCESSOR.dataFromElement(pingList.getElementOrThrow("description"));
@@ -77,7 +71,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         serverInfo.putNumber("port", serverInfoConfig.port());
         serverInfo.putBoolean("optifineEnabled", serverInfoConfig.optifineEnabled());
         serverInfo.putString("authType", serverInfoConfig.authType().name());
-        serverInfo.putString("velocitySecret", serverInfoConfig.velocitySecret());
+        serverInfo.putString("proxySecret", serverInfoConfig.proxySecret());
 
         ConfigNode pingList = new LinkedConfigNode(1);
         PingListConfig pingListConfig = serverConfig.pingListConfig();
@@ -89,4 +83,5 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
         return configNode;
     }
+
 }

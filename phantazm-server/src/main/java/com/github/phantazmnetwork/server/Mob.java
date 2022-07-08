@@ -143,34 +143,40 @@ public final class Mob {
         LOGGER.info("Loading mob files...");
 
         Map<Key, MobModel> loadedModels = new HashMap<>();
-        try (Stream<Path> paths = Files.list(mobPath)) {
-            String ending;
-            if (codec.getPreferredExtensions().isEmpty()) {
-                ending = "";
-            } else {
-                ending = "." + codec.getPreferredExtensions().get(0);
-            }
-            PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
-            paths.forEach(path -> {
-                if (matcher.matches(path) && Files.isRegularFile(path)) {
-                    try {
-                        MobModel model = ConfigBridges.read(path, codec, getModelProcessor());
-                        if (loadedModels.containsKey(model.key())) {
-                            LOGGER.warn("Duplicate key ({}), skipping...", model.key());
-                        }
-                        else {
-                            loadedModels.put(model.key(), model);
-                        }
-                    } catch (IOException e) {
-                        LOGGER.warn("Could not load mob file", e);
-                    }
+        try {
+            Files.createDirectories(mobPath);
+
+            try (Stream<Path> paths = Files.list(mobPath)) {
+                String ending;
+                if (codec.getPreferredExtensions().isEmpty()) {
+                    ending = "";
+                } else {
+                    ending = "." + codec.getPreferredExtensions().get(0);
                 }
-            });
-        } catch (IOException e) {
-            LOGGER.warn("Could not list files in mob directory", e);
+                PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + ending);
+                paths.forEach(path -> {
+                    if (matcher.matches(path) && Files.isRegularFile(path)) {
+                        try {
+                            MobModel model = ConfigBridges.read(path, codec, getModelProcessor());
+                            if (loadedModels.containsKey(model.key())) {
+                                LOGGER.warn("Duplicate key ({}), skipping...", model.key());
+                            }
+                            else {
+                                loadedModels.put(model.key(), model);
+                            }
+                        } catch (IOException e) {
+                            LOGGER.warn("Could not load mob file", e);
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                LOGGER.warn("Could not list files in mob directory", e);
+            }
+        }
+        catch (IOException e) {
+            LOGGER.warn("Failed to create directory {}", mobPath);
         }
         models = Map.copyOf(loadedModels);
-
         LOGGER.info("Loaded {} mob files.", models.size());
     }
 
