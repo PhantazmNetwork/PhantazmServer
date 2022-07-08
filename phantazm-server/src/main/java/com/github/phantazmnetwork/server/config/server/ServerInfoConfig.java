@@ -10,13 +10,13 @@ import java.util.Objects;
  * @param port The port to run the server on
  * @param optifineEnabled Whether optifine support is enabled
  * @param authType The type of authentication the server will use
- * @param velocitySecret The secret used for authentication
+ * @param proxySecret The secret used for authentication
  */
 public record ServerInfoConfig(@NotNull String serverIP,
                                int port,
                                boolean optifineEnabled,
                                @NotNull AuthType authType,
-                               @NotNull String velocitySecret) {
+                               @NotNull String proxySecret) {
     /**
      * The default server address string.
      */
@@ -38,16 +38,16 @@ public record ServerInfoConfig(@NotNull String serverIP,
     public static final AuthType DEFAULT_AUTH_TYPE = AuthType.MOJANG;
 
     /**
-     * The default Velocity secret. This is used so the config file gets filled in, but the empty string should NEVER
+     * The default proxy secret. This is used so the config file gets filled in, but the empty string should NEVER
      * be used as an actual secret during production.
      */
-    public static final String DEFAULT_VELOCITY_SECRET = "default";
+    public static final String DEFAULT_PROXY_SECRET = "default";
 
     /**
      * The default ServerInfoConfig instance.
      */
     public static final ServerInfoConfig DEFAULT = new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT,
-            DEFAULT_OPTIFINE_ENABLED, DEFAULT_AUTH_TYPE, DEFAULT_VELOCITY_SECRET);
+            DEFAULT_OPTIFINE_ENABLED, DEFAULT_AUTH_TYPE, DEFAULT_PROXY_SECRET);
 
     /**
      * Creates config regarding server info.
@@ -55,12 +55,12 @@ public record ServerInfoConfig(@NotNull String serverIP,
      * @param port The port to run the server on
      * @param optifineEnabled Whether optifine support is enabled
      * @param authType The type of authentication the server will use
-     * @param velocitySecret The secret used for authentication
+     * @param proxySecret The secret used for authentication
      */
     public ServerInfoConfig {
         Objects.requireNonNull(serverIP, "serverIP");
         Objects.requireNonNull(authType, "authType");
-        Objects.requireNonNull(velocitySecret, "velocitySecret");
+        Objects.requireNonNull(proxySecret, "proxySecret");
     }
 
 }

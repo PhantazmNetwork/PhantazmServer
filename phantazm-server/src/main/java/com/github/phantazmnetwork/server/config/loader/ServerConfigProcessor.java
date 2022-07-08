@@ -34,10 +34,10 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType")
                 .toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid AuthType, must " +
                 "be one of the following: " + Arrays.toString(AuthType.values())));
-        String velocitySecret = serverInfo.getStringOrThrow("velocitySecret");
+        String proxySecret = serverInfo.getStringOrThrow("proxySecret");
 
         ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverAddress, port, optifineEnabled, authType,
-                velocitySecret);
+                proxySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
         Component description = COMPONENT_PROCESSOR.dataFromElement(pingList.getElementOrThrow("description"));
@@ -71,7 +71,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         serverInfo.putNumber("port", serverInfoConfig.port());
         serverInfo.putBoolean("optifineEnabled", serverInfoConfig.optifineEnabled());
         serverInfo.putString("authType", serverInfoConfig.authType().name());
-        serverInfo.putString("velocitySecret", serverInfoConfig.velocitySecret());
+        serverInfo.putString("proxySecret", serverInfoConfig.proxySecret());
 
         ConfigNode pingList = new LinkedConfigNode(1);
         PingListConfig pingListConfig = serverConfig.pingListConfig();

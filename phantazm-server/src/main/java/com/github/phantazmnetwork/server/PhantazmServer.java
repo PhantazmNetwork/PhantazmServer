@@ -88,11 +88,12 @@ public final class PhantazmServer {
                         "\"default\". Only use this option when running in a secure development environment.");
             }
             else if((serverInfoConfig.authType() == AuthType.VELOCITY || serverInfoConfig.authType() == AuthType.BUNGEE)
-                    && serverInfoConfig.velocitySecret().equals(ServerInfoConfig.DEFAULT_VELOCITY_SECRET)) {
+                    && serverInfoConfig.proxySecret().equals(ServerInfoConfig.DEFAULT_PROXY_SECRET)) {
                 LOGGER.error("When using AuthType.VELOCITY or AuthType.BUNGEE, velocitySecret must be set to a value " +
                         "other than the default for security reasons.");
                 LOGGER.error("If you are running in a development environment, you can use the 'unsafe' program " +
                         "argument to force the server to start regardless.");
+                MinecraftServer.stopCleanly();
                 return;
             }
 
@@ -101,6 +102,7 @@ public final class PhantazmServer {
         }
         catch (ConfigProcessException e) {
             LOGGER.error("Fatal error when loading configuration data", e);
+            MinecraftServer.stopCleanly();
             return;
         }
 
@@ -112,6 +114,7 @@ public final class PhantazmServer {
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during initialization", exception);
+            MinecraftServer.stopCleanly();
             return;
         }
 
@@ -120,6 +123,7 @@ public final class PhantazmServer {
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
+            MinecraftServer.stopCleanly();
         }
     }
 
@@ -157,9 +161,9 @@ public final class PhantazmServer {
             case MOJANG -> MojangAuth.init();
             case BUNGEE -> {
                 BungeeCordProxy.enable();
-                BungeeCordProxy.setBungeeGuardTokens(Set.of(infoConfig.velocitySecret()));
+                BungeeCordProxy.setBungeeGuardTokens(Set.of(infoConfig.proxySecret()));
             }
-            case VELOCITY -> VelocityProxy.enable(infoConfig.velocitySecret());
+            case VELOCITY -> VelocityProxy.enable(infoConfig.proxySecret());
         }
 
         node.addListener(ServerListPingEvent.class, event -> event.getResponseData().setDescription(serverConfig
