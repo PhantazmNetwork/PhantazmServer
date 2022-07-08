@@ -1,30 +1,33 @@
 package com.github.phantazmnetwork.api.chat;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.command.CommandSender;
+import net.minestom.server.event.player.PlayerChatEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Predicate;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
- * Represents a channel where messages can be sent to a group of {@link Audience}s.
- * These are typically subscribed to by players, such as all chat, party chat, or guild chat.
+ * Represents a chat channel. This is backed by an {@link Audience}, where messages are sent to.
  */
-@FunctionalInterface
 public interface ChatChannel {
 
     /**
-     * Broadcasts a {@link Component}.
-     *
-     * @param sender The associated {@link CommandSender}, or null if none such exists
-     * @param message The message to send
-     * @param messageType The type of the message
-     * @param filter A filter for {@link Audience}s in the channel
+     * Finds an {@link Audience} to send messages to. This represents the "channel".
+     * @param channelMember The player that is a member of this channel
+     * @param onSuccess A callback when an {@link Audience} is successfully found
+     * @param onFailure A callback when an {@link Audience} is not found that provides an error {@link Component} message
+     *                  that is meant to be sent to the channel member
      */
-    void broadcast(@Nullable CommandSender sender, @NotNull Component message, @NotNull MessageType messageType,
-                   @NotNull Predicate<? super Audience> filter);
+    void findAudience(@NotNull UUID channelMember, @NotNull Consumer<Audience> onSuccess,
+                      @NotNull Consumer<Component> onFailure);
+
+    /**
+     * Formats a message. Channels may add custom style or formatting.
+     * @param chatEvent The {@link PlayerChatEvent} that is being formatted
+     * @return The formatted {@link Component} message
+     */
+    @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent);
 
 }

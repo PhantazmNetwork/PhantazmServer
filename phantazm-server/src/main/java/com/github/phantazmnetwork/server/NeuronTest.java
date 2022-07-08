@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import net.minestom.server.attribute.Attribute;
@@ -9,6 +8,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
@@ -22,12 +22,11 @@ final class NeuronTest {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> global, @NotNull Spawner spawner,
-                           @NotNull EventNode<Event> phantazm) {
+    static void initialize(@NotNull EventNode<Event> global, @NotNull Spawner spawner) {
         GroundMinestomDescriptor testDescriptor = GroundMinestomDescriptor.of(EntityType.PHANTOM, "phantom");
 
-        phantazm.addListener(ChatChannelSendEvent.class, event -> {
-            String msg = event.getInput();
+        global.addListener(PlayerChatEvent.class, event -> {
+            String msg = event.getMessage();
             Player player = event.getPlayer();
             Instance instance = player.getInstance();
 

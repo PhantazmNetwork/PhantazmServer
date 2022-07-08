@@ -1,17 +1,20 @@
 package com.github.phantazmnetwork.api.chat.command;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.github.phantazmnetwork.api.chat.ChatChannel;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * {@link Command} used to switch between chat channels.
@@ -23,37 +26,44 @@ public class ChatCommand extends Command {
      */
     public static final String COMMAND_ID = "chat";
 
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
     /**
      * Creates a chat {@link Command}.
      *
-     * @param channelFinders A map of channel names to a {@link Function}
-     *                       that will get a {@link ChatChannel} for a specific {@link Player}
-     * @param playerChannels A cache of player channels based on their {@link UUID}
-     * @param defaultChannel The default channel to be used
+     * @param channels A {@link Map} of {@link String} channel names to {@link ChatChannel}s.
+     * @param playerChannels A {@link Map} of player channel names based on their {@link UUID}
+     * @param defaultChannelNameSupplier A {@link Supplier} of the default {@link ChatChannel} name
      */
-    public ChatCommand(@NotNull Map<String, Function<Player, ChatChannel>> channelFinders,
-                       @NotNull Cache<UUID, ChatChannel> playerChannels, @NotNull ChatChannel defaultChannel) {
+    public ChatCommand(@NotNull Map<String, ChatChannel> channels, @NotNull Map<UUID, String> playerChannels,
+                       @NotNull Supplier<String> defaultChannelNameSupplier) {
         super(COMMAND_ID);
 
-        Objects.requireNonNull(channelFinders, "channelFinders");
+        Objects.requireNonNull(channels, "channels");
         Objects.requireNonNull(playerChannels, "playerChannels");
+        Objects.requireNonNull(defaultChannelNameSupplier, "defaultChannelNameSupplier");
 
-        Argument<Function<Player, ChatChannel>> channelArgument = new ArgumentChannel("channel", channelFinders);
-        channelArgument.setCallback((sender, exception) -> {
+        String[] channelNames = channels.keySet().toArray(EMPTY_STRING_ARRAY);
+        Argument<String> channelNameArgument = new ArgumentWord("channel").from(channelNames);
+        channelNameArgument.setSuggestionCallback((sender, context, suggestion) -> {
+            for (String channelName : channelNames) {
+                suggestion.addEntry(new SuggestionEntry(channelName));
+            }
+        });
+
+        channelNameArgument.setCallback((sender, exception) -> {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("Invalid channel! Valid options are ");
 
-            Collection<String> channelNames = channelFinders.keySet();
-            int i = 0;
-            for (Iterator<String> iterator = channelNames.iterator(); iterator.hasNext(); i++) {
-                String name = iterator.next();
+            for (int i = 0; i < channelNames.length; i++) {
+                String name = channelNames[i];
                 stringBuilder.append(name);
 
-                if (i < channelNames.size() - 2) {
+                if (i < channelNames.length - 2) {
                     stringBuilder.append(", ");
                 }
-                else if (i == channelNames.size() - 2) {
-                    if (channelNames.size() != 2) {
+                else if (i == channelNames.length - 2) {
+                    if (channelNames.length != 2) {
                         stringBuilder.append(",");
                     }
                     stringBuilder.append(" or ");
@@ -61,11 +71,6 @@ public class ChatCommand extends Command {
             }
 
             sender.sendMessage(Component.text(stringBuilder.toString(), NamedTextColor.RED));
-        });
-        channelArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            for (String name : channelFinders.keySet()) {
-                suggestion.addEntry(new SuggestionEntry(name));
-            }
         });
 
         addConditionalSyntax((sender, commandString) -> {
@@ -78,31 +83,28 @@ public class ChatCommand extends Command {
             return false;
         }, (sender, context) -> {
             Player player = (Player) sender;
-            String channelName = context.getRaw(channelArgument).toUpperCase();
 
-            ChatChannel channel = context.get(channelArgument).apply(player);
-            if (channel == null) {
-                sender.sendMessage(Component.text("You can't join the " + channelName + " channel!",
-                        NamedTextColor.RED));
+            String channelName = context.get(channelNameArgument);
+            Component channelNameComponent = Component.text(channelName, NamedTextColor.GOLD);
+            String previousChannelName = playerChannels.computeIfAbsent(player.getUuid(),
+                    uuid -> defaultChannelNameSupplier.get());
+
+            JoinConfiguration joinConfiguration = JoinConfiguration.separator(Component.space());
+            if (channelName.equals(previousChannelName)) {
+                Component message = Component.join(joinConfiguration, Component.text("You are already in the"),
+                        channelNameComponent, Component.text("channel!")).color(NamedTextColor.RED);
+                sender.sendMessage(message);
                 return;
             }
 
-
-            ChatChannel previousChannel = playerChannels.get(player.getUuid(), (unused) -> defaultChannel);
-            if (channel == previousChannel) {
-                sender.sendMessage(Component.text("You are already in the " + channelName + " channel!",
-                        NamedTextColor.RED));
-                return;
-            }
-
-            playerChannels.put(player.getUuid(), channel);
-            player.sendMessage(Component
-                    .textOfChildren(
-                            Component.text("Set chat channel to "),
-                            Component.text(channelName, NamedTextColor.GOLD),
-                            Component.text(".")
-                    ).color(NamedTextColor.GREEN));
-        }, channelArgument);
+            playerChannels.put(player.getUuid(), channelName);
+            Component message = Component.textOfChildren(
+                    Component.text("Set chat channel to "),
+                    channelNameComponent,
+                    Component.text(".")
+            ).color(NamedTextColor.GREEN);
+            player.sendMessage(message);
+        }, channelNameArgument);
     }
 
 }

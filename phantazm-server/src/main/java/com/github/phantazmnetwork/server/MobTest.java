@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.mob.MobModel;
@@ -23,6 +22,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -38,7 +38,7 @@ final class MobTest {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> phantazm) {
+    static void initialize(@NotNull EventNode<Event> global) {
         TargetSelector<Player> playerSelector = new FirstTargetSelector<>(new NearestPlayersSelector(20.0F, 1));
         MobModel model = new MobModel(
                 Key.key(Namespaces.PHANTAZM, "mob.test"),
@@ -69,8 +69,8 @@ final class MobTest {
         );
 
         Wrapper<PhantazmMob> mobReference = Wrapper.ofNull();
-        phantazm.addListener(ChatChannelSendEvent.class, event -> {
-            String msg = event.getInput();
+        global.addListener(PlayerChatEvent.class, event -> {
+            String msg = event.getMessage();
             Player player = event.getPlayer();
             Instance instance = player.getInstance();
 
