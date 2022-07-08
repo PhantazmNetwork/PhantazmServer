@@ -13,7 +13,6 @@ import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.util.RGBLike;
-import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -96,7 +95,7 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
     }
 
     @Override
-    public @NotNull Component choose(@NotNull GunState state, @NotNull Entity entity, float progress) {
+    public @NotNull Component choose(@NotNull GunState state, float progress) {
         return data.message().color(TextColor.lerp(progress, data.from(), data.to()));
     }
 

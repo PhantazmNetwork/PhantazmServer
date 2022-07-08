@@ -13,6 +13,21 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * An individual gun level of a gun.
+ * @param upgrades Suggested upgrade {@link Key}s for next levels
+ * @param stack The {@link ItemStack} for this level
+ * @param stats The gun's {@link GunStats}
+ * @param shootTester The gun's {@link ShootTester}
+ * @param reloadTester The gun's {@link ReloadTester}
+ * @param firer The gun's {@link Firer}
+ * @param startEffects The gun's {@link GunEffect}s that are invoked when the gun level becomes active
+ * @param shootEffects The gun's {@link GunEffect}s that are invoked when the gun is shot
+ * @param reloadEffects The gun's {@link GunEffect}s that are invoked when the gun begins reloading
+ * @param tickEffects The gun's {@link GunEffect}s that are invoked every tick
+ * @param noAmmoEffects The gun's {@link GunEffect}s that are invoked when the gun has no ammo
+ * @param gunStackMappers The gun's {@link GunStackMapper}s that produce the visual {@link ItemStack} representation of the gun
+ */
 public record GunLevel(@NotNull Set<Key> upgrades,
                        @NotNull ItemStack stack,
                        @NotNull GunStats stats,
@@ -26,6 +41,21 @@ public record GunLevel(@NotNull Set<Key> upgrades,
                        @NotNull Collection<GunEffect> noAmmoEffects,
                        @NotNull Collection<GunStackMapper> gunStackMappers) {
 
+    /**
+     * Creates a {@link GunLevel}.
+     * @param upgrades Suggested upgrade {@link Key}s for next levels
+     * @param stack The {@link ItemStack} for this level
+     * @param stats The gun's {@link GunStats}
+     * @param shootTester The gun's {@link ShootTester}
+     * @param reloadTester The gun's {@link ReloadTester}
+     * @param firer The gun's {@link Firer}
+     * @param startEffects The gun's {@link GunEffect}s that are invoked when the gun level becomes active
+     * @param shootEffects The gun's {@link GunEffect}s that are invoked when the gun is shot
+     * @param reloadEffects The gun's {@link GunEffect}s that are invoked when the gun begins reloading
+     * @param tickEffects The gun's {@link GunEffect}s that are invoked every tick
+     * @param noAmmoEffects The gun's {@link GunEffect}s that are invoked when the gun has no ammo
+     * @param gunStackMappers The gun's {@link GunStackMapper}s that produce the visual {@link ItemStack} representation of the gun
+     */
     public GunLevel {
         verifyCollection(upgrades, "upgrades");
         Objects.requireNonNull(stack, "stack");

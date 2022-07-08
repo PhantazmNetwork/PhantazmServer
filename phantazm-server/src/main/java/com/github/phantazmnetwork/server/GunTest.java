@@ -240,7 +240,8 @@ final class GunTest {
         GradientActionBarChooser.Data sActionBarChooser = new GradientActionBarChooser.Data(Component.text("RELOADING",
                 null, TextDecoration.BOLD), NamedTextColor.RED, NamedTextColor.GREEN);
         Key sReloadActionBarEffectKey = Key.key(Namespaces.PHANTAZM, "reload_action_bar_effect");
-        ReloadActionBarEffect.Data sReloadActionBarEffect = new ReloadActionBarEffect.Data(sStatsKey, sReloadTesterKey, sActionBarChooserKey);
+        ReloadActionBarEffect.Data sReloadActionBarEffect = new ReloadActionBarEffect.Data(sStatsKey,
+                sSoundEffectAudienceProviderKey, sReloadTesterKey, sActionBarChooserKey);
         Key sClipStackMapperKey = Key.key(Namespaces.PHANTAZM, "clip_stack_mapper");
         ClipStackMapper.Data sClipStackMapper = new ClipStackMapper.Data(sReloadTesterKey);
         Map<Key, Keyed> theMap = new LinkedHashMap<>();

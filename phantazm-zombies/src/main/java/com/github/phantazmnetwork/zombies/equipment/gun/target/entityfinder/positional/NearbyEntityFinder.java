@@ -16,10 +16,20 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Objects;
 
+/**
+ * A {@link PositionalEntityFinder} which finds all nearby {@link Entity}s.
+ */
 public class NearbyEntityFinder implements PositionalEntityFinder {
 
+    /**
+     * Data for a {@link NearbyEntityFinder}.
+     * @param range The range to search for nearby {@link Entity}s
+     */
     public record Data(double range) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY
                 = Key.key(Namespaces.PHANTAZM,"gun.target.entity_finder.positional.nearby_entity");
 
@@ -29,6 +39,10 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -50,6 +64,10 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
 
     private final Data data;
 
+    /**
+     * Creates a {@link NearbyEntityFinder}.
+     * @param data The {@link NearbyEntityFinder}'s {@link Data}
+     */
     public NearbyEntityFinder(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }

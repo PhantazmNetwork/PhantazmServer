@@ -14,6 +14,9 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A {@link ConfigProcessor} for {@link GunLevelData}.
+ */
 public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData> {
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
@@ -25,6 +28,10 @@ public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData
 
     private final ConfigProcessor<ItemStack> stackProcessor;
 
+    /**
+     * Creates a {@link GunLevelDataConfigProcessor}.
+     * @param stackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
+     */
     public GunLevelDataConfigProcessor(@NotNull ConfigProcessor<ItemStack> stackProcessor) {
         this.stackProcessor = Objects.requireNonNull(stackProcessor, "stackProcessor");
     }

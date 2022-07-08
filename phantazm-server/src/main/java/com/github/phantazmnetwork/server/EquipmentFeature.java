@@ -263,10 +263,11 @@ final class EquipmentFeature {
      * @return A {@link Map} of dependency adders
      */
     private static @NotNull Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> createDependencyAdders() {
-        Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> dependencyAdders = new HashMap<>(14);
+        Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> dependencyAdders = new HashMap<>(15);
         dependencyAdders.put(GunLevelData.SERIAL_KEY, GunLevelData.dependencyConsumer());
         dependencyAdders.put(PlaySoundEffect.Data.SERIAL_KEY, PlaySoundEffect.dependencyConsumer());
         dependencyAdders.put(ReloadActionBarEffect.Data.SERIAL_KEY, ReloadActionBarEffect.dependencyConsumer());
+        dependencyAdders.put(SendMessageEffect.Data.SERIAL_KEY, SendMessageEffect.dependencyConsumer());
         dependencyAdders.put(ShootExpEffect.Data.SERIAL_KEY, ShootExpEffect.dependencyConsumer());
         dependencyAdders.put(StateReloadTester.Data.SERIAL_KEY, StateReloadTester.dependencyConsumer());
         dependencyAdders.put(StateShootTester.Data.SERIAL_KEY, StateShootTester.dependencyConsumer());
@@ -337,10 +338,10 @@ final class EquipmentFeature {
             GunStats stats = provider.getDependency(data.statsKey());
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
             ReloadActionBarChooser chooser = provider.getDependency(data.reloadActionBarChooserKey());
-            return new ReloadActionBarEffect(playerView, stats, reloadTester, chooser);
+            return new ReloadActionBarEffect(stats, playerView::getPlayer, reloadTester, chooser);
         };
         Factory<SendMessageEffect.Data, SendMessageEffect> sendMessageEffect
-                = (provider, data) -> new SendMessageEffect(data, playerView);
+                = (provider, data) -> new SendMessageEffect(data, playerView::getPlayer);
         Factory<ShootExpEffect.Data, ShootExpEffect> shootExpEffect = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             return new ShootExpEffect(playerView, stats);

@@ -18,10 +18,21 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A {@link ShotHandler} that sets {@link Entity}s on fire.
+ */
 public class IgniteShotHandler implements ShotHandler {
 
+    /**
+     * Data for an {@link IgniteShotHandler}.
+     * @param duration The duration of the fire for regular targets
+     * @param headshotDuration The duration of the fire for headshots
+     */
     public record Data(int duration, int headshotDuration) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.ignite");
 
         @Override
@@ -30,6 +41,10 @@ public class IgniteShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -59,6 +74,10 @@ public class IgniteShotHandler implements ShotHandler {
 
     private final Data data;
 
+    /**
+     * Creates an {@link IgniteShotHandler}.
+     * @param data The {@link IgniteShotHandler}'s {@link Data}
+     */
     public IgniteShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }

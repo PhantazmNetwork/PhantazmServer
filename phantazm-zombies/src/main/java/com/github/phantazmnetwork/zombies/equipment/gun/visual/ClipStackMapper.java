@@ -19,13 +19,13 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
- * Maps an {@link ItemStack} based on a gun's current clip.
+ * A {@link GunStackMapper} that maps {@link ItemStack} based on a gun's current clip.
  */
 public class ClipStackMapper implements GunStackMapper {
 
     /**
      * Data for a {@link ClipStackMapper}.
-     * @param reloadTesterKey A {@link Key} to the {@link ClipStackMapper}'s {@link ReloadTester}
+     * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
      */
     public record Data(@NotNull Key reloadTesterKey) implements Keyed {
 
@@ -36,7 +36,7 @@ public class ClipStackMapper implements GunStackMapper {
 
         /**
          * Creates a {@link Data}.
-         * @param reloadTesterKey A {@link Key} to the {@link ClipStackMapper}'s {@link ReloadTester}
+         * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
          */
         public Data {
             Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");

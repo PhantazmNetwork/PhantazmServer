@@ -12,10 +12,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * An {@link IntersectionFinder} that uses ray tracing to find intersections.
+ */
 public class RayTraceIntersectionFinder implements IntersectionFinder {
 
+    /**
+     * Data for a {@link RayTraceIntersectionFinder}.
+     */
     public record Data() implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.intersection_finder.ray_trace");
 
         @Override
@@ -25,6 +34,10 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
 
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return ConfigProcessor.emptyProcessor(Data::new);
     }

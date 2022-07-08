@@ -18,10 +18,24 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Optional;
 
+/**
+ * A {@link BlockIteration} method that employs a technique called "wallshooting".
+ * If a shot intersects a block whose bounding box is not a cube,
+ * the shot will pass through all future blocks until it reaches an endpoint.
+ * This allows players to shoot through walls by shooting into blocks like slabs.
+ * However, if this gun does not pass directly through a non-cube block, it will act the same as
+ * a {@link RayTraceBlockIteration}.
+ */
 public class WallshotBlockIteration implements BlockIteration {
 
+    /**
+     * Data for a {@link WallshotBlockIteration}.
+     */
     public record Data() implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.block_iteration.wallshot");
 
         @Override
@@ -30,6 +44,10 @@ public class WallshotBlockIteration implements BlockIteration {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return ConfigProcessor.emptyProcessor(Data::new);
     }

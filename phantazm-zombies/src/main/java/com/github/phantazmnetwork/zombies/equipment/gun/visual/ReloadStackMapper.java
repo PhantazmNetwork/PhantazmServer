@@ -19,12 +19,28 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
+/**
+ * A {@link GunStackMapper} that maps based on a gun's reload progress.
+ */
 public class ReloadStackMapper implements GunStackMapper {
 
+    /**
+     * Data for a {@link ReloadStackMapper}.
+     * @param statsKey A {@link Key} to the gun's {@link GunStats}
+     * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+     */
     public record Data(@NotNull Key statsKey, @NotNull Key reloadTesterKey) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.stack_mapper.reload.durability");
 
+        /**
+         * Creates a {@link Data}.
+         * @param statsKey A {@link Key} to the gun's {@link GunStats}
+         * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+         */
         public Data {
             Objects.requireNonNull(statsKey, "statsKey");
             Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
@@ -36,6 +52,10 @@ public class ReloadStackMapper implements GunStackMapper {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
 
@@ -60,6 +80,10 @@ public class ReloadStackMapper implements GunStackMapper {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> {
             keys.add(data.statsKey());
@@ -71,6 +95,11 @@ public class ReloadStackMapper implements GunStackMapper {
 
     private final ReloadTester reloadTester;
 
+    /**
+     * Creates a {@link ReloadStackMapper}.
+     * @param stats The gun's {@link GunStats}
+     * @param reloadTester The gun's {@link ReloadTester}
+     */
     public ReloadStackMapper(@NotNull GunStats stats, @NotNull ReloadTester reloadTester) {
         this.stats = Objects.requireNonNull(stats, "stats");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");

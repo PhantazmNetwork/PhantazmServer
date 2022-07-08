@@ -33,8 +33,24 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+/**
+ * A {@link Firer} that works by firing projectiles.
+ */
 public class ProjectileFirer implements Firer {
 
+    /**
+     * Data for a {@link ProjectileFirer}.
+     * @param endSelectorKey A {@link Key} to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinderKey A {@link Key} to the {@link ProjectileFirer}'s {@link TargetFinder}
+     * @param collisionFilterKey A {@link Key} to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
+     * @param shotHandlerKeys A {@link Collection} of {@link Key}s to the {@link ProjectileFirer}'s {@link ShotHandler}s
+     * @param entityType The {@link EntityType} of the {@link ProjectileFirer}'s projectiles
+     * @param power The power of the {@link ProjectileFirer}'s projectiles
+     * @param spread The spread of the {@link ProjectileFirer}'s projectiles
+     * @param hasGravity Whether the {@link ProjectileFirer}'s projectiles have gravity
+     * @param maxAliveTime The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
+     *                     before automatically exploding
+     */
     public record Data(@NotNull Key endSelectorKey,
                        @NotNull Key targetFinderKey,
                        @NotNull Key collisionFilterKey,
@@ -45,8 +61,23 @@ public class ProjectileFirer implements Firer {
                        boolean hasGravity,
                        long maxAliveTime) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.projectile");
 
+        /**
+         * Creates a {@link Data}.
+         * @param endSelectorKey A {@link Key} to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
+         * @param targetFinderKey A {@link Key} to the {@link ProjectileFirer}'s {@link TargetFinder}
+         * @param collisionFilterKey A {@link Key} to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
+         * @param shotHandlerKeys A {@link Collection} of {@link Key}s to the {@link ProjectileFirer}'s {@link ShotHandler}s
+         * @param entityType The {@link EntityType} of the {@link ProjectileFirer}'s projectiles
+         * @param power The power of the {@link ProjectileFirer}'s projectiles
+         * @param spread The spread of the {@link ProjectileFirer}'s projectiles
+         * @param hasGravity Whether the {@link ProjectileFirer}'s projectiles have gravity
+         * @param maxAliveTime The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
+         */
         public Data {
             Objects.requireNonNull(endSelectorKey, "endSelectorKey");
             Objects.requireNonNull(targetFinderKey, "targetFinderKey");
@@ -64,6 +95,10 @@ public class ProjectileFirer implements Firer {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
@@ -108,6 +143,10 @@ public class ProjectileFirer implements Firer {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> {
             keys.add(data.endSelectorKey());
@@ -155,6 +194,16 @@ public class ProjectileFirer implements Firer {
 
     private final Collection<ShotHandler> shotHandlers;
 
+    /**
+     * Creates a new {@link ProjectileFirer}.
+     * @param data The {@link Data} of the {@link ProjectileFirer}
+     * @param entitySupplier A {@link Supplier} of the {@link Entity} shooter
+     * @param shooterUUID The UUID of the {@link Entity} shooter
+     * @param endSelector The {@link ShotEndpointSelector} of the {@link ProjectileFirer}
+     * @param targetFinder The {@link TargetFinder} of the {@link ProjectileFirer}
+     * @param collisionFilter The {@link ProjectileCollisionFilter} of the {@link ProjectileFirer}
+     * @param shotHandlers The {@link ShotHandler}s of the {@link ProjectileFirer}
+     */
     public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
                            @NotNull UUID shooterUUID, @NotNull ShotEndpointSelector endSelector,
                            @NotNull TargetFinder targetFinder, @NotNull ProjectileCollisionFilter collisionFilter, @NotNull Collection<ShotHandler> shotHandlers) {
@@ -213,6 +262,10 @@ public class ProjectileFirer implements Firer {
         }
     }
 
+    /**
+     * Called when a projectile comes into contact with a block.
+     * @param event The associated {@link ProjectileCollideWithBlockEvent}
+     */
     public void onProjectileCollision(@NotNull ProjectileCollideWithBlockEvent event) {
         if (!(event.getEntity() instanceof EntityProjectile projectile)) {
             return;
@@ -226,6 +279,10 @@ public class ProjectileFirer implements Firer {
         onProjectileCollision(firedShot, projectile, event.getCollisionPosition());
     }
 
+    /**
+     * Called when a projectile comes into contact with an entity.
+     * @param event The associated {@link ProjectileCollideWithEntityEvent}
+     */
     public void onProjectileCollision(@NotNull ProjectileCollideWithEntityEvent event) {
         if (!(event.getEntity() instanceof EntityProjectile projectile
                 && collisionFilter.shouldExplode(event.getTarget()))) {

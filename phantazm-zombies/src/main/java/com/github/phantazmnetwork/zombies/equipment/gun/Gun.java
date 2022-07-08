@@ -136,6 +136,10 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         reload();
     }
 
+    /**
+     * Gets the current {@link GunState} of the {@link Gun}
+     * @return The current {@link GunState} of the {@link Gun}
+     */
     public @NotNull GunState getState() {
         return state;
     }

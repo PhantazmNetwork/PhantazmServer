@@ -23,12 +23,28 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A {@link ShotHandler} that creates a trail of particles.
+ */
 public class ParticleTrailShotHandler implements ShotHandler {
 
+    /**
+     * Data for a {@link ParticleTrailShotHandler}.
+     * @param particle The {@link ParticleWrapper} to use for the trail
+     * @param trailCount The number of particles to create in the trail
+     */
     public record Data(@NotNull ParticleWrapper particle, int trailCount) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.particle_trail");
 
+        /**
+         * Creates a {@link Data}.
+         * @param particle The {@link ParticleWrapper} to use for the trail
+         * @param trailCount The number of particles to create in the trail
+         */
         public Data {
             Objects.requireNonNull(particle, "particle");
         }
@@ -39,6 +55,11 @@ public class ParticleTrailShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @param particleProcessor A {@link ConfigProcessor} for {@link ParticleWrapper}s
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor(@NotNull ConfigProcessor<ParticleWrapper> particleProcessor) {
 
         return new ConfigProcessor<>() {
@@ -67,6 +88,10 @@ public class ParticleTrailShotHandler implements ShotHandler {
 
     private final Data data;
 
+    /**
+     * Creates a {@link ParticleTrailShotHandler}.
+     * @param data The {@link ParticleTrailShotHandler}'s {@link Data}
+     */
     public ParticleTrailShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }

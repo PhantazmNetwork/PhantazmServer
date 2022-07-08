@@ -20,10 +20,21 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A {@link ShotHandler} that applies a {@link Potion} to {@link Entity} targets.
+ */
 public class PotionShotHandler implements ShotHandler {
 
+    /**
+     * Data for a {@link PotionShotHandler}.
+     * @param potion The {@link Potion} to apply to regular {@link Entity} targets
+     * @param headshotPotion The {@link Potion} to apply to headshot {@link Entity} targets
+     */
     public record Data(@NotNull Potion potion, @NotNull Potion headshotPotion) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.potion");
 
         @Override
@@ -32,6 +43,10 @@ public class PotionShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Potion> potionProcessor = MinestomConfigProcessors.potion();
 
@@ -57,6 +72,10 @@ public class PotionShotHandler implements ShotHandler {
 
     private final Data data;
 
+    /**
+     * Creates a {@link PotionShotHandler}.
+     * @param data The {@link PotionShotHandler}'s {@link Data}
+     */
     public PotionShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }

@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.target.tester;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.MobStore;
+import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -16,10 +17,20 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A {@link TargetTester} that only selects {@link PhantazmMob}s.
+ */
 public class PhantazmTargetTester implements TargetTester {
 
+    /**
+     * Data for a {@link PhantazmTargetTester}.
+     * @param ignorePreviousHits Whether to ignore previously hit {@link UUID}s
+     */
     public record Data(boolean ignorePreviousHits) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.target_tester.phantazm");
 
         @Override
@@ -29,6 +40,10 @@ public class PhantazmTargetTester implements TargetTester {
 
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
             @Override
@@ -52,13 +67,19 @@ public class PhantazmTargetTester implements TargetTester {
 
     private final MobStore mobStore;
 
+    /**
+     * Creates a {@link PhantazmTargetTester}.
+     * @param data The {@link PhantazmTargetTester}'s {@link Data}
+     * @param mobStore The {@link MobStore} to retrieve {@link PhantazmMob}s from
+     */
     public PhantazmTargetTester(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
-    public boolean useTarget(@NotNull Entity target, @NotNull Collection<UUID> previousHits) {UUID uuid = target.getUuid();
+    public boolean useTarget(@NotNull Entity target, @NotNull Collection<UUID> previousHits) {
+        UUID uuid = target.getUuid();
         return !(data.ignorePreviousHits() && previousHits.contains(target.getUuid())) && mobStore.getMob(uuid) != null;
     }
 }

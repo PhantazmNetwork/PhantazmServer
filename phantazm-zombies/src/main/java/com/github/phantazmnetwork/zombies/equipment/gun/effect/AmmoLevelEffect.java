@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
- * An effect which sets the level of a {@link Player} based on the ammo of a gun.
+ * A {@link GunEffect} that sets the level of a {@link Player} based on the ammo of a gun.
  */
 public class AmmoLevelEffect implements GunEffect {
 
