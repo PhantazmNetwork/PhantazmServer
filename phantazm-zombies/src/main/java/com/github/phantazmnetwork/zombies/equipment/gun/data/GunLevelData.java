@@ -8,14 +8,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
-public record GunLevelData(int order, // TODO: key based upgrades
+public record GunLevelData(@NotNull Set<Key> upgrades,
                            @NotNull ItemStack stack,
                            @NotNull Key stats,
                            @NotNull Key shootTester,
                            @NotNull Key reloadTester,
                            @NotNull Key firer,
+                           @NotNull Collection<Key> startEffects,
                            @NotNull Collection<Key> shootEffects,
                            @NotNull Collection<Key> reloadEffects,
                            @NotNull Collection<Key> tickEffects,
@@ -39,16 +41,25 @@ public record GunLevelData(int order, // TODO: key based upgrades
     }
 
     public GunLevelData {
+        verifyCollection(upgrades, "upgrades");
         Objects.requireNonNull(stack, "stack");
         Objects.requireNonNull(stats, "stats");
         Objects.requireNonNull(shootTester, "shootTester");
         Objects.requireNonNull(reloadTester, "reloadTester");
         Objects.requireNonNull(firer, "firer");
-        Objects.requireNonNull(shootEffects, "shootEffects");
-        Objects.requireNonNull(reloadEffects, "reloadEffects");
-        Objects.requireNonNull(tickEffects, "tickEffects");
-        Objects.requireNonNull(noAmmoEffects, "noAmmoEffects");
-        Objects.requireNonNull(gunStackMappers, "gunStackMappers");
+        verifyCollection(startEffects, "startEffects");
+        verifyCollection(shootEffects, "shootEffects");
+        verifyCollection(reloadEffects, "reloadEffects");
+        verifyCollection(tickEffects, "tickEffects");
+        verifyCollection(noAmmoEffects, "noAmmoEffects");
+        verifyCollection(gunStackMappers, "gunStackMappers");
+    }
+
+    private void verifyCollection(@NotNull Collection<?> collection, @NotNull String name) {
+        Objects.requireNonNull(collection, name);
+        for (Object element : collection) {
+            Objects.requireNonNull(element, name + " element");
+        }
     }
 
     @Override

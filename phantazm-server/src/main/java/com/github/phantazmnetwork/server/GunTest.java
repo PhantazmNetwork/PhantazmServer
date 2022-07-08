@@ -245,12 +245,13 @@ final class GunTest {
         ClipStackMapper.Data sClipStackMapper = new ClipStackMapper.Data(sReloadTesterKey);
         Map<Key, Keyed> theMap = new LinkedHashMap<>();
         theMap.put(gunLevelKey, new GunLevelData(
-                0,
+                Collections.emptySet(),
                 ItemStack.builder(Material.WOODEN_HOE).displayName(Component.text("Tahmid's Gun")).build(),
                 sStatsKey,
                 sShootTesterKey,
                 sReloadTesterKey,
                 sFirerKey,
+                Collections.emptyList(),
                 List.of(sSoundKey),
                 List.of(),
                 List.of(sReloadActionBarEffectKey),

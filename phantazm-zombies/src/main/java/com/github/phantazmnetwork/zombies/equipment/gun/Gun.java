@@ -6,12 +6,12 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.Upgradable;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Gun extends CachedInventoryObject implements Equipment, Upgradable {
@@ -20,20 +20,27 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
     private final GunModel model;
 
+    private final Set<GunLevel> tickingLevels;
+
     private GunState state;
 
-    private int level;
+    private Key levelKey;
+
+    private GunLevel level;
 
     private boolean reloadComplete = false;
 
     public Gun(@NotNull PlayerView playerView, @NotNull GunModel model) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.model = Objects.requireNonNull(model, "model");
-        this.level = 0;
+        this.tickingLevels = Collections.newSetFromMap(new IdentityHashMap<>(model.levels().size()));
 
         GunStats stats = getLevel().stats();
         this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats.reloadSpeed(), stats.maxAmmo(),
                 stats.maxClip(), false, 0);
+        this.levelKey = model.rootLevel();
+        this.level = model.levels().get(levelKey);
+        tickingLevels.add(level);
     }
 
     public void shoot() {
@@ -104,16 +111,12 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         reload();
     }
 
-    public @NotNull PlayerView getOwner() {
-        return playerView;
-    }
-
     public @NotNull GunState getState() {
         return state;
     }
 
     public @NotNull GunLevel getLevel() {
-        return model.levels().get(level);
+        return level;
     }
 
     private void modifyState(@NotNull Consumer<GunState.Builder> consumer) {
@@ -161,34 +164,60 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
         }
 
-        // previous levels must still be ticked if they are expecting to clear queues, etc.
-        for (int i = 0; i <= level; i++) {
-            GunLevel gunLevel = model.levels().get(i);
-            gunLevel.firer().tick(state, time);
-            for (GunEffect effect : gunLevel.shootEffects()) {
+        for (GunLevel tickingLevel : tickingLevels) {
+            tickingLevel.firer().tick(state, time);
+            for (GunEffect effect : tickingLevel.shootEffects()) {
                 effect.tick(state, time);
             }
-            for (GunEffect effect : gunLevel.reloadEffects()) {
+            for (GunEffect effect : tickingLevel.reloadEffects()) {
                 effect.tick(state, time);
             }
-            for (GunEffect effect : gunLevel.noAmmoEffects()) {
+            for (GunEffect effect : tickingLevel.noAmmoEffects()) {
                 effect.tick(state, time);
             }
-            for (GunEffect effect : gunLevel.tickEffects()) {
-                effect.apply(state);
-            }
+        }
+        for (GunEffect effect : level.tickEffects()) {
+            effect.apply(state);
         }
 
         setDirty();
     }
 
     @Override
-    public void upgrade() {
-        if (level < model.levels().size() - 1) {
-            level++;
-        }
-
-        setDirty();
+    public @NotNull Set<Key> getSuggestedUpgrades() {
+        return level.upgrades();
     }
 
+    @Override
+    public @NotNull Collection<Key> getLevels() {
+        return model.levels().keySet();
+    }
+
+    @Override
+    public void setLevel(@NotNull Key key) {
+        Objects.requireNonNull(key, "key");
+        if (levelKey.equals(key)) {
+            return;
+        }
+
+        GunLevel newLevel = model.levels().get(key);
+        if (newLevel == null) {
+            throw new IllegalArgumentException("No level with key " + key);
+        }
+
+        levelKey = key;
+        level = newLevel;
+        tickingLevels.add(newLevel);
+
+        modifyState(builder -> {
+            builder.setAmmo(newLevel.stats().maxAmmo());
+            builder.setClip(newLevel.stats().maxClip());
+            builder.setTicksSinceLastReload(newLevel.stats().reloadSpeed());
+            builder.setTicksSinceLastShot(newLevel.stats().shootSpeed());
+            builder.setTicksSinceLastFire(newLevel.stats().shotInterval());
+        });
+        for (GunEffect effect : level.startEffects()) {
+            effect.apply(state);
+        }
+    }
 }
