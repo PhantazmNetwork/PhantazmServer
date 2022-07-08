@@ -39,23 +39,43 @@ Generally, you'll want to build from the `master` branch, unless you're testing 
 
 ## Usage
 
-You should use the latest Java 17 build to run Phantazm.
+You should use the latest Java 17 build to run Phantazm. The server supports Minecraft client versions 1.7-1.18.
 
-The proxy and server use the BungeeCord protocol to communicate by default. This requires you to set up a shared secret (string) that the proxy will use to authenticate itself to the server. The server *will refuse to run* with the default secret (an empty string), for security reasons. You'll need to configure your own secret.
+### For development
 
-First, come up with an appropriate secret. You can use a password manager, or a generation tool like `apg` or `pwgen`. If you're just hosting Phantazm locally, with no intention of port-forwarding, you don't have to worry too much about password strength. However, if your server is accessible from the Internet, make sure it's suitably complex. Keep in mind that your secret isn't something you need to actually *remember*, and thus there's no real drawback to making it as long as you want.
+The proxy and server use BungeeCord with BungeeGuard handshakes to communicate by default. This requires the use of a shared secret (string). This string is used to authenticate the proxy and ensure that no players can connect directly to the underlying server.
+
+When running locally-hosted development builds, you can launch the server in "unsafe" mode (by specifying the `unsafe` program argument). This will disable the check that would normally prevent the server from running while using the default secret. This allows you to fire up Phantazm instances for local testing without needing to configure a unique shared secret first.
+
+When launching Phantazm through IntelliJ (such as by using the `Run server` or `Run server + Velocity` run configurations), `unsafe` mode is **enabled**, so you don't have to do anything extra.
+
+**Warning**: Make sure your locally-hosted development server & proxy are not visible from the Internet if you're launching in unsafe mode!
+
+### For production
+
+If the `unsafe` argument is not specified, the server *will refuse to run* with the default secret, for security reasons. You'll need to configure your own secret.
+
+First, come up with an appropriate string. You can use a password manager, or a generation tool like `apg` or `pwgen`. If your server is accessible from the Internet, make sure it's suitably complex. Keep in mind that your secret isn't something you need to actually *remember*, and thus there's no real drawback to making it as long as you want.
+
+Next, set the `proxySecret` field in `./run/server-1/server-config.toml`, and the `forwarding-secret` field in `./run/velocity/velocity.toml`, to the same string (your secret).
 
 **Warning**: The secret is stored, in plaintext, in both the server and proxy configuration files. This is, regrettably, something we can't do much about. Make sure access to your backend servers is properly secured.
 
-Next, set the `velocitySecret` field in `./run/server-1/server-config.toml`, and the `forwarding-secret` field in `./run/velocity/velocity.toml`, to the same string (your secret).
+### Running
+
 
 The proxy will (by default) bind to `0.0.0.0:25565` and the server to `0.0.0.0:25567`, so you can connect through the proxy by adding the `localhost` server address in your Minecraft client.
 
-If you're using IntelliJ, you can launch this testing server using the `Run server` run configuration, or the server and proxy at once using the `Run server + Velocity` configuration.
+If you're using IntelliJ, you can launch this testing server using the `Run server` run configuration (the server will use unsafe mode), or the server and proxy at once using the `Run server + Velocity` configuration.
 
-You can also run the server and proxy from the command line as follows: \
-`java -jar ./run/server-1/server.jar` \
-`java -jar ./run/velocity/velocity.jar`
+You can also run the server from the command line as follows: \
+`./gradlew setupServer copyJar` \
+`cd ./run/server-1` \
+`java -jar server.jar` 
+
+And the proxy: \
+`cd ./run/velocity` \
+`java -jar velocity.jar`
 
 ## Maintainers
 
