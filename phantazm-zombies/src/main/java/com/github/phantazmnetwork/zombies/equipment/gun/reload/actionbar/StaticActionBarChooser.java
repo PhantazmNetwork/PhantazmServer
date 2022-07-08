@@ -11,7 +11,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -58,7 +58,7 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
     }
 
     @Override
-    public @NotNull Component choose(@NotNull GunState state, @NotNull Player player, float progress) {
+    public @NotNull Component choose(@NotNull GunState state, @NotNull Entity entity, float progress) {
         return data.message();
     }
 

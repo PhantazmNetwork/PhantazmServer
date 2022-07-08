@@ -10,8 +10,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+/**
+ * Represents specific data for a {@link Particle} that cannot be represented with primitives.
+ */
 public interface ParticleData extends Keyed {
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link ParticleData}.
+     * @param stackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
+     * @return A {@link ConfigProcessor} for {@link ParticleData}
+     */
     static @NotNull ConfigProcessor<ParticleData> processor(@NotNull ConfigProcessor<ItemStack> stackProcessor) {
         return new VariantConfigProcessor<>(Map.of(
                 BlockParticleData.SERIAL_KEY, BlockParticleData.processor(),
@@ -22,8 +30,17 @@ public interface ParticleData extends Keyed {
         )::get);
     }
 
+    /**
+     * Checks if a {@link Particle} is applicable to this data.
+     * @param particle The particle to check
+     * @return True if the particle is applicable to this data
+     */
     boolean isValid(@NotNull Particle particle);
 
+    /**
+     * Writes the particle data to a {@link BinaryWriter}.
+     * @param binaryWriter The {@link BinaryWriter} to write to
+     */
     void write(@NotNull BinaryWriter binaryWriter);
 
 }

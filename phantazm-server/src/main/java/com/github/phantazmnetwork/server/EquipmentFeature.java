@@ -10,12 +10,13 @@ import com.github.phantazmnetwork.commons.factory.DependencyProvider;
 import com.github.phantazmnetwork.commons.factory.Factory;
 import com.github.phantazmnetwork.commons.factory.FactoryDependencyProvider;
 import com.github.phantazmnetwork.mob.MobStore;
+import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunLevel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunModel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityAudienceProvider;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.PlayerAudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunData;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelData;
@@ -78,6 +79,9 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+/**
+ * Main entrypoint for equipment features.
+ */
 final class EquipmentFeature {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentFeature.class);
@@ -88,6 +92,11 @@ final class EquipmentFeature {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Initialize equipment features.
+     * @param equipmentPath The {@link Path} to the equipment folder
+     * @param codec A {@link ConfigCodec} for serialization
+     */
     static void initialize(@NotNull Path equipmentPath, @NotNull ConfigCodec codec) {
         String ending;
         if (codec.getPreferredExtensions().isEmpty()) {
@@ -192,13 +201,18 @@ final class EquipmentFeature {
         LOGGER.info("Loaded {} guns.", gunLevelMap.size());
     }
 
+    /**
+     * Create a {@link ConfigProcessor} for gun level data.
+     * This takes the form of {@link ComplexData} in order to instantiate {@link GunLevel}s.
+     * @return A {@link ConfigProcessor} for gun level data
+     */
     // this should be private when GunTest is deleted
     public static @NotNull ConfigProcessor<ComplexData> createGunLevelProcessor() {
         Map<Key, ConfigProcessor<? extends Keyed>> gunProcessors = new HashMap<>(38);
         gunProcessors.put(GunStats.SERIAL_KEY, GunStats.processor());
         gunProcessors.put(GunLevelData.SERIAL_KEY, new GunLevelDataConfigProcessor(ItemStackConfigProcessors.snbt()));
         gunProcessors.put(EntityInstanceAudienceProvider.Data.SERIAL_KEY, EntityInstanceAudienceProvider.processor());
-        gunProcessors.put(EntityAudienceProvider.Data.SERIAL_KEY, EntityAudienceProvider.processor());
+        gunProcessors.put(PlayerAudienceProvider.Data.SERIAL_KEY, PlayerAudienceProvider.processor());
         gunProcessors.put(AmmoLevelEffect.Data.SERIAL_KEY, AmmoLevelEffect.processor());
         gunProcessors.put(PlaySoundEffect.Data.SERIAL_KEY, PlaySoundEffect.processor());
         gunProcessors.put(ReloadActionBarEffect.Data.SERIAL_KEY, ReloadActionBarEffect.processor());
@@ -242,6 +256,12 @@ final class EquipmentFeature {
         return new ComplexDataConfigProcessor(gunProcessors);
     }
 
+    /**
+     * Creates a {@link Map} of dependency adders.
+     * A dependency adder adds its {@link Key} dependencies to a {@link Collection} of required dependencies.
+     * This allows us to validate whether all of our dependencies are present while reading config.
+     * @return A {@link Map} of dependency adders
+     */
     private static @NotNull Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> createDependencyAdders() {
         Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> dependencyAdders = new HashMap<>(14);
         dependencyAdders.put(GunLevelData.SERIAL_KEY, GunLevelData.dependencyConsumer());
@@ -271,6 +291,15 @@ final class EquipmentFeature {
         dependencyAdder.accept((TObject) object, dependencies);
     }
 
+    /**
+     * Creates a {@link Gun}.
+     * @param key The {@link Key} of the gun type
+     * @param node The {@link EventNode} to register events to
+     * @param store A {@link MobStore} for registered {@link PhantazmMob}s
+     * @param playerView A {@link PlayerView} for the player that is using the gun
+     * @param random A {@link Random} for random number generation
+     * @return A new {@link Gun}
+     */
     public static @NotNull Gun createGun(@NotNull Key key, @NotNull EventNode<Event> node, @NotNull MobStore store,
                                          @NotNull PlayerView playerView, @NotNull Random random) {
         List<ComplexData> complexDataList = gunLevelMap.get(key);
@@ -296,8 +325,8 @@ final class EquipmentFeature {
         };
         Factory<EntityInstanceAudienceProvider.Data, EntityInstanceAudienceProvider> entityInstanceAudienceProvider
                 = (provider, data) -> new EntityInstanceAudienceProvider(playerView::getPlayer);
-        Factory<EntityAudienceProvider.Data, EntityAudienceProvider> playerAudienceProvider
-                = (provider, data) -> new EntityAudienceProvider(playerView::getPlayer);
+        Factory<PlayerAudienceProvider.Data, PlayerAudienceProvider> playerAudienceProvider
+                = (provider, data) -> new PlayerAudienceProvider(playerView);
         Factory<AmmoLevelEffect.Data, AmmoLevelEffect> ammoLevelEffect
                 = (provider, data) -> new AmmoLevelEffect(playerView);
         Factory<PlaySoundEffect.Data, PlaySoundEffect> playSoundEffect = (provider, data) -> {
@@ -431,7 +460,7 @@ final class EquipmentFeature {
         factories.put(GunStats.SERIAL_KEY, gunStats);
         factories.put(GunLevelData.SERIAL_KEY, gunLevel);
         factories.put(EntityInstanceAudienceProvider.Data.SERIAL_KEY, entityInstanceAudienceProvider);
-        factories.put(EntityAudienceProvider.Data.SERIAL_KEY, playerAudienceProvider);
+        factories.put(PlayerAudienceProvider.Data.SERIAL_KEY, playerAudienceProvider);
         factories.put(AmmoLevelEffect.Data.SERIAL_KEY, ammoLevelEffect);
         factories.put(PlaySoundEffect.Data.SERIAL_KEY, playSoundEffect);
         factories.put(ReloadActionBarEffect.Data.SERIAL_KEY, reloadActionBarEffect);
@@ -477,7 +506,7 @@ final class EquipmentFeature {
             gunLevels.put(complexData.mainKey(), getter.getDependency(complexData.mainKey()));
         }
 
-        return new Gun(playerView, new GunModel(key, gunLevels));
+        return new Gun(playerView::getPlayer, new GunModel(key, gunLevels));
     }
 
 }

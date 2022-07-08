@@ -62,6 +62,11 @@ public class MobStore {
         uuidToTriggers.put(uuid, createTriggerInstances(mob));
     }
 
+    /**
+     * Gets the {@link PhantazmMob} associated with a {@link UUID}.
+     * @param uuid The {@link UUID} of the {@link PhantazmMob} to get
+     * @return The {@link PhantazmMob} associated with the {@link UUID} or null if none exists
+     */
     public PhantazmMob getMob(@NotNull UUID uuid) {
         return uuidToMob.get(Objects.requireNonNull(uuid, "uuid"));
     }

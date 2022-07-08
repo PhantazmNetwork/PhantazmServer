@@ -18,12 +18,26 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
+/**
+ * Maps an {@link ItemStack} based on a gun's current clip.
+ */
 public class ClipStackMapper implements GunStackMapper {
 
+    /**
+     * Data for a {@link ClipStackMapper}.
+     * @param reloadTesterKey A {@link Key} to the {@link ClipStackMapper}'s {@link ReloadTester}
+     */
     public record Data(@NotNull Key reloadTesterKey) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.stack_mapper.clip.stack_count");
 
+        /**
+         * Creates a {@link Data}.
+         * @param reloadTesterKey A {@link Key} to the {@link ClipStackMapper}'s {@link ReloadTester}
+         */
         public Data {
             Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
         }
@@ -34,6 +48,10 @@ public class ClipStackMapper implements GunStackMapper {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
 
@@ -56,12 +74,20 @@ public class ClipStackMapper implements GunStackMapper {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.reloadTesterKey());
     }
 
     private final ReloadTester reloadTester;
 
+    /**
+     * Creates a {@link ClipStackMapper}.
+     * @param reloadTester The {@link ReloadTester} to use to determine whether the gun is currently reloading
+     */
     public ClipStackMapper(@NotNull ReloadTester reloadTester) {
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
     }

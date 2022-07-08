@@ -21,12 +21,22 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A {@link ShotHandler} which creates an explosion at the end of a shot.
+ */
 public class ExplosionShotHandler implements ShotHandler {
 
     private static final byte[] ZERO_BYTE_ARRAY = new byte[0];
 
+    /**
+     * Data for an {@link ExplosionShotHandler}.
+     * @param radius The radius of the explosion
+     */
     public record Data(float radius) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.explosion");
 
         @Override
@@ -35,6 +45,10 @@ public class ExplosionShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -59,12 +73,17 @@ public class ExplosionShotHandler implements ShotHandler {
 
     private final Data data;
 
+    /**
+     * Creates a new {@link ExplosionShotHandler}.
+     * @param data The {@link Data} for this {@link ExplosionShotHandler}
+     */
     public ExplosionShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
+                       @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;

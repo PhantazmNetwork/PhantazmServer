@@ -134,7 +134,9 @@ public final class Mob {
         loadModels(mobPath, codec);
     }
 
-    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node, @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
+    @SuppressWarnings("SameParameterValue")
+    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
+                                                          @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
         node.addListener(trigger.eventClass(), event ->
                 mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
     }
@@ -188,6 +190,10 @@ public final class Mob {
         return MODEL_PROCESSOR;
     }
 
+    /**
+     * Gets the {@link MobStore} used by the {@link Mob} system.
+     * @return The {@link MobStore} used by the {@link Mob} system
+     */
     public static MobStore getMobStore() {
         return MOB_STORE;
     }
@@ -204,6 +210,7 @@ public final class Mob {
      * Gets the loaded {@link MobModel}s.
      * @return The loaded {@link MobModel}s
      */
+    @SuppressWarnings("unused")
     public static @NotNull @Unmodifiable Map<Key, MobModel> getModels() {
         return requireInitialized(models);
     }

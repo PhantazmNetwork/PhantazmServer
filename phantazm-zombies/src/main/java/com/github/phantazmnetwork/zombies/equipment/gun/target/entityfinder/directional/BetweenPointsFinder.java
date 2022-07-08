@@ -14,10 +14,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * A {@link DirectionalEntityFinder} that finds entities between the start and end point of a shot.
+ */
 public class BetweenPointsFinder implements DirectionalEntityFinder {
 
+    /**
+     * Data for a {@link BetweenPointsFinder}.
+     */
     public record Data() implements Keyed {
 
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
         public static final Key SERIAL_KEY
                 = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.between_points");
 
@@ -27,6 +36,10 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return ConfigProcessor.emptyProcessor(Data::new);
     }

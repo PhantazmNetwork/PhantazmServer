@@ -20,10 +20,21 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A {@link TargetLimiter} based on distance from the shot's start position.
+ */
 public class DistanceTargetLimiter implements TargetLimiter {
 
+    /**
+     * Data for a {@link DistanceTargetLimiter}.
+     * @param targetLimit The maximum number of targets to select
+     * @param prioritizeClosest Whether the closest targets should be prioritized or the farthest targets should be prioritized
+     */
     public record Data(int targetLimit, boolean prioritizeClosest) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.target_limiter.distance");
 
         @Override
@@ -32,6 +43,10 @@ public class DistanceTargetLimiter implements TargetLimiter {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
             @Override
@@ -58,6 +73,10 @@ public class DistanceTargetLimiter implements TargetLimiter {
 
     private final Data data;
 
+    /**
+     * Creates a new {@link DistanceTargetLimiter} with the given {@link Data}.
+     * @param data The {@link Data} to use
+     */
     public DistanceTargetLimiter(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }

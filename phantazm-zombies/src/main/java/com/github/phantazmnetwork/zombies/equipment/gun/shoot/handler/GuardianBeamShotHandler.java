@@ -26,17 +26,31 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 
 // TODO: verify if we need packets
+
+/**
+ * A {@link ShotHandler} which creates a guardian beam.
+ */
 public class GuardianBeamShotHandler implements ShotHandler {
 
+    /**
+     * Data for a {@link GuardianBeamShotHandler}.
+     * @param entityType The entity type of the guardian to create a beam with
+     * @param beamTime The time in ticks the beam will last
+     */
     public record Data(@NotNull EntityType entityType, long beamTime) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.guardian_beam");
 
+        /**
+         * Creates a {@link Data}.
+         * @param entityType The entity type of the guardian to create a beam with
+         * @param beamTime The time in ticks the beam will last
+         */
         public Data {
             Objects.requireNonNull(entityType, "entityType");
-            if (beamTime < 0) {
-                throw new IllegalArgumentException("beamTime must be greater than or equal to 0");
-            }
         }
 
         @Override
@@ -45,6 +59,10 @@ public class GuardianBeamShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -61,15 +79,16 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(1);
+                ConfigNode node = new LinkedConfigNode(2);
                 node.putBoolean("isElder", data.entityType() == EntityType.ELDER_GUARDIAN);
                 node.putNumber("beamTime", data.beamTime());
+
                 return node;
             }
         };
     }
 
-    private record Beam(@NotNull Reference<Instance> instance, @NotNull Entity guardian, @NotNull Entity armorStand,
+    private record Beam(@NotNull Reference<Instance> instance, @NotNull Entity guardian, @NotNull Entity marker,
                         long time) {
 
     }
@@ -78,6 +97,10 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
     private final Data data;
 
+    /**
+     * Creates a new {@link GuardianBeamShotHandler}.
+     * @param data The data for this {@link GuardianBeamShotHandler}
+     */
     public GuardianBeamShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -89,30 +112,29 @@ public class GuardianBeamShotHandler implements ShotHandler {
             return;
         }
 
-        Entity armorStand = new Entity(EntityType.ARMOR_STAND);
-        EntityMeta armorStandMeta = armorStand.getEntityMeta();
-        armorStandMeta.setInvisible(true);
+        Entity marker = new Entity(EntityType.MARKER);
+        EntityMeta markerMeta = marker.getEntityMeta();
+        markerMeta.setInvisible(true);
 
         Entity guardian = new Entity(data.entityType());
         GuardianMeta guardianMeta = (GuardianMeta) guardian.getEntityMeta();
-        guardianMeta.setTarget(armorStand);
+        guardianMeta.setTarget(marker);
         guardian.setInvisible(true);
 
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
-        ServerPacket armorStandSpawnPacket = new SpawnLivingEntityPacket(armorStand.getEntityId(), armorStand.getUuid(),
-                armorStand.getEntityType().id(), Pos.fromPoint(shot.end()), 0.0F, (short) 0, (short) 0,
-                (short) 0);
-        ServerPacket armorStandMetaPacket = armorStand.getMetadataPacket();
+        ServerPacket markerSpawnPacket = new SpawnLivingEntityPacket(marker.getEntityId(), marker.getUuid(),
+                marker.getEntityType().id(), Pos.fromPoint(shot.end()), 0.0F, (short) 0, (short) 0, (short) 0);
+        ServerPacket markerMetaPacket = marker.getMetadataPacket();
         ServerPacket guardianSpawnPacket = new SpawnLivingEntityPacket(guardian.getEntityId(), guardian.getUuid(),
                 guardian.getEntityType().id(), start, start.yaw(), (short) 0, (short) 0, (short) 0);
         ServerPacket guardianMetaPacket = guardian.getMetadataPacket();
 
-        instance.sendGroupedPacket(armorStandSpawnPacket);
-        instance.sendGroupedPacket(armorStandMetaPacket);
+        instance.sendGroupedPacket(markerSpawnPacket);
+        instance.sendGroupedPacket(markerMetaPacket);
         instance.sendGroupedPacket(guardianSpawnPacket);
         instance.sendGroupedPacket(guardianMetaPacket);
 
-        removalQueue.add(new Beam(new WeakReference<>(instance), guardian, armorStand, System.currentTimeMillis()));
+        removalQueue.add(new Beam(new WeakReference<>(instance), guardian, marker, System.currentTimeMillis()));
     }
 
     @Override
@@ -122,7 +144,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
             removalQueue.remove();
             Instance instance = beam.instance().get();
             if (instance != null) {
-                instance.sendGroupedPacket(new DestroyEntitiesPacket(List.of(beam.armorStand().getEntityId(),
+                instance.sendGroupedPacket(new DestroyEntitiesPacket(List.of(beam.marker().getEntityId(),
                         beam.guardian().getEntityId())));
             }
         }

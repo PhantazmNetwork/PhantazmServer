@@ -11,6 +11,7 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
@@ -22,11 +23,23 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
+/**
+ * A {@link ShotHandler} that provides feedback to an {@link Audience}.
+ */
 public class FeedbackShotHandler implements ShotHandler {
 
+    /**
+     * Data for a {@link FeedbackShotHandler}.
+     * @param audienceProviderKey A {@link Key} to the {@link FeedbackShotHandler}'s {@link AudienceProvider}
+     * @param message The message to send for regular hits
+     * @param headshotMessage The message to send for headshots
+     */
     public record Data(@NotNull Key audienceProviderKey, @NotNull Component message,
                        @NotNull Component headshotMessage) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.feedback");
 
         @Override
@@ -35,6 +48,10 @@ public class FeedbackShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Component> componentProcessor = AdventureConfigProcessors.component();
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
@@ -62,6 +79,10 @@ public class FeedbackShotHandler implements ShotHandler {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.audienceProviderKey());
     }
@@ -70,6 +91,11 @@ public class FeedbackShotHandler implements ShotHandler {
 
     private final AudienceProvider audienceProvider;
 
+    /**
+     * Creates a {@link FeedbackShotHandler}.
+     * @param data The {@link Data} for this {@link FeedbackShotHandler}
+     * @param audienceProvider The {@link AudienceProvider} for this {@link FeedbackShotHandler}
+     */
     public FeedbackShotHandler(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data, "data");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");

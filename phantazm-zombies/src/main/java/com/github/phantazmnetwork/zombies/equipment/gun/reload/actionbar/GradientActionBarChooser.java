@@ -13,17 +13,35 @@ import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.util.RGBLike;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link ReloadActionBarChooser} which colors a {@link Component} based on reload progress with a gradient between two colors.
+ */
 public class GradientActionBarChooser implements ReloadActionBarChooser {
 
+    /**
+     * Data for a {@link GradientActionBarChooser}.
+     * @param message The message to send
+     * @param from The starting color of the gradient
+     * @param to The ending color of the gradient
+     */
     public record Data(@NotNull Component message, @NotNull RGBLike from, @NotNull RGBLike to) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.gradient");
 
+        /**
+         * Creates a {@link Data}.
+         * @param message The message to send
+         * @param from The starting color of the gradient
+         * @param to The ending color of the gradient
+         */
         public Data {
             Objects.requireNonNull(message, "message");
             Objects.requireNonNull(from, "from");
@@ -36,6 +54,10 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Component> componentProcessor = AdventureConfigProcessors.component();
         ConfigProcessor<RGBLike> rgbLikeProcessor = AdventureConfigProcessors.rgbLike();
@@ -65,12 +87,16 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
 
     private final Data data;
 
+    /**
+     * Creates a new {@link GradientActionBarChooser} with the given {@link Data}.
+     * @param data The {@link Data} to use
+     */
     public GradientActionBarChooser(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
-    public @NotNull Component choose(@NotNull GunState state, @NotNull Player player, float progress) {
+    public @NotNull Component choose(@NotNull GunState state, @NotNull Entity entity, float progress) {
         return data.message().color(TextColor.lerp(progress, data.from(), data.to()));
     }
 
