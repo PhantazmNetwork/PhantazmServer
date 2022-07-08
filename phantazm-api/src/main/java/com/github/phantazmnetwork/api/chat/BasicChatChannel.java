@@ -44,7 +44,7 @@ public abstract class BasicChatChannel implements ChatChannel {
                 return;
             }
 
-            onFailure.accept(Component.text("You are not in an instance.", NamedTextColor.RED));
+            onFailure.accept(audiencePair.right());
         }
         else {
             onFailure.accept(Component.text("You are offline.", NamedTextColor.RED));
