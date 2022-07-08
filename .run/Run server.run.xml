@@ -1,8 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run server" type="JarApplication">
     <option name="JAR_PATH" value="$PROJECT_DIR$/run/server-1/server.jar" />
+    <option name="VM_PARAMETERS" value="-Dfile.encoding=UTF-8" />
     <option name="PROGRAM_PARAMETERS" value="unsafe" />
-    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/run/server-1" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$\run\server-1" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
       <option name="Gradle.BeforeRunTask" enabled="false" tasks="setupServer copyJar" externalProjectPath="$PROJECT_DIR$/phantazm-server" vmOptions="" scriptParameters="" />
