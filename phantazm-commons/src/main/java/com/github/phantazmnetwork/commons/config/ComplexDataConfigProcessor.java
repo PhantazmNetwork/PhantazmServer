@@ -15,12 +15,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * {@link ConfigProcessor} for {@link ComplexData}.
+ */
 public class ComplexDataConfigProcessor implements ConfigProcessor<ComplexData> {
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
     private final Map<Key, ConfigProcessor<? extends Keyed>> subProcessors;
 
+    /**
+     * Creates a new {@link ComplexDataConfigProcessor}.
+     * @param subProcessors The sub-processors that process the complex data's objects
+     */
     public ComplexDataConfigProcessor(@NotNull Map<Key, ConfigProcessor<? extends Keyed>> subProcessors) {
         this.subProcessors = Objects.requireNonNull(subProcessors, "subprocessors");
     }

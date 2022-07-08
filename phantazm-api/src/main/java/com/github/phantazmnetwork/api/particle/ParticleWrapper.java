@@ -7,11 +7,23 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A wrapper around the necessary information to create a {@link ParticlePacket}.
+ * @param particle The type of particle to use
+ * @param data The specific data for the particle
+ * @param distance Whether the particle should be "long-distance"
+ * @param offsetX A delta x offset for the particle's velocity
+ * @param offsetY A delta y offset for the particle's velocity
+ * @param offsetZ A delta z offset for the particle's velocity
+ * @param particleData Float data for the particle
+ * @param particleCount The number of particles to spawn
+ */
 public record ParticleWrapper(@NotNull Particle particle,
                               @NotNull ParticleData data,
                               boolean distance,
@@ -21,6 +33,11 @@ public record ParticleWrapper(@NotNull Particle particle,
                               float particleData,
                               int particleCount) {
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link ParticleWrapper}s.
+     * @param particleDataProcessor A {@link ConfigProcessor} for {@link ParticleData}
+     * @return A {@link ConfigProcessor} for {@link ParticleWrapper}s
+     */
     public static @NotNull ConfigProcessor<ParticleWrapper> processor(@NotNull ConfigProcessor<ParticleData> particleDataProcessor) {
         ConfigProcessor<Particle> particleProcessor = MinestomConfigProcessors.particle();
 
@@ -61,6 +78,17 @@ public record ParticleWrapper(@NotNull Particle particle,
         };
     }
 
+    /**
+     * Creates a {@link ParticleWrapper}.
+     * @param particle The type of particle to use
+     * @param data The specific data for the particle
+     * @param distance Whether the particle should be "long-distance"
+     * @param offsetX A delta x offset for the particle's velocity
+     * @param offsetY A delta y offset for the particle's velocity
+     * @param offsetZ A delta z offset for the particle's velocity
+     * @param particleData Float data for the particle
+     * @param particleCount The number of particles to spawn
+     */
     public ParticleWrapper {
         Objects.requireNonNull(particle, "particle");
         Objects.requireNonNull(data, "data");

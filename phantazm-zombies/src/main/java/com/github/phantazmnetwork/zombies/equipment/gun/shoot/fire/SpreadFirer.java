@@ -17,12 +17,29 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.BiConsumer;
 
+/**
+ * A {@link Firer} which delegates to multiple sub-{@link Firer}.
+ * Sub-{@link Firer}s may shoot at a slightly different angle than the direction of the original shot.
+ */
 public class SpreadFirer implements Firer {
 
+    /**
+     * Data for a {@link SpreadFirer}.
+     * @param subFirerKeys A {@link Collection} of {@link Key}s to the {@link SpreadFirer}'s sub-{@link Firer}s
+     * @param angleVariance The maximum angle variance for each sub-{@link Firer}
+     */
     public record Data(@NotNull Collection<Key> subFirerKeys, float angleVariance) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.firer.spread");
 
+        /**
+         * Creates a {@link Data}.
+         * @param subFirerKeys A {@link Collection} of {@link Key}s to the {@link SpreadFirer}'s sub-{@link Firer}s
+         * @param angleVariance The maximum angle variance for each sub-{@link Firer}
+         */
         public Data {
             Objects.requireNonNull(subFirerKeys, "subFirerKeys");
         }
@@ -33,6 +50,10 @@ public class SpreadFirer implements Firer {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
@@ -61,6 +82,10 @@ public class SpreadFirer implements Firer {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.addAll(data.subFirerKeys());
     }
@@ -71,10 +96,16 @@ public class SpreadFirer implements Firer {
 
     private final Collection<Firer> subFirers;
 
+    /**
+     * Creates a {@link SpreadFirer}.
+     * @param data The {@link SpreadFirer}'s {@link Data}
+     * @param random The {@link Random} to use for angle variance
+     * @param subFirers A {@link Collection} of sub-{@link Firer}s
+     */
     public SpreadFirer(@NotNull Data data, @NotNull Random random, @NotNull Collection<Firer> subFirers) {
         this.data = Objects.requireNonNull(data, "data");
         this.random = Objects.requireNonNull(random, "random");
-        this.subFirers = Objects.requireNonNull(subFirers, "subFirers");
+        this.subFirers = List.copyOf(subFirers);
     }
 
     @Override

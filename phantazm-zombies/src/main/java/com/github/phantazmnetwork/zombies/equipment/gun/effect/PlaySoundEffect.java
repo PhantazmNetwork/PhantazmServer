@@ -18,12 +18,28 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
+/**
+ * A {@link GunEffect} that plays a {@link Sound}.
+ */
 public class PlaySoundEffect implements GunEffect {
 
+    /**
+     * Data for an {@link PlaySoundEffect}.
+     * @param audienceProviderKey A {@link Key} to the {@link PlaySoundEffect}'s {@link AudienceProvider}
+     * @param sound The {@link Sound} to play
+     */
     public record Data(@NotNull Key audienceProviderKey, @NotNull Sound sound) implements Keyed {
 
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.play_sound");
 
+        /**
+         * Creates a {@link Data}.
+         * @param audienceProviderKey A {@link Key} to the {@link PlaySoundEffect}'s {@link AudienceProvider}
+         * @param sound The {@link Sound} to play
+         */
         public Data {
             Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
             Objects.requireNonNull(sound, "sound");
@@ -35,6 +51,10 @@ public class PlaySoundEffect implements GunEffect {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         ConfigProcessor<Sound> soundProcessor = AdventureConfigProcessors.sound();
@@ -60,6 +80,10 @@ public class PlaySoundEffect implements GunEffect {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.audienceProviderKey());
     }
@@ -68,6 +92,11 @@ public class PlaySoundEffect implements GunEffect {
 
     private final AudienceProvider audienceProvider;
 
+    /**
+     * Creates a {@link PlaySoundEffect}.
+     * @param data The {@link Data} for this {@link PlaySoundEffect}
+     * @param audienceProvider The {@link AudienceProvider} for this {@link PlaySoundEffect}
+     */
     public PlaySoundEffect(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data, "data");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");

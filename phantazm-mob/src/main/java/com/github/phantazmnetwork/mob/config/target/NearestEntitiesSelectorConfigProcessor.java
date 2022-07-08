@@ -33,7 +33,7 @@ public abstract class NearestEntitiesSelectorConfigProcessor<TSelector extends N
 
     /**
      * Creates a {@link TSelector}.
-     * @param range The range of the selector
+     * @param range The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      * @return A new {@link TSelector}
      */

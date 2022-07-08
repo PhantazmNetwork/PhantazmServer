@@ -8,10 +8,19 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A {@link HeadshotTester} based on the eye height of the target.
+ */
 public class EyeHeightHeadshotTester implements HeadshotTester {
 
+    /**
+     * Data for an {@link EyeHeightHeadshotTester}.
+     */
     public record Data() implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.headshot_tester.eye_height");
 
         @Override
@@ -20,6 +29,10 @@ public class EyeHeightHeadshotTester implements HeadshotTester {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return ConfigProcessor.emptyProcessor(Data::new);
     }

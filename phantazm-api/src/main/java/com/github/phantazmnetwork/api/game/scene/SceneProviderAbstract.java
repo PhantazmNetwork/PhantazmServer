@@ -62,7 +62,8 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
             if (scene.isShutdown()) {
                 iterator.remove();
-            } else {
+            }
+            else {
                 scene.tick(time);
             }
         }

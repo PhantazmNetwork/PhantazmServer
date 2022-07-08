@@ -8,6 +8,7 @@ import java.util.Objects;
  * General config for the server.
  * @param serverInfoConfig Config for the server's setup
  * @param pingListConfig Config for the server's ping list
+ * @param pathfinderConfig Config for pathfinding
  */
 public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig,
                            @NotNull PingListConfig pingListConfig,
@@ -22,7 +23,7 @@ public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig,
      * Creates config for the server.
      * @param serverInfoConfig Config for the server's setup
      * @param pingListConfig Config for the server's ping list
-     * @param pathfinderConfig config for pathfinding
+     * @param pathfinderConfig Config for pathfinding
      */
     public ServerConfig {
         Objects.requireNonNull(serverInfoConfig, "serverInfoConfig");

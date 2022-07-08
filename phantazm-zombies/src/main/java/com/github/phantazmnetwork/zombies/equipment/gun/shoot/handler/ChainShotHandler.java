@@ -24,13 +24,35 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.BiConsumer;
 
+/**
+ * A {@link ShotHandler} which fires its own shots based on the entities that are hit.
+ */
 public class ChainShotHandler implements ShotHandler {
 
+    /**
+     * Data for a {@link ChainShotHandler}.
+     * @param finderKey A {@link Key} to the {@link ChainShotHandler}'s {@link PositionalEntityFinder} which finds
+     *                  {@link Entity}s to shoot in the direction of
+     * @param firerKey A {@link Key} to the {@link ChainShotHandler}'s {@link Firer} used to shoot new shots
+     * @param ignorePreviousHits Whether the {@link ChainShotHandler} should shoot in the direction of previously hit targets
+     * @param fireAttempts The number of times the {@link ChainShotHandler} should try to shoot at new targets
+     */
     public record Data(@NotNull Key finderKey, @NotNull Key firerKey, boolean ignorePreviousHits, int fireAttempts)
             implements Keyed {
 
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.shot_handler.chain");
 
+        /**
+         * Creates a {@link Data}.
+         * @param finderKey A {@link Key} to the {@link ChainShotHandler}'s {@link PositionalEntityFinder} which finds
+         *                  {@link Entity}s to shoot in the direction of
+         * @param firerKey A {@link Key} to the {@link ChainShotHandler}'s {@link Firer} used to shoot new shots
+         * @param ignorePreviousHits Whether the {@link ChainShotHandler} should shoot in the direction of previously hit targets
+         * @param fireAttempts The number of times the {@link ChainShotHandler} should try to shoot at new targets
+         */
         public Data {
             Objects.requireNonNull(finderKey, "finderKey");
             Objects.requireNonNull(firerKey, "firerKey");
@@ -42,6 +64,10 @@ public class ChainShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
 
@@ -73,6 +99,10 @@ public class ChainShotHandler implements ShotHandler {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> {
             keys.add(data.finderKey());
@@ -86,6 +116,12 @@ public class ChainShotHandler implements ShotHandler {
 
     private final Firer firer;
 
+    /**
+     * Creates a new {@link ChainShotHandler}.
+     * @param data The {@link Data} for this {@link ChainShotHandler}
+     * @param finder The {@link PositionalEntityFinder} used to find {@link Entity}s to shoot in the direction of
+     * @param firer The {@link Firer} used to shoot new shots
+     */
     public ChainShotHandler(@NotNull Data data, @NotNull PositionalEntityFinder finder, @NotNull Firer firer) {
         this.data = Objects.requireNonNull(data, "data");
         this.finder = Objects.requireNonNull(finder, "finder");

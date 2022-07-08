@@ -16,12 +16,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Particle data for dust particles.
+ */
 public class DustParticleData implements ParticleData {
 
+    /**
+     * The serial {@link Key} for {@link DustParticleData}.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.dust");
 
     private static final Key KEY = Particle.DUST.key();
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link DustParticleData}.
+     * @return A {@link ConfigProcessor} for {@link DustParticleData}
+     */
     public static @NotNull ConfigProcessor<DustParticleData> processor() {
         ConfigProcessor<RGBLike> rgbProcessor = AdventureConfigProcessors.rgbLike();
 
@@ -58,6 +68,11 @@ public class DustParticleData implements ParticleData {
 
     private final float size;
 
+    /**
+     * Creates a new {@link DustParticleData}.
+     * @param color The color of the particle
+     * @param size The size of the particle
+     */
     public DustParticleData(@NotNull RGBLike color, float size) {
         Objects.requireNonNull(color, "color");
         this.red = color.red() / 255.0F;

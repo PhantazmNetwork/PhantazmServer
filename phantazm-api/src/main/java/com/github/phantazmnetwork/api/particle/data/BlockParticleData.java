@@ -14,8 +14,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Particle data that involves block states.
+ */
 public final class BlockParticleData implements ParticleData {
 
+    /**
+     * The serial {@link Key} for {@link BlockParticleData}.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.block");
 
     private static final Set<Key> VALID_KEYS = Set.of(
@@ -24,6 +30,10 @@ public final class BlockParticleData implements ParticleData {
             Particle.FALLING_DUST.key()
     );
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link BlockParticleData}.
+     * @return A {@link ConfigProcessor} for {@link BlockParticleData}
+     */
     public static @NotNull ConfigProcessor<BlockParticleData> processor() {
         return new ConfigProcessor<>() {
             @Override
@@ -44,6 +54,10 @@ public final class BlockParticleData implements ParticleData {
 
     private final short stateId;
 
+    /**
+     * Creates a new {@link BlockParticleData}.
+     * @param block The block state of the particle
+     */
     public BlockParticleData(@NotNull Block block) {
         this(Objects.requireNonNull(block, "block").stateId());
     }

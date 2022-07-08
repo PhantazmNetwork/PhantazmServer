@@ -24,20 +24,35 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+/**
+ * A {@link Firer} that fires using "hit scan". Targets will be immediately found and shot.
+ */
 public class HitScanFirer implements Firer {
 
+    /**
+     * Data for a {@link HitScanFirer}.
+     * @param endSelectorKey A {@link Key} to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinderKey A {@link Key} to the {@link HitScanFirer}'s {@link TargetFinder}
+     * @param shotHandlerKeys A {@link Key} to the {@link HitScanFirer}'s {@link ShotHandler}s
+     */
     public record Data(@NotNull Key endSelectorKey, @NotNull Key targetFinderKey,
                        @NotNull Collection<Key> shotHandlerKeys) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan");
 
+        /**
+         * Creates a {@link Data}.
+         * @param endSelectorKey A {@link Key} to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
+         * @param targetFinderKey A {@link Key} to the {@link HitScanFirer}'s {@link TargetFinder}
+         * @param shotHandlerKeys A {@link Key} to the {@link HitScanFirer}'s {@link ShotHandler}s
+         */
         public Data {
             Objects.requireNonNull(endSelectorKey, "endSelectorKey");
             Objects.requireNonNull(targetFinderKey, "targetFinderKey");
             Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
-            for (Key key : shotHandlerKeys) {
-                Objects.requireNonNull(key, "shotHandlerKeys element");
-            }
         }
 
         @Override
@@ -46,6 +61,10 @@ public class HitScanFirer implements Firer {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
@@ -73,6 +92,10 @@ public class HitScanFirer implements Firer {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> {
             keys.add(data.endSelectorKey());
@@ -89,13 +112,20 @@ public class HitScanFirer implements Firer {
 
     private final Collection<ShotHandler> shotHandlers;
 
+    /**
+     * Creates a {@link HitScanFirer}.
+     * @param entitySupplier A {@link Supplier} for the {@link Entity} shooter
+     * @param endSelector The {@link HitScanFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinder The {@link HitScanFirer}'s {@link TargetFinder}
+     * @param shotHandlers The {@link HitScanFirer}'s {@link ShotHandler}s
+     */
     public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
                         @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
                         @NotNull Collection<ShotHandler> shotHandlers) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
-        this.shotHandlers = Objects.requireNonNull(shotHandlers, "shotHandlers");
+        this.shotHandlers = List.copyOf(shotHandlers);
     }
 
     @Override

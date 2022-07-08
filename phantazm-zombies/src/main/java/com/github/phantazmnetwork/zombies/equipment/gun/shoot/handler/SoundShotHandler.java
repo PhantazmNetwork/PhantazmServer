@@ -20,12 +20,30 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.BiConsumer;
 
+/**
+ * A {@link ShotHandler} that plays a {@link Sound}.
+ */
 public class SoundShotHandler implements ShotHandler {
 
+    /**
+     * Data for a {@link SoundShotHandler}.
+     * @param audienceProviderKey A {@link Key} to the {@link SoundShotHandler}'s {@link AudienceProvider}
+     * @param sound The sound to play for regular targets
+     * @param headshotSound The sound to play for headshots
+     */
     public record Data(@NotNull Key audienceProviderKey, @NotNull Sound sound, @NotNull Sound headshotSound) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.sound");
 
+        /**
+         * Creates a {@link Data}.
+         * @param audienceProviderKey A {@link Key} to the {@link SoundShotHandler}'s {@link AudienceProvider}
+         * @param sound The sound to play for regular targets
+         * @param headshotSound The sound to play for headshots
+         */
         public Data {
             Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
             Objects.requireNonNull(sound, "sound");
@@ -38,6 +56,10 @@ public class SoundShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
         ConfigProcessor<Sound> soundProcessor = AdventureConfigProcessors.sound();
@@ -65,6 +87,10 @@ public class SoundShotHandler implements ShotHandler {
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.audienceProviderKey());
     }
@@ -73,6 +99,11 @@ public class SoundShotHandler implements ShotHandler {
 
     private final AudienceProvider audienceProvider;
 
+    /**
+     * Creates a {@link SoundShotHandler}.
+     * @param data The {@link SoundShotHandler}'s {@link Data}
+     * @param audienceProvider The {@link SoundShotHandler}'s {@link AudienceProvider}
+     */
     public SoundShotHandler(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data, "data");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");

@@ -11,21 +11,46 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Particle data for sculk vibrations.
+ */
 public class VibrationParticleData implements ParticleData {
 
+    /**
+     * The serial {@link Key} for {@link VibrationParticleData}.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.vibration");
 
     private static final Key KEY = Particle.VIBRATION.key();
 
+    /**
+     * A position source for sculk vibrations.
+     */
     public sealed interface PositionSource extends Keyed permits BlockPositionSource, EntityPositionSource {
 
+        /**
+         * Writes the {@link PositionSource} to the given {@link BinaryWriter}.
+         * @param binaryWriter The {@link BinaryWriter} to write to
+         */
         void write(@NotNull BinaryWriter binaryWriter);
 
     }
 
+    /**
+     * A block position source for sculk vibrations.
+     * @param blockPosition The block position source
+     */
     public record BlockPositionSource(@NotNull Point blockPosition) implements PositionSource {
 
         private static final Key KEY = Key.key("block");
+
+        /**
+         * Creates a new {@link BlockPositionSource}.
+         * @param blockPosition The block position source
+         */
+        public BlockPositionSource {
+            Objects.requireNonNull(blockPosition, "blockPosition");
+        }
 
         @Override
         public void write(@NotNull BinaryWriter binaryWriter) {
@@ -38,6 +63,9 @@ public class VibrationParticleData implements ParticleData {
         }
     }
 
+    /**
+     * An entity position source for sculk vibrations.
+     */
     public static final class EntityPositionSource implements PositionSource {
 
         private static final Key KEY = Key.key("entity");
@@ -46,6 +74,10 @@ public class VibrationParticleData implements ParticleData {
 
         private final float eyeHeight;
 
+        /**
+         * Creates a new {@link EntityPositionSource}.
+         * @param entity The entity source
+         */
         public EntityPositionSource(@NotNull Entity entity) {
             Objects.requireNonNull(entity, "entity");
             this.entityId = entity.getEntityId();
@@ -68,6 +100,11 @@ public class VibrationParticleData implements ParticleData {
 
     private final int ticks;
 
+    /**
+     * Creates a new {@link VibrationParticleData}.
+     * @param positionSource The position source of the vibration
+     * @param ticks The arrival ticks for the vibration
+     */
     public VibrationParticleData(@NotNull PositionSource positionSource, int ticks) {
         this.positionSource = Objects.requireNonNull(positionSource, "positionSource");
         this.ticks = ticks;

@@ -10,6 +10,10 @@ import java.util.Objects;
 
 /**
  * Config for a single {@link Lobby}.
+ * @param instanceConfig The {@link InstanceConfig} for the {@link Lobby}
+ * @param lobbyPaths The lobby paths used to load the {@link Instance} for the lobby
+ * @param maxPlayers The maximum players possible for the {@link Lobby}
+ * @param maxLobbies The maximum number of {@link Lobby}s for this {@link Lobby} type
  */
 public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
                           @NotNull List<String> lobbyPaths,

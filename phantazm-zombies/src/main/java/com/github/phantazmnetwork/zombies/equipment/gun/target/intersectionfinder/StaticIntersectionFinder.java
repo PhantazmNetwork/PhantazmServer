@@ -12,10 +12,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * An {@link IntersectionFinder} that always finds an intersection at the center of an {@link Entity}.
+ */
 public class StaticIntersectionFinder implements IntersectionFinder {
 
+    /**
+     * Data for a {@link StaticIntersectionFinder}.
+     */
     public record Data() implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.intersection_finder.static");
 
         @Override
@@ -24,6 +33,10 @@ public class StaticIntersectionFinder implements IntersectionFinder {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return ConfigProcessor.emptyProcessor(Data::new);
     }

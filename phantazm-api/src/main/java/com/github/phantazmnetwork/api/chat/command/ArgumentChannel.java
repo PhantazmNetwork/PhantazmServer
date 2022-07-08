@@ -53,8 +53,6 @@ public class ArgumentChannel extends Argument<Function<Player, ChatChannel>> {
 
     @Override
     public byte[] nodeProperties() {
-        return BinaryWriter.makeArray(packetWriter -> {
-            packetWriter.writeVarInt(0);
-        });
+        return BinaryWriter.makeArray(packetWriter -> packetWriter.writeVarInt(0));
     }
 }

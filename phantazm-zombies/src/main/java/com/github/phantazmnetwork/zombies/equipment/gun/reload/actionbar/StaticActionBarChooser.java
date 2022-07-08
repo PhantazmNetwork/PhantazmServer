@@ -11,17 +11,30 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link ReloadActionBarChooser} that sends a static {@link Component} message.
+ */
 public class StaticActionBarChooser implements ReloadActionBarChooser {
 
+    /**
+     * Data for a {@link StaticActionBarChooser}.
+     * @param message The message to send
+     */
     public record Data(@NotNull Component message) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.static");
 
+        /**
+         * Creates a {@link Data}.
+         * @param message The message to send
+         */
         public Data {
             Objects.requireNonNull(message, "message");
         }
@@ -32,6 +45,10 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Component> componentProcessor = AdventureConfigProcessors.component();
         return new ConfigProcessor<>() {
@@ -53,12 +70,16 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
 
     private final Data data;
 
+    /**
+     * Creates a {@link StaticActionBarChooser}.
+     * @param data The {@link StaticActionBarChooser}'s {@link Data}
+     */
     public StaticActionBarChooser(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
-    public @NotNull Component choose(@NotNull GunState state, @NotNull Player player, float progress) {
+    public @NotNull Component choose(@NotNull GunState state, float progress) {
         return data.message();
     }
 

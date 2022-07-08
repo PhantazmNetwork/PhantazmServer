@@ -10,16 +10,17 @@ import com.github.phantazmnetwork.commons.factory.DependencyProvider;
 import com.github.phantazmnetwork.commons.factory.Factory;
 import com.github.phantazmnetwork.commons.factory.FactoryDependencyProvider;
 import com.github.phantazmnetwork.mob.MobStore;
+import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunLevel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunModel;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityAudienceProvider;
-import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelDataConfigProcessor;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.PlayerAudienceProvider;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunData;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelData;
+import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelDataConfigProcessor;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.StateReloadTester;
@@ -31,10 +32,10 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.StateShootTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.HitScanFirer;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.PhantazmProjectileCollisionFilter;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.SpreadFirer;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.PhantazmMobProjectileCollisionFilter;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.ProjectileCollisionFilter;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.ProjectileFirer;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.SpreadFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.BasicTargetFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.TargetFinder;
@@ -51,7 +52,7 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinde
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.TargetLimiter;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmTargetTester;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmMobTargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
@@ -60,8 +61,6 @@ import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.event.Event;
@@ -80,6 +79,9 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+/**
+ * Main entrypoint for equipment features.
+ */
 final class EquipmentFeature {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentFeature.class);
@@ -90,6 +92,11 @@ final class EquipmentFeature {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Initialize equipment features.
+     * @param equipmentPath The {@link Path} to the equipment folder
+     * @param codec A {@link ConfigCodec} for serialization
+     */
     static void initialize(@NotNull Path equipmentPath, @NotNull ConfigCodec codec) {
         String ending;
         if (codec.getPreferredExtensions().isEmpty()) {
@@ -115,17 +122,13 @@ final class EquipmentFeature {
         gunLevelMap = new HashMap<>();
         try (Stream<Path> gunDirectories = Files.find(guns, 1,
                 (path, attributes) -> attributes.isDirectory())) {
-            gunIteration: for (Path gunDirectory : (Iterable<? extends Path>) gunDirectories::iterator) {
-                String infoFileName;
-                if (codec.getPreferredExtensions().isEmpty()) {
-                    infoFileName = "info";
-                }
-                else {
-                    infoFileName = "info." + codec.getPreferredExtensions().get(0);
-                }
+            for (Path gunDirectory : (Iterable<? extends Path>) gunDirectories::iterator) {
+                String infoFileName = codec.getPreferredExtensions().isEmpty()
+                        ? "info"
+                        : "info." + codec.getPreferredExtensions().get(0);
                 Path infoPath = gunDirectory.resolve(infoFileName);
                 if (!Files.isRegularFile(infoPath)) {
-                    LOGGER.warn("No info file at {}.", infoPath);
+                    LOGGER.warn("No gun info file at {}.", infoPath);
                     continue;
                 }
 
@@ -133,11 +136,13 @@ final class EquipmentFeature {
                 try {
                     gunData = ConfigBridges.read(infoPath, codec, gunDataProcessor);
                 } catch (ConfigProcessException e) {
-                    LOGGER.warn("Failed to read info file at {}.", infoPath, e);
+                    LOGGER.warn("Failed to read gun info file at {}.", infoPath, e);
                     continue;
                 }
 
-                Int2ObjectMap<ComplexData> levelDataMap = new Int2ObjectOpenHashMap<>();
+                Set<Key> foundLevelKeys = new HashSet<>();
+                Set<Key> requiredLevelKeys = new HashSet<>();
+                List<ComplexData> levelData = new ArrayList<>();
                 Path levelsPath = gunDirectory.resolve("levels");
                 try (Stream<Path> levelDirectories = Files.find(levelsPath, 1,
                         (path, attributes) -> attributes.isRegularFile() && matcher.matches(path))) {
@@ -166,40 +171,21 @@ final class EquipmentFeature {
                                 continue;
                             }
 
-                            int order = gunLevelData.order();
-                            levelDataMap.put(order, data);
-                        }
-                        catch (IOException e) {
+                            foundLevelKeys.add(data.mainKey());
+                            requiredLevelKeys.addAll(gunLevelData.upgrades());
+                        } catch (IOException e) {
                             LOGGER.warn("Failed to read level file at {}.", levelFile, e);
                         }
                     }
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     LOGGER.warn("Failed to read levels directory at {}.", levelsPath, e);
                     continue;
                 }
 
-                int maxOrder = -1;
-                for (int order : levelDataMap.keySet()) {
-                    if (order > maxOrder) {
-                        maxOrder = order;
-                    }
-                }
-                if (maxOrder == -1) {
-                    LOGGER.warn("The gun at {} needs to have at least one level}.", gunDirectory);
+                requiredLevelKeys.removeAll(foundLevelKeys);
+                if (!requiredLevelKeys.isEmpty()) {
+                    LOGGER.warn("Invalid gun at {}. Missing required keys: {}", infoPath, requiredLevelKeys);
                     continue;
-                }
-
-                List<ComplexData> levelData = new ArrayList<>(levelDataMap.size());
-                for (int i = 0; i <= maxOrder; i++) {
-                    ComplexData data = levelDataMap.get(i);
-                    if (data != null) {
-                        levelData.add(data);
-                    }
-                    else {
-                        LOGGER.warn("Missing level {} for gun {}.", i, gunData.name());
-                        continue gunIteration;
-                    }
                 }
 
                 gunLevelMap.put(gunData.name(), levelData);
@@ -212,13 +198,17 @@ final class EquipmentFeature {
         LOGGER.info("Loaded {} guns.", gunLevelMap.size());
     }
 
-    // this should be private when GunTest is deleted
-    public static @NotNull ConfigProcessor<ComplexData> createGunLevelProcessor() {
+    /**
+     * Create a {@link ConfigProcessor} for gun level data.
+     * This takes the form of {@link ComplexData} in order to instantiate {@link GunLevel}s.
+     * @return A {@link ConfigProcessor} for gun level data
+     */
+    private static @NotNull ConfigProcessor<ComplexData> createGunLevelProcessor() {
         Map<Key, ConfigProcessor<? extends Keyed>> gunProcessors = new HashMap<>(38);
         gunProcessors.put(GunStats.SERIAL_KEY, GunStats.processor());
         gunProcessors.put(GunLevelData.SERIAL_KEY, new GunLevelDataConfigProcessor(ItemStackConfigProcessors.snbt()));
         gunProcessors.put(EntityInstanceAudienceProvider.Data.SERIAL_KEY, EntityInstanceAudienceProvider.processor());
-        gunProcessors.put(EntityAudienceProvider.Data.SERIAL_KEY, EntityAudienceProvider.processor());
+        gunProcessors.put(PlayerAudienceProvider.Data.SERIAL_KEY, PlayerAudienceProvider.processor());
         gunProcessors.put(AmmoLevelEffect.Data.SERIAL_KEY, AmmoLevelEffect.processor());
         gunProcessors.put(PlaySoundEffect.Data.SERIAL_KEY, PlaySoundEffect.processor());
         gunProcessors.put(ReloadActionBarEffect.Data.SERIAL_KEY, ReloadActionBarEffect.processor());
@@ -231,7 +221,7 @@ final class EquipmentFeature {
         gunProcessors.put(RayTraceBlockIteration.Data.SERIAL_KEY, RayTraceBlockIteration.processor());
         gunProcessors.put(WallshotBlockIteration.Data.SERIAL_KEY, WallshotBlockIteration.processor());
         gunProcessors.put(HitScanFirer.Data.SERIAL_KEY, HitScanFirer.processor());
-        gunProcessors.put(PhantazmProjectileCollisionFilter.Data.SERIAL_KEY, PhantazmProjectileCollisionFilter.processor());
+        gunProcessors.put(PhantazmMobProjectileCollisionFilter.Data.SERIAL_KEY, PhantazmMobProjectileCollisionFilter.processor());
         gunProcessors.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.processor());
         gunProcessors.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.processor());
         gunProcessors.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.processor());
@@ -250,7 +240,7 @@ final class EquipmentFeature {
         gunProcessors.put(AroundEndFinder.Data.SERIAL_KEY, AroundEndFinder.processor());
         gunProcessors.put(BetweenPointsFinder.Data.SERIAL_KEY, BetweenPointsFinder.processor());
         gunProcessors.put(NearbyEntityFinder.Data.SERIAL_KEY, NearbyEntityFinder.processor());
-        gunProcessors.put(PhantazmTargetTester.Data.SERIAL_KEY, PhantazmTargetTester.processor());
+        gunProcessors.put(PhantazmMobTargetTester.Data.SERIAL_KEY, PhantazmMobTargetTester.processor());
         gunProcessors.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, EyeHeightHeadshotTester.processor());
         gunProcessors.put(StaticHeadshotTester.Data.SERIAL_KEY, StaticHeadshotTester.processor());
         gunProcessors.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, RayTraceIntersectionFinder.processor());
@@ -262,11 +252,18 @@ final class EquipmentFeature {
         return new ComplexDataConfigProcessor(gunProcessors);
     }
 
+    /**
+     * Creates a {@link Map} of dependency adders.
+     * A dependency adder adds its {@link Key} dependencies to a {@link Collection} of required dependencies.
+     * This allows us to validate whether all of our dependencies are present while reading config.
+     * @return A {@link Map} of dependency adders
+     */
     private static @NotNull Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> createDependencyAdders() {
-        Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> dependencyAdders = new HashMap<>(13);
+        Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> dependencyAdders = new HashMap<>(15);
         dependencyAdders.put(GunLevelData.SERIAL_KEY, GunLevelData.dependencyConsumer());
         dependencyAdders.put(PlaySoundEffect.Data.SERIAL_KEY, PlaySoundEffect.dependencyConsumer());
         dependencyAdders.put(ReloadActionBarEffect.Data.SERIAL_KEY, ReloadActionBarEffect.dependencyConsumer());
+        dependencyAdders.put(SendMessageEffect.Data.SERIAL_KEY, SendMessageEffect.dependencyConsumer());
         dependencyAdders.put(ShootExpEffect.Data.SERIAL_KEY, ShootExpEffect.dependencyConsumer());
         dependencyAdders.put(StateReloadTester.Data.SERIAL_KEY, StateReloadTester.dependencyConsumer());
         dependencyAdders.put(StateShootTester.Data.SERIAL_KEY, StateShootTester.dependencyConsumer());
@@ -275,6 +272,7 @@ final class EquipmentFeature {
         dependencyAdders.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.dependencyConsumer());
         dependencyAdders.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.dependencyConsumer());
         dependencyAdders.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.dependencyConsumer());
+        dependencyAdders.put(FeedbackShotHandler.Data.SERIAL_KEY, FeedbackShotHandler.dependencyConsumer());
         dependencyAdders.put(SoundShotHandler.Data.SERIAL_KEY, SoundShotHandler.dependencyConsumer());
         dependencyAdders.put(BasicTargetFinder.Data.SERIAL_KEY, BasicTargetFinder.dependencyConsumer());
         dependencyAdders.put(ClipStackMapper.Data.SERIAL_KEY, ClipStackMapper.dependencyConsumer());
@@ -290,6 +288,15 @@ final class EquipmentFeature {
         dependencyAdder.accept((TObject) object, dependencies);
     }
 
+    /**
+     * Creates a {@link Gun}.
+     * @param key The {@link Key} of the gun type
+     * @param node The {@link EventNode} to register events to
+     * @param store A {@link MobStore} for registered {@link PhantazmMob}s
+     * @param playerView A {@link PlayerView} for the player that is using the gun
+     * @param random A {@link Random} for random number generation
+     * @return A new {@link Gun}
+     */
     public static @NotNull Gun createGun(@NotNull Key key, @NotNull EventNode<Event> node, @NotNull MobStore store,
                                          @NotNull PlayerView playerView, @NotNull Random random) {
         List<ComplexData> complexDataList = gunLevelMap.get(key);
@@ -303,19 +310,20 @@ final class EquipmentFeature {
             ShootTester shootTester = provider.getDependency(data.shootTester());
             ReloadTester reloadTester = provider.getDependency(data.reloadTester());
             Firer firer = provider.getDependency(data.firer());
+            Collection<GunEffect> activateEffects = provider.getDependencies(data.activateEffects());
             Collection<GunEffect> shootEffects = provider.getDependencies(data.shootEffects());
             Collection<GunEffect> reloadEffects = provider.getDependencies(data.reloadEffects());
             Collection<GunEffect> tickEffects = provider.getDependencies(data.tickEffects());
             Collection<GunEffect> noAmmoEffects = provider.getDependencies(data.noAmmoEffects());
             Collection<GunStackMapper> gunStackMappers = provider.getDependencies(data.gunStackMappers());
 
-            return new GunLevel(data.stack(), stats, shootTester, reloadTester, firer, shootEffects,
-                    reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
+            return new GunLevel(data.upgrades(), data.stack(), stats, shootTester, reloadTester, firer, activateEffects,
+                    shootEffects, reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
         };
         Factory<EntityInstanceAudienceProvider.Data, EntityInstanceAudienceProvider> entityInstanceAudienceProvider
                 = (provider, data) -> new EntityInstanceAudienceProvider(playerView::getPlayer);
-        Factory<EntityAudienceProvider.Data, EntityAudienceProvider> playerAudienceProvider
-                = (provider, data) -> new EntityAudienceProvider(playerView::getPlayer);
+        Factory<PlayerAudienceProvider.Data, PlayerAudienceProvider> playerAudienceProvider
+                = (provider, data) -> new PlayerAudienceProvider(playerView);
         Factory<AmmoLevelEffect.Data, AmmoLevelEffect> ammoLevelEffect
                 = (provider, data) -> new AmmoLevelEffect(playerView);
         Factory<PlaySoundEffect.Data, PlaySoundEffect> playSoundEffect = (provider, data) -> {
@@ -326,10 +334,10 @@ final class EquipmentFeature {
             GunStats stats = provider.getDependency(data.statsKey());
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
             ReloadActionBarChooser chooser = provider.getDependency(data.reloadActionBarChooserKey());
-            return new ReloadActionBarEffect(playerView, stats, reloadTester, chooser);
+            return new ReloadActionBarEffect(stats, playerView::getPlayer, reloadTester, chooser);
         };
         Factory<SendMessageEffect.Data, SendMessageEffect> sendMessageEffect
-                = (provider, data) -> new SendMessageEffect(data, playerView);
+                = (provider, data) -> new SendMessageEffect(data, playerView::getPlayer);
         Factory<ShootExpEffect.Data, ShootExpEffect> shootExpEffect = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             return new ShootExpEffect(playerView, stats);
@@ -357,8 +365,8 @@ final class EquipmentFeature {
 
             return new HitScanFirer(playerView::getPlayer, endSelector, targetFinder, shotHandlers);
         };
-        Factory<PhantazmProjectileCollisionFilter.Data, PhantazmProjectileCollisionFilter> phantazmProjectileCollisionFilter
-                = (provider, data) -> new PhantazmProjectileCollisionFilter(store);
+        Factory<PhantazmMobProjectileCollisionFilter.Data, PhantazmMobProjectileCollisionFilter> phantazmProjectileCollisionFilter
+                = (provider, data) -> new PhantazmMobProjectileCollisionFilter(store);
         Factory<ProjectileFirer.Data, ProjectileFirer> projectileFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
@@ -386,8 +394,10 @@ final class EquipmentFeature {
                 = (provider, data) -> new DamageShotHandler(data);
         Factory<ExplosionShotHandler.Data, ExplosionShotHandler> explosionShotHandler
                 = (provider, data) -> new ExplosionShotHandler(data);
-        Factory<FeedbackShotHandler.Data, FeedbackShotHandler> feedbackShotHandler
-                = (provider, data) -> new FeedbackShotHandler(data, playerView);
+        Factory<FeedbackShotHandler.Data, FeedbackShotHandler> feedbackShotHandler = (provider, data) -> {
+            AudienceProvider audienceProvider = provider.getDependency(data.audienceProviderKey());
+            return new FeedbackShotHandler(data, audienceProvider);
+        };
         Factory<GuardianBeamShotHandler.Data, GuardianBeamShotHandler> guardianBeamShotHandler
                 = (provider, data) -> new GuardianBeamShotHandler(data);
         Factory<IgniteShotHandler.Data, IgniteShotHandler> igniteShotHandler
@@ -413,8 +423,8 @@ final class EquipmentFeature {
                 = (provider, data) -> new BetweenPointsFinder();
         Factory<NearbyEntityFinder.Data, NearbyEntityFinder> nearbyEntityFinder
                 = (provider, data) -> new NearbyEntityFinder(data);
-        Factory<PhantazmTargetTester.Data, PhantazmTargetTester> phantazmTargetTester
-                = (provider, data) -> new PhantazmTargetTester(data, store);
+        Factory<PhantazmMobTargetTester.Data, PhantazmMobTargetTester> phantazmTargetTester
+                = (provider, data) -> new PhantazmMobTargetTester(data, store);
         Factory<EyeHeightHeadshotTester.Data, EyeHeightHeadshotTester> eyeHeightHeadshotTester
                 = (provider, data) -> new EyeHeightHeadshotTester();
         Factory<StaticHeadshotTester.Data, StaticHeadshotTester> staticHeadshotTester
@@ -447,7 +457,7 @@ final class EquipmentFeature {
         factories.put(GunStats.SERIAL_KEY, gunStats);
         factories.put(GunLevelData.SERIAL_KEY, gunLevel);
         factories.put(EntityInstanceAudienceProvider.Data.SERIAL_KEY, entityInstanceAudienceProvider);
-        factories.put(EntityAudienceProvider.Data.SERIAL_KEY, playerAudienceProvider);
+        factories.put(PlayerAudienceProvider.Data.SERIAL_KEY, playerAudienceProvider);
         factories.put(AmmoLevelEffect.Data.SERIAL_KEY, ammoLevelEffect);
         factories.put(PlaySoundEffect.Data.SERIAL_KEY, playSoundEffect);
         factories.put(ReloadActionBarEffect.Data.SERIAL_KEY, reloadActionBarEffect);
@@ -460,7 +470,7 @@ final class EquipmentFeature {
         factories.put(RayTraceBlockIteration.Data.SERIAL_KEY, rayTraceBlockIteration);
         factories.put(WallshotBlockIteration.Data.SERIAL_KEY, wallshotBlockIteration);
         factories.put(HitScanFirer.Data.SERIAL_KEY, hitScanFirer);
-        factories.put(PhantazmProjectileCollisionFilter.Data.SERIAL_KEY, phantazmProjectileCollisionFilter);
+        factories.put(PhantazmMobProjectileCollisionFilter.Data.SERIAL_KEY, phantazmProjectileCollisionFilter);
         factories.put(ProjectileFirer.Data.SERIAL_KEY, projectileFirer);
         factories.put(SpreadFirer.Data.SERIAL_KEY, spreadFirer);
         factories.put(ChainShotHandler.Data.SERIAL_KEY, chainShotHandler);
@@ -477,7 +487,7 @@ final class EquipmentFeature {
         factories.put(AroundEndFinder.Data.SERIAL_KEY, aroundEndFinder);
         factories.put(BetweenPointsFinder.Data.SERIAL_KEY, betweenPointsFinder);
         factories.put(NearbyEntityFinder.Data.SERIAL_KEY, nearbyEntityFinder);
-        factories.put(PhantazmTargetTester.Data.SERIAL_KEY, phantazmTargetTester);
+        factories.put(PhantazmMobTargetTester.Data.SERIAL_KEY, phantazmTargetTester);
         factories.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, eyeHeightHeadshotTester);
         factories.put(StaticHeadshotTester.Data.SERIAL_KEY, staticHeadshotTester);
         factories.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, rayTraceTargetTester);
@@ -487,13 +497,13 @@ final class EquipmentFeature {
         factories.put(ClipStackMapper.Data.SERIAL_KEY, clipStackMapper);
         factories.put(ReloadStackMapper.Data.SERIAL_KEY, reloadStackMapper);
 
-        List<GunLevel> gunLevels = new ArrayList<>(complexDataList.size());
+        Map<Key, GunLevel> gunLevels = new HashMap<>(complexDataList.size());
         for (ComplexData complexData : complexDataList) {
             DependencyProvider getter = new FactoryDependencyProvider(complexData.objects(), factories);
-            gunLevels.add(getter.getDependency(complexData.mainKey()));
+            gunLevels.put(complexData.mainKey(), getter.getDependency(complexData.mainKey()));
         }
 
-        return new Gun(playerView, new GunModel(gunLevels, key));
+        return new Gun(playerView::getPlayer, new GunModel(key, gunLevels));
     }
 
 }

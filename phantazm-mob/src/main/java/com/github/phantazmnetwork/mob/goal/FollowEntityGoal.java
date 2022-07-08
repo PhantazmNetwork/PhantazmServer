@@ -39,11 +39,9 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
             @Override
             public void start() {
                 MinestomDescriptor descriptor = (MinestomDescriptor) mob.entity().getDescriptor();
-                mob.entity().getNavigator().setDestination(() -> {
-                    return selector.selectTarget()
-                            .map(descriptor::computeTargetPosition)
-                            .orElse(null);
-                });
+                mob.entity().getNavigator().setDestination(() -> selector.selectTarget()
+                        .map(descriptor::computeTargetPosition)
+                        .orElse(null));
             }
 
             @Override
