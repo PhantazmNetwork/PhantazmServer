@@ -115,7 +115,7 @@ public final class PhantazmServer {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(node, PHANTAZM_NODE, serverConfig, lobbiesConfig);
+            initializeFeatures(node, serverConfig, lobbiesConfig);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -143,15 +143,15 @@ public final class PhantazmServer {
         return false;
     }
 
-    private static void initializeFeatures(EventNode<Event> global, EventNode<Event> phantazm, ServerConfig serverConfig,
+    private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
                                            LobbiesConfig lobbiesConfig) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool
                 .commonPool()), MinecraftServer.getConnectionManager());
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
-        Chat.initialize(global);
+        Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
         Neuron.initialize(global, serverConfig.pathfinderConfig());
-        NeuronTest.initialize(global, Neuron.getSpawner(), phantazm);
+        NeuronTest.initialize(global, Neuron.getSpawner());
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
         EquipmentFeature.initialize(Path.of("./equipment/"), new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                 () -> new Dump(DumpSettings.builder()
