@@ -135,6 +135,10 @@ public final class AdventureConfigProcessors {
         return soundSource;
     }
 
+    /**
+     * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link RGBLike} objects.
+     * @return the ConfigProcessor used to serialize/deserialize RGBLike instances
+     */
     public static @NotNull ConfigProcessor<RGBLike> rgbLike() {
         return rgbLike;
     }

@@ -157,7 +157,6 @@ public final class PhantazmServer {
                 () -> new Dump(DumpSettings.builder()
                         .setDefaultFlowStyle(FlowStyle.BLOCK)
                         .build())));
-        GunTest.initialize(global, phantazm, viewProvider);
         ZombiesTest.initialize(global);
     }
 

@@ -203,8 +203,7 @@ final class EquipmentFeature {
      * This takes the form of {@link ComplexData} in order to instantiate {@link GunLevel}s.
      * @return A {@link ConfigProcessor} for gun level data
      */
-    // this should be private when GunTest is deleted
-    public static @NotNull ConfigProcessor<ComplexData> createGunLevelProcessor() {
+    private static @NotNull ConfigProcessor<ComplexData> createGunLevelProcessor() {
         Map<Key, ConfigProcessor<? extends Keyed>> gunProcessors = new HashMap<>(38);
         gunProcessors.put(GunStats.SERIAL_KEY, GunStats.processor());
         gunProcessors.put(GunLevelData.SERIAL_KEY, new GunLevelDataConfigProcessor(ItemStackConfigProcessors.snbt()));

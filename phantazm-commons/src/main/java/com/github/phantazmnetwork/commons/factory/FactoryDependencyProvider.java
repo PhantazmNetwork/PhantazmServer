@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * A {@link DependencyProvider} that internally uses {@link Factory}s in order to provide dependencies.
+ */
 public class FactoryDependencyProvider implements DependencyProvider {
 
     private final Map<Key, Keyed> loadedData;
@@ -16,9 +19,14 @@ public class FactoryDependencyProvider implements DependencyProvider {
 
     private final Map<Key, Factory<?, ?>> factories;
 
+    /**
+     * Creates a new {@link FactoryDependencyProvider}.
+     * @param loadedData A {@link Map} of loaded data that {@link Factory}s can use to create dependencies
+     * @param factories A {@link Map} of {@link Factory}s that are used to create dependencies
+     */
     public FactoryDependencyProvider(@NotNull Map<Key, Keyed> loadedData, @NotNull Map<Key, Factory<?, ?>> factories) {
-        this.loadedData = Map.copyOf(Objects.requireNonNull(loadedData, "loadedData"));
-        this.factories = Map.copyOf(Objects.requireNonNull(factories, "factories"));
+        this.loadedData = Map.copyOf(loadedData);
+        this.factories = Map.copyOf(factories);
         for (Key key : loadedData.keySet()) {
             if (!factories.containsKey(key)) {
                 throw new IllegalArgumentException("No factory found for key " + key);
