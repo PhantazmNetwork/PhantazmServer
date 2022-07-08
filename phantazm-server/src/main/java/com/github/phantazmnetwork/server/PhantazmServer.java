@@ -22,6 +22,7 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
@@ -62,7 +63,8 @@ public final class PhantazmServer {
             serverConfig = handler.getData(Configuration.SERVER_CONFIG_KEY);
             ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
             if(isUnsafe(args)) {
-                LOGGER.warn("""             
+                LOGGER.warn("""
+                                            
                                             ██
                                           ██░░██
                                         ██░░░░░░██
