@@ -68,12 +68,14 @@ The proxy will (by default) bind to `0.0.0.0:25565` and the server to `0.0.0.0:2
 
 If you're using IntelliJ, you can launch this testing server using the `Run server` run configuration (the server will use unsafe mode), or the server and proxy at once using the `Run server + Velocity` configuration.
 
-You can also run the server and proxy from the command line as follows: \
+You can also run the server from the command line as follows: \
 `./gradlew setupServer copyJar` \
 `cd ./run/server-1` \
-`java -jar server.jar` \
-`cd ../velocity` \
-`java -jar .velocity.jar`
+`java -jar server.jar` 
+
+And the proxy: \
+`cd ./run/velocity` \
+`java -jar velocity.jar`
 
 ## Maintainers
 
