@@ -29,7 +29,7 @@ public class InstanceChatChannel extends BasicChatChannel {
     protected @NotNull Pair<Audience, Component> getAudience(@NotNull Player player) {
         Instance instance = player.getInstance();
         if (instance == null) {
-            return Pair.of(null, Component.text("is not in an instance.", NamedTextColor.RED));
+            return Pair.of(null, Component.text("You are not in an instance.", NamedTextColor.RED));
         }
 
         return Pair.of((ForwardingAudience) () -> List.of(instance), null);
