@@ -57,7 +57,7 @@ If the `unsafe` argument is not specified, the server *will refuse to run* with 
 
 First, come up with an appropriate string. You can use a password manager, or a generation tool like `apg` or `pwgen`. If your server is accessible from the Internet, make sure it's suitably complex. Keep in mind that your secret isn't something you need to actually *remember*, and thus there's no real drawback to making it as long as you want.
 
-Next, set the `velocitySecret` field in `./run/server-1/server-config.toml`, and the `forwarding-secret` field in `./run/velocity/velocity.toml`, to the same string (your secret).
+Next, set the `proxySecret` field in `./run/server-1/server-config.toml`, and the `forwarding-secret` field in `./run/velocity/velocity.toml`, to the same string (your secret).
 
 **Warning**: The secret is stored, in plaintext, in both the server and proxy configuration files. This is, regrettably, something we can't do much about. Make sure access to your backend servers is properly secured.
 
