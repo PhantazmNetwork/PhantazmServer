@@ -31,16 +31,8 @@ public record GunShot(@NotNull Pos start,
     public GunShot {
         Objects.requireNonNull(start, "start");
         Objects.requireNonNull(end, "end");
-        verifyCollection(regularTargets, "regularTargets");
-        verifyCollection(headshotTargets, "headshotTargets");
+        Objects.requireNonNull(regularTargets, "regularTargets");
+        Objects.requireNonNull(headshotTargets, "headshotTargets");
     }
-
-    private void verifyCollection(@NotNull Collection<?> collection, @NotNull String name) {
-        Objects.requireNonNull(collection, name);
-        for (Object element : collection) {
-            Objects.requireNonNull(element, name + " element");
-        }
-    }
-
 
 }

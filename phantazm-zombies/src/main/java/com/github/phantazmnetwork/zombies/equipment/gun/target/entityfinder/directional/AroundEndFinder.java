@@ -26,7 +26,7 @@ public class AroundEndFinder implements DirectionalEntityFinder {
 
     /**
      * Data for an {@link AroundEndFinder}.
-     * @param range The range to search for entities
+     * @param range The euclidean distance range to search for entities
      */
     public record Data(double range) implements Keyed {
 

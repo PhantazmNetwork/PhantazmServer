@@ -11,6 +11,8 @@ public interface ShootTester {
     /**
      * Tests if the gun should shoot.
      * A gun may be able to fire as determined by {@link #canFire(GunState)} while not being able to shoot.
+     * For example, a gun may fire multiple times every single time it shoots. However, while the gun is still sending a volley of shots,
+     * while it may be able to fire, it cannot start an entirely new volley of shots.
      * @param state The gun's current {@link GunState}
      * @return Whether the gun should shoot
      */

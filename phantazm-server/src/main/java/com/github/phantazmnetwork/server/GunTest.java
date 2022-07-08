@@ -30,7 +30,7 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.dire
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.EyeHeightHeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.RayTraceIntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmTargetTester;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmMobTargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
@@ -214,7 +214,7 @@ final class GunTest {
         Key sEntityFinderKey = Key.key(Namespaces.PHANTAZM, "entity_finder");
         BetweenPointsFinder.Data sEntityFinder = new BetweenPointsFinder.Data();
         Key sTargetTesterKey = Key.key(Namespaces.PHANTAZM, "target_tester");
-        PhantazmTargetTester.Data sTargetTester = new PhantazmTargetTester.Data(true);
+        PhantazmMobTargetTester.Data sTargetTester = new PhantazmMobTargetTester.Data(true);
         Key sIntersectionFinderKey = Key.key(Namespaces.PHANTAZM, "intersection_finder");
         RayTraceIntersectionFinder.Data sIntersectionFinder = new RayTraceIntersectionFinder.Data();
         Key sHeadshotTesterKey = Key.key(Namespaces.PHANTAZM, "headshot_tester");

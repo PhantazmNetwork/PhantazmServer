@@ -14,10 +14,10 @@ import java.util.Objects;
 /**
  * A {@link ProjectileCollisionFilter} which explodes when it comes in contact with {@link PhantazmMob}s.
  */
-public class PhantazmProjectileCollisionFilter implements ProjectileCollisionFilter {
+public class PhantazmMobProjectileCollisionFilter implements ProjectileCollisionFilter {
 
     /**
-     * Data for a {@link PhantazmProjectileCollisionFilter}.
+     * Data for a {@link PhantazmMobProjectileCollisionFilter}.
      */
     public record Data() implements Keyed {
 
@@ -44,10 +44,10 @@ public class PhantazmProjectileCollisionFilter implements ProjectileCollisionFil
     private final MobStore mobStore;
 
     /**
-     * Creates a new {@link PhantazmProjectileCollisionFilter}.
+     * Creates a new {@link PhantazmMobProjectileCollisionFilter}.
      * @param mobStore A {@link MobStore} to retrive {@link PhantazmMob}s from
      */
-    public PhantazmProjectileCollisionFilter(@NotNull MobStore mobStore) {
+    public PhantazmMobProjectileCollisionFilter(@NotNull MobStore mobStore) {
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 

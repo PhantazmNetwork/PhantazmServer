@@ -21,10 +21,6 @@ public record GunModel(@NotNull Key rootLevel, @NotNull Map<Key, GunLevel> level
     public GunModel {
         Objects.requireNonNull(rootLevel, "rootLevel");
         Objects.requireNonNull(levels, "levels");
-
-        for (GunLevel level : levels.values()) {
-            Objects.requireNonNull(level, "levels level");
-        }
     }
 
 }

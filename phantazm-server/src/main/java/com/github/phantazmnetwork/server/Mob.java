@@ -149,12 +149,9 @@ public final class Mob {
             Files.createDirectories(mobPath);
 
             try (Stream<Path> paths = Files.list(mobPath)) {
-                String ending;
-                if (codec.getPreferredExtensions().isEmpty()) {
-                    ending = "";
-                } else {
-                    ending = "." + codec.getPreferredExtensions().get(0);
-                }
+                String ending = codec.getPreferredExtensions().isEmpty()
+                        ? ""
+                        : "." + codec.getPreferredExtensions().get(0);
                 PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + ending);
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {

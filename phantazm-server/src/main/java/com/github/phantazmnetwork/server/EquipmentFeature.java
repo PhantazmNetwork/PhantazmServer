@@ -33,7 +33,7 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.*;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.HitScanFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.SpreadFirer;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.PhantazmProjectileCollisionFilter;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.PhantazmMobProjectileCollisionFilter;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.ProjectileCollisionFilter;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.ProjectileFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.*;
@@ -52,7 +52,7 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinde
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.TargetLimiter;
-import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmTargetTester;
+import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.PhantazmMobTargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
@@ -123,15 +123,12 @@ final class EquipmentFeature {
         try (Stream<Path> gunDirectories = Files.find(guns, 1,
                 (path, attributes) -> attributes.isDirectory())) {
             for (Path gunDirectory : (Iterable<? extends Path>) gunDirectories::iterator) {
-                String infoFileName;
-                if (codec.getPreferredExtensions().isEmpty()) {
-                    infoFileName = "info";
-                } else {
-                    infoFileName = "info." + codec.getPreferredExtensions().get(0);
-                }
+                String infoFileName = codec.getPreferredExtensions().isEmpty()
+                        ? "info"
+                        : "info." + codec.getPreferredExtensions().get(0);
                 Path infoPath = gunDirectory.resolve(infoFileName);
                 if (!Files.isRegularFile(infoPath)) {
-                    LOGGER.warn("No info file at {}.", infoPath);
+                    LOGGER.warn("No gun info file at {}.", infoPath);
                     continue;
                 }
 
@@ -139,7 +136,7 @@ final class EquipmentFeature {
                 try {
                     gunData = ConfigBridges.read(infoPath, codec, gunDataProcessor);
                 } catch (ConfigProcessException e) {
-                    LOGGER.warn("Failed to read info file at {}.", infoPath, e);
+                    LOGGER.warn("Failed to read gun info file at {}.", infoPath, e);
                     continue;
                 }
 
@@ -181,7 +178,7 @@ final class EquipmentFeature {
                         }
                     }
                 } catch (IOException e) {
-                    LOGGER.warn("Failed to read levelRoot directory at {}.", levelsPath, e);
+                    LOGGER.warn("Failed to read levels directory at {}.", levelsPath, e);
                     continue;
                 }
 
@@ -225,7 +222,7 @@ final class EquipmentFeature {
         gunProcessors.put(RayTraceBlockIteration.Data.SERIAL_KEY, RayTraceBlockIteration.processor());
         gunProcessors.put(WallshotBlockIteration.Data.SERIAL_KEY, WallshotBlockIteration.processor());
         gunProcessors.put(HitScanFirer.Data.SERIAL_KEY, HitScanFirer.processor());
-        gunProcessors.put(PhantazmProjectileCollisionFilter.Data.SERIAL_KEY, PhantazmProjectileCollisionFilter.processor());
+        gunProcessors.put(PhantazmMobProjectileCollisionFilter.Data.SERIAL_KEY, PhantazmMobProjectileCollisionFilter.processor());
         gunProcessors.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.processor());
         gunProcessors.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.processor());
         gunProcessors.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.processor());
@@ -244,7 +241,7 @@ final class EquipmentFeature {
         gunProcessors.put(AroundEndFinder.Data.SERIAL_KEY, AroundEndFinder.processor());
         gunProcessors.put(BetweenPointsFinder.Data.SERIAL_KEY, BetweenPointsFinder.processor());
         gunProcessors.put(NearbyEntityFinder.Data.SERIAL_KEY, NearbyEntityFinder.processor());
-        gunProcessors.put(PhantazmTargetTester.Data.SERIAL_KEY, PhantazmTargetTester.processor());
+        gunProcessors.put(PhantazmMobTargetTester.Data.SERIAL_KEY, PhantazmMobTargetTester.processor());
         gunProcessors.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, EyeHeightHeadshotTester.processor());
         gunProcessors.put(StaticHeadshotTester.Data.SERIAL_KEY, StaticHeadshotTester.processor());
         gunProcessors.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, RayTraceIntersectionFinder.processor());
@@ -314,14 +311,14 @@ final class EquipmentFeature {
             ShootTester shootTester = provider.getDependency(data.shootTester());
             ReloadTester reloadTester = provider.getDependency(data.reloadTester());
             Firer firer = provider.getDependency(data.firer());
-            Collection<GunEffect> startEffects = provider.getDependencies(data.startEffects());
+            Collection<GunEffect> activateEffects = provider.getDependencies(data.activateEffects());
             Collection<GunEffect> shootEffects = provider.getDependencies(data.shootEffects());
             Collection<GunEffect> reloadEffects = provider.getDependencies(data.reloadEffects());
             Collection<GunEffect> tickEffects = provider.getDependencies(data.tickEffects());
             Collection<GunEffect> noAmmoEffects = provider.getDependencies(data.noAmmoEffects());
             Collection<GunStackMapper> gunStackMappers = provider.getDependencies(data.gunStackMappers());
 
-            return new GunLevel(data.upgrades(), data.stack(), stats, shootTester, reloadTester, firer, startEffects,
+            return new GunLevel(data.upgrades(), data.stack(), stats, shootTester, reloadTester, firer, activateEffects,
                     shootEffects, reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
         };
         Factory<EntityInstanceAudienceProvider.Data, EntityInstanceAudienceProvider> entityInstanceAudienceProvider
@@ -369,8 +366,8 @@ final class EquipmentFeature {
 
             return new HitScanFirer(playerView::getPlayer, endSelector, targetFinder, shotHandlers);
         };
-        Factory<PhantazmProjectileCollisionFilter.Data, PhantazmProjectileCollisionFilter> phantazmProjectileCollisionFilter
-                = (provider, data) -> new PhantazmProjectileCollisionFilter(store);
+        Factory<PhantazmMobProjectileCollisionFilter.Data, PhantazmMobProjectileCollisionFilter> phantazmProjectileCollisionFilter
+                = (provider, data) -> new PhantazmMobProjectileCollisionFilter(store);
         Factory<ProjectileFirer.Data, ProjectileFirer> projectileFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
@@ -427,8 +424,8 @@ final class EquipmentFeature {
                 = (provider, data) -> new BetweenPointsFinder();
         Factory<NearbyEntityFinder.Data, NearbyEntityFinder> nearbyEntityFinder
                 = (provider, data) -> new NearbyEntityFinder(data);
-        Factory<PhantazmTargetTester.Data, PhantazmTargetTester> phantazmTargetTester
-                = (provider, data) -> new PhantazmTargetTester(data, store);
+        Factory<PhantazmMobTargetTester.Data, PhantazmMobTargetTester> phantazmTargetTester
+                = (provider, data) -> new PhantazmMobTargetTester(data, store);
         Factory<EyeHeightHeadshotTester.Data, EyeHeightHeadshotTester> eyeHeightHeadshotTester
                 = (provider, data) -> new EyeHeightHeadshotTester();
         Factory<StaticHeadshotTester.Data, StaticHeadshotTester> staticHeadshotTester
@@ -474,7 +471,7 @@ final class EquipmentFeature {
         factories.put(RayTraceBlockIteration.Data.SERIAL_KEY, rayTraceBlockIteration);
         factories.put(WallshotBlockIteration.Data.SERIAL_KEY, wallshotBlockIteration);
         factories.put(HitScanFirer.Data.SERIAL_KEY, hitScanFirer);
-        factories.put(PhantazmProjectileCollisionFilter.Data.SERIAL_KEY, phantazmProjectileCollisionFilter);
+        factories.put(PhantazmMobProjectileCollisionFilter.Data.SERIAL_KEY, phantazmProjectileCollisionFilter);
         factories.put(ProjectileFirer.Data.SERIAL_KEY, projectileFirer);
         factories.put(SpreadFirer.Data.SERIAL_KEY, spreadFirer);
         factories.put(ChainShotHandler.Data.SERIAL_KEY, chainShotHandler);
@@ -491,7 +488,7 @@ final class EquipmentFeature {
         factories.put(AroundEndFinder.Data.SERIAL_KEY, aroundEndFinder);
         factories.put(BetweenPointsFinder.Data.SERIAL_KEY, betweenPointsFinder);
         factories.put(NearbyEntityFinder.Data.SERIAL_KEY, nearbyEntityFinder);
-        factories.put(PhantazmTargetTester.Data.SERIAL_KEY, phantazmTargetTester);
+        factories.put(PhantazmMobTargetTester.Data.SERIAL_KEY, phantazmTargetTester);
         factories.put(EyeHeightHeadshotTester.Data.SERIAL_KEY, eyeHeightHeadshotTester);
         factories.put(StaticHeadshotTester.Data.SERIAL_KEY, staticHeadshotTester);
         factories.put(RayTraceIntersectionFinder.Data.SERIAL_KEY, rayTraceTargetTester);

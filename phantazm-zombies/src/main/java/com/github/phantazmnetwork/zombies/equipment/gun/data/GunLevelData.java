@@ -25,7 +25,7 @@ import java.util.function.BiConsumer;
  * @param shootTester A {@link Key} to the gun's {@link ShootTester}
  * @param reloadTester A {@link Key} to the gun's {@link ReloadTester}
  * @param firer A {@link Key} to the gun's {@link Firer}
- * @param startEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+ * @param activateEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
  *                     that are invoked when the gun level becomes active
  * @param shootEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
  *                     that are invoked when the gun is shot
@@ -44,7 +44,7 @@ public record GunLevelData(@NotNull Set<Key> upgrades,
                            @NotNull Key shootTester,
                            @NotNull Key reloadTester,
                            @NotNull Key firer,
-                           @NotNull Collection<Key> startEffects,
+                           @NotNull Collection<Key> activateEffects,
                            @NotNull Collection<Key> shootEffects,
                            @NotNull Collection<Key> reloadEffects,
                            @NotNull Collection<Key> tickEffects,
@@ -82,7 +82,7 @@ public record GunLevelData(@NotNull Set<Key> upgrades,
      * @param shootTester A {@link Key} to the gun's {@link ShootTester}
      * @param reloadTester A {@link Key} to the gun's {@link ReloadTester}
      * @param firer A {@link Key} to the gun's {@link Firer}
-     * @param startEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+     * @param activateEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
      *                     that are invoked when the gun level becomes active
      * @param shootEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
      *                     that are invoked when the gun is shot
@@ -102,7 +102,7 @@ public record GunLevelData(@NotNull Set<Key> upgrades,
         Objects.requireNonNull(shootTester, "shootTester");
         Objects.requireNonNull(reloadTester, "reloadTester");
         Objects.requireNonNull(firer, "firer");
-        verifyCollection(startEffects, "startEffects");
+        verifyCollection(activateEffects, "activateEffects");
         verifyCollection(shootEffects, "shootEffects");
         verifyCollection(reloadEffects, "reloadEffects");
         verifyCollection(tickEffects, "tickEffects");

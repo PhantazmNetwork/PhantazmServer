@@ -20,10 +20,10 @@ import java.util.UUID;
 /**
  * A {@link TargetTester} that only selects {@link PhantazmMob}s.
  */
-public class PhantazmTargetTester implements TargetTester {
+public class PhantazmMobTargetTester implements TargetTester {
 
     /**
-     * Data for a {@link PhantazmTargetTester}.
+     * Data for a {@link PhantazmMobTargetTester}.
      * @param ignorePreviousHits Whether to ignore previously hit {@link UUID}s
      */
     public record Data(boolean ignorePreviousHits) implements Keyed {
@@ -68,11 +68,11 @@ public class PhantazmTargetTester implements TargetTester {
     private final MobStore mobStore;
 
     /**
-     * Creates a {@link PhantazmTargetTester}.
-     * @param data The {@link PhantazmTargetTester}'s {@link Data}
+     * Creates a {@link PhantazmMobTargetTester}.
+     * @param data The {@link PhantazmMobTargetTester}'s {@link Data}
      * @param mobStore The {@link MobStore} to retrieve {@link PhantazmMob}s from
      */
-    public PhantazmTargetTester(@NotNull Data data, @NotNull MobStore mobStore) {
+    public PhantazmMobTargetTester(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }

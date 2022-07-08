@@ -167,7 +167,8 @@ public class BasicTargetFinder implements TargetFinder {
         for (Pair<? extends LivingEntity, Vec> pair : adjustedLocations) {
             if (headshotTester.isHeadshot(shooter, pair.left(), pair.right())) {
                 headshots.add(new GunHit(pair.left(), pair.right()));
-            } else {
+            }
+            else {
                 targets.add(new GunHit(pair.left(), pair.right()));
             }
             previousHits.add(pair.left().getUuid());

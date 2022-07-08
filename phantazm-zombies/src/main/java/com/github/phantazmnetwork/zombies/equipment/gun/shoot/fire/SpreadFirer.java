@@ -42,9 +42,6 @@ public class SpreadFirer implements Firer {
          */
         public Data {
             Objects.requireNonNull(subFirerKeys, "subFirerKeys");
-            for (Key key : subFirerKeys) {
-                Objects.requireNonNull(key, "subFirerKeys key");
-            }
         }
 
         @Override
@@ -108,10 +105,7 @@ public class SpreadFirer implements Firer {
     public SpreadFirer(@NotNull Data data, @NotNull Random random, @NotNull Collection<Firer> subFirers) {
         this.data = Objects.requireNonNull(data, "data");
         this.random = Objects.requireNonNull(random, "random");
-        this.subFirers = Objects.requireNonNull(subFirers, "subFirers");
-        for (Firer firer : subFirers) {
-            Objects.requireNonNull(firer, "subFirers firer");
-        }
+        this.subFirers = List.copyOf(subFirers);
     }
 
     @Override

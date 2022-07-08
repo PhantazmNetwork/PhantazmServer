@@ -23,7 +23,7 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
 
     /**
      * Data for a {@link NearbyEntityFinder}.
-     * @param range The range to search for nearby {@link Entity}s
+     * @param range The euclidean distance range to search for nearby {@link Entity}s
      */
     public record Data(double range) implements Keyed {
 

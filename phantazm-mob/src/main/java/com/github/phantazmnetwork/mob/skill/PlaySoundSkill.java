@@ -70,7 +70,8 @@ public class PlaySoundSkill implements Skill {
         return () -> selector.selectTarget().ifPresent(audience -> {
             if (followAudience) {
                 audience.playSound(sound, Sound.Emitter.self());
-            } else {
+            }
+            else {
                 audience.playSound(sound);
             }
         });

@@ -53,9 +53,6 @@ public class HitScanFirer implements Firer {
             Objects.requireNonNull(endSelectorKey, "endSelectorKey");
             Objects.requireNonNull(targetFinderKey, "targetFinderKey");
             Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
-            for (Key key : shotHandlerKeys) {
-                Objects.requireNonNull(key, "shotHandlerKeys element");
-            }
         }
 
         @Override
@@ -128,10 +125,7 @@ public class HitScanFirer implements Firer {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
-        this.shotHandlers = Objects.requireNonNull(shotHandlers, "shotHandlers");
-        for (ShotHandler shotHandler : shotHandlers) {
-            Objects.requireNonNull(shotHandler, "shotHandlers shotHandler");
-        }
+        this.shotHandlers = List.copyOf(shotHandlers);
     }
 
     @Override

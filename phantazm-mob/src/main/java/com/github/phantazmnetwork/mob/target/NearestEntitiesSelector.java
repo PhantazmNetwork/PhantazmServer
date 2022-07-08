@@ -20,7 +20,7 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
 
     /**
      * Creates a {@link NearestEntitiesSelector}.
-     * @param range The range of the selector
+     * @param range The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      */
     public NearestEntitiesSelector(double range, int targetLimit) {
@@ -67,8 +67,8 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
     }
 
     /**
-     * Gets the range of the selector.
-     * @return The range of the selector
+     * Gets the euclidean distance range of the selector.
+     * @return The euclidean distance range of the selector
      */
     public double getRange() {
         return range;

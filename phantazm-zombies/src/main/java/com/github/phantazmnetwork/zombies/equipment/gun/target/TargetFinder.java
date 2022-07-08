@@ -12,8 +12,11 @@ import java.util.UUID;
 
 /**
  * Finds targets for a shot.
- * While entity finders find possible entity candidates, implementations of this class
- * should find actual targets: both regular shots and headshots.
+ * Entity finders find entities that are possible target candidates.
+ * Implementations may use these in order to select entities to become actual targets.
+ * These targets are grouped into "regular" and "headshot" targets.
+ * Targets do not necessarily need to be shot through the head in order to be considered headshots, but
+ * other code treats regular shots and headshots differently.
  */
 public interface TargetFinder {
 

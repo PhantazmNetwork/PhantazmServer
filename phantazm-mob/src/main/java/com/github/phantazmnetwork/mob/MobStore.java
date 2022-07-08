@@ -71,6 +71,15 @@ public class MobStore {
         return uuidToMob.get(Objects.requireNonNull(uuid, "uuid"));
     }
 
+    /**
+     * Checks if the mob store contains a {@link PhantazmMob} associated with a {@link UUID}.
+     * @param uuid The {@link UUID} to check
+     * @return Whether a {@link PhantazmMob} is associated with the {@link UUID} in the store
+     */
+    public boolean hasMob(@NotNull UUID uuid) {
+        return uuidToMob.containsKey(Objects.requireNonNull(uuid, "uuid"));
+    }
+
     private @NotNull Map<Key, Collection<SkillInstance>> createTriggerInstances(@NotNull PhantazmMob mob) {
         Map<Key, Collection<SkillInstance>> triggerInstances = new HashMap<>(mob.model().getTriggers().size());
         for (Map.Entry<Key, Collection<Skill>> entry : mob.model().getTriggers().entrySet()) {

@@ -21,7 +21,7 @@ import java.util.Set;
  * @param shootTester The gun's {@link ShootTester}
  * @param reloadTester The gun's {@link ReloadTester}
  * @param firer The gun's {@link Firer}
- * @param startEffects The gun's {@link GunEffect}s that are invoked when the gun level becomes active
+ * @param activateEffects The gun's {@link GunEffect}s that are invoked when the gun level becomes active
  * @param shootEffects The gun's {@link GunEffect}s that are invoked when the gun is shot
  * @param reloadEffects The gun's {@link GunEffect}s that are invoked when the gun begins reloading
  * @param tickEffects The gun's {@link GunEffect}s that are invoked every tick
@@ -34,7 +34,7 @@ public record GunLevel(@NotNull Set<Key> upgrades,
                        @NotNull ShootTester shootTester,
                        @NotNull ReloadTester reloadTester,
                        @NotNull Firer firer,
-                       @NotNull Collection<GunEffect> startEffects,
+                       @NotNull Collection<GunEffect> activateEffects,
                        @NotNull Collection<GunEffect> shootEffects,
                        @NotNull Collection<GunEffect> reloadEffects,
                        @NotNull Collection<GunEffect> tickEffects,
@@ -49,7 +49,7 @@ public record GunLevel(@NotNull Set<Key> upgrades,
      * @param shootTester The gun's {@link ShootTester}
      * @param reloadTester The gun's {@link ReloadTester}
      * @param firer The gun's {@link Firer}
-     * @param startEffects The gun's {@link GunEffect}s that are invoked when the gun level becomes active
+     * @param activateEffects The gun's {@link GunEffect}s that are invoked when the gun level becomes active
      * @param shootEffects The gun's {@link GunEffect}s that are invoked when the gun is shot
      * @param reloadEffects The gun's {@link GunEffect}s that are invoked when the gun begins reloading
      * @param tickEffects The gun's {@link GunEffect}s that are invoked every tick
@@ -63,7 +63,7 @@ public record GunLevel(@NotNull Set<Key> upgrades,
         Objects.requireNonNull(shootTester, "shootTester");
         Objects.requireNonNull(reloadTester, "reloadTester");
         Objects.requireNonNull(firer, "firer");
-        verifyCollection(startEffects, "startEffects");
+        verifyCollection(activateEffects, "activateEffects");
         verifyCollection(shootEffects, "shootEffects");
         verifyCollection(reloadEffects, "reloadEffects");
         verifyCollection(tickEffects, "tickEffects");

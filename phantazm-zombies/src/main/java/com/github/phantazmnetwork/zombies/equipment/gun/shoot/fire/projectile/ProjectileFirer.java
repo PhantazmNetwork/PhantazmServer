@@ -83,9 +83,6 @@ public class ProjectileFirer implements Firer {
             Objects.requireNonNull(targetFinderKey, "targetFinderKey");
             Objects.requireNonNull(collisionFilterKey, "collisionFilterKey");
             Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
-            for (Key key : shotHandlerKeys) {
-                Objects.requireNonNull(key, "shotHandlerKey key");
-            }
             Objects.requireNonNull(entityType, "entityType");
         }
 
@@ -213,10 +210,7 @@ public class ProjectileFirer implements Firer {
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
         this.collisionFilter = Objects.requireNonNull(collisionFilter, "collisionFilter");
-        this.shotHandlers = Objects.requireNonNull(shotHandlers, "shotHandlers");
-        for (ShotHandler shotHandler : shotHandlers) {
-            Objects.requireNonNull(shotHandler, "shotHandlers shotHandler");
-        }
+        this.shotHandlers = List.copyOf(shotHandlers);
     }
 
     @Override

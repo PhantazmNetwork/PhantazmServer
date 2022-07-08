@@ -140,7 +140,8 @@ public class ReloadActionBarEffect implements GunEffect {
             float progress = (float) state.ticksSinceLastReload() / stats.reloadSpeed();
             audienceProvider.provideAudience().ifPresent(audience -> audience.sendActionBar(chooser.choose(state, progress)));
             active = true;
-        } else if (active) {
+        }
+        else if (active) {
             audienceProvider.provideAudience().ifPresent(audience -> audience.sendActionBar(Component.empty()));
             active = false;
         }
