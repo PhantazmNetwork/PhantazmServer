@@ -120,9 +120,12 @@ final class EquipmentFeature {
         Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> dependencyAdders = createDependencyAdders();
 
         gunLevelMap = new HashMap<>();
-        try (Stream<Path> gunDirectories = Files.find(guns, 1,
-                (path, attributes) -> attributes.isDirectory())) {
+        try (Stream<Path> gunDirectories = Files.list(guns)) {
             for (Path gunDirectory : (Iterable<? extends Path>) gunDirectories::iterator) {
+                if (!Files.isDirectory(gunDirectory)) {
+                    continue;
+                }
+
                 String infoFileName = codec.getPreferredExtensions().isEmpty()
                         ? "info"
                         : "info." + codec.getPreferredExtensions().get(0);
@@ -144,9 +147,12 @@ final class EquipmentFeature {
                 Set<Key> requiredLevelKeys = new HashSet<>();
                 List<ComplexData> levelData = new ArrayList<>();
                 Path levelsPath = gunDirectory.resolve("levels");
-                try (Stream<Path> levelDirectories = Files.find(levelsPath, 1,
-                        (path, attributes) -> attributes.isRegularFile() && matcher.matches(path))) {
+                try (Stream<Path> levelDirectories = Files.list(levelsPath)) {
                     for (Path levelFile : (Iterable<? extends Path>) levelDirectories::iterator) {
+                        if (!(Files.isRegularFile(levelFile) && matcher.matches(levelFile))) {
+                            continue;
+                        }
+
                         try {
                             ComplexData data = ConfigBridges.read(levelFile, codec, gunLevelProcessor);
 

@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.api.chat.ChatChannel;
 import com.github.phantazmnetwork.api.chat.InstanceChatChannel;
 import com.github.phantazmnetwork.api.chat.SelfChatChannel;
 import com.github.phantazmnetwork.api.chat.command.ChatCommand;
+import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandManager;
@@ -34,6 +35,8 @@ public final class Chat {
     /**
      * Initializes chat features. Should only be called once from {@link PhantazmServer#main(String[])}.
      * @param node the node to register chat-related events to
+     * @param viewProvider A {@link PlayerViewProvider} to create {@link PlayerView}s
+     * @param commandManager The {@link CommandManager} to register chat commands to
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
                            @NotNull CommandManager commandManager) {
