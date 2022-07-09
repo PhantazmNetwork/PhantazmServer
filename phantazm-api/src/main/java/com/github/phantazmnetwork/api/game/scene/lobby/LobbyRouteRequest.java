@@ -25,7 +25,7 @@ public record LobbyRouteRequest(@NotNull String targetLobbyName, @NotNull LobbyJ
     }
 
     @Override
-    public @UnmodifiableView @NotNull Collection<PlayerView> getPlayers() {
-        return joinRequest.getPlayers();
+    public int getRequestWeight() {
+        return joinRequest().getRequestWeight();
     }
 }
