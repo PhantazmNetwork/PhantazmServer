@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.api.game.scene.lobby;
 
 import com.github.phantazmnetwork.api.config.InstanceConfig;
+import com.github.phantazmnetwork.api.game.scene.InstanceScene;
 import com.github.phantazmnetwork.api.game.scene.RouteResult;
 import com.github.phantazmnetwork.api.game.scene.Scene;
 import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
@@ -17,19 +18,8 @@ import java.util.*;
 /**
  * Represents a lobby. Most basic scene which contains {@link Player}s.
  */
-public class Lobby implements Scene<LobbyJoinRequest> {
-
-    private final Instance instance;
-
+public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private final InstanceConfig instanceConfig;
-
-    private final SceneFallback fallback;
-
-    private final Map<UUID, PlayerView> players = new HashMap<>();
-
-    private final Map<UUID, PlayerView> unmodifiablePlayers = Collections.unmodifiableMap(players);
-
-    private boolean shutdown = false;
 
     private boolean joinable = true;
 
@@ -40,9 +30,8 @@ public class Lobby implements Scene<LobbyJoinRequest> {
      * @param fallback A fallback for the lobby
      */
     public Lobby(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig, @NotNull SceneFallback fallback) {
-        this.instance = Objects.requireNonNull(instance, "instance");
+        super(instance, fallback);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
-        this.fallback = Objects.requireNonNull(fallback, "fallback");
     }
 
     @Override
@@ -54,8 +43,9 @@ public class Lobby implements Scene<LobbyJoinRequest> {
             return new RouteResult(false, Optional.of(Component.text("Lobby is not joinable.")));
         }
 
-        Collection<Pair<PlayerView, Player>> joiners = new ArrayList<>();
-        for (PlayerView playerView : joinRequest.getPlayers()) {
+        Collection<PlayerView> playerViews = joinRequest.getPlayers();
+        Collection<Pair<PlayerView, Player>> joiners = new ArrayList<>(playerViews.size());
+        for (PlayerView playerView : playerViews) {
             playerView.getPlayer().ifPresent(player -> {
                 if (player.getInstance() != instance) {
                     joiners.add(Pair.of(playerView, player));
@@ -99,46 +89,6 @@ public class Lobby implements Scene<LobbyJoinRequest> {
     }
 
     @Override
-    public @NotNull Map<UUID, PlayerView> getPlayers() {
-        return unmodifiablePlayers;
-    }
-
-    @Override
-    public int getIngamePlayerCount() {
-        Wrapper<Integer> count = Wrapper.of(0);
-
-        for (PlayerView playerView : getPlayers().values()) {
-            playerView.getPlayer().ifPresent(player -> {
-                if (player.getInstance() == instance) {
-                    count.apply(val -> val + 1);
-                }
-            });
-        }
-
-        return count.get();
-    }
-
-    @Override
-    public int getJoinWeight(@NotNull LobbyJoinRequest request) {
-        return -(getIngamePlayerCount() + request.getPlayers().size());
-    }
-
-    @Override
-    public boolean isShutdown() {
-        return shutdown;
-    }
-
-    @Override
-    public void forceShutdown() {
-        for (PlayerView player : players.values()) {
-            player.getPlayer().ifPresent(unused -> fallback.fallback(player));
-        }
-        players.clear();
-
-        shutdown = true;
-    }
-
-    @Override
     public boolean isJoinable() {
         return joinable;
     }
@@ -147,10 +97,4 @@ public class Lobby implements Scene<LobbyJoinRequest> {
     public void setJoinable(boolean joinable) {
         this.joinable = joinable;
     }
-
-    @Override
-    public void tick(long time) {
-        // NO-OP
-    }
-
 }

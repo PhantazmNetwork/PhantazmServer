@@ -12,7 +12,7 @@ import java.util.UUID;
  * Represents a scene which accepts join requests.
  * @param <TRequest> The type of request used for joins.
  */
-public interface Scene<TRequest> extends Tickable {
+public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
 
     /**
      * Routes a join request to the scene.
