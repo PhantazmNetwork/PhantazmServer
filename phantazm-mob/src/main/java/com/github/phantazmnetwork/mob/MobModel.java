@@ -107,6 +107,10 @@ public class MobModel implements Keyed {
         return equipment;
     }
 
+    /**
+     * Gets the mob's attributes.
+     * @return The mob's attributes
+     */
     public @NotNull @Unmodifiable Object2FloatMap<String> getAttributes() {
         return attributes;
     }

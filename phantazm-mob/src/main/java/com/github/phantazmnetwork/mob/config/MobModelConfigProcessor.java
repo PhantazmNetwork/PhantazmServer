@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.mob.config;
 
-import com.github.phantazmnetwork.api.config.processor.AttributeMapConfigProcessor;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.goal.Goal;
@@ -15,6 +14,7 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.EquipmentSlot;
@@ -36,7 +36,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
     private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
 
     private static final ConfigProcessor<Object2FloatMap<String>> ATTRIBUTE_MAP_PROCESSOR
-            = AttributeMapConfigProcessor.processor();
+            = ConfigProcessor.FLOAT.mapProcessor(Object2FloatOpenHashMap::new);
 
     private final ConfigProcessor<MinestomDescriptor> descriptorProcessor;
 

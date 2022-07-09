@@ -14,10 +14,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link HeadshotTester} that always headshots or always does not headshot.
+ */
 public class StaticHeadshotTester implements HeadshotTester {
 
+    /**
+     * Data for a {@link StaticHeadshotTester}.
+     * @param shouldHeadshot Whether the {@link StaticHeadshotTester} should always headshot
+     */
     public record Data(boolean shouldHeadshot) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.headshot_tester.static");
 
         @Override
@@ -26,6 +36,10 @@ public class StaticHeadshotTester implements HeadshotTester {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -46,6 +60,10 @@ public class StaticHeadshotTester implements HeadshotTester {
 
     private final Data data;
 
+    /**
+     * Creates a {@link StaticHeadshotTester}.
+     * @param data The {@link StaticHeadshotTester}'s {@link Data}
+     */
     public StaticHeadshotTester(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }

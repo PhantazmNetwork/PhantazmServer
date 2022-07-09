@@ -13,12 +13,22 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.utils.binary.BinaryWriter;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Particle data for a dust particle that transitions between two colors.
+ */
 public class TransitionDustParticleData implements ParticleData {
 
+    /**
+     * The serial {@link Key} for {@link TransitionDustParticleData}.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.dust_color_transition");
 
     private static final Key KEY = Particle.DUST_COLOR_TRANSITION.key();
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link TransitionDustParticleData}.
+     * @return A {@link ConfigProcessor} for {@link TransitionDustParticleData}
+     */
     public static @NotNull ConfigProcessor<TransitionDustParticleData> processor() {
         ConfigProcessor<RGBLike> rgbProcessor = AdventureConfigProcessors.rgbLike();
 
@@ -66,6 +76,12 @@ public class TransitionDustParticleData implements ParticleData {
 
     private final float size;
 
+    /**
+     * Creates a new {@link TransitionDustParticleData}.
+     * @param from The initial color of the particle
+     * @param to The final color of the particle
+     * @param size The size of the particle
+     */
     public TransitionDustParticleData(@NotNull RGBLike from, @NotNull RGBLike to, float size) {
         this.fromRed = from.red() / 255.0F;
         this.fromGreen = from.green() / 255.0F;

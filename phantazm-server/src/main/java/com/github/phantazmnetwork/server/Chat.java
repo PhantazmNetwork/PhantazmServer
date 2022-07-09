@@ -1,28 +1,23 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.phantazmnetwork.api.chat.ChatChannel;
-import com.github.phantazmnetwork.api.chat.ChatChannelSendEvent;
+import com.github.phantazmnetwork.api.chat.InstanceChatChannel;
+import com.github.phantazmnetwork.api.chat.SelfChatChannel;
 import com.github.phantazmnetwork.api.chat.command.ChatCommand;
-import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identified;
-import net.kyori.adventure.identity.Identity;
+import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Entity;
+import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.instance.Instance;
+import net.minestom.server.event.player.PlayerLoginEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 /**
  * Entrypoint for chat-related features.
@@ -40,35 +35,12 @@ public final class Chat {
     /**
      * Initializes chat features. Should only be called once from {@link PhantazmServer#main(String[])}.
      * @param node the node to register chat-related events to
+     * @param viewProvider A {@link PlayerViewProvider} to create {@link PlayerView}s
+     * @param commandManager The {@link CommandManager} to register chat commands to
      */
-    static void initialize(EventNode<Event> node) {
-        ChatChannel defaultChannel = (sender, message, messageType, filter) -> {
-            if (sender instanceof Entity entity && sender instanceof Identified identified) {
-                Instance instance = entity.getInstance();
-                if (instance != null) {
-                    Component formatted = Component.join(JoinConfiguration.separator(Component.space()),
-                            Component.text("all"),
-                            Component.text(">", NamedTextColor.GRAY),
-                            message);
-                    instance.filterAudience(filter).sendMessage(identified, formatted, messageType);
-                }
-            }
-        };
-
-        ChatChannel selfChannel = (sender, message, messageType, filter) -> {
-            if (sender != null) {
-                Identity identity = (sender instanceof Identified identified)
-                        ? identified.identity()
-                        : Identity.nil();
-                Component formatted = Component.join(JoinConfiguration.separator(Component.space()),
-                        Component.text("self"),
-                        Component.text(">", NamedTextColor.GRAY),
-                        message);
-                sender.filterAudience(filter).sendMessage(identity, formatted, messageType);
-            }
-        };
-
-        Map<String, Function<Player, ChatChannel>> channels = new HashMap<>() {
+    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
+                           @NotNull CommandManager commandManager) {
+        Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
                 if (key.equals(DEFAULT_CHAT_CHANNEL_NAME)) {
@@ -79,24 +51,30 @@ public final class Chat {
             }
         };
 
-        channels.put(DEFAULT_CHAT_CHANNEL_NAME, (unused) -> defaultChannel);
-        channels.put("self", (unused) -> selfChannel);
+        channels.put(DEFAULT_CHAT_CHANNEL_NAME, new InstanceChatChannel(viewProvider));
+        channels.put("self", new SelfChatChannel(viewProvider));
 
-        Cache<UUID, ChatChannel> playerChannels = Caffeine.newBuilder().weakValues().build();
-        MinecraftServer.getCommandManager().register(new ChatCommand(channels, playerChannels, defaultChannel));
+        Map<UUID, String> playerChannels = new HashMap<>();
+        commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));
+        node.addListener(PlayerLoginEvent.class, event -> {
+            UUID channel = event.getPlayer().getUuid();
+            playerChannels.putIfAbsent(channel, DEFAULT_CHAT_CHANNEL_NAME);
+        });
         node.addListener(PlayerChatEvent.class, event -> {
             event.setCancelled(true);
 
-            ChatChannel channel = playerChannels.get(event.getPlayer().getUuid(), (unused) -> defaultChannel);
-            Component message = (event.getChatFormatFunction() != null)
-                    ? event.getChatFormatFunction().apply(event)
-                    : event.getDefaultChatFormat().get();
+            Player player = event.getPlayer();
+            UUID uuid = player.getUuid();
+            String channelName = playerChannels.putIfAbsent(uuid, DEFAULT_CHAT_CHANNEL_NAME);
+            ChatChannel channel = channels.get(channelName);
+            if (channel == null) {
+                return;
+            }
 
-            ChatChannelSendEvent channelSendEvent = new ChatChannelSendEvent(channel, event.getPlayer(),
-                    event.getMessage(), message);
-            PhantazmServer.PHANTAZM_NODE.callCancellable(channelSendEvent,
-                    () -> channel.broadcast(event.getPlayer(), channelSendEvent.getMessage(), MessageType.CHAT,
-                            audience -> true));
+            channel.findAudience(uuid, audience -> {
+                Component message = channel.formatMessage(event);
+                audience.sendMessage(message);
+            }, player::sendMessage);
         });
     }
 }

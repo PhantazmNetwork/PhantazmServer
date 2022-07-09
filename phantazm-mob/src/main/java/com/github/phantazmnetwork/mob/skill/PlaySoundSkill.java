@@ -67,15 +67,14 @@ public class PlaySoundSkill implements Skill {
     @Override
     public @NotNull SkillInstance createSkill(@NotNull PhantazmMob sender) {
         TargetSelectorInstance<? extends Audience> selector = selectorCreator.createSelector(sender);
-        return () -> {
-            selector.selectTarget().ifPresent(audience -> {
-                if (followAudience) {
-                    audience.playSound(sound, Sound.Emitter.self());
-                } else {
-                    audience.playSound(sound);
-                }
-            });
-        };
+        return () -> selector.selectTarget().ifPresent(audience -> {
+            if (followAudience) {
+                audience.playSound(sound, Sound.Emitter.self());
+            }
+            else {
+                audience.playSound(sound);
+            }
+        });
     }
 
     @Override

@@ -18,6 +18,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * {@link ConfigProcessor}s for Minestom-specific objects that are serializable.
+ */
 public class MinestomConfigProcessors {
 
     private MinestomConfigProcessors() {
@@ -82,18 +85,35 @@ public class MinestomConfigProcessors {
         }
     };
 
+    /**
+     * Gets a {@link ConfigProcessor} for {@link EntityType}s.
+     * @return A {@link ConfigProcessor} for {@link EntityType}s
+     */
     public static @NotNull ConfigProcessor<EntityType> entityType() {
         return ENTITY_TYPE;
     }
 
+    /**
+     * Gets a {@link ConfigProcessor} for {@link Particle}s.
+     * @return A {@link ConfigProcessor} for {@link Particle}s
+     */
     public static @NotNull ConfigProcessor<Particle> particle() {
         return PARTICLE;
     }
 
+    /**
+     * Gets a {@link ConfigProcessor} for {@link PotionEffect}s.
+     * @return A {@link ConfigProcessor} for {@link PotionEffect}s
+     */
+    @SuppressWarnings("unused")
     public static @NotNull ConfigProcessor<PotionEffect> potionEffect() {
         return POTION_EFFECT;
     }
 
+    /**
+     * Gets a {@link ConfigProcessor} for {@link Potion}s.
+     * @return A {@link ConfigProcessor} for {@link Potion}s
+     */
     public static @NotNull ConfigProcessor<Potion> potion() {
         return POTION;
     }

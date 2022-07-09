@@ -2,14 +2,20 @@ package com.github.phantazmnetwork.server.config.lobby;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Config for the server's {@link com.github.phantazmnetwork.api.game.scene.lobby.Lobby}s.
+ * @param instancesPath The path where {@link Instance}s are located
+ * @param kickMessage A {@link Component} used to display a message to the player when they are kicked when no valid lobby exists to route them to
+ * @param mainLobbyName The {@link String} name of the main lobby
+ * @param lobbies A {@link Map} of {@link String} lobby names to their respective {@link LobbyConfig}s
  */
 public record LobbiesConfig(@NotNull Path instancesPath,
                             @NotNull Component kickMessage,
@@ -37,5 +43,22 @@ public record LobbiesConfig(@NotNull Path instancesPath,
      */
     public static final LobbiesConfig DEFAULT = new LobbiesConfig(DEFAULT_INSTANCES_PATH, DEFAULT_KICK_MESSAGE,
             DEFAULT_MAIN_LOBBY_NAME, Collections.emptyMap());
+
+    /**
+     * Creates a {@link LobbiesConfig}.
+     * @param instancesPath The path where {@link Instance}s are located
+     * @param kickMessage A {@link Component} used to display a message to the player when they are kicked when no valid lobby exists to route them to
+     * @param mainLobbyName The {@link String} name of the main lobby
+     * @param lobbies A {@link Map} of {@link String} lobby names to their respective {@link LobbyConfig}s
+     */
+    public LobbiesConfig {
+        Objects.requireNonNull(instancesPath, "instancesPath");
+        Objects.requireNonNull(kickMessage, "kickMessage");
+        Objects.requireNonNull(mainLobbyName, "mainLobbyName");
+        Objects.requireNonNull(lobbies, "lobbies");
+        for (LobbyConfig config : lobbies.values()) {
+            Objects.requireNonNull(config, "lobbies config");
+        }
+    }
 
 }

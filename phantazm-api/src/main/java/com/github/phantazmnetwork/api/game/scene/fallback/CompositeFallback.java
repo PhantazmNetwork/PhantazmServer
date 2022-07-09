@@ -8,7 +8,6 @@ import java.util.Objects;
 /**
  * A {@link SceneFallback} which delegates to multiple sub-{@link SceneFallback}s.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class CompositeFallback implements SceneFallback {
 
     private final Iterable<SceneFallback> fallbacks;

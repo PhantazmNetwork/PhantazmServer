@@ -2,14 +2,11 @@ package com.github.phantazmnetwork.mob.target;
 
 import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.ToDoubleFunction;
 
 /**
  * A {@link TargetSelector} that selects nearby {@link Entity}s.
@@ -23,7 +20,7 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
 
     /**
      * Creates a {@link NearestEntitiesSelector}.
-     * @param range The range of the selector
+     * @param range The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      */
     public NearestEntitiesSelector(double range, int targetLimit) {
@@ -57,15 +54,7 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
                 potentialTargets.add(entity);
             }
 
-            potentialTargets.sort(Comparator.comparingDouble(new ToDoubleFunction<>() {
-
-                private final Object2DoubleMap<UUID> distanceMap = new Object2DoubleOpenHashMap<>(potentialTargets.size());
-
-                @Override
-                public double applyAsDouble(Entity value) {
-                    return distanceMap.computeIfAbsent(value.getUuid(), (unused) -> mob.entity().getDistanceSquared(value));
-                }
-            }));
+            potentialTargets.sort(Comparator.comparingDouble(entity -> mob.entity().getDistanceSquared(entity)));
 
             int targetCount = Math.min(potentialTargets.size(), targetLimit);
             Collection<TReturn> targets = new ArrayList<>(targetCount);
@@ -78,8 +67,8 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
     }
 
     /**
-     * Gets the range of the selector.
-     * @return The range of the selector
+     * Gets the euclidean distance range of the selector.
+     * @return The euclidean distance range of the selector
      */
     public double getRange() {
         return range;

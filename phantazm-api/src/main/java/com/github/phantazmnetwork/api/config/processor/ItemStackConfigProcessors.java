@@ -43,7 +43,7 @@ public class ItemStackConfigProcessors {
 
             @SuppressWarnings("UnstableApiUsage")
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull ItemStack itemStack) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull ItemStack itemStack) {
                 return new ConfigPrimitive(itemStack.toItemNBT().toSNBT());
             }
         };

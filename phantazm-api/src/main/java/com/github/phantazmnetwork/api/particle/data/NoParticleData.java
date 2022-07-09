@@ -7,10 +7,20 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.utils.binary.BinaryWriter;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Particle data without any extra data.
+ */
 public class NoParticleData implements ParticleData {
 
+    /**
+     * The serial {@link Key} for {@link NoParticleData}.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.none");
 
+    /**
+     * Gets a {@link ConfigProcessor} for {@link NoParticleData}.
+     * @return A {@link ConfigProcessor} for {@link NoParticleData}
+     */
     public static @NotNull ConfigProcessor<NoParticleData> processor() {
         return ConfigProcessor.emptyProcessor(NoParticleData::new);
     }

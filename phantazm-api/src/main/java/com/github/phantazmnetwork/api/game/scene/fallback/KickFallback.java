@@ -11,7 +11,6 @@ import java.util.Optional;
 /**
  * A {@link SceneFallback} which kicks {@link Player}s.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class KickFallback implements SceneFallback {
 
     private final Component kickMessage;

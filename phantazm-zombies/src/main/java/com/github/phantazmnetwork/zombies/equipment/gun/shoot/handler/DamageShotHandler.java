@@ -19,10 +19,21 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A {@link ShotHandler} that deals damage to targets.
+ */
 public class DamageShotHandler implements ShotHandler {
 
+    /**
+     * Data for a {@link DamageShotHandler}.
+     * @param damage The amount of damage to deal to regular targets
+     * @param headshotDamage The amount of damage to deal to headshots
+     */
     public record Data(float damage, float headshotDamage) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.damage");
 
         @Override
@@ -31,6 +42,10 @@ public class DamageShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -60,6 +75,10 @@ public class DamageShotHandler implements ShotHandler {
 
     private final Data data;
 
+    /**
+     * Creates a new {@link DamageShotHandler} with the given {@link Data}.
+     * @param data The {@link Data} to use
+     */
     public DamageShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }

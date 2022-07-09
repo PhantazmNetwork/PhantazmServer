@@ -12,18 +12,33 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
+/**
+ * A {@link GunEffect} that sets a {@link Player}'s exp based on the time since their last shot.
+ */
 public class ShootExpEffect implements GunEffect {
 
+    /**
+     * Data for a {@link ShootExpEffect}.
+     * @param statsKey A {@link Key} to the gun's {@link GunStats}
+     */
     public record Data(@NotNull Key statsKey) implements Keyed {
 
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.exp.shoot");
 
+        /**
+         * Creates a {@link Data}.
+         * @param statsKey A {@link Key} to the gun's {@link GunStats}
+         */
         public Data {
             Objects.requireNonNull(statsKey, "statsKey");
         }
@@ -34,6 +49,10 @@ public class ShootExpEffect implements GunEffect {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
 
@@ -49,11 +68,16 @@ public class ShootExpEffect implements GunEffect {
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(1);
                 node.put("statsKey", keyProcessor.elementFromData(data.statsKey()));
+
                 return node;
             }
         };
     }
 
+    /**
+     * Creates a dependency consumer for {@link Data}s.
+     * @return A dependency consumer for {@link Data}s
+     */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.statsKey());
     }
@@ -64,6 +88,11 @@ public class ShootExpEffect implements GunEffect {
 
     private final GunStats stats;
 
+    /**
+     * Creates a {@link ShootExpEffect}.
+     * @param playerView The {@link PlayerView} of the {@link Player} to set the exp of
+     * @param stats The {@link GunStats} of the gun
+     */
     public ShootExpEffect(@NotNull PlayerView playerView, @NotNull GunStats stats) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.stats = Objects.requireNonNull(stats, "stats");

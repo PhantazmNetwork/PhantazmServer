@@ -76,7 +76,7 @@ public final class Mob {
         ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(Map.of(
                 GroundMinestomDescriptor.SERIAL_KEY, new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
         )::get);
-        ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor = new NearestEntitiesSelectorConfigProcessor<NearestEntitiesSelector<Player>>() {
+        ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor = new NearestEntitiesSelectorConfigProcessor<>() {
             @Override
             protected @NotNull NearestEntitiesSelector<Player> createSelector(double range, int targetLimit) {
                 return new NearestPlayersSelector(range, targetLimit);
@@ -134,10 +134,11 @@ public final class Mob {
         loadModels(mobPath, codec);
     }
 
-    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node, @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
-        node.addListener(trigger.eventClass(), event -> {
-            mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key());
-        });
+    @SuppressWarnings("SameParameterValue")
+    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
+                                                          @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
+        node.addListener(trigger.eventClass(), event ->
+                mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
     }
 
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
@@ -148,12 +149,9 @@ public final class Mob {
             Files.createDirectories(mobPath);
 
             try (Stream<Path> paths = Files.list(mobPath)) {
-                String ending;
-                if (codec.getPreferredExtensions().isEmpty()) {
-                    ending = "";
-                } else {
-                    ending = "." + codec.getPreferredExtensions().get(0);
-                }
+                String ending = codec.getPreferredExtensions().isEmpty()
+                        ? ""
+                        : "." + codec.getPreferredExtensions().get(0);
                 PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + ending);
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {
@@ -189,6 +187,10 @@ public final class Mob {
         return MODEL_PROCESSOR;
     }
 
+    /**
+     * Gets the {@link MobStore} used by the {@link Mob} system.
+     * @return The {@link MobStore} used by the {@link Mob} system
+     */
     public static MobStore getMobStore() {
         return MOB_STORE;
     }
@@ -205,6 +207,7 @@ public final class Mob {
      * Gets the loaded {@link MobModel}s.
      * @return The loaded {@link MobModel}s
      */
+    @SuppressWarnings("unused")
     public static @NotNull @Unmodifiable Map<Key, MobModel> getModels() {
         return requireInitialized(models);
     }

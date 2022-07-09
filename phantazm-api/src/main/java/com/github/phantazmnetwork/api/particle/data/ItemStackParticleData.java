@@ -14,12 +14,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Particle data that is related to {@link ItemStack}s.
+ */
 public class ItemStackParticleData implements ParticleData {
 
+    /**
+     * The serial {@link Key} for {@link ItemStackParticleData}.
+     */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.item");
 
     private static final Key KEY = Particle.ITEM.key();
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link ItemStackParticleData}.
+     * @param stackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
+     * @return A {@link ConfigProcessor} for {@link ItemStackParticleData}
+     */
     public static @NotNull ConfigProcessor<ItemStackParticleData> processor(@NotNull ConfigProcessor<ItemStack> stackProcessor) {
         return new ConfigProcessor<>() {
             @Override
@@ -40,6 +51,10 @@ public class ItemStackParticleData implements ParticleData {
 
     private final ItemStack stack;
 
+    /**
+     * Creates a new {@link ItemStackParticleData} with the given {@link ItemStack}.
+     * @param stack The {@link ItemStack} to use
+     */
     public ItemStackParticleData(@NotNull ItemStack stack) {
         this.stack = Objects.requireNonNull(stack, "stack");
     }

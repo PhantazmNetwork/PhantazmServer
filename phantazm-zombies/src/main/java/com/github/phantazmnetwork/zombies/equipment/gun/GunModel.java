@@ -1,21 +1,26 @@
 package com.github.phantazmnetwork.zombies.equipment.gun;
 
-import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-public record GunModel(@NotNull List<GunLevel> levels, @NotNull Key name) implements Keyed {
+/**
+ * A model that represents a gun.
+ * @param rootLevel The root level of the gun's upgrade tree
+ * @param levels A {@link Map} of level {@link Key}s to the gun's possible {@link GunLevel}s
+ */
+public record GunModel(@NotNull Key rootLevel, @NotNull Map<Key, GunLevel> levels) {
 
+    /**
+     * Creates a {@link GunModel}.
+     * @param rootLevel The root level of the gun's upgrade tree
+     * @param levels A {@link Map} of level {@link Key}s to the gun's possible {@link GunLevel}s
+     */
     public GunModel {
+        Objects.requireNonNull(rootLevel, "rootLevel");
         Objects.requireNonNull(levels, "levels");
-        Objects.requireNonNull(name, "serialKey");
     }
 
-    @Override
-    public @NotNull Key key() {
-        return name;
-    }
 }

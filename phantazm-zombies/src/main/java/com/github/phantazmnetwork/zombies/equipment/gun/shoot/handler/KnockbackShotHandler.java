@@ -20,10 +20,21 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A {@link ShotHandler} which applies knocback to {@link Entity}s.
+ */
 public class KnockbackShotHandler implements ShotHandler {
 
+    /**
+     * Data for a {@link KnockbackShotHandler}.
+     * @param knockback The knockback to apply to regular targets
+     * @param headshotKnockback The knockback to apply to headshots
+     */
     public record Data(double knockback, double headshotKnockback) implements Keyed {
 
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.knockback");
 
         @Override
@@ -32,19 +43,17 @@ public class KnockbackShotHandler implements ShotHandler {
         }
     }
 
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 double knockback = element.getNumberOrThrow("knockback").doubleValue();
-                if (knockback < 0) {
-                    throw new ConfigProcessException("knockback must be greater than or equal to 0");
-                }
                 double headshotKnockback = element.getNumberOrThrow("headshotKnockback").doubleValue();
-                if (headshotKnockback < 0) {
-                    throw new ConfigProcessException("headshotKnockback must be greater than or equal to 0");
-                }
 
                 return new Data(knockback, headshotKnockback);
             }
@@ -62,6 +71,10 @@ public class KnockbackShotHandler implements ShotHandler {
 
     private final Data data;
 
+    /**
+     * Creates a {@link KnockbackShotHandler}.
+     * @param data The {@link KnockbackShotHandler}'s {@link Data}
+     */
     public KnockbackShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
