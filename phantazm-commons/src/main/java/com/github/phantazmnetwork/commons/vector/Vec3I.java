@@ -103,9 +103,12 @@ public interface Vec3I extends Comparable<Vec3I> {
     }
 
     /**
-     * Returns the mutable thread-local Vec3I instance. This can be used to enable safe, performant optimization when
+     * <p>Returns the mutable thread-local Vec3I instance. This can be used to enable safe, performant optimization when
      * iterating many vectors; instead of creating a new vector every iteration, the iterator can update the vector's
-     * state as needed.
+     * state as needed.</p>
+     *
+     * <p>Since a unique mutable instance is created and re-used per thread, the initial values of this vector's
+     * components can be anything, depending on how it was last used.</p>
      * @return the thread-local Vec3I instance for this thread
      */
     static @NotNull Vec3I threadLocal() {
@@ -177,6 +180,10 @@ public interface Vec3I extends Comparable<Vec3I> {
         return this;
     }
 
+    /**
+     * Returns a mutable copy of this vector. This always creates a new instance.
+     * @return a mutable copy of this vector
+     */
     default @NotNull Vec3I mutableCopy() {
         return new MutableVec3I(getX(), getY(), getZ());
     }

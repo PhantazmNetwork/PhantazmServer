@@ -221,6 +221,21 @@ public interface Region3I extends Iterable<Vec3I> {
         return overlaps(this, other);
     }
 
+    /**
+     * Determines if this Region overlaps the given vector position.
+     * @param position the position to check for overlap
+     * @return true if the position overlaps, false otherwise
+     */
+    default boolean contains(@NotNull Vec3I position) {
+        Vec3I origin = origin();
+        if(position.getX() >= origin.getX() && position.getY() >= origin.getY() && position.getZ() >= origin.getZ()) {
+            Vec3I end = origin.add(lengths());
+            return position.getX() < end.getX() && position.getY() < end.getY() && position.getZ() < end.getZ();
+        }
+
+        return false;
+    }
+
     @Override
     default @NotNull Iterator<Vec3I> iterator() {
         Vec3I origin = origin();
