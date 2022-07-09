@@ -10,7 +10,7 @@ import java.util.Optional;
  * A provider to create new {@link Scene}s.
  * @param <TRequest>> The requests used for the {@link Scene}s that the provider creates
  */
-public interface SceneProvider<TScene extends Scene<TRequest>, TRequest> extends Tickable {
+public interface SceneProvider<TScene extends Scene<TRequest>, TRequest extends SceneJoinRequest> extends Tickable {
 
     /**
      * Provides a {@link Scene}.

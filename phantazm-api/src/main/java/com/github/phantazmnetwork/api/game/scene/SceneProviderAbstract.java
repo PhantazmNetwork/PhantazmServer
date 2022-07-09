@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * An abstract base for {@link SceneProvider}s.
  */
-public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TRequest>
+public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TRequest extends SceneJoinRequest>
         implements SceneProvider<TScene, TRequest> {
 
     private final Collection<TScene> scenes = new ArrayList<>();
