@@ -49,7 +49,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     }
 
     @Override
-    public int getJoinWeight(@NotNull SceneJoinRequest request) {
+    public int getJoinWeight(@NotNull TRequest request) {
         return -(getIngamePlayerCount() + request.getRequestWeight());
     }
 

@@ -109,4 +109,12 @@ public interface Vec3D extends Comparable<Vec3D> {
     static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
         return Math.sqrt(squaredDistance(x1, y1, z1, x2, y2, z2));
     }
+
+    default double squaredDistance(double x, double y, double z) {
+        return Vec3D.squaredDistance(x, y, z, getX(), getY(), getZ());
+    }
+
+    default double squaredDistance(@NotNull Vec3D other) {
+        return squaredDistance(other.getX(), other.getY(), other.getZ());
+    }
 }
