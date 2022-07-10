@@ -332,10 +332,10 @@ public class BasicEditorSession implements EditorSession {
 
         renderer.removeIf(key -> key.value().startsWith("shop."));
         int i = 0;
-        for(ShopInfo shopInfo : currentMap.shops()) {
+        for(ShopPositionInfo shopPositionInfo : currentMap.shops()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "shop." + i++),
                     ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true, false,
-                    RenderUtils.arrayFromRegion(Region3I.normalized(shopInfo.triggerLocation(),
+                    RenderUtils.arrayFromRegion(Region3I.normalized(shopPositionInfo.triggerLocation(),
                             Vec3I.of(1, 1, 1)), currentMap.info().origin(), new Vec3d[2], 0)));
         }
     }

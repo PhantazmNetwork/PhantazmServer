@@ -25,12 +25,11 @@ public class ZombiesMap extends MapObject<MapInfo> {
      * Constructs a new instance of this class.
      *
      * @param info     the backing data object
-     * @param origin   the origin vector this object's coordinates are considered relative to
      * @param instance the instance which this MapObject is in
      */
-    public ZombiesMap(@NotNull MapInfo info, @NotNull Vec3I origin, @NotNull Instance instance,
-                      @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler blockHandler) {
-        super(info, origin, instance);
+    public ZombiesMap(@NotNull MapInfo info, @NotNull Instance instance, @NotNull MobSpawner mobSpawner,
+                      @NotNull ClientBlockHandler blockHandler) {
+        super(info, info.info().origin(), instance);
 
         List<SpawnruleInfo> spawnruleData = info.spawnrules();
         List<SpawnpointInfo> spawnpointData = info.spawnpoints();

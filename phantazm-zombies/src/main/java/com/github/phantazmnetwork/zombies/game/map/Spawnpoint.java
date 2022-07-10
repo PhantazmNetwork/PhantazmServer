@@ -21,6 +21,7 @@ import java.util.function.Function;
  */
 public class Spawnpoint extends MapObject<SpawnpointInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Spawnpoint.class);
+
     private final Function<Key, SpawnruleInfo> spawnrules;
     private final MobSpawner mobSpawner;
 
@@ -41,21 +42,26 @@ public class Spawnpoint extends MapObject<SpawnpointInfo> {
     }
 
     /**
-     * Determines if this spawnpoint may spawn a {@link MobModel}.
+     * Determines if this spawnpoint may spawn a {@link MobModel}. Note that spawnpoints do not take factors outside
+     * themselves into account, they only consider their internal (black/white)list of spawn-able mobs
      * @param model the model to spawn
-     * @param spawnType the spawntype, current unused
+     * @param spawnType the spawntype, which must match the spawnrule's spawn type
      * @return true if the mob can spawn, false otherwise
      */
     public boolean canSpawn(@NotNull MobModel model, @NotNull Key spawnType) {
-        //TODO: spawnType key currently not used
-
         Objects.requireNonNull(model, "model");
+        Objects.requireNonNull(spawnType, "spawnType");
 
         Key spawnruleKey = data.spawnRule();
         SpawnruleInfo spawnrule = spawnrules.apply(spawnruleKey);
+
         if(spawnrule == null) {
             LOGGER.warn("Unrecognized spawnrule " + spawnruleKey + " at " + data.position() + "; mob allowed to spawn");
             return true;
+        }
+
+        if(!spawnrule.spawnType().equals(spawnType)) {
+            return false;
         }
 
         return spawnrule.isBlacklist() != spawnrule.spawns().contains(model.key());

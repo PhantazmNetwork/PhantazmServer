@@ -32,6 +32,7 @@ import java.util.function.Predicate;
 
 /**
  * Supports instance-wide client blocks.
+ * @see ClientBlockHandlerSource
  */
 public class InstanceClientBlockHandler implements ClientBlockHandler {
     private final Reference<Instance> instance;
@@ -156,6 +157,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPrePlayerStartDigging(PrePlayerStartDiggingEvent event) {
+        if(this.instance.get() == null) {
+            return;
+        }
+
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
@@ -176,6 +181,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPlayerBlockBreak(PlayerBlockBreakEvent event) {
+        if(this.instance.get() == null) {
+            return;
+        }
+
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
@@ -190,6 +199,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPreBlockChange(PreBlockChangeEvent event) {
+        if(this.instance.get() == null) {
+            return;
+        }
+
         Point blockPosition = event.blockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
@@ -206,6 +219,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPlayerChunkLoad(PlayerChunkLoadEvent event) {
+        if(this.instance.get() == null) {
+            return;
+        }
+
         int cx = event.getChunkX();
         int cz = event.getChunkZ();
 

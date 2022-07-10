@@ -11,7 +11,7 @@ import java.util.Objects;
 public record MapInfo(@NotNull MapSettingsInfo info,
                       @NotNull List<RoomInfo> rooms,
                       @NotNull List<DoorInfo> doors,
-                      @NotNull List<ShopInfo> shops,
+                      @NotNull List<ShopPositionInfo> shops,
                       @NotNull List<WindowInfo> windows,
                       @NotNull List<RoundInfo> rounds,
                       @NotNull List<SpawnruleInfo> spawnrules,

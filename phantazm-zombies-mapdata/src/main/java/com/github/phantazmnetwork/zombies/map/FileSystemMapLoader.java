@@ -86,7 +86,7 @@ public class FileSystemMapLoader implements MapLoader {
         FolderPaths paths = new FolderPaths(mapDirectory);
         List<RoomInfo> rooms = new ArrayList<>();
         List<DoorInfo> doors = new ArrayList<>();
-        List<ShopInfo> shops = new ArrayList<>();
+        List<ShopPositionInfo> shops = new ArrayList<>();
         List<WindowInfo> windows = new ArrayList<>();
         List<RoundInfo> rounds = new ArrayList<>();
         List<SpawnruleInfo> spawnrules = new ArrayList<>();
@@ -157,7 +157,7 @@ public class FileSystemMapLoader implements MapLoader {
                     .doorInfo().elementFromData(door), codec);
         }
 
-        for(ShopInfo shop : data.shops()) {
+        for(ShopPositionInfo shop : data.shops()) {
             ConfigBridges.write(paths.shops.resolve(getPositionString(shop.triggerLocation()) + "-" + shop.id()
                     .value() + extension), MapProcessors.shopInfo().elementFromData(shop), codec);
         }

@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * Instance-wide Hologram implementation.
+ * Instance-wide Hologram implementation. This object retains a strong reference to its instance, and therefore should
+ * not be stored for longer than the lifetime of the instance.
  */
 public class InstanceHologram extends AbstractList<Component> implements Hologram {
     private static final double MESSAGE_HEIGHT = 0.25;

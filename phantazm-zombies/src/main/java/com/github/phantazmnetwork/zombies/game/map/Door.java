@@ -10,6 +10,8 @@ import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.Objects;
  * Represents a door. May be opened once.
  */
 public class Door extends MapObject<DoorInfo> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Door.class);
     private final Block fillBlock;
     private final Region3I enclosing;
     private final Vec3D center;
@@ -40,12 +43,20 @@ public class Door extends MapObject<DoorInfo> {
 
         List<Region3I> regions = doorInfo.regions();
         if(regions.size() == 0) {
-            throw new IllegalArgumentException("Door has no regions");
+            LOGGER.warn("Door has no regions, enclosing bounds and center set to origin");
+            enclosing = Region3I.encompassing(origin, origin);
+            center = Vec3D.of(origin);
         }
+        else {
+            Region3I[] regionArray = regions.toArray(new Region3I[0]);
+            for(int i = 0; i < regionArray.length; i++) {
+                Region3I current = regionArray[i];
+                regionArray[i] = current.add(origin);
+            }
 
-        Region3I[] regionArray = regions.toArray(new Region3I[0]);
-        enclosing = Region3I.enclosing(regionArray);
-        center = enclosing.getCenter();
+            enclosing = Region3I.enclosing(regionArray);
+            center = enclosing.getCenter();
+        }
 
         List<HologramInfo> hologramInfo = data.holograms();
         holograms = new ArrayList<>(hologramInfo.size());

@@ -236,6 +236,15 @@ public interface Region3I extends Iterable<Vec3I> {
         return false;
     }
 
+    /**
+     * Adds a vector to this region. The returned object will represent the translated region.
+     * @param position the translation to apply
+     * @return the translated region
+     */
+    default @NotNull Region3I add(@NotNull Vec3I position) {
+        return new BasicRegion3I(origin().add(position), lengths());
+    }
+
     @Override
     default @NotNull Iterator<Vec3I> iterator() {
         Vec3I origin = origin();
