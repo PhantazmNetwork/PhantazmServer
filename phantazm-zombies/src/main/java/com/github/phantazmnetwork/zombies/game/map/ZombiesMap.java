@@ -16,7 +16,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
 
-public class ZombiesMap extends MapObject<MapInfo> {
+public class ZombiesMap extends PositionalMapObject<MapInfo> {
     private final List<Spawnpoint> unmodifiableSpawnpoints;
     private final List<Window> unmodifiableWindows;
     private final List<Door> unmodifiableDoors;

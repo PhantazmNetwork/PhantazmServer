@@ -20,7 +20,7 @@ import java.util.Objects;
 /**
  * Represents a door. May be opened once.
  */
-public class Door extends MapObject<DoorInfo> {
+public class Door extends PositionalMapObject<DoorInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Door.class);
     private final Block fillBlock;
     private final Region3I enclosing;

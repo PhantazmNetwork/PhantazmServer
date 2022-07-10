@@ -199,14 +199,16 @@ public final class MapProcessors {
         @Override
         public RoundInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             int round = element.getNumberOrThrow("round").intValue();
+            Key action = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("action"));
             List<WaveInfo> waves = waveInfoList.dataFromElement(element.getListOrThrow("waves"));
-            return new RoundInfo(round, waves);
+            return new RoundInfo(round, action, waves);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(RoundInfo roundInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
             node.putNumber("round", roundInfo.round());
+            node.put("action", AdventureConfigProcessors.key().elementFromData(roundInfo.action()));
             node.put("waves", waveInfoList.elementFromData(roundInfo.waves()));
             return node;
         }

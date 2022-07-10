@@ -25,7 +25,7 @@ import java.util.*;
  * but are considered barriers by clients.
  * @see ClientBlockHandler
  */
-public class Window extends MapObject<WindowInfo> {
+public class Window extends PositionalMapObject<WindowInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
     private static final Block DEFAULT_PADDING = Block.OAK_SLAB;
 

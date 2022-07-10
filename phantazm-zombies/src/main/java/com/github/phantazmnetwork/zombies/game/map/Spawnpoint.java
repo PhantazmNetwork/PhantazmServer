@@ -19,7 +19,7 @@ import java.util.function.Function;
 /**
  * Represents a particular position where {@link PhantazmMob} instances may be spawned.
  */
-public class Spawnpoint extends MapObject<SpawnpointInfo> {
+public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Spawnpoint.class);
 
     private final Function<Key, SpawnruleInfo> spawnrules;
