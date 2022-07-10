@@ -199,16 +199,18 @@ public final class MapProcessors {
         @Override
         public RoundInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             int round = element.getNumberOrThrow("round").intValue();
-            Key action = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("action"));
+            Key startAction = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("startAction"));
+            Key endAction = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("endAction"));
             List<WaveInfo> waves = waveInfoList.dataFromElement(element.getListOrThrow("waves"));
-            return new RoundInfo(round, action, waves);
+            return new RoundInfo(round, startAction, endAction, waves);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(RoundInfo roundInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(2);
+            ConfigNode node = new LinkedConfigNode(4);
             node.putNumber("round", roundInfo.round());
-            node.put("action", AdventureConfigProcessors.key().elementFromData(roundInfo.action()));
+            node.put("startAction", AdventureConfigProcessors.key().elementFromData(roundInfo.startAction()));
+            node.put("endAction", AdventureConfigProcessors.key().elementFromData(roundInfo.endAction()));
             node.put("waves", waveInfoList.elementFromData(roundInfo.waves()));
             return node;
         }
@@ -235,14 +237,16 @@ public final class MapProcessors {
         @Override
         public SpawnInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Key spawnType = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnType"));
             int amount = element.getNumberOrThrow("amount").intValue();
-            return new SpawnInfo(id, amount);
+            return new SpawnInfo(id, spawnType, amount);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(SpawnInfo spawnInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
             node.put("id", AdventureConfigProcessors.key().elementFromData(spawnInfo.id()));
+            node.put("spawnType", AdventureConfigProcessors.key().elementFromData(spawnInfo.spawnType()));
             node.putNumber("amount", spawnInfo.amount());
             return node;
         }

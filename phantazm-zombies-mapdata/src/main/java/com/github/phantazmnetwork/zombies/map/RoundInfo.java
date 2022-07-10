@@ -10,7 +10,8 @@ import java.util.Objects;
  * Defines a round.
  */
 public record RoundInfo(int round,
-                        @NotNull Key action,
+                        @NotNull Key startAction,
+                        @NotNull Key endAction,
                         @NotNull List<WaveInfo> waves) {
 
     /**
