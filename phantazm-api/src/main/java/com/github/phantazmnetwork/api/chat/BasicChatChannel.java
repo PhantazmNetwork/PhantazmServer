@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.api.chat;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -33,12 +34,12 @@ public abstract class BasicChatChannel implements ChatChannel {
 
     @Override
     public void findAudience(@NotNull UUID channelMember, @NotNull Consumer<Audience> onSuccess,
-                             @NotNull Consumer<Component> onFailure) {
+                             @NotNull Consumer<ObjectBooleanPair<Component>> onFailure) {
         PlayerView view = viewProvider.fromUUID(channelMember);
         Optional<Player> playerOptional = view.getPlayer();
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-            Pair<Audience, Component> audiencePair = getAudience(player);
+            Pair<Audience, ObjectBooleanPair<Component>> audiencePair = getAudience(player);
             if (audiencePair.left() != null) {
                 onSuccess.accept(audiencePair.left());
                 return;
@@ -47,7 +48,7 @@ public abstract class BasicChatChannel implements ChatChannel {
             onFailure.accept(audiencePair.right());
         }
         else {
-            onFailure.accept(Component.text("You are offline.", NamedTextColor.RED));
+            onFailure.accept(ObjectBooleanPair.of(Component.text("You are offline.", NamedTextColor.RED), false));
         }
     }
 
@@ -66,8 +67,10 @@ public abstract class BasicChatChannel implements ChatChannel {
      * Gets an {@link Audience} from a {@link Player}.
      * @param player The {@link Player} to retrieve the {@link Audience} from
      * @return A {@link Pair} representing the result. If the left {@link Audience} is present, an {@link Audience} was
-     * successfully found. If the left {@link Audience} is null, then the right {@link Component} provides an error message.
+     * successfully found. If the left {@link Audience} is null,
+     * then the right {@link Pair} has a {@link Component} provides an error message
+     * and a boolean that determines whether the chat channel is now invalid.
      */
-    protected abstract @NotNull Pair<Audience, Component> getAudience(@NotNull Player player);
+    protected abstract @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player);
 
 }

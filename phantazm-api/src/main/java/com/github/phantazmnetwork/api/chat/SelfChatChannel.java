@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.api.chat;
 
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -24,7 +25,7 @@ public class SelfChatChannel extends BasicChatChannel {
     }
 
     @Override
-    protected @NotNull Pair<Audience, Component> getAudience(@NotNull Player player) {
+    protected @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player) {
         return Pair.of(player, null);
     }
 

@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
@@ -25,7 +26,7 @@ final class NeuronTest {
     static void initialize(@NotNull EventNode<Event> global, @NotNull Spawner spawner) {
         GroundMinestomDescriptor testDescriptor = GroundMinestomDescriptor.of(EntityType.PHANTOM, "phantom");
 
-        global.addListener(PlayerChatEvent.class, event -> {
+        global.addListener(EventListener.builder(PlayerChatEvent.class).ignoreCancelled(false).handler(event -> {
             String msg = event.getMessage();
             Player player = event.getPlayer();
             Instance instance = player.getInstance();
@@ -67,7 +68,7 @@ final class NeuronTest {
                     }
                 }
             }
-        });
+        }).build());
 
         global.addListener(PlayerSpawnEvent.class, event -> {
             if(!event.isFirstSpawn()) {

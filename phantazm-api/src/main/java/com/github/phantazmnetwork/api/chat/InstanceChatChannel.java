@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.api.chat;
 
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
@@ -26,10 +27,10 @@ public class InstanceChatChannel extends BasicChatChannel {
     }
 
     @Override
-    protected @NotNull Pair<Audience, Component> getAudience(@NotNull Player player) {
+    protected @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player) {
         Instance instance = player.getInstance();
         if (instance == null) {
-            return Pair.of(null, Component.text("You are not in an instance.", NamedTextColor.RED));
+            return Pair.of(null, ObjectBooleanPair.of(Component.text("You are not in an instance.", NamedTextColor.RED), true));
         }
 
         return Pair.of((ForwardingAudience) () -> List.of(instance), null);

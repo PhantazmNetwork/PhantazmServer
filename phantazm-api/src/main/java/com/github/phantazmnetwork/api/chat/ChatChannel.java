@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.api.chat;
 
+import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.player.PlayerChatEvent;
@@ -18,10 +19,10 @@ public interface ChatChannel {
      * @param channelMember The player that is a member of this channel
      * @param onSuccess A callback when an {@link Audience} is successfully found
      * @param onFailure A callback when an {@link Audience} is not found that provides an error {@link Component} message
-     *                  that is meant to be sent to the channel member
+     *                  that is meant to be sent to the channel member and whether the chat channel should be returned to the default
      */
     void findAudience(@NotNull UUID channelMember, @NotNull Consumer<Audience> onSuccess,
-                      @NotNull Consumer<Component> onFailure);
+                      @NotNull Consumer<ObjectBooleanPair<Component>> onFailure);
 
     /**
      * Formats a message. Channels may add custom style or formatting.

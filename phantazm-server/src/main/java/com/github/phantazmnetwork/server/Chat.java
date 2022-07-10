@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.api.chat.command.ChatCommand;
 import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.api.player.PlayerViewProvider;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -57,8 +58,8 @@ public final class Chat {
         Map<UUID, String> playerChannels = new HashMap<>();
         commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));
         node.addListener(PlayerLoginEvent.class, event -> {
-            UUID channel = event.getPlayer().getUuid();
-            playerChannels.putIfAbsent(channel, DEFAULT_CHAT_CHANNEL_NAME);
+            UUID uuid = event.getPlayer().getUuid();
+            playerChannels.putIfAbsent(uuid, DEFAULT_CHAT_CHANNEL_NAME);
         });
         node.addListener(PlayerChatEvent.class, event -> {
             event.setCancelled(true);
@@ -74,7 +75,17 @@ public final class Chat {
             channel.findAudience(uuid, audience -> {
                 Component message = channel.formatMessage(event);
                 audience.sendMessage(message);
-            }, player::sendMessage);
+            }, failure -> {
+                player.sendMessage(failure.left());
+                if (failure.rightBoolean()) {
+                    player.sendMessage(Component.text().append(
+                            Component.text("Set channel to "),
+                            Component.text(DEFAULT_CHAT_CHANNEL_NAME, NamedTextColor.GOLD),
+                            Component.text(".")
+                    ).color(NamedTextColor.GREEN));
+                    playerChannels.put(player.getUuid(), DEFAULT_CHAT_CHANNEL_NAME);
+                }
+            });
         });
     }
 }
