@@ -1,7 +1,13 @@
 package com.github.phantazmnetwork.zombies.game.map.action;
 
+import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.game.map.Round;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -32,6 +38,30 @@ public class AnnounceRoundAction implements Action<Round> {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
+    }
+
+    private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
+        @Override
+        public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String formatMessage = element.getStringOrThrow("formatMessage");
+            TitlePart<Component> titlePart = AdventureConfigProcessors.componentTitlePart().dataFromElement(element
+                    .getElementOrThrow("titlePart"));
+            int priority = element.getNumberOrThrow("priority").intValue();
+            return new Data(formatMessage, titlePart, priority);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(Data data) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(3);
+            node.putString("formatMessage", data.formatMessage);
+            node.put("titlePart", AdventureConfigProcessors.componentTitlePart().elementFromData(data.titlePart));
+            node.putNumber("priority", data.priority);
+            return node;
+        }
+    };
+
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return PROCESSOR;
     }
 
     private final Data data;

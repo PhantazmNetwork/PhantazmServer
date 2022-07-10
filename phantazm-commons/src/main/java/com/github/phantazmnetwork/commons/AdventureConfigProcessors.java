@@ -12,6 +12,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.RGBLike;
 import org.jetbrains.annotations.NotNull;
 
@@ -101,6 +102,31 @@ public final class AdventureConfigProcessors {
         }
     };
 
+    private static final ConfigProcessor<TitlePart<Component>> componentTitlePart = new ConfigProcessor<>() {
+        @Override
+        public TitlePart<Component> dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String name = ConfigProcessor.STRING.dataFromElement(element);
+            return switch (name) {
+                case "TITLE" -> TitlePart.TITLE;
+                case "SUBTITLE" -> TitlePart.SUBTITLE;
+                default -> throw new ConfigProcessException("Unrecognized TitlePart " + name);
+            };
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(TitlePart<Component> componentTitlePart)
+                throws ConfigProcessException {
+            if(componentTitlePart.equals(TitlePart.TITLE)) {
+                return new ConfigPrimitive("TITLE");
+            }
+            else if(componentTitlePart.equals(TitlePart.SUBTITLE)) {
+                return new ConfigPrimitive("SUBTITLE");
+            }
+
+            throw new ConfigProcessException("Unrecognized TitlePart " + componentTitlePart);
+        }
+    };
+
     private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessor.enumProcessor(Sound.Source.class);
 
     /**
@@ -117,6 +143,15 @@ public final class AdventureConfigProcessors {
      */
     public static @NotNull ConfigProcessor<Component> component() {
         return component;
+    }
+
+    /**
+     * Returns the {@link  ConfigProcessor} implementation used to serialize/deserialize {@link TitlePart} objects of
+     * type {@link Component}.
+     * @return the ConfigProcessor used to serialize/deserialize TitlePart instances
+     */
+    public static @NotNull ConfigProcessor<TitlePart<Component>> componentTitlePart() {
+        return componentTitlePart;
     }
 
     /**
