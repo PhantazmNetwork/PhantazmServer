@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
 import com.github.phantazmnetwork.commons.Tickable;
+import com.github.phantazmnetwork.zombies.game.RoundAction;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.map.RoundInfo;
 import com.github.phantazmnetwork.zombies.map.WaveInfo;
@@ -9,18 +10,15 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Round extends MapObject<RoundInfo> implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
 
     private final List<Wave> unmodifiableWaves;
-    private final Consumer<Round> startAction;
-    private final Consumer<Round> endAction;
+    private final List<RoundAction> startActions;
+    private final List<RoundAction> endActions;
     private final SpawnDistributor spawnDistributor;
 
     private boolean isActive;
@@ -38,8 +36,8 @@ public class Round extends MapObject<RoundInfo> implements Tickable {
      *
      * @param roundInfo the backing data object
      */
-    public Round(@NotNull RoundInfo roundInfo, @NotNull Consumer<Round> startAction,
-                 @NotNull Consumer<Round> endAction, @NotNull SpawnDistributor spawnDistributor) {
+    public Round(@NotNull RoundInfo roundInfo, @NotNull List<RoundAction> startActions,
+                 @NotNull List<RoundAction> endActions, @NotNull SpawnDistributor spawnDistributor) {
         super(roundInfo);
         List<WaveInfo> waveInfo = roundInfo.waves();
         if(waveInfo.size() == 0) {
@@ -52,9 +50,12 @@ public class Round extends MapObject<RoundInfo> implements Tickable {
         }
 
         this.unmodifiableWaves = Collections.unmodifiableList(waves);
-        this.startAction = Objects.requireNonNull(startAction, "startAction");
-        this.endAction = Objects.requireNonNull(endAction, "endAction");
+        this.startActions = Objects.requireNonNull(startActions, "startActions");
+        this.endActions = Objects.requireNonNull(endActions, "endActions");
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnHandler");
+
+        this.startActions.sort(Comparator.comparingInt(RoundAction::priority));
+        this.endActions.sort(Comparator.comparingInt(RoundAction::priority));
     }
 
     public @UnmodifiableView @NotNull List<Wave> getWaves() {
@@ -93,7 +94,9 @@ public class Round extends MapObject<RoundInfo> implements Tickable {
         }
 
         isActive = true;
-        startAction.accept(this);
+        for(RoundAction action : startActions) {
+            action.perform(this);
+        }
 
         if(unmodifiableWaves.size() > 0) {
             waveStartTime = time;
@@ -114,7 +117,9 @@ public class Round extends MapObject<RoundInfo> implements Tickable {
         }
 
         isActive = false;
-        endAction.accept(this);
+        for(RoundAction action : endActions) {
+            action.perform(this);
+        }
 
         waveStartTime = 0;
         currentWave = null;
@@ -133,7 +138,7 @@ public class Round extends MapObject<RoundInfo> implements Tickable {
 
             long timeSinceLastWave = time - waveStartTime;
             if(waveIndex < unmodifiableWaves.size() && timeSinceLastWave > currentWave.data.delayTicks()) {
-                spawnDistributor.spawn(currentWave.data.spawns());
+                spawnDistributor.distributeSpawns(currentWave.data.spawns());
 
                 waveStartTime = time;
                 if(++waveIndex >= unmodifiableWaves.size()) {

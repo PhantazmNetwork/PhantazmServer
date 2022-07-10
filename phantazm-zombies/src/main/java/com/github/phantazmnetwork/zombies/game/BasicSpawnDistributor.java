@@ -29,7 +29,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
     }
 
     @Override
-    public void spawn(@NotNull Collection<SpawnInfo> spawns) {
+    public void distributeSpawns(@NotNull Collection<SpawnInfo> spawns) {
         List<Pair<MobModel, Key>> spawnList = new ArrayList<>();
         for(SpawnInfo spawnInfo : spawns) {
             for(int i = 0; i < spawnInfo.amount(); i++) {

@@ -6,5 +6,5 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 
 public interface SpawnDistributor {
-    void spawn(@NotNull Collection<SpawnInfo> spawns);
+    void distributeSpawns(@NotNull Collection<SpawnInfo> spawns);
 }

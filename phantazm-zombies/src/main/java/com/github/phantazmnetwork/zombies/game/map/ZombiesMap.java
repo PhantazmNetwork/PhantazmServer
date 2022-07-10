@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
 import com.github.phantazmnetwork.api.ClientBlockHandler;
+import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.factory.DependencyProvider;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
@@ -16,10 +17,14 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
 
-public class ZombiesMap extends PositionalMapObject<MapInfo> {
+public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
     private final List<Spawnpoint> unmodifiableSpawnpoints;
     private final List<Window> unmodifiableWindows;
     private final List<Door> unmodifiableDoors;
+    private final List<Round> unmodifiableRounds;
+
+    private int roundIndex = 0;
+    private Round currentRound;
 
     /**
      * Constructs a new instance of this class.
@@ -35,6 +40,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> {
         List<SpawnpointInfo> spawnpointData = info.spawnpoints();
         List<WindowInfo> windowData = info.windows();
         List<DoorInfo> doorData = info.doors();
+        List<RoundInfo> roundData = info.rounds();
 
         Map<Key, SpawnruleInfo> spawnruleMap = new HashMap<>(spawnruleData.size());
 
@@ -46,6 +52,9 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> {
 
         List<Door> doors = new ArrayList<>(doorData.size());
         this.unmodifiableDoors = Collections.unmodifiableList(doors);
+
+        List<Round> rounds = new ArrayList<>(roundData.size());
+        this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
         for(SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
             spawnpoints.add(new Spawnpoint(spawnpointInfo, origin, instance, spawnruleMap::get, mobSpawner));
@@ -63,6 +72,10 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> {
             //TODO: include door fill block in mapInfo
             doors.add(new Door(doorInfo, origin, instance, Block.AIR));
         }
+
+        for(RoundInfo roundInfo : roundData) {
+
+        }
     }
 
     public @UnmodifiableView @NotNull List<Spawnpoint> getSpawnpoints() {
@@ -75,6 +88,29 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> {
 
     public @UnmodifiableView @NotNull List<Door> getDoors() {
         return unmodifiableDoors;
+    }
+
+    public @UnmodifiableView @NotNull List<Round> getRounds() {
+        return unmodifiableRounds;
+    }
+
+    public Round currentRound() {
+        return currentRound;
+    }
+
+    public void startRound(int roundIndex) {
+        Objects.checkIndex(roundIndex, unmodifiableRounds.size());
+
+        this.roundIndex = roundIndex;
+        Round newCurrent = unmodifiableRounds.get(roundIndex);
+        if(newCurrent == currentRound) {
+            currentRound.endRound();
+            currentRound.startRound();
+            return;
+        }
+
+        currentRound = newCurrent;
+        currentRound.startRound();
     }
 
     public @NotNull Optional<Window> nearestWindowInRange(@NotNull Vec3D origin, double distance) {
@@ -110,5 +146,26 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public void tick(long time) {
+        roundTick(time);
+    }
+
+    private void roundTick(long time) {
+        if(currentRound != null) {
+            currentRound.tick(time);
+
+            if(!currentRound.isActive()) {
+                if(++roundIndex < unmodifiableRounds.size()) {
+                    currentRound = unmodifiableRounds.get(roundIndex);
+                    currentRound.startRound();
+                }
+                else {
+                    //TODO end of game code
+                }
+            }
+        }
     }
 }
