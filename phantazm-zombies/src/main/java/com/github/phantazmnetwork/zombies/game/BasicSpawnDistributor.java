@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game;
 
 import com.github.phantazmnetwork.mob.MobModel;
+import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.game.map.Spawnpoint;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import it.unimi.dsi.fastutil.Pair;
@@ -29,28 +30,35 @@ public class BasicSpawnDistributor implements SpawnDistributor {
     }
 
     @Override
-    public void distributeSpawns(@NotNull Collection<SpawnInfo> spawns) {
+    public @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<SpawnInfo> spawns) {
         List<Pair<MobModel, Key>> spawnList = new ArrayList<>();
         for(SpawnInfo spawnInfo : spawns) {
-            for(int i = 0; i < spawnInfo.amount(); i++) {
-                Key id = spawnInfo.id();
-                MobModel model = modelFunction.apply(id);
-                if(model == null) {
-                    LOGGER.warn("Found unrecognized mob type {}", id);
-                    break;
-                }
+            Key id = spawnInfo.id();
+            MobModel model = modelFunction.apply(id);
+            if(model == null) {
+                LOGGER.warn("Found unrecognized mob type {}", id);
+                continue;
+            }
 
+            for(int i = 0; i < spawnInfo.amount(); i++) {
                 spawnList.add(Pair.of(model, spawnInfo.spawnType()));
             }
         }
 
-        Collections.shuffle(spawnList, random);
+        if(spawnList.isEmpty()) {
+            LOGGER.warn("Spawn distributor received empty spawn list");
+            return Collections.emptyList();
+        }
+
         List<Spawnpoint> candidates = candidateGenerator.get();
         if(candidates == null || candidates.isEmpty()) {
             LOGGER.warn("Spawnpoint candidate generator returned a null or empty list");
-            return;
+            return Collections.emptyList();
         }
 
+        Collections.shuffle(spawnList, random);
+
+        List<PhantazmMob> spawnedMobs = new ArrayList<>(spawnList.size());
         int candidateIndex = 0;
         for(int i = spawnList.size() - 1; i >= 0; i--) {
             Pair<MobModel, Key> spawnEntry = spawnList.get(i);
@@ -60,15 +68,12 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             boolean spawned = false;
             for(int j = 0; j < candidates.size(); j++) {
                 Spawnpoint candidate = candidates.get(candidateIndex++);
+                candidateIndex %= candidates.size();
 
                 if(candidate.canSpawn(model, spawnType)) {
-                    candidate.spawn(model);
+                    spawnedMobs.add(candidate.spawn(model));
                     spawned = true;
                     break;
-                }
-
-                if(candidateIndex >= candidates.size()) {
-                    candidateIndex = 0;
                 }
             }
 
@@ -76,5 +81,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 LOGGER.warn("Found no suitable spawnpoint for mob {} using spawn type {}", model.key(), spawnType);
             }
         }
+
+        return spawnedMobs;
     }
 }

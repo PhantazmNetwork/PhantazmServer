@@ -18,9 +18,10 @@ import org.jetbrains.annotations.UnmodifiableView;
 import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
-    private final List<Spawnpoint> unmodifiableSpawnpoints;
-    private final List<Window> unmodifiableWindows;
+    private final List<Room> unmodifiableRooms;
     private final List<Door> unmodifiableDoors;
+    private final List<Window> unmodifiableWindows;
+    private final List<Spawnpoint> unmodifiableSpawnpoints;
     private final List<Round> unmodifiableRounds;
 
     private int roundIndex = 0;
@@ -36,25 +37,42 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                       @NotNull ClientBlockHandler blockHandler) {
         super(info, info.info().origin(), instance);
 
-        List<SpawnruleInfo> spawnruleData = info.spawnrules();
-        List<SpawnpointInfo> spawnpointData = info.spawnpoints();
-        List<WindowInfo> windowData = info.windows();
+        List<RoomInfo> roomData = info.rooms();
         List<DoorInfo> doorData = info.doors();
+        List<WindowInfo> windowData = info.windows();
+        List<SpawnpointInfo> spawnpointData = info.spawnpoints();
+        List<SpawnruleInfo> spawnruleData = info.spawnrules();
         List<RoundInfo> roundData = info.rounds();
 
-        Map<Key, SpawnruleInfo> spawnruleMap = new HashMap<>(spawnruleData.size());
-
-        List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointData.size());
-        this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
-
-        List<Window> windows = new ArrayList<>(windowData.size());
-        this.unmodifiableWindows = Collections.unmodifiableList(windows);
+        List<Room> rooms = new ArrayList<>(roomData.size());
+        this.unmodifiableRooms = Collections.unmodifiableList(rooms);
 
         List<Door> doors = new ArrayList<>(doorData.size());
         this.unmodifiableDoors = Collections.unmodifiableList(doors);
 
+        List<Window> windows = new ArrayList<>(windowData.size());
+        this.unmodifiableWindows = Collections.unmodifiableList(windows);
+
+        List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointData.size());
+        this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
+
+        Map<Key, SpawnruleInfo> spawnruleMap = new HashMap<>(spawnruleData.size());
+
         List<Round> rounds = new ArrayList<>(roundData.size());
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
+
+        for(RoomInfo roomInfo : roomData) {
+            //rooms.add(new Room(roomInfo, origin, instance));
+        }
+
+        for(DoorInfo doorInfo : doorData) {
+            //TODO: include door fill block in mapInfo
+            doors.add(new Door(doorInfo, origin, instance, Block.AIR));
+        }
+
+        for(WindowInfo windowInfo : windowData) {
+            windows.add(new Window(instance, windowInfo, origin, blockHandler));
+        }
 
         for(SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
             spawnpoints.add(new Spawnpoint(spawnpointInfo, origin, instance, spawnruleMap::get, mobSpawner));
@@ -62,15 +80,6 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
         for(SpawnruleInfo spawnrule : spawnruleData) {
             spawnruleMap.put(spawnrule.id(), spawnrule);
-        }
-
-        for(WindowInfo windowInfo : windowData) {
-            windows.add(new Window(instance, windowInfo, origin, blockHandler));
-        }
-
-        for(DoorInfo doorInfo : doorData) {
-            //TODO: include door fill block in mapInfo
-            doors.add(new Door(doorInfo, origin, instance, Block.AIR));
         }
 
         for(RoundInfo roundInfo : roundData) {
@@ -137,7 +146,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         for(Door door : unmodifiableDoors) {
             Region3I enclosing = door.getEnclosing();
             if(enclosing.contains(block)) {
-                for(Region3I subRegion : door.data.regions()) {
+                for(Region3I subRegion : door.regions()) {
                     if(subRegion.contains(block)) {
                         return Optional.of(door);
                     }
