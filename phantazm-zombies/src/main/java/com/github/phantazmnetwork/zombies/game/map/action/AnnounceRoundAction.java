@@ -8,6 +8,7 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -40,12 +41,7 @@ public class AnnounceRoundAction implements Action<Round> {
         }
     }
 
-    private static final KeyedConfigProcessor<Data> PROCESSOR = new KeyedConfigProcessor<>() {
-        @Override
-        public @NotNull Key key() {
-            return Data.SERIAL_KEY;
-        }
-
+    private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
         @Override
         public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             String formatMessage = element.getStringOrThrow("formatMessage");
@@ -65,7 +61,7 @@ public class AnnounceRoundAction implements Action<Round> {
         }
     };
 
-    public static @NotNull KeyedConfigProcessor<Data> processor() {
+    public static @NotNull ConfigProcessor<Data> processor() {
         return PROCESSOR;
     }
 
