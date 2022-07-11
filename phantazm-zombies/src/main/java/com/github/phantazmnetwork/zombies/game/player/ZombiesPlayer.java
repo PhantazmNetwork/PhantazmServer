@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.player;
 
 import com.github.phantazmnetwork.api.inventory.InventoryObject;
+import com.github.phantazmnetwork.api.player.PlayerView;
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import org.jetbrains.annotations.NotNull;
@@ -22,4 +23,7 @@ public interface ZombiesPlayer extends Tickable {
     @NotNull @UnmodifiableView Collection<Equipment> getEquipment();
 
     @NotNull @UnmodifiableView Collection<InventoryObject> getInventoryObjects();
+
+    @NotNull PlayerView getPlayerView();
+
 }
