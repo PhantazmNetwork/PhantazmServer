@@ -8,11 +8,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * Lazily-initializing implementation of {@link DependencyProvider}.
+ */
 class LazyDependencyProvider implements DependencyProvider {
     private final Function<? super Key, ?> dependencyFunction;
 
     private final Map<Key, Object> loadedDependencies;
 
+    /**
+     * Creates a new instance of this class using the provided dependency creation function.
+     * @param dependencyFunction the dependency creation function
+     */
     LazyDependencyProvider(@NotNull Function<? super Key, ?> dependencyFunction) {
         this.dependencyFunction = Objects.requireNonNull(dependencyFunction, "dependencyFunction");
         this.loadedDependencies = new HashMap<>(8);

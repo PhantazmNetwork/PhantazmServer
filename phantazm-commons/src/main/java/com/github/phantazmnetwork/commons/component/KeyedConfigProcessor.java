@@ -9,7 +9,14 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A {@link ConfigProcessor} implementation meant to serialize data which subclasses {@link Keyed}.
+ * @param <TData> the Keyed-subclassing data
+ */
 public abstract class KeyedConfigProcessor<TData extends Keyed> implements ConfigProcessor<TData> {
+    /**
+     * The name of the key which identifies data and associates it with a particular component.
+     */
     public static final String SERIAL_KEY_NAME = "serialKey";
 
     @Override
@@ -31,7 +38,18 @@ public abstract class KeyedConfigProcessor<TData extends Keyed> implements Confi
         return newNode;
     }
 
+    /**
+     * Creates some data from a {@link ConfigNode}.
+     * @param node the node to create data from
+     * @return the created data
+     * @throws ConfigProcessException if an error occurs during configuration processing
+     */
     public abstract @NotNull TData dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException;
 
+    /**
+     * Creates a {@link ConfigNode} from some data.
+     * @param data the data to create a ConfigNode from
+     * @return the created ConfigNode
+     */
     public abstract @NotNull ConfigNode nodeFromData(@NotNull TData data);
 }

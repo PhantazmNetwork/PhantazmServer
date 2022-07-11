@@ -26,6 +26,12 @@ public interface DependencyProvider {
      */
     boolean prepare(@NotNull Iterable<? extends Key> dependencies);
 
+    /**
+     * Creates a new {@link DependencyProvider} implementation that will lazily resolve dependencies using the given
+     * function during the "prepare" phase.
+     * @param dependencyFunction the function used to create dependencies
+     * @return a new DependencyProvider implementation
+     */
     static @NotNull DependencyProvider lazy(@NotNull Function<? super Key, ?> dependencyFunction) {
         return new LazyDependencyProvider(dependencyFunction);
     }

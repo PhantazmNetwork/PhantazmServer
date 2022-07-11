@@ -17,6 +17,10 @@ import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+/**
+ * Standard reflection-based implementation of {@link ComponentBuilder}. This is the main entrypoint of the component
+ * framework.
+ */
 public class ReflectiveComponentBuilder implements ComponentBuilder {
     private static final Predicate<Method> BASE = method -> {
         int modifiers = method.getModifiers();
@@ -26,6 +30,11 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
     private final KeyedConfigRegistry configRegistry;
     private final KeyedFactoryRegistry factoryRegistry;
 
+    /**
+     * Creates a new instance of this class which will use the provided registries to handle component creation.
+     * @param configRegistry the {@link KeyedConfigRegistry} used to register configuration processors
+     * @param factoryRegistry the {@link KeyedFactoryRegistry} used to register component factories
+     */
     public ReflectiveComponentBuilder(@NotNull KeyedConfigRegistry configRegistry,
                                       @NotNull KeyedFactoryRegistry factoryRegistry) {
         this.configRegistry = Objects.requireNonNull(configRegistry, "configRegistry");

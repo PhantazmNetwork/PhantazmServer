@@ -8,9 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Basic implementation of {@link KeyedFactoryRegistry} backed by a {@link HashMap}.
+ */
 public class BasicKeyedFactoryRegistry implements KeyedFactoryRegistry {
     private final Map<Key, KeyedFactory<?, ?>> factoryMap;
 
+    /**
+     * Creates a new instance of this class. The internal {@link HashMap} uses default capacity.
+     */
     public BasicKeyedFactoryRegistry() {
         this.factoryMap = new HashMap<>();
     }
