@@ -2,22 +2,34 @@ package com.github.phantazmnetwork.zombies.game.map;
 
 import com.github.phantazmnetwork.api.ClientBlockHandler;
 import com.github.phantazmnetwork.commons.Tickable;
-import com.github.phantazmnetwork.commons.factory.DependencyProvider;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
+import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
+import com.github.phantazmnetwork.zombies.game.map.action.Action;
+import com.github.phantazmnetwork.zombies.game.map.action.AnnounceRoundAction;
+import com.github.phantazmnetwork.commons.component.ConfigRegistries;
+import com.github.phantazmnetwork.commons.component.KeyedConfigRegistry;
+import com.github.phantazmnetwork.commons.component.KeyedFactory;
+import com.github.phantazmnetwork.commons.component.KeyedFactoryRegistry;
 import com.github.phantazmnetwork.zombies.map.*;
+import com.github.steanky.ethylene.core.collection.ConfigList;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.coordinate.Point;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
+
     private final List<Room> unmodifiableRooms;
     private final List<Door> unmodifiableDoors;
     private final List<Window> unmodifiableWindows;
@@ -33,8 +45,11 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
      * @param info     the backing data object
      * @param instance the instance which this MapObject is in
      */
-    public ZombiesMap(@NotNull MapInfo info, @NotNull Instance instance, @NotNull MobSpawner mobSpawner,
-                      @NotNull ClientBlockHandler blockHandler) {
+    public ZombiesMap(@NotNull MapInfo info,
+                      @NotNull Instance instance,
+                      @NotNull MobSpawner mobSpawner,
+                      @NotNull ClientBlockHandler blockHandler,
+                      @NotNull SpawnDistributor spawnDistributor) {
         super(info, info.info().origin(), instance);
 
         List<RoomInfo> roomData = info.rooms();
@@ -45,29 +60,25 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         List<RoundInfo> roundData = info.rounds();
 
         List<Room> rooms = new ArrayList<>(roomData.size());
-        this.unmodifiableRooms = Collections.unmodifiableList(rooms);
-
         List<Door> doors = new ArrayList<>(doorData.size());
-        this.unmodifiableDoors = Collections.unmodifiableList(doors);
-
         List<Window> windows = new ArrayList<>(windowData.size());
-        this.unmodifiableWindows = Collections.unmodifiableList(windows);
-
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointData.size());
-        this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
-
+        List<Round> rounds = new ArrayList<>(roundData.size());
         Map<Key, SpawnruleInfo> spawnruleMap = new HashMap<>(spawnruleData.size());
 
-        List<Round> rounds = new ArrayList<>(roundData.size());
+        this.unmodifiableRooms = Collections.unmodifiableList(rooms);
+        this.unmodifiableDoors = Collections.unmodifiableList(doors);
+        this.unmodifiableWindows = Collections.unmodifiableList(windows);
+        this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
         for(RoomInfo roomInfo : roomData) {
-            //rooms.add(new Room(roomInfo, origin, instance));
+
         }
 
         for(DoorInfo doorInfo : doorData) {
             //TODO: include door fill block in mapInfo
-            doors.add(new Door(doorInfo, origin, instance, Block.AIR));
+            doors.add(new Door(doorInfo, origin, instance, Block.AIR, List.of()));
         }
 
         for(WindowInfo windowInfo : windowData) {

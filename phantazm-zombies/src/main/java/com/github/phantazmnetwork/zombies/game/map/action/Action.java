@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.action;
 
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 /**

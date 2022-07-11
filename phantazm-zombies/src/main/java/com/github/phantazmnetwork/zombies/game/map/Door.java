@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.api.hologram.InstanceHologram;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import net.minestom.server.instance.Instance;
@@ -22,12 +23,15 @@ import java.util.*;
  */
 public class Door extends PositionalMapObject<DoorInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Door.class);
+    private static final Region3I[] EMPTY_REGION_ARRAY = new Region3I[0];
+
     private final Block fillBlock;
     private final Region3I enclosing;
     private final Vec3D center;
     private final List<Region3I> regions;
 
     private final ArrayList<Hologram> holograms;
+    private final List<Action<Door>> openActions;
 
     private boolean isOpen;
 
@@ -38,8 +42,8 @@ public class Door extends PositionalMapObject<DoorInfo> {
      * @param origin the origin vector to which this door's coordinates are considered relative
      * @param instance  the instance which this MapObject is in
      */
-    public Door(@NotNull DoorInfo doorInfo, @NotNull Vec3I origin, @NotNull Instance instance,
-                @NotNull Block fillBlock) {
+    public Door(@NotNull DoorInfo doorInfo, @NotNull Vec3I origin, @NotNull Instance instance, @NotNull Block fillBlock,
+                @NotNull List<Action<Door>> openActions) {
         super(doorInfo, origin, instance);
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
@@ -52,10 +56,9 @@ public class Door extends PositionalMapObject<DoorInfo> {
             this.regions = Collections.emptyList();
         }
         else {
-            Region3I[] regionArray = regions.toArray(new Region3I[0]);
+            Region3I[] regionArray = regions.toArray(EMPTY_REGION_ARRAY);
             for(int i = 0; i < regionArray.length; i++) {
-                Region3I current = regionArray[i];
-                regionArray[i] = current.add(origin);
+                regionArray[i] = regionArray[i].add(origin);
             }
 
             enclosing = Region3I.enclosing(regionArray);
@@ -74,6 +77,9 @@ public class Door extends PositionalMapObject<DoorInfo> {
             hologram.setInstance(instance);
             holograms.add(hologram);
         }
+
+        this.openActions = Objects.requireNonNull(openActions, "openActions");
+        this.openActions.sort(Comparator.reverseOrder());
     }
 
     /**
@@ -91,10 +97,9 @@ public class Door extends PositionalMapObject<DoorInfo> {
         if(!isOpen) {
             isOpen = true;
 
-            for(Region3I region : data.regions()) {
+            for(Region3I region : regions) {
                 for(Vec3I block : region) {
-                    instance.setBlock(block.getX() + origin.getX(), block.getY() + origin.getY(), block
-                            .getZ() + origin.getZ(), fillBlock);
+                    instance.setBlock(block.getX(), block.getY(), block.getZ(), fillBlock);
                 }
             }
 
@@ -105,6 +110,10 @@ public class Door extends PositionalMapObject<DoorInfo> {
 
             holograms.clear();
             holograms.trimToSize();
+
+            for(Action<Door> action : openActions) {
+                action.perform(this);
+            }
         }
     }
 

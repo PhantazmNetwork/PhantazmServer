@@ -22,6 +22,10 @@ public class Wave extends MapObject<WaveInfo> {
         this.mobCount = count;
     }
 
+    /**
+     * Gets the total number of mobs that should spawn this wave.
+     * @return the total number of mobs that should spawn this wave
+     */
     public int mobCount() {
         return mobCount;
     }

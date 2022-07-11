@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
+import com.github.steanky.ethylene.core.collection.ArrayConfigList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +53,8 @@ public class NewRoomGui extends NamedObjectGui {
             List<Region3I> bounds = new ArrayList<>(1);
             bounds.add(selected);
 
-            RoomInfo newRoom = new RoomInfo(roomKey, Component.text(roomKey.value()), bounds);
+            RoomInfo newRoom = new RoomInfo(roomKey, Component.text(roomKey.value()), bounds,
+                    new ArrayConfigList(0));
             session.setLastRoom(newRoom);
             currentMap.rooms().add(newRoom);
             session.refreshRooms();

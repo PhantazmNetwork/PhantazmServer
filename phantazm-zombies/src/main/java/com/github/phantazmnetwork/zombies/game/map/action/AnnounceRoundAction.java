@@ -3,11 +3,11 @@ package com.github.phantazmnetwork.zombies.game.map.action;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.game.map.Round;
+import com.github.phantazmnetwork.commons.component.KeyedConfigProcessor;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -32,7 +32,7 @@ public class AnnounceRoundAction implements Action<Round> {
     public record Data(@NotNull String formatMessage,
                         @NotNull TitlePart<Component> titlePart,
                         int priority) implements Keyed {
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "map.round.action.announce");
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.round.action.announce");
 
         @Override
         public @NotNull Key key() {
@@ -40,7 +40,12 @@ public class AnnounceRoundAction implements Action<Round> {
         }
     }
 
-    private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
+    private static final KeyedConfigProcessor<Data> PROCESSOR = new KeyedConfigProcessor<>() {
+        @Override
+        public @NotNull Key key() {
+            return Data.SERIAL_KEY;
+        }
+
         @Override
         public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             String formatMessage = element.getStringOrThrow("formatMessage");
@@ -60,7 +65,7 @@ public class AnnounceRoundAction implements Action<Round> {
         }
     };
 
-    public static @NotNull ConfigProcessor<Data> processor() {
+    public static @NotNull KeyedConfigProcessor<Data> processor() {
         return PROCESSOR;
     }
 

@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.commons.vector.VectorConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -15,9 +16,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Contains static {@link ConfigProcessor} instances used for serializing or deserializing various map-related data
@@ -107,15 +106,17 @@ public final class MapProcessors {
             Component displayName = AdventureConfigProcessors.component().dataFromElement(element
                     .getElementOrThrow("displayName"));
             List<Region3I> regions = regionInfoList.dataFromElement(element.getElementOrThrow("regions"));
-            return new RoomInfo(id, displayName, regions);
+            ConfigList openActions = element.getListOrThrow("openActions");
+            return new RoomInfo(id, displayName, regions, openActions);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(RoomInfo roomInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(3);
+            ConfigNode node = new LinkedConfigNode(4);
             node.put("id", AdventureConfigProcessors.key().elementFromData(roomInfo.id()));
             node.put("displayName", AdventureConfigProcessors.component().elementFromData(roomInfo.displayName()));
             node.put("regions", regionInfoList.elementFromData(roomInfo.regions()));
+            node.put("openActions", roomInfo.openActions());
             return node;
         }
     };
