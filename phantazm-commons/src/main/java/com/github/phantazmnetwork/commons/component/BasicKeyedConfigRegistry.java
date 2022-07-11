@@ -20,11 +20,12 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
     }
 
     @Override
-    public void registerProcessor(@NotNull KeyedConfigProcessor<? extends Keyed> processor) {
+    public void registerProcessor(@NotNull Key key, @NotNull KeyedConfigProcessor<? extends Keyed> processor) {
+        Objects.requireNonNull(key, "key");
         Objects.requireNonNull(processor, "processor");
 
-        if(processors.putIfAbsent(processor.key(), processor) != null) {
-            throw new IllegalArgumentException("Processor for for key " + processor.key() + " was already registered");
+        if(processors.putIfAbsent(key, processor) != null) {
+            throw new IllegalArgumentException("Processor for for key " + key + " was already registered");
         }
     }
 
@@ -57,10 +58,6 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
     private static void check(KeyedConfigProcessor<?> obj, Key key) throws ConfigProcessException {
         if(obj == null) {
             throw new ConfigProcessException("No processor found for key " + key);
-        }
-
-        if(!obj.key().equals(key)) {
-            throw new ConfigProcessException("Cannot process objects of type " + key + " with " + obj.key());
         }
     }
 }

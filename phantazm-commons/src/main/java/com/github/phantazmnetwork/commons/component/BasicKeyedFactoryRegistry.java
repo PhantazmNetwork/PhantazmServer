@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class BasicKeyedFactoryRegistry implements KeyedFactoryRegistry {
     private final Map<Key, KeyedFactory<?, ?>> factoryMap;
@@ -21,8 +22,11 @@ public class BasicKeyedFactoryRegistry implements KeyedFactoryRegistry {
     }
 
     @Override
-    public void registerFactory(@NotNull KeyedFactory<?, ?> factory) {
-        if(factoryMap.putIfAbsent(factory.key(), factory) != null) {
+    public void registerFactory(@NotNull Key key, @NotNull KeyedFactory<?, ?> factory) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(factory, "factory");
+
+        if(factoryMap.putIfAbsent(key, factory) != null) {
             throw new IllegalArgumentException("A factory for that key already has been registered");
         }
     }

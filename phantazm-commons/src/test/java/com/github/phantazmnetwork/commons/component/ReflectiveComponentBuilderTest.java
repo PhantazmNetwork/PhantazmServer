@@ -33,7 +33,7 @@ class ReflectiveComponentBuilderTest {
         }
     }
 
-    @ComponentModel
+    @ComponentModel("phantazm:test")
     public static class NoFactoryModel {
         public static KeyedFactory<?, ?> factory() {
             return null;
@@ -45,7 +45,7 @@ class ReflectiveComponentBuilderTest {
         }
     }
 
-    @ComponentModel
+    @ComponentModel("phantazm:test")
     public static class NoProcessorModel {
         @ComponentFactory
         public static KeyedFactory<?, ?> factory() {
@@ -57,7 +57,7 @@ class ReflectiveComponentBuilderTest {
         }
     }
 
-    @ComponentModel
+    @ComponentModel("phantazm:test")
     public static class TestComponent {
         public record Data(int number, String string) implements Keyed {
             public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "test");
@@ -69,11 +69,6 @@ class ReflectiveComponentBuilderTest {
         }
 
         private static final KeyedConfigProcessor<Data> PROCESSOR = new KeyedConfigProcessor<>() {
-            @Override
-            public @NotNull Key key() {
-                return Data.SERIAL_KEY;
-            }
-
             @Override
             public @NotNull Data dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException {
                 int number = node.getNumberOrThrow("number").intValue();
@@ -101,13 +96,8 @@ class ReflectiveComponentBuilderTest {
             }
 
             @Override
-            public @Unmodifiable @NotNull List<Key> dependencySpec() {
+            public @Unmodifiable @NotNull List<Key> dependencies() {
                 return DEPENDENCIES;
-            }
-
-            @Override
-            public @NotNull Key key() {
-                return Data.SERIAL_KEY;
             }
         };
 
@@ -163,7 +153,7 @@ class ReflectiveComponentBuilderTest {
         componentData.putString("string", "vegetals");
 
         Map<Key, Object> dependencyMap = new HashMap<>(1);
-        dependencyMap.put(TestComponent.FACTORY.dependencySpec().get(0), 420);
+        dependencyMap.put(TestComponent.FACTORY.dependencies().get(0), 420);
 
         DependencyProvider provider = DependencyProvider.lazy(dependencyMap::get);
 

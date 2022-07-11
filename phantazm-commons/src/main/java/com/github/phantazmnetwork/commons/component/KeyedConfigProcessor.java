@@ -6,11 +6,10 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class KeyedConfigProcessor<TData extends Keyed> implements ConfigProcessor<TData>, Keyed {
+public abstract class KeyedConfigProcessor<TData extends Keyed> implements ConfigProcessor<TData> {
     public static final String SERIAL_KEY_NAME = "serialKey";
 
     @Override
@@ -19,23 +18,14 @@ public abstract class KeyedConfigProcessor<TData extends Keyed> implements Confi
             throw new ConfigProcessException("Element must be a node");
         }
 
-        Key key = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow(SERIAL_KEY_NAME));
-        if(!key.equals(key())) {
-            throw new ConfigProcessException("Cannot deserialize serial elements of type " + key);
-        }
-
         return dataFromNode(element.asNode());
     }
 
     @Override
     public final @NotNull ConfigElement elementFromData(TData data) throws ConfigProcessException {
-        if(!data.key().equals(key())) {
-            throw new ConfigProcessException("Cannot serialize data with key of type " + data.key());
-        }
-
         ConfigNode dataNode = nodeFromData(data);
         ConfigNode newNode = new LinkedConfigNode(dataNode.size() + 1);
-        newNode.put(SERIAL_KEY_NAME, AdventureConfigProcessors.key().elementFromData(key()));
+        newNode.put(SERIAL_KEY_NAME, AdventureConfigProcessors.key().elementFromData(data.key()));
         newNode.putAll(dataNode);
 
         return newNode;

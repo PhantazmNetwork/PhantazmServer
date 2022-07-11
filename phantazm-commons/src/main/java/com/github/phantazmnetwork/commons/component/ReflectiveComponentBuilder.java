@@ -8,6 +8,7 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,7 +34,8 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
 
     @Override
     public void registerComponentClass(@NotNull Class<?> component) {
-        if(component.getAnnotation(ComponentModel.class) == null) {
+        ComponentModel annotation = component.getAnnotation(ComponentModel.class);
+        if(annotation == null) {
             throw new IllegalArgumentException("Class " + component.getTypeName() + " must have the ComponentModel " +
                     "annotation");
         }
@@ -72,14 +74,13 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
             throw new IllegalStateException(e);
         }
 
-        Key processorKey = processor.key();
-        Key factoryKey = factory.key();
-        if(!processorKey.equals(factoryKey)) {
-            throw new IllegalStateException("Key used by the processor and factory cannot differ");
-        }
 
-        configRegistry.registerProcessor(processor);
-        factoryRegistry.registerFactory(factory);
+        @Subst("phantazm:test")
+        String value = annotation.value();
+        Key componentKey = Key.key(value);
+
+        configRegistry.registerProcessor(componentKey, processor);
+        factoryRegistry.registerFactory(componentKey, factory);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         Key dataKey = data.key();
         KeyedFactory<TData, ?> factory = factoryRegistry.getFactory(dataKey);
 
-        if(!provider.prepare(factory.dependencySpec())) {
+        if(!provider.prepare(factory.dependencies())) {
             throw new IllegalStateException("Unable to prepare dependencies");
         }
 

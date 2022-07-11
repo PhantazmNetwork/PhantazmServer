@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.commons.component.annotation;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,4 +12,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-public @interface ComponentModel { }
+public @interface ComponentModel {
+    @NotNull String value();
+}
