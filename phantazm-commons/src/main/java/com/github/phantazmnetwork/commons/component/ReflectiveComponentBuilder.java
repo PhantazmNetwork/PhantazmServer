@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -83,11 +84,11 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
     }
 
     @Override
-    public <TData extends Keyed, TComponent> TComponent makeComponent(@NotNull ConfigElement element,
+    public <TData extends Keyed, TComponent> TComponent makeComponent(@NotNull ConfigNode node,
                                                                       @NotNull DependencyProvider provider) {
         Keyed data;
         try {
-            data = configRegistry.deserialize(element);
+            data = configRegistry.deserialize(node);
         }
         catch (ConfigProcessException e) {
             throw new IllegalArgumentException(e);

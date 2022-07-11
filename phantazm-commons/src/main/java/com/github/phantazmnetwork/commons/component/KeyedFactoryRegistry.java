@@ -5,7 +5,7 @@ import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 public interface KeyedFactoryRegistry {
-    <TComponent, TData extends Keyed> KeyedFactory<TData, TComponent> getFactory(@NotNull Key type);
+    <TData extends Keyed, TComponent> KeyedFactory<TData, TComponent> getFactory(@NotNull Key type);
 
     void registerFactory(@NotNull KeyedFactory<?, ?> factory);
 

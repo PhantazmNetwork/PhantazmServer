@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.commons.component;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -11,10 +12,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
+public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
     private final Map<Key, KeyedConfigProcessor<? extends Keyed>> processors;
 
-    BasicKeyedConfigRegistry() {
+    public BasicKeyedConfigRegistry() {
         this.processors = new HashMap<>();
     }
 
@@ -34,9 +35,9 @@ class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
     }
 
     @Override
-    public @NotNull Keyed deserialize(@NotNull ConfigElement element) throws ConfigProcessException {
+    public @NotNull Keyed deserialize(@NotNull ConfigNode node) throws ConfigProcessException {
         try{
-            return dataFromElement(element);
+            return dataFromElement(node);
         }
         catch (ClassCastException e) {
             throw new ConfigProcessException(e);
@@ -48,19 +49,15 @@ class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
         return elementFromData(data);
     }
 
-    private Keyed dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-        if(!element.isNode()) {
-            throw new ConfigProcessException("Element is not a node");
-        }
-
-        Key key = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("serialKey"));
+    private Keyed dataFromElement(ConfigNode node) throws ConfigProcessException {
+        Key key = AdventureConfigProcessors.key().dataFromElement(node.getElementOrThrow("serialKey"));
         KeyedConfigProcessor<? extends Keyed> processor = processors.get(key);
         check(processor, key);
 
-        return processor.dataFromElement(element);
+        return processor.dataFromElement(node);
     }
 
-    private @NotNull ConfigElement elementFromData(Keyed keyed) throws ConfigProcessException {
+    private ConfigElement elementFromData(Keyed keyed) throws ConfigProcessException {
         Key key = keyed.key();
 
         //noinspection unchecked

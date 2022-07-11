@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.commons.component;
 
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
@@ -20,16 +21,7 @@ public interface KeyedConfigRegistry {
 
     boolean hasProcessor(@NotNull Key type);
 
-    @NotNull Keyed deserialize(@NotNull ConfigElement element) throws ConfigProcessException;
-
-    default @NotNull List<Keyed> deserializeList(@NotNull ConfigList list) throws ConfigProcessException {
-        List<Keyed> newList = new ArrayList<>(list.size());
-        for(ConfigElement element : list) {
-            newList.add(deserialize(element));
-        }
-
-        return newList;
-    }
+    @NotNull Keyed deserialize(@NotNull ConfigNode node) throws ConfigProcessException;
 
     @NotNull ConfigElement serialize(Keyed data) throws ConfigProcessException;
 }

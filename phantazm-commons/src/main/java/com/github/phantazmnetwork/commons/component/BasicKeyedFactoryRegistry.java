@@ -15,7 +15,7 @@ public class BasicKeyedFactoryRegistry implements KeyedFactoryRegistry {
     }
 
     @Override
-    public <TComponent, TData extends Keyed> KeyedFactory<TData, TComponent> getFactory(@NotNull Key type) {
+    public <TData extends Keyed, TComponent> KeyedFactory<TData, TComponent> getFactory(@NotNull Key type) {
         //noinspection unchecked
         return (KeyedFactory<TData, TComponent>) factoryMap.get(type);
     }
