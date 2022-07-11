@@ -9,11 +9,11 @@ import java.util.Objects;
 import java.util.function.Function;
 
 class LazyDependencyProvider implements DependencyProvider {
-    private final Function<Key, ?> dependencyFunction;
+    private final Function<? super Key, ?> dependencyFunction;
 
     private final Map<Key, Object> loadedDependencies;
 
-    LazyDependencyProvider(@NotNull Function<Key, ?> dependencyFunction) {
+    LazyDependencyProvider(@NotNull Function<? super Key, ?> dependencyFunction) {
         this.dependencyFunction = Objects.requireNonNull(dependencyFunction, "dependencyFunction");
         this.loadedDependencies = new HashMap<>(8);
     }
@@ -25,7 +25,7 @@ class LazyDependencyProvider implements DependencyProvider {
             return (TDependency) loadedDependencies.get(key);
         }
 
-        throw new IllegalArgumentException("No loaded dependency available for key " + key);
+        throw new IllegalArgumentException("No dependency available for key " + key);
     }
 
     @Override

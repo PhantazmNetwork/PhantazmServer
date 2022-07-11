@@ -41,7 +41,7 @@ public abstract class KeyedConfigProcessor<TData extends Keyed> implements Confi
         return newNode;
     }
 
-    public abstract TData dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException;
+    public abstract @NotNull TData dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException;
 
-    public abstract @NotNull ConfigNode nodeFromData(TData data);
+    public abstract @NotNull ConfigNode nodeFromData(@NotNull TData data);
 }

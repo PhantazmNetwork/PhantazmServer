@@ -4,11 +4,9 @@ import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
-import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +14,6 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,15 +75,14 @@ class ReflectiveComponentBuilderTest {
             }
 
             @Override
-            public Data dataFromNode(@NotNull ConfigNode node)
-                    throws ConfigProcessException {
+            public @NotNull Data dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException {
                 int number = node.getNumberOrThrow("number").intValue();
                 String string = node.getStringOrThrow("string");
                 return new Data(number, string);
             }
 
             @Override
-            public @NotNull ConfigNode nodeFromData(Data data) {
+            public @NotNull ConfigNode nodeFromData(@NotNull Data data) {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.putNumber("number", data.number);
                 node.putString("string", data.string);
@@ -124,7 +120,7 @@ class ReflectiveComponentBuilderTest {
         }
 
         @ComponentFactory
-        public static KeyedFactory<?, ?> factory() {
+        public static KeyedFactory<Data, TestComponent> factory() {
             return FACTORY;
         }
 
@@ -173,9 +169,9 @@ class ReflectiveComponentBuilderTest {
 
         TestComponent component = builder.makeComponent(componentData, provider);
         TestComponent.Data data = component.data;
+
         assertEquals(69, data.number);
         assertEquals("vegetals", data.string);
-
         assertEquals(component.dependency, 420);
     }
 }
