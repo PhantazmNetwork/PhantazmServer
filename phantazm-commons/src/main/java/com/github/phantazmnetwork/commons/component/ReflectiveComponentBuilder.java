@@ -17,6 +17,11 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class ReflectiveComponentBuilder implements ComponentBuilder {
+    private static final Predicate<Method> BASE = method -> {
+        int modifiers = method.getModifiers();
+        return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && method.getParameterCount() == 0;
+    };
+
     private final KeyedConfigRegistry configRegistry;
     private final KeyedFactoryRegistry factoryRegistry;
 
@@ -33,12 +38,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
                     "annotation");
         }
 
-        Predicate<Method> base = method -> {
-            int modifiers = method.getModifiers();
-            return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && method.getParameterCount() == 0;
-        };
-
-        Method processorMethod = ReflectionUtils.declaredMethodMatching(component, base.and(method -> method
+        Method processorMethod = ReflectionUtils.declaredMethodMatching(component, BASE.and(method -> method
                 .isAnnotationPresent(ComponentProcessor.class) && KeyedConfigProcessor.class.isAssignableFrom(method
                 .getReturnType())));
         if(processorMethod == null) {
@@ -46,7 +46,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
                     .getTypeName());
         }
 
-        Method factoryMethod = ReflectionUtils.declaredMethodMatching(component, base.and(method -> method
+        Method factoryMethod = ReflectionUtils.declaredMethodMatching(component, BASE.and(method -> method
                 .isAnnotationPresent(ComponentFactory.class) && KeyedFactory.class.isAssignableFrom(method
                 .getReturnType())));
         if(factoryMethod == null) {
