@@ -11,18 +11,20 @@ import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class KeyedConfigProcessor<TData extends Keyed> implements ConfigProcessor<TData>, Keyed {
+    public static final String SERIAL_KEY_NAME = "serialKey";
+
     @Override
     public final TData dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         if(!element.isNode()) {
             throw new ConfigProcessException("Element must be a node");
         }
 
-        Key key = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("serialKey"));
+        Key key = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow(SERIAL_KEY_NAME));
         if(!key.equals(key())) {
             throw new ConfigProcessException("Cannot deserialize serial elements of type " + key);
         }
 
-        return dataFromElementKey(element.asNode());
+        return dataFromNode(element.asNode());
     }
 
     @Override
@@ -31,15 +33,15 @@ public abstract class KeyedConfigProcessor<TData extends Keyed> implements Confi
             throw new ConfigProcessException("Cannot serialize data with key of type " + data.key());
         }
 
-        ConfigNode dataNode = elementFromDataKey(data);
+        ConfigNode dataNode = nodeFromData(data);
         ConfigNode newNode = new LinkedConfigNode(dataNode.size() + 1);
-        newNode.put("serialKey", AdventureConfigProcessors.key().elementFromData(key()));
+        newNode.put(SERIAL_KEY_NAME, AdventureConfigProcessors.key().elementFromData(key()));
         newNode.putAll(dataNode);
 
         return newNode;
     }
 
-    public abstract TData dataFromElementKey(@NotNull ConfigNode node) throws ConfigProcessException;
+    public abstract TData dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException;
 
-    public abstract @NotNull ConfigNode elementFromDataKey(TData data);
+    public abstract @NotNull ConfigNode nodeFromData(TData data);
 }

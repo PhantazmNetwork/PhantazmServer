@@ -78,7 +78,7 @@ class ReflectiveComponentBuilderTest {
             }
 
             @Override
-            public Data dataFromElementKey(@NotNull ConfigNode node)
+            public Data dataFromNode(@NotNull ConfigNode node)
                     throws ConfigProcessException {
                 int number = node.getNumberOrThrow("number").intValue();
                 String string = node.getStringOrThrow("string");
@@ -86,7 +86,7 @@ class ReflectiveComponentBuilderTest {
             }
 
             @Override
-            public @NotNull ConfigNode elementFromDataKey(Data data) {
+            public @NotNull ConfigNode nodeFromData(Data data) {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.putNumber("number", data.number);
                 node.putString("string", data.string);

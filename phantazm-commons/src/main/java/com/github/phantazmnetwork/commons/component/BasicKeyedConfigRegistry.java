@@ -36,20 +36,6 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
 
     @Override
     public @NotNull Keyed deserialize(@NotNull ConfigNode node) throws ConfigProcessException {
-        try{
-            return dataFromElement(node);
-        }
-        catch (ClassCastException e) {
-            throw new ConfigProcessException(e);
-        }
-    }
-
-    @Override
-    public @NotNull ConfigElement serialize(Keyed data) throws ConfigProcessException {
-        return elementFromData(data);
-    }
-
-    private Keyed dataFromElement(ConfigNode node) throws ConfigProcessException {
         Key key = AdventureConfigProcessors.key().dataFromElement(node.getElementOrThrow("serialKey"));
         KeyedConfigProcessor<? extends Keyed> processor = processors.get(key);
         check(processor, key);
@@ -57,14 +43,15 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
         return processor.dataFromElement(node);
     }
 
-    private ConfigElement elementFromData(Keyed keyed) throws ConfigProcessException {
-        Key key = keyed.key();
+    @Override
+    public @NotNull ConfigElement serialize(@NotNull Keyed data) throws ConfigProcessException {
+        Key key = data.key();
 
         //noinspection unchecked
         KeyedConfigProcessor<Keyed> processor = (KeyedConfigProcessor<Keyed>) processors.get(key);
         check(processor, key);
 
-        return processor.elementFromData(keyed);
+        return processor.elementFromData(data);
     }
 
     private static void check(KeyedConfigProcessor<?> obj, Key key) throws ConfigProcessException {

@@ -23,5 +23,5 @@ public interface KeyedConfigRegistry {
 
     @NotNull Keyed deserialize(@NotNull ConfigNode node) throws ConfigProcessException;
 
-    @NotNull ConfigElement serialize(Keyed data) throws ConfigProcessException;
+    @NotNull ConfigElement serialize(@NotNull Keyed data) throws ConfigProcessException;
 }
