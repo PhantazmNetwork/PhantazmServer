@@ -55,14 +55,14 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         }
 
         KeyedConfigProcessor<? extends Keyed> processor;
-        KeyedFactory<?> factory;
+        KeyedFactory<?, ?> factory;
         try {
             processor = (KeyedConfigProcessor<?>) processorMethod.invoke(null);
             if(processor == null) {
                 throw new IllegalStateException("Processor method invocation returned null");
             }
 
-            factory = (KeyedFactory<?>) factoryMethod.invoke(null);
+            factory = (KeyedFactory<?, ?>) factoryMethod.invoke(null);
             if(factory == null) {
                 throw new IllegalStateException("Factory method invocation returned null");
             }
@@ -83,7 +83,8 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
     }
 
     @Override
-    public <TComponent> TComponent makeComponent(@NotNull ConfigElement element, @NotNull DependencyProvider provider) {
+    public <TData extends Keyed, TComponent> TComponent makeComponent(@NotNull ConfigElement element,
+                                                                      @NotNull DependencyProvider provider) {
         Keyed data;
         try {
             data = configRegistry.deserialize(element);
@@ -93,13 +94,13 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         }
 
         Key dataKey = data.key();
-        KeyedFactory<?> factory = factoryRegistry.getFactory(dataKey);
+        KeyedFactory<TData, ?> factory = factoryRegistry.getFactory(dataKey);
 
         if(!provider.prepare(factory.dependencySpec())) {
             throw new IllegalStateException("Unable to prepare dependencies");
         }
 
         //noinspection unchecked
-        return (TComponent) factory.make(provider, data);
+        return (TComponent) factory.make(provider, (TData) data);
     }
 }

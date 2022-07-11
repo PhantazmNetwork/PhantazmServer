@@ -1,12 +1,13 @@
 package com.github.phantazmnetwork.commons.component;
 
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 public interface KeyedFactoryRegistry {
-    <TData> KeyedFactory<TData> getFactory(@NotNull Key type);
+    <TComponent, TData extends Keyed> KeyedFactory<TData, TComponent> getFactory(@NotNull Key type);
 
-    void registerFactory(@NotNull KeyedFactory<?> factory);
+    void registerFactory(@NotNull KeyedFactory<?, ?> factory);
 
     boolean hasFactory(@NotNull Key type);
 }

@@ -1,26 +1,27 @@
 package com.github.phantazmnetwork.commons.component;
 
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class BasicKeyedFactoryRegistry implements KeyedFactoryRegistry {
-    private final Map<Key, KeyedFactory<?>> factoryMap;
+public class BasicKeyedFactoryRegistry implements KeyedFactoryRegistry {
+    private final Map<Key, KeyedFactory<?, ?>> factoryMap;
 
-    BasicKeyedFactoryRegistry() {
+    public BasicKeyedFactoryRegistry() {
         this.factoryMap = new HashMap<>();
     }
 
     @Override
-    public <TData> KeyedFactory<TData> getFactory(@NotNull Key type) {
+    public <TComponent, TData extends Keyed> KeyedFactory<TData, TComponent> getFactory(@NotNull Key type) {
         //noinspection unchecked
-        return (KeyedFactory<TData>) factoryMap.get(type);
+        return (KeyedFactory<TData, TComponent>) factoryMap.get(type);
     }
 
     @Override
-    public void registerFactory(@NotNull KeyedFactory<?> factory) {
+    public void registerFactory(@NotNull KeyedFactory<?, ?> factory) {
         if(factoryMap.putIfAbsent(factory.key(), factory) != null) {
             throw new IllegalArgumentException("A factory for that key already has been registered");
         }

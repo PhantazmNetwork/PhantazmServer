@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public interface KeyedFactory<TData> extends Keyed {
-    @NotNull TData make(@NotNull DependencyProvider dependencyProvider, @NotNull Keyed data);
+public interface KeyedFactory<TData extends Keyed, TComponent> extends Keyed {
+    @NotNull TComponent make(@NotNull DependencyProvider dependencyProvider, @NotNull TData data);
 
     @NotNull Collection<Key> dependencySpec();
 }
