@@ -13,23 +13,23 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 import java.util.function.Predicate;
 
-public final class ConfigRegistries {
-    private static final KeyedConfigRegistry CONFIG_REGISTRY = new BasicKeyedConfigRegistry();
-    private static final KeyedFactoryRegistry FACTORY_REGISTRY = new BasicKeyedFactoryRegistry();
+public class ReflectiveComponentBuilder implements ComponentBuilder {
+    private final KeyedConfigRegistry configRegistry;
+    private final KeyedFactoryRegistry factoryRegistry;
 
-    public static @NotNull KeyedConfigRegistry configRegistry() {
-        return CONFIG_REGISTRY;
+    public ReflectiveComponentBuilder(@NotNull KeyedConfigRegistry configRegistry,
+                                      @NotNull KeyedFactoryRegistry factoryRegistry) {
+        this.configRegistry = Objects.requireNonNull(configRegistry, "configRegistry");
+        this.factoryRegistry = Objects.requireNonNull(factoryRegistry, "factoryRegistry");
     }
 
-    public static @NotNull KeyedFactoryRegistry factoryRegistry() {
-        return FACTORY_REGISTRY;
-    }
-
-    public static void registerComponent(@NotNull Class<?> clazz) {
-        if(clazz.getAnnotation(ComponentModel.class) == null) {
-            throw new IllegalArgumentException("Class " + clazz.getTypeName() + " must have the ComponentModel " +
+    @Override
+    public void registerComponentClass(@NotNull Class<?> component) {
+        if(component.getAnnotation(ComponentModel.class) == null) {
+            throw new IllegalArgumentException("Class " + component.getTypeName() + " must have the ComponentModel " +
                     "annotation");
         }
 
@@ -38,19 +38,19 @@ public final class ConfigRegistries {
             return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && method.getParameterCount() == 0;
         };
 
-        Method processorMethod = ReflectionUtils.declaredMethodMatching(clazz, base.and(method -> method
+        Method processorMethod = ReflectionUtils.declaredMethodMatching(component, base.and(method -> method
                 .isAnnotationPresent(ComponentProcessor.class) && KeyedConfigProcessor.class.isAssignableFrom(method
                 .getReturnType())));
         if(processorMethod == null) {
-            throw new IllegalArgumentException("Unable to find processor method for component class " + clazz
+            throw new IllegalArgumentException("Unable to find processor method for component class " + component
                     .getTypeName());
         }
 
-        Method factoryMethod = ReflectionUtils.declaredMethodMatching(clazz, base.and(method -> method
+        Method factoryMethod = ReflectionUtils.declaredMethodMatching(component, base.and(method -> method
                 .isAnnotationPresent(ComponentFactory.class) && KeyedFactory.class.isAssignableFrom(method
                 .getReturnType())));
         if(factoryMethod == null) {
-            throw new IllegalArgumentException("Unable to find factory method for component class " + clazz
+            throw new IllegalArgumentException("Unable to find factory method for component class " + component
                     .getTypeName());
         }
 
@@ -78,28 +78,28 @@ public final class ConfigRegistries {
             throw new IllegalStateException("Key used by the processor and factory cannot differ");
         }
 
-        CONFIG_REGISTRY.registerProcessor(processor);
-        FACTORY_REGISTRY.registerFactory(factory);
+        configRegistry.registerProcessor(processor);
+        factoryRegistry.registerFactory(factory);
     }
 
-    public static <TComponent> TComponent makeComponent(@NotNull ConfigElement element,
-                                                        @NotNull DependencyProvider dependencyProvider) {
+    @Override
+    public <TComponent> TComponent makeComponent(@NotNull ConfigElement element, @NotNull DependencyProvider provider) {
         Keyed data;
         try {
-            data = CONFIG_REGISTRY.deserialize(element);
+            data = configRegistry.deserialize(element);
         }
         catch (ConfigProcessException e) {
             throw new IllegalArgumentException(e);
         }
 
         Key dataKey = data.key();
-        KeyedFactory<?> factory = FACTORY_REGISTRY.getFactory(dataKey);
+        KeyedFactory<?> factory = factoryRegistry.getFactory(dataKey);
 
-        if(!dependencyProvider.prepare(factory.dependencySpec())) {
+        if(!provider.prepare(factory.dependencySpec())) {
             throw new IllegalStateException("Unable to prepare dependencies");
         }
 
         //noinspection unchecked
-        return (TComponent) factory.make(dependencyProvider, data);
+        return (TComponent) factory.make(provider, data);
     }
 }
