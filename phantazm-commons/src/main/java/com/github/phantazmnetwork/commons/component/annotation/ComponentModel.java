@@ -6,9 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Represents a class that obeys the component model.
+ * Marks a class that obeys the standard component model.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-public @interface ComponentModel {
-}
+public @interface ComponentModel { }

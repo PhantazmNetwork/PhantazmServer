@@ -11,6 +11,6 @@ public interface DependencyProvider {
     boolean prepare(@NotNull Iterable<? extends Key> dependencies);
 
     static @NotNull DependencyProvider lazy(@NotNull Function<Key, Object> dependencyFunction) {
-        return new LazyDependencyProvider(dependencyFunction, 5);
+        return new LazyDependencyProvider(dependencyFunction);
     }
 }

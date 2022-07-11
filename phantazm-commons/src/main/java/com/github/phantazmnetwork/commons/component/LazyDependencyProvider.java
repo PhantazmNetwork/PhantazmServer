@@ -9,13 +9,13 @@ import java.util.Objects;
 import java.util.function.Function;
 
 class LazyDependencyProvider implements DependencyProvider {
-    private final Function<Key, Object> dependencyFunction;
+    private final Function<Key, ?> dependencyFunction;
 
     private final Map<Key, Object> loadedDependencies;
 
-    LazyDependencyProvider(@NotNull Function<Key, Object> dependencyFunction, int size) {
+    LazyDependencyProvider(@NotNull Function<Key, ?> dependencyFunction) {
         this.dependencyFunction = Objects.requireNonNull(dependencyFunction, "dependencyFunction");
-        this.loadedDependencies = new HashMap<>(size);
+        this.loadedDependencies = new HashMap<>(8);
     }
 
     @Override

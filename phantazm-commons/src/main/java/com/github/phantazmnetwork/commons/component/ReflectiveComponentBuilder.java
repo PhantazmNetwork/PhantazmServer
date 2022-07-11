@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.commons.ReflectionUtils;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
-import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.kyori.adventure.key.Key;
