@@ -8,7 +8,6 @@
 plugins {
     id("phantazm.java-library-conventions")
 
-    @Suppress("UnstableApiUsage")
     alias(libs.plugins.fabric.loom)
 }
 
@@ -21,6 +20,11 @@ repositories {
     maven("https://server.bbkr.space/artifactory/libs-release")
 }
 
+val transitiveInclude: Configuration by configurations.creating {
+    exclude("it.unimi.dsi", "fastutil")
+    exclude("net.fabricmc", "fabric-loader")
+}
+
 dependencies {
     minecraft(libs.minecraft)
     mappings(libs.yarn.mappings) {
@@ -29,13 +33,38 @@ dependencies {
         }
     }
     modImplementation(libs.bundles.fabric)
-    modImplementation(libs.renderer)
     modImplementation(libs.libgui)
 
+    modImplementation(libs.renderer)
+    @Suppress("UnstableApiUsage")
+    transitiveInclude(libs.renderer)
+
     implementation(project(":phantazm-commons"))
+    transitiveInclude(project(":phantazm-commons"))
     implementation(project(":phantazm-zombies-mapdata"))
+    transitiveInclude(project(":phantazm-zombies-mapdata"))
 
     implementation(libs.ethylene.yaml)
+    @Suppress("UnstableApiUsage")
+    transitiveInclude(libs.ethylene.yaml)
+}
+
+project.afterEvaluate {
+    transitiveInclude.incoming.resolutionResult.allComponents {
+        val idCopy = id
+        dependencies {
+            when (idCopy) {
+                is ModuleComponentIdentifier -> {
+                    include(idCopy.group, idCopy.module, idCopy.version)
+                }
+                is ProjectComponentIdentifier -> {
+                    if (idCopy.projectPath != project.path) {
+                        include(project(idCopy.projectPath))
+                    }
+                }
+            }
+        }
+    }
 }
 
 tasks.processResources {
