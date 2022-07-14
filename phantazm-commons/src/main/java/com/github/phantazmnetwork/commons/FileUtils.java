@@ -86,6 +86,10 @@ public final class FileUtils {
     public static void deleteRecursivelyIfExists(@NotNull Path directory) throws IOException {
         Objects.requireNonNull(directory, "directory");
 
+        if (!Files.isDirectory(directory)) {
+            return;
+        }
+
         Files.walkFileTree(directory, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {

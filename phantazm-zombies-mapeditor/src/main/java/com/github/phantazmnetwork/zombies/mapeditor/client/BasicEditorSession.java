@@ -124,9 +124,14 @@ public class BasicEditorSession implements EditorSession {
         this.enabled = enabled;
         this.renderer.setEnabled(enabled);
 
-        if(!enabled) {
+        if (enabled) {
+            refreshMap();
+        }
+        else {
             firstSelected = null;
             secondSelected = null;
+
+            renderer.clear();
         }
     }
 
@@ -252,7 +257,7 @@ public class BasicEditorSession implements EditorSession {
                 loader.save(map);
             }
             catch (IOException e) {
-                LOGGER.warn("Error when trying to save map " + map.info().id());
+                LOGGER.warn("Error when trying to save map " + map.info().id(), e);
             }
         }
     }
