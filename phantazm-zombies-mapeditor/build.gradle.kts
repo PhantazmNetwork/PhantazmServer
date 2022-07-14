@@ -45,11 +45,11 @@ dependencies {
         exclude(fabricLoaderModule.group, fabricLoaderModule.name)
     }
 
-    shade(project(":phantazm-commons")) {
+    shade(projects.phantazmCommons) {
         val fastutilModule = libs.fastutil.get().module
         exclude(fastutilModule.group, fastutilModule.name)
     }
-    shade(project(":phantazm-zombies-mapdata")) {
+    shade(projects.phantazmZombiesMapdata) {
         val fastutilModule = libs.fastutil.get().module
         exclude(fastutilModule.group, fastutilModule.name)
     }

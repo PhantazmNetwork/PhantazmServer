@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":phantazm-commons"))
+    api(projects.phantazmCommons)
     api(libs.ethylene.core)
     api(libs.caffeine)
 }

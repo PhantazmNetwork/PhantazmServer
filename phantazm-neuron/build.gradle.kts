@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":phantazm-commons"))
+    implementation(projects.phantazmCommons)
     implementation(libs.caffeine)
     testImplementation(libs.ethylene.toml)
 }

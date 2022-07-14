@@ -11,10 +11,11 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":phantazm-api"))
-    implementation(project(":phantazm-mob"))
-    implementation(project(":phantazm-neuron-minestom"))
-    implementation(project(":phantazm-zombies"))
+    implementation(projects.phantazmApi)
+    implementation(projects.phantazmMob)
+    implementation(projects.phantazmNeuronMinestom)
+    implementation(projects.phantazmZombiesMapdata)
+    implementation(projects.phantazmZombies)
 
     implementation(libs.adventure.text.minimessage)
     implementation(libs.ethylene.toml)
