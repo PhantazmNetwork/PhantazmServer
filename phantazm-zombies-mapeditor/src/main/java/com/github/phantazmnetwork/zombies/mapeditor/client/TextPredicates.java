@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.mods.mapeditor.client;
+package com.github.phantazmnetwork.zombies.mapeditor.client;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import net.kyori.adventure.key.InvalidKeyException;

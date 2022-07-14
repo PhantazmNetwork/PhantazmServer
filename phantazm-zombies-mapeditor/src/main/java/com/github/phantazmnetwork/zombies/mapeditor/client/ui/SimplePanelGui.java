@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui;
+package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;

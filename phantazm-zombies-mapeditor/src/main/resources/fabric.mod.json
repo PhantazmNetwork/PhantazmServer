@@ -11,7 +11,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.github.phantazmnetwork.zombies.mods.mapeditor.client.MapeditorClient"
+      "com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorClient"
     ]
   },
   "mixins": [

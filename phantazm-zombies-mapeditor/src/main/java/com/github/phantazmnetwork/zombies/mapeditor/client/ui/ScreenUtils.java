@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui;
+package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;

@@ -23,11 +23,10 @@ repositories {
     maven("https://server.bbkr.space/artifactory/libs-release")
 }
 
-val modShade: Configuration by configurations.creating
-configurations.modImplementation.get().extendsFrom(modShade)
-
-val shade: Configuration by configurations.creating
-configurations.implementation.get().extendsFrom(shade)
+val shade: Configuration by configurations.creating {
+    val fastutilModule = libs.fastutil.get().module
+    exclude(fastutilModule.group, fastutilModule.name)
+}
 
 dependencies {
     minecraft(libs.minecraft)
@@ -37,25 +36,16 @@ dependencies {
         }
     }
     modImplementation(libs.bundles.fabric)
+    modImplementation(libs.renderer)
     modImplementation(libs.libgui)
 
-    @Suppress("UnstableApiUsage")
-    modShade(libs.renderer) {
-        val fabricLoaderModule = libs.fabric.loader.get().module
-        exclude(fabricLoaderModule.group, fabricLoaderModule.name)
-    }
-
-    shade(projects.phantazmCommons) {
-        val fastutilModule = libs.fastutil.get().module
-        exclude(fastutilModule.group, fastutilModule.name)
-    }
-    shade(projects.phantazmZombiesMapdata) {
-        val fastutilModule = libs.fastutil.get().module
-        exclude(fastutilModule.group, fastutilModule.name)
-    }
+    shade(projects.phantazmCommons)
+    shade(projects.phantazmZombiesMapdata)
 
     @Suppress("UnstableApiUsage")
     shade(libs.ethylene.yaml)
+
+    implementation(shade)
 }
 
 tasks.processResources {
@@ -68,13 +58,13 @@ tasks.compileJava {
 
 val relocateShadowJar by tasks.creating(ConfigureShadowRelocation::class) {
     target = tasks.shadowJar.get()
-    prefix = "com.github.phantazmnetwork.zombies.mods.mapeditor.client.shadow"
+    prefix = "com.github.phantazmnetwork.zombies.mapeditor.client.shadow"
 }
 
 tasks.shadowJar {
     dependsOn(relocateShadowJar)
     archiveClassifier.set("shadowJar")
-    configurations = listOf(modShade, shade)
+    configurations = listOf(shade)
 
     from("../LICENSE") {
         rename {

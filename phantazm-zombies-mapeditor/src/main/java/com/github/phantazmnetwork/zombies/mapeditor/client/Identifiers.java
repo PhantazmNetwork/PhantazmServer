@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.mods.mapeditor.client;
+package com.github.phantazmnetwork.zombies.mapeditor.client;
 
 import net.minecraft.util.Identifier;
 

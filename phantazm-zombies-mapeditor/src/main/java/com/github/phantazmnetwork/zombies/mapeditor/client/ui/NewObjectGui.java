@@ -1,11 +1,11 @@
-package com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui;
+package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.mods.mapeditor.client.EditorSession;
-import com.github.phantazmnetwork.zombies.mods.mapeditor.client.TranslationKeys;
+import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
+import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import net.minecraft.client.MinecraftClient;

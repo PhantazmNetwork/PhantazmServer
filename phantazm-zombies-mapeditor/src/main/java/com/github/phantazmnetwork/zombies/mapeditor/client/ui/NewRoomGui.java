@@ -1,11 +1,11 @@
-package com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui;
+package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.LogicUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.zombies.map.RoomInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.mods.mapeditor.client.EditorSession;
+import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import com.github.steanky.ethylene.core.collection.ArrayConfigList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
