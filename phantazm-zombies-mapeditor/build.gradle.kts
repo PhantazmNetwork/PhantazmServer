@@ -1,5 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
-
 // https://youtrack.jetbrains.com/issue/KTIJ-19369/False-positive-can-t-be-called-in-this-context-by-implicit-recei
 @Suppress(
     "DSL_SCOPE_VIOLATION",
@@ -11,7 +9,6 @@ plugins {
     id("phantazm.java-library-conventions")
 
     alias(libs.plugins.fabric.loom)
-    alias(libs.plugins.shadow)
 }
 
 base {
@@ -23,9 +20,14 @@ repositories {
     maven("https://server.bbkr.space/artifactory/libs-release")
 }
 
-val shade: Configuration by configurations.creating {
-    val fastutilModule = libs.fastutil.get().module
-    exclude(fastutilModule.group, fastutilModule.name)
+fun Configuration.exclude(provider: Provider<MinimalExternalModuleDependency>) {
+    val module = provider.get().module
+    exclude(module.group, module.name)
+}
+
+val includeTransitive: Configuration by configurations.creating {
+    exclude(libs.fabric.loader)
+    exclude(libs.fastutil)
 }
 
 dependencies {
@@ -35,17 +37,36 @@ dependencies {
             classifier = "v2"
         }
     }
-    modImplementation(libs.bundles.fabric)
-    modImplementation(libs.renderer)
-    modImplementation(libs.libgui)
 
-    shade(projects.phantazmCommons)
-    shade(projects.phantazmZombiesMapdata)
+    modImplementation(libs.bundles.fabric)
+    modImplementation(libs.libgui)
+    modImplementation(libs.renderer)
+
+    implementation(projects.phantazmCommons)
+    implementation(projects.phantazmZombiesMapdata)
+    implementation(libs.ethylene.yaml)
 
     @Suppress("UnstableApiUsage")
-    shade(libs.ethylene.yaml)
+    includeTransitive(libs.renderer)
+    includeTransitive(projects.phantazmCommons)
+    includeTransitive(projects.phantazmZombiesMapdata)
+    @Suppress("UnstableApiUsage")
+    includeTransitive(libs.ethylene.yaml)
 
-    implementation(shade)
+    val resolutionResult = includeTransitive.incoming.resolutionResult
+    resolutionResult.allComponents {
+        when (val idCopy = id) {
+            resolutionResult.root.id -> {
+                return@allComponents
+            }
+            is ModuleComponentIdentifier -> {
+                include(idCopy.group, idCopy.module, idCopy.version)
+            }
+            is ProjectComponentIdentifier -> {
+                include(project(idCopy.projectPath))
+            }
+        }
+    }
 }
 
 tasks.processResources {
@@ -56,24 +77,10 @@ tasks.compileJava {
     options.release.set(java.toolchain.languageVersion.get().asInt())
 }
 
-val relocateShadowJar by tasks.creating(ConfigureShadowRelocation::class) {
-    target = tasks.shadowJar.get()
-    prefix = "com.github.phantazmnetwork.zombies.mapeditor.client.shadow"
-}
-
-tasks.shadowJar {
-    dependsOn(relocateShadowJar)
-    archiveClassifier.set("shadowJar")
-    configurations = listOf(shade)
-
+tasks.jar {
     from("../LICENSE") {
         rename {
             "${it}_${base.archivesName.get()}"
         }
     }
-}
-
-tasks.remapJar {
-    dependsOn(tasks.shadowJar)
-    inputFile.set(tasks.shadowJar.get().archiveFile)
 }
