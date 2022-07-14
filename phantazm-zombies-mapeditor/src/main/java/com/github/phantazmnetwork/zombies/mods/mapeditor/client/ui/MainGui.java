@@ -1,12 +1,12 @@
-package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
+package com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
-import com.github.phantazmnetwork.zombies.mapeditor.client.Identifiers;
-import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
-import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.EditorSession;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.Identifiers;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.TextPredicates;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.widget.*;
 import net.kyori.adventure.key.Key;

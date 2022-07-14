@@ -46,3 +46,5 @@ fabric = ["fabric-api", "fabric-loader"]
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version = "0.12.54" }
+
+shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }

@@ -1,9 +1,9 @@
-package com.github.phantazmnetwork.zombies.mapeditor.client;
+package com.github.phantazmnetwork.zombies.mods.mapeditor.client;
 
 import com.github.phantazmnetwork.zombies.map.FileSystemMapLoader;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
-import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
-import com.github.phantazmnetwork.zombies.mapeditor.client.ui.NewObjectGui;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.render.ObjectRenderer;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui.MainGui;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui.NewObjectGui;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;

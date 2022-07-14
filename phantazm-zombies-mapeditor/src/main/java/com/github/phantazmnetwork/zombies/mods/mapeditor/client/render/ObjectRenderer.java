@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.mapeditor.client.render;
+package com.github.phantazmnetwork.zombies.mods.mapeditor.client.render;
 
 import net.kyori.adventure.key.Key;
 import net.minecraft.util.math.Vec3d;

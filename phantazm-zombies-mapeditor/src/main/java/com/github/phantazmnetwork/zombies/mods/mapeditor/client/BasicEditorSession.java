@@ -1,12 +1,12 @@
-package com.github.phantazmnetwork.zombies.mapeditor.client;
+package com.github.phantazmnetwork.zombies.mods.mapeditor.client;
 
 import com.github.phantazmnetwork.commons.FileUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.*;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.render.ObjectRenderer;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.render.RenderUtils;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;

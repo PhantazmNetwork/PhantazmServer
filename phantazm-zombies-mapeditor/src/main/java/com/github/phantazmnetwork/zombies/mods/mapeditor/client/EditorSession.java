@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.mapeditor.client;
+package com.github.phantazmnetwork.zombies.mods.mapeditor.client;
 
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;

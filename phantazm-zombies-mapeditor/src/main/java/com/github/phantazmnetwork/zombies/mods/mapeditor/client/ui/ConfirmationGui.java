@@ -1,6 +1,6 @@
-package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
+package com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui;
 
-import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WText;
 import net.minecraft.text.Text;

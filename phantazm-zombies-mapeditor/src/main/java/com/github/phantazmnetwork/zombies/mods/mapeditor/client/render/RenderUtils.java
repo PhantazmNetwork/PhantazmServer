@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.mapeditor.client.render;
+package com.github.phantazmnetwork.zombies.mods.mapeditor.client.render;
 
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
@@ -7,10 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
-import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer.RenderObject;
 
 /**
- * Contains useful utilities for working with {@link RenderObject}s
+ * Contains useful utilities for working with {@link ObjectRenderer.RenderObject}s
  */
 public final class RenderUtils {
     private RenderUtils() {
@@ -19,7 +18,7 @@ public final class RenderUtils {
 
     /**
      * Converts the given list of {@link Region3I} instances into a single array of {@link Vec3d} instances, for use in
-     * creating a representative {@link RenderObject}.
+     * creating a representative {@link ObjectRenderer.RenderObject}.
      * @param regions the regions list
      * @param origin the origin vector to which the regions are measured relative to
      * @return a flat array which can be used to construct a RenderObject

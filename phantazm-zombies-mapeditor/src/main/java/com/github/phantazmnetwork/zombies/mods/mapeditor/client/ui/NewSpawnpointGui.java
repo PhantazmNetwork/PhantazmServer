@@ -1,11 +1,11 @@
-package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
+package com.github.phantazmnetwork.zombies.mods.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.LogicUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.SpawnpointInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
+import com.github.phantazmnetwork.zombies.mods.mapeditor.client.EditorSession;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
 // https://youtrack.jetbrains.com/issue/KTIJ-19369/False-positive-can-t-be-called-in-this-context-by-implicit-recei
 @Suppress(
     "DSL_SCOPE_VIOLATION",
@@ -9,6 +11,7 @@ plugins {
     id("phantazm.java-library-conventions")
 
     alias(libs.plugins.fabric.loom)
+    alias(libs.plugins.shadow)
 }
 
 base {
@@ -20,10 +23,11 @@ repositories {
     maven("https://server.bbkr.space/artifactory/libs-release")
 }
 
-val transitiveInclude: Configuration by configurations.creating {
-    exclude("it.unimi.dsi", "fastutil")
-    exclude("net.fabricmc", "fabric-loader")
-}
+val modShade: Configuration by configurations.creating
+configurations.modImplementation.get().extendsFrom(modShade)
+
+val shade: Configuration by configurations.creating
+configurations.implementation.get().extendsFrom(shade)
 
 dependencies {
     minecraft(libs.minecraft)
@@ -35,36 +39,23 @@ dependencies {
     modImplementation(libs.bundles.fabric)
     modImplementation(libs.libgui)
 
-    modImplementation(libs.renderer)
     @Suppress("UnstableApiUsage")
-    transitiveInclude(libs.renderer)
-
-    implementation(project(":phantazm-commons"))
-    transitiveInclude(project(":phantazm-commons"))
-    implementation(project(":phantazm-zombies-mapdata"))
-    transitiveInclude(project(":phantazm-zombies-mapdata"))
-
-    implementation(libs.ethylene.yaml)
-    @Suppress("UnstableApiUsage")
-    transitiveInclude(libs.ethylene.yaml)
-}
-
-project.afterEvaluate {
-    transitiveInclude.incoming.resolutionResult.allComponents {
-        val idCopy = id
-        dependencies {
-            when (idCopy) {
-                is ModuleComponentIdentifier -> {
-                    include(idCopy.group, idCopy.module, idCopy.version)
-                }
-                is ProjectComponentIdentifier -> {
-                    if (idCopy.projectPath != project.path) {
-                        include(project(idCopy.projectPath))
-                    }
-                }
-            }
-        }
+    modShade(libs.renderer) {
+        val fabricLoaderModule = libs.fabric.loader.get().module
+        exclude(fabricLoaderModule.group, fabricLoaderModule.name)
     }
+
+    shade(project(":phantazm-commons")) {
+        val fastutilModule = libs.fastutil.get().module
+        exclude(fastutilModule.group, fastutilModule.name)
+    }
+    shade(project(":phantazm-zombies-mapdata")) {
+        val fastutilModule = libs.fastutil.get().module
+        exclude(fastutilModule.group, fastutilModule.name)
+    }
+
+    @Suppress("UnstableApiUsage")
+    shade(libs.ethylene.yaml)
 }
 
 tasks.processResources {
@@ -75,10 +66,24 @@ tasks.compileJava {
     options.release.set(java.toolchain.languageVersion.get().asInt())
 }
 
-tasks.jar {
+val relocateShadowJar by tasks.creating(ConfigureShadowRelocation::class) {
+    target = tasks.shadowJar.get()
+    prefix = "com.github.phantazmnetwork.zombies.mods.mapeditor.client.shadow"
+}
+
+tasks.shadowJar {
+    dependsOn(relocateShadowJar)
+    archiveClassifier.set("shadowJar")
+    configurations = listOf(modShade, shade)
+
     from("../LICENSE") {
         rename {
-            "${it}_${base.archivesName}"
+            "${it}_${base.archivesName.get()}"
         }
     }
+}
+
+tasks.remapJar {
+    dependsOn(tasks.shadowJar)
+    inputFile.set(tasks.shadowJar.get().archiveFile)
 }
