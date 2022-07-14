@@ -57,6 +57,8 @@ public class StageTransition implements Tickable {
 
         this.currentStageIndex = currentStageIndex;
         currentStage.end();
+
         currentStage = stages.get(currentStageIndex);
+        currentStage.start();
     }
 }

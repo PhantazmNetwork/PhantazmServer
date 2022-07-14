@@ -31,13 +31,14 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private boolean joinable;
 
-    public ZombiesScene(@NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull ZombiesMap map,
+    public ZombiesScene(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
+                        @NotNull SceneFallback fallback, @NotNull ZombiesMap map,
                         @NotNull StageTransition stageTransition,
                         @NotNull Function<PlayerView, ZombiesPlayer> playerCreator,
                         @NotNull Random random) {
         super(instance, fallback);
 
-        this.zombiesPlayers = new HashMap<>(map.getData().info().maxPlayers());
+        this.zombiesPlayers = zombiesPlayers;
         this.map = Objects.requireNonNull(map, "map");
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
@@ -75,7 +76,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         return;
                     }
 
-                    player.sendMessage(messages.get(random.nextInt(messages.size())));
+                    if (!messages.isEmpty()) {
+                        player.sendMessage(messages.get(random.nextInt(messages.size())));
+                    }
                 });
             });
         }
@@ -127,5 +130,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             zombiesPlayer.tick(time);
         }
+        stageTransition.tick(time);
     }
 }

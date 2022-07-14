@@ -6,7 +6,6 @@ import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
-import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.map.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
@@ -39,8 +38,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     public ZombiesMap(@NotNull MapInfo info,
                       @NotNull Instance instance,
                       @NotNull MobSpawner mobSpawner,
-                      @NotNull ClientBlockHandler blockHandler,
-                      @NotNull SpawnDistributor spawnDistributor) {
+                      @NotNull ClientBlockHandler blockHandler/*,
+                      @NotNull SpawnDistributor spawnDistributor*/) {
         super(info, info.info().origin(), instance);
 
         List<RoomInfo> roomData = info.rooms();

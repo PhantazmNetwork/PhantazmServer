@@ -12,6 +12,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.RGBLike;
 import org.jetbrains.annotations.NotNull;
@@ -127,6 +128,8 @@ public final class AdventureConfigProcessors {
         }
     };
 
+    private static final ConfigProcessor<TitlePart<Title.Times>> timesTitlePart = ConfigProcessor.emptyProcessor(() -> TitlePart.TIMES);
+
     private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessor.enumProcessor(Sound.Source.class);
 
     /**
@@ -152,6 +155,10 @@ public final class AdventureConfigProcessors {
      */
     public static @NotNull ConfigProcessor<TitlePart<Component>> componentTitlePart() {
         return componentTitlePart;
+    }
+
+    public static @NotNull ConfigProcessor<TitlePart<Title.Times>> timesTitlePart() {
+        return timesTitlePart;
     }
 
     /**
