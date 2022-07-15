@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    implementation(projects.phantazmApi)
+    implementation(projects.phantazmCore)
     implementation(projects.phantazmMob)
     implementation(projects.phantazmZombiesMapdata)
 }

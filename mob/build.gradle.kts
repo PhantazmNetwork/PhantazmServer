@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(projects.phantazmNeuronMinestom)
-    implementation(projects.phantazmApi)
+    implementation(projects.phantazmCore)
     implementation(projects.phantazmCommons)
     implementation(libs.adventure.text.minimessage)
     testImplementation(libs.ethylene.core)

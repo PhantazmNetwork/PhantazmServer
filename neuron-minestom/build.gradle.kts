@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.phantazmApi)
+    implementation(projects.phantazmCore)
     api(projects.phantazmNeuron)
 }
