@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.commons.component;
 
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentDependency;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
@@ -18,8 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ReflectiveComponentBuilderTest {
     @Test
@@ -27,7 +27,7 @@ class ReflectiveComponentBuilderTest {
         ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
                                                                   Mockito.mock(KeyedFactoryRegistry.class)
         );
-        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoComponentModel.class));
+        assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoComponentModel.class));
     }
 
     @Test
@@ -35,7 +35,7 @@ class ReflectiveComponentBuilderTest {
         ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
                                                                   Mockito.mock(KeyedFactoryRegistry.class)
         );
-        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoFactoryModel.class));
+        assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoFactoryModel.class));
     }
 
     @Test
@@ -43,7 +43,7 @@ class ReflectiveComponentBuilderTest {
         ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
                                                                   Mockito.mock(KeyedFactoryRegistry.class)
         );
-        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoProcessorModel.class));
+        assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoProcessorModel.class));
     }
 
     @Test
@@ -68,6 +68,74 @@ class ReflectiveComponentBuilderTest {
         assertEquals(69, data.number);
         assertEquals("vegetals", data.string);
         assertEquals(component.dependency, 420);
+    }
+
+    @Test
+    void justDataInferredFactory() {
+        ComponentBuilder builder =
+                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+        assertDoesNotThrow(() -> builder.registerComponentClass(JustDataInferredFactoryModel.class));
+    }
+
+    @Test
+    void explicitDependencyConstructorFactory() throws ComponentException {
+        ComponentBuilder builder =
+                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+        assertDoesNotThrow(() -> builder.registerComponentClass(DependencyConstructorFactory.class));
+
+        ConfigNode node = new LinkedConfigNode(1);
+        node.putString("serialKey", "phantazm:test");
+
+        Map<Key, Object> depMap = new HashMap<>();
+        depMap.put(Key.key("phantazm:test.value"), 69420);
+
+        DependencyProvider deps = new LazyDependencyProvider(depMap::get);
+
+        DependencyConstructorFactory component = builder.makeComponent(node, deps);
+        assertEquals(69420, component.value);
+    }
+
+    @ComponentModel("phantazm:test")
+    public static class DependencyConstructorFactory {
+        @ComponentProcessor
+        public static KeyedConfigProcessor<?> processor() {
+            return KeyedConfigProcessor.fromSupplier(Data::new);
+        }
+
+        private int value;
+
+        @ComponentFactory
+        public DependencyConstructorFactory(@NotNull Data data, @ComponentDependency("phantazm:test.value") int value) {
+            this.value = value;
+        }
+
+        private record Data() implements Keyed {
+            @Override
+            public @NotNull Key key() {
+                return Key.key("phantazm:test");
+            }
+        }
+    }
+
+    @ComponentModel("phantazm:test")
+    public static class JustDataInferredFactoryModel {
+        @ComponentProcessor
+        public static KeyedConfigProcessor<?> processor() {
+            return KeyedConfigProcessor.fromSupplier(Data::new);
+        }
+
+        @ComponentFactory
+        public JustDataInferredFactoryModel(@NotNull Data data) {
+
+        }
+
+        private record Data() implements Keyed {
+
+            @Override
+            public @NotNull Key key() {
+                return null;
+            }
+        }
     }
 
     public static class NoComponentModel {

@@ -32,10 +32,8 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && method.getParameterCount() == 0;
     };
 
-    private static final Predicate<Constructor<?>> BASE_CONSTRUCTOR = constructor -> {
-        int modifiers = constructor.getModifiers();
-        return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers);
-    };
+    private static final Predicate<Constructor<?>> BASE_CONSTRUCTOR =
+            constructor -> Modifier.isPublic(constructor.getModifiers());
 
     private final KeyedConfigRegistry configRegistry;
     private final KeyedFactoryRegistry factoryRegistry;
@@ -64,11 +62,11 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
 
         Key componentKey = getKey(component, value);
         if (configRegistry.hasProcessor(componentKey)) {
-            throw new ComponentException("Component already registered under Key " + componentKey);
+            throw new ComponentException("Component already registered under " + componentKey);
         }
 
         if (factoryRegistry.hasFactory(componentKey)) {
-            throw new ComponentException("Factory already registered under Key " + componentKey);
+            throw new ComponentException("Factory already registered under " + componentKey);
         }
 
         KeyedConfigProcessor<?> processor = getProcessor(component);
@@ -194,7 +192,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
                 Object[] args = new Object[dependencyKeys.size() + 1];
                 args[0] = keyed;
                 for (int i = 1; i < args.length; i++) {
-                    args[i] = dependencyProvider.provide(dependencyKeys.get(i));
+                    args[i] = dependencyProvider.provide(dependencyKeys.get(i - 1));
                 }
 
                 return tryInvokeConstructor(declaredConstructor, args);
@@ -210,7 +208,12 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
     private static <T> T tryInvokeMethod(Method method, Object... args) throws ComponentException {
         try {
             //noinspection unchecked
-            return (T)method.invoke(null, args);
+            T result = (T)method.invoke(null, args);
+            if (result == null) {
+                throw new ComponentException("Null result when invoking component processor entrypoint for " +
+                                             method.getDeclaringClass().getTypeName());
+            }
+            return result;
         }
         catch (IllegalAccessException | InvocationTargetException e) {
             throw new ComponentException("Exception when invoking component processor entrypoint for " +
