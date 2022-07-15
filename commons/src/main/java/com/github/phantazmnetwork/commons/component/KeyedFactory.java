@@ -21,7 +21,7 @@ public interface KeyedFactory<TData extends Keyed, TComponent> {
      * @param data               the configurable data used to create the component
      * @return the component itself
      */
-    @NotNull TComponent make(@NotNull DependencyProvider dependencyProvider, @NotNull TData data);
+    @NotNull TComponent make(@NotNull DependencyProvider dependencyProvider, TData data);
 
     /**
      * Returns a representative list of all the dependencies this factory needs to use when creating components.

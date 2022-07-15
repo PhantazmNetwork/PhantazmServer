@@ -48,4 +48,6 @@ public interface KeyedConfigRegistry {
      * @throws ConfigProcessException if an error occurred during serialization
      */
     @NotNull ConfigNode serialize(@NotNull Keyed data) throws ConfigProcessException;
+
+    @NotNull Key extractKey(@NotNull ConfigNode data) throws ConfigProcessException;
 }

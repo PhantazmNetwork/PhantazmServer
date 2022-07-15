@@ -112,6 +112,14 @@ class ReflectiveComponentBuilderTest {
     }
 
     @ComponentModel("phantazm:test")
+    public static class NoDependenciesOrData {
+        @ComponentFactory
+        public NoDependenciesOrData() {
+
+        }
+    }
+
+    @ComponentModel("phantazm:test")
     public static class ImplicitDependencyConstructorFactory {
         @ComponentDependency("phantazm:test.value")
         public record Dependency(int value) {
@@ -242,7 +250,7 @@ class ReflectiveComponentBuilderTest {
                     List.of(Key.key(Namespaces.PHANTAZM, "test.dependency.number"));
 
             @Override
-            public @NotNull TestComponent make(@NotNull DependencyProvider dependencyProvider, @NotNull Data data) {
+            public @NotNull TestComponent make(@NotNull DependencyProvider dependencyProvider, Data data) {
                 int dependency = dependencyProvider.provide(DEPENDENCIES.get(0));
                 return new TestComponent(data, dependency);
             }

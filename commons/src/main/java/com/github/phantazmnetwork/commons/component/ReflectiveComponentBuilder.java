@@ -58,13 +58,20 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         String value = annotation.value();
 
         Key componentKey = getKey(component, value);
+        boolean hasProcessor = true;
         if (!configRegistry.hasProcessor(componentKey)) {
             KeyedConfigProcessor<?> processor = getProcessor(component);
-            configRegistry.registerProcessor(componentKey, processor);
+
+            if (processor == null) {
+                hasProcessor = false;
+            }
+            else {
+                configRegistry.registerProcessor(componentKey, processor);
+            }
         }
 
         if (!factoryRegistry.hasFactory(componentKey)) {
-            KeyedFactory<?, ?> factory = getFactory(component);
+            KeyedFactory<?, ?> factory = getFactory(component, hasProcessor);
             factoryRegistry.registerFactory(componentKey, factory);
         }
     }
@@ -73,15 +80,19 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
     public <TData extends Keyed, TComponent> TComponent makeComponent(@NotNull ConfigNode node,
                                                                       @NotNull DependencyProvider provider)
             throws ComponentException {
-        Keyed data;
+        Key dataKey;
+        Keyed data = null;
         try {
-            data = configRegistry.deserialize(node);
+            dataKey = configRegistry.extractKey(node);
+
+            if (configRegistry.hasProcessor(dataKey)) {
+                data = configRegistry.deserialize(node);
+            }
         }
         catch (ConfigProcessException e) {
             throw new ComponentException(e);
         }
 
-        Key dataKey = data.key();
         KeyedFactory<TData, ?> factory = factoryRegistry.getFactory(dataKey);
         if (factory == null) {
             throw new ComponentException("Unable to find a suitable factory for " + dataKey);
@@ -110,13 +121,13 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
                 method -> method.isAnnotationPresent(ComponentProcessor.class) &&
                           KeyedConfigProcessor.class.isAssignableFrom(method.getReturnType())));
         if (declaredProcessor == null) {
-            throw new ComponentException("No data processor method found in " + component.getTypeName());
+            return null;
         }
 
         return tryInvokeMethod(declaredProcessor);
     }
 
-    private static KeyedFactory<?, ?> getFactory(Class<?> component) throws ComponentException {
+    private static KeyedFactory<?, ?> getFactory(Class<?> component, boolean hasProcessor) throws ComponentException {
         Method declaredFactory = ReflectionUtils.declaredMethodMatching(component, BASE_METHOD.and(
                 method -> method.isAnnotationPresent(ComponentFactory.class) &&
                           KeyedFactory.class.isAssignableFrom(method.getReturnType())));
@@ -141,7 +152,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
             //zero-length constructor needs no data or dependencies
             return new KeyedFactory<>() {
                 @Override
-                public @NotNull Object make(@NotNull DependencyProvider dependencyProvider, @NotNull Keyed keyed) {
+                public @NotNull Object make(@NotNull DependencyProvider dependencyProvider, Keyed keyed) {
                     return tryInvokeConstructor(declaredConstructor);
                 }
 
@@ -180,11 +191,21 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
             }
         }
 
+        if (dataParameterIndex == -1 && hasProcessor) {
+            throw new ComponentException(
+                    "No data parameter found in component which specifies a processor " + component.getTypeName());
+        }
+
+        if (dataParameterIndex != -1 && !hasProcessor) {
+            throw new ComponentException(
+                    "Found data parameter in component which does not specify a processor " + component.getTypeName());
+        }
+
         int finalDataParameterIndex = dataParameterIndex;
 
         return new KeyedFactory<>() {
             @Override
-            public @NotNull Object make(@NotNull DependencyProvider dependencyProvider, @NotNull Keyed keyed) {
+            public @NotNull Object make(@NotNull DependencyProvider dependencyProvider, Keyed keyed) {
                 Object[] args;
                 if (finalDataParameterIndex == -1) {
                     //no data parameter, object is entirely dependencies
