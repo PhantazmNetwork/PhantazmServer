@@ -1,10 +1,7 @@
 package com.github.phantazmnetwork.commons.component;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentDependency;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
+import com.github.phantazmnetwork.commons.component.annotation.*;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -133,6 +130,7 @@ class ReflectiveComponentBuilderTest {
             this.dependency = dependency;
         }
 
+        @ComponentData
         private record Data() implements Keyed {
             @Override
             public @NotNull Key key() {
@@ -151,7 +149,7 @@ class ReflectiveComponentBuilderTest {
         private final int value;
 
         @ComponentFactory
-        public ExplicitDependencyConstructorFactory(@NotNull Data data,
+        public ExplicitDependencyConstructorFactory(@ComponentData @NotNull Data data,
                                                     @ComponentDependency("phantazm:test.value") int value) {
             this.value = value;
         }
@@ -172,7 +170,7 @@ class ReflectiveComponentBuilderTest {
         }
 
         @ComponentFactory
-        public JustDataInferredFactoryModel(@NotNull Data data) {
+        public JustDataInferredFactoryModel(@ComponentData @NotNull Data data) {
 
         }
 

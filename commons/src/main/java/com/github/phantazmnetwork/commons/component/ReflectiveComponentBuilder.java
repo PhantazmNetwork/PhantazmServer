@@ -63,7 +63,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
             configRegistry.registerProcessor(componentKey, processor);
         }
 
-        if (factoryRegistry.hasFactory(componentKey)) {
+        if (!factoryRegistry.hasFactory(componentKey)) {
             KeyedFactory<?, ?> factory = getFactory(component);
             factoryRegistry.registerFactory(componentKey, factory);
         }
@@ -83,6 +83,9 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
 
         Key dataKey = data.key();
         KeyedFactory<TData, ?> factory = factoryRegistry.getFactory(dataKey);
+        if (factory == null) {
+            throw new ComponentException("Unable to find a suitable factory for " + dataKey);
+        }
 
         if (!provider.load(factory.dependencies())) {
             throw new ComponentException("Unable to prepare dependencies for data " + dataKey);
@@ -191,14 +194,14 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
                     }
                 }
                 else {
-                    args = new Object[dependencyKeys.size() - 1];
+                    args = new Object[dependencyKeys.size() + 1];
                     args[finalDataParameterIndex] = keyed;
                     for (int i = 0; i < finalDataParameterIndex; i++) {
                         args[i] = dependencyProvider.provide(dependencyKeys.get(i));
                     }
 
                     for (int i = finalDataParameterIndex + 1; i < parameters.length; i++) {
-                        args[i] = dependencyKeys.get(i - 1);
+                        args[i] = dependencyProvider.provide(dependencyKeys.get(i - 1));
                     }
                 }
 
