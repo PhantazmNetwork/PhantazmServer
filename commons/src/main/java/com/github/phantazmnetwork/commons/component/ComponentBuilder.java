@@ -1,8 +1,13 @@
 package com.github.phantazmnetwork.commons.component;
 
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.function.IntFunction;
 
 /**
  * Represents a builder and registry of component objects. These are objects that are generally loaded from some
@@ -29,4 +34,17 @@ public interface ComponentBuilder {
      */
     <TData extends Keyed, TComponent> TComponent makeComponent(@NotNull ConfigNode node,
                                                                @NotNull DependencyProvider provider);
+
+    default <TData extends Keyed, TComponent, TCollection extends Collection<TComponent>> @NotNull TCollection makeComponents(
+            @NotNull ConfigList list, @NotNull DependencyProvider provider,
+            @NotNull IntFunction<TCollection> collectionIntFunction) {
+        TCollection out = collectionIntFunction.apply(list.size());
+        for (ConfigElement element : list) {
+            if (element.isNode()) {
+                out.add(makeComponent(element.asNode(), provider));
+            }
+        }
+
+        return out;
+    }
 }

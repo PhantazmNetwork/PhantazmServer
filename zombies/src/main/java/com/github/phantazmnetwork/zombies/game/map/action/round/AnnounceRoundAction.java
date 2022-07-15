@@ -1,8 +1,15 @@
-package com.github.phantazmnetwork.zombies.game.map.action;
+package com.github.phantazmnetwork.zombies.game.map.action.round;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.component.DependencyProvider;
+import com.github.phantazmnetwork.commons.component.KeyedFactory;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
 import com.github.phantazmnetwork.zombies.game.map.Round;
+import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -15,12 +22,15 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * An {@link Action} that announces the current round.
  */
+@ComponentModel("phantazm:zombies.map.round.action.announce")
 public class AnnounceRoundAction implements Action<Round> {
     private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
         @Override
@@ -41,6 +51,22 @@ public class AnnounceRoundAction implements Action<Round> {
             return node;
         }
     };
+
+    private static final KeyedFactory<Data, AnnounceRoundAction> FACTORY = new KeyedFactory<>() {
+        private static final List<Key> DEPENDENCIES = List.of(ZombiesMap.Context.DEPENDENCY_KEY);
+
+        @Override
+        public @NotNull AnnounceRoundAction make(@NotNull DependencyProvider dependencyProvider, @NotNull Data data) {
+            ZombiesMap.Context context = dependencyProvider.provide(ZombiesMap.Context.DEPENDENCY_KEY);
+            return new AnnounceRoundAction(data, context.instance());
+        }
+
+        @Override
+        public @Unmodifiable @NotNull List<Key> dependencies() {
+            return DEPENDENCIES;
+        }
+    };
+
     private final Data data;
     private final Audience audience;
 
@@ -55,8 +81,14 @@ public class AnnounceRoundAction implements Action<Round> {
         this.audience = Objects.requireNonNull(audience, "audience");
     }
 
+    @ComponentProcessor
     public static @NotNull ConfigProcessor<Data> processor() {
         return PROCESSOR;
+    }
+
+    @ComponentFactory
+    public static @NotNull KeyedFactory<Data, AnnounceRoundAction> factory() {
+        return FACTORY;
     }
 
     @Override

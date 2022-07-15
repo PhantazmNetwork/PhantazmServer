@@ -1,13 +1,22 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
+import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.component.ComponentBuilder;
+import com.github.phantazmnetwork.commons.component.DependencyProvider;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
+import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
+import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigList;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +27,12 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
+    public record Context(@NotNull Instance instance,
+                          @NotNull MobSpawner spawner,
+                          @NotNull ClientBlockHandler blockHandler) {
+        public static final Key DEPENDENCY_KEY = Key.key(Namespaces.PHANTAZM, "zombies.dependency.map.context");
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
 
     private final List<Room> unmodifiableRooms;
@@ -35,10 +50,16 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
      * @param info     the backing data object
      * @param instance the instance which this MapObject is in
      */
-    public ZombiesMap(@NotNull MapInfo info, @NotNull Instance instance, @NotNull MobSpawner mobSpawner,
-                      @NotNull ClientBlockHandler blockHandler/*,
-                      @NotNull SpawnDistributor spawnDistributor*/) {
+    public ZombiesMap(@NotNull MapInfo info, @NotNull ComponentBuilder builder, @NotNull Instance instance,
+                      @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler blockHandler,
+                      @NotNull SpawnDistributor spawnDistributor) {
         super(info, info.info().origin(), instance);
+
+        Context context = new Context(instance, mobSpawner, blockHandler);
+        Map<Key, Object> dependencyMap = new HashMap<>(1);
+        dependencyMap.put(Context.DEPENDENCY_KEY, context);
+
+        DependencyProvider provider = DependencyProvider.lazy(dependencyMap::get);
 
         List<RoomInfo> roomData = info.rooms();
         List<DoorInfo> doorData = info.doors();
@@ -61,7 +82,9 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
         for (RoomInfo roomInfo : roomData) {
-
+            rooms.add(new Room(roomInfo, getOrigin(), instance,
+                               builder.makeComponents(roomInfo.openActions(), provider, ArrayList::new)
+            ));
         }
 
         for (DoorInfo doorInfo : doorData) {
