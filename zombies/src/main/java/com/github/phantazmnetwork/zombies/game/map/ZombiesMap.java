@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.component.ComponentBuilder;
 import com.github.phantazmnetwork.commons.component.ComponentException;
 import com.github.phantazmnetwork.commons.component.DependencyProvider;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentDependency;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.vector.Region3I;
@@ -23,9 +24,11 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
+    @ComponentDependency("zombies.dependency.map.context")
     public record Context(@NotNull Instance instance,
                           @NotNull MobSpawner spawner,
-                          @NotNull ClientBlockHandler blockHandler) {
+                          @NotNull ClientBlockHandler blockHandler,
+                          @NotNull SpawnDistributor spawnDistributor) {
         public static final Key DEPENDENCY_KEY = Key.key(Namespaces.PHANTAZM, "zombies.dependency.map.context");
     }
 
@@ -51,7 +54,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                       @NotNull SpawnDistributor spawnDistributor) {
         super(info, info.settings().origin(), instance);
 
-        Context context = new Context(instance, mobSpawner, blockHandler);
+        Context context = new Context(instance, mobSpawner, blockHandler, spawnDistributor);
         Map<Key, Object> dependencyMap = new HashMap<>(1);
         dependencyMap.put(Context.DEPENDENCY_KEY, context);
 

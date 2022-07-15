@@ -1,14 +1,14 @@
 package com.github.phantazmnetwork.commons.component.annotation;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Used to mark the public static accessor method for factories available on standardized component objects.
- */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
-public @interface ComponentFactory {
+@Target({ElementType.PARAMETER, ElementType.TYPE})
+public @interface ComponentDependency {
+    @NotNull String value();
 }

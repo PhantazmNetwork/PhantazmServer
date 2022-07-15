@@ -30,7 +30,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
 
     @Override
     public @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<SpawnInfo> spawns) {
-        List<Pair<MobModel, Key>> spawnList = new ArrayList<>();
+        List<Pair<MobModel, Key>> spawnList = new ArrayList<>(spawns.size());
         for (SpawnInfo spawnInfo : spawns) {
             Key id = spawnInfo.id();
             MobModel model = modelFunction.apply(id);

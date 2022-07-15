@@ -2,9 +2,6 @@ package com.github.phantazmnetwork.zombies.game.map.action.round;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.component.DependencyProvider;
-import com.github.phantazmnetwork.commons.component.KeyedFactory;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
 import com.github.phantazmnetwork.zombies.game.map.Round;
@@ -22,9 +19,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -52,29 +47,9 @@ public class AnnounceRoundAction implements Action<Round> {
         }
     };
 
-    private static final KeyedFactory<Data, AnnounceRoundAction> FACTORY = new KeyedFactory<>() {
-        private static final List<Key> DEPENDENCIES = List.of(ZombiesMap.Context.DEPENDENCY_KEY);
-
-        @Override
-        public @NotNull AnnounceRoundAction make(@NotNull DependencyProvider dependencyProvider, @NotNull Data data) {
-            ZombiesMap.Context context = dependencyProvider.provide(ZombiesMap.Context.DEPENDENCY_KEY);
-            return new AnnounceRoundAction(data, context.instance());
-        }
-
-        @Override
-        public @Unmodifiable @NotNull List<Key> dependencies() {
-            return DEPENDENCIES;
-        }
-    };
-
     @ComponentProcessor
     public static @NotNull ConfigProcessor<Data> processor() {
         return PROCESSOR;
-    }
-
-    @ComponentFactory
-    public static @NotNull KeyedFactory<Data, AnnounceRoundAction> factory() {
-        return FACTORY;
     }
 
     private final Data data;
@@ -83,12 +58,12 @@ public class AnnounceRoundAction implements Action<Round> {
     /**
      * Creates a new instance of this class from the provided data, which will announce to the given {@link Audience}.
      *
-     * @param data     the data defining the behavior of ths {@link Action}
-     * @param audience the audience to announce to
+     * @param data    the data defining the behavior of ths {@link Action}
+     * @param context the context of this round
      */
-    public AnnounceRoundAction(@NotNull Data data, @NotNull Audience audience) {
+    public AnnounceRoundAction(@NotNull Data data, @NotNull ZombiesMap.Context context) {
         this.data = Objects.requireNonNull(data, "data");
-        this.audience = Objects.requireNonNull(audience, "audience");
+        this.audience = Objects.requireNonNull(context.instance(), "context.instance");
     }
 
     @Override

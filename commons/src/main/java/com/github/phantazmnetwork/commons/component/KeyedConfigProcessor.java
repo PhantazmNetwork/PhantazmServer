@@ -9,6 +9,9 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+import java.util.function.Supplier;
+
 /**
  * A {@link ConfigProcessor} implementation meant to serialize data which subclasses {@link Keyed}.
  *
@@ -54,5 +57,22 @@ public abstract class KeyedConfigProcessor<TData extends Keyed> implements Confi
      * @param data the data to create a ConfigNode from
      * @return the created ConfigNode
      */
-    public abstract @NotNull ConfigNode nodeFromData(@NotNull TData data);
+    public abstract @NotNull ConfigNode nodeFromData(@NotNull TData data) throws ConfigProcessException;
+
+    public static <TData extends Keyed> KeyedConfigProcessor<TData> fromSupplier(
+            @NotNull Supplier<? extends TData> supplier) {
+        Objects.requireNonNull(supplier, "supplier");
+
+        return new KeyedConfigProcessor<>() {
+            @Override
+            public @NotNull TData dataFromNode(@NotNull ConfigNode node) {
+                return supplier.get();
+            }
+
+            @Override
+            public @NotNull ConfigNode nodeFromData(@NotNull TData data) {
+                return new LinkedConfigNode(0);
+            }
+        };
+    }
 }
