@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.map;
 
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +10,10 @@ import java.util.Objects;
 /**
  * Defines a round.
  */
-public record RoundInfo(int round, @NotNull Key startAction, @NotNull Key endAction, @NotNull List<WaveInfo> waves) {
+public record RoundInfo(int round,
+                        @NotNull ConfigList startActions,
+                        @NotNull ConfigList endActions,
+                        @NotNull List<WaveInfo> waves) {
 
     /**
      * Creates a new instance of this record.

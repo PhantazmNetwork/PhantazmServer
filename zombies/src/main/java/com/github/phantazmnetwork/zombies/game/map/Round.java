@@ -40,7 +40,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         super(roundInfo, instance);
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.size() == 0) {
-            LOGGER.warn("Round {} has no waves", roundInfo.round());
+            LOGGER.warn("Round {} has no waves", roundInfo);
         }
 
         List<Wave> waves = new ArrayList<>(waveInfo.size());

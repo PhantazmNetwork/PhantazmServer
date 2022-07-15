@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
- * Config for server info.
+ * Config for server settings.
  *
  * @param serverIP        The IP to run the server on
  * @param port            The port to run the server on
@@ -53,7 +53,7 @@ public record ServerInfoConfig(@NotNull String serverIP,
             );
 
     /**
-     * Creates config regarding server info.
+     * Creates config regarding server settings.
      *
      * @param serverIP        The IP to run the server on
      * @param port            The port to run the server on

@@ -19,12 +19,6 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
         this.processors = new HashMap<>();
     }
 
-    private static void check(KeyedConfigProcessor<?> obj, Key key) throws ConfigProcessException {
-        if (obj == null) {
-            throw new ConfigProcessException("No processor found for key " + key);
-        }
-    }
-
     @Override
     public void registerProcessor(@NotNull Key key, @NotNull KeyedConfigProcessor<? extends Keyed> processor) {
         Objects.requireNonNull(key, "key");
@@ -65,5 +59,11 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
         }
 
         return element.asNode();
+    }
+
+    private static void check(KeyedConfigProcessor<?> obj, Key key) throws ConfigProcessException {
+        if (obj == null) {
+            throw new ConfigProcessException("No processor found for key " + key);
+        }
     }
 }

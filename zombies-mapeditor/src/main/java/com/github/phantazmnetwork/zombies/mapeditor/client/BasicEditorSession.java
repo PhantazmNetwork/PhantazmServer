@@ -167,7 +167,7 @@ public class BasicEditorSession implements EditorSession {
     @Override
     public @NotNull Region3I getSelection() {
         return Region3I.encompassing(getFirstSelection(), getSecondSelection(),
-                                     currentMap != null ? currentMap.info().origin() : Vec3I.ORIGIN
+                                     currentMap != null ? currentMap.settings().origin() : Vec3I.ORIGIN
         );
     }
 
@@ -189,7 +189,7 @@ public class BasicEditorSession implements EditorSession {
     public void addMap(@NotNull MapInfo map) {
         Objects.requireNonNull(map, "map");
 
-        Key id = map.info().id();
+        Key id = map.settings().id();
         if (maps.containsKey(id)) {
             throw new IllegalArgumentException("A map with id " + id + " already exists");
         }
@@ -208,7 +208,7 @@ public class BasicEditorSession implements EditorSession {
         Objects.requireNonNull(id, "id");
         maps.remove(id);
 
-        if (currentMap != null && currentMap.info().id().equals(id)) {
+        if (currentMap != null && currentMap.settings().id().equals(id)) {
             currentMap = null;
             refreshMap();
         }
@@ -237,7 +237,7 @@ public class BasicEditorSession implements EditorSession {
         try {
             Key oldId = null;
             if (currentMap != null) {
-                oldId = currentMap.info().id();
+                oldId = currentMap.settings().id();
             }
 
             Map<Key, MapInfo> newMaps = loadMaps();
@@ -259,7 +259,7 @@ public class BasicEditorSession implements EditorSession {
                 loader.save(map);
             }
             catch (IOException e) {
-                LOGGER.warn("Error when trying to save map " + map.info().id(), e);
+                LOGGER.warn("Error when trying to save map " + map.settings().id(), e);
             }
         }
     }
@@ -289,7 +289,7 @@ public class BasicEditorSession implements EditorSession {
                     new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id().value()),
                                                     ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true, false,
                                                     RenderUtils.arrayFromRegions(room.regions(),
-                                                                                 currentMap.info().origin()
+                                                                                 currentMap.settings().origin()
                                                     )
                     ));
         }
@@ -305,7 +305,7 @@ public class BasicEditorSession implements EditorSession {
                     new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "door." + door.id().value()),
                                                     ObjectRenderer.RenderType.FILLED, DOOR_COLOR, true, false,
                                                     RenderUtils.arrayFromRegions(door.regions(),
-                                                                                 currentMap.info().origin()
+                                                                                 currentMap.settings().origin()
                                                     )
                     ));
         }
@@ -321,7 +321,7 @@ public class BasicEditorSession implements EditorSession {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "window." + i++),
                                                                ObjectRenderer.RenderType.FILLED, WINDOW_COLOR, true,
                                                                false, RenderUtils.arrayFromRegion(window.frameRegion(),
-                                                                                                  currentMap.info()
+                                                                                                  currentMap.settings()
                                                                                                             .origin(),
                                                                                                   new Vec3d[2], 0
             )
@@ -339,7 +339,7 @@ public class BasicEditorSession implements EditorSession {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "spawnpoint." + i++),
                                                                ObjectRenderer.RenderType.FILLED, SPAWNPOINT_COLOR, true,
                                                                false, RenderUtils.arrayFromRegion(
-                    Region3I.normalized(spawnpointInfo.position(), Vec3I.of(1, 1, 1)), currentMap.info().origin(),
+                    Region3I.normalized(spawnpointInfo.position(), Vec3I.of(1, 1, 1)), currentMap.settings().origin(),
                     new Vec3d[2], 0
             )
             ));
@@ -357,7 +357,7 @@ public class BasicEditorSession implements EditorSession {
                                                                ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true,
                                                                false, RenderUtils.arrayFromRegion(
                     Region3I.normalized(shopPositionInfo.triggerLocation(), Vec3I.of(1, 1, 1)),
-                    currentMap.info().origin(), new Vec3d[2], 0
+                    currentMap.settings().origin(), new Vec3d[2], 0
             )
             ));
         }
@@ -387,7 +387,7 @@ public class BasicEditorSession implements EditorSession {
 
                                           try {
                                               MapInfo map = loader.load(name);
-                                              newMaps.put(map.info().id(), map);
+                                              newMaps.put(map.settings().id(), map);
                                               LOGGER.info("Successfully loaded map " + name);
                                           }
                                           catch (IOException e) {
@@ -406,7 +406,7 @@ public class BasicEditorSession implements EditorSession {
             return;
         }
 
-        MapSettingsInfo info = currentMap.info();
+        MapSettingsInfo info = currentMap.settings();
         renderer.putObject(
                 new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR, true, true,
                                                 RenderUtils.arrayFromRegion(

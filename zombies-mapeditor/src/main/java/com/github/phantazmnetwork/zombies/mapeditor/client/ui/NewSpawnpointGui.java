@@ -37,7 +37,7 @@ public class NewSpawnpointGui extends NamedObjectGui {
             Key spawnruleKey = Key.key(Namespaces.PHANTAZM, value);
             session.setLastSpawnrule(spawnruleKey);
 
-            Vec3I origin = currentMap.info().origin();
+            Vec3I origin = currentMap.settings().origin();
 
             currentMap.spawnpoints().add(new SpawnpointInfo(firstSelected.sub(origin), spawnruleKey));
             session.refreshSpawnpoints();

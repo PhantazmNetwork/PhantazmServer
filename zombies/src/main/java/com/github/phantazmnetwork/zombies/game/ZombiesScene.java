@@ -55,7 +55,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             newPlayers.add(player);
         }
 
-        MapSettingsInfo mapSettingsInfo = map.getData().info();
+        MapSettingsInfo mapSettingsInfo = map.getData().settings();
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
             return new RouteResult(false, Optional.of(Component.text("Too many players!", NamedTextColor.RED)));
         }
@@ -68,18 +68,16 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             zombiesPlayers.put(view.getUUID(), zombiesPlayer);
             players.put(view.getUUID(), view);
 
-            view.getPlayer().ifPresent(player -> {
-                player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
-                    if (throwable != null) {
-                        // todo: error handling
-                        return;
-                    }
+            view.getPlayer().ifPresent(player -> player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
+                if (throwable != null) {
+                    // todo: error handling
+                    return;
+                }
 
-                    if (!messages.isEmpty()) {
-                        player.sendMessage(messages.get(random.nextInt(messages.size())));
-                    }
-                });
-            });
+                if (!messages.isEmpty()) {
+                    player.sendMessage(messages.get(random.nextInt(messages.size())));
+                }
+            }));
         }
 
         return new RouteResult(true, Optional.empty());

@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Represents a Zombies map.
  */
-public record MapInfo(@NotNull MapSettingsInfo info,
+public record MapInfo(@NotNull MapSettingsInfo settings,
                       @NotNull List<RoomInfo> rooms,
                       @NotNull List<DoorInfo> doors,
                       @NotNull List<ShopPositionInfo> shops,
@@ -19,7 +19,7 @@ public record MapInfo(@NotNull MapSettingsInfo info,
     /**
      * Constructs a new instances of this record.
      *
-     * @param info        the info defining the general parameters for this map
+     * @param settings    the settings defining the general parameters for this map
      * @param rooms       this map's rooms
      * @param doors       this map's doors
      * @param shops       this map's shops
@@ -29,7 +29,7 @@ public record MapInfo(@NotNull MapSettingsInfo info,
      * @param spawnpoints this map's spawnpoints
      */
     public MapInfo {
-        Objects.requireNonNull(info, "info");
+        Objects.requireNonNull(settings, "settings");
         Objects.requireNonNull(rooms, "rooms");
         Objects.requireNonNull(doors, "doors");
         Objects.requireNonNull(shops, "shops");

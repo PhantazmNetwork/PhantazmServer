@@ -67,6 +67,16 @@ public class AnnounceRoundAction implements Action<Round> {
         }
     };
 
+    @ComponentProcessor
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return PROCESSOR;
+    }
+
+    @ComponentFactory
+    public static @NotNull KeyedFactory<Data, AnnounceRoundAction> factory() {
+        return FACTORY;
+    }
+
     private final Data data;
     private final Audience audience;
 
@@ -79,16 +89,6 @@ public class AnnounceRoundAction implements Action<Round> {
     public AnnounceRoundAction(@NotNull Data data, @NotNull Audience audience) {
         this.data = Objects.requireNonNull(data, "data");
         this.audience = Objects.requireNonNull(audience, "audience");
-    }
-
-    @ComponentProcessor
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
-    }
-
-    @ComponentFactory
-    public static @NotNull KeyedFactory<Data, AnnounceRoundAction> factory() {
-        return FACTORY;
     }
 
     @Override

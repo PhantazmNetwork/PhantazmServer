@@ -36,7 +36,7 @@ public class MainGui extends SimplePanelGui {
         Objects.requireNonNull(session, "session");
 
         //pre-initialization
-        List<Key> mapNames = session.mapView().values().stream().map(map -> map.info().id()).toList();
+        List<Key> mapNames = session.mapView().values().stream().map(map -> map.settings().id()).toList();
 
         //create GUI components...
         WSprite icon = new WSprite(Identifiers.ICON);
@@ -118,7 +118,7 @@ public class MainGui extends SimplePanelGui {
             if (requireMap(session, feedback)) {
                 MinecraftClient.getInstance().setScreen(new CottonClientScreen(
                         new ConfirmationGui(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY),
-                                            () -> session.removeMap(session.getMap().info().id())
+                                            () -> session.removeMap(session.getMap().settings().id())
                         )));
             }
         });
@@ -145,7 +145,7 @@ public class MainGui extends SimplePanelGui {
 
     private void updateCurrentMap(EditorSession session, WText currentMap) {
         currentMap.setText(session.hasMap() ? new TranslatableText(TranslationKeys.GUI_MAPEDITOR_CURRENT_MAP,
-                                                                   session.getMap().info().id().value()
+                                                                   session.getMap().settings().id().value()
         ) : new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
     }
 }

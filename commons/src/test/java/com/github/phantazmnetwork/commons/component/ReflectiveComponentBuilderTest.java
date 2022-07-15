@@ -47,7 +47,7 @@ class ReflectiveComponentBuilderTest {
     }
 
     @Test
-    void basicComponent() {
+    void basicComponent() throws ComponentException {
         ComponentBuilder builder =
                 new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
         builder.registerComponentClass(TestComponent.class);

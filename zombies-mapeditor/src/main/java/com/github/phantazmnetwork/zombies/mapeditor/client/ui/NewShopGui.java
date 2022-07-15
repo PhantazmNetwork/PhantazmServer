@@ -34,7 +34,7 @@ public class NewShopGui extends NamedObjectGui {
             }
 
             Key typeKey = Key.key(Namespaces.PHANTAZM, value);
-            Vec3I origin = currentMap.info().origin();
+            Vec3I origin = currentMap.settings().origin();
 
             currentMap.shops().add(new ShopPositionInfo(typeKey, firstSelected.sub(origin)));
             session.refreshShops();

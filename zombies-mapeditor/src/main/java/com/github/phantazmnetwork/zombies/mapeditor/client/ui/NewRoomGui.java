@@ -33,7 +33,7 @@ public class NewRoomGui extends NamedObjectGui {
 
         MapInfo currentMap = session.getMap();
         Region3I selected = Region3I.encompassing(session.getFirstSelection(), session.getSecondSelection(),
-                                                  currentMap.info().origin()
+                                                  currentMap.settings().origin()
         );
         buttonAdd.setOnClick(() -> {
             String value = textFieldName.getText();

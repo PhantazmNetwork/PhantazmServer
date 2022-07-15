@@ -129,11 +129,11 @@ final class EquipmentFeature {
                 }
 
                 String infoFileName = codec.getPreferredExtensions().isEmpty()
-                                      ? "info"
-                                      : "info." + codec.getPreferredExtensions().get(0);
+                                      ? "settings"
+                                      : "settings." + codec.getPreferredExtensions().get(0);
                 Path infoPath = gunDirectory.resolve(infoFileName);
                 if (!Files.isRegularFile(infoPath)) {
-                    LOGGER.warn("No gun info file at {}.", infoPath);
+                    LOGGER.warn("No gun settings file at {}.", infoPath);
                     continue;
                 }
 
@@ -142,7 +142,7 @@ final class EquipmentFeature {
                     gunData = ConfigBridges.read(infoPath, codec, gunDataProcessor);
                 }
                 catch (ConfigProcessException e) {
-                    LOGGER.warn("Failed to read gun info file at {}.", infoPath, e);
+                    LOGGER.warn("Failed to read gun settings file at {}.", infoPath, e);
                     continue;
                 }
 

@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.game.map;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.component.ComponentBuilder;
+import com.github.phantazmnetwork.commons.component.ComponentException;
 import com.github.phantazmnetwork.commons.component.DependencyProvider;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.commons.Tickable;
@@ -10,13 +11,8 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
-import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigList;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +49,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     public ZombiesMap(@NotNull MapInfo info, @NotNull ComponentBuilder builder, @NotNull Instance instance,
                       @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler blockHandler,
                       @NotNull SpawnDistributor spawnDistributor) {
-        super(info, info.info().origin(), instance);
+        super(info, info.settings().origin(), instance);
 
         Context context = new Context(instance, mobSpawner, blockHandler);
         Map<Key, Object> dependencyMap = new HashMap<>(1);
@@ -81,31 +77,57 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
-        for (RoomInfo roomInfo : roomData) {
-            rooms.add(new Room(roomInfo, getOrigin(), instance,
-                               builder.makeComponents(roomInfo.openActions(), provider, ArrayList::new)
-            ));
+        try {
+            for (RoomInfo roomInfo : roomData) {
+                rooms.add(new Room(roomInfo, getOrigin(), instance,
+                                   builder.makeComponents(roomInfo.openActions(), provider, ArrayList::new,
+                                                          e -> LOGGER.warn("Error initializing room actions for {}: {}",
+                                                                           roomInfo, e
+                                                          )
+                                   )
+                ));
+            }
+
+            for (DoorInfo doorInfo : doorData) {
+                doors.add(new Door(doorInfo, origin, instance, Block.AIR,
+                                   builder.makeComponents(doorInfo.openActions(), provider, ArrayList::new,
+                                                          e -> LOGGER.warn("Error initializing door actions for {}: {}",
+                                                                           doorInfo, e
+                                                          )
+                                   )
+                ));
+            }
+
+            for (WindowInfo windowInfo : windowData) {
+                windows.add(new Window(instance, windowInfo, origin, blockHandler));
+            }
+
+            for (SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
+                spawnpoints.add(new Spawnpoint(spawnpointInfo, origin, instance, spawnruleMap::get, mobSpawner));
+            }
+
+            for (SpawnruleInfo spawnrule : spawnruleData) {
+                spawnruleMap.put(spawnrule.id(), spawnrule);
+            }
+
+            for (RoundInfo roundInfo : roundData) {
+                rounds.add(new Round(roundInfo, instance,
+                                     builder.makeComponents(roundInfo.startActions(), provider, ArrayList::new,
+                                                            e -> LOGGER.warn(
+                                                                    "Error initializing round start actions for {}: {}",
+                                                                    roundInfo, e
+                                                            )
+                                     ), builder.makeComponents(roundInfo.endActions(), provider, ArrayList::new,
+                                                               e -> LOGGER.warn(
+                                                                       "Error initializing round end actions for {}: {}",
+                                                                       roundInfo, e
+                                                               )
+                ), spawnDistributor
+                ));
+            }
         }
-
-        for (DoorInfo doorInfo : doorData) {
-            //TODO: include door fill block in mapInfo
-            doors.add(new Door(doorInfo, origin, instance, Block.AIR, List.of()));
-        }
-
-        for (WindowInfo windowInfo : windowData) {
-            windows.add(new Window(instance, windowInfo, origin, blockHandler));
-        }
-
-        for (SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
-            spawnpoints.add(new Spawnpoint(spawnpointInfo, origin, instance, spawnruleMap::get, mobSpawner));
-        }
-
-        for (SpawnruleInfo spawnrule : spawnruleData) {
-            spawnruleMap.put(spawnrule.id(), spawnrule);
-        }
-
-        for (RoundInfo roundInfo : roundData) {
-
+        catch (ComponentException e) {
+            LOGGER.warn("Uncaught ComponentException when constructing map {}: {}", info.settings().id(), e);
         }
     }
 

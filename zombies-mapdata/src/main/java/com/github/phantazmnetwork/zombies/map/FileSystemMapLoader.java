@@ -46,7 +46,7 @@ public class FileSystemMapLoader implements MapLoader {
         List<String> preferredExtensions = codec.getPreferredExtensions();
         if (preferredExtensions.isEmpty()) {
             this.configPredicate = (path, attrs) -> true;
-            this.mapInfoName = "info";
+            this.mapInfoName = "settings";
         }
         else {
             this.configPredicate = (path, attr) -> {
@@ -62,7 +62,7 @@ public class FileSystemMapLoader implements MapLoader {
 
                 return false;
             };
-            this.mapInfoName = "info." + preferredExtensions.get(0);
+            this.mapInfoName = "settings." + preferredExtensions.get(0);
         }
     }
 
@@ -118,10 +118,10 @@ public class FileSystemMapLoader implements MapLoader {
 
     @Override
     public void save(@NotNull MapInfo data) throws IOException {
-        Path mapDirectory = root.resolve(data.info().id().value());
+        Path mapDirectory = root.resolve(data.settings().id().value());
         Files.createDirectories(mapDirectory);
 
-        MapSettingsInfo mapSettingsInfo = data.info();
+        MapSettingsInfo mapSettingsInfo = data.settings();
         ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapSettingsInfo),
                             codec
         );

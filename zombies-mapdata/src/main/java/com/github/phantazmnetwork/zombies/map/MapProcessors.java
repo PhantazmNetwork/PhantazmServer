@@ -129,7 +129,8 @@ public final class MapProcessors {
             List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow("holograms"));
             List<Region3I> regions = regionInfoList.dataFromElement(element.getListOrThrow("regions"));
             Sound openSound = AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("openSound"));
-            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound);
+            ConfigList openActions = element.getListOrThrow("openActions");
+            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound, openActions);
         }
 
         @Override
@@ -141,6 +142,7 @@ public final class MapProcessors {
             node.put("holograms", hologramInfoList.elementFromData(doorInfo.holograms()));
             node.put("regions", regionInfoList.elementFromData(doorInfo.regions()));
             node.put("openSound", AdventureConfigProcessors.sound().elementFromData(doorInfo.openSound()));
+            node.put("openActions", doorInfo.openActions());
             return node;
         }
     };
@@ -189,18 +191,18 @@ public final class MapProcessors {
         @Override
         public RoundInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             int round = element.getNumberOrThrow("round").intValue();
-            Key startAction = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("startAction"));
-            Key endAction = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("endAction"));
+            ConfigList startActions = element.getListOrThrow("startActions");
+            ConfigList endActions = element.getListOrThrow("endActions");
             List<WaveInfo> waves = waveInfoList.dataFromElement(element.getListOrThrow("waves"));
-            return new RoundInfo(round, startAction, endAction, waves);
+            return new RoundInfo(round, startActions, endActions, waves);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(RoundInfo roundInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(4);
             node.putNumber("round", roundInfo.round());
-            node.put("startAction", AdventureConfigProcessors.key().elementFromData(roundInfo.startAction()));
-            node.put("endAction", AdventureConfigProcessors.key().elementFromData(roundInfo.endAction()));
+            node.put("startActions", roundInfo.startActions());
+            node.put("endActions", roundInfo.endActions());
             node.put("waves", waveInfoList.elementFromData(roundInfo.waves()));
             return node;
         }

@@ -46,7 +46,7 @@ public class NewObjectGui extends SimplePanelGui {
         gridPanelRoot.add(newShop, 0, 4, 5, 1);
 
         MapInfo currentMap = session.getMap();
-        Vec3I origin = currentMap.info().origin();
+        Vec3I origin = currentMap.settings().origin();
         Region3I selected = session.getSelection();
 
         newRoom.setOnClick(

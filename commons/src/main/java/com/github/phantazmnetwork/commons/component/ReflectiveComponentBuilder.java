@@ -45,27 +45,25 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
     }
 
     @Override
-    public void registerComponentClass(@NotNull Class<?> component) {
+    public void registerComponentClass(@NotNull Class<?> component) throws ComponentException {
         ComponentModel annotation = component.getAnnotation(ComponentModel.class);
         if (annotation == null) {
-            throw new IllegalArgumentException(
-                    "Class " + component.getTypeName() + " must have the ComponentModel " + "annotation");
+            throw new ComponentException(
+                    "Class " + component.getTypeName() + " must have the ComponentModel annotation");
         }
 
         Method processorMethod = ReflectionUtils.declaredMethodMatching(component, BASE.and(
                 method -> method.isAnnotationPresent(ComponentProcessor.class) &&
                           KeyedConfigProcessor.class.isAssignableFrom(method.getReturnType())));
         if (processorMethod == null) {
-            throw new IllegalArgumentException(
-                    "Unable to find processor method for component class " + component.getTypeName());
+            throw new ComponentException("Unable to find processor method for " + component.getTypeName());
         }
 
         Method factoryMethod = ReflectionUtils.declaredMethodMatching(component, BASE.and(
                 method -> method.isAnnotationPresent(ComponentFactory.class) &&
                           KeyedFactory.class.isAssignableFrom(method.getReturnType())));
         if (factoryMethod == null) {
-            throw new IllegalArgumentException(
-                    "Unable to find factory method for component class " + component.getTypeName());
+            throw new ComponentException("Unable to find factory method for " + component.getTypeName());
         }
 
         KeyedConfigProcessor<? extends Keyed> processor;
@@ -73,12 +71,13 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         try {
             processor = (KeyedConfigProcessor<?>)processorMethod.invoke(null);
             if (processor == null) {
-                throw new IllegalStateException("Processor method invocation returned null");
+                throw new ComponentException(
+                        "Processor method invocation returned null for " + component.getTypeName());
             }
 
             factory = (KeyedFactory<?, ?>)factoryMethod.invoke(null);
             if (factory == null) {
-                throw new IllegalStateException("Factory method invocation returned null");
+                throw new ComponentException("Factory method invocation returned null for " + component.getTypeName());
             }
         }
         catch (InvocationTargetException | IllegalAccessException e) {
@@ -94,7 +93,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
             componentKey = Key.key(value);
         }
         catch (InvalidKeyException e) {
-            throw new IllegalStateException("Invalid component name for class " + component.getTypeName(), e);
+            throw new ComponentException("Invalid component name for " + component.getTypeName(), e);
         }
 
         configRegistry.registerProcessor(componentKey, processor);
@@ -103,20 +102,21 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
 
     @Override
     public <TData extends Keyed, TComponent> TComponent makeComponent(@NotNull ConfigNode node,
-                                                                      @NotNull DependencyProvider provider) {
+                                                                      @NotNull DependencyProvider provider)
+            throws ComponentException {
         Keyed data;
         try {
             data = configRegistry.deserialize(node);
         }
         catch (ConfigProcessException e) {
-            throw new IllegalArgumentException(e);
+            throw new ComponentException(e);
         }
 
         Key dataKey = data.key();
         KeyedFactory<TData, ?> factory = factoryRegistry.getFactory(dataKey);
 
         if (!provider.load(factory.dependencies())) {
-            throw new IllegalStateException("Unable to prepare dependencies for data " + dataKey);
+            throw new ComponentException("Unable to prepare dependencies for data " + dataKey);
         }
 
         //noinspection unchecked
