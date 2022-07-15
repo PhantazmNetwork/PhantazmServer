@@ -42,14 +42,6 @@ public class StageTransition implements Tickable {
         return currentStageIndex;
     }
 
-    public @NotNull Stage getCurrentStage() {
-        return currentStage;
-    }
-
-    public int getStageCount() {
-        return stages.size();
-    }
-
     public void setCurrentStageIndex(int currentStageIndex) {
         if (currentStageIndex < 0 || currentStageIndex >= stages.size()) {
             throw new IllegalArgumentException("Invalid stage index: " + currentStageIndex);
@@ -60,5 +52,13 @@ public class StageTransition implements Tickable {
 
         currentStage = stages.get(currentStageIndex);
         currentStage.start();
+    }
+
+    public @NotNull Stage getCurrentStage() {
+        return currentStage;
+    }
+
+    public int getStageCount() {
+        return stages.size();
     }
 }

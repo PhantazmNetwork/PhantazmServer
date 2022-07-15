@@ -21,19 +21,18 @@ public record DoorInfo(@NotNull Key id,
     /**
      * The default sound played when a door opens.
      */
-    public static final Sound DEFAULT_OPEN_SOUND = Sound.sound(Key.key("minecraft:block.wooden_door.open"),
-            Sound.Source.BLOCK,
-            2.0F,
-            1.0F);
+    public static final Sound DEFAULT_OPEN_SOUND =
+            Sound.sound(Key.key("minecraft:block.wooden_door.open"), Sound.Source.BLOCK, 2.0F, 1.0F);
 
     /**
      * Creates a new instance of this record.
-     * @param id the unique id of this door
-     * @param opensTo the unique ids of the rooms to which this door opens to
-     * @param costs the costs, which each represent the cost of opening the door from the room to which their index
-     *              (in opensTo) corresponds
+     *
+     * @param id        the unique id of this door
+     * @param opensTo   the unique ids of the rooms to which this door opens to
+     * @param costs     the costs, which each represent the cost of opening the door from the room to which their index
+     *                  (in opensTo) corresponds
      * @param holograms the holograms to display at each side of the door
-     * @param regions the regions which make up the door
+     * @param regions   the regions which make up the door
      * @param openSound the sound to play when opening the door
      */
     public DoorInfo {
@@ -47,11 +46,11 @@ public record DoorInfo(@NotNull Key id,
 
     /**
      * Initializes a new DoorInfo with default values (opens to no rooms, has no costs and no holograms).
-     * @param id the id of the door
+     *
+     * @param id      the id of the door
      * @param regions the regions making up the door
      */
     public DoorInfo(@NotNull Key id, @NotNull List<Region3I> regions) {
-        this(id, new ArrayList<>(0), new ArrayList<>(0),
-                new ArrayList<>(0), regions, DEFAULT_OPEN_SOUND);
+        this(id, new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), regions, DEFAULT_OPEN_SOUND);
     }
 }

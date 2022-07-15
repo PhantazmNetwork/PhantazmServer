@@ -15,8 +15,9 @@ public interface Firer extends GunTickEffect {
 
     /**
      * Fires a shot.
-     * @param state The {@link GunState} of the gun
-     * @param start The start position of the shot
+     *
+     * @param state        The {@link GunState} of the gun
+     * @param start        The start position of the shot
      * @param previousHits Previously hit entities by other {@link Firer}s
      */
     void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits);

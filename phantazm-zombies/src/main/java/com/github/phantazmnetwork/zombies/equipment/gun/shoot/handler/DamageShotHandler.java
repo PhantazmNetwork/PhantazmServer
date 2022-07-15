@@ -24,26 +24,20 @@ import java.util.UUID;
  */
 public class DamageShotHandler implements ShotHandler {
 
+    private final Data data;
+
     /**
-     * Data for a {@link DamageShotHandler}.
-     * @param damage The amount of damage to deal to regular targets
-     * @param headshotDamage The amount of damage to deal to headshots
+     * Creates a new {@link DamageShotHandler} with the given {@link Data}.
+     *
+     * @param data The {@link Data} to use
      */
-    public record Data(float damage, float headshotDamage) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.damage");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public DamageShotHandler(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -73,18 +67,9 @@ public class DamageShotHandler implements ShotHandler {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a new {@link DamageShotHandler} with the given {@link Data}.
-     * @param data The {@link Data} to use
-     */
-    public DamageShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
+                       @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
             target.entity().damage(DamageType.fromEntity(attacker), data.damage());
         }
@@ -96,6 +81,25 @@ public class DamageShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for a {@link DamageShotHandler}.
+     *
+     * @param damage         The amount of damage to deal to regular targets
+     * @param headshotDamage The amount of damage to deal to headshots
+     */
+    public record Data(float damage, float headshotDamage) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.damage");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

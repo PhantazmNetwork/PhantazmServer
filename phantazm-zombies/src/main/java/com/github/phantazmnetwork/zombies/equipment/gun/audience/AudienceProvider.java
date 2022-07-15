@@ -13,6 +13,7 @@ public interface AudienceProvider {
 
     /**
      * Provides an {@link Audience}.
+     *
      * @return An {@link Optional} of an {@link Audience}
      */
     @NotNull Optional<? extends Audience> provideAudience();

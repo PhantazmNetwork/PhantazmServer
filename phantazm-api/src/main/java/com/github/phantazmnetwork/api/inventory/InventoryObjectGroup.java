@@ -11,6 +11,7 @@ public interface InventoryObjectGroup {
 
     /**
      * Adds a slot to the group.
+     *
      * @param slot The slot to add
      * @throws IllegalArgumentException If the group already contains the slot
      */
@@ -18,6 +19,7 @@ public interface InventoryObjectGroup {
 
     /**
      * Removes a slot from the group.
+     *
      * @param slot The slot to remove
      * @throws IllegalArgumentException If the group does not contain the slot
      */
@@ -25,6 +27,7 @@ public interface InventoryObjectGroup {
 
     /**
      * Gets an unmodifiable view of the group's slots.
+     *
      * @return An unmodifiable view of the group's slots
      */
     @NotNull @UnmodifiableView IntSet getSlots();
@@ -32,6 +35,7 @@ public interface InventoryObjectGroup {
     /**
      * Checks whether the group within a profile is considered full.
      * This means that no {@link InventoryObject}s may be pushed to the group.
+     *
      * @return Whether the group is considered full
      */
     boolean isFull();
@@ -39,12 +43,14 @@ public interface InventoryObjectGroup {
     /**
      * Checks whether the group within a profile is considered empty.
      * This means that no {@link InventoryObject}s may be popped from the group.
+     *
      * @return Whether the group is considered empty
      */
     boolean isEmpty();
 
     /**
      * Computes the next slot that an {@link InventoryObject} should be placed in.
+     *
      * @param toPush The {@link InventoryObject} to push
      * @throws IllegalArgumentException If the group's representation is full (check this against {@link #isFull()})
      */
@@ -52,6 +58,7 @@ public interface InventoryObjectGroup {
 
     /**
      * Computes the next slot that an {@link InventoryObject} should be popped from.
+     *
      * @return The {@link InventoryObject} that was popped
      * @throws IllegalArgumentException If the group's representation is empty (check this against {@link #isEmpty()})
      */

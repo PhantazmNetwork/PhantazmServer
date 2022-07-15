@@ -26,6 +26,7 @@ public class GroundMinestomDescriptorConfigProcessor implements ConfigProcessor<
 
     /**
      * Creates a new {@link GroundMinestomDescriptorConfigProcessor}.
+     *
      * @param calculatorProcessor A {@link ConfigProcessor} for {@link Calculator}s
      */
     public GroundMinestomDescriptorConfigProcessor(@NotNull ConfigProcessor<Calculator> calculatorProcessor) {
@@ -36,7 +37,8 @@ public class GroundMinestomDescriptorConfigProcessor implements ConfigProcessor<
     public GroundMinestomDescriptor dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         String id = element.getStringOrThrow("id");
         Calculator calculator = calculatorProcessor.dataFromElement(element.getElementOrThrow("calculator"));
-        EntityType entityType = EntityType.fromNamespaceId(NamespaceID.from(KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("entityType"))));
+        EntityType entityType = EntityType.fromNamespaceId(
+                NamespaceID.from(KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("entityType"))));
         float jumpHeight = element.getNumberOrThrow("jumpHeight").floatValue();
         float fallTolerance = element.getNumberOrThrow("fallTolerance").floatValue();
         float stepHeight = element.getNumberOrThrow("stepHeight").floatValue();
@@ -75,7 +77,8 @@ public class GroundMinestomDescriptorConfigProcessor implements ConfigProcessor<
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull GroundMinestomDescriptor groundMinestomDescriptor) throws ConfigProcessException {
+    public @NotNull ConfigElement elementFromData(@NotNull GroundMinestomDescriptor groundMinestomDescriptor)
+            throws ConfigProcessException {
         ConfigNode node = new LinkedConfigNode(6);
         node.putString("id", groundMinestomDescriptor.getID());
         node.put("calculator", calculatorProcessor.elementFromData(groundMinestomDescriptor.getCalculator()));

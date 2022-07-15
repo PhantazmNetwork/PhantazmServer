@@ -46,9 +46,10 @@ public final class NeuralEntity extends LivingEntity implements Agent {
 
     /**
      * Creates a new NeuralEntity.
+     *
      * @param descriptor the descriptor used to define this agent's characteristics
-     * @param uuid this entity's unique ID
-     * @param provider the {@link ContextProvider} used to provide {@link PathContext} instances for this entity
+     * @param uuid       this entity's unique ID
+     * @param provider   the {@link ContextProvider} used to provide {@link PathContext} instances for this entity
      */
     public NeuralEntity(@NotNull MinestomDescriptor descriptor, @NotNull UUID uuid, @NotNull ContextProvider provider) {
         super(descriptor.getEntityType(), uuid);
@@ -71,6 +72,7 @@ public final class NeuralEntity extends LivingEntity implements Agent {
 
     /**
      * Tick to process AI logic.
+     *
      * @param time The time of the tick
      */
     private void aiTick(long time) {
@@ -81,6 +83,7 @@ public final class NeuralEntity extends LivingEntity implements Agent {
 
     /**
      * Adds a {@link GoalGroup} to this entity.
+     *
      * @param group The {@link GoalGroup} to add
      */
     public void addGoalGroup(@NotNull GoalGroup group) {
@@ -92,9 +95,9 @@ public final class NeuralEntity extends LivingEntity implements Agent {
     public boolean canPathfind() {
         Instance instance = this.instance;
         Chunk currentChunk = this.currentChunk;
-        return instance != null && currentChunk != null && !isDead() && instance.getWorldBorder().isInside(this)
-                && !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null && descriptor
-                .canPathfind(this);
+        return instance != null && currentChunk != null && !isDead() && instance.getWorldBorder().isInside(this) &&
+               !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null &&
+               descriptor.canPathfind(this);
     }
 
     @Override
@@ -122,6 +125,7 @@ public final class NeuralEntity extends LivingEntity implements Agent {
     /**
      * Returns the {@link Navigator} managing this entity. Will throw an exception if this entity does not have an
      * instance defined yet.
+     *
      * @return the Navigator used for pathfinding
      */
     public @NotNull Navigator getNavigator() {
@@ -132,11 +136,12 @@ public final class NeuralEntity extends LivingEntity implements Agent {
     /**
      * Sets the given entity as a navigation target for this entity. If null, pathfinding will be cancelled. If
      * non-null, this entity will follow the given entity according to its navigation capabilities.
+     *
      * @param target the target entity to follow
      */
     public void setTarget(@Nullable Entity target) {
         Navigator navigator = getNavigator();
-        if(target == null) {
+        if (target == null) {
             navigator.setDestination(null);
         }
         else {
@@ -164,7 +169,8 @@ public final class NeuralEntity extends LivingEntity implements Agent {
         if (removalAnimationDelay > 0) {
             // Needed for proper death animation (wait for it to finish before destroying the entity)
             scheduleRemove(Duration.of(removalAnimationDelay, TimeUnit.MILLISECOND));
-        } else {
+        }
+        else {
             // Instant removal without animation playback
             remove();
         }
@@ -203,7 +209,7 @@ public final class NeuralEntity extends LivingEntity implements Agent {
      * @param swingHand true to swing the entity main hand, false otherwise
      */
     public void attack(@NotNull Entity target, boolean swingHand) {
-        if(swingHand) {
+        if (swingHand) {
             swingMainHand();
         }
 
@@ -222,13 +228,13 @@ public final class NeuralEntity extends LivingEntity implements Agent {
     }
 
     private void cancelNavigation() {
-        if(navigator != null) {
+        if (navigator != null) {
             navigator.setDestination(null);
         }
     }
 
     private void requireInstance() {
-        if(instance == null) {
+        if (instance == null) {
             throw new IllegalStateException("Entity has no instance set");
         }
     }

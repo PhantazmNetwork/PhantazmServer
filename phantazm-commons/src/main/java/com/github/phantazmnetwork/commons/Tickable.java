@@ -8,6 +8,7 @@ public interface Tickable {
     /**
      * Executes a "tick".
      * This enables implementations to run periodic behavior.
+     *
      * @param time the number of milliseconds that have elapsed
      */
     void tick(long time);

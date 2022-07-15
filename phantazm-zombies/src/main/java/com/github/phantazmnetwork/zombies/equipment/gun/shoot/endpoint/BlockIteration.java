@@ -19,10 +19,11 @@ public interface BlockIteration {
 
     /**
      * Finds the end of a block iteration.
+     *
      * @param instance The {@link Instance} to iterate in
-     * @param shooter The shooter of the shot
-     * @param start The start {@link Point} of the shot
-     * @param it The {@link Iterator} of {@link Point}s to iterate over
+     * @param shooter  The shooter of the shot
+     * @param start    The start {@link Point} of the shot
+     * @param it       The {@link Iterator} of {@link Point}s to iterate over
      * @return The end {@link Vec} of the iteration
      */
     @NotNull Optional<Vec> findEnd(@NotNull Instance instance, @NotNull Entity shooter, @NotNull Pos start,

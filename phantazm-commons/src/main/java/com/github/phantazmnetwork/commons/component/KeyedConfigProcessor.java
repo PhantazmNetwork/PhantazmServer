@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link ConfigProcessor} implementation meant to serialize data which subclasses {@link Keyed}.
+ *
  * @param <TData> the Keyed-subclassing data
  */
 public abstract class KeyedConfigProcessor<TData extends Keyed> implements ConfigProcessor<TData> {
@@ -21,7 +22,7 @@ public abstract class KeyedConfigProcessor<TData extends Keyed> implements Confi
 
     @Override
     public final TData dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-        if(!element.isNode()) {
+        if (!element.isNode()) {
             throw new ConfigProcessException("Element must be a node");
         }
 
@@ -40,6 +41,7 @@ public abstract class KeyedConfigProcessor<TData extends Keyed> implements Confi
 
     /**
      * Creates some data from a {@link ConfigNode}.
+     *
      * @param node the node to create data from
      * @return the created data
      * @throws ConfigProcessException if an error occurs during configuration processing
@@ -48,6 +50,7 @@ public abstract class KeyedConfigProcessor<TData extends Keyed> implements Confi
 
     /**
      * Creates a {@link ConfigNode} from some data.
+     *
      * @param data the data to create a ConfigNode from
      * @return the created ConfigNode
      */

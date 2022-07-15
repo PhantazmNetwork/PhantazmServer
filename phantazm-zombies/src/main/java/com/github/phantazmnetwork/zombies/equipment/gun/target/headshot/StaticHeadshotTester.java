@@ -19,25 +19,20 @@ import java.util.Objects;
  */
 public class StaticHeadshotTester implements HeadshotTester {
 
+    private final Data data;
+
     /**
-     * Data for a {@link StaticHeadshotTester}.
-     * @param shouldHeadshot Whether the {@link StaticHeadshotTester} should always headshot
+     * Creates a {@link StaticHeadshotTester}.
+     *
+     * @param data The {@link StaticHeadshotTester}'s {@link Data}
      */
-    public record Data(boolean shouldHeadshot) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.headshot_tester.static");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public StaticHeadshotTester(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -58,19 +53,27 @@ public class StaticHeadshotTester implements HeadshotTester {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a {@link StaticHeadshotTester}.
-     * @param data The {@link StaticHeadshotTester}'s {@link Data}
-     */
-    public StaticHeadshotTester(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
     public boolean isHeadshot(@NotNull Entity shooter, @NotNull Entity entity, @NotNull Point intersection) {
         return data.shouldHeadshot();
+    }
+
+    /**
+     * Data for a {@link StaticHeadshotTester}.
+     *
+     * @param shouldHeadshot Whether the {@link StaticHeadshotTester} should always headshot
+     */
+    public record Data(boolean shouldHeadshot) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.headshot_tester.static");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

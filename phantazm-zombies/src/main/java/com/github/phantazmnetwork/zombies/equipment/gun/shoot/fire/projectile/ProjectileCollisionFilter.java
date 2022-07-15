@@ -11,6 +11,7 @@ public interface ProjectileCollisionFilter {
 
     /**
      * Tests whether a projectile should explode when it hits an {@link Entity}.
+     *
      * @param cause The {@link Entity} that the projectile hit
      * @return Whether the projectile should explode
      */

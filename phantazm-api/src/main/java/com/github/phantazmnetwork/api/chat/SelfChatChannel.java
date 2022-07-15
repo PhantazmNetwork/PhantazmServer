@@ -18,6 +18,7 @@ public class SelfChatChannel extends BasicChatChannel {
 
     /**
      * Creates a {@link SelfChatChannel}.
+     *
      * @param viewProvider The {@link SelfChatChannel}'s {@link PlayerViewProvider}
      */
     public SelfChatChannel(@NotNull PlayerViewProvider viewProvider) {
@@ -32,7 +33,8 @@ public class SelfChatChannel extends BasicChatChannel {
     @Override
     public @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent) {
         JoinConfiguration joinConfiguration = JoinConfiguration.separator(Component.space());
-        return Component.join(joinConfiguration, Component.text("self"),
-                Component.text(">", NamedTextColor.GRAY), super.formatMessage(chatEvent));
+        return Component.join(joinConfiguration, Component.text("self"), Component.text(">", NamedTextColor.GRAY),
+                              super.formatMessage(chatEvent)
+        );
     }
 }

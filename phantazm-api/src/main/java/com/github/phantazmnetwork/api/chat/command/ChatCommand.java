@@ -31,8 +31,8 @@ public class ChatCommand extends Command {
     /**
      * Creates a chat {@link Command}.
      *
-     * @param channels A {@link Map} of {@link String} channel names to {@link ChatChannel}s.
-     * @param playerChannels A {@link Map} of player channel names based on their {@link UUID}
+     * @param channels                   A {@link Map} of {@link String} channel names to {@link ChatChannel}s.
+     * @param playerChannels             A {@link Map} of player channel names based on their {@link UUID}
      * @param defaultChannelNameSupplier A {@link Supplier} of the default {@link ChatChannel} name
      */
     public ChatCommand(@NotNull Map<String, ChatChannel> channels, @NotNull Map<UUID, String> playerChannels,
@@ -78,30 +78,28 @@ public class ChatCommand extends Command {
                 return true;
             }
 
-            sender.sendMessage(Component.text("You have to be a player to use that command!",
-                    NamedTextColor.RED));
+            sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
             return false;
         }, (sender, context) -> {
-            Player player = (Player) sender;
+            Player player = (Player)sender;
 
             String channelName = context.get(channelNameArgument);
             Component channelNameComponent = Component.text(channelName, NamedTextColor.GOLD);
-            String previousChannelName = playerChannels.computeIfAbsent(player.getUuid(),
-                    uuid -> defaultChannelNameSupplier.get());
+            String previousChannelName =
+                    playerChannels.computeIfAbsent(player.getUuid(), uuid -> defaultChannelNameSupplier.get());
 
             JoinConfiguration joinConfiguration = JoinConfiguration.separator(Component.space());
             if (channelName.equals(previousChannelName)) {
                 Component message = Component.join(joinConfiguration, Component.text("You are already in the"),
-                        channelNameComponent, Component.text("channel!")).color(NamedTextColor.RED);
+                                                   channelNameComponent, Component.text("channel!")
+                ).color(NamedTextColor.RED);
                 sender.sendMessage(message);
                 return;
             }
 
             playerChannels.put(player.getUuid(), channelName);
-            Component message = Component.textOfChildren(
-                    Component.text("Set chat channel to "),
-                    channelNameComponent,
-                    Component.text(".")
+            Component message = Component.textOfChildren(Component.text("Set chat channel to "), channelNameComponent,
+                                                         Component.text(".")
             ).color(NamedTextColor.GREEN);
             player.sendMessage(message);
         }, channelNameArgument);

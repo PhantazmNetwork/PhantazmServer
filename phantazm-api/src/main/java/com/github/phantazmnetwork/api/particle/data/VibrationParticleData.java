@@ -22,6 +22,36 @@ public class VibrationParticleData implements ParticleData {
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.vibration");
 
     private static final Key KEY = Particle.VIBRATION.key();
+    private final PositionSource positionSource;
+    private final int ticks;
+
+    /**
+     * Creates a new {@link VibrationParticleData}.
+     *
+     * @param positionSource The position source of the vibration
+     * @param ticks          The arrival ticks for the vibration
+     */
+    public VibrationParticleData(@NotNull PositionSource positionSource, int ticks) {
+        this.positionSource = Objects.requireNonNull(positionSource, "positionSource");
+        this.ticks = ticks;
+    }
+
+    @Override
+    public boolean isValid(@NotNull Particle particle) {
+        return particle.key().equals(KEY);
+    }
+
+    @Override
+    public void write(@NotNull BinaryWriter binaryWriter) {
+        binaryWriter.writeSizedString(positionSource.key().asString());
+        positionSource.write(binaryWriter);
+        binaryWriter.writeVarInt(ticks);
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return SERIAL_KEY;
+    }
 
     /**
      * A position source for sculk vibrations.
@@ -30,6 +60,7 @@ public class VibrationParticleData implements ParticleData {
 
         /**
          * Writes the {@link PositionSource} to the given {@link BinaryWriter}.
+         *
          * @param binaryWriter The {@link BinaryWriter} to write to
          */
         void write(@NotNull BinaryWriter binaryWriter);
@@ -38,6 +69,7 @@ public class VibrationParticleData implements ParticleData {
 
     /**
      * A block position source for sculk vibrations.
+     *
      * @param blockPosition The block position source
      */
     public record BlockPositionSource(@NotNull Point blockPosition) implements PositionSource {
@@ -46,6 +78,7 @@ public class VibrationParticleData implements ParticleData {
 
         /**
          * Creates a new {@link BlockPositionSource}.
+         *
          * @param blockPosition The block position source
          */
         public BlockPositionSource {
@@ -76,12 +109,13 @@ public class VibrationParticleData implements ParticleData {
 
         /**
          * Creates a new {@link EntityPositionSource}.
+         *
          * @param entity The entity source
          */
         public EntityPositionSource(@NotNull Entity entity) {
             Objects.requireNonNull(entity, "entity");
             this.entityId = entity.getEntityId();
-            this.eyeHeight = (float) entity.getEyeHeight();
+            this.eyeHeight = (float)entity.getEyeHeight();
         }
 
         @Override
@@ -94,37 +128,6 @@ public class VibrationParticleData implements ParticleData {
         public @NotNull Key key() {
             return KEY;
         }
-    }
-
-    private final PositionSource positionSource;
-
-    private final int ticks;
-
-    /**
-     * Creates a new {@link VibrationParticleData}.
-     * @param positionSource The position source of the vibration
-     * @param ticks The arrival ticks for the vibration
-     */
-    public VibrationParticleData(@NotNull PositionSource positionSource, int ticks) {
-        this.positionSource = Objects.requireNonNull(positionSource, "positionSource");
-        this.ticks = ticks;
-    }
-
-    @Override
-    public boolean isValid(@NotNull Particle particle) {
-        return particle.key().equals(KEY);
-    }
-
-    @Override
-    public void write(@NotNull BinaryWriter binaryWriter) {
-        binaryWriter.writeSizedString(positionSource.key().asString());
-        positionSource.write(binaryWriter);
-        binaryWriter.writeVarInt(ticks);
-    }
-
-    @Override
-    public @NotNull Key key() {
-        return SERIAL_KEY;
     }
 
 }

@@ -13,6 +13,7 @@ public interface Explorer {
      * Produces an {@link Iterable} over {@link Vec3I} instances which may be added to {@code current} to produce new
      * nodes (which will typically be explored by a {@link PathOperation}). The iterable may actively perform
      * calculations as it is iterated, or return a value from cache.
+     *
      * @param current the node from which to search for new nodes to expand
      * @return an Iterable which will iterate over the new nodes
      */
@@ -21,6 +22,7 @@ public interface Explorer {
     /**
      * Performs implementation-dependent initialization tasks on the given Node object. This may include setting the
      * node's offset height or other properties.
+     *
      * @param node the node to initialize
      */
     void initializeNode(@NotNull Node node);

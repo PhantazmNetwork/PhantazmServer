@@ -57,67 +57,63 @@ import java.util.stream.Stream;
  */
 public final class Mob {
 
-    private Mob() {
-        throw new UnsupportedOperationException();
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Mob.class);
-
     private static final ConfigProcessor<MobModel> MODEL_PROCESSOR;
-
     private static final MobStore MOB_STORE = new MobStore();
-
     private static MobSpawner mobSpawner;
-
     private static Map<Key, MobModel> models;
 
     static {
         ConfigProcessor<Calculator> calculatorProcessor = new CalculatorConfigProcessor();
-        ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(Map.of(
-                GroundMinestomDescriptor.SERIAL_KEY, new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
-        )::get);
-        ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor = new NearestEntitiesSelectorConfigProcessor<>() {
-            @Override
-            protected @NotNull NearestEntitiesSelector<Player> createSelector(double range, int targetLimit) {
-                return new NearestPlayersSelector(range, targetLimit);
-            }
-        };
-        ConfigProcessor<? extends TargetSelector<Player>> nearestPlayerSelector = new MappedSelectorConfigProcessor<Iterable<Player>, FirstTargetSelector<Player>>(nearestPlayersSelectorProcessor) {
-            @Override
-            protected @NotNull FirstTargetSelector<Player> createSelector(@NotNull TargetSelector<Iterable<Player>> delegate) {
-                return new FirstTargetSelector<>(delegate);
-            }
-        };
-        ConfigProcessor<TargetSelector<? extends Audience>> audienceSelectorProcessor = new VariantConfigProcessor<>(Map.of(
-                NearestPlayersSelector.SERIAL_KEY, nearestPlayerSelector
-        )::get);
-        ConfigProcessor<Skill> skillProcessor = new VariantConfigProcessor<>(Map.of(
-                PlaySoundSkill.SERIAL_KEY, new PlaySoundSkillConfigProcessor(audienceSelectorProcessor)
-        )::get);
-        ConfigProcessor<TargetSelector<Player>> playerSelectorProcessor = new VariantConfigProcessor<>(Map.of(
-                NearestPlayersSelector.SERIAL_KEY, nearestPlayerSelector
-        )::get);
-        ConfigProcessor<FollowEntityGoal<Player>> followPlayerGoalProcessor = new FollowEntityGoalConfigProcessor<>(playerSelectorProcessor) {
-            @Override
-            protected @NotNull FollowEntityGoal<Player> createGoal(@NotNull TargetSelector<Player> selector) {
-                return new FollowEntityGoal<>(selector) {
+        ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(
+                Map.of(GroundMinestomDescriptor.SERIAL_KEY,
+                       new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
+                )::get);
+        ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor =
+                new NearestEntitiesSelectorConfigProcessor<>() {
                     @Override
-                    public @NotNull Key key() {
-                        return FollowPlayerGoal.SERIAL_KEY;
+                    protected @NotNull NearestEntitiesSelector<Player> createSelector(double range, int targetLimit) {
+                        return new NearestPlayersSelector(range, targetLimit);
                     }
                 };
-            }
-        };
-        ConfigProcessor<Goal> goalProcessor = new VariantConfigProcessor<>(Map.of(
-                UseSkillGoal.SERIAL_KEY, new UseSkillGoalConfigProcessor(skillProcessor),
-                FollowPlayerGoal.SERIAL_KEY, followPlayerGoalProcessor
-        )::get);
-        MODEL_PROCESSOR = new MobModelConfigProcessor(
-                descriptorProcessor,
-                goalProcessor,
-                skillProcessor,
-                ItemStackConfigProcessors.snbt()
+        ConfigProcessor<? extends TargetSelector<Player>> nearestPlayerSelector =
+                new MappedSelectorConfigProcessor<Iterable<Player>, FirstTargetSelector<Player>>(
+                        nearestPlayersSelectorProcessor) {
+                    @Override
+                    protected @NotNull FirstTargetSelector<Player> createSelector(
+                            @NotNull TargetSelector<Iterable<Player>> delegate) {
+                        return new FirstTargetSelector<>(delegate);
+                    }
+                };
+        ConfigProcessor<TargetSelector<? extends Audience>> audienceSelectorProcessor =
+                new VariantConfigProcessor<>(Map.of(NearestPlayersSelector.SERIAL_KEY, nearestPlayerSelector)::get);
+        ConfigProcessor<Skill> skillProcessor = new VariantConfigProcessor<>(
+                Map.of(PlaySoundSkill.SERIAL_KEY, new PlaySoundSkillConfigProcessor(audienceSelectorProcessor))::get);
+        ConfigProcessor<TargetSelector<Player>> playerSelectorProcessor =
+                new VariantConfigProcessor<>(Map.of(NearestPlayersSelector.SERIAL_KEY, nearestPlayerSelector)::get);
+        ConfigProcessor<FollowEntityGoal<Player>> followPlayerGoalProcessor =
+                new FollowEntityGoalConfigProcessor<>(playerSelectorProcessor) {
+                    @Override
+                    protected @NotNull FollowEntityGoal<Player> createGoal(@NotNull TargetSelector<Player> selector) {
+                        return new FollowEntityGoal<>(selector) {
+                            @Override
+                            public @NotNull Key key() {
+                                return FollowPlayerGoal.SERIAL_KEY;
+                            }
+                        };
+                    }
+                };
+        ConfigProcessor<Goal> goalProcessor = new VariantConfigProcessor<>(
+                Map.of(UseSkillGoal.SERIAL_KEY, new UseSkillGoalConfigProcessor(skillProcessor),
+                       FollowPlayerGoal.SERIAL_KEY, followPlayerGoalProcessor
+                )::get);
+        MODEL_PROCESSOR = new MobModelConfigProcessor(descriptorProcessor, goalProcessor, skillProcessor,
+                                                      ItemStackConfigProcessors.snbt()
         );
+    }
+
+    private Mob() {
+        throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -137,8 +133,9 @@ public final class Mob {
     @SuppressWarnings("SameParameterValue")
     private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
                                                           @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
-        node.addListener(trigger.eventClass(), event ->
-                mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
+        node.addListener(trigger.eventClass(),
+                         event -> mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key())
+        );
     }
 
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
@@ -149,9 +146,8 @@ public final class Mob {
             Files.createDirectories(mobPath);
 
             try (Stream<Path> paths = Files.list(mobPath)) {
-                String ending = codec.getPreferredExtensions().isEmpty()
-                        ? ""
-                        : "." + codec.getPreferredExtensions().get(0);
+                String ending =
+                        codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtensions().get(0);
                 PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**." + ending);
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {
@@ -163,12 +159,14 @@ public final class Mob {
                             else {
                                 loadedModels.put(model.key(), model);
                             }
-                        } catch (IOException e) {
+                        }
+                        catch (IOException e) {
                             LOGGER.warn("Could not load mob file", e);
                         }
                     }
                 });
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 LOGGER.warn("Could not list files in mob directory", e);
             }
         }
@@ -181,6 +179,7 @@ public final class Mob {
 
     /**
      * Gets a {@link ConfigProcessor} for {@link MobModel}s.
+     *
      * @return A {@link ConfigProcessor} for {@link MobModel}s.
      */
     public static @NotNull ConfigProcessor<MobModel> getModelProcessor() {
@@ -189,6 +188,7 @@ public final class Mob {
 
     /**
      * Gets the {@link MobStore} used by the {@link Mob} system.
+     *
      * @return The {@link MobStore} used by the {@link Mob} system
      */
     public static MobStore getMobStore() {
@@ -197,6 +197,7 @@ public final class Mob {
 
     /**
      * Gets the global {@link MobSpawner}.
+     *
      * @return The global {@link MobSpawner}.
      */
     public static @NotNull MobSpawner getMobSpawner() {
@@ -205,6 +206,7 @@ public final class Mob {
 
     /**
      * Gets the loaded {@link MobModel}s.
+     *
      * @return The loaded {@link MobModel}s
      */
     @SuppressWarnings("unused")

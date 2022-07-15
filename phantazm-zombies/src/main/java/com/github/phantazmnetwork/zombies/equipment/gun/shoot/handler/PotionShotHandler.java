@@ -25,26 +25,20 @@ import java.util.UUID;
  */
 public class PotionShotHandler implements ShotHandler {
 
+    private final Data data;
+
     /**
-     * Data for a {@link PotionShotHandler}.
-     * @param potion The {@link Potion} to apply to regular {@link Entity} targets
-     * @param headshotPotion The {@link Potion} to apply to headshot {@link Entity} targets
+     * Creates a {@link PotionShotHandler}.
+     *
+     * @param data The {@link PotionShotHandler}'s {@link Data}
      */
-    public record Data(@NotNull Potion potion, @NotNull Potion headshotPotion) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.potion");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public PotionShotHandler(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -70,18 +64,9 @@ public class PotionShotHandler implements ShotHandler {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a {@link PotionShotHandler}.
-     * @param data The {@link PotionShotHandler}'s {@link Data}
-     */
-    public PotionShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
+                       @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
             target.entity().addEffect(data.potion());
         }
@@ -93,6 +78,25 @@ public class PotionShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for a {@link PotionShotHandler}.
+     *
+     * @param potion         The {@link Potion} to apply to regular {@link Entity} targets
+     * @param headshotPotion The {@link Potion} to apply to headshot {@link Entity} targets
+     */
+    public record Data(@NotNull Potion potion, @NotNull Potion headshotPotion) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.potion");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

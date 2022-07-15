@@ -24,26 +24,20 @@ import java.util.Objects;
  */
 public class AroundEndFinder implements DirectionalEntityFinder {
 
+    private final Data data;
+
     /**
-     * Data for an {@link AroundEndFinder}.
-     * @param range The euclidean distance range to search for entities
+     * Creates a new {@link AroundEndFinder}.
+     *
+     * @param data The {@link Data} for the {@link AroundEndFinder}
      */
-    public record Data(double range) implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY
-                = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.around_end");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public AroundEndFinder(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -69,16 +63,6 @@ public class AroundEndFinder implements DirectionalEntityFinder {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a new {@link AroundEndFinder}.
-     * @param data The {@link Data} for the {@link AroundEndFinder}
-     */
-    public AroundEndFinder(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
     public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
                                                           @NotNull Point end) {
@@ -91,6 +75,24 @@ public class AroundEndFinder implements DirectionalEntityFinder {
         }
 
         return livingEntities;
+    }
+
+    /**
+     * Data for an {@link AroundEndFinder}.
+     *
+     * @param range The euclidean distance range to search for entities
+     */
+    public record Data(double range) implements Keyed {
+
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.around_end");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

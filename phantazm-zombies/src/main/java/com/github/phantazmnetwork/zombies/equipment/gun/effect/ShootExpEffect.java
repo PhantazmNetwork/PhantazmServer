@@ -24,33 +24,24 @@ import java.util.function.BiConsumer;
  */
 public class ShootExpEffect implements GunEffect {
 
+    private final PlayerView playerView;
+    private final GunStats stats;
+    private boolean currentlyActive = false;
+
     /**
-     * Data for a {@link ShootExpEffect}.
-     * @param statsKey A {@link Key} to the gun's {@link GunStats}
+     * Creates a {@link ShootExpEffect}.
+     *
+     * @param playerView The {@link PlayerView} of the {@link Player} to set the exp of
+     * @param stats      The {@link GunStats} of the gun
      */
-    public record Data(@NotNull Key statsKey) implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.exp.shoot");
-
-        /**
-         * Creates a {@link Data}.
-         * @param statsKey A {@link Key} to the gun's {@link GunStats}
-         */
-        public Data {
-            Objects.requireNonNull(statsKey, "statsKey");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public ShootExpEffect(@NotNull PlayerView playerView, @NotNull GunStats stats) {
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.stats = Objects.requireNonNull(stats, "stats");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -76,32 +67,19 @@ public class ShootExpEffect implements GunEffect {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.statsKey());
     }
 
-    private boolean currentlyActive = false;
-
-    private final PlayerView playerView;
-
-    private final GunStats stats;
-
-    /**
-     * Creates a {@link ShootExpEffect}.
-     * @param playerView The {@link PlayerView} of the {@link Player} to set the exp of
-     * @param stats The {@link GunStats} of the gun
-     */
-    public ShootExpEffect(@NotNull PlayerView playerView, @NotNull GunStats stats) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.stats = Objects.requireNonNull(stats, "stats");
-    }
-
     @Override
     public void apply(@NotNull GunState state) {
         if (state.isMainEquipment()) {
-            float exp = state.ammo() > 0 ? (float) state.ticksSinceLastShot() / stats.shootSpeed() : 0F; // TODO: fix for fire speed
+            float exp = state.ammo() > 0
+                        ? (float)state.ticksSinceLastShot() / stats.shootSpeed()
+                        : 0F; // TODO: fix for fire speed
             playerView.getPlayer().ifPresent(player -> player.setExp(exp));
             currentlyActive = true;
         }
@@ -114,6 +92,33 @@ public class ShootExpEffect implements GunEffect {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for a {@link ShootExpEffect}.
+     *
+     * @param statsKey A {@link Key} to the gun's {@link GunStats}
+     */
+    public record Data(@NotNull Key statsKey) implements Keyed {
+
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.exp.shoot");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param statsKey A {@link Key} to the gun's {@link GunStats}
+         */
+        public Data {
+            Objects.requireNonNull(statsKey, "statsKey");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

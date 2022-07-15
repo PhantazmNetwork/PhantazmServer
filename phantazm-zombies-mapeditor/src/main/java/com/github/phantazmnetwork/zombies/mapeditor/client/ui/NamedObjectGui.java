@@ -26,6 +26,7 @@ public class NamedObjectGui extends SimplePanelGui {
      * The initial name. This is the initial text for the name {@link WTextField}. If null, the text field will be
      * empty. The initial name must conform to the predicate {@link TextPredicates#validKeyPredicate()}. If it does not,
      * the initial text will be empty.
+     *
      * @param initialName the initial name
      */
     public NamedObjectGui(@Nullable String initialName) {

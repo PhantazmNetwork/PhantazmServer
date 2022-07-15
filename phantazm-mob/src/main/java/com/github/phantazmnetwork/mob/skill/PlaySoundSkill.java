@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.mob.skill;
 
+import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
@@ -20,7 +20,7 @@ public class PlaySoundSkill implements Skill {
      * The serial {@link Key} for {@link PlaySoundSkill}s.
      */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "skill.play_sound");
-    
+
     private final TargetSelector<? extends Audience> selectorCreator;
 
     private final Sound sound;
@@ -29,8 +29,9 @@ public class PlaySoundSkill implements Skill {
 
     /**
      * Creates a {@link PlaySoundSkill}.
-     * @param selector The {@link TargetSelector} used to select {@link Audience}s
-     * @param sound The {@link Sound} to play
+     *
+     * @param selector       The {@link TargetSelector} used to select {@link Audience}s
+     * @param sound          The {@link Sound} to play
      * @param followAudience Whether the {@link Sound} should follow the {@link Audience}
      */
     public PlaySoundSkill(@NotNull TargetSelector<? extends Audience> selector, @NotNull Sound sound,
@@ -42,6 +43,7 @@ public class PlaySoundSkill implements Skill {
 
     /**
      * Gets the {@link TargetSelector} used to select {@link Audience}s.
+     *
      * @return The {@link TargetSelector} used to select {@link Audience}s
      */
     public @NotNull TargetSelector<? extends Audience> getSelector() {
@@ -50,6 +52,7 @@ public class PlaySoundSkill implements Skill {
 
     /**
      * Gets the {@link Sound} to play.
+     *
      * @return The {@link Sound} to play
      */
     public @NotNull Sound getSound() {
@@ -58,6 +61,7 @@ public class PlaySoundSkill implements Skill {
 
     /**
      * Gets whether the {@link Sound} should follow the {@link Audience}.
+     *
      * @return Whether the {@link Sound} should follow the {@link Audience}
      */
     public boolean shouldFollowAudience() {

@@ -24,6 +24,7 @@ public abstract class InstanceMapObject<TData> extends MapObject<TData> {
 
     /**
      * Gets the instance this map object is in.
+     *
      * @return the instance this map object is in
      */
     public @NotNull Instance getInstance() {

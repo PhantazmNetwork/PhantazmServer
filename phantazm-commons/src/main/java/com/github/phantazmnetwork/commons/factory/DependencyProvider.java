@@ -13,17 +13,19 @@ public interface DependencyProvider {
 
     /**
      * Gets an individual dependency.
+     *
      * @param key The {@link Key} of the dependency
-     * @return The dependency associated with the {@code key}
      * @param <T> The type of the dependency
+     * @return The dependency associated with the {@code key}
      */
     <T> @NotNull T getDependency(@NotNull Key key);
 
     /**
      * Provides a {@link Collection} of dependencies.
+     *
      * @param keys The keys of the dependencies
+     * @param <T>  The shared data type of the dependencies
      * @return A {@link Collection} of dependencies
-     * @param <T> The shared data type of the dependencies
      */
     default <T> @NotNull Collection<T> getDependencies(@NotNull Collection<Key> keys) {
         Collection<T> dependencies = new ArrayList<>(keys.size());
@@ -36,6 +38,7 @@ public interface DependencyProvider {
 
     /**
      * Checks whether the provider has a dependency.
+     *
      * @param key The {@link Key} of the dependency
      * @return Whether the provider has the dependency associated with the {@code key}
      */

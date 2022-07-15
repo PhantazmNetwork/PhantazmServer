@@ -12,8 +12,9 @@ public interface HeadshotTester {
 
     /**
      * Tests whether the intersection of an {@link Entity} and a shot should result in a headshot.
-     * @param shooter The shooter {@link Entity}
-     * @param entity The target {@link Entity}
+     *
+     * @param shooter      The shooter {@link Entity}
+     * @param entity       The target {@link Entity}
      * @param intersection The intersection between the target and the shot
      * @return Whether the intersection should result in a headshot
      */

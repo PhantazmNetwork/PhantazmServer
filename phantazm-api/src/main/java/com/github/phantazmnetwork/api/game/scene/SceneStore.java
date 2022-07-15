@@ -11,7 +11,8 @@ public interface SceneStore {
 
     /**
      * Gets a {@link Scene} by a {@link SceneKey}.
-     * @param key The key associated with the {@link Scene}
+     *
+     * @param key      The key associated with the {@link Scene}
      * @param <TScene> The type of the {@link Scene}
      * @return An {@link Optional} of a {@link Scene}
      */
@@ -19,8 +20,9 @@ public interface SceneStore {
 
     /**
      * Adds a {@link Scene} to the store
-     * @param key The key to associate with the {@link Scene}
-     * @param scene The {@link Scene} to add
+     *
+     * @param key      The key to associate with the {@link Scene}
+     * @param scene    The {@link Scene} to add
      * @param <TScene> The type of the {@link Scene}
      * @throws IllegalStateException If a {@link Scene} with the given key has already been added
      */

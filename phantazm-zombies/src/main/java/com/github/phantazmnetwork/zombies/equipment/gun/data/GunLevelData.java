@@ -19,22 +19,23 @@ import java.util.function.BiConsumer;
 
 /**
  * Data for a gun level.
- * @param upgrades Suggested upgrade {@link Key}s for next levels
- * @param stack The {@link ItemStack} for this level
- * @param stats A {@link Key} to the gun's {@link GunStats}
- * @param shootTester A {@link Key} to the gun's {@link ShootTester}
- * @param reloadTester A {@link Key} to the gun's {@link ReloadTester}
- * @param firer A {@link Key} to the gun's {@link Firer}
+ *
+ * @param upgrades        Suggested upgrade {@link Key}s for next levels
+ * @param stack           The {@link ItemStack} for this level
+ * @param stats           A {@link Key} to the gun's {@link GunStats}
+ * @param shootTester     A {@link Key} to the gun's {@link ShootTester}
+ * @param reloadTester    A {@link Key} to the gun's {@link ReloadTester}
+ * @param firer           A {@link Key} to the gun's {@link Firer}
  * @param activateEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
- *                     that are invoked when the gun level becomes active
- * @param shootEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
- *                     that are invoked when the gun is shot
- * @param reloadEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
- *                      that are invoked when the gun begins reloading
- * @param tickEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
- *                    that are invoked every tick
- * @param noAmmoEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
- *                      that are invoked when the gun has no ammo
+ *                        that are invoked when the gun level becomes active
+ * @param shootEffects    A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+ *                        that are invoked when the gun is shot
+ * @param reloadEffects   A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+ *                        that are invoked when the gun begins reloading
+ * @param tickEffects     A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+ *                        that are invoked every tick
+ * @param noAmmoEffects   A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+ *                        that are invoked when the gun has no ammo
  * @param gunStackMappers A {@link Collection} of {@link Key}s to the gun's {@link GunStackMapper}s
  *                        that produce the visual {@link ItemStack} representation of the gun
  */
@@ -57,41 +58,24 @@ public record GunLevelData(@NotNull Set<Key> upgrades,
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.level");
 
     /**
-     * Creates a dependency consumer for {@link GunLevelData}s.
-     * @return A dependency consumer for {@link GunLevelData}s
-     */
-    public static @NotNull BiConsumer<GunLevelData, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.stats());
-            keys.add(data.shootTester());
-            keys.add(data.reloadTester());
-            keys.add(data.firer());
-            keys.addAll(data.shootEffects());
-            keys.addAll(data.reloadEffects());
-            keys.addAll(data.tickEffects());
-            keys.addAll(data.noAmmoEffects());
-            keys.addAll(data.gunStackMappers());
-        };
-    }
-
-    /**
      * Creates a {@link GunLevelData}.
-     * @param upgrades Suggested upgrade {@link Key}s for next levels
-     * @param stack The {@link ItemStack} for this level
-     * @param stats A {@link Key} to the gun's {@link GunStats}
-     * @param shootTester A {@link Key} to the gun's {@link ShootTester}
-     * @param reloadTester A {@link Key} to the gun's {@link ReloadTester}
-     * @param firer A {@link Key} to the gun's {@link Firer}
+     *
+     * @param upgrades        Suggested upgrade {@link Key}s for next levels
+     * @param stack           The {@link ItemStack} for this level
+     * @param stats           A {@link Key} to the gun's {@link GunStats}
+     * @param shootTester     A {@link Key} to the gun's {@link ShootTester}
+     * @param reloadTester    A {@link Key} to the gun's {@link ReloadTester}
+     * @param firer           A {@link Key} to the gun's {@link Firer}
      * @param activateEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
-     *                     that are invoked when the gun level becomes active
-     * @param shootEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
-     *                     that are invoked when the gun is shot
-     * @param reloadEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
-     *                      that are invoked when the gun begins reloading
-     * @param tickEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
-     *                    that are invoked every tick
-     * @param noAmmoEffects A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
-     *                      that are invoked when the gun has no ammo
+     *                        that are invoked when the gun level becomes active
+     * @param shootEffects    A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+     *                        that are invoked when the gun is shot
+     * @param reloadEffects   A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+     *                        that are invoked when the gun begins reloading
+     * @param tickEffects     A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+     *                        that are invoked every tick
+     * @param noAmmoEffects   A {@link Collection} of {@link Key}s to the gun's {@link GunEffect}s
+     *                        that are invoked when the gun has no ammo
      * @param gunStackMappers A {@link Collection} of {@link Key}s to the gun's {@link GunStackMapper}s
      *                        that produce the visual {@link ItemStack} representation of the gun
      */
@@ -108,6 +92,25 @@ public record GunLevelData(@NotNull Set<Key> upgrades,
         verifyCollection(tickEffects, "tickEffects");
         verifyCollection(noAmmoEffects, "noAmmoEffects");
         verifyCollection(gunStackMappers, "gunStackMappers");
+    }
+
+    /**
+     * Creates a dependency consumer for {@link GunLevelData}s.
+     *
+     * @return A dependency consumer for {@link GunLevelData}s
+     */
+    public static @NotNull BiConsumer<GunLevelData, Collection<Key>> dependencyConsumer() {
+        return (data, keys) -> {
+            keys.add(data.stats());
+            keys.add(data.shootTester());
+            keys.add(data.reloadTester());
+            keys.add(data.firer());
+            keys.addAll(data.shootEffects());
+            keys.addAll(data.reloadEffects());
+            keys.addAll(data.tickEffects());
+            keys.addAll(data.noAmmoEffects());
+            keys.addAll(data.gunStackMappers());
+        };
     }
 
     private void verifyCollection(@NotNull Collection<?> collection, @NotNull String name) {

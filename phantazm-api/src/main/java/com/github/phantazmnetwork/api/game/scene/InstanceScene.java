@@ -11,6 +11,7 @@ import java.util.*;
 
 /**
  * Basic Scene which corresponds to a single {@link Instance} and {@link SceneFallback} to route players.
+ *
  * @param <TRequest>
  */
 public abstract class InstanceScene<TRequest extends SceneJoinRequest> implements Scene<TRequest> {

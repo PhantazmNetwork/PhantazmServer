@@ -20,8 +20,9 @@ public class InventoryProfileSwitcherTest {
 
         inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile);
 
-        assertThrowsExactly(IllegalArgumentException.class, () ->
-                inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile));
+        assertThrowsExactly(IllegalArgumentException.class,
+                            () -> inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile)
+        );
     }
 
     @Test
@@ -57,8 +58,7 @@ public class InventoryProfileSwitcherTest {
 
         inventoryProfileSwitcher.switchProfile(firstKey);
 
-        assertThrowsExactly(IllegalArgumentException.class, () ->
-                inventoryProfileSwitcher.switchProfile(secondKey));
+        assertThrowsExactly(IllegalArgumentException.class, () -> inventoryProfileSwitcher.switchProfile(secondKey));
         assertSame(inventoryProfile, inventoryProfileSwitcher.getCurrentProfile());
     }
 

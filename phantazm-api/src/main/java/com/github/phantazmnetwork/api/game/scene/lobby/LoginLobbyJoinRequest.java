@@ -25,7 +25,8 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
 
     /**
      * Creates a {@link LobbyJoinRequest} for a newly joining player.
-     * @param event The {@link PlayerLoginEvent} associated with the new player
+     *
+     * @param event        The {@link PlayerLoginEvent} associated with the new player
      * @param viewProvider The {@link PlayerViewProvider} for the server
      */
     public LoginLobbyJoinRequest(@NotNull PlayerLoginEvent event, @NotNull PlayerViewProvider viewProvider) {

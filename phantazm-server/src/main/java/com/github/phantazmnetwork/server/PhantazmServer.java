@@ -12,7 +12,6 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.hologram.Hologram;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -50,6 +49,7 @@ public final class PhantazmServer {
 
     /**
      * Starting point for the server.
+     *
      * @param args Do you even know java?
      *             I don't know java.
      *             At all.
@@ -67,39 +67,40 @@ public final class PhantazmServer {
 
             serverConfig = handler.getData(Configuration.SERVER_CONFIG_KEY);
             ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
-            if(isUnsafe(args)) {
+            if (isUnsafe(args)) {
                 LOGGER.warn("""
-                                            
-                                            ██
-                                          ██░░██
-                                        ██░░░░░░██
-                                      ██░░░░░░░░░░██
-                                      ██░░░░░░░░░░██
-                                    ██░░░░░░░░░░░░░░██
-                                  ██░░░░░░██████░░░░░░██
-                                  ██░░░░░░██████░░░░░░██
-                                ██░░░░░░░░██████░░░░░░░░██
-                                ██░░░░░░░░██████░░░░░░░░██
-                              ██░░░░░░░░░░██████░░░░░░░░░░██
-                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
-                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
-                          ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██
-                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
-                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
-                      ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██
-                      ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-                        ██████████████████████████████████████████
-                    """);
+                                                            
+                                                            ██
+                                                          ██░░██
+                                                        ██░░░░░░██
+                                                      ██░░░░░░░░░░██
+                                                      ██░░░░░░░░░░██
+                                                    ██░░░░░░░░░░░░░░██
+                                                  ██░░░░░░██████░░░░░░██
+                                                  ██░░░░░░██████░░░░░░██
+                                                ██░░░░░░░░██████░░░░░░░░██
+                                                ██░░░░░░░░██████░░░░░░░░██
+                                              ██░░░░░░░░░░██████░░░░░░░░░░██
+                                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
+                                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
+                                          ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██
+                                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
+                                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
+                                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
+                                      ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██
+                                      ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
+                                        ██████████████████████████████████████████
+                                    """);
                 LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value " +
-                        "\"default\". Only use this option when running in a secure development environment.");
+                            "\"default\". Only use this option when running in a secure development environment.");
             }
-            else if((serverInfoConfig.authType() == AuthType.VELOCITY || serverInfoConfig.authType() == AuthType.BUNGEE)
-                    && serverInfoConfig.proxySecret().equals(ServerInfoConfig.DEFAULT_PROXY_SECRET)) {
+            else if ((serverInfoConfig.authType() == AuthType.VELOCITY ||
+                      serverInfoConfig.authType() == AuthType.BUNGEE) &&
+                     serverInfoConfig.proxySecret().equals(ServerInfoConfig.DEFAULT_PROXY_SECRET)) {
                 LOGGER.error("When using AuthType.VELOCITY or AuthType.BUNGEE, proxySecret must be set to a value " +
-                        "other than the default for security reasons.");
+                             "other than the default for security reasons.");
                 LOGGER.error("If you are running in a development environment, you can use the 'unsafe' program " +
-                        "argument to force the server to start regardless.");
+                             "argument to force the server to start regardless.");
                 MinecraftServer.stopCleanly();
                 return;
             }
@@ -135,8 +136,8 @@ public final class PhantazmServer {
     }
 
     private static boolean isUnsafe(String[] args) {
-        for(String arg : args) {
-            if(arg.equals(UNSAFE_ARGUMENT)) {
+        for (String arg : args) {
+            if (arg.equals(UNSAFE_ARGUMENT)) {
                 return true;
             }
         }
@@ -146,18 +147,20 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
                                            LobbiesConfig lobbiesConfig) {
-        PlayerViewProvider viewProvider = new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool
-                .commonPool()), MinecraftServer.getConnectionManager());
+        PlayerViewProvider viewProvider =
+                new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
+                                            MinecraftServer.getConnectionManager()
+                );
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
         Neuron.initialize(global, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner());
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
-        EquipmentFeature.initialize(Path.of("./equipment/"), new YamlCodec(() -> new Load(LoadSettings.builder().build()),
-                () -> new Dump(DumpSettings.builder()
-                        .setDefaultFlowStyle(FlowStyle.BLOCK)
-                        .build())));
+        EquipmentFeature.initialize(Path.of("./equipment/"),
+                                    new YamlCodec(() -> new Load(LoadSettings.builder().build()), () -> new Dump(
+                                            DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()))
+        );
         ZombiesTest.initialize(global);
     }
 
@@ -177,8 +180,9 @@ public final class PhantazmServer {
             case VELOCITY -> VelocityProxy.enable(infoConfig.proxySecret());
         }
 
-        node.addListener(ServerListPingEvent.class, event -> event.getResponseData().setDescription(serverConfig
-                .pingListConfig().description()));
+        node.addListener(ServerListPingEvent.class,
+                         event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description())
+        );
 
         server.start(infoConfig.serverIP(), infoConfig.port());
     }

@@ -9,11 +9,11 @@ import java.util.Objects;
 /**
  * Defines a spawnpoint.
  */
-public record SpawnpointInfo(@NotNull Vec3I position,
-                             @NotNull Key spawnRule) {
+public record SpawnpointInfo(@NotNull Vec3I position, @NotNull Key spawnRule) {
     /**
      * Creates a new instance of this record.
-     * @param position the position of the spawnpoint
+     *
+     * @param position  the position of the spawnpoint
      * @param spawnRule the id of the spawnrule which will be used to dictate what may spawn here
      */
     public SpawnpointInfo {

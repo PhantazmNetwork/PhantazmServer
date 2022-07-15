@@ -12,7 +12,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +37,9 @@ public class Door extends PositionalMapObject<DoorInfo> {
     /**
      * Constructs a new instance of this class.
      *
-     * @param doorInfo  the backing data object
-     * @param origin the origin vector to which this door's coordinates are considered relative
-     * @param instance  the instance which this MapObject is in
+     * @param doorInfo the backing data object
+     * @param origin   the origin vector to which this door's coordinates are considered relative
+     * @param instance the instance which this MapObject is in
      */
     public Door(@NotNull DoorInfo doorInfo, @NotNull Vec3I origin, @NotNull Instance instance, @NotNull Block fillBlock,
                 @NotNull List<Action<Door>> openActions) {
@@ -48,7 +47,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
         List<Region3I> regions = doorInfo.regions();
-        if(regions.size() == 0) {
+        if (regions.size() == 0) {
             LOGGER.warn("Door has no regions, enclosing bounds and center set to origin");
 
             enclosing = Region3I.encompassing(origin, origin);
@@ -57,7 +56,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
         }
         else {
             Region3I[] regionArray = regions.toArray(EMPTY_REGION_ARRAY);
-            for(int i = 0; i < regionArray.length; i++) {
+            for (int i = 0; i < regionArray.length; i++) {
                 regionArray[i] = regionArray[i].add(origin);
             }
 
@@ -69,10 +68,12 @@ public class Door extends PositionalMapObject<DoorInfo> {
         List<HologramInfo> hologramInfo = data.holograms();
         holograms = new ArrayList<>(hologramInfo.size());
 
-        for(HologramInfo info : hologramInfo) {
+        for (HologramInfo info : hologramInfo) {
             Vec3D offset = info.position();
-            Hologram hologram = new InstanceHologram(Vec3D.of(center.getX() + offset.getX(), center.getY() +
-                    offset.getY(), center.getZ() + offset.getZ()), 0.1);
+            Hologram hologram = new InstanceHologram(
+                    Vec3D.of(center.getX() + offset.getX(), center.getY() + offset.getY(),
+                             center.getZ() + offset.getZ()
+                    ), 0.1);
             hologram.addAll(info.text());
             hologram.setInstance(instance);
             holograms.add(hologram);
@@ -84,6 +85,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
 
     /**
      * Determines if this door is currently open or not.
+     *
      * @return true if this door has been opened, false otherwise
      */
     public boolean isOpen() {
@@ -94,16 +96,16 @@ public class Door extends PositionalMapObject<DoorInfo> {
      * Permanently opens this door, removing its blocks. If the door is already open, this method will do nothing.
      */
     public void open() {
-        if(!isOpen) {
+        if (!isOpen) {
             isOpen = true;
 
-            for(Region3I region : regions) {
-                for(Vec3I block : region) {
+            for (Region3I region : regions) {
+                for (Vec3I block : region) {
                     instance.setBlock(block.getX(), block.getY(), block.getZ(), fillBlock);
                 }
             }
 
-            for(Hologram hologram : holograms) {
+            for (Hologram hologram : holograms) {
                 hologram.clear();
                 hologram.trimToSize();
             }
@@ -111,7 +113,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
             holograms.clear();
             holograms.trimToSize();
 
-            for(Action<Door> action : openActions) {
+            for (Action<Door> action : openActions) {
                 action.perform(this);
             }
         }
@@ -124,6 +126,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
     /**
      * Gets the center of the door, to which distances should be measured. This is equal to the center of the enclosing
      * region.
+     *
      * @return the center of the door
      */
     public @NotNull Vec3D getCenter() {
@@ -133,6 +136,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
     /**
      * Gets the enclosing region of this door, which is the smallest possible bounding box that encloses every
      * subregion for this door.
+     *
      * @return the enclosing region for this door
      */
     public @NotNull Region3I getEnclosing() {

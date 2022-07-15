@@ -22,21 +22,23 @@ class ShapeSolid extends PointSolid {
     /**
      * Creates a new instance of this class from the provided {@link Shape}. The shape's child bounding boxes, if any,
      * will be accounted for.
+     *
      * @param shape the shape to create this solid from
      */
     ShapeSolid(@NotNull Shape shape) {
         super(VecUtils.toFloat(shape.relativeStart()), VecUtils.toFloat(shape.relativeEnd()));
 
         List<BoundingBox> children = shape.childBounds();
-        if(children.isEmpty()) {
+        if (children.isEmpty()) {
             this.hasChildren = false;
             this.children = Collections.emptySet();
         }
         else {
             List<Solid> childSolids = new ArrayList<>(children.size());
-            for(BoundingBox boundingBox : children) {
-                childSolids.add(new PointSolid(VecUtils.toFloat(boundingBox.relativeStart()), VecUtils.toFloat(
-                        boundingBox.relativeEnd())));
+            for (BoundingBox boundingBox : children) {
+                childSolids.add(new PointSolid(VecUtils.toFloat(boundingBox.relativeStart()),
+                                               VecUtils.toFloat(boundingBox.relativeEnd())
+                ));
             }
 
             this.hasChildren = true;

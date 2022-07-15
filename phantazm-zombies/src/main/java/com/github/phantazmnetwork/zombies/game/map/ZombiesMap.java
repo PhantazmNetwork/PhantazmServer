@@ -35,9 +35,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
      * @param info     the backing data object
      * @param instance the instance which this MapObject is in
      */
-    public ZombiesMap(@NotNull MapInfo info,
-                      @NotNull Instance instance,
-                      @NotNull MobSpawner mobSpawner,
+    public ZombiesMap(@NotNull MapInfo info, @NotNull Instance instance, @NotNull MobSpawner mobSpawner,
                       @NotNull ClientBlockHandler blockHandler/*,
                       @NotNull SpawnDistributor spawnDistributor*/) {
         super(info, info.info().origin(), instance);
@@ -62,28 +60,28 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
-        for(RoomInfo roomInfo : roomData) {
+        for (RoomInfo roomInfo : roomData) {
 
         }
 
-        for(DoorInfo doorInfo : doorData) {
+        for (DoorInfo doorInfo : doorData) {
             //TODO: include door fill block in mapInfo
             doors.add(new Door(doorInfo, origin, instance, Block.AIR, List.of()));
         }
 
-        for(WindowInfo windowInfo : windowData) {
+        for (WindowInfo windowInfo : windowData) {
             windows.add(new Window(instance, windowInfo, origin, blockHandler));
         }
 
-        for(SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
+        for (SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
             spawnpoints.add(new Spawnpoint(spawnpointInfo, origin, instance, spawnruleMap::get, mobSpawner));
         }
 
-        for(SpawnruleInfo spawnrule : spawnruleData) {
+        for (SpawnruleInfo spawnrule : spawnruleData) {
             spawnruleMap.put(spawnrule.id(), spawnrule);
         }
 
-        for(RoundInfo roundInfo : roundData) {
+        for (RoundInfo roundInfo : roundData) {
 
         }
     }
@@ -113,7 +111,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
         this.roundIndex = roundIndex;
         Round newCurrent = unmodifiableRounds.get(roundIndex);
-        if(newCurrent == currentRound) {
+        if (newCurrent == currentRound) {
             currentRound.endRound();
             currentRound.startRound();
             return;
@@ -128,15 +126,15 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
         double nearestDistance = Double.POSITIVE_INFINITY;
         Window nearestWindow = null;
-        for(Window window : unmodifiableWindows) {
+        for (Window window : unmodifiableWindows) {
             double currentDistance = window.getCenter().squaredDistance(origin);
-            if(currentDistance < nearestDistance) {
+            if (currentDistance < nearestDistance) {
                 nearestDistance = currentDistance;
                 nearestWindow = window;
             }
         }
 
-        if(nearestDistance < distanceSquared) {
+        if (nearestDistance < distanceSquared) {
             return Optional.of(nearestWindow);
         }
 
@@ -144,11 +142,11 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     }
 
     public @NotNull Optional<Door> doorAt(@NotNull Vec3I block) {
-        for(Door door : unmodifiableDoors) {
+        for (Door door : unmodifiableDoors) {
             Region3I enclosing = door.getEnclosing();
-            if(enclosing.contains(block)) {
-                for(Region3I subRegion : door.regions()) {
-                    if(subRegion.contains(block)) {
+            if (enclosing.contains(block)) {
+                for (Region3I subRegion : door.regions()) {
+                    if (subRegion.contains(block)) {
                         return Optional.of(door);
                     }
                 }
@@ -164,11 +162,11 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     }
 
     private void roundTick(long time) {
-        if(currentRound != null) {
+        if (currentRound != null) {
             currentRound.tick(time);
 
-            if(!currentRound.isActive()) {
-                if(++roundIndex < unmodifiableRounds.size()) {
+            if (!currentRound.isActive()) {
+                if (++roundIndex < unmodifiableRounds.size()) {
                     currentRound = unmodifiableRounds.get(roundIndex);
                     currentRound.startRound();
                 }

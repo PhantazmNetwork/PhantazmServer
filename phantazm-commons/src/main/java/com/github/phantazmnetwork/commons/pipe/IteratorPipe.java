@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 
 /**
  * A Pipe implementation based off of an iterator. Not part of the public API.
+ *
  * @param <TValue> the upper bound of the value held in the backing iterator
  */
 final class IteratorPipe<TValue> implements Pipe<TValue> {
@@ -16,6 +17,7 @@ final class IteratorPipe<TValue> implements Pipe<TValue> {
     /**
      * Creates a new pipe based off of the given iterator. Instances can be obtained through
      * {@link Pipe#from(Iterator)}.
+     *
      * @param iterator the backing iterator
      */
     IteratorPipe(@NotNull Iterator<? extends TValue> iterator) {
@@ -24,12 +26,12 @@ final class IteratorPipe<TValue> implements Pipe<TValue> {
 
     @Override
     public boolean hasNext() {
-        if(ended) {
+        if (ended) {
             return false;
         }
 
         boolean hasNext = iterator.hasNext();
-        if(!hasNext) {
+        if (!hasNext) {
             iterator = null;
             ended = true;
         }
@@ -39,7 +41,7 @@ final class IteratorPipe<TValue> implements Pipe<TValue> {
 
     @Override
     public TValue next() {
-        if(ended) {
+        if (ended) {
             throw new NoSuchElementException();
         }
 

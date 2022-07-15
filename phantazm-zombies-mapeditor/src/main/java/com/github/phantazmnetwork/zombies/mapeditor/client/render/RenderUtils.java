@@ -19,8 +19,9 @@ public final class RenderUtils {
     /**
      * Converts the given list of {@link Region3I} instances into a single array of {@link Vec3d} instances, for use in
      * creating a representative {@link ObjectRenderer.RenderObject}.
+     *
      * @param regions the regions list
-     * @param origin the origin vector to which the regions are measured relative to
+     * @param origin  the origin vector to which the regions are measured relative to
      * @return a flat array which can be used to construct a RenderObject
      */
     public static Vec3d @NotNull [] arrayFromRegions(@NotNull List<? extends Region3I> regions, @NotNull Vec3I origin) {
@@ -29,7 +30,7 @@ public final class RenderUtils {
 
         Vec3d[] boundsArray = new Vec3d[regions.size() * 2];
 
-        for(int i = 0; i < regions.size(); i++) {
+        for (int i = 0; i < regions.size(); i++) {
             arrayFromRegion(regions.get(i), origin, boundsArray, i * 2);
         }
 
@@ -39,10 +40,11 @@ public final class RenderUtils {
     /**
      * Converts a single {@link Region3I} into a pair of {@link Vec3d} objects, entering them into the given array
      * starting at the offset value. The region is considered relative to the given origin vector.
-     * @param region the region to convert
-     * @param origin the origin to which region is relative to
+     *
+     * @param region      the region to convert
+     * @param origin      the origin to which region is relative to
      * @param boundsArray the Vec3d array to populate
-     * @param offset the offset vector to start entering values
+     * @param offset      the offset vector to start entering values
      * @return {@code boundsArray}, for convenience
      */
     public static Vec3d @NotNull [] arrayFromRegion(@NotNull Region3I region, @NotNull Vec3I origin,
@@ -54,11 +56,14 @@ public final class RenderUtils {
         Vec3I infoOrigin = region.origin();
         Vec3I lengths = region.lengths();
 
-        boundsArray[offset] = new Vec3d(infoOrigin.getX() + origin.getX() - ObjectRenderer.EPSILON, infoOrigin
-                .getY() + origin.getY() - ObjectRenderer.EPSILON, infoOrigin.getZ() + origin.getZ() - ObjectRenderer
-                .EPSILON);
-        boundsArray[offset + 1] = new Vec3d(lengths.getX() + ObjectRenderer.DOUBLE_EPSILON, lengths.getY() +
-                ObjectRenderer.DOUBLE_EPSILON, lengths.getZ() + ObjectRenderer.DOUBLE_EPSILON);
+        boundsArray[offset] = new Vec3d(infoOrigin.getX() + origin.getX() - ObjectRenderer.EPSILON,
+                                        infoOrigin.getY() + origin.getY() - ObjectRenderer.EPSILON,
+                                        infoOrigin.getZ() + origin.getZ() - ObjectRenderer.EPSILON
+        );
+        boundsArray[offset + 1] = new Vec3d(lengths.getX() + ObjectRenderer.DOUBLE_EPSILON,
+                                            lengths.getY() + ObjectRenderer.DOUBLE_EPSILON,
+                                            lengths.getZ() + ObjectRenderer.DOUBLE_EPSILON
+        );
 
         return boundsArray;
     }

@@ -18,8 +18,9 @@ public class InventoryProfileTest {
 
         inventoryProfile.setInventoryObject(slot, inventoryObject);
 
-        assertThrowsExactly(IllegalArgumentException.class, () ->
-                inventoryProfile.setInventoryObject(slot, inventoryObject));
+        assertThrowsExactly(IllegalArgumentException.class,
+                            () -> inventoryProfile.setInventoryObject(slot, inventoryObject)
+        );
     }
 
     @Test
@@ -51,8 +52,7 @@ public class InventoryProfileTest {
     public void testRemoveObjectInUnoccupiedSlot() {
         InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
 
-        assertThrowsExactly(IllegalArgumentException.class, () ->
-                inventoryProfile.removeInventoryObject(0));
+        assertThrowsExactly(IllegalArgumentException.class, () -> inventoryProfile.removeInventoryObject(0));
     }
 
 }

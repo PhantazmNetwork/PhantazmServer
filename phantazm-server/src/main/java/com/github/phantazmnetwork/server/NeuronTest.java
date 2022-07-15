@@ -31,15 +31,17 @@ final class NeuronTest {
             Player player = event.getPlayer();
             Instance instance = player.getInstance();
 
-            if(instance != null) {
+            if (instance != null) {
                 switch (msg) {
                     case "T" -> spawner.spawnEntity(instance, player.getPosition().add(5, 0, 0), testDescriptor,
-                            neuralEntity -> {
-                        //neuralEntity.setGravity(0, 0.2);
-                        neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
-                            }).setTarget(player);
+                                                    neuralEntity -> {
+                                                        //neuralEntity.setGravity(0, 0.2);
+                                                        neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED)
+                                                                    .setBaseValue(0.1F);
+                                                    }
+                    ).setTarget(player);
                     case "TT" -> {
-                        for(int i = 0; i < 500; i++) {
+                        for (int i = 0; i < 500; i++) {
                             spawner.spawnEntity(instance, player.getPosition(), testDescriptor).setTarget(player);
                         }
                     }
@@ -62,7 +64,7 @@ final class NeuronTest {
                     }
                     case "V" -> {
                         Set<Entity> entities = instance.getEntities();
-                        for(Entity entity : entities) {
+                        for (Entity entity : entities) {
                             entity.setVelocity(new Vec(10, 0, 0));
                         }
                     }
@@ -71,7 +73,7 @@ final class NeuronTest {
         }).build());
 
         global.addListener(PlayerSpawnEvent.class, event -> {
-            if(!event.isFirstSpawn()) {
+            if (!event.isFirstSpawn()) {
                 return;
             }
 
@@ -80,8 +82,8 @@ final class NeuronTest {
             event.getPlayer().setFlying(true);
             Pos start = event.getPlayer().getPosition().sub(0, 1, 0);
 
-            for(int i = 0; i < 100; i++) {
-                for(int j = 0; j < 100; j++) {
+            for (int i = 0; i < 100; i++) {
+                for (int j = 0; j < 100; j++) {
                     event.getSpawnInstance().setBlock(start.add(i, 0, j), Block.GOLD_BLOCK);
                 }
             }

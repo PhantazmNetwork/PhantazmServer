@@ -17,9 +17,10 @@ public interface MobSpawner {
 
     /**
      * Spawns a {@link PhantazmMob}.
+     *
      * @param instance The {@link Instance} to spawn the {@link PhantazmMob} in
-     * @param point The {@link Point} to spawn the {@link PhantazmMob} at
-     * @param model The {@link MobModel} of the {@link PhantazmMob} to spawn
+     * @param point    The {@link Point} to spawn the {@link PhantazmMob} at
+     * @param model    The {@link MobModel} of the {@link PhantazmMob} to spawn
      * @return A new {@link PhantazmMob}
      */
     @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Point point, @NotNull MobModel model);

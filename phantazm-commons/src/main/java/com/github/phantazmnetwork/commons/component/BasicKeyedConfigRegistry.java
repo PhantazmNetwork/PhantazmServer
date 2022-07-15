@@ -19,12 +19,18 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
         this.processors = new HashMap<>();
     }
 
+    private static void check(KeyedConfigProcessor<?> obj, Key key) throws ConfigProcessException {
+        if (obj == null) {
+            throw new ConfigProcessException("No processor found for key " + key);
+        }
+    }
+
     @Override
     public void registerProcessor(@NotNull Key key, @NotNull KeyedConfigProcessor<? extends Keyed> processor) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(processor, "processor");
 
-        if(processors.putIfAbsent(key, processor) != null) {
+        if (processors.putIfAbsent(key, processor) != null) {
             throw new IllegalArgumentException("Processor for for key " + key + " was already registered");
         }
     }
@@ -37,8 +43,8 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
 
     @Override
     public @NotNull Keyed deserialize(@NotNull ConfigNode node) throws ConfigProcessException {
-        Key key = AdventureConfigProcessors.key().dataFromElement(node.getElementOrThrow(KeyedConfigProcessor
-                .SERIAL_KEY_NAME));
+        Key key = AdventureConfigProcessors.key().dataFromElement(
+                node.getElementOrThrow(KeyedConfigProcessor.SERIAL_KEY_NAME));
         KeyedConfigProcessor<? extends Keyed> processor = processors.get(key);
         check(processor, key);
 
@@ -50,20 +56,14 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
         Key key = data.key();
 
         //noinspection unchecked
-        KeyedConfigProcessor<Keyed> processor = (KeyedConfigProcessor<Keyed>) processors.get(key);
+        KeyedConfigProcessor<Keyed> processor = (KeyedConfigProcessor<Keyed>)processors.get(key);
         check(processor, key);
 
         ConfigElement element = processor.elementFromData(data);
-        if(!element.isNode()) {
+        if (!element.isNode()) {
             throw new ConfigProcessException("Element must be a node");
         }
 
         return element.asNode();
-    }
-
-    private static void check(KeyedConfigProcessor<?> obj, Key key) throws ConfigProcessException {
-        if(obj == null) {
-            throw new ConfigProcessException("No processor found for key " + key);
-        }
     }
 }

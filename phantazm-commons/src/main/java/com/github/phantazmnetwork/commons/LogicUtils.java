@@ -17,16 +17,17 @@ public final class LogicUtils {
     /**
      * If the input object {@code in} is null, returns null. Otherwise, calls the mapping function with {@code in} and
      * returns the result of that function.
-     * @param in the input object
+     *
+     * @param in     the input object
      * @param mapper the mapping function
-     * @return null if in is null, or the result of calling the specified mapping function
-     * @param <TIn> the input type
+     * @param <TIn>  the input type
      * @param <TOut> the output type
+     * @return null if in is null, or the result of calling the specified mapping function
      */
     public static <TIn, TOut> @Nullable TOut nullCoalesce(@Nullable TIn in,
                                                           @NotNull Function<? super TIn, ? extends TOut> mapper) {
         Objects.requireNonNull(mapper, "mapper");
-        if(in == null) {
+        if (in == null) {
             return null;
         }
 

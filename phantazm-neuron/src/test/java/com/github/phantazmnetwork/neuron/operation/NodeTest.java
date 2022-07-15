@@ -11,7 +11,7 @@ class NodeTest {
         Node[] array = new Node[size];
 
         Node prev = null;
-        for(int i = size - 1; i >= 0; i--) {
+        for (int i = size - 1; i >= 0; i--) {
             array[i] = prev = new Node(Vec3I.of(i, i, i), i, i, prev);
         }
 
@@ -39,7 +39,7 @@ class NodeTest {
         Node[] nodes = makeLinkedArray(10);
 
         int i = 0;
-        for(Node node : nodes[0]) {
+        for (Node node : nodes[0]) {
             assertSame(nodes[i++], node);
         }
 
@@ -59,7 +59,7 @@ class NodeTest {
 
         Node inverted = nodes[0].reverse();
         int i = 0;
-        for(Node node : inverted) {
+        for (Node node : inverted) {
             assertEquals(nodes[nodes.length - (++i)], node);
         }
 

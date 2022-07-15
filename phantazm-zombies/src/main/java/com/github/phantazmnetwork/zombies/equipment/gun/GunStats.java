@@ -14,19 +14,16 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A gun's generic stats. These stats only pertain to shooting, not aspects such as damage or knockback.
  * These are handled by individual {@link ShotHandler}s.
- * @param shootSpeed The gun's shoot speed
- * @param reloadSpeed The gun's reload speed
- * @param maxAmmo The gun's max ammo
- * @param maxClip The gun's max clip
- * @param shots The gun's shots per clip
+ *
+ * @param shootSpeed   The gun's shoot speed
+ * @param reloadSpeed  The gun's reload speed
+ * @param maxAmmo      The gun's max ammo
+ * @param maxClip      The gun's max clip
+ * @param shots        The gun's shots per clip
  * @param shotInterval The interval between gun fire
  */
-public record GunStats(long shootSpeed,
-                       long reloadSpeed,
-                       int maxAmmo,
-                       int maxClip,
-                       int shots,
-                       long shotInterval) implements Keyed {
+public record GunStats(long shootSpeed, long reloadSpeed, int maxAmmo, int maxClip, int shots, long shotInterval)
+        implements Keyed {
 
     /**
      * The serial {@link Key} for {@link GunStats}.
@@ -35,6 +32,7 @@ public record GunStats(long shootSpeed,
 
     /**
      * Creates a {@link ConfigProcessor} for {@link GunStats}.
+     *
      * @return A {@link ConfigProcessor} for {@link GunStats}
      */
     public static @NotNull ConfigProcessor<GunStats> processor() {

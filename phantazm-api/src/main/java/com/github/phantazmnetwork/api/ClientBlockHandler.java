@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.api;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
-import net.minestom.server.instance.Instance;
 
 /**
  * <p>Allows for "client blocks". These are blocks that exist purely on the client, they do not exist server-side. If a
@@ -21,16 +21,18 @@ import net.minestom.server.instance.Instance;
 public interface ClientBlockHandler {
     /**
      * Sets or updates a client-only block at the given location.
+     *
      * @param type the kind of block to set
-     * @param x the x-coordinate
-     * @param y the y-coordinate
-     * @param z the z-coordinate
+     * @param x    the x-coordinate
+     * @param y    the y-coordinate
+     * @param z    the z-coordinate
      */
     void setClientBlock(@NotNull Block type, int x, int y, int z);
 
     /**
      * Convenience overload for {@link ClientBlockHandler#setClientBlock(Block, int, int, int)}.
-     * @param type the kind of block to set
+     *
+     * @param type          the kind of block to set
      * @param blockLocation the block location
      */
     default void setClientBlock(@NotNull Block type, @NotNull Vec3I blockLocation) {
@@ -39,6 +41,7 @@ public interface ClientBlockHandler {
 
     /**
      * Removes a client-only block, if it exists at the given location.
+     *
      * @param x the x-coordinate
      * @param y the y-coordinate
      * @param z the z-coordinate
@@ -47,6 +50,7 @@ public interface ClientBlockHandler {
 
     /**
      * Convenience overload for {@link ClientBlockHandler#removeClientBlock(int, int, int)}.
+     *
      * @param blockLocation the block location
      */
     default void removeClientBlock(@NotNull Vec3I blockLocation) {

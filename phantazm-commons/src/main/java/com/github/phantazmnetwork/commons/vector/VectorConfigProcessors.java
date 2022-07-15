@@ -88,6 +88,7 @@ public final class VectorConfigProcessors {
 
     /**
      * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Vec3I} instances.
+     *
      * @return the ConfigProcessor used to serialize/deserialize Vec3I instances
      */
     public static @NotNull ConfigProcessor<Vec3I> vec3I() {
@@ -96,6 +97,7 @@ public final class VectorConfigProcessors {
 
     /**
      * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Vec3D} instances.
+     *
      * @return the ConfigProcessor used to serialize/deserialize Vec3D instances
      */
     public static @NotNull ConfigProcessor<Vec3D> vec3D() {
@@ -104,6 +106,7 @@ public final class VectorConfigProcessors {
 
     /**
      * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Vec3F} instances.
+     *
      * @return the ConfigProcessor used to serialize/deserialize Vec3F instances
      */
     public static @NotNull ConfigProcessor<Vec3F> vec3F() {
@@ -112,7 +115,10 @@ public final class VectorConfigProcessors {
 
     /**
      * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Region3I} instances.
+     *
      * @return the ConfigProcessor used to serialize/deserialize Region3I instances
      */
-    public static @NotNull ConfigProcessor<Region3I> region3I() { return region3I; }
+    public static @NotNull ConfigProcessor<Region3I> region3I() {
+        return region3I;
+    }
 }

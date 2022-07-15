@@ -20,33 +20,20 @@ import java.util.Objects;
  */
 public class StaticActionBarChooser implements ReloadActionBarChooser {
 
+    private final Data data;
+
     /**
-     * Data for a {@link StaticActionBarChooser}.
-     * @param message The message to send
+     * Creates a {@link StaticActionBarChooser}.
+     *
+     * @param data The {@link StaticActionBarChooser}'s {@link Data}
      */
-    public record Data(@NotNull Component message) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.static");
-
-        /**
-         * Creates a {@link Data}.
-         * @param message The message to send
-         */
-        public Data {
-            Objects.requireNonNull(message, "message");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public StaticActionBarChooser(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -68,19 +55,36 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a {@link StaticActionBarChooser}.
-     * @param data The {@link StaticActionBarChooser}'s {@link Data}
-     */
-    public StaticActionBarChooser(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
     public @NotNull Component choose(@NotNull GunState state, float progress) {
         return data.message();
+    }
+
+    /**
+     * Data for a {@link StaticActionBarChooser}.
+     *
+     * @param message The message to send
+     */
+    public record Data(@NotNull Component message) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.static");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param message The message to send
+         */
+        public Data {
+            Objects.requireNonNull(message, "message");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

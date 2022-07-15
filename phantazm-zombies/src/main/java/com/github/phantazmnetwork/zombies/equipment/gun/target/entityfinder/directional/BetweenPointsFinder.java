@@ -20,24 +20,8 @@ import java.util.Collection;
 public class BetweenPointsFinder implements DirectionalEntityFinder {
 
     /**
-     * Data for a {@link BetweenPointsFinder}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY
-                = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.between_points");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-    }
-
-    /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -52,6 +36,23 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
         instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, entities::add);
 
         return entities;
+    }
+
+    /**
+     * Data for a {@link BetweenPointsFinder}.
+     */
+    public record Data() implements Keyed {
+
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
+        public static final Key SERIAL_KEY =
+                Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.between_points");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

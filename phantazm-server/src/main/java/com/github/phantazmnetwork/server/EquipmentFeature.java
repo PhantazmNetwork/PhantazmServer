@@ -16,8 +16,8 @@ import com.github.phantazmnetwork.zombies.equipment.gun.GunLevel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunModel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.PlayerAudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
+import com.github.phantazmnetwork.zombies.equipment.gun.audience.PlayerAudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunData;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelData;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunLevelDataConfigProcessor;
@@ -94,8 +94,9 @@ final class EquipmentFeature {
 
     /**
      * Initialize equipment features.
+     *
      * @param equipmentPath The {@link Path} to the equipment folder
-     * @param codec A {@link ConfigCodec} for serialization
+     * @param codec         A {@link ConfigCodec} for serialization
      */
     static void initialize(@NotNull Path equipmentPath, @NotNull ConfigCodec codec) {
         String ending;
@@ -110,7 +111,8 @@ final class EquipmentFeature {
         Path guns = equipmentPath.resolve("guns");
         try {
             Files.createDirectories(guns);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             LOGGER.warn("Failed to create guns directory.", e);
             return;
         }
@@ -121,14 +123,14 @@ final class EquipmentFeature {
 
         gunLevelMap = new HashMap<>();
         try (Stream<Path> gunDirectories = Files.list(guns)) {
-            for (Path gunDirectory : (Iterable<? extends Path>) gunDirectories::iterator) {
+            for (Path gunDirectory : (Iterable<? extends Path>)gunDirectories::iterator) {
                 if (!Files.isDirectory(gunDirectory)) {
                     continue;
                 }
 
                 String infoFileName = codec.getPreferredExtensions().isEmpty()
-                        ? "info"
-                        : "info." + codec.getPreferredExtensions().get(0);
+                                      ? "info"
+                                      : "info." + codec.getPreferredExtensions().get(0);
                 Path infoPath = gunDirectory.resolve(infoFileName);
                 if (!Files.isRegularFile(infoPath)) {
                     LOGGER.warn("No gun info file at {}.", infoPath);
@@ -138,7 +140,8 @@ final class EquipmentFeature {
                 GunData gunData;
                 try {
                     gunData = ConfigBridges.read(infoPath, codec, gunDataProcessor);
-                } catch (ConfigProcessException e) {
+                }
+                catch (ConfigProcessException e) {
                     LOGGER.warn("Failed to read gun info file at {}.", infoPath, e);
                     continue;
                 }
@@ -148,7 +151,7 @@ final class EquipmentFeature {
                 List<ComplexData> levelData = new ArrayList<>();
                 Path levelsPath = gunDirectory.resolve("levels");
                 try (Stream<Path> levelDirectories = Files.list(levelsPath)) {
-                    for (Path levelFile : (Iterable<? extends Path>) levelDirectories::iterator) {
+                    for (Path levelFile : (Iterable<? extends Path>)levelDirectories::iterator) {
                         if (!(Files.isRegularFile(levelFile) && matcher.matches(levelFile))) {
                             continue;
                         }
@@ -158,8 +161,8 @@ final class EquipmentFeature {
 
                             Set<Key> required = new HashSet<>();
                             for (Keyed object : data.objects().values()) {
-                                BiConsumer<? extends Keyed, Collection<Key>> dependencyAdder
-                                        = dependencyAdders.get(object.key());
+                                BiConsumer<? extends Keyed, Collection<Key>> dependencyAdder =
+                                        dependencyAdders.get(object.key());
                                 if (dependencyAdder != null) {
                                     invokeDependencyAdder(dependencyAdder, object, required);
                                 }
@@ -179,11 +182,13 @@ final class EquipmentFeature {
 
                             foundLevelKeys.add(data.mainKey());
                             requiredLevelKeys.addAll(gunLevelData.upgrades());
-                        } catch (IOException e) {
+                        }
+                        catch (IOException e) {
                             LOGGER.warn("Failed to read level file at {}.", levelFile, e);
                         }
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     LOGGER.warn("Failed to read levels directory at {}.", levelsPath, e);
                     continue;
                 }
@@ -207,6 +212,7 @@ final class EquipmentFeature {
     /**
      * Create a {@link ConfigProcessor} for gun level data.
      * This takes the form of {@link ComplexData} in order to instantiate {@link GunLevel}s.
+     *
      * @return A {@link ConfigProcessor} for gun level data
      */
     private static @NotNull ConfigProcessor<ComplexData> createGunLevelProcessor() {
@@ -227,7 +233,9 @@ final class EquipmentFeature {
         gunProcessors.put(RayTraceBlockIteration.Data.SERIAL_KEY, RayTraceBlockIteration.processor());
         gunProcessors.put(WallshotBlockIteration.Data.SERIAL_KEY, WallshotBlockIteration.processor());
         gunProcessors.put(HitScanFirer.Data.SERIAL_KEY, HitScanFirer.processor());
-        gunProcessors.put(PhantazmMobProjectileCollisionFilter.Data.SERIAL_KEY, PhantazmMobProjectileCollisionFilter.processor());
+        gunProcessors.put(PhantazmMobProjectileCollisionFilter.Data.SERIAL_KEY,
+                          PhantazmMobProjectileCollisionFilter.processor()
+        );
         gunProcessors.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.processor());
         gunProcessors.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.processor());
         gunProcessors.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.processor());
@@ -238,8 +246,7 @@ final class EquipmentFeature {
         gunProcessors.put(IgniteShotHandler.Data.SERIAL_KEY, IgniteShotHandler.processor());
         gunProcessors.put(KnockbackShotHandler.Data.SERIAL_KEY, KnockbackShotHandler.processor());
         gunProcessors.put(ParticleTrailShotHandler.Data.SERIAL_KEY, ParticleTrailShotHandler.processor(
-                ParticleWrapper.processor(ParticleData.processor(ItemStackConfigProcessors.snbt()))
-        ));
+                ParticleWrapper.processor(ParticleData.processor(ItemStackConfigProcessors.snbt()))));
         gunProcessors.put(PotionShotHandler.Data.SERIAL_KEY, PotionShotHandler.processor());
         gunProcessors.put(SoundShotHandler.Data.SERIAL_KEY, SoundShotHandler.processor());
         gunProcessors.put(StateShootTester.Data.SERIAL_KEY, StateShootTester.processor());
@@ -262,6 +269,7 @@ final class EquipmentFeature {
      * Creates a {@link Map} of dependency adders.
      * A dependency adder adds its {@link Key} dependencies to a {@link Collection} of required dependencies.
      * This allows us to validate whether all of our dependencies are present while reading config.
+     *
      * @return A {@link Map} of dependency adders
      */
     private static @NotNull Map<Key, BiConsumer<? extends Keyed, Collection<Key>>> createDependencyAdders() {
@@ -288,19 +296,20 @@ final class EquipmentFeature {
     }
 
     @SuppressWarnings("unchecked")
-    private static <TObject extends Keyed> void invokeDependencyAdder(@NotNull BiConsumer<TObject, Collection<Key>> dependencyAdder,
-                                                                      @NotNull Keyed object,
-                                                                      @NotNull Collection<Key> dependencies) {
-        dependencyAdder.accept((TObject) object, dependencies);
+    private static <TObject extends Keyed> void invokeDependencyAdder(
+            @NotNull BiConsumer<TObject, Collection<Key>> dependencyAdder, @NotNull Keyed object,
+            @NotNull Collection<Key> dependencies) {
+        dependencyAdder.accept((TObject)object, dependencies);
     }
 
     /**
      * Creates a {@link Gun}.
-     * @param key The {@link Key} of the gun type
-     * @param node The {@link EventNode} to register events to
-     * @param store A {@link MobStore} for registered {@link PhantazmMob}s
+     *
+     * @param key        The {@link Key} of the gun type
+     * @param node       The {@link EventNode} to register events to
+     * @param store      A {@link MobStore} for registered {@link PhantazmMob}s
      * @param playerView A {@link PlayerView} for the player that is using the gun
-     * @param random A {@link Random} for random number generation
+     * @param random     A {@link Random} for random number generation
      * @return A new {@link Gun}
      */
     public static @NotNull Gun createGun(@NotNull Key key, @NotNull EventNode<Event> node, @NotNull MobStore store,
@@ -324,14 +333,15 @@ final class EquipmentFeature {
             Collection<GunStackMapper> gunStackMappers = provider.getDependencies(data.gunStackMappers());
 
             return new GunLevel(data.upgrades(), data.stack(), stats, shootTester, reloadTester, firer, activateEffects,
-                    shootEffects, reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
+                                shootEffects, reloadEffects, tickEffects, noAmmoEffects, gunStackMappers
+            );
         };
-        Factory<EntityInstanceAudienceProvider.Data, EntityInstanceAudienceProvider> entityInstanceAudienceProvider
-                = (provider, data) -> new EntityInstanceAudienceProvider(playerView::getPlayer);
-        Factory<PlayerAudienceProvider.Data, PlayerAudienceProvider> playerAudienceProvider
-                = (provider, data) -> new PlayerAudienceProvider(playerView);
-        Factory<AmmoLevelEffect.Data, AmmoLevelEffect> ammoLevelEffect
-                = (provider, data) -> new AmmoLevelEffect(playerView);
+        Factory<EntityInstanceAudienceProvider.Data, EntityInstanceAudienceProvider> entityInstanceAudienceProvider =
+                (provider, data) -> new EntityInstanceAudienceProvider(playerView::getPlayer);
+        Factory<PlayerAudienceProvider.Data, PlayerAudienceProvider> playerAudienceProvider =
+                (provider, data) -> new PlayerAudienceProvider(playerView);
+        Factory<AmmoLevelEffect.Data, AmmoLevelEffect> ammoLevelEffect =
+                (provider, data) -> new AmmoLevelEffect(playerView);
         Factory<PlaySoundEffect.Data, PlaySoundEffect> playSoundEffect = (provider, data) -> {
             AudienceProvider audienceProvider = provider.getDependency(data.audienceProviderKey());
             return new PlaySoundEffect(data, audienceProvider);
@@ -342,28 +352,29 @@ final class EquipmentFeature {
             ReloadActionBarChooser chooser = provider.getDependency(data.reloadActionBarChooserKey());
             return new ReloadActionBarEffect(stats, playerView::getPlayer, reloadTester, chooser);
         };
-        Factory<SendMessageEffect.Data, SendMessageEffect> sendMessageEffect
-                = (provider, data) -> new SendMessageEffect(data, playerView::getPlayer);
+        Factory<SendMessageEffect.Data, SendMessageEffect> sendMessageEffect =
+                (provider, data) -> new SendMessageEffect(data, playerView::getPlayer);
         Factory<ShootExpEffect.Data, ShootExpEffect> shootExpEffect = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             return new ShootExpEffect(playerView, stats);
         };
-        Factory<GradientActionBarChooser.Data, GradientActionBarChooser> gradientActionBarChooser
-                = (provider, data) -> new GradientActionBarChooser(data);
-        Factory<StaticActionBarChooser.Data, StaticActionBarChooser> staticActionBarChooser
-                = (provider, data) -> new StaticActionBarChooser(data);
+        Factory<GradientActionBarChooser.Data, GradientActionBarChooser> gradientActionBarChooser =
+                (provider, data) -> new GradientActionBarChooser(data);
+        Factory<StaticActionBarChooser.Data, StaticActionBarChooser> staticActionBarChooser =
+                (provider, data) -> new StaticActionBarChooser(data);
         Factory<StateReloadTester.Data, StateReloadTester> stateReloadTester = (provider, data) -> {
             GunStats stats = provider.getDependency(data.statsKey());
             return new StateReloadTester(stats);
         };
-        Factory<BasicShotEndpointSelector.Data, BasicShotEndpointSelector> basicShotEndpointSelector = (provider, data) -> {
-            BlockIteration blockIteration = provider.getDependency(data.blockIterationKey());
-            return new BasicShotEndpointSelector(data, playerView::getPlayer, blockIteration);
-        };
-        Factory<RayTraceBlockIteration.Data, RayTraceBlockIteration> rayTraceBlockIteration
-                = (provider, data) -> new RayTraceBlockIteration();
-        Factory<WallshotBlockIteration.Data, WallshotBlockIteration> wallshotBlockIteration
-                = (provider, data) -> new WallshotBlockIteration();
+        Factory<BasicShotEndpointSelector.Data, BasicShotEndpointSelector> basicShotEndpointSelector =
+                (provider, data) -> {
+                    BlockIteration blockIteration = provider.getDependency(data.blockIterationKey());
+                    return new BasicShotEndpointSelector(data, playerView::getPlayer, blockIteration);
+                };
+        Factory<RayTraceBlockIteration.Data, RayTraceBlockIteration> rayTraceBlockIteration =
+                (provider, data) -> new RayTraceBlockIteration();
+        Factory<WallshotBlockIteration.Data, WallshotBlockIteration> wallshotBlockIteration =
+                (provider, data) -> new WallshotBlockIteration();
         Factory<HitScanFirer.Data, HitScanFirer> hitScanFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
@@ -371,16 +382,18 @@ final class EquipmentFeature {
 
             return new HitScanFirer(playerView::getPlayer, endSelector, targetFinder, shotHandlers);
         };
-        Factory<PhantazmMobProjectileCollisionFilter.Data, PhantazmMobProjectileCollisionFilter> phantazmProjectileCollisionFilter
-                = (provider, data) -> new PhantazmMobProjectileCollisionFilter(store);
+        Factory<PhantazmMobProjectileCollisionFilter.Data, PhantazmMobProjectileCollisionFilter>
+                phantazmProjectileCollisionFilter = (provider, data) -> new PhantazmMobProjectileCollisionFilter(store);
         Factory<ProjectileFirer.Data, ProjectileFirer> projectileFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
             ProjectileCollisionFilter collisionFilter = provider.getDependency(data.collisionFilterKey());
             Collection<ShotHandler> shotHandlers = provider.getDependencies(data.shotHandlerKeys());
 
-            ProjectileFirer firer = new ProjectileFirer(data, playerView::getPlayer, playerView.getUUID(), endSelector,
-                    targetFinder, collisionFilter, shotHandlers);
+            ProjectileFirer firer =
+                    new ProjectileFirer(data, playerView::getPlayer, playerView.getUUID(), endSelector, targetFinder,
+                                        collisionFilter, shotHandlers
+                    );
             node.addListener(ProjectileCollideWithBlockEvent.class, firer::onProjectileCollision);
             node.addListener(ProjectileCollideWithEntityEvent.class, firer::onProjectileCollision);
 
@@ -396,26 +409,25 @@ final class EquipmentFeature {
 
             return new ChainShotHandler(data, finder, firer);
         };
-        Factory<DamageShotHandler.Data, DamageShotHandler> damageShotHandler
-                = (provider, data) -> new DamageShotHandler(data);
-        Factory<ExplosionShotHandler.Data, ExplosionShotHandler> explosionShotHandler
-                = (provider, data) -> new ExplosionShotHandler(data);
+        Factory<DamageShotHandler.Data, DamageShotHandler> damageShotHandler =
+                (provider, data) -> new DamageShotHandler(data);
+        Factory<ExplosionShotHandler.Data, ExplosionShotHandler> explosionShotHandler =
+                (provider, data) -> new ExplosionShotHandler(data);
         Factory<FeedbackShotHandler.Data, FeedbackShotHandler> feedbackShotHandler = (provider, data) -> {
             AudienceProvider audienceProvider = provider.getDependency(data.audienceProviderKey());
             return new FeedbackShotHandler(data, audienceProvider);
         };
-        Factory<GuardianBeamShotHandler.Data, GuardianBeamShotHandler> guardianBeamShotHandler
-                = (provider, data) -> new GuardianBeamShotHandler(data);
-        Factory<IgniteShotHandler.Data, IgniteShotHandler> igniteShotHandler
-                = (provider, data) -> new IgniteShotHandler(data);
-        Factory<KnockbackShotHandler.Data, KnockbackShotHandler> knockbackShotHandler
-                = (provider, data) -> new KnockbackShotHandler(data);
-        Factory<ParticleTrailShotHandler.Data, ParticleTrailShotHandler> particleTrailShotHandler
-                = (provider, data) -> new ParticleTrailShotHandler(data);
-        Factory<PotionShotHandler.Data, PotionShotHandler> potionShotHandler
-                = (provider, data) -> new PotionShotHandler(data);
-        Factory<SoundShotHandler.Data, SoundShotHandler> soundShotHandler
-                = (provider, data) -> {
+        Factory<GuardianBeamShotHandler.Data, GuardianBeamShotHandler> guardianBeamShotHandler =
+                (provider, data) -> new GuardianBeamShotHandler(data);
+        Factory<IgniteShotHandler.Data, IgniteShotHandler> igniteShotHandler =
+                (provider, data) -> new IgniteShotHandler(data);
+        Factory<KnockbackShotHandler.Data, KnockbackShotHandler> knockbackShotHandler =
+                (provider, data) -> new KnockbackShotHandler(data);
+        Factory<ParticleTrailShotHandler.Data, ParticleTrailShotHandler> particleTrailShotHandler =
+                (provider, data) -> new ParticleTrailShotHandler(data);
+        Factory<PotionShotHandler.Data, PotionShotHandler> potionShotHandler =
+                (provider, data) -> new PotionShotHandler(data);
+        Factory<SoundShotHandler.Data, SoundShotHandler> soundShotHandler = (provider, data) -> {
             AudienceProvider audienceProvider = provider.getDependency(data.audienceProviderKey());
             return new SoundShotHandler(data, audienceProvider);
         };
@@ -425,20 +437,20 @@ final class EquipmentFeature {
             return new StateShootTester(stats, reloadTester);
         };
         Factory<AroundEndFinder.Data, AroundEndFinder> aroundEndFinder = (provider, data) -> new AroundEndFinder(data);
-        Factory<BetweenPointsFinder.Data, BetweenPointsFinder> betweenPointsFinder
-                = (provider, data) -> new BetweenPointsFinder();
-        Factory<NearbyEntityFinder.Data, NearbyEntityFinder> nearbyEntityFinder
-                = (provider, data) -> new NearbyEntityFinder(data);
-        Factory<PhantazmMobTargetTester.Data, PhantazmMobTargetTester> phantazmTargetTester
-                = (provider, data) -> new PhantazmMobTargetTester(data, store);
-        Factory<EyeHeightHeadshotTester.Data, EyeHeightHeadshotTester> eyeHeightHeadshotTester
-                = (provider, data) -> new EyeHeightHeadshotTester();
-        Factory<StaticHeadshotTester.Data, StaticHeadshotTester> staticHeadshotTester
-                = (provider, data) -> new StaticHeadshotTester(data);
-        Factory<RayTraceIntersectionFinder.Data, RayTraceIntersectionFinder> rayTraceTargetTester
-                = (provider, data) -> new RayTraceIntersectionFinder();
-        Factory<StaticIntersectionFinder.Data, StaticIntersectionFinder> staticTargetTester
-                = (provider, data) -> new StaticIntersectionFinder();
+        Factory<BetweenPointsFinder.Data, BetweenPointsFinder> betweenPointsFinder =
+                (provider, data) -> new BetweenPointsFinder();
+        Factory<NearbyEntityFinder.Data, NearbyEntityFinder> nearbyEntityFinder =
+                (provider, data) -> new NearbyEntityFinder(data);
+        Factory<PhantazmMobTargetTester.Data, PhantazmMobTargetTester> phantazmTargetTester =
+                (provider, data) -> new PhantazmMobTargetTester(data, store);
+        Factory<EyeHeightHeadshotTester.Data, EyeHeightHeadshotTester> eyeHeightHeadshotTester =
+                (provider, data) -> new EyeHeightHeadshotTester();
+        Factory<StaticHeadshotTester.Data, StaticHeadshotTester> staticHeadshotTester =
+                (provider, data) -> new StaticHeadshotTester(data);
+        Factory<RayTraceIntersectionFinder.Data, RayTraceIntersectionFinder> rayTraceTargetTester =
+                (provider, data) -> new RayTraceIntersectionFinder();
+        Factory<StaticIntersectionFinder.Data, StaticIntersectionFinder> staticTargetTester =
+                (provider, data) -> new StaticIntersectionFinder();
         Factory<BasicTargetFinder.Data, BasicTargetFinder> basicTargetFinder = (provider, data) -> {
             DirectionalEntityFinder finder = provider.getDependency(data.entityFinderKey());
             TargetTester targetTester = provider.getDependency(data.targetTesterKey());
@@ -447,8 +459,8 @@ final class EquipmentFeature {
             TargetLimiter targetLimiter = provider.getDependency(data.targetLimiterKey());
             return new BasicTargetFinder(finder, targetTester, intersectionFinder, headshotTester, targetLimiter);
         };
-        Factory<DistanceTargetLimiter.Data, DistanceTargetLimiter> distanceTargetLimiter
-                = (provider, data) -> new DistanceTargetLimiter(data);
+        Factory<DistanceTargetLimiter.Data, DistanceTargetLimiter> distanceTargetLimiter =
+                (provider, data) -> new DistanceTargetLimiter(data);
         Factory<ClipStackMapper.Data, ClipStackMapper> clipStackMapper = (provider, data) -> {
             ReloadTester reloadTester = provider.getDependency(data.reloadTesterKey());
             return new ClipStackMapper(reloadTester);

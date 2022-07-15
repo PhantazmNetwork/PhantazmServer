@@ -22,39 +22,20 @@ import java.util.Objects;
  */
 public class GradientActionBarChooser implements ReloadActionBarChooser {
 
+    private final Data data;
+
     /**
-     * Data for a {@link GradientActionBarChooser}.
-     * @param message The message to send
-     * @param from The starting color of the gradient
-     * @param to The ending color of the gradient
+     * Creates a new {@link GradientActionBarChooser} with the given {@link Data}.
+     *
+     * @param data The {@link Data} to use
      */
-    public record Data(@NotNull Component message, @NotNull RGBLike from, @NotNull RGBLike to) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.gradient");
-
-        /**
-         * Creates a {@link Data}.
-         * @param message The message to send
-         * @param from The starting color of the gradient
-         * @param to The ending color of the gradient
-         */
-        public Data {
-            Objects.requireNonNull(message, "message");
-            Objects.requireNonNull(from, "from");
-            Objects.requireNonNull(to, "to");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public GradientActionBarChooser(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -84,19 +65,42 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a new {@link GradientActionBarChooser} with the given {@link Data}.
-     * @param data The {@link Data} to use
-     */
-    public GradientActionBarChooser(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
     public @NotNull Component choose(@NotNull GunState state, float progress) {
         return data.message().color(TextColor.lerp(progress, data.from(), data.to()));
+    }
+
+    /**
+     * Data for a {@link GradientActionBarChooser}.
+     *
+     * @param message The message to send
+     * @param from    The starting color of the gradient
+     * @param to      The ending color of the gradient
+     */
+    public record Data(@NotNull Component message, @NotNull RGBLike from, @NotNull RGBLike to) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.gradient");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param message The message to send
+         * @param from    The starting color of the gradient
+         * @param to      The ending color of the gradient
+         */
+        public Data {
+            Objects.requireNonNull(message, "message");
+            Objects.requireNonNull(from, "from");
+            Objects.requireNonNull(to, "to");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

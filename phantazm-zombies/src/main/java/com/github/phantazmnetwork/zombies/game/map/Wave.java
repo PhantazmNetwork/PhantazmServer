@@ -15,7 +15,7 @@ public class Wave extends MapObject<WaveInfo> {
     public Wave(@NotNull WaveInfo waveInfo) {
         super(waveInfo);
         int count = 0;
-        for(SpawnInfo spawnInfo : waveInfo.spawns()) {
+        for (SpawnInfo spawnInfo : waveInfo.spawns()) {
             count += spawnInfo.amount();
         }
 
@@ -24,6 +24,7 @@ public class Wave extends MapObject<WaveInfo> {
 
     /**
      * Gets the total number of mobs that should spawn this wave.
+     *
      * @return the total number of mobs that should spawn this wave
      */
     public int mobCount() {

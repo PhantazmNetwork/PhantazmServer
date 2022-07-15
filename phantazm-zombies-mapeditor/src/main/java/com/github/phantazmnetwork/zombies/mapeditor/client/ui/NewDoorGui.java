@@ -19,6 +19,7 @@ import java.util.Objects;
 public class NewDoorGui extends NamedObjectGui {
     /**
      * Constructs a new instance of this GUI. The user may create a new door, or add regions to an existing door.
+     *
      * @param session the current {@link EditorSession}
      */
     @SuppressWarnings("PatternValidation")
@@ -31,13 +32,13 @@ public class NewDoorGui extends NamedObjectGui {
         Region3I selected = session.getSelection();
         buttonAdd.setOnClick(() -> {
             String value = textFieldName.getText();
-            if(value.isEmpty()) {
+            if (value.isEmpty()) {
                 return;
             }
 
             Key doorKey = Key.key(Namespaces.PHANTAZM, value);
-            for(DoorInfo doorInfo : currentMap.doors()) {
-                if(doorInfo.id().equals(doorKey)) {
+            for (DoorInfo doorInfo : currentMap.doors()) {
+                if (doorInfo.id().equals(doorKey)) {
                     doorInfo.regions().add(selected);
                     session.refreshDoors();
                     session.setLastDoor(doorInfo);

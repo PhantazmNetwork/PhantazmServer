@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 public interface PlayerViewProvider {
     /**
      * Returns a {@link PlayerView} instance for the specified UUID.
+     *
      * @param uuid the UUID to create the view with
      * @return an PlayerView instance representing a player with the given UUID
      */
@@ -45,6 +46,7 @@ public interface PlayerViewProvider {
      * Optionally returns a {@link PlayerView} instance with the given name, if they exist and are online. However, note
      * that it is not guaranteed that the player represented by the PlayerView will still be online when this method
      * returns.
+     *
      * @param name the name of the player
      * @return an Optional that will only contain a corresponding PlayerView if a player with the specified name exists
      * and is online
@@ -54,6 +56,7 @@ public interface PlayerViewProvider {
 
     /**
      * Creates a {@link PlayerView} from an already-existing {@link Player}.
+     *
      * @param player the player to create a PlayerView instance from
      * @return a PlayerView instance for the given Player
      */

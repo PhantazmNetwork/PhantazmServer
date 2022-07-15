@@ -9,6 +9,7 @@ public interface Equipment {
 
     /**
      * Invoked when a {@link Player} changes their slot to or from the one containing this {@link Equipment}.
+     *
      * @param selected Whether the {@link Player} is now holding this {@link Equipment}
      */
     void setSelected(boolean selected);

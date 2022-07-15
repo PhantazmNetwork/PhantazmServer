@@ -17,26 +17,30 @@ import org.jetbrains.annotations.NotNull;
 public interface Controller {
     /**
      * The current x-coordinate of the {@link Agent} controlled by this controller.
+     *
      * @return a {@code double} representing the precise x-coordinate
      */
     double getX();
 
     /**
      * The current y-coordinate of the {@link Agent} controlled by this controller.
+     *
      * @return a {@code double} representing the precise y-coordinate
      */
     double getY();
 
     /**
      * The current z-coordinate of the {@link Agent} controlled by this controller.
+     *
      * @return a {@code double} representing the precise z-coordinate
      */
     double getZ();
 
     /**
      * Called to advance Agents along a path. This is expected to be called every tick by a {@link Navigator}.
+     *
      * @param current the node the controller is currently in
-     * @param target the node the controller is attempting to move to
+     * @param target  the node the controller is attempting to move to
      */
     void advance(@NotNull Node current, @NotNull Node target);
 
@@ -44,6 +48,7 @@ public interface Controller {
      * Can be used to determine if this controller has caused its entity to undergo a multi-tick movement (and is thus
      * under "control" for this tick, and possibly more). Useful for navigators to determine when to perform certain
      * checks.
+     *
      * @return {@code true} if this controller is "controlling" this entity for this tick, {@code false} otherwise
      */
     boolean hasControl();

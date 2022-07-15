@@ -18,13 +18,14 @@ public record MapInfo(@NotNull MapSettingsInfo info,
                       @NotNull List<SpawnpointInfo> spawnpoints) {
     /**
      * Constructs a new instances of this record.
-     * @param info the info defining the general parameters for this map
-     * @param rooms this map's rooms
-     * @param doors this map's doors
-     * @param shops this map's shops
-     * @param windows this map's windows
-     * @param rounds this map's rounds
-     * @param spawnrules this map's spawnrules
+     *
+     * @param info        the info defining the general parameters for this map
+     * @param rooms       this map's rooms
+     * @param doors       this map's doors
+     * @param shops       this map's shops
+     * @param windows     this map's windows
+     * @param rounds      this map's rounds
+     * @param spawnrules  this map's spawnrules
      * @param spawnpoints this map's spawnpoints
      */
     public MapInfo {

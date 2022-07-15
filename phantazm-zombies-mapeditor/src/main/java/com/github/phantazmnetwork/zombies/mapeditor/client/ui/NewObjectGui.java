@@ -2,8 +2,8 @@ package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
+import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
@@ -25,6 +25,7 @@ import java.util.Objects;
 public class NewObjectGui extends SimplePanelGui {
     /**
      * Constructs a new instance of this GUI, which allows the user to pick a kind of object they'd like to create.
+     *
      * @param session the current {@link EditorSession}
      */
     public NewObjectGui(@NotNull EditorSession session) {
@@ -48,22 +49,23 @@ public class NewObjectGui extends SimplePanelGui {
         Vec3I origin = currentMap.info().origin();
         Region3I selected = session.getSelection();
 
-        newRoom.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(
-                new NewRoomGui(session))));
-        newDoor.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(
-                new NewDoorGui(session))));
+        newRoom.setOnClick(
+                () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewRoomGui(session))));
+        newDoor.setOnClick(
+                () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewDoorGui(session))));
         newWindow.setOnClick(() -> {
             PlayerEntity playerEntity = MinecraftClient.getInstance().player;
-            if(playerEntity == null) {
+            if (playerEntity == null) {
                 return;
             }
 
             List<String> blockData = new ArrayList<>(selected.volume());
-            for(Vec3I position : selected) {
+            for (Vec3I position : selected) {
                 //convert to world coordinate space, so we can grab the actual block
-                blockData.add(NbtHelper.fromBlockState(playerEntity.world.getBlockState(new BlockPos.Mutable(position
-                        .getX() + origin.getX(), position.getY() + origin.getY(), position.getZ() + origin
-                        .getZ()))).toString());
+                blockData.add(NbtHelper.fromBlockState(playerEntity.world.getBlockState(
+                        new BlockPos.Mutable(position.getX() + origin.getX(), position.getY() + origin.getY(),
+                                             position.getZ() + origin.getZ()
+                        ))).toString());
             }
 
             currentMap.windows().add(new WindowInfo(selected, blockData));
@@ -71,9 +73,9 @@ public class NewObjectGui extends SimplePanelGui {
             session.refreshWindows();
             ScreenUtils.closeCurrentScreen();
         });
-        newSpawnpoint.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(
-                new NewSpawnpointGui(session))));
-        newShop.setOnClick(() -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(
-                new NewShopGui(session))));
+        newSpawnpoint.setOnClick(
+                () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewSpawnpointGui(session))));
+        newShop.setOnClick(
+                () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewShopGui(session))));
     }
 }

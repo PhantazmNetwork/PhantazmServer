@@ -17,6 +17,7 @@ public class ContextualSpawner implements Spawner {
 
     /**
      * Creates a new ContextualSpawner that will use the given {@link ContextProvider} to build all entities.
+     *
      * @param contextProvider the ContextProvider which will be used to construct new entities
      */
     public ContextualSpawner(@NotNull ContextProvider contextProvider) {
@@ -25,7 +26,8 @@ public class ContextualSpawner implements Spawner {
 
     @Override
     public @NotNull NeuralEntity spawnEntity(@NotNull Instance instance, @NotNull Point point,
-                                             @NotNull MinestomDescriptor type, @NotNull Consumer<? super NeuralEntity> settings) {
+                                             @NotNull MinestomDescriptor type,
+                                             @NotNull Consumer<? super NeuralEntity> settings) {
         NeuralEntity entity = new NeuralEntity(type, UUID.randomUUID(), contextProvider);
         settings.accept(entity);
         entity.setInstance(instance, point);

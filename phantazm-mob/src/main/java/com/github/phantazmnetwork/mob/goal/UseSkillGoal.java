@@ -2,8 +2,8 @@ package com.github.phantazmnetwork.mob.goal;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.mob.skill.SkillInstance;
 import com.github.phantazmnetwork.mob.skill.Skill;
+import com.github.phantazmnetwork.mob.skill.SkillInstance;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +12,8 @@ import java.util.Objects;
 
 /**
  * A {@link Goal} that periodically uses a {@link Skill}.
- * @param skill The {@link Skill} to use
+ *
+ * @param skill  The {@link Skill} to use
  * @param period The period between uses
  */
 public record UseSkillGoal(@NotNull Skill skill, long period) implements Goal {
@@ -24,7 +25,8 @@ public record UseSkillGoal(@NotNull Skill skill, long period) implements Goal {
 
     /**
      * Creates a {@link UseSkillGoal}.
-     * @param skill The {@link Skill} to use
+     *
+     * @param skill  The {@link Skill} to use
      * @param period The period between uses
      */
     public UseSkillGoal {

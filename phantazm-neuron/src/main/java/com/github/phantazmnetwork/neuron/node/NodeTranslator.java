@@ -20,7 +20,8 @@ public interface NodeTranslator {
      * environmental factors. A typical use case would be "snapping" the vector pointing to the location of a new node
      * such that it is on top of a solid. If this movement attempt is not valid, this method will return the origin
      * vector.
-     * @param node the node to translate
+     *
+     * @param node   the node to translate
      * @param deltaX the x-component of the attempted movement vector
      * @param deltaY the y-component of the attempted movement vector
      * @param deltaZ the z-component of the attempted movement vector
@@ -31,6 +32,7 @@ public interface NodeTranslator {
     /**
      * Performs initialization tasks on this node. This may include setting arbitrary properties like offset height.
      * This should be called once per node.
+     *
      * @param node the node to initialize
      */
     void initializeNode(@NotNull Node node);

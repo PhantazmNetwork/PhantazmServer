@@ -23,13 +23,14 @@ public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData
 
     private static final ConfigProcessor<Set<Key>> KEY_SET_PROCESSOR = KEY_PROCESSOR.setProcessor();
 
-    private static final ConfigProcessor<Collection<Key>> KEY_COLLECTION_PROCESSOR
-            = KEY_PROCESSOR.collectionProcessor();
+    private static final ConfigProcessor<Collection<Key>> KEY_COLLECTION_PROCESSOR =
+            KEY_PROCESSOR.collectionProcessor();
 
     private final ConfigProcessor<ItemStack> stackProcessor;
 
     /**
      * Creates a {@link GunLevelDataConfigProcessor}.
+     *
      * @param stackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
      */
     public GunLevelDataConfigProcessor(@NotNull ConfigProcessor<ItemStack> stackProcessor) {
@@ -44,15 +45,22 @@ public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData
         Key shootTester = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("shootTester"));
         Key reloadTester = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("reloadTester"));
         Key firer = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("firer"));
-        Collection<Key> activateEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("activateEffects"));
-        Collection<Key> shootEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("shootEffects"));
-        Collection<Key> reloadEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("reloadEffects"));
-        Collection<Key> tickEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("tickEffects"));
-        Collection<Key> noAmmoEffects = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("noAmmoEffects"));
-        Collection<Key> gunStackMappers = KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("gunStackMappers"));
+        Collection<Key> activateEffects =
+                KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("activateEffects"));
+        Collection<Key> shootEffects =
+                KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("shootEffects"));
+        Collection<Key> reloadEffects =
+                KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("reloadEffects"));
+        Collection<Key> tickEffects =
+                KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("tickEffects"));
+        Collection<Key> noAmmoEffects =
+                KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("noAmmoEffects"));
+        Collection<Key> gunStackMappers =
+                KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("gunStackMappers"));
 
         return new GunLevelData(upgrades, stack, stats, shootTester, reloadTester, firer, activateEffects, shootEffects,
-                reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
+                                reloadEffects, tickEffects, noAmmoEffects, gunStackMappers
+        );
     }
 
     @Override

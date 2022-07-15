@@ -22,43 +22,33 @@ import java.util.function.Function;
  */
 public class MobTriggers {
 
-    private MobTriggers() {
-        throw new UnsupportedOperationException();
-    }
-
     /**
      * A {@link MobTrigger} for when an {@link Entity} is damaged.
      */
     public static final MobTrigger<EntityDamageEvent> DAMAGE_TRIGGER =
             regularTrigger("damage", EntityDamageEvent.class);
-
     /**
      * A {@link MobTrigger} for when an {@link Entity} is spawned.
      */
-    public static final MobTrigger<EntitySpawnEvent> SPAWN_TRIGGER =
-            regularTrigger("spawn", EntitySpawnEvent.class);
-
+    public static final MobTrigger<EntitySpawnEvent> SPAWN_TRIGGER = regularTrigger("spawn", EntitySpawnEvent.class);
     /**
      * A {@link MobTrigger} for when an {@link Entity} is killed.
      */
-    public static final MobTrigger<EntityDeathEvent> DEATH_TRIGGER =
-            regularTrigger("death", EntityDeathEvent.class);
-
+    public static final MobTrigger<EntityDeathEvent> DEATH_TRIGGER = regularTrigger("death", EntityDeathEvent.class);
     /**
      * A {@link MobTrigger} for when a {@link Player} interacts with an {@link Entity}.
      */
     public static final MobTrigger<PlayerEntityInteractEvent> INTERACT_TRIGGER =
             trigger("interact", PlayerEntityInteractEvent.class, PlayerEntityInteractEvent::getTarget);
-
     /**
      * A {@link Collection} of default {@link MobTrigger}s.
      */
-    public static final Collection<MobTrigger<?>> TRIGGERS = List.of(
-            DAMAGE_TRIGGER,
-            SPAWN_TRIGGER,
-            DEATH_TRIGGER,
-            INTERACT_TRIGGER
-    );
+    public static final Collection<MobTrigger<?>> TRIGGERS =
+            List.of(DAMAGE_TRIGGER, SPAWN_TRIGGER, DEATH_TRIGGER, INTERACT_TRIGGER);
+
+    private MobTriggers() {
+        throw new UnsupportedOperationException();
+    }
 
     private static <TEvent extends Event> @NotNull MobTrigger<TEvent> trigger(@Subst("interact") @NotNull String name,
                                                                               @NotNull Class<TEvent> eventClass,
@@ -66,8 +56,8 @@ public class MobTriggers {
         return new MobTrigger<>(Key.key(Namespaces.PHANTAZM, name), eventClass, entityGetter);
     }
 
-    private static <TEvent extends EntityEvent> @NotNull MobTrigger<TEvent> regularTrigger(@Subst("damage") @NotNull String name,
-                                                                                           @NotNull Class<TEvent> eventClass) {
+    private static <TEvent extends EntityEvent> @NotNull MobTrigger<TEvent> regularTrigger(
+            @Subst("damage") @NotNull String name, @NotNull Class<TEvent> eventClass) {
         return trigger(name, eventClass, EntityEvent::getEntity);
     }
 

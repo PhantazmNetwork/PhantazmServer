@@ -21,8 +21,9 @@ public class FactoryDependencyProvider implements DependencyProvider {
 
     /**
      * Creates a new {@link FactoryDependencyProvider}.
+     *
      * @param loadedData A {@link Map} of loaded data that {@link Factory}s can use to create dependencies
-     * @param factories A {@link Map} of {@link Factory}s that are used to create dependencies
+     * @param factories  A {@link Map} of {@link Factory}s that are used to create dependencies
      */
     public FactoryDependencyProvider(@NotNull Map<Key, Keyed> loadedData, @NotNull Map<Key, Factory<?, ?>> factories) {
         this.loadedData = Map.copyOf(loadedData);
@@ -45,12 +46,13 @@ public class FactoryDependencyProvider implements DependencyProvider {
                 throw new IllegalArgumentException("No data found for key: " + key);
             }
 
-            Factory<Keyed, ?> factory = (Factory<Keyed, ?>) factories.get(data.key());
-            loadedObjects.put(key, Objects.requireNonNull(object = factory.make(this, data),
-                    "factory produced null object"));
+            Factory<Keyed, ?> factory = (Factory<Keyed, ?>)factories.get(data.key());
+            loadedObjects.put(key,
+                              Objects.requireNonNull(object = factory.make(this, data), "factory produced null object")
+            );
         }
 
-        return (T) object;
+        return (T)object;
     }
 
     @Override

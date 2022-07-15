@@ -23,33 +23,20 @@ import java.util.function.BiConsumer;
  */
 public class ClipStackMapper implements GunStackMapper {
 
+    private final ReloadTester reloadTester;
+
     /**
-     * Data for a {@link ClipStackMapper}.
-     * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+     * Creates a {@link ClipStackMapper}.
+     *
+     * @param reloadTester The {@link ReloadTester} to use to determine whether the gun is currently reloading
      */
-    public record Data(@NotNull Key reloadTesterKey) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.stack_mapper.clip.stack_count");
-
-        /**
-         * Creates a {@link Data}.
-         * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
-         */
-        public Data {
-            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public ClipStackMapper(@NotNull ReloadTester reloadTester) {
+        this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -76,20 +63,11 @@ public class ClipStackMapper implements GunStackMapper {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.reloadTesterKey());
-    }
-
-    private final ReloadTester reloadTester;
-
-    /**
-     * Creates a {@link ClipStackMapper}.
-     * @param reloadTester The {@link ReloadTester} to use to determine whether the gun is currently reloading
-     */
-    public ClipStackMapper(@NotNull ReloadTester reloadTester) {
-        this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
     }
 
     @Override
@@ -99,6 +77,33 @@ public class ClipStackMapper implements GunStackMapper {
         }
 
         return intermediate;
+    }
+
+    /**
+     * Data for a {@link ClipStackMapper}.
+     *
+     * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+     */
+    public record Data(@NotNull Key reloadTesterKey) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.stack_mapper.clip.stack_count");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+         */
+        public Data {
+            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

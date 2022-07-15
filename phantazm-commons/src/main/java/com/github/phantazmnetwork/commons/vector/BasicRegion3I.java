@@ -10,7 +10,8 @@ import org.jetbrains.annotations.NotNull;
 record BasicRegion3I(Vec3I origin, Vec3I lengths) implements Region3I {
     /**
      * Creates a new instance of this record.
-     * @param origin the origin vector
+     *
+     * @param origin  the origin vector
      * @param lengths the lengths vector
      */
     BasicRegion3I(@NotNull Vec3I origin, @NotNull Vec3I lengths) {

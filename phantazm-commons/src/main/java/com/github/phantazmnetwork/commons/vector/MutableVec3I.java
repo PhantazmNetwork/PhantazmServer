@@ -12,6 +12,7 @@ class MutableVec3I extends Vec3IBase {
 
     /**
      * Creates a new, mutable vector.
+     *
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
@@ -28,23 +29,23 @@ class MutableVec3I extends Vec3IBase {
     }
 
     @Override
-    public int getY() {
-        return y;
-    }
-
-    @Override
-    public int getZ() {
-        return z;
-    }
-
-    @Override
     public void setX(int x) {
         this.x = x;
     }
 
     @Override
+    public int getY() {
+        return y;
+    }
+
+    @Override
     public void setY(int y) {
         this.y = y;
+    }
+
+    @Override
+    public int getZ() {
+        return z;
     }
 
     @Override

@@ -24,37 +24,23 @@ import java.util.function.BiConsumer;
  */
 public class SendMessageEffect implements GunEffect {
 
+    private final Data data;
+    private final AudienceProvider audienceProvider;
+
     /**
-     * Data for a {@link SendMessageEffect}.
-     * @param audienceProviderKey A {@link Key} to the {@link SendMessageEffect}'s {@link AudienceProvider}
-     * @param message The {@link Component} to send to the {@link Audience}
+     * Creates a {@link SendMessageEffect}.
+     *
+     * @param data             The {@link SendMessageEffect}'s {@link Data}
+     * @param audienceProvider The {@link SendMessageEffect}'s {@link AudienceProvider}
      */
-    public record Data(@NotNull Key audienceProviderKey, @NotNull Component message) implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.send_message");
-
-        /**
-         * Creates a {@link Data}.
-         * @param audienceProviderKey A {@link Key} to the {@link SendMessageEffect}'s {@link AudienceProvider}
-         * @param message The {@link Component} to send to the {@link Audience}
-         */
-        public Data {
-            Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
-            Objects.requireNonNull(message, "message");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-
+    public SendMessageEffect(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -65,7 +51,8 @@ public class SendMessageEffect implements GunEffect {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key audienceProviderKey = keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
+                Key audienceProviderKey =
+                        keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
                 Component message = componentProcessor.dataFromElement(element.getElementOrThrow("message"));
 
                 return new Data(audienceProviderKey, message);
@@ -84,24 +71,11 @@ public class SendMessageEffect implements GunEffect {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.audienceProviderKey());
-    }
-
-    private final Data data;
-
-    private final AudienceProvider audienceProvider;
-
-    /**
-     * Creates a {@link SendMessageEffect}.
-     * @param data The {@link SendMessageEffect}'s {@link Data}
-     * @param audienceProvider The {@link SendMessageEffect}'s {@link AudienceProvider}
-     */
-    public SendMessageEffect(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }
 
     @Override
@@ -111,6 +85,37 @@ public class SendMessageEffect implements GunEffect {
 
     @Override
     public void tick(@NotNull GunState state, long time) {
+
+    }
+
+    /**
+     * Data for a {@link SendMessageEffect}.
+     *
+     * @param audienceProviderKey A {@link Key} to the {@link SendMessageEffect}'s {@link AudienceProvider}
+     * @param message             The {@link Component} to send to the {@link Audience}
+     */
+    public record Data(@NotNull Key audienceProviderKey, @NotNull Component message) implements Keyed {
+
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.send_message");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param audienceProviderKey A {@link Key} to the {@link SendMessageEffect}'s {@link AudienceProvider}
+         * @param message             The {@link Component} to send to the {@link Audience}
+         */
+        public Data {
+            Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
+            Objects.requireNonNull(message, "message");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
 
     }
 

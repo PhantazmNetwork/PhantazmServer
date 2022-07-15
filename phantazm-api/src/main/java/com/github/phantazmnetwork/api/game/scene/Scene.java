@@ -10,12 +10,14 @@ import java.util.UUID;
 
 /**
  * Represents a scene which accepts join requests.
+ *
  * @param <TRequest> The type of request used for joins.
  */
 public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
 
     /**
      * Routes a join request to the scene.
+     *
      * @param joinRequest The request for the join
      * @return The result of the join
      */
@@ -23,6 +25,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
 
     /**
      * Removes players from the scene.
+     *
      * @param leavers The {@link UUID}s of the players to remove
      * @return The result of the leave
      */
@@ -31,6 +34,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     /**
      * Gets the {@link PlayerView}s that are associated with the scene.
      * Some players might not be in game.
+     *
      * @return A view of the {@link PlayerView}s associated the scene.
      */
     @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers();
@@ -38,6 +42,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     /**
      * Gets the number of players that are considered "ingame" in the scene.
      * This count may differ from the number of entries in
+     *
      * @return The number of players ingame
      */
     int getIngamePlayerCount();
@@ -45,6 +50,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     /**
      * Gets a reported value as a weight for join requests.
      * Greater values indicate that this scene should be preferred for joins.
+     *
      * @param request The join request used to determine the scene's weight
      * @return The reported weight value
      */
@@ -53,6 +59,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     /**
      * Whether the scene is currently shutdown.
      * Shutdown scenes should not allow more players.
+     *
      * @return Whether the scene is shutdown
      */
     boolean isShutdown();
@@ -64,6 +71,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
 
     /**
      * Checks whether the scene is considered joinable.
+     *
      * @return Whether the scene is considered joinable
      */
     boolean isJoinable();
@@ -71,6 +79,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     /**
      * Sets whether the scene should be considered joinable.
      * Joinable is defined on an implementation basis.
+     *
      * @param joinable Whether the scene should be joinable
      */
     void setJoinable(boolean joinable);

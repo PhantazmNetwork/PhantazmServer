@@ -16,9 +16,10 @@ public interface DirectionalEntityFinder {
 
     /**
      * Finds entities given the start and end of a shot.
+     *
      * @param instance The instance to search in
-     * @param start The start of the shot
-     * @param end The end of the shot
+     * @param start    The start of the shot
+     * @param end      The end of the shot
      * @return A {@link Collection} of {@link LivingEntity}s
      */
     @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start, @NotNull Point end);

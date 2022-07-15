@@ -22,33 +22,20 @@ import java.util.function.BiConsumer;
  */
 public class StateReloadTester implements ReloadTester {
 
+    private final GunStats stats;
+
     /**
-     * Data for a {@link StateReloadTester}.
-     * @param statsKey A {@link Key} to the gun's {@link GunStats}
+     * Creates a {@link StateReloadTester}.
+     *
+     * @param stats The gun's {@link GunStats}
      */
-    public record Data(@NotNull Key statsKey) implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.reload_tester.state");
-
-        /**
-         * Creates a {@link Data}.
-         * @param statsKey A {@link Key} to the gun's {@link GunStats}
-         */
-        public Data {
-            Objects.requireNonNull(statsKey, "statsKey");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public StateReloadTester(@NotNull GunStats stats) {
+        this.stats = Objects.requireNonNull(stats, "stats");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -74,20 +61,11 @@ public class StateReloadTester implements ReloadTester {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.statsKey());
-    }
-
-    private final GunStats stats;
-
-    /**
-     * Creates a {@link StateReloadTester}.
-     * @param stats The gun's {@link GunStats}
-     */
-    public StateReloadTester(@NotNull GunStats stats) {
-        this.stats = Objects.requireNonNull(stats, "stats");
     }
 
     @Override
@@ -103,6 +81,33 @@ public class StateReloadTester implements ReloadTester {
     @Override
     public boolean isReloading(@NotNull GunState state) {
         return state.ticksSinceLastReload() < stats.reloadSpeed();
+    }
+
+    /**
+     * Data for a {@link StateReloadTester}.
+     *
+     * @param statsKey A {@link Key} to the gun's {@link GunStats}
+     */
+    public record Data(@NotNull Key statsKey) implements Keyed {
+
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.reload_tester.state");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param statsKey A {@link Key} to the gun's {@link GunStats}
+         */
+        public Data {
+            Objects.requireNonNull(statsKey, "statsKey");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

@@ -11,53 +11,21 @@ import java.util.NoSuchElementException;
  */
 public interface Region3I extends Iterable<Vec3I> {
     /**
-     * The "origin" vector of this region. This is the corner closest to ⟨-∞, -∞, -∞⟩.
-     * @return the origin vector for this region
-     */
-    @NotNull Vec3I origin();
-
-    /**
-     * The "length" vectors for this region. These are always positive or zero, and when added to the origin vector
-     * produce the maximum corner for this region (the corner closest to ⟨∞, ∞, ∞⟩).
-     * @return the length vectors for this region
-     */
-    @NotNull Vec3I lengths();
-
-    /**
-     * Returns the "max" vector of this region. This is the sum of the origin and lengths vector.
-     * @return the max vector of this region
-     */
-    default @NotNull Vec3I getMax() {
-        return origin().add(lengths());
-    }
-
-    /**
-     * Returns the exact center of this region as a double vector.
-     * @return the center of this region
-     */
-    default @NotNull Vec3D getCenter() {
-        Vec3I origin = origin();
-        Vec3I lengths = lengths();
-
-        return Vec3D.of(origin.getX() + ((double)lengths.getX() / 2D), origin.getY() +
-                ((double)lengths.getY() / 2D), origin.getZ() + ((double)lengths.getZ() / 2D));
-    }
-
-    /**
      * Computes the smallest possible Region3I that can enclose all the given regions.
+     *
      * @param regions the regions a new Region3I must enclose
      * @return a new Region3I that must enclose all regions
      * @throws IllegalArgumentException if regions is empty
-     * @throws NullPointerException if regions is null or contains a null element
+     * @throws NullPointerException     if regions is null or contains a null element
      */
     static @NotNull Region3I enclosing(Region3I @NotNull ... regions) {
-        if(regions.length == 0) {
+        if (regions.length == 0) {
             throw new IllegalArgumentException("Must provide at least one region");
         }
 
         Region3I first = regions[0];
         //shortcut
-        if(regions.length == 1) {
+        if (regions.length == 1) {
             return first;
         }
 
@@ -72,7 +40,7 @@ public interface Region3I extends Iterable<Vec3I> {
         int maxY = firstMax.getY();
         int maxZ = firstMax.getZ();
 
-        for(int i = 1; i < regions.length; i++) {
+        for (int i = 1; i < regions.length; i++) {
             Region3I sample = regions[i];
             Vec3I sampleOrigin = sample.origin();
             Vec3I sampleMax = sample.getMax();
@@ -92,7 +60,8 @@ public interface Region3I extends Iterable<Vec3I> {
     /**
      * Produces a new Region3I that encompasses both of the given vectors, whose coordinates will be considered relative
      * to the origin ⟨0, 0, 0⟩.
-     * @param first the fist vector to encompass
+     *
+     * @param first  the fist vector to encompass
      * @param second the second vector to encompass
      * @return a new Region3I encompassing both vectors
      */
@@ -103,8 +72,9 @@ public interface Region3I extends Iterable<Vec3I> {
     /**
      * Produces a new Region3I that encompasses both of the given vectors, whose coordinates will be considered relative
      * to the third vector.
-     * @param first the fist vector to encompass
-     * @param second the second vector to encompass
+     *
+     * @param first      the fist vector to encompass
+     * @param second     the second vector to encompass
      * @param relativeTo the vector to which {@code first} and {@code second} will be considered relative to
      * @return a new Region3I encompassing both vectors
      */
@@ -124,8 +94,9 @@ public interface Region3I extends Iterable<Vec3I> {
      * Produces a new Region3I from "normalizing" the given origin and lengths vectors. The lengths may be negative, in
      * which case the new origin vector will differ from the original, but the result will still represent the same
      * bounding box.
-     * @param origin the origin vector
-     * @param lengths the lengths vector (components may be negative)
+     *
+     * @param origin     the origin vector
+     * @param lengths    the lengths vector (components may be negative)
      * @param relativeTo the vector to which origin is considered relative to
      * @return a new Region3I with non-negative lengths, representing the same bounding box
      */
@@ -137,7 +108,8 @@ public interface Region3I extends Iterable<Vec3I> {
      * Produces a new Region3I from "normalizing" the given origin and lengths vectors. The lengths may be negative, in
      * which case the new origin vector will differ from the original, but the result will still represent the same
      * bounding box. Vectors are considered relative to the origin ⟨0, 0, 0⟩.
-     * @param origin the origin vector
+     *
+     * @param origin  the origin vector
      * @param lengths the lengths vector (components may be negative)
      * @return a new Region3I with non-negative lengths, representing the same bounding box
      */
@@ -148,6 +120,7 @@ public interface Region3I extends Iterable<Vec3I> {
     /**
      * Check if two bounding boxes overlap each other. All lengths should be non-negative, all origins should represent
      * the corner closest to ⟨-∞, -∞, -∞⟩ for their respective bounding box.
+     *
      * @param oX1 the X-component of the origin vector of the first bounding box
      * @param oY1 the Y-component of the origin vector of the first bounding box
      * @param oZ1 the Z-component of the origin vector of the first bounding box
@@ -162,8 +135,8 @@ public interface Region3I extends Iterable<Vec3I> {
      * @param lZ2 the Z-length of the second bounding box
      * @return true if the bounding boxes overlap, false otherwise
      */
-    static boolean overlaps(int oX1, int oY1, int oZ1, int lX1, int lY1, int lZ1,
-                            int oX2, int oY2, int oZ2, int lX2, int lY2, int lZ2) {
+    static boolean overlaps(int oX1, int oY1, int oZ1, int lX1, int lY1, int lZ1, int oX2, int oY2, int oZ2, int lX2,
+                            int lY2, int lZ2) {
         int nx1 = oX1 + lX1;
         int ny1 = oY1 + lY1;
         int nz1 = oZ1 + lZ1;
@@ -172,30 +145,33 @@ public interface Region3I extends Iterable<Vec3I> {
         int ny2 = oY2 + lY2;
         int nz2 = oZ2 + lZ2;
 
-        return Math.min(oX1, nx1) < Math.max(oX2, nx2) && Math.max(oX1, nx1) > Math.min(oX2, nx2)
-                && Math.min(oY1, ny1) < Math.max(oY2, ny2) && Math.max(oY1, ny1) > Math.min(oY2, ny2)
-                && Math.min(oZ1, nz1) < Math.max(oZ2, nz2) && Math.max(oZ1, nz1) > Math.min(oZ2, nz2);
+        return Math.min(oX1, nx1) < Math.max(oX2, nx2) && Math.max(oX1, nx1) > Math.min(oX2, nx2) &&
+               Math.min(oY1, ny1) < Math.max(oY2, ny2) && Math.max(oY1, ny1) > Math.min(oY2, ny2) &&
+               Math.min(oZ1, nz1) < Math.max(oZ2, nz2) && Math.max(oZ1, nz1) > Math.min(oZ2, nz2);
     }
 
     /**
      * Checks if two bounding boxes overlap each other. All lengths should be non-negative, all origins should represent
      * the corner closest to ⟨-∞, -∞, -∞⟩ for their respective bounding box.
-     * @param firstOrigin the origin of the first bounding box
-     * @param firstLengths the lengths for the first bounding box
-     * @param secondOrigin the origin of the second bounding box
+     *
+     * @param firstOrigin   the origin of the first bounding box
+     * @param firstLengths  the lengths for the first bounding box
+     * @param secondOrigin  the origin of the second bounding box
      * @param secondLengths the lengths of the second bounding box
      * @return true if the bounding boxes overlap, false otherwise
      */
-    static boolean overlaps(@NotNull Vec3I firstOrigin, @NotNull Vec3I firstLengths,
-                            @NotNull Vec3I secondOrigin, @NotNull Vec3I secondLengths) {
-        return overlaps(firstOrigin.getX(), firstOrigin.getY(), firstOrigin.getZ(), firstLengths.getX(), firstLengths
-                .getY(), firstLengths.getZ(), secondOrigin.getX(), secondOrigin.getY(), secondOrigin.getZ(),
-                secondLengths.getX(), secondLengths.getY(), secondLengths.getZ());
+    static boolean overlaps(@NotNull Vec3I firstOrigin, @NotNull Vec3I firstLengths, @NotNull Vec3I secondOrigin,
+                            @NotNull Vec3I secondLengths) {
+        return overlaps(firstOrigin.getX(), firstOrigin.getY(), firstOrigin.getZ(), firstLengths.getX(),
+                        firstLengths.getY(), firstLengths.getZ(), secondOrigin.getX(), secondOrigin.getY(),
+                        secondOrigin.getZ(), secondLengths.getX(), secondLengths.getY(), secondLengths.getZ()
+        );
     }
 
     /**
      * Checks if two bounding boxes overlap each other.
-     * @param first the first bounding box
+     *
+     * @param first  the first bounding box
      * @param second the second bounding box.
      * @return true if the bounding boxes overlap, false otherwise
      */
@@ -204,7 +180,46 @@ public interface Region3I extends Iterable<Vec3I> {
     }
 
     /**
+     * The "origin" vector of this region. This is the corner closest to ⟨-∞, -∞, -∞⟩.
+     *
+     * @return the origin vector for this region
+     */
+    @NotNull Vec3I origin();
+
+    /**
+     * The "length" vectors for this region. These are always positive or zero, and when added to the origin vector
+     * produce the maximum corner for this region (the corner closest to ⟨∞, ∞, ∞⟩).
+     *
+     * @return the length vectors for this region
+     */
+    @NotNull Vec3I lengths();
+
+    /**
+     * Returns the "max" vector of this region. This is the sum of the origin and lengths vector.
+     *
+     * @return the max vector of this region
+     */
+    default @NotNull Vec3I getMax() {
+        return origin().add(lengths());
+    }
+
+    /**
+     * Returns the exact center of this region as a double vector.
+     *
+     * @return the center of this region
+     */
+    default @NotNull Vec3D getCenter() {
+        Vec3I origin = origin();
+        Vec3I lengths = lengths();
+
+        return Vec3D.of(origin.getX() + ((double)lengths.getX() / 2D), origin.getY() + ((double)lengths.getY() / 2D),
+                        origin.getZ() + ((double)lengths.getZ() / 2D)
+        );
+    }
+
+    /**
      * Returns the volume for this bounding box.
+     *
      * @return the volume of this bounding box
      */
     default int volume() {
@@ -214,6 +229,7 @@ public interface Region3I extends Iterable<Vec3I> {
 
     /**
      * Checks if this bounding box overlaps another.
+     *
      * @param other the other bounding box to check against
      * @return true if the bounding boxes overlap, false otherwise
      */
@@ -223,12 +239,13 @@ public interface Region3I extends Iterable<Vec3I> {
 
     /**
      * Determines if this Region overlaps the given vector position.
+     *
      * @param position the position to check for overlap
      * @return true if the position overlaps, false otherwise
      */
     default boolean contains(@NotNull Vec3I position) {
         Vec3I origin = origin();
-        if(position.getX() >= origin.getX() && position.getY() >= origin.getY() && position.getZ() >= origin.getZ()) {
+        if (position.getX() >= origin.getX() && position.getY() >= origin.getY() && position.getZ() >= origin.getZ()) {
             Vec3I end = origin.add(lengths());
             return position.getX() < end.getX() && position.getY() < end.getY() && position.getZ() < end.getZ();
         }
@@ -238,6 +255,7 @@ public interface Region3I extends Iterable<Vec3I> {
 
     /**
      * Adds a vector to this region. The returned object will represent the translated region.
+     *
      * @param position the translation to apply
      * @return the translated region
      */
@@ -251,15 +269,13 @@ public interface Region3I extends Iterable<Vec3I> {
         Vec3I lengths = lengths();
 
         return new Iterator<>() {
-            private int x = origin.getX();
-            private int y = origin.getY();
-            private int z = origin.getZ();
-
             private final int xEnd = origin.getX() + lengths.getX();
             private final int yEnd = origin.getY() + lengths.getY();
             private final int zEnd = origin.getZ() + lengths.getZ();
-
             private final Vec3I local = Vec3I.threadLocal();
+            private int x = origin.getX();
+            private int y = origin.getY();
+            private int z = origin.getZ();
 
             @Override
             public boolean hasNext() {
@@ -272,11 +288,11 @@ public interface Region3I extends Iterable<Vec3I> {
                 int curY = y;
                 int curZ = z;
 
-                if(++x >= xEnd) {
+                if (++x >= xEnd) {
                     curX = x = origin.getX();
-                    if(++y >= yEnd) {
+                    if (++y >= yEnd) {
                         curY = y = origin.getY();
-                        if(++z > zEnd) {
+                        if (++z > zEnd) {
                             throw new NoSuchElementException();
                         }
                     }

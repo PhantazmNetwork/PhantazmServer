@@ -16,6 +16,7 @@ import java.util.function.Function;
 /**
  * A {@link ConfigProcessor} which processes {@link TValue}s.
  * This can be used to process inheritance and identifies variants based on {@link Keyed#key()}.
+ *
  * @param <TValue> The type of {@link TValue} to process
  */
 public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProcessor<TValue> {
@@ -26,6 +27,7 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
 
     /**
      * Creates a new {@link VariantConfigProcessor}.
+     *
      * @param subprocessorProvider A {@link Function} that provides {@link ConfigProcessor} based on a {@link Key},
      *                             or null if no such {@link ConfigProcessor} is available
      */
@@ -58,7 +60,7 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull TValue data) throws ConfigProcessException {
-        ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>) subProcessors.apply(data.key());
+        ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>)subProcessors.apply(data.key());
         if (processor == null) {
             throw new ConfigProcessException("No subprocessor for key " + data.key());
         }

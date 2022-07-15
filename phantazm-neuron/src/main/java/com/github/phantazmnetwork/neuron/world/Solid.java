@@ -17,6 +17,7 @@ import java.util.Set;
 public interface Solid {
     /**
      * Reports if this solid has "child" components.
+     *
      * @return {@code true} if this solid has child components, {@code false} otherwise
      */
     boolean hasChildren();
@@ -24,6 +25,7 @@ public interface Solid {
     /**
      * Retrieves the minimum floating-point vector for this solid. Each component must range from [0.0, 1.0] and be
      * smaller than or equal to each equivalent component in the vector returned by {@code getMax()}.
+     *
      * @return the minimum vector
      */
     @NotNull Vec3F getMin();
@@ -31,12 +33,14 @@ public interface Solid {
     /**
      * Retrieves the maximum floating-point vector for this solid. Each component must range from [0.0, 1.0] and be
      * greater than or equal to each equivalent component in the vector returned by {@code getMin()}.
+     *
      * @return the minimum vector
      */
     @NotNull Vec3F getMax();
 
     /**
      * Returns an {@link Iterable} over any child solids. Will be empty if this solid does not have any children.
+     *
      * @return an iterable over any child solids
      */
     @NotNull @Unmodifiable Set<Solid> getChildren();
@@ -44,12 +48,13 @@ public interface Solid {
     /**
      * Determines if this solid  overlaps the given bounds. The solid itself is considered relative to the origin
      * (0, 0, 0).
-     * @param x the x-component of the minimum vector
-     * @param y the y-component of the minimum vector
-     * @param z the z-component of the minimum vector
-     * @param width the width of the bounding box (x-length)
+     *
+     * @param x      the x-component of the minimum vector
+     * @param y      the y-component of the minimum vector
+     * @param z      the z-component of the minimum vector
+     * @param width  the width of the bounding box (x-length)
      * @param height the height of the bounding box (y-length)
-     * @param depth the depth of the bounding box (z-length)
+     * @param depth  the depth of the bounding box (z-length)
      * @return {@code true} if the given bounding box overlaps this solid, false otherwise
      */
     boolean overlaps(double x, double y, double z, double width, double height, double depth);

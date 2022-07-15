@@ -10,6 +10,7 @@ import java.io.IOException;
 public interface MapLoader {
     /**
      * Loads some named {@link MapInfo}.
+     *
      * @param mapName the name of the map to load
      * @return the loaded map
      * @throws IOException if an IO error occurs
@@ -18,6 +19,7 @@ public interface MapLoader {
 
     /**
      * Saves some {@link MapInfo}.
+     *
      * @param data the MapInfo to save
      * @throws IOException if an IO error occurs
      */

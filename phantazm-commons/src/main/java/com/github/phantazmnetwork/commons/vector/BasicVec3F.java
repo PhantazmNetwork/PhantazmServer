@@ -10,6 +10,7 @@ class BasicVec3F extends Vec3FBase {
 
     /**
      * Creates a new instance of this class from the given float triplet.
+     *
      * @param x the x-coordinate
      * @param y the y-coordinate
      * @param z the z-coordinate

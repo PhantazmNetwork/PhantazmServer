@@ -23,26 +23,20 @@ import java.util.UUID;
  */
 public class IgniteShotHandler implements ShotHandler {
 
+    private final Data data;
+
     /**
-     * Data for an {@link IgniteShotHandler}.
-     * @param duration The duration of the fire for regular targets
-     * @param headshotDuration The duration of the fire for headshots
+     * Creates an {@link IgniteShotHandler}.
+     *
+     * @param data The {@link IgniteShotHandler}'s {@link Data}
      */
-    public record Data(int duration, int headshotDuration) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.ignite");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public IgniteShotHandler(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -72,18 +66,9 @@ public class IgniteShotHandler implements ShotHandler {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates an {@link IgniteShotHandler}.
-     * @param data The {@link IgniteShotHandler}'s {@link Data}
-     */
-    public IgniteShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
+                       @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
             target.entity().setFireForDuration(data.duration());
         }
@@ -95,6 +80,25 @@ public class IgniteShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for an {@link IgniteShotHandler}.
+     *
+     * @param duration         The duration of the fire for regular targets
+     * @param headshotDuration The duration of the fire for headshots
+     */
+    public record Data(int duration, int headshotDuration) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.ignite");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

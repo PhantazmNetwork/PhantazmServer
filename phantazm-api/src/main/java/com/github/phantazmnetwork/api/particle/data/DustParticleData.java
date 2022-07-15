@@ -27,9 +27,28 @@ public class DustParticleData implements ParticleData {
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.dust");
 
     private static final Key KEY = Particle.DUST.key();
+    private final float red;
+    private final float green;
+    private final float blue;
+    private final float size;
+
+    /**
+     * Creates a new {@link DustParticleData}.
+     *
+     * @param color The color of the particle
+     * @param size  The size of the particle
+     */
+    public DustParticleData(@NotNull RGBLike color, float size) {
+        Objects.requireNonNull(color, "color");
+        this.red = color.red() / 255.0F;
+        this.green = color.green() / 255.0F;
+        this.blue = color.blue() / 255.0F;
+        this.size = size;
+    }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link DustParticleData}.
+     *
      * @return A {@link ConfigProcessor} for {@link DustParticleData}
      */
     public static @NotNull ConfigProcessor<DustParticleData> processor() {
@@ -37,7 +56,8 @@ public class DustParticleData implements ParticleData {
 
         return new ConfigProcessor<>() {
             @Override
-            public @NotNull DustParticleData dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            public @NotNull DustParticleData dataFromElement(@NotNull ConfigElement element)
+                    throws ConfigProcessException {
                 RGBLike rgb = rgbProcessor.dataFromElement(element.getElementOrThrow("color"));
                 float size = element.getNumberOrThrow("size").floatValue();
                 if (size < 0.01F || size > 4.0F) {
@@ -48,7 +68,8 @@ public class DustParticleData implements ParticleData {
             }
 
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull DustParticleData dustParticleData) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull DustParticleData dustParticleData)
+                    throws ConfigProcessException {
                 RGBLike color = TextColor.color(dustParticleData.red, dustParticleData.green, dustParticleData.blue);
 
                 ConfigNode node = new LinkedConfigNode(2);
@@ -58,27 +79,6 @@ public class DustParticleData implements ParticleData {
                 return node;
             }
         };
-    }
-
-    private final float red;
-
-    private final float green;
-
-    private final float blue;
-
-    private final float size;
-
-    /**
-     * Creates a new {@link DustParticleData}.
-     * @param color The color of the particle
-     * @param size The size of the particle
-     */
-    public DustParticleData(@NotNull RGBLike color, float size) {
-        Objects.requireNonNull(color, "color");
-        this.red = color.red() / 255.0F;
-        this.green = color.green() / 255.0F;
-        this.blue = color.blue() / 255.0F;
-        this.size = size;
     }
 
     @Override

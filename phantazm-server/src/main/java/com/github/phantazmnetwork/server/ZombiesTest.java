@@ -2,19 +2,14 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.api.ClientBlockHandler;
 import com.github.phantazmnetwork.api.InstanceClientBlockHandler;
-import com.github.phantazmnetwork.api.VecUtils;
 import com.github.phantazmnetwork.api.hologram.Hologram;
 import com.github.phantazmnetwork.api.hologram.InstanceHologram;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +23,7 @@ final class ZombiesTest {
 
         global.addListener(PlayerLoginEvent.class, event -> {
             Instance spawnInstance = event.getSpawningInstance();
-            if(spawnInstance != null) {
+            if (spawnInstance != null) {
                 ClientBlockHandler tracker = new InstanceClientBlockHandler(spawnInstance, global);
                 tracker.setClientBlock(Block.BARRIER, 1, 100, 1);
 

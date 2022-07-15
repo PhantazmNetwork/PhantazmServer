@@ -19,6 +19,7 @@ public class InstanceSpace extends VoxelSpace {
     /**
      * Creates a new instance of this class. The given {@link Instance} may only supply {@link NeuralChunk}s, as these
      * are used to properly locate and construct {@link Solid} objects.
+     *
      * @param instance the instance which will supply solids and chunks as needed
      */
     public InstanceSpace(@NotNull Instance instance) {
@@ -28,11 +29,11 @@ public class InstanceSpace extends VoxelSpace {
     @Override
     public @Nullable Solid solidAt(int x, int y, int z) {
         Chunk chunk = instance.getChunk(x >> 4, z >> 4);
-        if(chunk == null) {
+        if (chunk == null) {
             return null;
         }
 
-        if(chunk instanceof NeuralChunk neuralChunk) {
+        if (chunk instanceof NeuralChunk neuralChunk) {
             return neuralChunk.getSolid(x, y, z);
         }
 

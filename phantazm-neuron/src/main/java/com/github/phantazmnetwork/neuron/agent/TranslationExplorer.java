@@ -21,8 +21,9 @@ public class TranslationExplorer extends CachingExplorer {
 
     /**
      * Creates a new TranslationExplorer which will use the given {@link NodeTranslator}.
-     * @param cache the cache used to store computed translation vectors, if null caching will be disabled (not
-     *              recommended)
+     *
+     * @param cache      the cache used to store computed translation vectors, if null caching will be disabled (not
+     *                   recommended)
      * @param descriptor the descriptor of the agent using this explorer
      * @param translator the translator used by this explorer
      */
@@ -39,7 +40,8 @@ public class TranslationExplorer extends CachingExplorer {
 
     @Override
     public @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current) {
-        return Pipe.from(descriptor.stepDirections()).map(delta -> translator.translate(current, delta.getX(), delta
-                .getY(), delta.getZ())).filter(delta -> !delta.equals(Vec3I.ORIGIN));
+        return Pipe.from(descriptor.stepDirections())
+                   .map(delta -> translator.translate(current, delta.getX(), delta.getY(), delta.getZ()))
+                   .filter(delta -> !delta.equals(Vec3I.ORIGIN));
     }
 }

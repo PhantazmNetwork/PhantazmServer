@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 
 /**
  * A {@link Pipe} implementation with a backing array. Not part of the public API.
+ *
  * @param <TComponent> the component type of the backing array
  */
 final class ArrayPipe<TComponent> implements Pipe<TComponent> {
@@ -15,9 +16,10 @@ final class ArrayPipe<TComponent> implements Pipe<TComponent> {
     /**
      * Creates a new ArrayPipe from the given array. Instances can be obtained through calls to
      * {@link Pipe#of(Object[])}.
+     *
      * @param array the backing array
      */
-    ArrayPipe(TComponent @NotNull[] array) {
+    ArrayPipe(TComponent @NotNull [] array) {
         this.array = array;
     }
 
@@ -28,13 +30,13 @@ final class ArrayPipe<TComponent> implements Pipe<TComponent> {
 
     @Override
     public TComponent next() {
-        if(!hasNext()) {
+        if (!hasNext()) {
             array = null;
             throw new NoSuchElementException();
         }
 
         TComponent element = array[index++];
-        if(index == array.length) {
+        if (index == array.length) {
             array = null;
         }
 

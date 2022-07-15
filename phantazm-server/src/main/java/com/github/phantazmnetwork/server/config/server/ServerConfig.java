@@ -6,8 +6,9 @@ import java.util.Objects;
 
 /**
  * General config for the server.
+ *
  * @param serverInfoConfig Config for the server's setup
- * @param pingListConfig Config for the server's ping list
+ * @param pingListConfig   Config for the server's ping list
  * @param pathfinderConfig Config for pathfinding
  */
 public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig,
@@ -16,13 +17,14 @@ public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig,
     /**
      * The default ServerConfig instance.
      */
-    public static final ServerConfig DEFAULT = new ServerConfig(ServerInfoConfig.DEFAULT, PingListConfig.DEFAULT,
-            PathfinderConfig.DEFAULT);
+    public static final ServerConfig DEFAULT =
+            new ServerConfig(ServerInfoConfig.DEFAULT, PingListConfig.DEFAULT, PathfinderConfig.DEFAULT);
 
     /**
      * Creates config for the server.
+     *
      * @param serverInfoConfig Config for the server's setup
-     * @param pingListConfig Config for the server's ping list
+     * @param pingListConfig   Config for the server's ping list
      * @param pathfinderConfig Config for pathfinding
      */
     public ServerConfig {

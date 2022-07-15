@@ -19,18 +19,17 @@ import java.util.Objects;
  */
 public class InstanceHologram extends AbstractList<Component> implements Hologram {
     private static final double MESSAGE_HEIGHT = 0.25;
-
-    private Instance instance;
-
     private final ArrayList<Entity> markers;
     private final ArrayList<Component> components;
-    private Vec3D location;
     private final double gap;
+    private Instance instance;
+    private Vec3D location;
 
     /**
      * Creates a new instance of this class, whose holograms will be rendered at the given location.
+     *
      * @param location the location to render holograms
-     * @param gap the distance between separate hologram messages
+     * @param gap      the distance between separate hologram messages
      */
     public InstanceHologram(@NotNull Vec3D location, double gap) {
         this.location = Objects.requireNonNull(location, "location");
@@ -47,7 +46,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     @Override
     public void setLocation(@NotNull Vec3D location) {
         Objects.requireNonNull(location, "location");
-        if(!location.equals(this.location)) {
+        if (!location.equals(this.location)) {
             this.location = location;
             updateMarkers();
         }
@@ -56,7 +55,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     @Override
     public void setInstance(@NotNull Instance instance) {
         Objects.requireNonNull(instance, "instance");
-        if(this.instance != instance) {
+        if (this.instance != instance) {
             this.instance = instance;
             updateMarkers();
         }
@@ -90,7 +89,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     @Override
     public void clear() {
-        for(Entity entity : markers) {
+        for (Entity entity : markers) {
             entity.remove();
         }
         markers.clear();
@@ -108,7 +107,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     private void updateMarkers() {
-        if(instance == null) {
+        if (instance == null) {
             return;
         }
 
@@ -116,10 +115,10 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         double totalHeight = gap * (markerCount - 1) + markerCount * MESSAGE_HEIGHT;
         double topCornerHeight = location.getY() + totalHeight / 2;
 
-        for(int i = 0; i < markerCount; i++) {
+        for (int i = 0; i < markerCount; i++) {
             Entity marker = markers.get(i);
             Pos pos = new Pos(location.getX(), topCornerHeight - (i * (gap + MESSAGE_HEIGHT)), location.getZ());
-            if(marker.getInstance() == instance) {
+            if (marker.getInstance() == instance) {
                 marker.teleport(pos);
             }
             else {
@@ -130,7 +129,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     private Entity makeMarker(Component display) {
         Entity stand = new Entity(EntityType.MARKER);
-        MarkerMeta meta = (MarkerMeta) stand.getEntityMeta();
+        MarkerMeta meta = (MarkerMeta)stand.getEntityMeta();
         meta.setHasNoGravity(true);
         meta.setCustomNameVisible(true);
         meta.setInvisible(true);

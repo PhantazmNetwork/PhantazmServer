@@ -17,6 +17,7 @@ public class KickFallback implements SceneFallback {
 
     /**
      * Creates a kick fallback.
+     *
      * @param kickMessage The message used for kicks
      */
     public KickFallback(@NotNull Component kickMessage) {

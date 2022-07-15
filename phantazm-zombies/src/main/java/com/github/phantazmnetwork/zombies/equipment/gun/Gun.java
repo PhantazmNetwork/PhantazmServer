@@ -39,8 +39,9 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
     /**
      * Creates a new gun.
+     *
      * @param entitySupplier A {@link Supplier} that provides the owner of the {@link Gun}
-     * @param model The {@link GunModel} of the {@link Gun}
+     * @param model          The {@link GunModel} of the {@link Gun}
      */
     public Gun(@NotNull Supplier<Optional<? extends Entity>> entitySupplier, @NotNull GunModel model) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
@@ -52,7 +53,8 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
         GunStats stats = level.stats();
         this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats.reloadSpeed(), stats.maxAmmo(),
-                stats.maxClip(), false, 0);
+                                  stats.maxClip(), false, 0
+        );
     }
 
     /**
@@ -139,6 +141,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
     /**
      * Gets the current {@link GunState} of the {@link Gun}
+     *
      * @return The current {@link GunState} of the {@link Gun}
      */
     public @NotNull GunState getState() {

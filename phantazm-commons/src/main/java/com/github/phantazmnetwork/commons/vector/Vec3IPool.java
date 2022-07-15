@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 interface Vec3IPool {
     /**
      * Returns a value from cache with the components (x, y, z). If no such component exists, {@code null} is returned.
+     *
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component

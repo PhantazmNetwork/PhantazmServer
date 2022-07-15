@@ -19,6 +19,7 @@ public class NoParticleData implements ParticleData {
 
     /**
      * Gets a {@link ConfigProcessor} for {@link NoParticleData}.
+     *
      * @return A {@link ConfigProcessor} for {@link NoParticleData}
      */
     public static @NotNull ConfigProcessor<NoParticleData> processor() {

@@ -16,7 +16,8 @@ public interface TargetLimiter {
 
     /**
      * Limits a {@link List} of targets to shoot from.
-     * @param start The starting position of the shot
+     *
+     * @param start   The starting position of the shot
      * @param targets The targets to shoot from
      * @return A modified {@link List} of targets to shoot from
      */

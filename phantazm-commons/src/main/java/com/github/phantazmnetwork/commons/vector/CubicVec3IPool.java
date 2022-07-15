@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
  * cases.</p>
  *
  * <p>{@link CubicVec3IPool#fromCache(int, int, int)} is inherently thread-safe.</p>
+ *
  * @see ImmutableVec3I
  */
 class CubicVec3IPool implements Vec3IPool {
@@ -22,16 +23,17 @@ class CubicVec3IPool implements Vec3IPool {
     /**
      * Creates a new cache with the specified width. The cache will hold {@code width^3} values, with an even
      * distribution of positive and negative values.
+     *
      * @param cacheWidth the width of the cache
      * @throws IllegalArgumentException if cacheWidth is smaller than 2, not a power of 2, or larger than 256
      */
     CubicVec3IPool(int cacheWidth) {
-        if(cacheWidth < 2 || !isPowerOf2(cacheWidth)) {
+        if (cacheWidth < 2 || !isPowerOf2(cacheWidth)) {
             throw new IllegalArgumentException("cacheWidth must be power of 2 and >= 2");
         }
 
         //OOM prevention
-        if(cacheWidth > 256) {
+        if (cacheWidth > 256) {
             throw new IllegalArgumentException("cacheWidth must not be larger than 256");
         }
 
@@ -44,9 +46,9 @@ class CubicVec3IPool implements Vec3IPool {
 
         //fill the entire cache: this allows fromCache to be made threadsafe without needing to synchronize
         int pos = 0;
-        for(int i = 0; i < cacheWidth; i++) {
-            for(int j = 0; j < cacheWidth; j++) {
-                for(int k = 0; k < cacheWidth; k++) {
+        for (int i = 0; i < cacheWidth; i++) {
+            for (int j = 0; j < cacheWidth; j++) {
+                for (int k = 0; k < cacheWidth; k++) {
                     cache[pos++] = new ImmutableVec3I(i - halfWidth, j - halfWidth, k - halfWidth);
                 }
             }
@@ -63,7 +65,7 @@ class CubicVec3IPool implements Vec3IPool {
 
     @Override
     public @Nullable Vec3I fromCache(int x, int y, int z) {
-        if(inRange(x) && inRange(y) && inRange(z)) {
+        if (inRange(x) && inRange(y) && inRange(z)) {
             return cache[((x + halfWidth) << shiftZ) | ((y + halfWidth) << shiftY) | (z + halfWidth)];
         }
 

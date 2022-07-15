@@ -26,12 +26,7 @@ public class EndGameStage implements Stage {
     @Override
     public void tick(long time) {
         if (endGameDuration == endGameTicksRemaining--) {
-            Sound sound = Sound.sound(
-                    SoundEvent.ENTITY_ENDER_DRAGON_DEATH.key(),
-                    Sound.Source.MASTER,
-                    1.0F,
-                    1.0F
-            );
+            Sound sound = Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH.key(), Sound.Source.MASTER, 1.0F, 1.0F);
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
                 zombiesPlayer.getPlayerView().getPlayer().ifPresent(player -> {
                     player.playSound(sound);

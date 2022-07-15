@@ -16,40 +16,25 @@ import java.util.Objects;
  */
 public class AmmoLevelEffect implements GunEffect {
 
-    /**
-     * Data for an {@link AmmoLevelEffect}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.level.ammo");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return ConfigProcessor.emptyProcessor(Data::new);
-    }
-
     private final PlayerView playerView;
-
     private boolean currentlyActive = false;
 
     /**
      * Creates a new {@link AmmoLevelEffect}.
+     *
      * @param playerView The {@link PlayerView} of the {@link Player} to set the level of
      */
     public AmmoLevelEffect(@NotNull PlayerView playerView) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+    }
+
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return ConfigProcessor.emptyProcessor(Data::new);
     }
 
     @Override
@@ -67,6 +52,22 @@ public class AmmoLevelEffect implements GunEffect {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for an {@link AmmoLevelEffect}.
+     */
+    public record Data() implements Keyed {
+
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.level.ammo");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

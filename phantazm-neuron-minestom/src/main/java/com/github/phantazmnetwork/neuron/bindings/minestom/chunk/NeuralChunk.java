@@ -18,9 +18,10 @@ import org.jetbrains.annotations.Nullable;
 public class NeuralChunk extends DynamicChunk {
     /**
      * Creates a new NeuralChunk for the given instance.
+     *
      * @param instance the instance this chunk belongs to
-     * @param chunkX the chunk's x-coordinate
-     * @param chunkZ the chunk's z-coordinate
+     * @param chunkX   the chunk's x-coordinate
+     * @param chunkZ   the chunk's z-coordinate
      */
     public NeuralChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
         super(instance, chunkX, chunkZ);
@@ -29,6 +30,7 @@ public class NeuralChunk extends DynamicChunk {
     /**
      * Tries to obtain a {@link Solid} located at the provided world coordinates. This properly accounts for blocks
      * larger than 1, like walls and fences.
+     *
      * @param x the x-coordinate of the solid
      * @param y the y-coordinate of the solid
      * @param z the z-coordinate of the solid
@@ -37,14 +39,14 @@ public class NeuralChunk extends DynamicChunk {
     public @Nullable Solid getSolid(int x, int y, int z) {
         synchronized (this) {
             Block current = getBlock(x, y, z, Condition.TYPE);
-            if(current == null) {
+            if (current == null) {
                 return null; //result of getBlock with Condition.TYPE should never actually be null
             }
 
             Shape currentShape = current.registry().collisionShape();
 
             double height = currentShape.relativeEnd().y();
-            if(height > 0.5) { //no point in checking below
+            if (height > 0.5) { //no point in checking below
                 return SolidProvider.fromShape(currentShape);
             }
 
@@ -52,13 +54,13 @@ public class NeuralChunk extends DynamicChunk {
             //we need to check below
             Block below = getBlock(x, y - 1, z, Condition.TYPE);
 
-            if(below != null) {
+            if (below != null) {
                 Shape belowShape = below.registry().collisionShape();
-                if(PhysicsUtils.isTall(belowShape)) {
+                if (PhysicsUtils.isTall(belowShape)) {
                     //split tall shape
                     Solid upperSolid = SolidProvider.getSplit(belowShape)[1];
 
-                    if(currentCollidable) {
+                    if (currentCollidable) {
                         //if the current shape also has collision, combine with the split
                         return SolidProvider.composite(upperSolid, SolidProvider.fromShape(currentShape));
                     }
@@ -67,7 +69,7 @@ public class NeuralChunk extends DynamicChunk {
                 }
             }
 
-            if(!currentCollidable) {
+            if (!currentCollidable) {
                 return null;
             }
 

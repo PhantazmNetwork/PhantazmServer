@@ -14,6 +14,7 @@ public class BasicInventoryObject implements InventoryObject {
 
     /**
      * Creates a basic {@link InventoryObject}.
+     *
      * @param itemStack The initial {@link ItemStack} of the {@link InventoryObject}
      */
     public BasicInventoryObject(@NotNull ItemStack itemStack) {

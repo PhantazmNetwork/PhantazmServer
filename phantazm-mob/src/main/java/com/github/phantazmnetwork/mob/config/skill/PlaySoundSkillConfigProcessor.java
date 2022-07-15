@@ -25,9 +25,11 @@ public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundS
 
     /**
      * Creates a new {@link PlaySoundSkillConfigProcessor}.
+     *
      * @param selectorProcessor A {@link ConfigProcessor} for audience {@link TargetSelector}s
      */
-    public PlaySoundSkillConfigProcessor(@NotNull ConfigProcessor<TargetSelector<? extends Audience>> selectorProcessor) {
+    public PlaySoundSkillConfigProcessor(
+            @NotNull ConfigProcessor<TargetSelector<? extends Audience>> selectorProcessor) {
         this.selectorProcessor = Objects.requireNonNull(selectorProcessor, "selectorProcessor");
     }
 
@@ -42,7 +44,8 @@ public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundS
     }
 
     @Override
-    public @NotNull ConfigElement elementFromData(@NotNull PlaySoundSkill playSoundSkill) throws ConfigProcessException {
+    public @NotNull ConfigElement elementFromData(@NotNull PlaySoundSkill playSoundSkill)
+            throws ConfigProcessException {
         ConfigNode node = new LinkedConfigNode(3);
 
         TargetSelector<? extends Audience> selector = playSoundSkill.getSelector();

@@ -14,35 +14,36 @@ public final class MathUtils {
 
     /**
      * Computes the lambertW (product logarithm) for a given real value and branch.
+     *
      * @param branch the branch to use (either 0 or -1)
-     * @param z the value to compute W for
+     * @param z      the value to compute W for
      * @return the product logarithm of {@code z} on {@code branch}
      */
     public static double lambertW(int branch, double z) {
-        if(branch != -1 && branch != 0) {
+        if (branch != -1 && branch != 0) {
             throw new IllegalArgumentException("The only valid values for branch_index is -1 (W_{-1}) and 0 (W_{0}).");
         }
 
-        if(z < -E_INVERSE) {
-            throw new IllegalArgumentException("The real branches of Lambert W function are not defined for z < -1/e," +
-                    " value was " + z);
+        if (z < -E_INVERSE) {
+            throw new IllegalArgumentException(
+                    "The real branches of Lambert W function are not defined for z < -1/e," + " value was " + z);
         }
 
         double w = initW(branch, z);
-        if(Double.isNaN(w)) {
+        if (Double.isNaN(w)) {
             return w;
         }
 
         double delta;
-        for(int i = 0; i < SERIES_MAX; i++) {
+        for (int i = 0; i < SERIES_MAX; i++) {
             double ew = Math.exp(w);
             delta = w * ew - z;
 
-            if(delta == 0) {
+            if (delta == 0) {
                 break;
             }
 
-            if(Math.abs(-delta / (ew * (w + 1))) < ACCURACY) {
+            if (Math.abs(-delta / (ew * (w + 1))) < ACCURACY) {
                 break;
             }
 
@@ -54,13 +55,13 @@ public final class MathUtils {
 
     private static double initW(int branch, double z) {
         double w;
-        if(z >= 0) {
-            if(branch == 0) {
-                if(z <= 500.0) {
+        if (z >= 0) {
+            if (branch == 0) {
+                if (z <= 500.0) {
                     w = 0.665 * (1 + 0.0195 * Math.log(z + 1.0)) * Math.log(z + 1.0) + 0.04;
                 }
                 else {
-                    w  = Math.log(z - 4.0) - (1.0 - 1.0 / Math.log(z)) * Math.log(Math.log(z));
+                    w = Math.log(z - 4.0) - (1.0 - 1.0 / Math.log(z)) * Math.log(Math.log(z));
                 }
             }
             else {
@@ -68,8 +69,8 @@ public final class MathUtils {
             }
         }
         else {
-            if(Math.abs(z + Math.exp(-1)) >  0.01) {
-                if(branch == 0) {
+            if (Math.abs(z + Math.exp(-1)) > 0.01) {
+                if (branch == 0) {
                     w = 0;
                 }
                 else {
@@ -77,12 +78,12 @@ public final class MathUtils {
                 }
             }
             else {
-                if(z == -Math.exp(-1)) {
+                if (z == -Math.exp(-1)) {
                     w = -1;
                 }
                 else {
                     double sqrt = Math.sqrt(2 * (Math.exp(1) * z + 1));
-                    if(branch == 0) {
+                    if (branch == 0) {
                         w = -1 + sqrt;
                     }
                     else {
@@ -100,6 +101,7 @@ public final class MathUtils {
      * Returns a {@code double} value representing the distance between {@code x} and the largest double value that is
      * smaller than or equal to {@code x} and is a mathematical integer. This is equivalent to
      * {@code x - Math.floor(x)}.
+     *
      * @param x the value to find the floor offset for
      * @return a non-negative double value
      */
@@ -109,7 +111,8 @@ public final class MathUtils {
 
     /**
      * If the magnitude of {@code x} is smaller than {@code epsilon}, returns 0. Otherwise, returns {@code x}.
-     * @param x the number which will potentially be reduced to 0
+     *
+     * @param x       the number which will potentially be reduced to 0
      * @param epsilon the tolerance value
      * @return {@code x}, or 0 if x is sufficiently close to it
      */

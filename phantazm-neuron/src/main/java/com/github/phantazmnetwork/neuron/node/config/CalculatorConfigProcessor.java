@@ -11,11 +11,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class CalculatorConfigProcessor implements ConfigProcessor<Calculator> {
 
-    private enum CalculatorType {
-        SQUARED_DISTANCE
-    }
-
-    private static final ConfigProcessor<CalculatorType> CALCULATOR_TYPE_PROCESSOR = ConfigProcessor.enumProcessor(CalculatorType.class);
+    private static final ConfigProcessor<CalculatorType> CALCULATOR_TYPE_PROCESSOR =
+            ConfigProcessor.enumProcessor(CalculatorType.class);
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
     @Override
@@ -32,5 +29,9 @@ public class CalculatorConfigProcessor implements ConfigProcessor<Calculator> {
         }
 
         throw new ConfigProcessException("Unknown calculator");
+    }
+
+    private enum CalculatorType {
+        SQUARED_DISTANCE
     }
 }

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public interface ContextProvider {
     /**
      * Provides a {@link PathContext}, given an {@link Instance}.
+     *
      * @param instance the instance to provide a context for
      * @return the PathContext associated with this instance
      */

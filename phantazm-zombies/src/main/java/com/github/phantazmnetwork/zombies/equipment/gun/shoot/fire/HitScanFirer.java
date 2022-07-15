@@ -29,40 +29,31 @@ import java.util.function.Supplier;
  */
 public class HitScanFirer implements Firer {
 
+    private final Supplier<Optional<? extends Entity>> entitySupplier;
+    private final ShotEndpointSelector endSelector;
+    private final TargetFinder targetFinder;
+    private final Collection<ShotHandler> shotHandlers;
+
     /**
-     * Data for a {@link HitScanFirer}.
-     * @param endSelectorKey A {@link Key} to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
-     * @param targetFinderKey A {@link Key} to the {@link HitScanFirer}'s {@link TargetFinder}
-     * @param shotHandlerKeys A {@link Key} to the {@link HitScanFirer}'s {@link ShotHandler}s
+     * Creates a {@link HitScanFirer}.
+     *
+     * @param entitySupplier A {@link Supplier} for the {@link Entity} shooter
+     * @param endSelector    The {@link HitScanFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinder   The {@link HitScanFirer}'s {@link TargetFinder}
+     * @param shotHandlers   The {@link HitScanFirer}'s {@link ShotHandler}s
      */
-    public record Data(@NotNull Key endSelectorKey, @NotNull Key targetFinderKey,
-                       @NotNull Collection<Key> shotHandlerKeys) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan");
-
-        /**
-         * Creates a {@link Data}.
-         * @param endSelectorKey A {@link Key} to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
-         * @param targetFinderKey A {@link Key} to the {@link HitScanFirer}'s {@link TargetFinder}
-         * @param shotHandlerKeys A {@link Key} to the {@link HitScanFirer}'s {@link ShotHandler}s
-         */
-        public Data {
-            Objects.requireNonNull(endSelectorKey, "endSelectorKey");
-            Objects.requireNonNull(targetFinderKey, "targetFinderKey");
-            Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+                        @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
+                        @NotNull Collection<ShotHandler> shotHandlers) {
+        this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
+        this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
+        this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
+        this.shotHandlers = List.copyOf(shotHandlers);
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -75,7 +66,8 @@ public class HitScanFirer implements Firer {
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Key endSelectorKey = keyProcessor.dataFromElement(element.getElementOrThrow("endSelectorKey"));
                 Key targetFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetFinderKey"));
-                Collection<Key> shotHandlerKeys = collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlerKeys"));
+                Collection<Key> shotHandlerKeys =
+                        collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlerKeys"));
 
                 return new Data(endSelectorKey, targetFinderKey, shotHandlerKeys);
             }
@@ -94,6 +86,7 @@ public class HitScanFirer implements Firer {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
@@ -102,30 +95,6 @@ public class HitScanFirer implements Firer {
             keys.add(data.targetFinderKey());
             keys.addAll(data.shotHandlerKeys());
         };
-    }
-
-    private final Supplier<Optional<? extends Entity>> entitySupplier;
-
-    private final ShotEndpointSelector endSelector;
-
-    private final TargetFinder targetFinder;
-
-    private final Collection<ShotHandler> shotHandlers;
-
-    /**
-     * Creates a {@link HitScanFirer}.
-     * @param entitySupplier A {@link Supplier} for the {@link Entity} shooter
-     * @param endSelector The {@link HitScanFirer}'s {@link ShotEndpointSelector}
-     * @param targetFinder The {@link HitScanFirer}'s {@link TargetFinder}
-     * @param shotHandlers The {@link HitScanFirer}'s {@link ShotHandler}s
-     */
-    public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-                        @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
-                        @NotNull Collection<ShotHandler> shotHandlers) {
-        this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
-        this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
-        this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
-        this.shotHandlers = List.copyOf(shotHandlers);
     }
 
     @Override
@@ -145,8 +114,9 @@ public class HitScanFirer implements Firer {
                 previousHits.add(hit.entity().getUuid());
             }
             for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(state, player, previousHits, new GunShot(start, end, target.regular(),
-                        target.headshot()));
+                shotHandler.handle(state, player, previousHits,
+                                   new GunShot(start, end, target.regular(), target.headshot())
+                );
             }
         });
     }
@@ -155,6 +125,41 @@ public class HitScanFirer implements Firer {
     public void tick(@NotNull GunState state, long time) {
         for (ShotHandler handler : shotHandlers) {
             handler.tick(state, time);
+        }
+    }
+
+    /**
+     * Data for a {@link HitScanFirer}.
+     *
+     * @param endSelectorKey  A {@link Key} to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinderKey A {@link Key} to the {@link HitScanFirer}'s {@link TargetFinder}
+     * @param shotHandlerKeys A {@link Key} to the {@link HitScanFirer}'s {@link ShotHandler}s
+     */
+    public record Data(@NotNull Key endSelectorKey,
+                       @NotNull Key targetFinderKey,
+                       @NotNull Collection<Key> shotHandlerKeys) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param endSelectorKey  A {@link Key} to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
+         * @param targetFinderKey A {@link Key} to the {@link HitScanFirer}'s {@link TargetFinder}
+         * @param shotHandlerKeys A {@link Key} to the {@link HitScanFirer}'s {@link ShotHandler}s
+         */
+        public Data {
+            Objects.requireNonNull(endSelectorKey, "endSelectorKey");
+            Objects.requireNonNull(targetFinderKey, "targetFinderKey");
+            Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
         }
     }
 

@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 
 /**
  * A {@link Pipe} object containing a single instance. Not part of the public API.
+ *
  * @param <TTYpe> the type of element contained in this pipe
  */
 final class SingletonPipe<TTYpe> implements Pipe<TTYpe> {
@@ -15,6 +16,7 @@ final class SingletonPipe<TTYpe> implements Pipe<TTYpe> {
     /**
      * Creates a new SingletonPipe containing the specified value. Instances may be obtained through
      * {@link Pipe#of(Object[])}.
+     *
      * @param value the only value contained in this pipe
      */
     SingletonPipe(@Nullable TTYpe value) {
@@ -28,7 +30,7 @@ final class SingletonPipe<TTYpe> implements Pipe<TTYpe> {
 
     @Override
     public TTYpe next() {
-        if(end) {
+        if (end) {
             throw new NoSuchElementException();
         }
 

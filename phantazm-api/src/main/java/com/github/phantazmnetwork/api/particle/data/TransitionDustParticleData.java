@@ -24,9 +24,34 @@ public class TransitionDustParticleData implements ParticleData {
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.dust_color_transition");
 
     private static final Key KEY = Particle.DUST_COLOR_TRANSITION.key();
+    private final float fromRed;
+    private final float fromGreen;
+    private final float fromBlue;
+    private final float toRed;
+    private final float toGreen;
+    private final float toBlue;
+    private final float size;
+
+    /**
+     * Creates a new {@link TransitionDustParticleData}.
+     *
+     * @param from The initial color of the particle
+     * @param to   The final color of the particle
+     * @param size The size of the particle
+     */
+    public TransitionDustParticleData(@NotNull RGBLike from, @NotNull RGBLike to, float size) {
+        this.fromRed = from.red() / 255.0F;
+        this.fromGreen = from.green() / 255.0F;
+        this.fromBlue = from.blue() / 255.0F;
+        this.toRed = to.red() / 255.0F;
+        this.toGreen = to.green() / 255.0F;
+        this.toBlue = to.blue() / 255.0F;
+        this.size = size;
+    }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link TransitionDustParticleData}.
+     *
      * @return A {@link ConfigProcessor} for {@link TransitionDustParticleData}
      */
     public static @NotNull ConfigProcessor<TransitionDustParticleData> processor() {
@@ -34,7 +59,8 @@ public class TransitionDustParticleData implements ParticleData {
 
         return new ConfigProcessor<>() {
             @Override
-            public @NotNull TransitionDustParticleData dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            public @NotNull TransitionDustParticleData dataFromElement(@NotNull ConfigElement element)
+                    throws ConfigProcessException {
                 RGBLike from = rgbProcessor.dataFromElement(element.getElementOrThrow("from"));
                 RGBLike to = rgbProcessor.dataFromElement(element.getElementOrThrow("to"));
                 float size = element.getNumberOrThrow("size").floatValue();
@@ -46,11 +72,15 @@ public class TransitionDustParticleData implements ParticleData {
             }
 
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull TransitionDustParticleData transitionDustParticleData) throws ConfigProcessException {
-                TextColor from = TextColor.color(transitionDustParticleData.fromRed,
-                        transitionDustParticleData.fromGreen, transitionDustParticleData.fromBlue);
-                TextColor to = TextColor.color(transitionDustParticleData.toRed,
-                        transitionDustParticleData.toGreen, transitionDustParticleData.toBlue);
+            public @NotNull ConfigElement elementFromData(
+                    @NotNull TransitionDustParticleData transitionDustParticleData) throws ConfigProcessException {
+                TextColor from =
+                        TextColor.color(transitionDustParticleData.fromRed, transitionDustParticleData.fromGreen,
+                                        transitionDustParticleData.fromBlue
+                        );
+                TextColor to = TextColor.color(transitionDustParticleData.toRed, transitionDustParticleData.toGreen,
+                                               transitionDustParticleData.toBlue
+                );
 
                 LinkedConfigNode node = new LinkedConfigNode(3);
                 node.put("from", rgbProcessor.elementFromData(from));
@@ -60,36 +90,6 @@ public class TransitionDustParticleData implements ParticleData {
                 return node;
             }
         };
-    }
-
-    private final float fromRed;
-
-    private final float fromGreen;
-
-    private final float fromBlue;
-
-    private final float toRed;
-
-    private final float toGreen;
-
-    private final float toBlue;
-
-    private final float size;
-
-    /**
-     * Creates a new {@link TransitionDustParticleData}.
-     * @param from The initial color of the particle
-     * @param to The final color of the particle
-     * @param size The size of the particle
-     */
-    public TransitionDustParticleData(@NotNull RGBLike from, @NotNull RGBLike to, float size) {
-        this.fromRed = from.red() / 255.0F;
-        this.fromGreen = from.green() / 255.0F;
-        this.fromBlue = from.blue() / 255.0F;
-        this.toRed = to.red() / 255.0F;
-        this.toGreen = to.green() / 255.0F;
-        this.toBlue = to.blue() / 255.0F;
-        this.size = size;
     }
 
     @Override

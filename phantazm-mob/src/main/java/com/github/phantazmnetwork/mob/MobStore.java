@@ -21,8 +21,9 @@ public class MobStore {
 
     /**
      * Attempts to activate triggers for an {@link Entity}.
+     *
      * @param entity The {@link Entity} to activate triggers for
-     * @param key The {@link Key} of the {@link net.minestom.server.event.Event} that triggered the activation
+     * @param key    The {@link Key} of the {@link net.minestom.server.event.Event} that triggered the activation
      */
     public void useTrigger(@NotNull Entity entity, @NotNull Key key) {
         Map<Key, Collection<SkillInstance>> triggers = uuidToTriggers.get(entity.getUuid());
@@ -38,6 +39,7 @@ public class MobStore {
 
     /**
      * Called when an {@link Entity} dies.
+     *
      * @param event The {@link EntityDeathEvent} that occurred
      */
     public void onMobDeath(@NotNull EntityDeathEvent event) {
@@ -48,6 +50,7 @@ public class MobStore {
 
     /**
      * Registers a {@link PhantazmMob} to the store.
+     *
      * @param mob The {@link PhantazmMob} to register
      */
     public void registerMob(@NotNull PhantazmMob mob) {
@@ -64,6 +67,7 @@ public class MobStore {
 
     /**
      * Gets the {@link PhantazmMob} associated with a {@link UUID}.
+     *
      * @param uuid The {@link UUID} of the {@link PhantazmMob} to get
      * @return The {@link PhantazmMob} associated with the {@link UUID} or null if none exists
      */
@@ -73,6 +77,7 @@ public class MobStore {
 
     /**
      * Checks if the mob store contains a {@link PhantazmMob} associated with a {@link UUID}.
+     *
      * @param uuid The {@link UUID} to check
      * @return Whether a {@link PhantazmMob} is associated with the {@link UUID} in the store
      */

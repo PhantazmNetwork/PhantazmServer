@@ -17,17 +17,59 @@ public interface NavigationTracker {
      */
     NavigationTracker NULL = new NavigationTracker() {
         @Override
-        public void onPathfind(@NotNull Navigator navigator) {}
+        public void onPathfind(@NotNull Navigator navigator) {
+        }
 
         @Override
-        public void onPathfindComplete(@NotNull Navigator navigator, @NotNull Node pathStart, @Nullable PathResult result) {}
+        public void onPathfindComplete(@NotNull Navigator navigator, @NotNull Node pathStart,
+                                       @Nullable PathResult result) {
+        }
 
         @Override
-        public void onDestinationReached(@NotNull Navigator navigator) {}
+        public void onDestinationReached(@NotNull Navigator navigator) {
+        }
 
         @Override
-        public void onNavigationError(@NotNull Navigator navigator, @Nullable Node pathStart, @NotNull ErrorType errorType) {}
+        public void onNavigationError(@NotNull Navigator navigator, @Nullable Node pathStart,
+                                      @NotNull ErrorType errorType) {
+        }
     };
+
+    /**
+     * Called directly after the given {@link Navigator} begins a pathfinding operation. The navigator should have a set
+     * destination.
+     *
+     * @param navigator the navigator which just began pathfinding
+     */
+    void onPathfind(@NotNull Navigator navigator);
+
+    /**
+     * Called directly after the given {@link Navigator} finishes a pathfinding operation (but before it begins walking
+     * along it). The navigator should have a set destination.
+     *
+     * @param navigator the navigator which just finished a pathfinding operation
+     * @param pathStart the beginning of the path
+     * @param result    the {@link PathResult} representing the completed pathfinding operation, which may be null if the
+     *                  operation was cancelled or an error occurred
+     */
+    void onPathfindComplete(@NotNull Navigator navigator, @NotNull Node pathStart, @Nullable PathResult result);
+
+    /**
+     * Called directly after the given {@link Navigator} reaches its destination (but before a new destination is
+     * calculated). Therefore, the navigator should have a destination set.
+     *
+     * @param navigator the navigator which just reached its destination
+     */
+    void onDestinationReached(@NotNull Navigator navigator);
+
+    /**
+     * Called when the given {@link Navigator} encounters a navigation error.
+     *
+     * @param navigator the navigator which just erred
+     * @param pathStart the beginning of the path
+     * @param errorType the {@link ErrorType} describing the error
+     */
+    void onNavigationError(@NotNull Navigator navigator, @Nullable Node pathStart, @NotNull ErrorType errorType);
 
     /**
      * Describes types of navigation error.
@@ -43,36 +85,4 @@ public interface NavigationTracker {
          */
         NO_START
     }
-
-    /**
-     * Called directly after the given {@link Navigator} begins a pathfinding operation. The navigator should have a set
-     * destination.
-     * @param navigator the navigator which just began pathfinding
-     */
-    void onPathfind(@NotNull Navigator navigator);
-
-    /**
-     * Called directly after the given {@link Navigator} finishes a pathfinding operation (but before it begins walking
-     * along it). The navigator should have a set destination.
-     * @param navigator the navigator which just finished a pathfinding operation
-     * @param pathStart the beginning of the path
-     * @param result the {@link PathResult} representing the completed pathfinding operation, which may be null if the
-     *               operation was cancelled or an error occurred
-     */
-    void onPathfindComplete(@NotNull Navigator navigator, @NotNull Node pathStart, @Nullable PathResult result);
-
-    /**
-     * Called directly after the given {@link Navigator} reaches its destination (but before a new destination is
-     * calculated). Therefore, the navigator should have a destination set.
-     * @param navigator the navigator which just reached its destination
-     */
-    void onDestinationReached(@NotNull Navigator navigator);
-
-    /**
-     * Called when the given {@link Navigator} encounters a navigation error.
-     * @param navigator the navigator which just erred
-     * @param pathStart the beginning of the path
-     * @param errorType the {@link ErrorType} describing the error
-     */
-    void onNavigationError(@NotNull Navigator navigator, @Nullable Node pathStart, @NotNull ErrorType errorType);
 }

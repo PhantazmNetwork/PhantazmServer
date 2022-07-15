@@ -10,6 +10,7 @@ import java.util.*;
 
 /**
  * A {@link TargetSelector} that selects nearby {@link Entity}s.
+ *
  * @param <TReturn> A mapped type of the target {@link Entity}
  */
 public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector<Iterable<TReturn>> {
@@ -20,7 +21,8 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
 
     /**
      * Creates a {@link NearestEntitiesSelector}.
-     * @param range The euclidean distance range of the selector
+     *
+     * @param range       The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      */
     public NearestEntitiesSelector(double range, int targetLimit) {
@@ -68,6 +70,7 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
 
     /**
      * Gets the euclidean distance range of the selector.
+     *
      * @return The euclidean distance range of the selector
      */
     public double getRange() {
@@ -76,6 +79,7 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
 
     /**
      * Gets the maximum number of targets to select.
+     *
      * @return The maximum number of targets to select
      */
     public int getTargetLimit() {
@@ -84,6 +88,7 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
 
     /**
      * Maps a {@link Entity} to a target.
+     *
      * @param entity The {@link Entity} to map
      * @return The mapped target
      */
@@ -91,9 +96,10 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
 
     /**
      * Checks if a target is valid.
-     * @param mob The mob using the {@link NearestPlayersSelector}
+     *
+     * @param mob          The mob using the {@link NearestPlayersSelector}
      * @param targetEntity The target {@link Entity}
-     * @param target The mapped target
+     * @param target       The mapped target
      * @return Whether the target is valid
      */
     protected abstract boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity,

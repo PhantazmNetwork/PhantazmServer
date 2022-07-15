@@ -10,6 +10,7 @@ class ImmutableVec3I extends Vec3IBase {
 
     /**
      * Creates a new instance of this class from the given int triplet.
+     *
      * @param x the x-coordinate
      * @param y the y-coordinate
      * @param z the z-coordinate

@@ -2,8 +2,8 @@ package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.zombies.map.ShopPositionInfo;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
+import com.github.phantazmnetwork.zombies.map.ShopPositionInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +16,7 @@ import java.util.Objects;
 public class NewShopGui extends NamedObjectGui {
     /**
      * Constructs a new instance of this GUI, which allows a user to create shops of a specific type.
+     *
      * @param session the current {@link EditorSession}
      */
     @SuppressWarnings("PatternValidation")
@@ -28,7 +29,7 @@ public class NewShopGui extends NamedObjectGui {
         Vec3I firstSelected = session.getFirstSelection();
         buttonAdd.setOnClick(() -> {
             String value = textFieldName.getText();
-            if(value.isEmpty()) {
+            if (value.isEmpty()) {
                 return;
             }
 
@@ -36,7 +37,9 @@ public class NewShopGui extends NamedObjectGui {
             Vec3I origin = currentMap.info().origin();
 
             currentMap.shops().add(new ShopPositionInfo(typeKey, Vec3I.of(firstSelected.getX() - origin.getX(),
-                    firstSelected.getY() - origin.getY(), firstSelected.getZ() - origin.getZ())));
+                                                                          firstSelected.getY() - origin.getY(),
+                                                                          firstSelected.getZ() - origin.getZ()
+            )));
             session.refreshShops();
             ScreenUtils.closeCurrentScreen();
         });

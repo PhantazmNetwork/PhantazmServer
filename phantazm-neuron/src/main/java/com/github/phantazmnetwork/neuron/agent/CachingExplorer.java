@@ -13,16 +13,16 @@ import java.util.Objects;
  * A general {@link Explorer} implementation that takes advantage of a {@link PathCache} object for caching.
  */
 public abstract class CachingExplorer implements Explorer {
-    private final PathCache cache;
-
     /**
      * The descriptor for the {@link Agent} using this Explorer.
      */
     protected final Descriptor descriptor;
+    private final PathCache cache;
 
     /**
      * Creates a new ContextualExplorer from the given {@link PathCache} and {@link Descriptor}.
-     * @param cache the PathCache instance used for caching — if null no caching will be performed (not recommended)
+     *
+     * @param cache      the PathCache instance used for caching — if null no caching will be performed (not recommended)
      * @param descriptor the descriptor of the agent using this explorer
      */
     public CachingExplorer(@Nullable PathCache cache, @NotNull Descriptor descriptor) {
@@ -33,10 +33,10 @@ public abstract class CachingExplorer implements Explorer {
     @Override
     public final @NotNull Iterable<Vec3I> expandNode(@NotNull Node current) {
         //only cache nodes that are centered
-        if(cache != null && current.isCentered()) {
+        if (cache != null && current.isCentered()) {
             Vec3I currentPos = current.getPosition();
-            return cache.getSteps(currentPos, descriptor).orElse(() -> cache.watchSteps(currentPos, descriptor,
-                    getWalkIterator(current)));
+            return cache.getSteps(currentPos, descriptor)
+                        .orElse(() -> cache.watchSteps(currentPos, descriptor, getWalkIterator(current)));
         }
 
         return () -> getWalkIterator(current);
@@ -44,6 +44,7 @@ public abstract class CachingExplorer implements Explorer {
 
     /**
      * Returns an {@link Iterator} that calculates each translation vector as it is iterated.
+     *
      * @param current the current node
      * @return an Iterator over the translation vectors
      */

@@ -9,8 +9,9 @@ import java.util.Objects;
 
 /**
  * A {@link TargetSelector} that maps target types.
+ *
  * @param <TFrom> The delegate {@link TargetSelector}'s target type
- * @param <TTo> The new {@link TargetSelector}'s target type
+ * @param <TTo>   The new {@link TargetSelector}'s target type
  */
 public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> {
 
@@ -18,6 +19,7 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
 
     /**
      * Creates a new {@link MappedSelector}.
+     *
      * @param delegate The delegate {@link TargetSelector} to map
      */
     public MappedSelector(@NotNull TargetSelector<TFrom> delegate) {
@@ -26,6 +28,7 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
 
     /**
      * Gets the delegate {@link TargetSelector}.
+     *
      * @return The delegate {@link TargetSelector}
      */
     public @NotNull TargetSelector<TFrom> getDelegate() {
@@ -45,6 +48,7 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
 
     /**
      * Maps a {@link TFrom} target to a {@link TTo} target.
+     *
      * @param from The {@link TFrom} target to map
      * @return The {@link TTo} target
      */
