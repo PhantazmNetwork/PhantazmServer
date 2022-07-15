@@ -16,6 +16,31 @@ import java.util.Optional;
  */
 public class PlayerAudienceProvider implements AudienceProvider {
 
+    private final PlayerView playerView;
+
+    /**
+     * Creates a new {@link PlayerAudienceProvider}.
+     *
+     * @param playerView The {@link PlayerView} of the {@link Player}
+     */
+    public PlayerAudienceProvider(@NotNull PlayerView playerView) {
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
+    }
+
+    /**
+     * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
+     * @return A {@link ConfigProcessor} for {@link Data}s
+     */
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return ConfigProcessor.emptyProcessor(Data::new);
+    }
+
+    @Override
+    public @NotNull Optional<? extends Player> provideAudience() {
+        return playerView.getPlayer();
+    }
+
     /**
      * Data for a {@link PlayerAudienceProvider}.
      */
@@ -30,28 +55,5 @@ public class PlayerAudienceProvider implements AudienceProvider {
         public @NotNull Key key() {
             return SERIAL_KEY;
         }
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return ConfigProcessor.emptyProcessor(Data::new);
-    }
-
-    private final PlayerView playerView;
-
-    /**
-     * Creates a new {@link PlayerAudienceProvider}.
-     * @param playerView The {@link PlayerView} of the {@link Player}
-     */
-    public PlayerAudienceProvider(@NotNull PlayerView playerView) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-    }
-
-    @Override
-    public @NotNull Optional<? extends Player> provideAudience() {
-        return playerView.getPlayer();
     }
 }

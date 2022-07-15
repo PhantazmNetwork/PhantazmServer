@@ -10,9 +10,11 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link ConfigProcessor} for {@link NearestEntitiesSelector}s.
+ *
  * @param <TSelector> The type of {@link NearestEntitiesSelector} to process
  */
-public abstract class NearestEntitiesSelectorConfigProcessor<TSelector extends NearestEntitiesSelector<?>> implements ConfigProcessor<TSelector> {
+public abstract class NearestEntitiesSelectorConfigProcessor<TSelector extends NearestEntitiesSelector<?>>
+        implements ConfigProcessor<TSelector> {
     @Override
     public @NotNull TSelector dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
         double range = element.getNumberOrThrow("range").doubleValue();
@@ -33,7 +35,8 @@ public abstract class NearestEntitiesSelectorConfigProcessor<TSelector extends N
 
     /**
      * Creates a {@link TSelector}.
-     * @param range The euclidean distance range of the selector
+     *
+     * @param range       The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      * @return A new {@link TSelector}
      */

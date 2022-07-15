@@ -21,26 +21,20 @@ import java.util.Objects;
  */
 public class NearbyEntityFinder implements PositionalEntityFinder {
 
+    private final Data data;
+
     /**
-     * Data for a {@link NearbyEntityFinder}.
-     * @param range The euclidean distance range to search for nearby {@link Entity}s
+     * Creates a {@link NearbyEntityFinder}.
+     *
+     * @param data The {@link NearbyEntityFinder}'s {@link Data}
      */
-    public record Data(double range) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY
-                = Key.key(Namespaces.PHANTAZM,"gun.target.entity_finder.positional.nearby_entity");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public NearbyEntityFinder(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -62,19 +56,28 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a {@link NearbyEntityFinder}.
-     * @param data The {@link NearbyEntityFinder}'s {@link Data}
-     */
-    public NearbyEntityFinder(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
     public @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Point start) {
         return instance.getNearbyEntities(start, data.range());
+    }
+
+    /**
+     * Data for a {@link NearbyEntityFinder}.
+     *
+     * @param range The euclidean distance range to search for nearby {@link Entity}s
+     */
+    public record Data(double range) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY =
+                Key.key(Namespaces.PHANTAZM, "gun.target.entity_finder.positional.nearby_entity");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

@@ -23,19 +23,23 @@ public final class Neuron {
 
     /**
      * Initializes pathfinding-related features. Should only be called once from {@link PhantazmServer#main(String[])}.
+     *
      * @param pathfinderConfig the {@link PathfinderConfig} instance used to configure pathfinding behavior
      */
     static void initialize(@NotNull EventNode<Event> globalNode, @NotNull PathfinderConfig pathfinderConfig) {
-        spawner = new ContextualSpawner(new BasicContextProvider(globalNode, Executors.newWorkStealingPool(
-                pathfinderConfig.threads()), pathfinderConfig.cacheSize(), pathfinderConfig.updateQueueCapacity()));
+        spawner = new ContextualSpawner(
+                new BasicContextProvider(globalNode, Executors.newWorkStealingPool(pathfinderConfig.threads()),
+                                         pathfinderConfig.cacheSize(), pathfinderConfig.updateQueueCapacity()
+                ));
     }
 
     /**
      * Returns the global {@link Spawner} used to spawn {@link NeuralEntity} instances.
+     *
      * @return the global spawner
      */
     public static @NotNull Spawner getSpawner() {
-        if(spawner == null) {
+        if (spawner == null) {
             throw new IllegalStateException("Neuron has not been initialized yet");
         }
 

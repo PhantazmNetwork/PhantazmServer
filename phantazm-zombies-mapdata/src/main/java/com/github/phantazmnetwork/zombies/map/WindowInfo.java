@@ -20,47 +20,36 @@ public record WindowInfo(@NotNull Region3I frameRegion,
     /**
      * The default "repair" sound used when a single block is repaired.
      */
-    public static final Sound DEFAULT_REPAIR_SOUND = Sound.sound(
-            Key.key("minecraft:block.wood.place"),
-            Sound.Source.BLOCK,
-            2.0F,
-            1.0F);
+    public static final Sound DEFAULT_REPAIR_SOUND =
+            Sound.sound(Key.key("minecraft:block.wood.place"), Sound.Source.BLOCK, 2.0F, 1.0F);
 
     /**
      * The default "repair all" sound used when all blocks in the window are repaired.
      */
-    public static final Sound DEFAULT_REPAIR_ALL_SOUND = Sound.sound(
-            Key.key("minecraft:block.wooden_trapdoor.close"),
-            Sound.Source.BLOCK,
-            2.0F,
-            1.0F);
+    public static final Sound DEFAULT_REPAIR_ALL_SOUND =
+            Sound.sound(Key.key("minecraft:block.wooden_trapdoor.close"), Sound.Source.BLOCK, 2.0F, 1.0F);
 
     /**
      * The default "break" sound used when breaking a single block.
      */
-    public static final Sound DEFAULT_BREAK_SOUND = Sound.sound(
-            Key.key("minecraft:block.wood.break"),
-            Sound.Source.HOSTILE,
-            2.0F,
-            0.8F);
+    public static final Sound DEFAULT_BREAK_SOUND =
+            Sound.sound(Key.key("minecraft:block.wood.break"), Sound.Source.HOSTILE, 2.0F, 0.8F);
 
     /**
      * The default "break all" sound used when all blocks in the window are broken.
      */
-    public static final Sound DEFAULT_BREAK_ALL_SOUND = Sound.sound(
-            Key.key("minecraft:entity.zombie.break_wooden_door"),
-            Sound.Source.HOSTILE,
-            2.0F,
-            1.0F);
+    public static final Sound DEFAULT_BREAK_ALL_SOUND =
+            Sound.sound(Key.key("minecraft:entity.zombie.break_wooden_door"), Sound.Source.HOSTILE, 2.0F, 1.0F);
 
     /**
      * Creates a new instance of this record.
-     * @param frameRegion the region representing the repairable part of the window
-     * @param repairBlocks the blocks used to repair the window when it is broken
-     * @param repairSound the sound played when a single block is repaired
+     *
+     * @param frameRegion    the region representing the repairable part of the window
+     * @param repairBlocks   the blocks used to repair the window when it is broken
+     * @param repairSound    the sound played when a single block is repaired
      * @param repairAllSound the sound played when the window is fully repaired
-     * @param breakSound the sound played when one block is broken
-     * @param breakAllSound the sound played when all blocks are broken
+     * @param breakSound     the sound played when one block is broken
+     * @param breakAllSound  the sound played when all blocks are broken
      */
     public WindowInfo {
         Objects.requireNonNull(frameRegion, "frameRegion");
@@ -73,12 +62,13 @@ public record WindowInfo(@NotNull Region3I frameRegion,
 
     /**
      * Constructs a new instance of this record, using all the default sounds.
-     * @param frameRegion the region representing the repairable part of the window
+     *
+     * @param frameRegion  the region representing the repairable part of the window
      * @param repairBlocks the blocks used to repair the window when it is broken
      */
-    public WindowInfo(@NotNull Region3I frameRegion,
-                      @NotNull List<String> repairBlocks) {
+    public WindowInfo(@NotNull Region3I frameRegion, @NotNull List<String> repairBlocks) {
         this(frameRegion, repairBlocks, DEFAULT_REPAIR_SOUND, DEFAULT_REPAIR_ALL_SOUND, DEFAULT_BREAK_SOUND,
-                DEFAULT_BREAK_ALL_SOUND);
+             DEFAULT_BREAK_ALL_SOUND
+        );
     }
 }

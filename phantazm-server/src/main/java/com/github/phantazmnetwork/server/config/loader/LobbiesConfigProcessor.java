@@ -101,8 +101,9 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
         ConfigNode configNode = new LinkedConfigNode(4);
         configNode.putString("instancesPath", lobbiesConfig.instancesPath().toString());
-        configNode.put("kickMessage", AdventureConfigProcessors.component().elementFromData(lobbiesConfig
-                .kickMessage()));
+        configNode.put("kickMessage",
+                       AdventureConfigProcessors.component().elementFromData(lobbiesConfig.kickMessage())
+        );
         configNode.putString("mainLobbyName", lobbiesConfig.mainLobbyName());
         configNode.put("lobbies", lobbiesNode);
 

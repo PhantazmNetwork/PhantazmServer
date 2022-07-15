@@ -28,15 +28,15 @@ import java.util.*;
  */
 public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
-    private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR
-            = ConfigProcessor.enumProcessor(EquipmentSlot.class);
+    private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR =
+            ConfigProcessor.enumProcessor(EquipmentSlot.class);
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
 
     private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
 
-    private static final ConfigProcessor<Object2FloatMap<String>> ATTRIBUTE_MAP_PROCESSOR
-            = ConfigProcessor.FLOAT.mapProcessor(Object2FloatOpenHashMap::new);
+    private static final ConfigProcessor<Object2FloatMap<String>> ATTRIBUTE_MAP_PROCESSOR =
+            ConfigProcessor.FLOAT.mapProcessor(Object2FloatOpenHashMap::new);
 
     private final ConfigProcessor<MinestomDescriptor> descriptorProcessor;
 
@@ -48,10 +48,11 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
     /**
      * Creates a new {@link MobModelConfigProcessor}.
+     *
      * @param descriptorProcessor A {@link ConfigProcessor} for {@link MinestomDescriptor}s
-     * @param goalProcessor A {@link ConfigProcessor} for {@link Goal}s
-     * @param skillProcessor A {@link ConfigProcessor} for {@link Skill}s
-     * @param itemStackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
+     * @param goalProcessor       A {@link ConfigProcessor} for {@link Goal}s
+     * @param skillProcessor      A {@link ConfigProcessor} for {@link Skill}s
+     * @param itemStackProcessor  A {@link ConfigProcessor} for {@link ItemStack}s
      */
     public MobModelConfigProcessor(@NotNull ConfigProcessor<MinestomDescriptor> descriptorProcessor,
                                    @NotNull ConfigProcessor<Goal> goalProcessor,
@@ -112,12 +113,13 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ConfigNode equipmentNode = element.getNodeOrThrow("equipment");
         Map<EquipmentSlot, ItemStack> equipment = new HashMap<>(equipmentNode.size());
         for (Map.Entry<String, ConfigElement> entry : equipmentNode.entrySet()) {
-            EquipmentSlot equipmentSlot = EQUIPMENT_SLOT_PROCESSOR.dataFromElement(new ConfigPrimitive(entry.getKey().toUpperCase()));
+            EquipmentSlot equipmentSlot =
+                    EQUIPMENT_SLOT_PROCESSOR.dataFromElement(new ConfigPrimitive(entry.getKey().toUpperCase()));
             equipment.put(equipmentSlot, itemStackProcessor.dataFromElement(entry.getValue()));
         }
 
-        Object2FloatMap<String> attributes
-                = ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
+        Object2FloatMap<String> attributes =
+                ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
 
         return new MobModel(key, descriptor, goalGroups, triggers, displayName, equipment, attributes);
     }

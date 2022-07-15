@@ -14,21 +14,25 @@ import java.util.Objects;
 
 /**
  * Provides {@link Solid} implementations for Minestom.
+ *
  * @see ShapeSolid
  * @see PointSolid
  */
 public final class SolidProvider {
-    private static final Map<Shape, Solid> SHAPE_SOLIDS = new Object2ObjectOpenCustomHashMap<>(HashStrategies
-            .identity());
-    private static final Map<Shape, Solid[]> SPLIT_MAP = new Object2ObjectOpenCustomHashMap<>(HashStrategies
-            .identity());
+    private static final Map<Shape, Solid> SHAPE_SOLIDS =
+            new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity());
+    private static final Map<Shape, Solid[]> SPLIT_MAP =
+            new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity());
 
 
-    private SolidProvider() { throw new UnsupportedOperationException(); }
+    private SolidProvider() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Returns a {@link Solid} implementation from the specified {@link Shape}. Values may or may not be returned from a
      * shared cache.
+     *
      * @param shape the shape to create a solid from
      * @return a Solid implementation, possibly from cache, representing the given shape
      */
@@ -39,7 +43,7 @@ public final class SolidProvider {
             solid = SHAPE_SOLIDS.get(shape);
         }
 
-        if(solid != null) {
+        if (solid != null) {
             return solid;
         }
 
@@ -53,7 +57,8 @@ public final class SolidProvider {
 
     /**
      * Creates a new composite solid from the given solids. The two solids may not be equal.
-     * @param first the first solid
+     *
+     * @param first  the first solid
      * @param second the second solid
      * @return a solid consisting of both of the original solids
      * @throws IllegalArgumentException if the two solids are equal
@@ -65,12 +70,13 @@ public final class SolidProvider {
     /**
      * Returns the "split" for a tall {@link Shape}. The first half of the split will be exactly 1 block in height,
      * whereas the remainder will generally be less than 1 in height.
+     *
      * @param shape the tall shape to split
      * @return an array with exactly two elements, the first being the lower portion of the shape, the second being the
      * higher portion
      */
     public static @NotNull Solid @NotNull [] getSplit(@NotNull Shape shape) {
-        if(shape.relativeEnd().y() < 1) {
+        if (shape.relativeEnd().y() < 1) {
             throw new IllegalArgumentException("Can't split a shape that isn't tall");
         }
 
@@ -79,6 +85,7 @@ public final class SolidProvider {
 
     /**
      * Creates a new {@link Solid} implementation from the given {@code min} and {@code max} points.
+     *
      * @param min the min point
      * @param max the max point
      * @return a new Solid implementation from the given points
@@ -95,16 +102,16 @@ public final class SolidProvider {
             split = SPLIT_MAP.get(tallShape);
         }
 
-        if(split != null) {
+        if (split != null) {
             return split;
         }
 
         Point start = tallShape.relativeStart();
         Point end = tallShape.relativeEnd();
-        Solid[] newSplit = new Solid[] {
-                fromPoints(VecUtils.toFloat(start), Vec3F.ofDouble(end.x(), 1, end.z())),
-                fromPoints(Vec3F.ofDouble(start.x(), 0, start.z()), Vec3F.ofDouble(end.x(), end.y() - 1, end.z()))
-        };
+        Solid[] newSplit = new Solid[] {fromPoints(VecUtils.toFloat(start), Vec3F.ofDouble(end.x(), 1, end.z())),
+                                        fromPoints(Vec3F.ofDouble(start.x(), 0, start.z()),
+                                                   Vec3F.ofDouble(end.x(), end.y() - 1, end.z())
+                                        )};
 
         synchronized (SPLIT_MAP) {
             SPLIT_MAP.put(tallShape, newSplit);

@@ -21,6 +21,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
     /**
      * Creates a basic {@link LobbyJoinRequest}.
+     *
      * @param players The players in the request
      */
     public BasicLobbyJoinRequest(@NotNull Collection<PlayerView> players) {

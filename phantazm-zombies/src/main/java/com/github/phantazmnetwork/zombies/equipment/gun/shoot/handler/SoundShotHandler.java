@@ -25,39 +25,23 @@ import java.util.function.BiConsumer;
  */
 public class SoundShotHandler implements ShotHandler {
 
+    private final Data data;
+    private final AudienceProvider audienceProvider;
+
     /**
-     * Data for a {@link SoundShotHandler}.
-     * @param audienceProviderKey A {@link Key} to the {@link SoundShotHandler}'s {@link AudienceProvider}
-     * @param sound The sound to play for regular targets
-     * @param headshotSound The sound to play for headshots
+     * Creates a {@link SoundShotHandler}.
+     *
+     * @param data             The {@link SoundShotHandler}'s {@link Data}
+     * @param audienceProvider The {@link SoundShotHandler}'s {@link AudienceProvider}
      */
-    public record Data(@NotNull Key audienceProviderKey, @NotNull Sound sound, @NotNull Sound headshotSound) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.sound");
-
-        /**
-         * Creates a {@link Data}.
-         * @param audienceProviderKey A {@link Key} to the {@link SoundShotHandler}'s {@link AudienceProvider}
-         * @param sound The sound to play for regular targets
-         * @param headshotSound The sound to play for headshots
-         */
-        public Data {
-            Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
-            Objects.requireNonNull(sound, "sound");
-            Objects.requireNonNull(headshotSound, "headshotSound");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public SoundShotHandler(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -68,7 +52,8 @@ public class SoundShotHandler implements ShotHandler {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key audienceProviderKey = keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
+                Key audienceProviderKey =
+                        keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
                 Sound sound = soundProcessor.dataFromElement(element.getElementOrThrow("sound"));
                 Sound headshotSound = soundProcessor.dataFromElement(element.getElementOrThrow("headshotSound"));
 
@@ -89,24 +74,11 @@ public class SoundShotHandler implements ShotHandler {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.audienceProviderKey());
-    }
-
-    private final Data data;
-
-    private final AudienceProvider audienceProvider;
-
-    /**
-     * Creates a {@link SoundShotHandler}.
-     * @param data The {@link SoundShotHandler}'s {@link Data}
-     * @param audienceProvider The {@link SoundShotHandler}'s {@link AudienceProvider}
-     */
-    public SoundShotHandler(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }
 
     @Override
@@ -132,6 +104,40 @@ public class SoundShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for a {@link SoundShotHandler}.
+     *
+     * @param audienceProviderKey A {@link Key} to the {@link SoundShotHandler}'s {@link AudienceProvider}
+     * @param sound               The sound to play for regular targets
+     * @param headshotSound       The sound to play for headshots
+     */
+    public record Data(@NotNull Key audienceProviderKey, @NotNull Sound sound, @NotNull Sound headshotSound)
+            implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.sound");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param audienceProviderKey A {@link Key} to the {@link SoundShotHandler}'s {@link AudienceProvider}
+         * @param sound               The sound to play for regular targets
+         * @param headshotSound       The sound to play for headshots
+         */
+        public Data {
+            Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
+            Objects.requireNonNull(sound, "sound");
+            Objects.requireNonNull(headshotSound, "headshotSound");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

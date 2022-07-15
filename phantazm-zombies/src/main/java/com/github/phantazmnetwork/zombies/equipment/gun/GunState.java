@@ -5,13 +5,14 @@ import org.jetbrains.annotations.NotNull;
 /**
  * The state of a gun. This class is immutable and may be updated with the {@link Builder}.
  * If necessary, {@link GunState} can be stored since it will not mutate with time.
- * @param ticksSinceLastShot The number of ticks since the last shot began
- * @param ticksSinceLastFire The number of ticks since the last gun's last fire
+ *
+ * @param ticksSinceLastShot   The number of ticks since the last shot began
+ * @param ticksSinceLastFire   The number of ticks since the last gun's last fire
  * @param ticksSinceLastReload The number of ticks since the last gun's last reload
- * @param ammo The amount of ammo left in the gun
- * @param clip The amount of ammo in the gun's clip
- * @param isMainEquipment Whether the gun is the main equipment
- * @param queuedShots The number of shots queued to be fired
+ * @param ammo                 The amount of ammo left in the gun
+ * @param clip                 The amount of ammo in the gun's clip
+ * @param isMainEquipment      Whether the gun is the main equipment
+ * @param queuedShots          The number of shots queued to be fired
  */
 public record GunState(long ticksSinceLastShot,
                        long ticksSinceLastFire,
@@ -23,17 +24,13 @@ public record GunState(long ticksSinceLastShot,
 
     /**
      * Converts the {@link GunState} to a {@link Builder}.
+     *
      * @return A {@link Builder} representation of the {@link GunState}
      */
     public @NotNull GunState.Builder toBuilder() {
-        return new Builder()
-                .setTicksSinceLastShot(ticksSinceLastShot)
-                .setTicksSinceLastFire(ticksSinceLastFire)
-                .setTicksSinceLastReload(ticksSinceLastReload)
-                .setAmmo(ammo)
-                .setClip(clip)
-                .setMainEquipment(isMainEquipment)
-                .setQueuedShots(queuedShots);
+        return new Builder().setTicksSinceLastShot(ticksSinceLastShot).setTicksSinceLastFire(ticksSinceLastFire)
+                            .setTicksSinceLastReload(ticksSinceLastReload).setAmmo(ammo).setClip(clip)
+                            .setMainEquipment(isMainEquipment).setQueuedShots(queuedShots);
     }
 
     /**
@@ -57,6 +54,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Gets the number of ticks since the last shot began.
+         *
          * @return The number of ticks since the last shot began
          */
         public long getTicksSinceLastShot() {
@@ -65,6 +63,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Sets the number of ticks since the last shot began.
+         *
          * @param ticksSinceLastShot The number of ticks since the last shot began
          * @return This {@link Builder}
          */
@@ -75,6 +74,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Gets the number of ticks since the last gun's last fire.
+         *
          * @return The number of ticks since the last gun's last fire
          */
         public long getTicksSinceLastFire() {
@@ -83,6 +83,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Sets the number of ticks since the last gun's last fire.
+         *
          * @param ticksSinceLastFire The number of ticks since the last gun's last fire
          * @return This {@link Builder}
          */
@@ -93,6 +94,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Gets the number of ticks since the last gun's last reload.
+         *
          * @return The number of ticks since the last gun's last reload
          */
         public long getTicksSinceLastReload() {
@@ -101,6 +103,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Sets the number of ticks since the last gun's last reload.
+         *
          * @param ticksSinceLastReload The number of ticks since the last gun's last reload
          * @return This {@link Builder}
          */
@@ -111,6 +114,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Gets the amount of ammo left in the gun.
+         *
          * @return The amount of ammo left in the gun
          */
         public int getAmmo() {
@@ -119,6 +123,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Sets the amount of ammo left in the gun.
+         *
          * @param ammo The amount of ammo left in the gun
          * @return This {@link Builder}
          */
@@ -129,6 +134,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Gets the amount of ammo in the gun's clip.
+         *
          * @return The amount of ammo in the gun's clip
          */
         public int getClip() {
@@ -137,6 +143,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Sets the amount of ammo in the gun's clip.
+         *
          * @param clip The amount of ammo in the gun's clip
          * @return This {@link Builder}
          */
@@ -147,6 +154,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Gets whether the gun is the main equipment.
+         *
          * @return Whether the gun is the main equipment
          */
         public boolean isMainEquipment() {
@@ -155,6 +163,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Sets whether the gun is the main equipment.
+         *
          * @param isMainWeapon Whether the gun is the main equipment
          * @return This {@link Builder}
          */
@@ -165,6 +174,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Gets the number of shots queued to be fired.
+         *
          * @return The number of shots queued to be fired
          */
         public int getQueuedShots() {
@@ -173,6 +183,7 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Sets the number of shots queued to be fired.
+         *
          * @param queuedShots The number of shots queued to be fired
          * @return This {@link Builder}
          */
@@ -183,11 +194,13 @@ public record GunState(long ticksSinceLastShot,
 
         /**
          * Builds a {@link GunState} from the current {@link Builder}.
+         *
          * @return A {@link GunState} representation of the {@link Builder}
          */
         public @NotNull GunState build() {
             return new GunState(ticksSinceLastShot, ticksSinceLastFire, ticksSinceLastReload, ammo, clip,
-                    isMainEquipment, queuedShots);
+                                isMainEquipment, queuedShots
+            );
         }
 
     }

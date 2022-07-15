@@ -9,6 +9,26 @@ import org.jetbrains.annotations.NotNull;
  * {@link Space#solidAt(int, int, int)}.
  */
 public abstract class VoxelSpace implements Space {
+    @Override
+    public @NotNull SolidSource solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
+                                                  @NotNull Order order) {
+        int xOrg = (int)Math.floor(oX);
+        int yOrg = (int)Math.floor(oY);
+        int zOrg = (int)Math.floor(oZ);
+
+        int xInc = (int)Math.signum(vX);
+        int yInc = (int)Math.signum(vY);
+        int zInc = (int)Math.signum(vZ);
+
+        int xEnd = ((int)Math.floor(oX + vX)) + xInc;
+        int yEnd = ((int)Math.floor(oY + vY)) + yInc;
+        int zEnd = ((int)Math.floor(oZ + vZ)) + zInc;
+
+        Order.IterationVariables variables =
+                order.getVariablesSupplier().make(xOrg, yOrg, zOrg, xInc, yInc, zInc, xEnd, yEnd, zEnd);
+        return () -> new BasicSolidPipe(order, variables);
+    }
+
     private class BasicSolidPipe extends Pipe.Advancing<Solid> implements SolidPipe {
         private final Order order;
         private final Order.IterationVariables variables;
@@ -30,19 +50,18 @@ public abstract class VoxelSpace implements Space {
         protected boolean advance() {
             Solid candidate;
             do {
-                if((first += variables.getFirstIncrement()) == variables.getFirstEnd()) {
+                if ((first += variables.getFirstIncrement()) == variables.getFirstEnd()) {
                     first = variables.getFirstOrigin();
-                    if((second += variables.getSecondIncrement()) == variables.getSecondEnd()) {
+                    if ((second += variables.getSecondIncrement()) == variables.getSecondEnd()) {
                         second = variables.getSecondOrigin();
-                        if((third += variables.getThirdIncrement()) == variables.getThirdEnd()) {
+                        if ((third += variables.getThirdIncrement()) == variables.getThirdEnd()) {
                             return false;
                         }
                     }
                 }
 
                 candidate = order.getSpaceAccessor().getSolid(first, second, third, VoxelSpace.this);
-            }
-            while (candidate == null);
+            } while (candidate == null);
 
             super.value = candidate;
             return true;
@@ -79,25 +98,5 @@ public abstract class VoxelSpace implements Space {
         public int getThird() {
             return third;
         }
-    }
-
-    @Override
-    public @NotNull SolidSource solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
-                                                  @NotNull Order order) {
-        int xOrg = (int) Math.floor(oX);
-        int yOrg = (int) Math.floor(oY);
-        int zOrg = (int) Math.floor(oZ);
-
-        int xInc = (int) Math.signum(vX);
-        int yInc = (int) Math.signum(vY);
-        int zInc = (int) Math.signum(vZ);
-
-        int xEnd = ((int) Math.floor(oX + vX)) + xInc;
-        int yEnd = ((int) Math.floor(oY + vY)) + yInc;
-        int zEnd = ((int) Math.floor(oZ + vZ)) + zInc;
-
-        Order.IterationVariables variables = order.getVariablesSupplier().make(xOrg, yOrg, zOrg, xInc, yInc, zInc, xEnd,
-                yEnd, zEnd);
-        return () -> new BasicSolidPipe(order, variables);
     }
 }

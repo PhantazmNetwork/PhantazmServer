@@ -13,12 +13,23 @@ import java.util.Objects;
 
 /**
  * General data for a gun.
+ *
  * @param name The unique {@link Key} name of the gun
  */
 public record GunData(@NotNull Key name) {
 
     /**
+     * Creates a {@link GunData}.
+     *
+     * @param name The unique {@link Key} name of the gun
+     */
+    public GunData {
+        Objects.requireNonNull(name, "name");
+    }
+
+    /**
      * Creates a {@link ConfigProcessor} for {@link GunData}.
+     *
      * @return A {@link ConfigProcessor} for {@link GunData}
      */
     public static @NotNull ConfigProcessor<GunData> processor() {
@@ -38,14 +49,6 @@ public record GunData(@NotNull Key name) {
                 return node;
             }
         };
-    }
-
-    /**
-     * Creates a {@link GunData}.
-     * @param name The unique {@link Key} name of the gun
-     */
-    public GunData {
-        Objects.requireNonNull(name, "name");
     }
 
 }

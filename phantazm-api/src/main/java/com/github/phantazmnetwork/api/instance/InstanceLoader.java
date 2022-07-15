@@ -14,8 +14,9 @@ public interface InstanceLoader {
 
     /**
      * Loads an {@link Instance}.
+     *
      * @param instanceManager The {@link InstanceManager} to register the {@link Instance} with
-     * @param subPaths Paths used to identify the {@link Instance}
+     * @param subPaths        Paths used to identify the {@link Instance}
      * @return A new {@link Instance}
      */
     @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager,

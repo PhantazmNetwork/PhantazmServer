@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.mob.goal;
 
+import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
-import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.minestom.server.entity.Entity;
@@ -12,6 +12,7 @@ import java.util.Objects;
 
 /**
  * A {@link Goal} that makes a {@link PhantazmMob} follow {@link Entity}s
+ *
  * @param <TEntity> The type of {@link Entity} to follow
  */
 public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
@@ -20,6 +21,7 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
 
     /**
      * Creates a {@link FollowEntityGoal}.
+     *
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
     public FollowEntityGoal(@NotNull TargetSelector<TEntity> selector) {
@@ -38,10 +40,9 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
 
             @Override
             public void start() {
-                MinestomDescriptor descriptor = (MinestomDescriptor) mob.entity().getDescriptor();
-                mob.entity().getNavigator().setDestination(() -> selector.selectTarget()
-                        .map(descriptor::computeTargetPosition)
-                        .orElse(null));
+                MinestomDescriptor descriptor = (MinestomDescriptor)mob.entity().getDescriptor();
+                mob.entity().getNavigator()
+                   .setDestination(() -> selector.selectTarget().map(descriptor::computeTargetPosition).orElse(null));
             }
 
             @Override
@@ -63,6 +64,7 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
 
     /**
      * Gets the {@link TargetSelector} used to select {@link Entity}s.
+     *
      * @return The {@link TargetSelector} used to select {@link Entity}s
      */
     public @NotNull TargetSelector<TEntity> getSelector() {

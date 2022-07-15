@@ -11,15 +11,16 @@ public interface Collider {
     /**
      * Locates the highest solid that the given bounding box would collide with, if it were to translate itself by the
      * given vector (dX, dY, dZ).
-     * @param x the x-component of the bounding box origin
-     * @param y the y-component of the bounding box origin
-     * @param z the z-component of the bounding box origin
-     * @param width the width of the bounding box (x-length)
+     *
+     * @param x      the x-component of the bounding box origin
+     * @param y      the y-component of the bounding box origin
+     * @param z      the z-component of the bounding box origin
+     * @param width  the width of the bounding box (x-length)
      * @param height the height of the bounding box (y-length)
-     * @param depth the depths of the bounding box (z-length)
-     * @param dX the x-component of the translation vector
-     * @param dY the y-component of the translation vector
-     * @param dZ the z-component of the translation vector
+     * @param depth  the depths of the bounding box (z-length)
+     * @param dX     the x-component of the translation vector
+     * @param dY     the y-component of the translation vector
+     * @param dZ     the z-component of the translation vector
      * @return the highest point, in world coordinates, of the highest solid colliding with the bounds as it moves along
      * the translation vector
      */
@@ -29,15 +30,16 @@ public interface Collider {
     /**
      * Locates the lowest solid that the given bounding box would collide with, if it were to translate itself by the
      * given vector (dX, dY, dZ).
-     * @param x the x-component of the bounding box origin
-     * @param y the y-component of the bounding box origin
-     * @param z the z-component of the bounding box origin
-     * @param width the width of the bounding box (x-length)
+     *
+     * @param x      the x-component of the bounding box origin
+     * @param y      the y-component of the bounding box origin
+     * @param z      the z-component of the bounding box origin
+     * @param width  the width of the bounding box (x-length)
      * @param height the height of the bounding box (y-length)
-     * @param depth the depths of the bounding box (z-length)
-     * @param dX the x-component of the translation vector
-     * @param dY the y-component of the translation vector
-     * @param dZ the z-component of the translation vector
+     * @param depth  the depths of the bounding box (z-length)
+     * @param dX     the x-component of the translation vector
+     * @param dY     the y-component of the translation vector
+     * @param dZ     the z-component of the translation vector
      * @return the lowest point, in world coordinates, of the lowest solid colliding with the bounds as it moves along
      * the translation vector
      */
@@ -47,6 +49,7 @@ public interface Collider {
     /**
      * Returns the y-coordinate of the highest face out of all collisions present in an origin-vector bounding box (x,
      * y, z, 1, 1, 1).
+     *
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
@@ -56,6 +59,7 @@ public interface Collider {
 
     /**
      * Convenience overload for {@link Collider#heightAt(int, int, int)} that takes a {@link Vec3I}.
+     *
      * @param vec3I the location to check for solids at
      * @return the height of the highest solid, if present, else the y-component of the given vector
      */

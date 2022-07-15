@@ -18,23 +18,8 @@ import java.util.Optional;
 public class StaticIntersectionFinder implements IntersectionFinder {
 
     /**
-     * Data for a {@link StaticIntersectionFinder}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.intersection_finder.static");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-    }
-
-    /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -49,6 +34,22 @@ public class StaticIntersectionFinder implements IntersectionFinder {
         double centerZ = (boundingBox.minZ() + boundingBox.maxZ()) / 2;
 
         return Optional.of(new Vec(centerX, centerY, centerZ));
+    }
+
+    /**
+     * Data for a {@link StaticIntersectionFinder}.
+     */
+    public record Data() implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.intersection_finder.static");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

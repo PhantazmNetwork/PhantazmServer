@@ -43,6 +43,7 @@ public enum AuthType {
 
     /**
      * Gets an {@link AuthType} by its name
+     *
      * @param name The name of the {@link AuthType}
      * @return An {@link Optional} of the {@link AuthType} associated with the name
      */

@@ -34,8 +34,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     public ZombiesScene(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
                         @NotNull SceneFallback fallback, @NotNull ZombiesMap map,
                         @NotNull StageTransition stageTransition,
-                        @NotNull Function<PlayerView, ZombiesPlayer> playerCreator,
-                        @NotNull Random random) {
+                        @NotNull Function<PlayerView, ZombiesPlayer> playerCreator, @NotNull Random random) {
         super(instance, fallback);
 
         this.zombiesPlayers = zombiesPlayers;
@@ -90,7 +89,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID leaver : leavers) {
             if (!players.containsKey(leaver)) {
-                return new RouteResult(false, Optional.of(Component.text("Not all players are within the scene.", NamedTextColor.RED)));
+                return new RouteResult(false, Optional.of(
+                        Component.text("Not all players are within the scene.", NamedTextColor.RED)));
             }
         }
 

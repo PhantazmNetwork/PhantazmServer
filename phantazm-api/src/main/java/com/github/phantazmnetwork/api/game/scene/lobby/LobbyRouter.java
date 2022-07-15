@@ -63,6 +63,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
 
     /**
      * Creates a {@link Lobby} router.
+     *
      * @param lobbyProviders The {@link SceneProvider}s for lobbies mapped based on lobby name.
      */
     public LobbyRouter(@NotNull Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders) {
@@ -80,9 +81,8 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
 
         SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
         if (lobbyProvider == null) {
-            return new RouteResult(false,
-                    Optional.of(Component.text("No lobbies exist under the name "
-                            + routeRequest.targetLobbyName() + ".")));
+            return new RouteResult(false, Optional.of(
+                    Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + ".")));
         }
 
         LobbyJoinRequest joinRequest = routeRequest.joinRequest();
@@ -106,8 +106,8 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID uuid : leavers) {
             if (!playerLobbyMap.containsKey(uuid)) {
-                return new RouteResult(false,
-                        Optional.of(Component.text(uuid + " is not part of a scene in the lobby router.")));
+                return new RouteResult(false, Optional.of(
+                        Component.text(uuid + " is not part of a scene in the lobby router.")));
             }
         }
 

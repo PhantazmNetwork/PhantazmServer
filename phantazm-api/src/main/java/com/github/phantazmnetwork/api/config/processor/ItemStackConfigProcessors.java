@@ -23,6 +23,7 @@ public class ItemStackConfigProcessors {
 
     /**
      * Creates a new {@link ConfigProcessor} for {@link ItemStack}s based on String NBT format.
+     *
      * @return A new {@link ConfigProcessor} for {@link ItemStack}s based on String NBT format
      */
     public static @NotNull ConfigProcessor<ItemStack> snbt() {
@@ -33,8 +34,9 @@ public class ItemStackConfigProcessors {
                 String nbtString = ConfigProcessor.STRING.dataFromElement(element);
                 NBTCompound itemCompound;
                 try {
-                    itemCompound = (NBTCompound) new SNBTParser(new StringReader(nbtString)).parse();
-                } catch (NBTException e) {
+                    itemCompound = (NBTCompound)new SNBTParser(new StringReader(nbtString)).parse();
+                }
+                catch (NBTException e) {
                     throw new ConfigProcessException(e);
                 }
 

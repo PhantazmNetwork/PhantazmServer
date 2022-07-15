@@ -28,11 +28,11 @@ public class CountdownStage implements Stage {
         long previousTicks = countdownTicksRemaining--;
 
         // TODO: delegate to another class
-        if (previousTicks == 400 || previousTicks == 200 || previousTicks == 100 || previousTicks == 80
-                || previousTicks == 60 || previousTicks == 40 || previousTicks == 20) {
+        if (previousTicks == 400 || previousTicks == 200 || previousTicks == 100 || previousTicks == 80 ||
+            previousTicks == 60 || previousTicks == 40 || previousTicks == 20) {
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-                Component message = Component.text(previousTicks / 20 + " seconds until the game starts.",
-                        NamedTextColor.YELLOW);
+                Component message =
+                        Component.text(previousTicks / 20 + " seconds until the game starts.", NamedTextColor.YELLOW);
                 zombiesPlayer.getPlayerView().getPlayer().ifPresent(player -> {
                     player.sendMessage(message);
                 });

@@ -12,63 +12,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface Vec3I extends Comparable<Vec3I> {
     /**
-     * The x-component of this vector.
-     * @return the x-component
-     */
-    int getX();
-
-    /**
-     * The y-component of this vector.
-     * @return the y-component
-     */
-    int getY();
-
-    /**
-     * The z-component of this vector.
-     * @return the z-component
-     */
-    int getZ();
-
-    /**
-     * Sets the x-component of this vector.
-     * @param x the new value of the x-component
-     * @throws UnsupportedOperationException if this vector is immutable
-     */
-    default void setX(int x) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the y-component of this vector.
-     * @param y the new value of the x-component
-     * @throws UnsupportedOperationException if this vector is immutable
-     */
-    default void setY(int y) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the z-component of this vector.
-     * @param z the new value of the x-component
-     * @throws UnsupportedOperationException if this vector is immutable
-     */
-    default void setZ(int z) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets the x, y, and z components of this vector.
-     * @param x the new value of the x-component
-     * @param y the new value of the y-component
-     * @param z the new value of the z-component
-     * @throws UnsupportedOperationException if this vector is immutable
-     * @return this vector, for chaining
-     */
-    default @NotNull Vec3I set(int x, int y, int z) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * A static, immutable vector representing the origin (0, 0, 0).
      */
     Vec3I ORIGIN = of(0, 0, 0);
@@ -77,17 +20,17 @@ public interface Vec3I extends Comparable<Vec3I> {
      * <p>Returns an immutable Vec3I implementation. This may not always create a new vector; common values may (but are
      * not guaranteed to be) returned from a persistent cache.</p>
      *
-     * @apiNote This method is threadsafe, as it relies only on the global {@link Vec3IPool} instance to supply cached
-     * values.
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
      * @return a new, immutable Vec3I instance with the given components
+     * @apiNote This method is threadsafe, as it relies only on the global {@link Vec3IPool} instance to supply cached
+     * values.
      * @see ImmutableVec3I
      */
     static @NotNull Vec3I of(int x, int y, int z) {
         Vec3I cached = Vec3IPools.GLOBAL.fromCache(x, y, z);
-        if(cached != null) {
+        if (cached != null) {
             return cached;
         }
 
@@ -109,6 +52,7 @@ public interface Vec3I extends Comparable<Vec3I> {
      *
      * <p>Since a unique mutable instance is created and re-used per thread, the initial values of this vector's
      * components can be anything, depending on how it was last used.</p>
+     *
      * @return the thread-local Vec3I instance for this thread
      */
     static @NotNull Vec3I threadLocal() {
@@ -118,6 +62,7 @@ public interface Vec3I extends Comparable<Vec3I> {
     /**
      * Returns a Vec3I created from taking the mathematical floor of each given {@code double} component before casting
      * to an integer.
+     *
      * @param x the x-component of the new vector, which will be floored
      * @param y the y-component of the new vector, which will be floored
      * @param z the z-component of the new vector, which will be floored
@@ -130,6 +75,7 @@ public interface Vec3I extends Comparable<Vec3I> {
     /**
      * Returns a Vec3I created from taking the mathematical floor of each given {@code double} component of the provided
      * vector before casting to an integer.
+     *
      * @return the floored vector
      */
     static @NotNull Vec3I floored(@NotNull Vec3D other) {
@@ -138,6 +84,7 @@ public interface Vec3I extends Comparable<Vec3I> {
 
     /**
      * Determines if two points are equal.
+     *
      * @param x1 first x-component
      * @param y1 first y-component
      * @param z1 first z-component
@@ -152,6 +99,7 @@ public interface Vec3I extends Comparable<Vec3I> {
 
     /**
      * Computes the hashcode of an integer triplet.
+     *
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
@@ -164,32 +112,9 @@ public interface Vec3I extends Comparable<Vec3I> {
         return 31 * h + z;
     }
 
-    default boolean isMutable() {
-        return false;
-    }
-
-    /**
-     * Returns an immutable copy of this vector if it is mutable. Otherwise, returns the same vector.
-     * @return an immutable copy of this vector if it is mutable, otherwise the same vector
-     */
-    default @NotNull Vec3I immutable() {
-        if(isMutable()) {
-            return Vec3I.of(getX(), getY(), getZ());
-        }
-
-        return this;
-    }
-
-    /**
-     * Returns a mutable copy of this vector. This always creates a new instance.
-     * @return a mutable copy of this vector
-     */
-    default @NotNull Vec3I mutableCopy() {
-        return new MutableVec3I(getX(), getY(), getZ());
-    }
-
     /**
      * Compares two integer vectors. Vectors are compared first by x-value, the y, then z.
+     *
      * @param x1 first x-component
      * @param y1 first y-component
      * @param z1 first z-component
@@ -215,6 +140,7 @@ public interface Vec3I extends Comparable<Vec3I> {
     /**
      * <p>Computes the <i>squared distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This uses the standard
      * distance formula for two 3-dimensional points, but omits the square root for performance.</p>
+     *
      * @param x1 first x-component
      * @param y1 first y-component
      * @param z1 first z-component
@@ -233,6 +159,7 @@ public interface Vec3I extends Comparable<Vec3I> {
     /**
      * <p>Computes the <i>distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This uses the standard
      * distance formula for two 3-dimensional points.</p>
+     *
      * @param x1 first x-component
      * @param y1 first y-component
      * @param z1 first z-component
@@ -247,6 +174,7 @@ public interface Vec3I extends Comparable<Vec3I> {
 
     /**
      * Computes the squared magnitude (length) of the given vector.
+     *
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
@@ -258,6 +186,7 @@ public interface Vec3I extends Comparable<Vec3I> {
 
     /**
      * Computes the magnitude (length) of the given vector.
+     *
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
@@ -268,8 +197,99 @@ public interface Vec3I extends Comparable<Vec3I> {
     }
 
     /**
+     * The x-component of this vector.
+     *
+     * @return the x-component
+     */
+    int getX();
+
+    /**
+     * Sets the x-component of this vector.
+     *
+     * @param x the new value of the x-component
+     * @throws UnsupportedOperationException if this vector is immutable
+     */
+    default void setX(int x) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * The y-component of this vector.
+     *
+     * @return the y-component
+     */
+    int getY();
+
+    /**
+     * Sets the y-component of this vector.
+     *
+     * @param y the new value of the x-component
+     * @throws UnsupportedOperationException if this vector is immutable
+     */
+    default void setY(int y) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * The z-component of this vector.
+     *
+     * @return the z-component
+     */
+    int getZ();
+
+    /**
+     * Sets the z-component of this vector.
+     *
+     * @param z the new value of the x-component
+     * @throws UnsupportedOperationException if this vector is immutable
+     */
+    default void setZ(int z) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets the x, y, and z components of this vector.
+     *
+     * @param x the new value of the x-component
+     * @param y the new value of the y-component
+     * @param z the new value of the z-component
+     * @return this vector, for chaining
+     * @throws UnsupportedOperationException if this vector is immutable
+     */
+    default @NotNull Vec3I set(int x, int y, int z) {
+        throw new UnsupportedOperationException();
+    }
+
+    default boolean isMutable() {
+        return false;
+    }
+
+    /**
+     * Returns an immutable copy of this vector if it is mutable. Otherwise, returns the same vector.
+     *
+     * @return an immutable copy of this vector if it is mutable, otherwise the same vector
+     */
+    default @NotNull Vec3I immutable() {
+        if (isMutable()) {
+            return Vec3I.of(getX(), getY(), getZ());
+        }
+
+        return this;
+    }
+
+    /**
+     * Returns a mutable copy of this vector. This always creates a new instance.
+     *
+     * @return a mutable copy of this vector
+     */
+    default @NotNull Vec3I mutableCopy() {
+        return new MutableVec3I(getX(), getY(), getZ());
+    }
+
+    /**
      * <p>Computes the <i>squared distance</i> between this vector and (x1, y1, z1). This uses the standard distance
      * formula for two 3-dimensional points, but omits the square root for performance.</p>
+     *
      * @param x first x-component
      * @param y first y-component
      * @param z first z-component
@@ -282,6 +302,7 @@ public interface Vec3I extends Comparable<Vec3I> {
     /**
      * <p>Computes the <i>squared distance</i> between this vector and another. This uses the standard distance
      * formula for two 3-dimensional points, but omits the square root for performance.</p>
+     *
      * @param other the other vector
      * @return the squared distance between this vector and another
      */
@@ -291,6 +312,7 @@ public interface Vec3I extends Comparable<Vec3I> {
 
     /**
      * Computes the squared magnitude (length) of this vector.
+     *
      * @return the squared magnitude of the vector
      */
     default double magnitudeSquared() {
@@ -299,6 +321,7 @@ public interface Vec3I extends Comparable<Vec3I> {
 
     /**
      * Computes the magnitude (length) of this vector.
+     *
      * @return the magnitude of the vector
      */
     default double magnitude() {

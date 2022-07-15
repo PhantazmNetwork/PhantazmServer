@@ -21,7 +21,8 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
 
     /**
      * Creates a {@link NearestPlayersSelector}.
-     * @param range The euclidean distance range of the selector
+     *
+     * @param range       The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      */
     public NearestPlayersSelector(double range, int targetLimit) {

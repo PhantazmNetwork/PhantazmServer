@@ -22,8 +22,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
     private final Random random;
 
     public BasicSpawnDistributor(@NotNull Function<Key, MobModel> modelFunction,
-                                 @NotNull Supplier<List<Spawnpoint>> candidateGenerator,
-                                 @NotNull Random random) {
+                                 @NotNull Supplier<List<Spawnpoint>> candidateGenerator, @NotNull Random random) {
         this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
         this.candidateGenerator = Objects.requireNonNull(candidateGenerator, "candidateGenerator");
         this.random = Objects.requireNonNull(random, "random");
@@ -32,26 +31,26 @@ public class BasicSpawnDistributor implements SpawnDistributor {
     @Override
     public @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<SpawnInfo> spawns) {
         List<Pair<MobModel, Key>> spawnList = new ArrayList<>();
-        for(SpawnInfo spawnInfo : spawns) {
+        for (SpawnInfo spawnInfo : spawns) {
             Key id = spawnInfo.id();
             MobModel model = modelFunction.apply(id);
-            if(model == null) {
+            if (model == null) {
                 LOGGER.warn("Found unrecognized mob type {}", id);
                 continue;
             }
 
-            for(int i = 0; i < spawnInfo.amount(); i++) {
+            for (int i = 0; i < spawnInfo.amount(); i++) {
                 spawnList.add(Pair.of(model, spawnInfo.spawnType()));
             }
         }
 
-        if(spawnList.isEmpty()) {
+        if (spawnList.isEmpty()) {
             LOGGER.warn("Spawn distributor received empty spawn list");
             return Collections.emptyList();
         }
 
         List<Spawnpoint> candidates = candidateGenerator.get();
-        if(candidates == null || candidates.isEmpty()) {
+        if (candidates == null || candidates.isEmpty()) {
             LOGGER.warn("Spawnpoint candidate generator returned a null or empty list");
             return Collections.emptyList();
         }
@@ -60,24 +59,24 @@ public class BasicSpawnDistributor implements SpawnDistributor {
 
         List<PhantazmMob> spawnedMobs = new ArrayList<>(spawnList.size());
         int candidateIndex = 0;
-        for(int i = spawnList.size() - 1; i >= 0; i--) {
+        for (int i = spawnList.size() - 1; i >= 0; i--) {
             Pair<MobModel, Key> spawnEntry = spawnList.get(i);
             MobModel model = spawnEntry.first();
             Key spawnType = spawnEntry.second();
 
             boolean spawned = false;
-            for(int j = 0; j < candidates.size(); j++) {
+            for (int j = 0; j < candidates.size(); j++) {
                 Spawnpoint candidate = candidates.get(candidateIndex++);
                 candidateIndex %= candidates.size();
 
-                if(candidate.canSpawn(model, spawnType)) {
+                if (candidate.canSpawn(model, spawnType)) {
                     spawnedMobs.add(candidate.spawn(model));
                     spawned = true;
                     break;
                 }
             }
 
-            if(!spawned) {
+            if (!spawned) {
                 LOGGER.warn("Found no suitable spawnpoint for mob {} using spawn type {}", model.key(), spawnType);
             }
         }

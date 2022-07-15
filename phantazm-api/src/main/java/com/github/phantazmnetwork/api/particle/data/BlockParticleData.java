@@ -24,20 +24,33 @@ public final class BlockParticleData implements ParticleData {
      */
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.block");
 
-    private static final Set<Key> VALID_KEYS = Set.of(
-            Particle.BLOCK.key(),
-            Particle.BLOCK_MARKER.key(),
-            Particle.FALLING_DUST.key()
-    );
+    private static final Set<Key> VALID_KEYS =
+            Set.of(Particle.BLOCK.key(), Particle.BLOCK_MARKER.key(), Particle.FALLING_DUST.key());
+    private final short stateId;
+
+    /**
+     * Creates a new {@link BlockParticleData}.
+     *
+     * @param block The block state of the particle
+     */
+    public BlockParticleData(@NotNull Block block) {
+        this(Objects.requireNonNull(block, "block").stateId());
+    }
+
+    private BlockParticleData(short stateId) {
+        this.stateId = stateId;
+    }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link BlockParticleData}.
+     *
      * @return A {@link ConfigProcessor} for {@link BlockParticleData}
      */
     public static @NotNull ConfigProcessor<BlockParticleData> processor() {
         return new ConfigProcessor<>() {
             @Override
-            public @NotNull BlockParticleData dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            public @NotNull BlockParticleData dataFromElement(@NotNull ConfigElement element)
+                    throws ConfigProcessException {
                 short stateId = element.getNumberOrThrow("stateId").shortValue();
                 return new BlockParticleData(stateId);
             }
@@ -50,20 +63,6 @@ public final class BlockParticleData implements ParticleData {
                 return node;
             }
         };
-    }
-
-    private final short stateId;
-
-    /**
-     * Creates a new {@link BlockParticleData}.
-     * @param block The block state of the particle
-     */
-    public BlockParticleData(@NotNull Block block) {
-        this(Objects.requireNonNull(block, "block").stateId());
-    }
-
-    private BlockParticleData(short stateId) {
-        this.stateId = stateId;
     }
 
     @Override

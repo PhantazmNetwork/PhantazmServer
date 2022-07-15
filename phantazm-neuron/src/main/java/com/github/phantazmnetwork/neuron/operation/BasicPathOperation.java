@@ -22,21 +22,21 @@ public class BasicPathOperation implements PathOperation {
     private final Explorer explorer;
     private final NodeQueue openSet;
     private final Object2ObjectOpenHashMap<Vec3I, Node> graph;
-
-    private State state;
     private final Node initial;
+    private State state;
     private Node best;
     private PathResult result;
 
     /**
      * Creates a new instance of BasicPathOperation from the given arguments.
-     * @param start the position of the starting node
-     * @param destination the position of the destination node
+     *
+     * @param start            the position of the starting node
+     * @param destination      the position of the destination node
      * @param successPredicate the predicate used to determine if the path has completed
-     * @param calculator the {@link Calculator} instance used to calculate distance/heuristics
-     * @param explorer the {@link Explorer} instance used to expand new nodes
-     * @param xOffset the x-offset of the starting node
-     * @param zOffset the z-offset of the starting node
+     * @param calculator       the {@link Calculator} instance used to calculate distance/heuristics
+     * @param explorer         the {@link Explorer} instance used to expand new nodes
+     * @param xOffset          the x-offset of the starting node
+     * @param zOffset          the z-offset of the starting node
      * @throws NullPointerException if any of the arguments are null
      */
     public BasicPathOperation(@NotNull Vec3I start, @NotNull Vec3I destination,
@@ -78,25 +78,25 @@ public class BasicPathOperation implements PathOperation {
     @Override
     public void step() {
         //don't allow users to keep calling step() after we've finished, they should be polling getState()
-        if(isComplete()) {
+        if (isComplete()) {
             throw new IllegalStateException("Operation has already finished");
         }
 
-        if(!openSet.isEmpty()) {
+        if (!openSet.isEmpty()) {
             //remove and return the smallest (most promising) node
             Node current = openSet.dequeue();
             explorer.initializeNode(current);
 
             //check if we reached our destination yet
             Vec3I currentPos = current.getPosition();
-            if(successPredicate.test(currentPos)) {
+            if (successPredicate.test(currentPos)) {
                 //success state, path was found
                 complete(true, current);
                 return;
             }
 
             //we haven't reached the destination, expand current
-            for(Vec3I walkVector : explorer.expandNode(current)) {
+            for (Vec3I walkVector : explorer.expandNode(current)) {
                 //x, y, and z are the coordinates of the "neighbor" node we're trying to explore
                 int x = currentPos.getX() + walkVector.getX();
                 int y = currentPos.getY() + walkVector.getY();
@@ -107,10 +107,14 @@ public class BasicPathOperation implements PathOperation {
                 previously-existing value. for the purposes of all maps (even comparator-based ones using Node's natural
                 ordering), node objects are safe for use as keys because comparison-changing values are final
                  */
-                Node neighbor = graph.computeIfAbsent(Vec3I.of(x, y, z), (Vec3I key) -> new Node(key, Float
-                        .POSITIVE_INFINITY, calculator.heuristic(key, destination), current));
+                Node neighbor = graph.computeIfAbsent(Vec3I.of(x, y, z),
+                                                      (Vec3I key) -> new Node(key, Float.POSITIVE_INFINITY,
+                                                                              calculator.heuristic(key, destination),
+                                                                              current
+                                                      )
+                );
 
-                if(neighbor == initial) {
+                if (neighbor == initial) {
                     //when re-visiting the first node, reset the offset value as we should be at the center
                     neighbor.setOffset(0.5F, neighbor.getYOffset(), 0.5F);
                 }
@@ -120,7 +124,7 @@ public class BasicPathOperation implements PathOperation {
 
                 //for brand-new nodes, neighbor.getG() is equal to Float.POSITIVE_INFINITY, so this will run for sure
                 //if however neighbor.getG() is less optimal, we will not explore the node
-                if(g < neighbor.getG()) {
+                if (g < neighbor.getG()) {
                     //our path to this node is indeed better, update stuff
                     neighbor.setParent(current);
                     neighbor.setG(g);
@@ -129,7 +133,7 @@ public class BasicPathOperation implements PathOperation {
             }
 
             //keep track of the nearest node to the goal (the smallest heuristic), in case it's unreachable
-            if(best == null || current.getH() < best.getH()) {
+            if (best == null || current.getH() < best.getH()) {
                 best = current;
             }
         }
@@ -147,7 +151,7 @@ public class BasicPathOperation implements PathOperation {
 
     @Override
     public @NotNull PathResult getResult() {
-        if(result == null) {
+        if (result == null) {
             throw new IllegalStateException("Operation has not yet completed");
         }
 

@@ -24,7 +24,7 @@ public class BasicKeyedFactoryRegistry implements KeyedFactoryRegistry {
     @Override
     public <TData extends Keyed, TComponent> KeyedFactory<TData, TComponent> getFactory(@NotNull Key type) {
         //noinspection unchecked
-        return (KeyedFactory<TData, TComponent>) factoryMap.get(type);
+        return (KeyedFactory<TData, TComponent>)factoryMap.get(type);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class BasicKeyedFactoryRegistry implements KeyedFactoryRegistry {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(factory, "factory");
 
-        if(factoryMap.putIfAbsent(key, factory) != null) {
+        if (factoryMap.putIfAbsent(key, factory) != null) {
             throw new IllegalArgumentException("A factory for that key already has been registered");
         }
     }

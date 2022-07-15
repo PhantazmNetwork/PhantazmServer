@@ -11,8 +11,8 @@ class CubicVec3IPoolTest {
 
     @Test
     void failFast() {
-        for(int i = 0; i <= (POW_2.get(POW_2.size() - 1)); i++) {
-            if(!POW_2.contains(i)) {
+        for (int i = 0; i <= (POW_2.get(POW_2.size() - 1)); i++) {
+            if (!POW_2.contains(i)) {
                 int finalI = i;
                 assertThrows(IllegalArgumentException.class, () -> new CubicVec3IPool(finalI));
             }
@@ -21,7 +21,7 @@ class CubicVec3IPoolTest {
 
     @Test
     void allPow2Widths() {
-        for(int pow2 : POW_2) {
+        for (int pow2 : POW_2) {
             new CubicVec3IPool(pow2);
         }
     }
@@ -29,9 +29,9 @@ class CubicVec3IPoolTest {
     @Test
     void correctValues() {
         Vec3IPool pool = new CubicVec3IPool(8);
-        for(int i = -4; i < 4; i++) {
-            for(int j = -4; j < 4; j++) {
-                for(int k = -4; k < 4; k++) {
+        for (int i = -4; i < 4; i++) {
+            for (int j = -4; j < 4; j++) {
+                for (int k = -4; k < 4; k++) {
                     assertEquals(new ImmutableVec3I(i, j, k), pool.fromCache(i, j, k));
                 }
             }

@@ -27,26 +27,20 @@ import java.util.UUID;
 public class ExplosionShotHandler implements ShotHandler {
 
     private static final byte[] ZERO_BYTE_ARRAY = new byte[0];
+    private final Data data;
 
     /**
-     * Data for an {@link ExplosionShotHandler}.
-     * @param radius The radius of the explosion
+     * Creates a new {@link ExplosionShotHandler}.
+     *
+     * @param data The {@link Data} for this {@link ExplosionShotHandler}
      */
-    public record Data(float radius) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.explosion");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public ExplosionShotHandler(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -71,16 +65,6 @@ public class ExplosionShotHandler implements ShotHandler {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a new {@link ExplosionShotHandler}.
-     * @param data The {@link Data} for this {@link ExplosionShotHandler}
-     */
-    public ExplosionShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
     public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
                        @NotNull GunShot shot) {
@@ -90,14 +74,34 @@ public class ExplosionShotHandler implements ShotHandler {
         }
 
         Point end = shot.end();
-        ServerPacket packet = new ExplosionPacket((float) end.x(), (float) end.y(), (float) end.z(), data.radius(),
-                ZERO_BYTE_ARRAY, 0, 0, 0);
+        ServerPacket packet =
+                new ExplosionPacket((float)end.x(), (float)end.y(), (float)end.z(), data.radius(), ZERO_BYTE_ARRAY, 0,
+                                    0, 0
+                );
         instance.sendGroupedPacket(packet);
     }
 
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for an {@link ExplosionShotHandler}.
+     *
+     * @param radius The radius of the explosion
+     */
+    public record Data(float radius) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.explosion");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

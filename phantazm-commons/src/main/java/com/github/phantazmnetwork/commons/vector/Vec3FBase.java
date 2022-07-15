@@ -13,15 +13,15 @@ public abstract class Vec3FBase implements Vec3F {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
 
-        if(obj == this) {
+        if (obj == this) {
             return true;
         }
 
-        if(obj instanceof Vec3F other) {
+        if (obj instanceof Vec3F other) {
             return Vec3F.equals(getX(), getY(), getZ(), other.getX(), other.getY(), other.getZ());
         }
 

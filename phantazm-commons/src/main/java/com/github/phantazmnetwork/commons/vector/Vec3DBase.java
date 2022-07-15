@@ -13,15 +13,15 @@ public abstract class Vec3DBase implements Vec3D {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
 
-        if(obj == this) {
+        if (obj == this) {
             return true;
         }
 
-        if(obj instanceof Vec3D other) {
+        if (obj instanceof Vec3D other) {
             return Vec3D.equals(getX(), getY(), getZ(), other.getX(), other.getY(), other.getZ());
         }
 

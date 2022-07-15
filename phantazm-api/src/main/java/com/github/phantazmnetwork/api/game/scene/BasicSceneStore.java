@@ -17,7 +17,7 @@ public class BasicSceneStore implements SceneStore {
     @SuppressWarnings("unchecked")
     @Override
     public <TScene extends Scene<?>> @NotNull Optional<TScene> getScene(@NotNull SceneKey<TScene> key) {
-        return Optional.ofNullable((TScene) scenes.get(key));
+        return Optional.ofNullable((TScene)scenes.get(key));
     }
 
     @Override

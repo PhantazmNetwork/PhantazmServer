@@ -17,6 +17,7 @@ public record InstanceConfig(@NotNull Pos spawnPoint) {
 
     /**
      * Creates config regarding a single {@link Instance}.
+     *
      * @param spawnPoint The spawn point for the {@link Instance}
      */
     public InstanceConfig {

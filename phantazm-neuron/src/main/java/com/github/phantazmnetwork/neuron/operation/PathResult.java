@@ -12,9 +12,9 @@ public record PathResult(@NotNull Node getStart, int exploredCount, boolean isSu
     /**
      * Creates a new BasicResult.
      *
-     * @param getStart the starting node
+     * @param getStart      the starting node
      * @param exploredCount the number of nodes that were explored for this path
-     * @param isSuccessful if the path is successful
+     * @param isSuccessful  if the path is successful
      */
     public PathResult {
         Objects.requireNonNull(getStart, "getStart");

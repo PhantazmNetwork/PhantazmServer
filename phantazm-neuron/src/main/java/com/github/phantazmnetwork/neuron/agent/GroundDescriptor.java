@@ -15,20 +15,15 @@ public interface GroundDescriptor extends PhysicalDescriptor {
     /**
      * The default value returned by {@link GroundDescriptor#stepDirections()}.
      */
-    Collection<? extends Vec3I> DEFAULT_WALK_DIRECTIONS = List.of(
-            Vec3I.of(1, 0, 0),
-            Vec3I.of(0, 0, 1),
-            Vec3I.of(-1, 0, 0),
-            Vec3I.of(0, 0, -1),
+    Collection<? extends Vec3I> DEFAULT_WALK_DIRECTIONS =
+            List.of(Vec3I.of(1, 0, 0), Vec3I.of(0, 0, 1), Vec3I.of(-1, 0, 0), Vec3I.of(0, 0, -1),
 
-            Vec3I.of(1, 0, 1),
-            Vec3I.of(-1, 0, 1),
-            Vec3I.of(1, 0, -1),
-            Vec3I.of(-1, 0, -1)
-    );
+                    Vec3I.of(1, 0, 1), Vec3I.of(-1, 0, 1), Vec3I.of(1, 0, -1), Vec3I.of(-1, 0, -1)
+            );
 
     /**
      * Returns the jump height for this agent.
+     *
      * @return the jump height for this agent
      */
     float getJumpHeight();
@@ -36,6 +31,7 @@ public interface GroundDescriptor extends PhysicalDescriptor {
     /**
      * Returns the fall tolerance for this agent. This is the maximum value beyond which agents will no longer be able
      * to pathfind down a vertical drop.
+     *
      * @return the fall tolerance for this agent
      */
     float getFallTolerance();
@@ -48,23 +44,24 @@ public interface GroundDescriptor extends PhysicalDescriptor {
     @Override
     default boolean shouldInvalidate(@NotNull Iterable<? extends Vec3I> cached, @NotNull Vec3I origin,
                                      @NotNull Vec3I update, @NotNull Solid oldSolid, @NotNull Solid newSolid) {
-        if(oldSolid.equals(newSolid)) {
+        if (oldSolid.equals(newSolid)) {
             //don't invalidate if no change occurred
             return false;
         }
 
         List<Vec3I> steps = new ArrayList<>(stepDirections());
-        for(Vec3I step : cached) { //check cached steps first
-            if(overlaps(origin, step, update)) {
+        for (Vec3I step : cached) { //check cached steps first
+            if (overlaps(origin, step, update)) {
                 return true;
             }
 
-            steps.removeIf(vector -> vector.getX() == (int) Math.signum(step.getX()) && vector.getY() == (int) Math
-                    .signum(step.getY()) && vector.getZ() == (int) Math.signum(step.getZ()));
+            steps.removeIf(vector -> vector.getX() == (int)Math.signum(step.getX()) &&
+                                     vector.getY() == (int)Math.signum(step.getY()) &&
+                                     vector.getZ() == (int)Math.signum(step.getZ()));
         }
 
-        for(Vec3I step : steps) {
-            if(overlaps(origin, step, update)) {
+        for (Vec3I step : steps) {
+            if (overlaps(origin, step, update)) {
                 return true;
             }
         }
@@ -91,34 +88,34 @@ public interface GroundDescriptor extends PhysicalDescriptor {
         double stepY = step.getY();
         double stepZ = step.getZ();
 
-        if(stepX < 0) {
+        if (stepX < 0) {
             minX += stepX;
         }
-        else if(stepX > 0) {
+        else if (stepX > 0) {
             maxX += stepX;
         }
 
-        if(stepY < 0) {
+        if (stepY < 0) {
             minY += stepY;
         }
-        else if(stepY > 0) {
+        else if (stepY > 0) {
             maxY += stepY;
         }
 
-        if(stepZ < 0) {
+        if (stepZ < 0) {
             minZ += stepZ;
         }
-        else if(stepZ > 0) {
+        else if (stepZ > 0) {
             maxZ += stepZ;
         }
 
-        int iMinX = (int) Math.floor(minX);
-        int iMinY = (int) Math.floor(minY);
-        int iMinZ = (int) Math.floor(minZ);
+        int iMinX = (int)Math.floor(minX);
+        int iMinY = (int)Math.floor(minY);
+        int iMinZ = (int)Math.floor(minZ);
 
-        int iMaxX = (int) Math.floor(maxX);
-        int iMaxY = (int) Math.floor(maxY);
-        int iMaxZ = (int) Math.floor(maxZ);
+        int iMaxX = (int)Math.floor(maxX);
+        int iMaxY = (int)Math.floor(maxY);
+        int iMaxZ = (int)Math.floor(maxZ);
 
         int uX = update.getX();
         int uY = update.getY();

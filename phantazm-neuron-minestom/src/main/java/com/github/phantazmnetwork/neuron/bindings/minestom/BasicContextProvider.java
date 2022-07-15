@@ -34,18 +34,19 @@ public class BasicContextProvider implements ContextProvider {
 
     /**
      * Creates a new instance of this class.
-     * @param globalEventNode the event node to which listeners for {@link BlockChangeEvent} and
-     * {@link InstanceUnregisterEvent} will be registered
-     * @param executor the {@link ExecutorService} used to run all pathfinding operations
-     * @param instanceCache the maximum size of the {@link PathCache} maintained for each instance
+     *
+     * @param globalEventNode     the event node to which listeners for {@link BlockChangeEvent} and
+     *                            {@link InstanceUnregisterEvent} will be registered
+     * @param executor            the {@link ExecutorService} used to run all pathfinding operations
+     * @param instanceCache       the maximum size of the {@link PathCache} maintained for each instance
      * @param updateQueueCapacity the capacity of the update queue (maximum number of block state changes that will be
      *                            kept in-memory at any given time; larger values mean more memory is used but may
      *                            prevent unnecessary cache invalidation
      */
     public BasicContextProvider(@NotNull EventNode<Event> globalEventNode, @NotNull ExecutorService executor,
                                 int instanceCache, int updateQueueCapacity) {
-        this.contextMap = Object2ObjectMaps.synchronize(new Object2ObjectOpenCustomHashMap<>(HashStrategies
-                .identity()));
+        this.contextMap =
+                Object2ObjectMaps.synchronize(new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity()));
         this.executorService = Objects.requireNonNull(executor, "executor");
         this.instanceCache = instanceCache;
         this.updateQueueCapacity = updateQueueCapacity;
@@ -56,17 +57,24 @@ public class BasicContextProvider implements ContextProvider {
 
     @Override
     public @NotNull PathContext provideContext(@NotNull Instance instance) {
-        return contextMap.computeIfAbsent(instance, newInstance -> new BasicPathContext(
-                new BasicPathEngine(executorService), new SpatialCollider(new InstanceSpace(newInstance)),
-                new BasicPathCache(instanceCache, updateQueueCapacity)));
+        return contextMap.computeIfAbsent(instance,
+                                          newInstance -> new BasicPathContext(new BasicPathEngine(executorService),
+                                                                              new SpatialCollider(
+                                                                                      new InstanceSpace(newInstance)),
+                                                                              new BasicPathCache(instanceCache,
+                                                                                                 updateQueueCapacity
+                                                                              )
+                                          )
+        );
     }
 
     private void onBlockChange(@NotNull BlockChangeEvent event) {
         PathContext context = contextMap.get(event.getInstance());
-        if(context != null) {
-            context.getCache().handleUpdate(VecUtils.toBlockInt(event.blockPosition()), SolidProvider.fromShape(
-                    event.getOldBlock().registry().collisionShape()), SolidProvider.fromShape(event.getBlock()
-                    .registry().collisionShape()));
+        if (context != null) {
+            context.getCache().handleUpdate(VecUtils.toBlockInt(event.blockPosition()),
+                                            SolidProvider.fromShape(event.getOldBlock().registry().collisionShape()),
+                                            SolidProvider.fromShape(event.getBlock().registry().collisionShape())
+            );
         }
     }
 

@@ -18,6 +18,7 @@ class LazyDependencyProvider implements DependencyProvider {
 
     /**
      * Creates a new instance of this class using the provided dependency creation function.
+     *
      * @param dependencyFunction the dependency creation function
      */
     LazyDependencyProvider(@NotNull Function<? super Key, ?> dependencyFunction) {
@@ -27,9 +28,9 @@ class LazyDependencyProvider implements DependencyProvider {
 
     @Override
     public <TDependency> TDependency provide(@NotNull Key key) {
-        if(loadedDependencies.containsKey(key)) {
+        if (loadedDependencies.containsKey(key)) {
             //noinspection unchecked
-            return (TDependency) loadedDependencies.get(key);
+            return (TDependency)loadedDependencies.get(key);
         }
 
         throw new IllegalArgumentException("No dependency available for key " + key);
@@ -37,9 +38,9 @@ class LazyDependencyProvider implements DependencyProvider {
 
     @Override
     public boolean prepare(@NotNull Iterable<? extends Key> dependencies) {
-        for(Key key : dependencies) {
+        for (Key key : dependencies) {
             Object dependency = dependencyFunction.apply(key);
-            if(dependency == null) {
+            if (dependency == null) {
                 return false;
             }
 

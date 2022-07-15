@@ -18,7 +18,8 @@ public class LobbyRouterFallback implements SceneFallback {
 
     /**
      * Creates a lobby router fallback.
-     * @param lobby The {@link LobbyRouter} to fallback to
+     *
+     * @param lobby     The {@link LobbyRouter} to fallback to
      * @param lobbyName The name of the {@link Lobby} to fallback to
      */
     public LobbyRouterFallback(@NotNull LobbyRouter lobby, @NotNull String lobbyName) {
@@ -28,8 +29,8 @@ public class LobbyRouterFallback implements SceneFallback {
 
     @Override
     public boolean fallback(@NotNull PlayerView player) {
-        return lobbyRouter.join(new LobbyRouteRequest(lobbyName,
-                        new BasicLobbyJoinRequest(Collections.singleton(player)))).success();
+        return lobbyRouter.join(
+                new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(Collections.singleton(player)))).success();
     }
 
 }

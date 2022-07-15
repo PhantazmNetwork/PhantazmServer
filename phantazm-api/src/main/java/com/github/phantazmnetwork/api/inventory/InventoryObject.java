@@ -12,12 +12,14 @@ public interface InventoryObject extends Tickable {
 
     /**
      * Gets the currently associated {@link ItemStack}.
+     *
      * @return The currently associated {@link ItemStack}
      */
     @NotNull ItemStack getItemStack();
 
     /**
      * Checks whether this inventory object should be redrawn.
+     *
      * @return Whether this inventory object should be redrawn
      */
     boolean shouldRedraw();

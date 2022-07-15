@@ -11,6 +11,7 @@ public interface SceneFallback {
 
     /**
      * Handles a fallback for a {@link PlayerView}.
+     *
      * @param player The {@link PlayerView} to handle
      * @return Whether the fallback was successful
      */

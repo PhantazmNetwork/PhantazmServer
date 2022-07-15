@@ -12,6 +12,7 @@ public interface Goal extends Keyed {
 
     /**
      * Creates a new {@link NeuralGoal}.
+     *
      * @param mob The {@link Goal}'s user
      * @return A new {@link NeuralGoal}
      */

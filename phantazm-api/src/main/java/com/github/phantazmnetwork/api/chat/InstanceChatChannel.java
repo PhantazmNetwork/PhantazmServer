@@ -20,6 +20,7 @@ public class InstanceChatChannel extends BasicChatChannel {
 
     /**
      * Creates a {@link InstanceChatChannel}.
+     *
      * @param viewProvider The {@link InstanceChatChannel}'s {@link PlayerViewProvider}
      */
     public InstanceChatChannel(@NotNull PlayerViewProvider viewProvider) {
@@ -30,10 +31,12 @@ public class InstanceChatChannel extends BasicChatChannel {
     protected @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player) {
         Instance instance = player.getInstance();
         if (instance == null) {
-            return Pair.of(null, ObjectBooleanPair.of(Component.text("You are not in an instance.", NamedTextColor.RED), true));
+            return Pair.of(null,
+                           ObjectBooleanPair.of(Component.text("You are not in an instance.", NamedTextColor.RED), true)
+            );
         }
 
-        return Pair.of((ForwardingAudience) () -> List.of(instance), null);
+        return Pair.of((ForwardingAudience)() -> List.of(instance), null);
     }
 
 }

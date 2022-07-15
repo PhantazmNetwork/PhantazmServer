@@ -16,7 +16,7 @@ public final class ScreenUtils {
      */
     public static void closeCurrentScreen() {
         Screen current = MinecraftClient.getInstance().currentScreen;
-        if(current != null) {
+        if (current != null) {
             current.close();
         }
     }

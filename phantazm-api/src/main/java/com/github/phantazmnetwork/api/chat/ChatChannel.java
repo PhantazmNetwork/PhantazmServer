@@ -16,16 +16,18 @@ public interface ChatChannel {
 
     /**
      * Finds an {@link Audience} to send messages to. This represents the "channel".
+     *
      * @param channelMember The player that is a member of this channel
-     * @param onSuccess A callback when an {@link Audience} is successfully found
-     * @param onFailure A callback when an {@link Audience} is not found that provides an error {@link Component} message
-     *                  that is meant to be sent to the channel member and whether the chat channel should be returned to the default
+     * @param onSuccess     A callback when an {@link Audience} is successfully found
+     * @param onFailure     A callback when an {@link Audience} is not found that provides an error {@link Component} message
+     *                      that is meant to be sent to the channel member and whether the chat channel should be returned to the default
      */
     void findAudience(@NotNull UUID channelMember, @NotNull Consumer<Audience> onSuccess,
                       @NotNull Consumer<ObjectBooleanPair<Component>> onFailure);
 
     /**
      * Formats a message. Channels may add custom style or formatting.
+     *
      * @param chatEvent The {@link PlayerChatEvent} that is being formatted
      * @return The formatted {@link Component} message
      */

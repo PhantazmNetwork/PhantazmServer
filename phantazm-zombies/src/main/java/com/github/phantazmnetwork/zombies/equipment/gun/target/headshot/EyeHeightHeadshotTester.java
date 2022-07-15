@@ -14,23 +14,8 @@ import org.jetbrains.annotations.NotNull;
 public class EyeHeightHeadshotTester implements HeadshotTester {
 
     /**
-     * Data for an {@link EyeHeightHeadshotTester}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.headshot_tester.eye_height");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-    }
-
-    /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -40,6 +25,22 @@ public class EyeHeightHeadshotTester implements HeadshotTester {
     @Override
     public boolean isHeadshot(@NotNull Entity shooter, @NotNull Entity entity, @NotNull Point intersection) {
         return intersection.y() >= entity.getPosition().y() + entity.getEyeHeight();
+    }
+
+    /**
+     * Data for an {@link EyeHeightHeadshotTester}.
+     */
+    public record Data() implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.headshot_tester.eye_height");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

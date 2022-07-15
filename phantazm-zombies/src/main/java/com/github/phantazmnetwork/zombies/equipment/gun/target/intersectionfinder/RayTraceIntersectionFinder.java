@@ -18,24 +18,8 @@ import java.util.Optional;
 public class RayTraceIntersectionFinder implements IntersectionFinder {
 
     /**
-     * Data for a {@link RayTraceIntersectionFinder}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM,"gun.intersection_finder.ray_trace");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-
-    }
-
-    /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -45,6 +29,23 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
     @Override
     public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start) {
         return RayUtils.rayTrace(entity.getBoundingBox(), entity.getPosition(), start);
+    }
+
+    /**
+     * Data for a {@link RayTraceIntersectionFinder}.
+     */
+    public record Data() implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.intersection_finder.ray_trace");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
+
     }
 
 }

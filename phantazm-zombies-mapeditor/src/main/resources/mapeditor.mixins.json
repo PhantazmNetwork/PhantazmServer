@@ -1,13 +1,13 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.github.phantazmnetwork.zombies.mapeditor.mixin",
-  "compatibilityLevel": "JAVA_8",
-  "mixins": [
-  ],
-  "client": [
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+    "required": true,
+    "minVersion": "0.8",
+    "package": "com.github.phantazmnetwork.zombies.mapeditor.mixin",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+    ],
+    "client": [
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }

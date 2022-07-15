@@ -15,7 +15,8 @@ import java.util.Objects;
 public class ConfirmationGui extends SimplePanelGui {
     /**
      * Creates a new ConfirmationGui with the provided query message and Runnable to execute if the user selects "yes".
-     * @param message the query message
+     *
+     * @param message   the query message
      * @param onConfirm the routine to execute if the user chooses "yes"
      */
     public ConfirmationGui(@NotNull Text message, @NotNull Runnable onConfirm) {

@@ -31,6 +31,7 @@ public class MojangIdentitySource implements IdentitySource {
     /**
      * Creates a new instance of this class using the provided {@link Executor} to (typically asynchronously) execute
      * name or UUID resolution requests to the Mojang API.
+     *
      * @param executor the executor used to run requests
      */
     public MojangIdentitySource(@NotNull Executor executor) {
@@ -48,11 +49,11 @@ public class MojangIdentitySource implements IdentitySource {
                 LOGGER.error("RuntimeException thrown during name resolution", exception);
             }
 
-            if(response != null) {
+            if (response != null) {
                 JsonElement nameElement = response.get(NAME_KEY);
-                if(nameElement != null && nameElement.isJsonPrimitive()) {
+                if (nameElement != null && nameElement.isJsonPrimitive()) {
                     JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
-                    if(primitive.isString()) {
+                    if (primitive.isString()) {
                         return Optional.of(primitive.getAsString());
                     }
                 }
@@ -75,11 +76,11 @@ public class MojangIdentitySource implements IdentitySource {
                 LOGGER.error("RuntimeException thrown during UUID resolution", exception);
             }
 
-            if(response != null) {
+            if (response != null) {
                 JsonElement idElement = response.get(ID_KEY);
-                if(idElement != null && idElement.isJsonPrimitive()) {
+                if (idElement != null && idElement.isJsonPrimitive()) {
                     JsonPrimitive idPrimitive = idElement.getAsJsonPrimitive();
-                    if(idPrimitive.isString()) {
+                    if (idPrimitive.isString()) {
                         return Optional.of(UUID.fromString(idPrimitive.getAsString()));
                     }
                 }

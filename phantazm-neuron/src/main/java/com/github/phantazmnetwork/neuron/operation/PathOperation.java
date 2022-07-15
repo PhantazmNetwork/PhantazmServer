@@ -9,6 +9,42 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface PathOperation {
     /**
+     * Computes a single iteration of the pathfinding algorithm used by this operation, so long as the operation has not
+     * yet completed.
+     *
+     * @throws IllegalStateException if the state of this operation is not {@link State#IN_PROGRESS}
+     */
+    void step();
+
+    /**
+     * Returns the state of this operation. This should be queried to determine if it's safe to call
+     * {@link PathOperation#step()} or {@link PathOperation#getResult()}.
+     *
+     * @return the current state of this operation
+     * @see State
+     */
+    @NotNull State getState();
+
+    /**
+     * Returns the {@link PathResult} object representing the completed operation.
+     *
+     * @return the PathResult
+     * @throws IllegalStateException if this operation's state is {@link State#IN_PROGRESS}
+     */
+    @NotNull PathResult getResult();
+
+    /**
+     * Equivalent to {@code getState() != State.IN_PROGRESS}.
+     *
+     * @return {@code true} if this operation has completed (if its state is {@link State#FAILED} or
+     * {@link State#SUCCEEDED}); false otherwise
+     */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    default boolean isComplete() {
+        return getState() != State.IN_PROGRESS;
+    }
+
+    /**
      * Used to represent the current state of the path.
      */
     enum State {
@@ -30,37 +66,5 @@ public interface PathOperation {
          * compute a valid starting position. If the latter is true, no best-case path exists.
          */
         FAILED
-    }
-
-    /**
-     * Computes a single iteration of the pathfinding algorithm used by this operation, so long as the operation has not
-     * yet completed.
-     * @throws IllegalStateException if the state of this operation is not {@link State#IN_PROGRESS}
-     */
-    void step();
-
-    /**
-     * Returns the state of this operation. This should be queried to determine if it's safe to call
-     * {@link PathOperation#step()} or {@link PathOperation#getResult()}.
-     * @see State
-     * @return the current state of this operation
-     */
-    @NotNull State getState();
-
-    /**
-     * Returns the {@link PathResult} object representing the completed operation.
-     * @return the PathResult
-     * @throws IllegalStateException if this operation's state is {@link State#IN_PROGRESS}
-     */
-    @NotNull PathResult getResult();
-
-    /**
-     * Equivalent to {@code getState() != State.IN_PROGRESS}.
-     * @return {@code true} if this operation has completed (if its state is {@link State#FAILED} or
-     * {@link State#SUCCEEDED}); false otherwise
-     */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    default boolean isComplete() {
-        return getState() != State.IN_PROGRESS;
     }
 }

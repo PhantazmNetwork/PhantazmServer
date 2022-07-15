@@ -18,9 +18,106 @@ import java.util.function.Supplier;
  *
  * <p>Wrapper instances can be obtained through the static factory method {@link Wrapper#of(Object)} or
  * {@link Wrapper#ofNull()}.</p>
+ *
  * @param <TType> the type of object stored in this reference
  */
 public abstract class Wrapper<TType> implements Supplier<TType> {
+    //disallow subclassing anywhere else
+    private Wrapper() {
+    }
+
+    /**
+     * Creates and returns a new Wrapper object holding the given value.
+     *
+     * @param value   the value to initially store in the wrapper
+     * @param <TType> the type of value held in the wrapper
+     * @return a mutable Wrapper implementation
+     */
+    public static <TType> @NotNull Wrapper<TType> of(@Nullable TType value) {
+        return new ObjectWrapper<>(value);
+    }
+
+    /**
+     * Creates and returns a new Wrapper with a null initial value.
+     *
+     * @param <TType> the type of value held in the wrapper
+     * @return a mutable Wrapper implementation
+     */
+    public static <TType> @NotNull Wrapper<TType> ofNull() {
+        return new ObjectWrapper<>(null);
+    }
+
+    /**
+     * Sets the value stored by this wrapper.
+     *
+     * @param value the new value
+     */
+    public abstract void set(@Nullable TType value);
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(get());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj == this) {
+            return true;
+        }
+
+        if (obj instanceof Wrapper<?> other) {
+            return Objects.equals(get(), other.get());
+        }
+
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "Wrapper{value=" + get() + "}";
+    }
+
+    /**
+     * Converts this Wrapper to an Optional instance.
+     *
+     * @return an Optional instance containing the same value as this wrapper, or {@link Optional#empty()} if this
+     * wrapper contains null
+     */
+    public @NotNull Optional<TType> toOptional() {
+        return Optional.ofNullable(get());
+    }
+
+    /**
+     * Applies a mapping function to this wrapper's value, and returns a new wrapper containing the result of this
+     * function.
+     *
+     * @param mapper the mapping function to apply
+     * @param <TNew> the new value
+     * @return a new wrapper holding the mapped value
+     */
+    public <TNew> @NotNull Wrapper<TNew> map(@NotNull Function<? super TType, ? extends TNew> mapper) {
+        Objects.requireNonNull(mapper, "mapper");
+        return new ObjectWrapper<>(mapper.apply(get()));
+    }
+
+    /**
+     * Applies a mapping function to this wrapper's value. The result of the mapping function will be the new value held
+     * by this wrapper, and is returned.
+     *
+     * @param mapper the mapping function to apply
+     * @return the new value
+     */
+    public TType apply(@NotNull Function<? super TType, ? extends TType> mapper) {
+        Objects.requireNonNull(mapper, "mapper");
+        TType newValue = mapper.apply(get());
+        set(newValue);
+        return newValue;
+    }
+
     private static final class ObjectWrapper<T> extends Wrapper<T> {
         private T value;
 
@@ -37,94 +134,5 @@ public abstract class Wrapper<TType> implements Supplier<TType> {
         public T get() {
             return value;
         }
-    }
-
-    //disallow subclassing anywhere else
-    private Wrapper() {}
-
-    /**
-     * Sets the value stored by this wrapper.
-     * @param value the new value
-     */
-    public abstract void set(@Nullable TType value);
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(get());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if(obj == null) {
-            return false;
-        }
-
-        if(obj == this) {
-            return true;
-        }
-
-        if(obj instanceof Wrapper<?> other) {
-            return Objects.equals(get(), other.get());
-        }
-
-        return false;
-    }
-
-    @Override
-    public String toString() {
-        return "Wrapper{value=" + get() + "}";
-    }
-
-    /**
-     * Converts this Wrapper to an Optional instance.
-     * @return an Optional instance containing the same value as this wrapper, or {@link Optional#empty()} if this
-     * wrapper contains null
-     */
-    public @NotNull Optional<TType> toOptional() {
-        return Optional.ofNullable(get());
-    }
-
-    /**
-     * Applies a mapping function to this wrapper's value, and returns a new wrapper containing the result of this
-     * function.
-     * @param mapper the mapping function to apply
-     * @param <TNew> the new value
-     * @return a new wrapper holding the mapped value
-     */
-    public <TNew> @NotNull Wrapper<TNew> map(@NotNull Function<? super TType, ? extends TNew> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
-        return new ObjectWrapper<>(mapper.apply(get()));
-    }
-
-    /**
-     * Applies a mapping function to this wrapper's value. The result of the mapping function will be the new value held
-     * by this wrapper, and is returned.
-     * @param mapper the mapping function to apply
-     * @return the new value
-     */
-    public TType apply(@NotNull Function<? super TType, ? extends TType> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
-        TType newValue = mapper.apply(get());
-        set(newValue);
-        return newValue;
-    }
-
-    /**
-     * Creates and returns a new Wrapper object holding the given value.
-     * @param value the value to initially store in the wrapper
-     * @param <TType> the type of value held in the wrapper
-     * @return a mutable Wrapper implementation
-     */
-    public static <TType> @NotNull Wrapper<TType> of(@Nullable TType value) {
-        return new ObjectWrapper<>(value);
-    }
-
-    /**
-     * Creates and returns a new Wrapper with a null initial value.
-     * @param <TType> the type of value held in the wrapper
-     * @return a mutable Wrapper implementation
-     */
-    public static <TType> @NotNull Wrapper<TType> ofNull() {
-        return new ObjectWrapper<>(null);
     }
 }

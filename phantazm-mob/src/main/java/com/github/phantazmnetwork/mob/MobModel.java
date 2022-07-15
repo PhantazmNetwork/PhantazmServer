@@ -37,18 +37,19 @@ public class MobModel implements Keyed {
 
     /**
      * Creates a new mob model.
-     * @param key The unique {@link Key} used to identify the mob
-     * @param descriptor The {@link MinestomDescriptor} used for the mob's navigation
-     * @param goalGroups Groups of {@link Goal}s to add
-     * @param triggers {@link Skill}s associated with triggers
+     *
+     * @param key         The unique {@link Key} used to identify the mob
+     * @param descriptor  The {@link MinestomDescriptor} used for the mob's navigation
+     * @param goalGroups  Groups of {@link Goal}s to add
+     * @param triggers    {@link Skill}s associated with triggers
      * @param displayName {@link Skill} The mob's display name, or null if it should not have one
-     * @param equipment The mob's equipment
-     * @param attributes The mob's attributes
+     * @param equipment   The mob's equipment
+     * @param attributes  The mob's attributes
      */
     public MobModel(@NotNull Key key, @NotNull MinestomDescriptor descriptor,
-                    @NotNull Collection<Collection<Goal>> goalGroups,
-                    @NotNull Map<Key, Collection<Skill>> triggers, @Nullable Component displayName,
-                    @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
+                    @NotNull Collection<Collection<Goal>> goalGroups, @NotNull Map<Key, Collection<Skill>> triggers,
+                    @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment,
+                    @NotNull Object2FloatMap<String> attributes) {
         this.key = Objects.requireNonNull(key, "key");
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.goalGroups = List.copyOf(Objects.requireNonNull(goalGroups, "goalGroups"));
@@ -60,6 +61,7 @@ public class MobModel implements Keyed {
 
     /**
      * Gets the unique {@link Key} used to identify the mob.
+     *
      * @return The unique {@link Key} used to identify the mob
      */
     @Override
@@ -69,6 +71,7 @@ public class MobModel implements Keyed {
 
     /**
      * Gets the {@link MinestomDescriptor} used for the mob's navigation.
+     *
      * @return The {@link MinestomDescriptor} used for the mob's navigation
      */
     public @NotNull MinestomDescriptor getDescriptor() {
@@ -77,6 +80,7 @@ public class MobModel implements Keyed {
 
     /**
      * Gets the groups of {@link Goal}s to add.
+     *
      * @return The groups of {@link Goal}s to add
      */
     public @Unmodifiable @NotNull Collection<Collection<Goal>> getGoalGroups() {
@@ -85,6 +89,7 @@ public class MobModel implements Keyed {
 
     /**
      * Gets the {@link Skill}s associated with triggers.
+     *
      * @return The {@link Skill}s associated with triggers
      */
     public @Unmodifiable @NotNull Map<Key, Collection<Skill>> getTriggers() {
@@ -93,6 +98,7 @@ public class MobModel implements Keyed {
 
     /**
      * Gets the mob's display name, or null if it should not have one.
+     *
      * @return The mob's display name, or null if it should not have one
      */
     public @NotNull Optional<Component> getDisplayName() {
@@ -101,6 +107,7 @@ public class MobModel implements Keyed {
 
     /**
      * Gets the mob's equipment.
+     *
      * @return The mob's equipment
      */
     public @Unmodifiable @NotNull Map<EquipmentSlot, ItemStack> getEquipment() {
@@ -109,6 +116,7 @@ public class MobModel implements Keyed {
 
     /**
      * Gets the mob's attributes.
+     *
      * @return The mob's attributes
      */
     public @NotNull @Unmodifiable Object2FloatMap<String> getAttributes() {

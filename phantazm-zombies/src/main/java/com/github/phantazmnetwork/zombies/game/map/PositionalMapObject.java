@@ -8,6 +8,7 @@ import java.util.Objects;
 
 /**
  * A {@link MapObject} that has a position and is tied to a particular instance.
+ *
  * @param <TData> the type of data
  */
 public abstract class PositionalMapObject<TData> extends InstanceMapObject<TData> {
@@ -30,6 +31,7 @@ public abstract class PositionalMapObject<TData> extends InstanceMapObject<TData
 
     /**
      * Gets the vector this object's coordinates are considered relative to.
+     *
      * @return the origin vector
      */
     public @NotNull Vec3I getOrigin() {

@@ -13,6 +13,7 @@ public class BasicInventoryProfile implements InventoryProfile {
 
     /**
      * Creates a basic inventory profile.
+     *
      * @param slotCount The number of slots held by the profile (indexed by 0)
      */
     public BasicInventoryProfile(int slotCount) {

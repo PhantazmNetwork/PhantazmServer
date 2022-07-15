@@ -41,12 +41,13 @@ public class GroundNavigator extends TrackingNavigator {
 
     /**
      * Creates a new GroundNavigator for gravity-bound movement.
-     * @param tracker the {@link NavigationTracker} used to record any events that occur during navigation
-     * @param pathEngine the {@link PathEngine} used to calculate paths
-     * @param agent the agent responsible for navigation
-     * @param immobileThreshold the time beyond which a non-moving agent will be considered "stuck" and the path will be
-     *                          recalculated
-     * @param missingStartDelay the time to wait before path recalculation if no starting position was found
+     *
+     * @param tracker                  the {@link NavigationTracker} used to record any events that occur during navigation
+     * @param pathEngine               the {@link PathEngine} used to calculate paths
+     * @param agent                    the agent responsible for navigation
+     * @param immobileThreshold        the time beyond which a non-moving agent will be considered "stuck" and the path will be
+     *                                 recalculated
+     * @param missingStartDelay        the time to wait before path recalculation if no starting position was found
      * @param explorationDelayFunction a function used to compute the recalculation delay after a path has been found,
      *                                 which is the time that the navigator will wait before recalculating if the
      *                                 destination changes
@@ -57,41 +58,44 @@ public class GroundNavigator extends TrackingNavigator {
         super(tracker, pathEngine, agent);
         this.immobileThreshold = immobileThreshold;
         this.missingStartDelay = missingStartDelay;
-        this.explorationDelayFunction = Objects.requireNonNull(explorationDelayFunction,
-                "explorationDelayFunction");
+        this.explorationDelayFunction = Objects.requireNonNull(explorationDelayFunction, "explorationDelayFunction");
+    }
+
+    private static boolean withinDistance(Controller controller, Node node) {
+        return node.getPosition().equals(Vec3I.floored(controller.getX(), controller.getY(), controller.getZ()));
     }
 
     @Override
     public void tick(long time) {
-        if(destinationSupplier != null) {
+        if (destinationSupplier != null) {
             Vec3I newDestination = destinationSupplier.get();
-            if(newDestination == null) {
+            if (newDestination == null) {
                 reset(time);
                 return;
             }
 
             boolean destinationChange = false;
-            if(!newDestination.equals(currentDestination)) {
+            if (!newDestination.equals(currentDestination)) {
                 destinationChange = true;
                 this.currentDestination = newDestination;
             }
 
             //if we don't already have a target, we must find a path in order to call continueAlongPath
-            if(target == null) {
+            if (target == null) {
                 //try pathfinding to the current destination
-                if(!tryPathfind(time) || !tryInitResult()) {
+                if (!tryPathfind(time) || !tryInitResult()) {
                     //we aren't allowed to pathfind right now due to cooldown or an error condition
                     return;
                 }
             }
-            else if(destinationChange) {
+            else if (destinationChange) {
                 //we already have a path, but our destination changed, so start calculating a new one (but keep moving)
-                if(tryPathfind(time)) {
+                if (tryPathfind(time)) {
                     tryInitResult();
                 }
             }
 
-            if(current == target || continueAlongPath(time)) {
+            if (current == target || continueAlongPath(time)) {
                 //path has ended
                 navigationTracker.onDestinationReached(this);
                 reset(time);
@@ -107,24 +111,26 @@ public class GroundNavigator extends TrackingNavigator {
         Node start = null;
         Node nearest = null;
         double nearestDistance = Double.POSITIVE_INFINITY;
-        for(Node node : pathStart) {
-            if(withinDistance(controller, node)) {
+        for (Node node : pathStart) {
+            if (withinDistance(controller, node)) {
                 start = node;
                 break;
             }
 
             Vec3I nodePos = node.getPosition();
-            double distance = Vec3D.squaredDistance(nodePos.getX() + node.getXOffset(), nodePos.getY() + node
-                            .getYOffset(), nodePos.getZ() + node.getZOffset(), controller.getX(), controller.getY(),
-                    controller.getZ());
-            if(distance < nearestDistance) {
+            double distance =
+                    Vec3D.squaredDistance(nodePos.getX() + node.getXOffset(), nodePos.getY() + node.getYOffset(),
+                                          nodePos.getZ() + node.getZOffset(), controller.getX(), controller.getY(),
+                                          controller.getZ()
+                    );
+            if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearest = node;
             }
         }
 
-        if(start == null) {
-            if(nearestDistance > 1) {
+        if (start == null) {
+            if (nearestDistance > 1) {
                 //failed to find adequate starting node
                 navigationTracker.onNavigationError(this, pathStart, NavigationTracker.ErrorType.NO_START);
                 recalculationDelay = missingStartDelay;
@@ -147,12 +153,14 @@ public class GroundNavigator extends TrackingNavigator {
     }
 
     private boolean tryInitResult() {
-        if(currentOperation.isDone()) {
+        if (currentOperation.isDone()) {
             PathResult result = null;
             try {
                 result = currentOperation.get();
                 currentOperation = null;
-            } catch (ExecutionException | InterruptedException ignored) {}
+            }
+            catch (ExecutionException | InterruptedException ignored) {
+            }
 
             return result != null && initializePath(result);
         }
@@ -161,8 +169,8 @@ public class GroundNavigator extends TrackingNavigator {
     }
 
     private boolean tryPathfind(long time) {
-        if(currentOperation == null) {
-            if(time - lastPathfind < recalculationDelay || !agent.canPathfind()) {
+        if (currentOperation == null) {
+            if (time - lastPathfind < recalculationDelay || !agent.canPathfind()) {
                 return false;
             }
 
@@ -176,23 +184,22 @@ public class GroundNavigator extends TrackingNavigator {
 
     private boolean continueAlongPath(long time) {
         Controller controller = agent.getController();
-        if(withinDistance(controller, target)) {
+        if (withinDistance(controller, target)) {
             current = target;
             target = current.getParent();
         }
 
-        if(target != null) {
+        if (target != null) {
             double currentX = controller.getX();
             double currentY = controller.getY();
             double currentZ = controller.getZ();
 
-            if(!controller.hasControl()) {
-                if(!Vec3D.equals(currentX, currentY, currentZ, lastX, lastY, lastZ)) {
+            if (!controller.hasControl()) {
+                if (!Vec3D.equals(currentX, currentY, currentZ, lastX, lastY, lastZ)) {
                     lastMoved = time;
                 }
-                else if(time - lastMoved > immobileThreshold) {
-                    navigationTracker.onNavigationError(this, null, NavigationTracker.ErrorType
-                            .STUCK);
+                else if (time - lastMoved > immobileThreshold) {
+                    navigationTracker.onNavigationError(this, null, NavigationTracker.ErrorType.STUCK);
                     //if we don't have any movement, stop moving along this path
                     return true;
                 }
@@ -226,18 +233,6 @@ public class GroundNavigator extends TrackingNavigator {
         lastZ = 0;
     }
 
-    private static boolean withinDistance(Controller controller, Node node) {
-        return node.getPosition().equals(Vec3I.floored(controller.getX(), controller.getY(), controller.getZ()));
-    }
-
-    @Override
-    public void setDestination(@Nullable Supplier<Vec3I> destinationSupplier) {
-        this.destinationSupplier = destinationSupplier;
-        if(destinationSupplier == null) {
-            reset(0);
-        }
-    }
-
     @Override
     public @NotNull Agent getAgent() {
         return agent;
@@ -250,10 +245,18 @@ public class GroundNavigator extends TrackingNavigator {
 
     @Override
     public @NotNull Vec3I getDestination() {
-        if(currentDestination == null) {
+        if (currentDestination == null) {
             throw new IllegalStateException("Cannot get the destination for a Navigator that has no path");
         }
 
         return currentDestination;
+    }
+
+    @Override
+    public void setDestination(@Nullable Supplier<Vec3I> destinationSupplier) {
+        this.destinationSupplier = destinationSupplier;
+        if (destinationSupplier == null) {
+            reset(0);
+        }
     }
 }

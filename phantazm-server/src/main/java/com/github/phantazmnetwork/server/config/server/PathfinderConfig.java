@@ -7,14 +7,16 @@ public record PathfinderConfig(int threads, int cacheSize, int updateQueueCapaci
     /**
      * The default PathfinderConfig.
      */
-    public static final PathfinderConfig DEFAULT = new PathfinderConfig(Runtime.getRuntime().availableProcessors(),
-            1024, 1024);
+    public static final PathfinderConfig DEFAULT =
+            new PathfinderConfig(Runtime.getRuntime().availableProcessors(), 1024, 1024);
 
     /**
      * Creates a config for pathfinding.
-     * @param threads the number of threads to use per instance for pathfinding operations
-     * @param cacheSize the size allocated to the cache, used to minimize collision checks
+     *
+     * @param threads             the number of threads to use per instance for pathfinding operations
+     * @param cacheSize           the size allocated to the cache, used to minimize collision checks
      * @param updateQueueCapacity the size of the update queue
      */
-    public PathfinderConfig {}
+    public PathfinderConfig {
+    }
 }

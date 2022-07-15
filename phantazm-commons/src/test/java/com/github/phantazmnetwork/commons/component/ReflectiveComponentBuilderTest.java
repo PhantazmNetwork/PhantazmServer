@@ -18,9 +18,58 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ReflectiveComponentBuilderTest {
+    @Test
+    void throwsWhenNoComponentModel() {
+        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
+                                                                  Mockito.mock(KeyedFactoryRegistry.class)
+        );
+        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoComponentModel.class));
+    }
+
+    @Test
+    void throwsWhenNoFactory() {
+        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
+                                                                  Mockito.mock(KeyedFactoryRegistry.class)
+        );
+        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoFactoryModel.class));
+    }
+
+    @Test
+    void throwsWhenNoProcessor() {
+        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
+                                                                  Mockito.mock(KeyedFactoryRegistry.class)
+        );
+        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoProcessorModel.class));
+    }
+
+    @Test
+    void basicComponent() {
+        ComponentBuilder builder =
+                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+        builder.registerComponentClass(TestComponent.class);
+
+        ConfigNode componentData = new LinkedConfigNode(2);
+        componentData.putString("serialKey", "phantazm:test");
+        componentData.putNumber("number", 69);
+        componentData.putString("string", "vegetals");
+
+        Map<Key, Object> dependencyMap = new HashMap<>(1);
+        dependencyMap.put(TestComponent.FACTORY.dependencies().get(0), 420);
+
+        DependencyProvider provider = DependencyProvider.lazy(dependencyMap::get);
+
+        TestComponent component = builder.makeComponent(componentData, provider);
+        TestComponent.Data data = component.data;
+
+        assertEquals(69, data.number);
+        assertEquals("vegetals", data.string);
+        assertEquals(component.dependency, 420);
+    }
+
     public static class NoComponentModel {
         @ComponentFactory
         public static KeyedFactory<?, ?> factory() {
@@ -59,15 +108,6 @@ class ReflectiveComponentBuilderTest {
 
     @ComponentModel("phantazm:test")
     public static class TestComponent {
-        public record Data(int number, String string) implements Keyed {
-            public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "test");
-
-            @Override
-            public @NotNull Key key() {
-                return SERIAL_KEY;
-            }
-        }
-
         private static final KeyedConfigProcessor<Data> PROCESSOR = new KeyedConfigProcessor<>() {
             @Override
             public @NotNull Data dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException {
@@ -84,10 +124,9 @@ class ReflectiveComponentBuilderTest {
                 return node;
             }
         };
-
         private static final KeyedFactory<Data, TestComponent> FACTORY = new KeyedFactory<>() {
-            private static final List<Key> DEPENDENCIES = List.of(Key.key(Namespaces.PHANTAZM,
-                    "test.dependency.number"));
+            private static final List<Key> DEPENDENCIES =
+                    List.of(Key.key(Namespaces.PHANTAZM, "test.dependency.number"));
 
             @Override
             public @NotNull TestComponent make(@NotNull DependencyProvider dependencyProvider, @NotNull Data data) {
@@ -100,7 +139,6 @@ class ReflectiveComponentBuilderTest {
                 return DEPENDENCIES;
             }
         };
-
         private final Data data;
         private final int dependency;
 
@@ -118,50 +156,14 @@ class ReflectiveComponentBuilderTest {
         public static KeyedConfigProcessor<Data> processor() {
             return PROCESSOR;
         }
-    }
 
-    @Test
-    void throwsWhenNoComponentModel() {
-        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class), Mockito
-                .mock(KeyedFactoryRegistry.class));
-        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoComponentModel.class));
-    }
+        public record Data(int number, String string) implements Keyed {
+            public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "test");
 
-    @Test
-    void throwsWhenNoFactory() {
-        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class), Mockito
-                .mock(KeyedFactoryRegistry.class));
-        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoFactoryModel.class));
-    }
-
-    @Test
-    void throwsWhenNoProcessor() {
-        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class), Mockito
-                .mock(KeyedFactoryRegistry.class));
-        assertThrows(IllegalArgumentException.class, () -> builder.registerComponentClass(NoProcessorModel.class));
-    }
-
-    @Test
-    void basicComponent() {
-        ComponentBuilder builder = new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(),
-                new BasicKeyedFactoryRegistry());
-        builder.registerComponentClass(TestComponent.class);
-
-        ConfigNode componentData = new LinkedConfigNode(2);
-        componentData.putString("serialKey", "phantazm:test");
-        componentData.putNumber("number", 69);
-        componentData.putString("string", "vegetals");
-
-        Map<Key, Object> dependencyMap = new HashMap<>(1);
-        dependencyMap.put(TestComponent.FACTORY.dependencies().get(0), 420);
-
-        DependencyProvider provider = DependencyProvider.lazy(dependencyMap::get);
-
-        TestComponent component = builder.makeComponent(componentData, provider);
-        TestComponent.Data data = component.data;
-
-        assertEquals(69, data.number);
-        assertEquals("vegetals", data.string);
-        assertEquals(component.dependency, 420);
+            @Override
+            public @NotNull Key key() {
+                return SERIAL_KEY;
+            }
+        }
     }
 }

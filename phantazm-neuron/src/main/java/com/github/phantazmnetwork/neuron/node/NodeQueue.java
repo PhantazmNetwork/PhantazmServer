@@ -13,6 +13,7 @@ import java.util.Objects;
  * modifying functions will update the {@code Node} object's internal index using {@link Node#setHeapIndex(int)}. This
  * is used to implement O(1) {@code contains} and faster updating of {@code Node} objects whose comparison relative to
  * other elements in the queue may have changed.
+ *
  * @see NodeHeaps
  * @see PriorityQueue
  */
@@ -31,15 +32,16 @@ public class NodeQueue implements PriorityQueue<Node> {
 
     /**
      * Creates a new NodeQueue with the provided initial capacity.
+     *
      * @param initialCapacity the initial capacity
      * @throws IllegalArgumentException if initialCapacity is negative
      */
     public NodeQueue(int initialCapacity) {
-        if(initialCapacity < 0) {
+        if (initialCapacity < 0) {
             throw new IllegalArgumentException("Invalid capacity " + initialCapacity);
         }
 
-        if(initialCapacity == 0) {
+        if (initialCapacity == 0) {
             heap = (Node[])ObjectArrays.EMPTY_ARRAY;
         }
         else {
@@ -57,6 +59,7 @@ public class NodeQueue implements PriorityQueue<Node> {
         heap[size++] = node;
         NodeHeaps.upHeap(heap, size - 1);
     }
+
     @Override
     public @NotNull Node dequeue() {
         if (size == 0) {
@@ -90,11 +93,12 @@ public class NodeQueue implements PriorityQueue<Node> {
 
     /**
      * If the given node is already in the heap, update its position, otherwise enqueue it.
+     *
      * @param node the node to update or enqueue
      */
     public void enqueueOrUpdate(@NotNull Node node) {
         Objects.requireNonNull(node, "node");
-        if(node.isOnHeap()) {
+        if (node.isOnHeap()) {
             //if we're already on the heap, call changed to update its position in-place
             changed(node);
         }
@@ -109,6 +113,7 @@ public class NodeQueue implements PriorityQueue<Node> {
      * greater than the size of the heap, the node is assumed to not be a part of this queue and an
      * {@link IllegalArgumentException} is thrown. Otherwise, it may be repositioned such that the heap invariant is
      * maintained, if it is necessary to do so.
+     *
      * @param node the node that was changed
      */
     public void changed(@NotNull Node node) {
@@ -133,7 +138,7 @@ public class NodeQueue implements PriorityQueue<Node> {
 
     @Override
     public void clear() {
-        for(int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             heap[i].setHeapIndex(-1);
             heap[i] = null;
         }

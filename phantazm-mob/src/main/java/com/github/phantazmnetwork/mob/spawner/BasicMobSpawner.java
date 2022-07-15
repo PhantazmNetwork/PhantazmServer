@@ -32,7 +32,8 @@ public class BasicMobSpawner implements MobSpawner {
 
     /**
      * Creates a new {@link BasicMobSpawner}.
-     * @param mobStore The {@link MobStore} to register new {@link PhantazmMob}s to
+     *
+     * @param mobStore      The {@link MobStore} to register new {@link PhantazmMob}s to
      * @param neuralSpawner The {@link Spawner} to spawn backing {@link NeuralEntity}s
      */
     public BasicMobSpawner(@NotNull MobStore mobStore, @NotNull Spawner neuralSpawner) {

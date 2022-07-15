@@ -18,6 +18,7 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
     /**
      * Creates a new instance of this class given the provided {@link ClientBlockHandler}-producing function. This
      * function must never return null.
+     *
      * @param handlerFunction the handler function, which should never return null
      */
     public BasicClientBlockHandlerSource(@NotNull Function<Instance, ClientBlockHandler> handlerFunction) {
@@ -27,7 +28,8 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
 
     @Override
     public @NotNull ClientBlockHandler forInstance(@NotNull Instance instance) {
-        return map.computeIfAbsent(Objects.requireNonNull(instance, "instance"), world ->
-                Objects.requireNonNull(this.blockHandlerFunction.apply(world), "handler"));
+        return map.computeIfAbsent(Objects.requireNonNull(instance, "instance"),
+                                   world -> Objects.requireNonNull(this.blockHandlerFunction.apply(world), "handler")
+        );
     }
 }

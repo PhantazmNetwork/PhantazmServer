@@ -19,6 +19,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
     /**
      * Creates an abstract {@link SceneProvider}.
+     *
      * @param maximumScenes The maximum number of {@link Scene}s in the provider.
      */
     public SceneProviderAbstract(int maximumScenes) {
@@ -71,6 +72,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
     /**
      * Chooses a {@link Scene} to be used for a request. This should already be a {@link Scene} in the provider.
+     *
      * @param request The request used to choose a {@link Scene}
      * @return An optional of a chosen {@link Scene}
      */
@@ -78,6 +80,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
     /**
      * Creates a {@link Scene}.
+     *
      * @param request The join request which triggered the creation of the {@link Scene}
      * @return The new {@link Scene}
      */

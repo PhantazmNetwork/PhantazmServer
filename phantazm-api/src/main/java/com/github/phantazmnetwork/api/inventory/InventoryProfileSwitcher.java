@@ -11,12 +11,14 @@ public interface InventoryProfileSwitcher {
 
     /**
      * Checks whether the profile switcher has a current {@link InventoryProfile}.
+     *
      * @return Whether the profile switcher has a current {@link InventoryProfile}
      */
     boolean hasCurrentProfile();
 
     /**
      * Gets the current {@link InventoryProfile} set by the view. This should be checked first with {@link #hasCurrentProfile()}.
+     *
      * @return The current view
      * @throws IllegalStateException If no current {@link InventoryProfile} is set
      */
@@ -24,6 +26,7 @@ public interface InventoryProfileSwitcher {
 
     /**
      * Switches the inventory's view to another view based on a {@link Key}.
+     *
      * @param key The {@link Key} of the profile to switch to, or to switch to no profile
      * @throws IllegalArgumentException If no {@link InventoryProfile} is registered with the {@link Key}
      */
@@ -31,7 +34,8 @@ public interface InventoryProfileSwitcher {
 
     /**
      * Registers a {@link InventoryProfile} to the view.
-     * @param key The {@link Key} to register the {@link InventoryProfile} with
+     *
+     * @param key     The {@link Key} to register the {@link InventoryProfile} with
      * @param profile The {@link InventoryProfile} to register
      * @throws IllegalArgumentException If an {@link InventoryProfile} is already registered with the {@link Key}
      */
@@ -39,6 +43,7 @@ public interface InventoryProfileSwitcher {
 
     /**
      * Unregisters a {@link InventoryProfile} from the view.
+     *
      * @param key The {@link Key} of the {@link InventoryProfile} to unregister
      * @throws IllegalArgumentException If no {@link InventoryProfile} is registered with the {@link Key}
      */

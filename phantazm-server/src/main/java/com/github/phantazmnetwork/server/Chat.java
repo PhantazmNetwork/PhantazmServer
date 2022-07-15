@@ -35,8 +35,9 @@ public final class Chat {
 
     /**
      * Initializes chat features. Should only be called once from {@link PhantazmServer#main(String[])}.
-     * @param node the node to register chat-related events to
-     * @param viewProvider A {@link PlayerViewProvider} to create {@link PlayerView}s
+     *
+     * @param node           the node to register chat-related events to
+     * @param viewProvider   A {@link PlayerViewProvider} to create {@link PlayerView}s
      * @param commandManager The {@link CommandManager} to register chat commands to
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
@@ -78,10 +79,10 @@ public final class Chat {
             }, failure -> {
                 player.sendMessage(failure.left());
                 if (failure.rightBoolean()) {
-                    player.sendMessage(Component.text().append(
-                            Component.text("Set channel to "),
-                            Component.text(DEFAULT_CHAT_CHANNEL_NAME, NamedTextColor.GOLD),
-                            Component.text(".")
+                    player.sendMessage(Component.text().append(Component.text("Set channel to "),
+                                                               Component.text(DEFAULT_CHAT_CHANNEL_NAME,
+                                                                              NamedTextColor.GOLD
+                                                               ), Component.text(".")
                     ).color(NamedTextColor.GREEN));
                     playerChannels.put(player.getUuid(), DEFAULT_CHAT_CHANNEL_NAME);
                 }

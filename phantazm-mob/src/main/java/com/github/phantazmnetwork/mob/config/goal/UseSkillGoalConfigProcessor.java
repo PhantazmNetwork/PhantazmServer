@@ -20,6 +20,7 @@ public class UseSkillGoalConfigProcessor implements ConfigProcessor<UseSkillGoal
 
     /**
      * Creates a new {@link UseSkillGoalConfigProcessor}.
+     *
      * @param skillProcessor A {@link ConfigProcessor} for {@link Skill}s
      */
     public UseSkillGoalConfigProcessor(@NotNull ConfigProcessor<Skill> skillProcessor) {

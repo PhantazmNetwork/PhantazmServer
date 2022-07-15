@@ -11,19 +11,19 @@ public final class TestUtils {
         long[] secondTimes = new long[reps];
         long[] firstTimes = new long[reps];
 
-        for(int r = 0; r < reps; r++) {
+        for (int r = 0; r < reps; r++) {
             Consumer<String> firstConsumer = first.get();
             Consumer<String> secondConsumer = second.get();
             String val = stringFunction.apply(r);
 
             long firstStart = System.nanoTime();
-            for(int i = 0; i < iters; i++) {
+            for (int i = 0; i < iters; i++) {
                 firstConsumer.accept(val);
             }
             firstTimes[r] = System.nanoTime() - firstStart;
 
             long secondStart = System.nanoTime();
-            for(int i = 0; i < iters; i++) {
+            for (int i = 0; i < iters; i++) {
                 secondConsumer.accept(val);
             }
             secondTimes[r] = System.nanoTime() - secondStart;
@@ -31,7 +31,7 @@ public final class TestUtils {
 
         long secondSum = 0;
         long firstSum = 0;
-        for(int i = 0; i < reps; i++) {
+        for (int i = 0; i < reps; i++) {
             firstSum += firstTimes[i];
             secondSum += secondTimes[i];
         }
@@ -41,7 +41,7 @@ public final class TestUtils {
 
         System.out.println(firstName + " average: " + firstAvg + "ns for " + iters + " " + operationName);
         System.out.println(secondName + " average: " + secondAvg + "ns for " + iters + " " + operationName);
-        System.out.println(firstName + " is " + secondAvg / firstAvg + "x faster than " + secondName + " over " + reps
-                + " repetitions");
+        System.out.println(firstName + " is " + secondAvg / firstAvg + "x faster than " + secondName + " over " + reps +
+                           " repetitions");
     }
 }

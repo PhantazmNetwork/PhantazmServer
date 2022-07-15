@@ -23,9 +23,10 @@ public class RayUtils {
 
     /**
      * Ray traces a {@link Shape} and finds an intersection position. This does not ray trace a {@link Shape}'s children.
-     * @param shape The {@link Shape} to ray trace
+     *
+     * @param shape         The {@link Shape} to ray trace
      * @param shapeLocation The location of the {@link Shape} in an {@link Instance}
-     * @param start The start position of the ray
+     * @param start         The start position of the ray
      * @return The intersection position if it exists, otherwise {@link Optional#empty()}
      */
     @SuppressWarnings({"DuplicatedCode", "UnstableApiUsage"})
@@ -111,9 +112,10 @@ public class RayUtils {
 
     /**
      * Finds the exact intersection position of a ray with a {@link Shape}. This does ray trace a {@link Shape}'s children.
-     * @param shape The {@link Shape} to ray trace
+     *
+     * @param shape         The {@link Shape} to ray trace
      * @param shapeLocation The location of the {@link Shape} in an {@link Instance}
-     * @param start The start position of the ray
+     * @param start         The start position of the ray
      * @return The intersection position if it exists, otherwise {@link Optional#empty()}
      */
     @SuppressWarnings("UnstableApiUsage")

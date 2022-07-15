@@ -33,14 +33,15 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
     /**
      * Creates a basic implementation of a {@link SceneProviderAbstract}.
+     *
      * @param newLobbyThreshold The weighting threshold for {@link Lobby}s. If no {@link Lobby}s are above
      *                          this threshold, a new lobby will be created.
-     * @param maximumLobbies The maximum {@link Lobby}s in the provider.
-     * @param instanceManager An {@link InstanceManager} used to create {@link Instance}
-     * @param instanceLoader A {@link InstanceLoader} used to load {@link Instance}s
-     * @param lobbyPaths The paths that identify the {@link Lobby} for the {@link InstanceLoader}
-     * @param fallback A {@link SceneFallback} for the created {@link Lobby}s
-     * @param instanceConfig The {@link InstanceConfig} for the {@link Lobby}s
+     * @param maximumLobbies    The maximum {@link Lobby}s in the provider.
+     * @param instanceManager   An {@link InstanceManager} used to create {@link Instance}
+     * @param instanceLoader    A {@link InstanceLoader} used to load {@link Instance}s
+     * @param lobbyPaths        The paths that identify the {@link Lobby} for the {@link InstanceLoader}
+     * @param fallback          A {@link SceneFallback} for the created {@link Lobby}s
+     * @param instanceConfig    The {@link InstanceConfig} for the {@link Lobby}s
      * @param chunkViewDistance The server's chunk view distance
      */
     public BasicLobbyProvider(int maximumLobbies, int newLobbyThreshold, @NotNull InstanceManager instanceManager,
@@ -65,8 +66,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         Phaser phaser = new Phaser(1);
         ChunkUtils.forChunksInRange(instanceConfig.spawnPoint(), chunkViewDistance, (chunkX, chunkZ) -> {
             phaser.register();
-            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) ->
-                    phaser.arriveAndDeregister());
+            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
         });
 
         phaser.arriveAndAwaitAdvance();

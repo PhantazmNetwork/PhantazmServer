@@ -22,10 +22,6 @@ import org.jetbrains.annotations.NotNull;
  * Adventure api ({@code net.kyori.adventure}).
  */
 public final class AdventureConfigProcessors {
-    private AdventureConfigProcessors() {
-        throw new UnsupportedOperationException();
-    }
-
     private static final ConfigProcessor<Key> key = new ConfigProcessor<>() {
         @SuppressWarnings("PatternValidation")
         @Override
@@ -34,7 +30,8 @@ public final class AdventureConfigProcessors {
                 String string = ConfigProcessor.STRING.dataFromElement(element);
                 if (string.contains(":")) {
                     return Key.key(string);
-                } else {
+                }
+                else {
                     return Key.key(Namespaces.PHANTAZM, string);
                 }
             }
@@ -51,7 +48,6 @@ public final class AdventureConfigProcessors {
             return new ConfigPrimitive(key.asString());
         }
     };
-
     private static final ConfigProcessor<Component> component = new ConfigProcessor<>() {
         @Override
         public Component dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -63,7 +59,50 @@ public final class AdventureConfigProcessors {
             return new ConfigPrimitive(MiniMessage.miniMessage().serialize(component));
         }
     };
+    private static final ConfigProcessor<RGBLike> rgbLike = new ConfigProcessor<>() {
+        @Override
+        public @NotNull RGBLike dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String hex = ConfigProcessor.STRING.dataFromElement(element);
+            TextColor color = TextColor.fromHexString(hex);
+            if (color == null) {
+                throw new ConfigProcessException("Invalid hex: " + hex);
+            }
 
+            return color;
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(@NotNull RGBLike rgbLike) {
+            return new ConfigPrimitive(TextColor.color(rgbLike).asHexString());
+        }
+    };
+    private static final ConfigProcessor<TitlePart<Component>> componentTitlePart = new ConfigProcessor<>() {
+        @Override
+        public TitlePart<Component> dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String name = ConfigProcessor.STRING.dataFromElement(element);
+            return switch (name) {
+                case "TITLE" -> TitlePart.TITLE;
+                case "SUBTITLE" -> TitlePart.SUBTITLE;
+                default -> throw new ConfigProcessException("Unrecognized TitlePart " + name);
+            };
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(TitlePart<Component> componentTitlePart)
+                throws ConfigProcessException {
+            if (componentTitlePart.equals(TitlePart.TITLE)) {
+                return new ConfigPrimitive("TITLE");
+            }
+            else if (componentTitlePart.equals(TitlePart.SUBTITLE)) {
+                return new ConfigPrimitive("SUBTITLE");
+            }
+
+            throw new ConfigProcessException("Unrecognized TitlePart " + componentTitlePart);
+        }
+    };
+    private static final ConfigProcessor<TitlePart<Title.Times>> timesTitlePart =
+            ConfigProcessor.emptyProcessor(() -> TitlePart.TIMES);
+    private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessor.enumProcessor(Sound.Source.class);
     private static final ConfigProcessor<Sound> sound = new ConfigProcessor<>() {
         @Override
         public Sound dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -85,55 +124,13 @@ public final class AdventureConfigProcessors {
         }
     };
 
-    private static final ConfigProcessor<RGBLike> rgbLike = new ConfigProcessor<>() {
-        @Override
-        public @NotNull RGBLike dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            String hex = ConfigProcessor.STRING.dataFromElement(element);
-            TextColor color = TextColor.fromHexString(hex);
-            if (color == null) {
-                throw new ConfigProcessException("Invalid hex: " + hex);
-            }
-
-            return color;
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(@NotNull RGBLike rgbLike) {
-            return new ConfigPrimitive(TextColor.color(rgbLike).asHexString());
-        }
-    };
-
-    private static final ConfigProcessor<TitlePart<Component>> componentTitlePart = new ConfigProcessor<>() {
-        @Override
-        public TitlePart<Component> dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            String name = ConfigProcessor.STRING.dataFromElement(element);
-            return switch (name) {
-                case "TITLE" -> TitlePart.TITLE;
-                case "SUBTITLE" -> TitlePart.SUBTITLE;
-                default -> throw new ConfigProcessException("Unrecognized TitlePart " + name);
-            };
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(TitlePart<Component> componentTitlePart)
-                throws ConfigProcessException {
-            if(componentTitlePart.equals(TitlePart.TITLE)) {
-                return new ConfigPrimitive("TITLE");
-            }
-            else if(componentTitlePart.equals(TitlePart.SUBTITLE)) {
-                return new ConfigPrimitive("SUBTITLE");
-            }
-
-            throw new ConfigProcessException("Unrecognized TitlePart " + componentTitlePart);
-        }
-    };
-
-    private static final ConfigProcessor<TitlePart<Title.Times>> timesTitlePart = ConfigProcessor.emptyProcessor(() -> TitlePart.TIMES);
-
-    private static final ConfigProcessor<Sound.Source> soundSource = ConfigProcessor.enumProcessor(Sound.Source.class);
+    private AdventureConfigProcessors() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link Key} objects.
+     *
      * @return the ConfigProcessor used to serialize/deserialize Key instances
      */
     public static @NotNull ConfigProcessor<Key> key() {
@@ -142,6 +139,7 @@ public final class AdventureConfigProcessors {
 
     /**
      * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link Component} objects.
+     *
      * @return the ConfigProcessor used to serialize/deserialize Component instances
      */
     public static @NotNull ConfigProcessor<Component> component() {
@@ -151,6 +149,7 @@ public final class AdventureConfigProcessors {
     /**
      * Returns the {@link  ConfigProcessor} implementation used to serialize/deserialize {@link TitlePart} objects of
      * type {@link Component}.
+     *
      * @return the ConfigProcessor used to serialize/deserialize TitlePart instances
      */
     public static @NotNull ConfigProcessor<TitlePart<Component>> componentTitlePart() {
@@ -163,6 +162,7 @@ public final class AdventureConfigProcessors {
 
     /**
      * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link Sound} objects.
+     *
      * @return the ConfigProcessor used to serialize/deserialize Sound instances
      */
     public static @NotNull ConfigProcessor<Sound> sound() {
@@ -171,6 +171,7 @@ public final class AdventureConfigProcessors {
 
     /**
      * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link Sound.Source} objects.
+     *
      * @return the ConfigProcessor used to serialize/deserialize Sound.Source instances
      */
     public static @NotNull ConfigProcessor<Sound.Source> soundSource() {
@@ -179,6 +180,7 @@ public final class AdventureConfigProcessors {
 
     /**
      * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link RGBLike} objects.
+     *
      * @return the ConfigProcessor used to serialize/deserialize RGBLike instances
      */
     public static @NotNull ConfigProcessor<RGBLike> rgbLike() {

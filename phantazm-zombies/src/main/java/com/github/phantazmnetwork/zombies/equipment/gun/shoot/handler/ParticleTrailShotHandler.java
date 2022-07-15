@@ -28,39 +28,25 @@ import java.util.UUID;
  */
 public class ParticleTrailShotHandler implements ShotHandler {
 
+    private final Data data;
+
     /**
-     * Data for a {@link ParticleTrailShotHandler}.
-     * @param particle The {@link ParticleWrapper} to use for the trail
-     * @param trailCount The number of particles to create in the trail
+     * Creates a {@link ParticleTrailShotHandler}.
+     *
+     * @param data The {@link ParticleTrailShotHandler}'s {@link Data}
      */
-    public record Data(@NotNull ParticleWrapper particle, int trailCount) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.particle_trail");
-
-        /**
-         * Creates a {@link Data}.
-         * @param particle The {@link ParticleWrapper} to use for the trail
-         * @param trailCount The number of particles to create in the trail
-         */
-        public Data {
-            Objects.requireNonNull(particle, "particle");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public ParticleTrailShotHandler(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @param particleProcessor A {@link ConfigProcessor} for {@link ParticleWrapper}s
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull ConfigProcessor<ParticleWrapper> particleProcessor) {
+    public static @NotNull ConfigProcessor<Data> processor(
+            @NotNull ConfigProcessor<ParticleWrapper> particleProcessor) {
 
         return new ConfigProcessor<>() {
 
@@ -86,16 +72,6 @@ public class ParticleTrailShotHandler implements ShotHandler {
         };
     }
 
-    private final Data data;
-
-    /**
-     * Creates a {@link ParticleTrailShotHandler}.
-     * @param data The {@link ParticleTrailShotHandler}'s {@link Data}
-     */
-    public ParticleTrailShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
     public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
                        @NotNull GunShot shot) {
@@ -110,9 +86,12 @@ public class ParticleTrailShotHandler implements ShotHandler {
         for (int i = 0; i < data.trailCount(); i++) {
             start = start.add(direction);
 
-            ServerPacket packet = ParticleCreator.createParticlePacket(particle.particle(), particle.distance(),
-                    start.x(), start.y(), start.z(), particle.offsetX(), particle.offsetY(), particle.offsetZ(),
-                    particle.particleData(), particle.particleCount(), particle.data()::write);
+            ServerPacket packet =
+                    ParticleCreator.createParticlePacket(particle.particle(), particle.distance(), start.x(), start.y(),
+                                                         start.z(), particle.offsetX(), particle.offsetY(),
+                                                         particle.offsetZ(), particle.particleData(),
+                                                         particle.particleCount(), particle.data()::write
+                    );
             instance.sendGroupedPacket(packet);
         }
     }
@@ -120,6 +99,35 @@ public class ParticleTrailShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for a {@link ParticleTrailShotHandler}.
+     *
+     * @param particle   The {@link ParticleWrapper} to use for the trail
+     * @param trailCount The number of particles to create in the trail
+     */
+    public record Data(@NotNull ParticleWrapper particle, int trailCount) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.particle_trail");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param particle   The {@link ParticleWrapper} to use for the trail
+         * @param trailCount The number of particles to create in the trail
+         */
+        public Data {
+            Objects.requireNonNull(particle, "particle");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

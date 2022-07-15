@@ -16,6 +16,22 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface Calculator {
     /**
+     * A simple Calculator implementation whose heuristic and distance functions just return the squared distance
+     * between the two points they are given. For typical grid-based navigation, this produces suitably natural paths.
+     */
+    Calculator SQUARED_DISTANCE = new Calculator() {
+        @Override
+        public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
+            return (float)Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
+        }
+
+        @Override
+        public float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
+            return (float)Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
+        }
+    };
+
+    /**
      * <p>Computes the heuristic.</p>
      *
      * <p>In order to ensure pathfinding that always finds the least-cost solution, the heuristic must be
@@ -30,12 +46,13 @@ public interface Calculator {
      *
      * <p>When the heuristic is always 0, A* effectively operates like Dijkstra's algorithm. This is generally
      * inefficient and should be avoided, as it will not "intelligently" prioritize more promising nodes.</p>
+     *
      * @param fromX current x
      * @param fromY current y
      * @param fromZ current z
-     * @param toX destination x
-     * @param toY destination y
-     * @param toZ destination z
+     * @param toX   destination x
+     * @param toY   destination y
+     * @param toZ   destination z
      * @return the heuristic value, {@code h}
      */
     float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ);
@@ -44,20 +61,22 @@ public interface Calculator {
      * Computes the distance between the given starting node and the destination. This value typically reflects the
      * squared straight-line distance, but may be reduced or increased in order to bias the resulting path towards or
      * away from certain nodes.
+     *
      * @param fromX current x
      * @param fromY current y
      * @param fromZ current z
-     * @param toX destination x
-     * @param toY destination y
-     * @param toZ destination z
+     * @param toX   destination x
+     * @param toY   destination y
+     * @param toZ   destination z
      * @return the distance value
      */
     float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ);
 
     /**
      * Convenience overload for {@link Calculator#heuristic(int, int, int, int, int, int)}.
+     *
      * @param from the first vector
-     * @param to the second vector
+     * @param to   the second vector
      * @return the heuristic value
      */
     default float heuristic(@NotNull Vec3I from, @NotNull Vec3I to) {
@@ -66,27 +85,12 @@ public interface Calculator {
 
     /**
      * Convenience overload for {@link Calculator#distance(int, int, int, int, int, int)}.
+     *
      * @param from the first vector
-     * @param to the second vector
+     * @param to   the second vector
      * @return the distance value
      */
     default float distance(@NotNull Vec3I from, @NotNull Vec3I to) {
         return distance(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
     }
-
-    /**
-     * A simple Calculator implementation whose heuristic and distance functions just return the squared distance
-     * between the two points they are given. For typical grid-based navigation, this produces suitably natural paths.
-     */
-    Calculator SQUARED_DISTANCE = new Calculator() {
-        @Override
-        public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return (float) Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
-        }
-
-        @Override
-        public float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return (float) Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
-        }
-    };
 }

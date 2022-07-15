@@ -7,6 +7,7 @@ import java.util.Objects;
 
 /**
  * Config for the server's ping list.
+ *
  * @param description The MOTD set in the server list
  */
 public record PingListConfig(@NotNull Component description) {
@@ -22,6 +23,7 @@ public record PingListConfig(@NotNull Component description) {
 
     /**
      * Creates config for the server's ping list.
+     *
      * @param description The MOTD set in the server list
      */
     public PingListConfig {

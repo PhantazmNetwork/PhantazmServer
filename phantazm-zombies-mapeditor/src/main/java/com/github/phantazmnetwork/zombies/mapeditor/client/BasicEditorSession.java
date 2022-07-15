@@ -57,24 +57,21 @@ public class BasicEditorSession implements EditorSession {
     private final ObjectRenderer renderer;
     private final Path mapFolder;
     private final MapLoader loader;
-
+    private final Map<Key, MapInfo> maps;
+    private final Map<Key, MapInfo> unmodifiableMaps;
     private RoomInfo lastRoom;
     private DoorInfo lastDoor;
     private Key lastSpawnrule;
     private boolean enabled;
-
     private Vec3i firstSelected;
     private Vec3i secondSelected;
-
     private MapInfo currentMap;
-
-    private final Map<Key, MapInfo> maps;
-    private final Map<Key, MapInfo> unmodifiableMaps;
 
     /**
      * Constructs a new instance of this class using the provided parameters.
-     * @param renderer the {@link ObjectRenderer} used to render map objects
-     * @param loader the {@link MapLoader} used to save or load map data
+     *
+     * @param renderer  the {@link ObjectRenderer} used to render map objects
+     * @param loader    the {@link MapLoader} used to save or load map data
      * @param mapFolder the {@link Path} which contains saved map data
      */
     public BasicEditorSession(@NotNull ObjectRenderer renderer, @NotNull MapLoader loader, @NotNull Path mapFolder) {
@@ -88,24 +85,28 @@ public class BasicEditorSession implements EditorSession {
     @Override
     public @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
                                                 @NotNull BlockHitResult blockHitResult) {
-        if(!enabled || !player.getInventory().getMainHandStack().getItem().equals(Items.STICK)) {
+        if (!enabled || !player.getInventory().getMainHandStack().getItem().equals(Items.STICK)) {
             return ActionResult.PASS;
         }
 
-        if(hand == Hand.MAIN_HAND) {
+        if (hand == Hand.MAIN_HAND) {
             Vec3i first = firstSelected;
             Vec3i newSelection = blockHitResult.getBlockPos();
 
-            if(first == null) {
+            if (first == null) {
                 firstSelected = newSelection;
                 secondSelected = newSelection;
                 updateSelectionRender(newSelection, ONE, newSelection);
             }
             else {
-                Vec3i min = new Vec3i(Math.min(newSelection.getX(), first.getX()), Math.min(newSelection.getY(), first
-                        .getY()), Math.min(newSelection.getZ(), first.getZ()));
-                Vec3i max = new Vec3i(Math.max(newSelection.getX(), first.getX()), Math.max(newSelection.getY(), first
-                        .getY()), Math.max(newSelection.getZ(), first.getZ()));
+                Vec3i min = new Vec3i(Math.min(newSelection.getX(), first.getX()),
+                                      Math.min(newSelection.getY(), first.getY()),
+                                      Math.min(newSelection.getZ(), first.getZ())
+                );
+                Vec3i max = new Vec3i(Math.max(newSelection.getX(), first.getX()),
+                                      Math.max(newSelection.getY(), first.getY()),
+                                      Math.max(newSelection.getZ(), first.getZ())
+                );
 
                 secondSelected = firstSelected;
                 firstSelected = newSelection;
@@ -117,6 +118,11 @@ public class BasicEditorSession implements EditorSession {
         }
 
         return ActionResult.PASS;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override
@@ -136,18 +142,13 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    @Override
     public boolean hasSelection() {
         return firstSelected != null && secondSelected != null;
     }
 
     @Override
     public @NotNull Vec3I getFirstSelection() {
-        if(firstSelected == null) {
+        if (firstSelected == null) {
             throw new IllegalStateException("No selection");
         }
 
@@ -156,7 +157,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public @NotNull Vec3I getSecondSelection() {
-        if(secondSelected == null) {
+        if (secondSelected == null) {
             throw new IllegalStateException("No selection");
         }
 
@@ -165,8 +166,9 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public @NotNull Region3I getSelection() {
-        return Region3I.encompassing(getFirstSelection(), getSecondSelection(), currentMap != null ? currentMap.info()
-                .origin() : Vec3I.ORIGIN);
+        return Region3I.encompassing(getFirstSelection(), getSecondSelection(),
+                                     currentMap != null ? currentMap.info().origin() : Vec3I.ORIGIN
+        );
     }
 
     @Override
@@ -176,7 +178,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public @NotNull MapInfo getMap() {
-        if(currentMap == null) {
+        if (currentMap == null) {
             throw new IllegalStateException("No map");
         }
 
@@ -188,7 +190,7 @@ public class BasicEditorSession implements EditorSession {
         Objects.requireNonNull(map, "map");
 
         Key id = map.info().id();
-        if(maps.containsKey(id)) {
+        if (maps.containsKey(id)) {
             throw new IllegalArgumentException("A map with id " + id + " already exists");
         }
 
@@ -206,7 +208,7 @@ public class BasicEditorSession implements EditorSession {
         Objects.requireNonNull(id, "id");
         maps.remove(id);
 
-        if(currentMap != null && currentMap.info().id().equals(id)) {
+        if (currentMap != null && currentMap.info().id().equals(id)) {
             currentMap = null;
             refreshMap();
         }
@@ -222,7 +224,7 @@ public class BasicEditorSession implements EditorSession {
         Objects.requireNonNull(id, "id");
 
         MapInfo newCurrent = maps.get(id);
-        if(newCurrent == null) {
+        if (newCurrent == null) {
             throw new IllegalArgumentException("A map with id " + id + " does not exist");
         }
 
@@ -234,7 +236,7 @@ public class BasicEditorSession implements EditorSession {
     public void loadMapsFromDisk() {
         try {
             Key oldId = null;
-            if(currentMap != null) {
+            if (currentMap != null) {
                 oldId = currentMap.info().id();
             }
 
@@ -252,7 +254,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void saveMapsToDisk() {
-        for(MapInfo map : maps.values()) {
+        for (MapInfo map : maps.values()) {
             try {
                 loader.save(map);
             }
@@ -282,11 +284,14 @@ public class BasicEditorSession implements EditorSession {
     public void refreshRooms() {
         requireMap();
 
-        for(RoomInfo room : currentMap.rooms()) {
-            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id()
-                    .value()), ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true,
-                    false, RenderUtils.arrayFromRegions(room.regions(), currentMap.info()
-                    .origin())));
+        for (RoomInfo room : currentMap.rooms()) {
+            renderer.putObject(
+                    new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id().value()),
+                                                    ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true, false,
+                                                    RenderUtils.arrayFromRegions(room.regions(),
+                                                                                 currentMap.info().origin()
+                                                    )
+                    ));
         }
     }
 
@@ -295,11 +300,14 @@ public class BasicEditorSession implements EditorSession {
     public void refreshDoors() {
         requireMap();
 
-        for(DoorInfo door : currentMap.doors()) {
-            renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "door." + door.id()
-                    .value()), ObjectRenderer.RenderType.FILLED, DOOR_COLOR, true,
-                    false, RenderUtils.arrayFromRegions(door.regions(), currentMap.info()
-                    .origin())));
+        for (DoorInfo door : currentMap.doors()) {
+            renderer.putObject(
+                    new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "door." + door.id().value()),
+                                                    ObjectRenderer.RenderType.FILLED, DOOR_COLOR, true, false,
+                                                    RenderUtils.arrayFromRegions(door.regions(),
+                                                                                 currentMap.info().origin()
+                                                    )
+                    ));
         }
     }
 
@@ -309,11 +317,15 @@ public class BasicEditorSession implements EditorSession {
 
         renderer.removeIf(key -> key.value().startsWith("window."));
         int i = 0;
-        for(WindowInfo window : currentMap.windows()) {
+        for (WindowInfo window : currentMap.windows()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "window." + i++),
-                    ObjectRenderer.RenderType.FILLED, WINDOW_COLOR, true,
-                    false, RenderUtils.arrayFromRegion(window.frameRegion(), currentMap.info()
-                    .origin(), new Vec3d[2], 0)));
+                                                               ObjectRenderer.RenderType.FILLED, WINDOW_COLOR, true,
+                                                               false, RenderUtils.arrayFromRegion(window.frameRegion(),
+                                                                                                  currentMap.info()
+                                                                                                            .origin(),
+                                                                                                  new Vec3d[2], 0
+            )
+            ));
         }
     }
 
@@ -323,11 +335,14 @@ public class BasicEditorSession implements EditorSession {
 
         renderer.removeIf(key -> key.value().startsWith("spawnpoint."));
         int i = 0;
-        for(SpawnpointInfo spawnpointInfo : currentMap.spawnpoints()) {
+        for (SpawnpointInfo spawnpointInfo : currentMap.spawnpoints()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "spawnpoint." + i++),
-                    ObjectRenderer.RenderType.FILLED, SPAWNPOINT_COLOR, true, false,
-                    RenderUtils.arrayFromRegion(Region3I.normalized(spawnpointInfo.position(),
-                            Vec3I.of(1, 1, 1)), currentMap.info().origin(), new Vec3d[2], 0)));
+                                                               ObjectRenderer.RenderType.FILLED, SPAWNPOINT_COLOR, true,
+                                                               false, RenderUtils.arrayFromRegion(
+                    Region3I.normalized(spawnpointInfo.position(), Vec3I.of(1, 1, 1)), currentMap.info().origin(),
+                    new Vec3d[2], 0
+            )
+            ));
         }
     }
 
@@ -337,11 +352,14 @@ public class BasicEditorSession implements EditorSession {
 
         renderer.removeIf(key -> key.value().startsWith("shop."));
         int i = 0;
-        for(ShopPositionInfo shopPositionInfo : currentMap.shops()) {
+        for (ShopPositionInfo shopPositionInfo : currentMap.shops()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "shop." + i++),
-                    ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true, false,
-                    RenderUtils.arrayFromRegion(Region3I.normalized(shopPositionInfo.triggerLocation(),
-                            Vec3I.of(1, 1, 1)), currentMap.info().origin(), new Vec3d[2], 0)));
+                                                               ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true,
+                                                               false, RenderUtils.arrayFromRegion(
+                    Region3I.normalized(shopPositionInfo.triggerLocation(), Vec3I.of(1, 1, 1)),
+                    currentMap.info().origin(), new Vec3d[2], 0
+            )
+            ));
         }
     }
 
@@ -363,19 +381,20 @@ public class BasicEditorSession implements EditorSession {
     private Map<Key, MapInfo> loadMaps() throws IOException {
         Map<Key, MapInfo> newMaps = new HashMap<>();
         FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory() && !path.equals(mapFolder),
-                mapFolder -> {
-            LOGGER.info("Trying to load map from " + mapFolder);
-            String name = mapFolder.getFileName().toString();
+                                      mapFolder -> {
+                                          LOGGER.info("Trying to load map from " + mapFolder);
+                                          String name = mapFolder.getFileName().toString();
 
-            try {
-                MapInfo map = loader.load(name);
-                newMaps.put(map.info().id(), map);
-                LOGGER.info("Successfully loaded map " + name);
-            }
-            catch (IOException e) {
-                LOGGER.warn("IOException when loading map " + name, e);
-            }
-        });
+                                          try {
+                                              MapInfo map = loader.load(name);
+                                              newMaps.put(map.info().id(), map);
+                                              LOGGER.info("Successfully loaded map " + name);
+                                          }
+                                          catch (IOException e) {
+                                              LOGGER.warn("IOException when loading map " + name, e);
+                                          }
+                                      }
+        );
 
         return newMaps;
     }
@@ -383,14 +402,18 @@ public class BasicEditorSession implements EditorSession {
     private void refreshMap() {
         renderer.removeIf(key -> !(key.equals(CURSOR_KEY) || key.equals(OUTLINE_KEY) || key.equals(SELECTION_KEY)));
 
-        if(currentMap == null) {
+        if (currentMap == null) {
             return;
         }
 
         MapSettingsInfo info = currentMap.info();
-        renderer.putObject(new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR,
-                true, true, RenderUtils.arrayFromRegion(Region3I.normalized(info
-                .origin(), Vec3I.of(1, 1, 1)), Vec3I.ORIGIN, new Vec3d[2], 0)));
+        renderer.putObject(
+                new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR, true, true,
+                                                RenderUtils.arrayFromRegion(
+                                                        Region3I.normalized(info.origin(), Vec3I.of(1, 1, 1)),
+                                                        Vec3I.ORIGIN, new Vec3d[2], 0
+                                                )
+                ));
 
         refreshRooms();
         refreshDoors();
@@ -400,22 +423,31 @@ public class BasicEditorSession implements EditorSession {
     }
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {
-        Vec3d startVec = new Vec3d(areaStart.getX() - ObjectRenderer.EPSILON, areaStart.getY() - ObjectRenderer
-                .EPSILON, areaStart.getZ() - ObjectRenderer.EPSILON);
-        Vec3d dimensionsVec = new Vec3d(dimensions.getX() + ObjectRenderer.DOUBLE_EPSILON, dimensions.getY() +
-                ObjectRenderer.DOUBLE_EPSILON, dimensions.getZ() + ObjectRenderer.DOUBLE_EPSILON);
+        Vec3d startVec = new Vec3d(areaStart.getX() - ObjectRenderer.EPSILON, areaStart.getY() - ObjectRenderer.EPSILON,
+                                   areaStart.getZ() - ObjectRenderer.EPSILON
+        );
+        Vec3d dimensionsVec = new Vec3d(dimensions.getX() + ObjectRenderer.DOUBLE_EPSILON,
+                                        dimensions.getY() + ObjectRenderer.DOUBLE_EPSILON,
+                                        dimensions.getZ() + ObjectRenderer.DOUBLE_EPSILON
+        );
         Vec3d clickedVec = new Vec3d(clicked.getX(), clicked.getY(), clicked.getZ());
 
-        renderer.putObject(new ObjectRenderer.RenderObject(SELECTION_KEY, ObjectRenderer.RenderType.FILLED,
-                SELECTION_COLOR, true, false, startVec, dimensionsVec));
-        renderer.putObject(new ObjectRenderer.RenderObject(OUTLINE_KEY, ObjectRenderer.RenderType.OUTLINE,
-                OUTLINE_COLOR, true, false, startVec, dimensionsVec));
-        renderer.putObject(new ObjectRenderer.RenderObject(CURSOR_KEY, ObjectRenderer.RenderType.OUTLINE, CURSOR_COLOR,
-                true, true, clickedVec.add(0.25, 0.25, 0.25), HALF));
+        renderer.putObject(
+                new ObjectRenderer.RenderObject(SELECTION_KEY, ObjectRenderer.RenderType.FILLED, SELECTION_COLOR, true,
+                                                false, startVec, dimensionsVec
+                ));
+        renderer.putObject(
+                new ObjectRenderer.RenderObject(OUTLINE_KEY, ObjectRenderer.RenderType.OUTLINE, OUTLINE_COLOR, true,
+                                                false, startVec, dimensionsVec
+                ));
+        renderer.putObject(
+                new ObjectRenderer.RenderObject(CURSOR_KEY, ObjectRenderer.RenderType.OUTLINE, CURSOR_COLOR, true, true,
+                                                clickedVec.add(0.25, 0.25, 0.25), HALF
+                ));
     }
 
     private void requireMap() {
-        if(currentMap == null) {
+        if (currentMap == null) {
             throw new IllegalStateException("No map");
         }
     }

@@ -10,6 +10,7 @@ public interface NeuralGoal extends Tickable {
 
     /**
      * Gets whether the goal should start.
+     *
      * @return Whether the goal should start
      */
     boolean shouldStart();
@@ -21,6 +22,7 @@ public interface NeuralGoal extends Tickable {
 
     /**
      * Gets whether the goal should end.
+     *
      * @return Whether the goal should end
      */
     boolean shouldEnd();

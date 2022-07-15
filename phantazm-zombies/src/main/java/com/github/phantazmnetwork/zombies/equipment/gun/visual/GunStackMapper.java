@@ -12,7 +12,8 @@ public interface GunStackMapper {
 
     /**
      * Maps an {@link ItemStack} based on a gun's {@link GunState}.
-     * @param state The state of the gun
+     *
+     * @param state        The state of the gun
      * @param intermediate The current representation of the gun's {@link ItemStack}
      * @return The mapped {@link ItemStack}
      */

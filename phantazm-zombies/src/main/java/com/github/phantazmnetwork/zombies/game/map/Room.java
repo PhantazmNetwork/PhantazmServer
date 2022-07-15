@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class Room extends PositionalMapObject<RoomInfo> {
-    private boolean isOpen;
     private final List<Action<Room>> openActions;
     private final List<Region3I> unmodifiableRegions;
+    private boolean isOpen;
 
     /**
      * Constructs a new instance of this class.
@@ -33,7 +33,7 @@ public class Room extends PositionalMapObject<RoomInfo> {
         Collections.sort(openActions);
 
         List<Region3I> list = new ArrayList<>(roomInfo.regions().size());
-        for(Region3I region : roomInfo.regions()) {
+        for (Region3I region : roomInfo.regions()) {
             list.add(region.add(origin));
         }
 
@@ -49,12 +49,12 @@ public class Room extends PositionalMapObject<RoomInfo> {
     }
 
     public void open() {
-        if(isOpen) {
+        if (isOpen) {
             return;
         }
 
         isOpen = true;
-        for(Action<Room> action : openActions) {
+        for (Action<Room> action : openActions) {
             action.perform(this);
         }
     }

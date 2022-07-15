@@ -14,6 +14,7 @@ public interface ShotEndpointSelector {
 
     /**
      * Finds the endpoint of a shot.
+     *
      * @param start The start position of the shot
      * @return The endpoint of the shot
      */

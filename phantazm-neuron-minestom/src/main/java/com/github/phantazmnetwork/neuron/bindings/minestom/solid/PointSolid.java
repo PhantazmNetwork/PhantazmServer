@@ -15,6 +15,7 @@ class PointSolid implements Solid {
 
     /**
      * Creates a new instance of this class from the given min and max vectors.
+     *
      * @param min the min vector
      * @param max the max vector
      */
@@ -36,18 +37,18 @@ class PointSolid implements Solid {
     @Override
     public boolean overlaps(double x, double y, double z, double width, double height, double depth) {
         boolean overlapsSelf = min.getX() < x + width && max.getX() > x && min.getY() < y + height && max.getY() > y &&
-                min.getZ() < z + depth && max.getZ() > z;
+                               min.getZ() < z + depth && max.getZ() > z;
 
-        if(!hasChildren()) {
+        if (!hasChildren()) {
             return overlapsSelf;
         }
 
-        if(!overlapsSelf) {
+        if (!overlapsSelf) {
             return false;
         }
 
-        for(Solid solid : getChildren()) {
-            if(solid.overlaps(x, y, z, width, height, depth)) {
+        for (Solid solid : getChildren()) {
+            if (solid.overlaps(x, y, z, width, height, depth)) {
                 return true;
             }
         }
@@ -72,16 +73,17 @@ class PointSolid implements Solid {
 
     @Override
     public final boolean equals(Object obj) {
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
 
-        if(obj == this) {
+        if (obj == this) {
             return true;
         }
 
-        if(obj instanceof Solid solid) {
-            return min.equals(solid.getMin()) && max.equals(solid.getMax()) && getChildren().equals(solid.getChildren());
+        if (obj instanceof Solid solid) {
+            return min.equals(solid.getMin()) && max.equals(solid.getMax()) &&
+                   getChildren().equals(solid.getChildren());
         }
 
         return false;

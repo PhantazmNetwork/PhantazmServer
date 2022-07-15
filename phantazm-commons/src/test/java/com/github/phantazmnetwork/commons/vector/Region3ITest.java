@@ -13,7 +13,7 @@ class Region3ITest {
             Region3I region = new BasicRegion3I(Vec3I.ORIGIN, Vec3I.of(1, 1, 1));
 
             int i = 0;
-            for(Vec3I vec : region) {
+            for (Vec3I vec : region) {
                 assertEquals(Vec3I.ORIGIN, vec);
                 i++;
             }
@@ -24,14 +24,14 @@ class Region3ITest {
         @Test
         void largerCount() {
             Vec3I[] vecs = new Vec3I[16];
-            for(int i = 0; i < vecs.length; i++) {
+            for (int i = 0; i < vecs.length; i++) {
                 vecs[i] = Vec3I.of(i, i, i);
             }
 
-            for(Vec3I size : vecs) {
+            for (Vec3I size : vecs) {
                 Region3I region = new BasicRegion3I(Vec3I.ORIGIN, size);
                 int count = 0;
-                for(Vec3I ignored : region) {
+                for (Vec3I ignored : region) {
                     count++;
                 }
 

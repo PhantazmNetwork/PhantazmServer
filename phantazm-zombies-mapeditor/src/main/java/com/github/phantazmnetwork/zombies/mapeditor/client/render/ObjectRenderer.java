@@ -24,6 +24,77 @@ public interface ObjectRenderer {
     float DOUBLE_EPSILON = EPSILON * 2;
 
     /**
+     * Removes a {@link RenderObject} with the given name from the render list, stopping it from appearing.
+     *
+     * @param key the id of the object to remove
+     */
+    void removeObject(@NotNull Key key);
+
+    /**
+     * Removes all {@link RenderObject} instances whose key matches the given predicate.
+     *
+     * @param keyPredicate the predicate determining which objects to remove
+     */
+    void removeIf(@NotNull Predicate<? super Key> keyPredicate);
+
+    /**
+     * Enumerates every {@link RenderObject}, calling the given Consumer with every instance.
+     *
+     * @param consumer the consumer to call
+     */
+    void forEach(@NotNull Consumer<? super RenderObject> consumer);
+
+    /**
+     * Adds an object to this renderer.
+     *
+     * @param value the object to add
+     */
+    void putObject(@NotNull RenderObject value);
+
+    /**
+     * If true, this renderer will render ALL objects through even opaque blocks. If false, this renderer will only
+     * render through opaque blocks for RenderObject instances which have that parameter enabled.
+     *
+     * @param rendersThroughWalls true if this renderer should force render through walls, false otherwise
+     */
+    void setRenderThroughWalls(boolean rendersThroughWalls);
+
+    /**
+     * Determines if a RenderObject with the given key exists in this renderer.
+     *
+     * @param key the key to check for
+     * @return true if an object with this key exists, false otherwise
+     */
+    boolean hasObject(@NotNull Key key);
+
+    /**
+     * Determines if this ObjectRenderer is currently enabled or disabled.
+     *
+     * @return true if enabled, false if disabled
+     */
+    boolean isEnabled();
+
+    /**
+     * Enables or disables the renderer. When the renderer is disabled, nothing will render.
+     *
+     * @param enabled true to enabled, false to disabled
+     */
+    void setEnabled(boolean enabled);
+
+    /**
+     * Returns the "size" of this renderer (number of registered RenderObjects). Invisible RenderObjects will count
+     * towards this total.
+     *
+     * @return the number of registered RenderObjects
+     */
+    int size();
+
+    /**
+     * Removes all RenderObject instances from this renderer.
+     */
+    void clear();
+
+    /**
      * Describes how a RenderObject should be rendered (either filled or wireframe outline).
      */
     enum RenderType {
@@ -76,16 +147,17 @@ public interface ObjectRenderer {
 
         /**
          * Creates a new instance of this class, with the specified initial values.
-         * @param key the name of this object
-         * @param type the initial RenderType
-         * @param color the initial Color
-         * @param shouldRender the initial visibility state (true if visible, false if invisible)
+         *
+         * @param key                the name of this object
+         * @param type               the initial RenderType
+         * @param color              the initial Color
+         * @param shouldRender       the initial visibility state (true if visible, false if invisible)
          * @param renderThroughWalls if this object should initially render through walls or not
-         * @param bounds the initial bounds array representing the corners of the bounding boxes to be displayed by this
-         *               object
+         * @param bounds             the initial bounds array representing the corners of the bounding boxes to be displayed by this
+         *                           object
          */
         public RenderObject(@NotNull Key key, @NotNull RenderType type, @NotNull Color color, boolean shouldRender,
-                            boolean renderThroughWalls, Vec3d ... bounds) {
+                            boolean renderThroughWalls, Vec3d... bounds) {
             this.key = Objects.requireNonNull(key, "key");
             this.type = Objects.requireNonNull(type, "type");
             this.color = Objects.requireNonNull(color, "color");
@@ -116,66 +188,4 @@ public interface ObjectRenderer {
             return key.hashCode();
         }
     }
-
-    /**
-     * Removes a {@link RenderObject} with the given name from the render list, stopping it from appearing.
-     * @param key the id of the object to remove
-     */
-    void removeObject(@NotNull Key key);
-
-    /**
-     * Removes all {@link RenderObject} instances whose key matches the given predicate.
-     * @param keyPredicate the predicate determining which objects to remove
-     */
-    void removeIf(@NotNull Predicate<? super Key> keyPredicate);
-
-    /**
-     * Enumerates every {@link RenderObject}, calling the given Consumer with every instance.
-     * @param consumer the consumer to call
-     */
-    void forEach(@NotNull Consumer<? super RenderObject> consumer);
-
-    /**
-     * Adds an object to this renderer.
-     * @param value the object to add
-     */
-    void putObject(@NotNull RenderObject value);
-
-    /**
-     * If true, this renderer will render ALL objects through even opaque blocks. If false, this renderer will only
-     * render through opaque blocks for RenderObject instances which have that parameter enabled.
-     * @param rendersThroughWalls true if this renderer should force render through walls, false otherwise
-     */
-    void setRenderThroughWalls(boolean rendersThroughWalls);
-
-    /**
-     * Enables or disables the renderer. When the renderer is disabled, nothing will render.
-     * @param enabled true to enabled, false to disabled
-     */
-    void setEnabled(boolean enabled);
-
-    /**
-     * Determines if a RenderObject with the given key exists in this renderer.
-     * @param key the key to check for
-     * @return true if an object with this key exists, false otherwise
-     */
-    boolean hasObject(@NotNull Key key);
-
-    /**
-     * Determines if this ObjectRenderer is currently enabled or disabled.
-     * @return true if enabled, false if disabled
-     */
-    boolean isEnabled();
-
-    /**
-     * Returns the "size" of this renderer (number of registered RenderObjects). Invisible RenderObjects will count
-     * towards this total.
-     * @return the number of registered RenderObjects
-     */
-    int size();
-
-    /**
-     * Removes all RenderObject instances from this renderer.
-     */
-    void clear();
 }

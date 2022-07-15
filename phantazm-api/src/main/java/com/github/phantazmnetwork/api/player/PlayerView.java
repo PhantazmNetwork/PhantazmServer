@@ -22,6 +22,7 @@ public interface PlayerView {
 
     /**
      * Gets the {@link UUID} of the player.
+     *
      * @return The {@link UUID} of the player
      */
     @NotNull UUID getUUID();
@@ -29,6 +30,7 @@ public interface PlayerView {
     /**
      * Attempts to resolve the username of this player. May perform an IO operation to determine the name from the UUID,
      * if necessary, and should cache the results of this operation.
+     *
      * @return a {@link CompletableFuture} representing an attempt at retrieving the username of this player. If the
      * username cannot be found due to network conditions or an invalid UUID, the returned String will be the result of
      * calling {@link UUID#toString()} on the stored UUID
@@ -38,12 +40,14 @@ public interface PlayerView {
     /**
      * Gets an {@link Optional} which may contain the player, only if they are online. Maintaining strong references to
      * {@link Player} objects should be avoided.
+     *
      * @return An {@link Optional} of the player which is empty when the player is offline
      */
     @NotNull Optional<Player> getPlayer();
 
     /**
      * Gets the {@link Component} display name of the player. May perform an IO operation to determine the player's username.
+     *
      * @return The {@link Component} display name of the player
      */
     @NotNull CompletableFuture<Component> getDisplayName();

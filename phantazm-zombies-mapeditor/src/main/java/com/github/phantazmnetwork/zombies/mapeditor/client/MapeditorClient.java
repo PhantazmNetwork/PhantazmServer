@@ -53,36 +53,42 @@ public class MapeditorClient implements ClientModInitializer {
         ObjectRenderer renderer = new Renderer();
         Events.registerEventHandlerClass(renderer);
 
-        EditorSession editorSession = new BasicEditorSession(renderer, new FileSystemMapLoader(
-                defaultMapDirectory, codec), defaultMapDirectory);
+        EditorSession editorSession =
+                new BasicEditorSession(renderer, new FileSystemMapLoader(defaultMapDirectory, codec),
+                                       defaultMapDirectory
+                );
         editorSession.loadMapsFromDisk();
 
         UseBlockCallback.EVENT.register(editorSession::handleBlockUse);
 
-        KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(TranslationKeys
-                .KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, TranslationKeys.CATEGORY_MAPEDITOR_ALL));
-        KeyBinding newObject = KeyBindingHelper.registerKeyBinding(new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE,
-                InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N, TranslationKeys.CATEGORY_MAPEDITOR_ALL));
+        KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M,
+                               TranslationKeys.CATEGORY_MAPEDITOR_ALL
+                ));
+        KeyBinding newObject = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
+                               TranslationKeys.CATEGORY_MAPEDITOR_ALL
+                ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if(mapeditorBinding.wasPressed()) {
+            if (mapeditorBinding.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(editorSession)));
             }
-            else if(newObject.wasPressed()) {
+            else if (newObject.wasPressed()) {
                 ClientPlayerEntity player = client.player;
-                if(player == null) {
+                if (player == null) {
                     return;
                 }
 
-                if(!editorSession.hasMap()) {
+                if (!editorSession.hasMap()) {
                     player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP),
-                            true);
+                                       true
+                    );
                     return;
                 }
 
-                if(!editorSession.hasSelection()) {
-                    player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION),
-                            true);
+                if (!editorSession.hasSelection()) {
+                    player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION), true);
                     return;
                 }
 
@@ -93,54 +99,53 @@ public class MapeditorClient implements ClientModInitializer {
 
     private static class Renderer implements ObjectRenderer {
         private static final RenderObject[] EMPTY_RENDER_OBJECT_ARRAY = new RenderObject[0];
-
-        private boolean enabled;
-        private boolean renderThroughWalls = false;
         private final Map<Key, RenderObject> renderObjects = new HashMap<>();
         private final Collection<RenderObject> values = renderObjects.values();
+        private boolean enabled;
+        private boolean renderThroughWalls = false;
         private RenderObject[] baked;
 
         @EventListener(shift = Shift.POST, type = EventType.WORLD_RENDER)
         void worldRender(@NotNull RenderEvent event) {
-            if(!enabled) {
+            if (!enabled) {
                 return;
             }
 
             MatrixStack stack = event.getStack();
-            if(renderThroughWalls) {
+            if (renderThroughWalls) {
                 Renderer3d.startRenderingThroughWalls();
             }
 
-            if(baked == null) {
+            if (baked == null) {
                 bake();
             }
 
-            for(ObjectRenderer.RenderObject object : baked) {
-                if(!object.shouldRender) {
+            for (ObjectRenderer.RenderObject object : baked) {
+                if (!object.shouldRender) {
                     //don't render objects whose rendering is disabled
                     continue;
                 }
 
                 boolean resetWallRender = false;
-                if(!renderThroughWalls && object.renderThroughWalls) {
+                if (!renderThroughWalls && object.renderThroughWalls) {
                     Renderer3d.startRenderingThroughWalls();
                     resetWallRender = true;
                 }
 
                 switch (object.type) {
                     case FILLED -> {
-                        for(int i = 0; i < object.bounds.length; i += 2) {
+                        for (int i = 0; i < object.bounds.length; i += 2) {
                             Renderer3d.renderFilled(stack, object.bounds[i], object.bounds[i + 1], object.color);
                         }
                     }
                     case OUTLINE -> {
-                        for(int i = 0; i < object.bounds.length; i += 2) {
+                        for (int i = 0; i < object.bounds.length; i += 2) {
                             Renderer3d.renderOutline(stack, object.bounds[i], object.bounds[i + 1], object.color);
                         }
                     }
                 }
 
-                if(resetWallRender) {
+                if (resetWallRender) {
                     Renderer3d.stopRenderingThroughWalls();
                 }
             }
@@ -155,7 +160,7 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public void removeObject(@NotNull Key key) {
             Objects.requireNonNull(key, "key");
-            if(renderObjects.remove(key) != null) {
+            if (renderObjects.remove(key) != null) {
                 baked = null;
             }
         }
@@ -163,7 +168,7 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public void removeIf(@NotNull Predicate<? super Key> keyPredicate) {
             Objects.requireNonNull(keyPredicate, "keyPredicate");
-            if(renderObjects.keySet().removeIf(keyPredicate)) {
+            if (renderObjects.keySet().removeIf(keyPredicate)) {
                 baked = null;
             }
         }
@@ -171,7 +176,7 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public void forEach(@NotNull Consumer<? super RenderObject> consumer) {
             Objects.requireNonNull(consumer, "object");
-            for(RenderObject sample : values) {
+            for (RenderObject sample : values) {
                 consumer.accept(sample);
             }
         }
@@ -181,13 +186,13 @@ public class MapeditorClient implements ClientModInitializer {
             Objects.requireNonNull(value, "value");
 
             RenderObject oldObject = renderObjects.get(value.key);
-            if(oldObject != null) {
-                if(baked != null) {
+            if (oldObject != null) {
+                if (baked != null) {
                     //to avoid having to re-bake, we can find the object in the render array and update in-place
                     int i = 0;
-                    for(RenderObject object : baked) {
-                        if(object.key.equals(value.key)) {
-                            if(oldObject != value) {
+                    for (RenderObject object : baked) {
+                        if (object.key.equals(value.key)) {
+                            if (oldObject != value) {
                                 //update the object present in the map only if necessary
                                 renderObjects.put(value.key, value);
                             }
@@ -213,11 +218,6 @@ public class MapeditorClient implements ClientModInitializer {
         }
 
         @Override
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        @Override
         public boolean hasObject(@NotNull Key key) {
             return renderObjects.containsKey(key);
         }
@@ -225,6 +225,11 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public boolean isEnabled() {
             return enabled;
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
         }
 
         @Override

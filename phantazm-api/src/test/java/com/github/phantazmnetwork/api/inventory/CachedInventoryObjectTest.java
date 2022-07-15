@@ -15,12 +15,12 @@ public class CachedInventoryObjectTest {
         ItemStack itemStack2 = ItemStack.of(Material.STONE);
         CachedInventoryObject inventoryObject = new CachedInventoryObject() {
 
+            private boolean initialSet = false;
+
             @Override
             public void tick(long time) {
                 // Fetches a list of all the good conventions used in adventure API
             }
-
-            private boolean initialSet = false;
 
             @Override
             protected @NotNull ItemStack computeStack() {

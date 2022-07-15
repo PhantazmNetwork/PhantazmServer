@@ -23,36 +23,23 @@ import java.util.function.BiConsumer;
  */
 public class PlaySoundEffect implements GunEffect {
 
+    private final Data data;
+    private final AudienceProvider audienceProvider;
+
     /**
-     * Data for an {@link PlaySoundEffect}.
-     * @param audienceProviderKey A {@link Key} to the {@link PlaySoundEffect}'s {@link AudienceProvider}
-     * @param sound The {@link Sound} to play
+     * Creates a {@link PlaySoundEffect}.
+     *
+     * @param data             The {@link Data} for this {@link PlaySoundEffect}
+     * @param audienceProvider The {@link AudienceProvider} for this {@link PlaySoundEffect}
      */
-    public record Data(@NotNull Key audienceProviderKey, @NotNull Sound sound) implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.play_sound");
-
-        /**
-         * Creates a {@link Data}.
-         * @param audienceProviderKey A {@link Key} to the {@link PlaySoundEffect}'s {@link AudienceProvider}
-         * @param sound The {@link Sound} to play
-         */
-        public Data {
-            Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
-            Objects.requireNonNull(sound, "sound");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public PlaySoundEffect(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -63,7 +50,8 @@ public class PlaySoundEffect implements GunEffect {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key audienceProviderKey = keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
+                Key audienceProviderKey =
+                        keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
                 Sound sound = soundProcessor.dataFromElement(element.getElementOrThrow("sound"));
 
                 return new Data(audienceProviderKey, sound);
@@ -82,35 +70,52 @@ public class PlaySoundEffect implements GunEffect {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.audienceProviderKey());
     }
 
-    private final Data data;
-
-    private final AudienceProvider audienceProvider;
-
-    /**
-     * Creates a {@link PlaySoundEffect}.
-     * @param data The {@link Data} for this {@link PlaySoundEffect}
-     * @param audienceProvider The {@link AudienceProvider} for this {@link PlaySoundEffect}
-     */
-    public PlaySoundEffect(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
-    }
-
     @Override
     public void apply(@NotNull GunState state) {
-        audienceProvider.provideAudience().ifPresent(audience -> audience.playSound(data.sound(),
-                Sound.Emitter.self()));
+        audienceProvider.provideAudience()
+                        .ifPresent(audience -> audience.playSound(data.sound(), Sound.Emitter.self()));
     }
 
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for an {@link PlaySoundEffect}.
+     *
+     * @param audienceProviderKey A {@link Key} to the {@link PlaySoundEffect}'s {@link AudienceProvider}
+     * @param sound               The {@link Sound} to play
+     */
+    public record Data(@NotNull Key audienceProviderKey, @NotNull Sound sound) implements Keyed {
+
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.play_sound");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param audienceProviderKey A {@link Key} to the {@link PlaySoundEffect}'s {@link AudienceProvider}
+         * @param sound               The {@link Sound} to play
+         */
+        public Data {
+            Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
+            Objects.requireNonNull(sound, "sound");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

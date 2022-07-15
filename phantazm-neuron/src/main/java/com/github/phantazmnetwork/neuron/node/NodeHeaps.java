@@ -6,6 +6,7 @@ import java.util.Comparator;
 
 /**
  * Utility method providing binary min-heap operations on {@link Node} arrays.
+ *
  * @see ObjectHeaps
  * @see NodeQueue
  */
@@ -14,9 +15,10 @@ public final class NodeHeaps {
      * Method based on {@link ObjectHeaps#downHeap(Object[], int, int, Comparator)}, but specialized for {@link Node}
      * objects. This will ensure that the heap index of all moved nodes is updated to match its position in the actual
      * array.
+     *
      * @param heap the min-heap of nodes
      * @param size the size of the heap
-     * @param i the index of the node to potentially move down
+     * @param i    the index of the node to potentially move down
      */
     public static void downHeap(Node[] heap, int size, int i) {
         Node first = heap[i];
@@ -44,8 +46,9 @@ public final class NodeHeaps {
      * Method based on {@link ObjectHeaps#upHeap(Object[], int, int, Comparator)}, but specialized for {@link Node}
      * objects. This will ensure that the heap index of all moved nodes is updated to match its position in the actual
      * array.
+     *
      * @param heap the min-heap of nodes
-     * @param i the index of the node to potentially move up
+     * @param i    the index of the node to potentially move up
      * @return the final index of the node which was moved
      */
     public static int upHeap(Node[] heap, int i) {

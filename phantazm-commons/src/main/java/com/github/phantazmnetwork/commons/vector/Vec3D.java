@@ -12,25 +12,8 @@ public interface Vec3D extends Comparable<Vec3D> {
     Vec3D ORIGIN = new BasicVec3D(0, 0, 0);
 
     /**
-     * Gets the x-component of this vector.
-     * @return the x-component of this vector
-     */
-    double getX();
-
-    /**
-     * Gets the y-component of this vector.
-     * @return the y-component of this vector
-     */
-    double getY();
-
-    /**
-     * Gets the z-component of this vector.
-     * @return the z-component of this vector
-     */
-    double getZ();
-
-    /**
      * Returns a new implementation of this interface. The returned object will be immutable.
+     *
      * @param x the x-component of the new vector
      * @param y the y-component of the new vector
      * @param z the z-component of the new vector
@@ -42,6 +25,7 @@ public interface Vec3D extends Comparable<Vec3D> {
 
     /**
      * Creates a new, immutable Vec3D from the provided integer vector.
+     *
      * @param vec the integer vector
      * @return a new double vector
      */
@@ -51,6 +35,7 @@ public interface Vec3D extends Comparable<Vec3D> {
 
     /**
      * Determines if two points are equal.
+     *
      * @param x1 first x-component
      * @param y1 first y-component
      * @param z1 first z-component
@@ -65,6 +50,7 @@ public interface Vec3D extends Comparable<Vec3D> {
 
     /**
      * Computes the hashcode of a double triplet.
+     *
      * @param x the x-component
      * @param y the y-component
      * @param z the z-component
@@ -80,6 +66,7 @@ public interface Vec3D extends Comparable<Vec3D> {
     /**
      * <p>Computes the <i>squared distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This uses the standard
      * distance formula for two 3-dimensional points, but omits the square root for performance.</p>
+     *
      * @param x1 first x-component
      * @param y1 first y-component
      * @param z1 first z-component
@@ -98,6 +85,7 @@ public interface Vec3D extends Comparable<Vec3D> {
     /**
      * <p>Computes the <i>distance</i> between two points (x1, y1, z1) and (x2, y2, z2). This uses the standard distance
      * formula for two 3-dimensional points.</p>
+     *
      * @param x1 first x-component
      * @param y1 first y-component
      * @param z1 first z-component
@@ -109,6 +97,27 @@ public interface Vec3D extends Comparable<Vec3D> {
     static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
         return Math.sqrt(squaredDistance(x1, y1, z1, x2, y2, z2));
     }
+
+    /**
+     * Gets the x-component of this vector.
+     *
+     * @return the x-component of this vector
+     */
+    double getX();
+
+    /**
+     * Gets the y-component of this vector.
+     *
+     * @return the y-component of this vector
+     */
+    double getY();
+
+    /**
+     * Gets the z-component of this vector.
+     *
+     * @return the z-component of this vector
+     */
+    double getZ();
 
     default double squaredDistance(double x, double y, double z) {
         return Vec3D.squaredDistance(x, y, z, getX(), getY(), getZ());

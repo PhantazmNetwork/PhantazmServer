@@ -10,6 +10,7 @@ public interface GunEffect extends GunTickEffect {
 
     /**
      * Applies the gun effect.
+     *
      * @param state The current {@link GunState} of the gun
      */
     void apply(@NotNull GunState state);

@@ -38,21 +38,22 @@ public final class Lobbies {
 
     /**
      * Initializes lobby-related features. Should only be called once from {@link PhantazmServer#main(String[])}.
-     * @param node the node to register lobby-related events to
+     *
+     * @param node               the node to register lobby-related events to
      * @param playerViewProvider the {@link PlayerViewProvider} instance used by the server
-     * @param lobbiesConfig the {@link LobbiesConfig} used to determine lobby behavior
+     * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
                            @NotNull LobbiesConfig lobbiesConfig) {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
-        InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(),
-                NeuralChunk::new);
+        InstanceLoader instanceLoader =
+                new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(), NeuralChunk::new);
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
-        Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders
-                = new HashMap<>(lobbiesConfig.lobbies().size());
+        Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
+                new HashMap<>(lobbiesConfig.lobbies().size());
         LobbyRouter lobbyRouter = new LobbyRouter(lobbyProviders);
         sceneStore.addScene(SceneKeys.LOBBY_ROUTER, lobbyRouter);
 
@@ -61,16 +62,11 @@ public final class Lobbies {
             throw new IllegalArgumentException("No main lobby config present");
         }
 
-        SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider = new BasicLobbyProvider(
-                mainLobbyConfig.maxLobbies(),
-                -mainLobbyConfig.maxPlayers(),
-                instanceManager,
-                instanceLoader,
-                mainLobbyConfig.lobbyPaths(),
-                finalFallback,
-                mainLobbyConfig.instanceConfig(),
-                MinecraftServer.getChunkViewDistance()
-        );
+        SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
+                new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceManager,
+                                       instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
+                                       mainLobbyConfig.instanceConfig(), MinecraftServer.getChunkViewDistance()
+                );
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         SceneFallback lobbyFallback = new LobbyRouterFallback(lobbyRouter, lobbiesConfig.mainLobbyName());
@@ -78,16 +74,14 @@ public final class Lobbies {
 
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
-                lobbyProviders.put(lobby.getKey(), new BasicLobbyProvider(
-                        lobby.getValue().maxLobbies(),
-                        -lobby.getValue().maxPlayers(),
-                        instanceManager,
-                        instanceLoader,
-                        lobby.getValue().lobbyPaths(),
-                        regularFallback,
-                        lobby.getValue().instanceConfig(),
-                        MinecraftServer.getChunkViewDistance()
-                ));
+                lobbyProviders.put(lobby.getKey(),
+                                   new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
+                                                          instanceManager, instanceLoader,
+                                                          lobby.getValue().lobbyPaths(), regularFallback,
+                                                          lobby.getValue().instanceConfig(),
+                                                          MinecraftServer.getChunkViewDistance()
+                                   )
+                );
             }
         }
 

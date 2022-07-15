@@ -29,23 +29,24 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     /**
      * Creates a new BasicPlayerViewProvider instance from the given parameters.
-     * @param identitySource the {@link IdentitySource} used to resolve names, if necessary
+     *
+     * @param identitySource    the {@link IdentitySource} used to resolve names, if necessary
      * @param connectionManager the {@link ConnectionManager} used by this server
-     * @param duration the duration for which name-to-UUID mappings will be cached
+     * @param duration          the duration for which name-to-UUID mappings will be cached
      */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
                                    @NotNull Duration duration) {
         this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.uuidToView = Caffeine.newBuilder().weakValues().build();
-        this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration, "duration"))
-                .build();
+        this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration, "duration")).build();
     }
 
     /**
      * Creates a new BasicPlayerViewProvider instance from the given parameters and the default duration of two minutes
      * for name-to-UUID mapping invalidation.
-     * @param identitySource the {@link IdentitySource} used to resolve names, if necessary
+     *
+     * @param identitySource    the {@link IdentitySource} used to resolve names, if necessary
      * @param connectionManager the {@link ConnectionManager} used by this server
      */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource,
@@ -63,7 +64,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     public @NotNull CompletableFuture<Optional<PlayerView>> fromName(@NotNull String name) {
         Objects.requireNonNull(name, "name");
         Player player = connectionManager.getPlayer(name);
-        if(player != null) {
+        if (player != null) {
             //if player is online, use the player object
             nameToUuid.put(name, player.getUuid());
             return CompletableFuture.completedFuture(Optional.of(fromPlayer(player)));
@@ -71,7 +72,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
         //if the player is offline, check the nameToUuid cache
         UUID cachedUuid = nameToUuid.getIfPresent(name);
-        if(cachedUuid != null) {
+        if (cachedUuid != null) {
             //we were able to resolve the name, so return a corresponding PlayerView
             return CompletableFuture.completedFuture(Optional.of(fromUUID(cachedUuid)));
         }
@@ -87,7 +88,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     public @NotNull Optional<PlayerView> fromNameIfOnline(@NotNull String name) {
         Objects.requireNonNull(name, "name");
         Player player = connectionManager.getPlayer(name);
-        if(player == null) {
+        if (player == null) {
             return Optional.empty();
         }
 

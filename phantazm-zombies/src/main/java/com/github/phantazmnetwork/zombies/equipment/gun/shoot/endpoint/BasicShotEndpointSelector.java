@@ -28,35 +28,27 @@ import java.util.function.Supplier;
  */
 public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
+    private final Data data;
+    private final Supplier<Optional<? extends Entity>> entitySupplier;
+    private final BlockIteration blockIteration;
+
     /**
-     * Data for a {@link BasicShotEndpointSelector}.
-     * @param blockIterationKey A {@link Key} to the {@link BasicShotEndpointSelector}'s {@link BlockIteration}
-     * @param maxDistance The maximum distance of the endpoint from the start
+     * Creates a {@link BasicShotEndpointSelector}.
+     *
+     * @param data           The {@link Data} for the {@link BasicShotEndpointSelector}
+     * @param entitySupplier A {@link Supplier} for the {@link Entity} find the endpoint from
+     * @param blockIteration A {@link BlockIteration} method to find the endpoint with
      */
-    public record Data(@NotNull Key blockIterationKey, int maxDistance) implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.end_selector.basic");
-
-        /**
-         * Creates a {@link Data}.
-         * @param blockIterationKey A {@link Key} to the {@link BasicShotEndpointSelector}'s {@link BlockIteration}
-         * @param maxDistance The maximum distance of the endpoint from the start
-         */
-        public Data {
-            Objects.requireNonNull(blockIterationKey, "blockIterationKey");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public BasicShotEndpointSelector(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+                                     @NotNull BlockIteration blockIteration) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.entitySupplier = Objects.requireNonNull(entitySupplier, "playerView");
+        this.blockIteration = Objects.requireNonNull(blockIteration, "blockIteration");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -87,29 +79,11 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.blockIterationKey());
-    }
-
-    private final Data data;
-
-    private final Supplier<Optional<? extends Entity>> entitySupplier;
-
-    private final BlockIteration blockIteration;
-
-    /**
-     * Creates a {@link BasicShotEndpointSelector}.
-     * @param data The {@link Data} for the {@link BasicShotEndpointSelector}
-     * @param entitySupplier A {@link Supplier} for the {@link Entity} find the endpoint from
-     * @param blockIteration A {@link BlockIteration} method to find the endpoint with
-     */
-    public BasicShotEndpointSelector(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-                                     @NotNull BlockIteration blockIteration) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.entitySupplier = Objects.requireNonNull(entitySupplier, "playerView");
-        this.blockIteration = Objects.requireNonNull(blockIteration, "blockIteration");
     }
 
     @Override
@@ -123,6 +97,35 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
             Iterator<Point> it = new BlockIterator(start, 0, data.maxDistance());
             return blockIteration.findEnd(instance, player, start, it).orElse(null);
         });
+    }
+
+    /**
+     * Data for a {@link BasicShotEndpointSelector}.
+     *
+     * @param blockIterationKey A {@link Key} to the {@link BasicShotEndpointSelector}'s {@link BlockIteration}
+     * @param maxDistance       The maximum distance of the endpoint from the start
+     */
+    public record Data(@NotNull Key blockIterationKey, int maxDistance) implements Keyed {
+
+        /**
+         * The serial {@link Key} for this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.end_selector.basic");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param blockIterationKey A {@link Key} to the {@link BasicShotEndpointSelector}'s {@link BlockIteration}
+         * @param maxDistance       The maximum distance of the endpoint from the start
+         */
+        public Data {
+            Objects.requireNonNull(blockIterationKey, "blockIterationKey");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

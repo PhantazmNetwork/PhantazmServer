@@ -34,8 +34,9 @@ public class GroundController implements Controller {
 
     /**
      * Creates a new GroundController managing the provided entity, using the given step distance and walk speed.
+     *
      * @param entity the entity managed by this controller
-     * @param step the maximum distance the entity may "step up" blocks
+     * @param step   the maximum distance the entity may "step up" blocks
      */
     public GroundController(@NotNull LivingEntity entity, float step) {
         this.entity = Objects.requireNonNull(entity, "entity");
@@ -84,16 +85,16 @@ public class GroundController implements Controller {
         double speedX = Math.copySign(Math.min(Math.abs(vX), Math.abs(dX)), dX);
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
 
-        if(jumping) {
-            if(entityPos.y() > exactTargetY) {
+        if (jumping) {
+            if (entityPos.y() > exactTargetY) {
                 //jump completed successfully
                 entity.refreshPosition(CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ)).newPosition()
-                        .withView(PositionUtils.getLookYaw(dX, dZ), 0));
+                                                     .withView(PositionUtils.getLookYaw(dX, dZ), 0));
                 entity.setVelocity(Vec.ZERO);
                 jumping = false;
                 return;
             }
-            else if(entity.isOnGround()) {
+            else if (entity.isOnGround()) {
                 //jump failed (we're back on the ground)
                 jumping = false;
             }
@@ -103,18 +104,19 @@ public class GroundController implements Controller {
             }
         }
 
-        if(entity.isOnGround()) {
+        if (entity.isOnGround()) {
             PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-            if(entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
+            if (entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
                 Vec3I currentPos = current.getPosition();
                 double nodeDiff = exactTargetY - (currentPos.getY() + current.getYOffset());
-                if(nodeDiff > step) {
-                    entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer
-                            .TICK_PER_SECOND));
+                if (nodeDiff > step) {
+                    entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(
+                            MinecraftServer.TICK_PER_SECOND));
                     jumping = true;
-                } else if(nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
+                }
+                else if (nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
                     entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
                     return;
                 }
@@ -135,7 +137,7 @@ public class GroundController implements Controller {
         double g = entity.getGravityAcceleration();
 
         //return a cached value if possible (lambertW can be expensive)
-        if(h == lastH && b == lastB && g == lastG) {
+        if (h == lastH && b == lastB && g == lastG) {
             return lastJumpVelocity;
         }
 
@@ -143,7 +145,7 @@ public class GroundController implements Controller {
         lastB = b;
         lastG = g;
 
-        if(b == 0) {
+        if (b == 0) {
             //when there's no drag to contend with, use a simple height formula
             return lastJumpVelocity = Math.sqrt(2 * g * h) + g;
         }

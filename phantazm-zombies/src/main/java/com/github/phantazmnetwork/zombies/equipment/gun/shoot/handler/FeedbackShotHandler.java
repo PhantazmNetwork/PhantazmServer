@@ -28,28 +28,23 @@ import java.util.function.BiConsumer;
  */
 public class FeedbackShotHandler implements ShotHandler {
 
+    private final Data data;
+    private final AudienceProvider audienceProvider;
+
     /**
-     * Data for a {@link FeedbackShotHandler}.
-     * @param audienceProviderKey A {@link Key} to the {@link FeedbackShotHandler}'s {@link AudienceProvider}
-     * @param message The message to send for regular hits
-     * @param headshotMessage The message to send for headshots
+     * Creates a {@link FeedbackShotHandler}.
+     *
+     * @param data             The {@link Data} for this {@link FeedbackShotHandler}
+     * @param audienceProvider The {@link AudienceProvider} for this {@link FeedbackShotHandler}
      */
-    public record Data(@NotNull Key audienceProviderKey, @NotNull Component message,
-                       @NotNull Component headshotMessage) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.feedback");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public FeedbackShotHandler(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -60,9 +55,11 @@ public class FeedbackShotHandler implements ShotHandler {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key audienceProviderKey = keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
+                Key audienceProviderKey =
+                        keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
                 Component message = componentProcessor.dataFromElement(element.getElementOrThrow("message"));
-                Component headshotMessage = componentProcessor.dataFromElement(element.getElementOrThrow("headshotMessage"));
+                Component headshotMessage =
+                        componentProcessor.dataFromElement(element.getElementOrThrow("headshotMessage"));
 
                 return new Data(audienceProviderKey, message, headshotMessage);
             }
@@ -81,28 +78,16 @@ public class FeedbackShotHandler implements ShotHandler {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
         return (data, keys) -> keys.add(data.audienceProviderKey());
     }
 
-    private final Data data;
-
-    private final AudienceProvider audienceProvider;
-
-    /**
-     * Creates a {@link FeedbackShotHandler}.
-     * @param data The {@link Data} for this {@link FeedbackShotHandler}
-     * @param audienceProvider The {@link AudienceProvider} for this {@link FeedbackShotHandler}
-     */
-    public FeedbackShotHandler(@NotNull Data data, @NotNull AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
-    }
-
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
+                       @NotNull GunShot shot) {
         audienceProvider.provideAudience().ifPresent(audience -> {
             for (GunHit ignored : shot.regularTargets()) {
                 audience.sendMessage(data.message());
@@ -116,6 +101,27 @@ public class FeedbackShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
+    }
+
+    /**
+     * Data for a {@link FeedbackShotHandler}.
+     *
+     * @param audienceProviderKey A {@link Key} to the {@link FeedbackShotHandler}'s {@link AudienceProvider}
+     * @param message             The message to send for regular hits
+     * @param headshotMessage     The message to send for headshots
+     */
+    public record Data(@NotNull Key audienceProviderKey, @NotNull Component message, @NotNull Component headshotMessage)
+            implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.feedback");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 

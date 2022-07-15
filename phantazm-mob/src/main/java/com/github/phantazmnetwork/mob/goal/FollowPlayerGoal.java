@@ -19,6 +19,7 @@ public class FollowPlayerGoal extends FollowEntityGoal<Player> {
 
     /**
      * Creates a new {@link FollowPlayerGoal}.
+     *
      * @param selector The {@link TargetSelector} used to select {@link Player}s
      */
     public FollowPlayerGoal(@NotNull TargetSelector<Player> selector) {

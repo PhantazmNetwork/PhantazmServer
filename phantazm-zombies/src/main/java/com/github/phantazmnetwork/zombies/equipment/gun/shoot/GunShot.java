@@ -11,9 +11,10 @@ import java.util.Objects;
 /**
  * Represents an individual gun shot. This should be produced by {@link Firer} implementations.
  * As such, it is associated with a gun's individual fire, not a complete volley of shots.
- * @param start The start position of the shot
- * @param end The end position of the shot
- * @param regularTargets The regular targets that were hit by the shot
+ *
+ * @param start           The start position of the shot
+ * @param end             The end position of the shot
+ * @param regularTargets  The regular targets that were hit by the shot
  * @param headshotTargets The headshot targets that were hit by the shot
  */
 public record GunShot(@NotNull Pos start,
@@ -23,9 +24,10 @@ public record GunShot(@NotNull Pos start,
 
     /**
      * Creates a {@link GunShot}.
-     * @param start The start position of the shot
-     * @param end The end position of the shot
-     * @param regularTargets The regular targets that were hit by the shot
+     *
+     * @param start           The start position of the shot
+     * @param end             The end position of the shot
+     * @param regularTargets  The regular targets that were hit by the shot
      * @param headshotTargets The headshot targets that were hit by the shot
      */
     public GunShot {

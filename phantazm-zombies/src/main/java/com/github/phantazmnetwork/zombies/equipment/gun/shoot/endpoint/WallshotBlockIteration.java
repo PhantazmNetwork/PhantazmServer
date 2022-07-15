@@ -29,23 +29,8 @@ import java.util.Optional;
 public class WallshotBlockIteration implements BlockIteration {
 
     /**
-     * Data for a {@link WallshotBlockIteration}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.block_iteration.wallshot");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-    }
-
-    /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -83,11 +68,26 @@ public class WallshotBlockIteration implements BlockIteration {
         }
 
         if (block != null) {
-            return RayUtils.rayTrace(new BoundingBox(1D, 1D, 1D),
-                    blockLocation.add(0.5D, 0D, 0.5D), start);
+            return RayUtils.rayTrace(new BoundingBox(1D, 1D, 1D), blockLocation.add(0.5D, 0D, 0.5D), start);
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Data for a {@link WallshotBlockIteration}.
+     */
+    public record Data() implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.block_iteration.wallshot");
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

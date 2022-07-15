@@ -26,18 +26,19 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
         String serverAddress = serverInfo.getStringOrThrow("serverIP");
         int port = serverInfo.getNumberOrThrow("port").intValue();
-        if (port < 0  || port > 65535) {
+        if (port < 0 || port > 65535) {
             throw new ConfigProcessException("Invalid port: " + port + ", must be in range [0, 65535]");
         }
 
         boolean optifineEnabled = serverInfo.getBooleanOrThrow("optifineEnabled");
-        AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType")
-                .toUpperCase(Locale.ENGLISH)).orElseThrow(() -> new ConfigProcessException("Invalid AuthType, must " +
-                "be one of the following: " + Arrays.toString(AuthType.values())));
+        AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType").toUpperCase(Locale.ENGLISH))
+                                    .orElseThrow(() -> new ConfigProcessException(
+                                            "Invalid AuthType, must " + "be one of the following: " +
+                                            Arrays.toString(AuthType.values())));
         String proxySecret = serverInfo.getStringOrThrow("proxySecret");
 
-        ServerInfoConfig serverInfoConfig = new ServerInfoConfig(serverAddress, port, optifineEnabled, authType,
-                proxySecret);
+        ServerInfoConfig serverInfoConfig =
+                new ServerInfoConfig(serverAddress, port, optifineEnabled, authType, proxySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
         Component description = COMPONENT_PROCESSOR.dataFromElement(pingList.getElementOrThrow("description"));
@@ -47,15 +48,15 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         int threads = pathfinderNode.getNumberOrThrow("threads").intValue();
         int cacheSize = pathfinderNode.getNumberOrThrow("cacheSize").intValue();
         int updateQueueCapacity = pathfinderNode.getNumberOrThrow("updateQueueCapacity").intValue();
-        if(threads < 1) {
+        if (threads < 1) {
             throw new ConfigProcessException("Invalid number of pathfinder threads, must be >= 1");
         }
 
-        if(cacheSize < 0) {
+        if (cacheSize < 0) {
             throw new ConfigProcessException("Pathfinder cache size must be >= 0");
         }
 
-        if(updateQueueCapacity < 0) {
+        if (updateQueueCapacity < 0) {
             throw new ConfigProcessException("Update queue capacity must be > 0");
         }
 

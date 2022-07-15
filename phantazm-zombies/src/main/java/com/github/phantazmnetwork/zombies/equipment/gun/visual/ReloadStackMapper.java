@@ -24,36 +24,23 @@ import java.util.function.BiConsumer;
  */
 public class ReloadStackMapper implements GunStackMapper {
 
+    private final GunStats stats;
+    private final ReloadTester reloadTester;
+
     /**
-     * Data for a {@link ReloadStackMapper}.
-     * @param statsKey A {@link Key} to the gun's {@link GunStats}
-     * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+     * Creates a {@link ReloadStackMapper}.
+     *
+     * @param stats        The gun's {@link GunStats}
+     * @param reloadTester The gun's {@link ReloadTester}
      */
-    public record Data(@NotNull Key statsKey, @NotNull Key reloadTesterKey) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.stack_mapper.reload.durability");
-
-        /**
-         * Creates a {@link Data}.
-         * @param statsKey A {@link Key} to the gun's {@link GunStats}
-         * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
-         */
-        public Data {
-            Objects.requireNonNull(statsKey, "statsKey");
-            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public ReloadStackMapper(@NotNull GunStats stats, @NotNull ReloadTester reloadTester) {
+        this.stats = Objects.requireNonNull(stats, "stats");
+        this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -82,6 +69,7 @@ public class ReloadStackMapper implements GunStackMapper {
 
     /**
      * Creates a dependency consumer for {@link Data}s.
+     *
      * @return A dependency consumer for {@link Data}s
      */
     public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
@@ -91,31 +79,47 @@ public class ReloadStackMapper implements GunStackMapper {
         };
     }
 
-    private final GunStats stats;
-
-    private final ReloadTester reloadTester;
-
-    /**
-     * Creates a {@link ReloadStackMapper}.
-     * @param stats The gun's {@link GunStats}
-     * @param reloadTester The gun's {@link ReloadTester}
-     */
-    public ReloadStackMapper(@NotNull GunStats stats, @NotNull ReloadTester reloadTester) {
-        this.stats = Objects.requireNonNull(stats, "stats");
-        this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
-    }
-
     @Override
     public @NotNull ItemStack map(@NotNull GunState state, @NotNull ItemStack intermediate) {
         if (reloadTester.isReloading(state)) {
             long reloadSpeed = stats.reloadSpeed();
             int maxDamage = intermediate.material().registry().maxDamage();
-            int damage = maxDamage - (int) (maxDamage * ((double) state.ticksSinceLastReload() / reloadSpeed));
+            int damage = maxDamage - (int)(maxDamage * ((double)state.ticksSinceLastReload() / reloadSpeed));
 
             return intermediate.withMeta(builder -> builder.damage(damage));
         }
 
         return intermediate;
+    }
+
+    /**
+     * Data for a {@link ReloadStackMapper}.
+     *
+     * @param statsKey        A {@link Key} to the gun's {@link GunStats}
+     * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+     */
+    public record Data(@NotNull Key statsKey, @NotNull Key reloadTesterKey) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.stack_mapper.reload.durability");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param statsKey        A {@link Key} to the gun's {@link GunStats}
+         * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+         */
+        public Data {
+            Objects.requireNonNull(statsKey, "statsKey");
+            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
     }
 
 }

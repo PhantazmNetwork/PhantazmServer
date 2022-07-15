@@ -41,9 +41,10 @@ class BasicPlayerView implements PlayerView {
 
     /**
      * Creates a basic {@link PlayerView}.
-     * @param identitySource The {@link IdentitySource} instance used to resolve usernames when necessary
+     *
+     * @param identitySource    The {@link IdentitySource} instance used to resolve usernames when necessary
      * @param connectionManager The {@link ConnectionManager} used to find {@link Player}s based on their {@link UUID}
-     * @param uuid The {@link UUID} of the {@link Player} to store
+     * @param uuid              The {@link UUID} of the {@link Player} to store
      */
     BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
                     @NotNull UUID uuid) {
@@ -55,9 +56,10 @@ class BasicPlayerView implements PlayerView {
 
     /**
      * Creates a basic {@link PlayerView} given a {@link ConnectionManager} and an already-existing {@link Player}.
-     * @param identitySource The {@link IdentitySource} instance used to resolve usernames when necessary
+     *
+     * @param identitySource    The {@link IdentitySource} instance used to resolve usernames when necessary
      * @param connectionManager the ConnectionManager used to find {@link Player}s based on their {@link UUID}
-     * @param player the player, whose UUID and username will be cached immediately
+     * @param player            the player, whose UUID and username will be cached immediately
      */
     BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
                     @NotNull Player player) {
@@ -70,7 +72,7 @@ class BasicPlayerView implements PlayerView {
 
     private CompletableFuture<String> getUsernameRequest() {
         synchronized (usernameRequestLock) {
-            if(usernameRequest != null) {
+            if (usernameRequest != null) {
                 return usernameRequest;
             }
 
@@ -94,12 +96,12 @@ class BasicPlayerView implements PlayerView {
     @Override
     public @NotNull CompletableFuture<String> getUsername() {
         Player player = playerReference.get();
-        if(player != null) {
+        if (player != null) {
             return CompletableFuture.completedFuture(username = player.getUsername());
         }
 
         synchronized (usernameLock) {
-            if(username != null) {
+            if (username != null) {
                 return CompletableFuture.completedFuture(username);
             }
 
@@ -111,7 +113,7 @@ class BasicPlayerView implements PlayerView {
     public @NotNull Optional<Player> getPlayer() {
         //first, try to get the cached player
         Player player = playerReference.get();
-        if(player != null && player.isOnline()) {
+        if (player != null && player.isOnline()) {
             return Optional.of(player);
         }
 

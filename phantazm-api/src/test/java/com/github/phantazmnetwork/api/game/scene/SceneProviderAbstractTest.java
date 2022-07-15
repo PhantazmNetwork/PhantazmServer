@@ -19,18 +19,19 @@ public class SceneProviderAbstractTest {
 
     @Test
     public void testMaximumLobbies() {
-        SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider = new SceneProviderAbstract<>(maximumLobbies) {
-            @Override
-            protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
-                return Optional.empty();
-            }
+        SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
+                new SceneProviderAbstract<>(maximumLobbies) {
+                    @Override
+                    protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
+                        return Optional.empty();
+                    }
 
-            @SuppressWarnings("unchecked")
-            @Override
-            protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
-                return (Scene<SceneJoinRequest>) mock(Scene.class);
-            }
-        };
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
+                        return (Scene<SceneJoinRequest>)mock(Scene.class);
+                    }
+                };
 
         SceneJoinRequest request = Mockito.mock(SceneJoinRequest.class);
         for (int i = 0; i < maximumLobbies; i++) {
@@ -47,21 +48,22 @@ public class SceneProviderAbstractTest {
             scenes.add(mock(Scene.class));
         }
 
-        SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider = new SceneProviderAbstract<>(maximumLobbies) {
+        SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
+                new SceneProviderAbstract<>(maximumLobbies) {
 
-            private final Iterator<Scene<SceneJoinRequest>> iterator = scenes.iterator();
+                    private final Iterator<Scene<SceneJoinRequest>> iterator = scenes.iterator();
 
-            @Override
-            protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
-                return Optional.empty();
-            }
+                    @Override
+                    protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
+                        return Optional.empty();
+                    }
 
-            @Override
-            protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
-                return iterator.next();
-            }
+                    @Override
+                    protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
+                        return iterator.next();
+                    }
 
-        };
+                };
 
         SceneJoinRequest request = Mockito.mock(SceneJoinRequest.class);
         for (int i = 0; i < maximumLobbies; i++) {
@@ -77,20 +79,21 @@ public class SceneProviderAbstractTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testProviderRemovesShutdownScenes() {
-        Scene<SceneJoinRequest> scene = (Scene<SceneJoinRequest>) mock(Scene.class);
+        Scene<SceneJoinRequest> scene = (Scene<SceneJoinRequest>)mock(Scene.class);
         when(scene.isShutdown()).thenReturn(true);
 
-        SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider = new SceneProviderAbstract<>(maximumLobbies) {
-            @Override
-            protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
-                return Optional.empty();
-            }
+        SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
+                new SceneProviderAbstract<>(maximumLobbies) {
+                    @Override
+                    protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
+                        return Optional.empty();
+                    }
 
-            @Override
-            protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
-                return scene;
-            }
-        };
+                    @Override
+                    protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
+                        return scene;
+                    }
+                };
 
         SceneJoinRequest request = Mockito.mock(SceneJoinRequest.class);
         sceneProvider.provideScene(request);

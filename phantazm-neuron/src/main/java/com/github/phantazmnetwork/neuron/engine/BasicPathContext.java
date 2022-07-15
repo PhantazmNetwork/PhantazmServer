@@ -8,13 +8,15 @@ import java.util.Objects;
 /**
  * Basic implementation of {@link PathContext}.
  */
-public record BasicPathContext(@NotNull PathEngine getEngine, @NotNull Collider getCollider,
+public record BasicPathContext(@NotNull PathEngine getEngine,
+                               @NotNull Collider getCollider,
                                @NotNull PathCache getCache) implements PathContext {
     /**
      * Creates a new instance of this record.
-     * @param getEngine the {@link PathEngine} for this context
+     *
+     * @param getEngine   the {@link PathEngine} for this context
      * @param getCollider the {@link Collider} for this context
-     * @param getCache the {@link PathCache} for this context
+     * @param getCache    the {@link PathCache} for this context
      * @throws NullPointerException if any of the arguments are null
      */
     public BasicPathContext {

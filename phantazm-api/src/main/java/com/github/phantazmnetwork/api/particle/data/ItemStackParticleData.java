@@ -25,38 +25,42 @@ public class ItemStackParticleData implements ParticleData {
     public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "particle_data.item");
 
     private static final Key KEY = Particle.ITEM.key();
+    private final ItemStack stack;
+
+    /**
+     * Creates a new {@link ItemStackParticleData} with the given {@link ItemStack}.
+     *
+     * @param stack The {@link ItemStack} to use
+     */
+    public ItemStackParticleData(@NotNull ItemStack stack) {
+        this.stack = Objects.requireNonNull(stack, "stack");
+    }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link ItemStackParticleData}.
+     *
      * @param stackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
      * @return A {@link ConfigProcessor} for {@link ItemStackParticleData}
      */
-    public static @NotNull ConfigProcessor<ItemStackParticleData> processor(@NotNull ConfigProcessor<ItemStack> stackProcessor) {
+    public static @NotNull ConfigProcessor<ItemStackParticleData> processor(
+            @NotNull ConfigProcessor<ItemStack> stackProcessor) {
         return new ConfigProcessor<>() {
             @Override
-            public @NotNull ItemStackParticleData dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            public @NotNull ItemStackParticleData dataFromElement(@NotNull ConfigElement element)
+                    throws ConfigProcessException {
                 ItemStack stack = stackProcessor.dataFromElement(element.getElementOrThrow("stack"));
                 return new ItemStackParticleData(stack);
             }
 
             @Override
-            public @NotNull ConfigElement elementFromData(@NotNull ItemStackParticleData itemStackParticleData) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull ItemStackParticleData itemStackParticleData)
+                    throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(1);
                 node.put("stack", stackProcessor.elementFromData(itemStackParticleData.stack));
 
                 return node;
             }
         };
-    }
-
-    private final ItemStack stack;
-
-    /**
-     * Creates a new {@link ItemStackParticleData} with the given {@link ItemStack}.
-     * @param stack The {@link ItemStack} to use
-     */
-    public ItemStackParticleData(@NotNull ItemStack stack) {
-        this.stack = Objects.requireNonNull(stack, "stack");
     }
 
     @Override

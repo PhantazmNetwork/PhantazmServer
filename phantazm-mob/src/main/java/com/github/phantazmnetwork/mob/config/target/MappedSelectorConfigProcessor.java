@@ -11,15 +11,18 @@ import java.util.Objects;
 
 /**
  * A {@link ConfigProcessor} for {@link MappedSelector}s.
- * @param <TFrom> The target type of the delegate {@link MappedSelector}
+ *
+ * @param <TFrom>     The target type of the delegate {@link MappedSelector}
  * @param <TSelector> The type of {@link MappedSelector} to process
  */
-public abstract class MappedSelectorConfigProcessor<TFrom, TSelector extends MappedSelector<TFrom, ?>> implements ConfigProcessor<TSelector> {
+public abstract class MappedSelectorConfigProcessor<TFrom, TSelector extends MappedSelector<TFrom, ?>>
+        implements ConfigProcessor<TSelector> {
 
     private final ConfigProcessor<? extends TargetSelector<TFrom>> delegateProcessor;
 
     /**
      * Creates a {@link MappedSelectorConfigProcessor}.
+     *
      * @param delegateProcessor A {@link ConfigProcessor} for the delegate {@link TargetSelector}
      */
     public MappedSelectorConfigProcessor(@NotNull ConfigProcessor<? extends TargetSelector<TFrom>> delegateProcessor) {
@@ -34,12 +37,14 @@ public abstract class MappedSelectorConfigProcessor<TFrom, TSelector extends Map
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull TSelector selector) throws ConfigProcessException {
-        ConfigProcessor<TargetSelector<TFrom>> genericProcessor = (ConfigProcessor<TargetSelector<TFrom>>) delegateProcessor;
+        ConfigProcessor<TargetSelector<TFrom>> genericProcessor =
+                (ConfigProcessor<TargetSelector<TFrom>>)delegateProcessor;
         return genericProcessor.elementFromData(selector.getDelegate());
     }
 
     /**
      * Creates a new {@link TSelector}.
+     *
      * @param delegate The delegate {@link TargetSelector}
      * @return A new {@link TSelector}
      */

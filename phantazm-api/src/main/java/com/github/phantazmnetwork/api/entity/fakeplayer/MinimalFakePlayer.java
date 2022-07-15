@@ -55,29 +55,30 @@ public class MinimalFakePlayer extends Entity {
     @SuppressWarnings("UnstableApiUsage")
     private void removeFromTabList(@NotNull PlayerConnection connection) {
         Objects.requireNonNull(connection, "connection");
-        schedulerManager.buildTask(() -> connection.sendPacket(getRemovePlayerPacket()))
-                .delay(20, TimeUnit.SERVER_TICK)
-                .schedule();
+        schedulerManager.buildTask(() -> connection.sendPacket(getRemovePlayerPacket())).delay(20, TimeUnit.SERVER_TICK)
+                        .schedule();
     }
 
     private @NotNull PlayerInfoPacket getAddPlayerPacket() {
         List<PlayerInfoPacket.AddPlayer.Property> properties;
         if (skin != null) {
-            PlayerInfoPacket.AddPlayer.Property skinProperty = new PlayerInfoPacket.AddPlayer.Property("textures",
-                    skin.textures(), skin.signature());
+            PlayerInfoPacket.AddPlayer.Property skinProperty =
+                    new PlayerInfoPacket.AddPlayer.Property("textures", skin.textures(), skin.signature());
             properties = Collections.singletonList(skinProperty);
         }
         else {
             properties = Collections.emptyList();
         }
 
-        PlayerInfoPacket.Entry entry = new PlayerInfoPacket.AddPlayer(getUuid(), username, properties,
-                GameMode.SURVIVAL, 0, null);
+        PlayerInfoPacket.Entry entry =
+                new PlayerInfoPacket.AddPlayer(getUuid(), username, properties, GameMode.SURVIVAL, 0, null);
         return new PlayerInfoPacket(PlayerInfoPacket.Action.ADD_PLAYER, entry);
     }
 
     private @NotNull PlayerInfoPacket getRemovePlayerPacket() {
-        return new PlayerInfoPacket(PlayerInfoPacket.Action.REMOVE_PLAYER, new PlayerInfoPacket.RemovePlayer(getUuid()));
+        return new PlayerInfoPacket(PlayerInfoPacket.Action.REMOVE_PLAYER,
+                                    new PlayerInfoPacket.RemovePlayer(getUuid())
+        );
     }
 
 }

@@ -60,10 +60,11 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Creates a new Node object with the specified parameters.
+     *
      * @param position the position of the node
-     * @param g the {@code g}-score (path distance to this node)
-     * @param h the {@code h}-score (heuristic)
-     * @param parent the parent node; may be null
+     * @param g        the {@code g}-score (path distance to this node)
+     * @param h        the {@code h}-score (heuristic)
+     * @param parent   the parent node; may be null
      */
     public Node(@NotNull Vec3I position, float g, float h, @Nullable Node parent) {
         this.position = Objects.requireNonNull(position, "position");
@@ -79,6 +80,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Returns the {@code g}-score for this node.
+     *
      * @return this node's {@code g}-score
      */
     public float getG() {
@@ -86,23 +88,8 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     }
 
     /**
-     * Returns the {@code h}-score for this node.
-     * @return this node's {@code h}-score
-     */
-    public float getH() {
-        return h;
-    }
-
-    /**
-     * Returns the {@code f}-score for this node, defined as the sum of its {@code g} and {@code h} scores.
-     * @return this node's {@code f}-score
-     */
-    public float getF() {
-        return g + h;
-    }
-
-    /**
      * Sets the {@code g}-score for this node.
+     *
      * @param g the new g-score
      */
     public void setG(float g) {
@@ -110,7 +97,17 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     }
 
     /**
+     * Returns the {@code h}-score for this node.
+     *
+     * @return this node's {@code h}-score
+     */
+    public float getH() {
+        return h;
+    }
+
+    /**
      * Sets the {@code h}-score for this node.
+     *
      * @param h the new h-score
      */
     public void setH(float h) {
@@ -118,7 +115,17 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     }
 
     /**
+     * Returns the {@code f}-score for this node, defined as the sum of its {@code g} and {@code h} scores.
+     *
+     * @return this node's {@code f}-score
+     */
+    public float getF() {
+        return g + h;
+    }
+
+    /**
      * Determines if this node is currently present inside a {@link NodeQueue} by checking its heap index.
+     *
      * @return true if this node is present in a NodeQueue, false otherwise
      */
     boolean isOnHeap() {
@@ -126,15 +133,8 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     }
 
     /**
-     * Sets the heap index. This is only used internally by {@link NodeQueue}.
-     * @param heapIndex the new heap index, or -1 to indicate removal
-     */
-    void setHeapIndex(int heapIndex) {
-        this.heapIndex = heapIndex;
-    }
-
-    /**
      * Gets the current heap index.
+     *
      * @return the current heap index, or a negative value if this node is not part of any {@link NodeQueue}
      */
     int getHeapIndex() {
@@ -142,7 +142,17 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     }
 
     /**
+     * Sets the heap index. This is only used internally by {@link NodeQueue}.
+     *
+     * @param heapIndex the new heap index, or -1 to indicate removal
+     */
+    void setHeapIndex(int heapIndex) {
+        this.heapIndex = heapIndex;
+    }
+
+    /**
      * Gets the parent node. May be null if this node has no parent.
+     *
      * @return the parent node
      */
     public @Nullable Node getParent() {
@@ -151,6 +161,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Sets the parent of this node, which may be null.
+     *
      * @param parent the new parent
      */
     public void setParent(@Nullable Node parent) {
@@ -162,24 +173,25 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
      * different nodes labelled a, b, and c, with arrows pointing to the parent of the node on the left:</p>
      *
      * <code>
-     *     a -> b -> c
+     * a -> b -> c
      * </code>
      *
      * <p>Calling reverse will produce the following list:</p>
      *
      * <code>
-     *     c -> b -> a
+     * c -> b -> a
      * </code>
      *
      * <p>The returned node will be the last node in the list before it was inverted. In the example shown above, this
      * is {@code c}.</p>
      *
      * <p>Special case: when this node has no parent, this node is returned.</p>
+     *
      * @return the starting node of the reversed linked list, which was the last node in the list before reversal
      */
     public @NotNull Node reverse() {
         Node prev = null;
-        for(Node node : this) {
+        for (Node node : this) {
             node.setParent(prev);
             prev = node;
         }
@@ -190,6 +202,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Gets the position of this node.
+     *
      * @return a {@link Vec3I} instance representing the position of this node
      */
     public @NotNull Vec3I getPosition() {
@@ -199,6 +212,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     /**
      * Sets the offset vector for this node. This is used to keep track of precise position, when necessary. Typically
      * only used for the first node in a path.
+     *
      * @param x the x-offset
      * @param y the y-offset
      * @param z the z-offset
@@ -211,6 +225,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Returns the x-component of the offset vector.
+     *
      * @return the x-component of the offset vector
      */
     public float getXOffset() {
@@ -219,6 +234,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Returns the y-component of the offset vector.
+     *
      * @return the y-component of the offset vector
      */
     public float getYOffset() {
@@ -227,6 +243,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     /**
      * Returns the z-component of the offset vector.
+     *
      * @return the z-component of the offset vector
      */
     public float getZOffset() {
@@ -236,6 +253,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     /**
      * Determines if this node's offset values are centered (are default). Equivalent to
      * {@code node.getXOffset() == 0.5 && node.getZOffset() == 0.5}.
+     *
      * @return {@code true} if this node's x and z offsets are centered, {@code false} otherwise
      */
     public boolean isCentered() {
@@ -245,7 +263,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
     @Override
     public int compareTo(@NotNull Node other) {
         int fCompare = Float.compare(getF(), other.getF());
-        if(fCompare == 0) {
+        if (fCompare == 0) {
             //use natural ordering as tiebreak: should never return 0 during actual pathfinding
             return position.compareTo(other.position);
         }
@@ -263,15 +281,15 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
 
     @Override
     public boolean equals(Object obj) {
-        if(this == obj) {
+        if (this == obj) {
             return true;
         }
 
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
 
-        if(obj instanceof Node other) {
+        if (obj instanceof Node other) {
             return position.equals(other.position) && g == other.g && h == other.h;
         }
 
@@ -296,7 +314,7 @@ public final class Node implements Comparable<Node>, Iterable<Node> {
             @Override
             public Node next() {
                 Node current = this.current;
-                if(current == null) {
+                if (current == null) {
                     throw new NoSuchElementException();
                 }
 

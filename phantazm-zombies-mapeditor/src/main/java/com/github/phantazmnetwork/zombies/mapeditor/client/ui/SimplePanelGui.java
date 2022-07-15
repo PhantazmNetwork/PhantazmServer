@@ -15,7 +15,8 @@ public class SimplePanelGui extends LightweightGuiDescription {
 
     /**
      * Creates a new SimplePanelGui with root panel measuring the given width and height.
-     * @param width the width of the panel
+     *
+     * @param width  the width of the panel
      * @param height the height of the panel
      */
     public SimplePanelGui(int width, int height) {

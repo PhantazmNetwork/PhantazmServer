@@ -32,6 +32,7 @@ public abstract class CachedInventoryObject implements InventoryObject {
 
     /**
      * Gets the current cached {@link ItemStack}.
+     *
      * @return The current cached {@link ItemStack}
      */
     protected @NotNull ItemStack peekStack() {
@@ -56,6 +57,7 @@ public abstract class CachedInventoryObject implements InventoryObject {
 
     /**
      * Computes this inventory object's current representation as an {@link ItemStack}.
+     *
      * @return This inventory object's current representation as an {@link ItemStack}
      */
     protected abstract @NotNull ItemStack computeStack();

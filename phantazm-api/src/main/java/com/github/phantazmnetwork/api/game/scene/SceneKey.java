@@ -6,6 +6,7 @@ import java.util.Objects;
 
 /**
  * A key used to identify unique {@link Scene}.
+ *
  * @param <TScene> The type of the associated {@link Scene}
  */
 @SuppressWarnings("unused")
@@ -13,6 +14,7 @@ public record SceneKey<TScene extends Scene<?>>(@NotNull String key) {
 
     /**
      * Creates a {@link Scene} key.
+     *
      * @param key The {@link String} representation of the key
      */
     public SceneKey {
@@ -28,7 +30,7 @@ public record SceneKey<TScene extends Scene<?>>(@NotNull String key) {
             return false;
         }
 
-        SceneKey<?> that = (SceneKey<?>) o;
+        SceneKey<?> that = (SceneKey<?>)o;
         return key.equals(that.key);
     }
 

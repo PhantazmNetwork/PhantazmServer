@@ -11,8 +11,9 @@ public interface GunTickEffect {
 
     /**
      * Ticks the effect.
+     *
      * @param state The current {@link GunState} of the gun
-     * @param time The time of the tick
+     * @param time  The time of the tick
      */
     void tick(@NotNull GunState state, long time);
 

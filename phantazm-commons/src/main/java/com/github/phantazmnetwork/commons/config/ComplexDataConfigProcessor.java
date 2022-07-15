@@ -26,10 +26,22 @@ public class ComplexDataConfigProcessor implements ConfigProcessor<ComplexData> 
 
     /**
      * Creates a new {@link ComplexDataConfigProcessor}.
+     *
      * @param subProcessors The sub-processors that process the complex data's objects
      */
     public ComplexDataConfigProcessor(@NotNull Map<Key, ConfigProcessor<? extends Keyed>> subProcessors) {
         this.subProcessors = Objects.requireNonNull(subProcessors, "subprocessors");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Keyed> @NotNull ConfigElement dependencyElementFromData(
+            @NotNull ConfigProcessor<T> configProcessor, @NotNull Keyed data) throws ConfigProcessException {
+        try {
+            return configProcessor.elementFromData((T)data);
+        }
+        catch (ClassCastException e) {
+            throw new ConfigProcessException("Mismatched data type for serial key" + data.key(), e);
+        }
     }
 
     @Override
@@ -94,17 +106,6 @@ public class ComplexDataConfigProcessor implements ConfigProcessor<ComplexData> 
         }
 
         return node;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Keyed> @NotNull ConfigElement dependencyElementFromData(@NotNull ConfigProcessor<T> configProcessor,
-                                                                                      @NotNull Keyed data) throws ConfigProcessException {
-        try {
-            return configProcessor.elementFromData((T) data);
-        }
-        catch (ClassCastException e) {
-            throw new ConfigProcessException("Mismatched data type for serial key" + data.key(), e);
-        }
     }
 
 }

@@ -37,7 +37,7 @@ minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "903e1338
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
 
-renderer = { module = "com.github.0x3C50:Renderer", version = "51f5a72f86" }
+renderer = { module = "com.github.0x3C50:Renderer", version = "51f5a72" }
 
 yarn-mappings = { module = "net.fabricmc:yarn", version = "1.18.2+build.3" }
 

@@ -17,6 +17,7 @@ public class GoalGroup implements Tickable {
 
     /**
      * Creates a {@link GoalGroup}.
+     *
      * @param goals The {@link NeuralGoal}s in the group
      */
     public GoalGroup(@NotNull Iterable<NeuralGoal> goals) {
@@ -29,7 +30,8 @@ public class GoalGroup implements Tickable {
             chooseGroup();
         }
         else if (activeGroup.shouldEnd()) {
-            activeGroup.end();;
+            activeGroup.end();
+            ;
             activeGroup = null;
         }
         else {

@@ -14,6 +14,7 @@ public class CompositeFallback implements SceneFallback {
 
     /**
      * Creates a composite {@link SceneFallback}.
+     *
      * @param fallbacks The {@link SceneFallback}s to use for the fallback. This will iterate over the fallbacks until
      *                  a fallback succeeds.
      */

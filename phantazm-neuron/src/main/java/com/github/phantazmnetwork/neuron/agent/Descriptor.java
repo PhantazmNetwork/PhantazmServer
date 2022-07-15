@@ -16,12 +16,14 @@ public interface Descriptor {
     /**
      * Returns the identification string used by this descriptor. Agents whose descriptors have equal ids may be able to
      * access the same cached values for certain operations.
+     *
      * @return the ID string for this descriptor
      */
     @NotNull String getID();
 
     /**
      * Returns the {@link Calculator} used to compute distance/heuristic values for this agent.
+     *
      * @return the Calculator instance which should be used by this agent
      */
     @NotNull Calculator getCalculator();
@@ -31,7 +33,8 @@ public interface Descriptor {
      * {@code position} and {@code destination} are equal. More complex conditions may be given, but care should be
      * taken to ensure that they are correlated with the heuristic used
      * ({@link Calculator#heuristic(int, int, int, int, int, int)}).
-     * @param position the current position
+     *
+     * @param position    the current position
      * @param destination the destination position
      * @return whether this agent should have completed
      */
@@ -49,9 +52,10 @@ public interface Descriptor {
      * benefits from caching.</p>
      *
      * <p>The default implementation makes no assumptions about the environment, and always returns {@code true}.</p>
-     * @param cached the cached iterable representing the steps the agent may make
-     * @param origin the agent origin
-     * @param update the location of the update
+     *
+     * @param cached   the cached iterable representing the steps the agent may make
+     * @param origin   the agent origin
+     * @param update   the location of the update
      * @param oldSolid the solid that was previously located at the given position
      * @param newSolid the new solid located at the given position
      * @return true if the cache should be invalidated, false if it should be retained
@@ -64,6 +68,7 @@ public interface Descriptor {
 
     /**
      * Gets the directions this agent should try to step.
+     *
      * @return a collection of the step directions for an agent using this descriptor
      */
     @NotNull Collection<? extends Vec3I> stepDirections();

@@ -16,6 +16,7 @@ public final class PhysicsUtils {
     /**
      * Determines if the given {@link PhysicsResult} represents a collision anywhere. Equivalent to
      * {@code result.collisionX() || result.collisionY() || result.collisionZ()}.
+     *
      * @param result the result to check if any collisions were found
      * @return {@code true} if the given PhysicsResult has any collisions, {@code false} otherwise
      */
@@ -26,6 +27,7 @@ public final class PhysicsUtils {
     /**
      * Can be used to determine if the given shape has any collision or not. Equivalent to
      * {@code !shape.relativeEnd().isZero()}.
+     *
      * @param shape the shape to test
      * @return {@code true} if the shape is collidable, {@code false} otherwise
      */
@@ -36,6 +38,7 @@ public final class PhysicsUtils {
     /**
      * Can be used to determine if a given {@link Shape} is "tall" (has a height greater than 1). Equivalent to
      * {@code shape.relativeEnd().y() > 1}.
+     *
      * @param shape the shape to test
      * @return {@code true} if the shape is tall, {@code false} otherwise
      */

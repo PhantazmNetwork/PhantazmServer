@@ -26,6 +26,7 @@ public abstract class BasicChatChannel implements ChatChannel {
 
     /**
      * Creates a {@link BasicChatChannel}.
+     *
      * @param viewProvider The {@link BasicChatChannel}'s {@link PlayerViewProvider}
      */
     public BasicChatChannel(@NotNull PlayerViewProvider viewProvider) {
@@ -65,6 +66,7 @@ public abstract class BasicChatChannel implements ChatChannel {
 
     /**
      * Gets an {@link Audience} from a {@link Player}.
+     *
      * @param player The {@link Player} to retrieve the {@link Audience} from
      * @return A {@link Pair} representing the result. If the left {@link Audience} is present, an {@link Audience} was
      * successfully found. If the left {@link Audience} is null,

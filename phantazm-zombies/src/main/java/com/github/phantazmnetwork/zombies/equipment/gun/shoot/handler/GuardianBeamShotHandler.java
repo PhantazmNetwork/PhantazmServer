@@ -32,35 +32,21 @@ import java.util.*;
  */
 public class GuardianBeamShotHandler implements ShotHandler {
 
+    private final Queue<Beam> removalQueue = new PriorityQueue<>(Comparator.comparingLong(Beam::time));
+    private final Data data;
+
     /**
-     * Data for a {@link GuardianBeamShotHandler}.
-     * @param entityType The entity type of the guardian to create a beam with
-     * @param beamTime The time in ticks the beam will last
+     * Creates a new {@link GuardianBeamShotHandler}.
+     *
+     * @param data The data for this {@link GuardianBeamShotHandler}
      */
-    public record Data(@NotNull EntityType entityType, long beamTime) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.guardian_beam");
-
-        /**
-         * Creates a {@link Data}.
-         * @param entityType The entity type of the guardian to create a beam with
-         * @param beamTime The time in ticks the beam will last
-         */
-        public Data {
-            Objects.requireNonNull(entityType, "entityType");
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public GuardianBeamShotHandler(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
+     *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
@@ -88,25 +74,9 @@ public class GuardianBeamShotHandler implements ShotHandler {
         };
     }
 
-    private record Beam(@NotNull Reference<Instance> instance, @NotNull Entity guardian, @NotNull Entity marker,
-                        long time) {
-
-    }
-
-    private final Queue<Beam> removalQueue = new PriorityQueue<>(Comparator.comparingLong(Beam::time));
-
-    private final Data data;
-
-    /**
-     * Creates a new {@link GuardianBeamShotHandler}.
-     * @param data The data for this {@link GuardianBeamShotHandler}
-     */
-    public GuardianBeamShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
-    }
-
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
+                       @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
@@ -117,16 +87,20 @@ public class GuardianBeamShotHandler implements ShotHandler {
         markerMeta.setInvisible(true);
 
         Entity guardian = new Entity(data.entityType());
-        GuardianMeta guardianMeta = (GuardianMeta) guardian.getEntityMeta();
+        GuardianMeta guardianMeta = (GuardianMeta)guardian.getEntityMeta();
         guardianMeta.setTarget(marker);
         guardian.setInvisible(true);
 
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
-        ServerPacket markerSpawnPacket = new SpawnLivingEntityPacket(marker.getEntityId(), marker.getUuid(),
-                marker.getEntityType().id(), Pos.fromPoint(shot.end()), 0.0F, (short) 0, (short) 0, (short) 0);
+        ServerPacket markerSpawnPacket =
+                new SpawnLivingEntityPacket(marker.getEntityId(), marker.getUuid(), marker.getEntityType().id(),
+                                            Pos.fromPoint(shot.end()), 0.0F, (short)0, (short)0, (short)0
+                );
         ServerPacket markerMetaPacket = marker.getMetadataPacket();
-        ServerPacket guardianSpawnPacket = new SpawnLivingEntityPacket(guardian.getEntityId(), guardian.getUuid(),
-                guardian.getEntityType().id(), start, start.yaw(), (short) 0, (short) 0, (short) 0);
+        ServerPacket guardianSpawnPacket =
+                new SpawnLivingEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(),
+                                            start, start.yaw(), (short)0, (short)0, (short)0
+                );
         ServerPacket guardianMetaPacket = guardian.getMetadataPacket();
 
         instance.sendGroupedPacket(markerSpawnPacket);
@@ -144,10 +118,46 @@ public class GuardianBeamShotHandler implements ShotHandler {
             removalQueue.remove();
             Instance instance = beam.instance().get();
             if (instance != null) {
-                instance.sendGroupedPacket(new DestroyEntitiesPacket(List.of(beam.marker().getEntityId(),
-                        beam.guardian().getEntityId())));
+                instance.sendGroupedPacket(
+                        new DestroyEntitiesPacket(List.of(beam.marker().getEntityId(), beam.guardian().getEntityId())));
             }
         }
+    }
+
+    /**
+     * Data for a {@link GuardianBeamShotHandler}.
+     *
+     * @param entityType The entity type of the guardian to create a beam with
+     * @param beamTime   The time in ticks the beam will last
+     */
+    public record Data(@NotNull EntityType entityType, long beamTime) implements Keyed {
+
+        /**
+         * The serial {@link Key} of this {@link Data}.
+         */
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.guardian_beam");
+
+        /**
+         * Creates a {@link Data}.
+         *
+         * @param entityType The entity type of the guardian to create a beam with
+         * @param beamTime   The time in ticks the beam will last
+         */
+        public Data {
+            Objects.requireNonNull(entityType, "entityType");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return SERIAL_KEY;
+        }
+    }
+
+    private record Beam(@NotNull Reference<Instance> instance,
+                        @NotNull Entity guardian,
+                        @NotNull Entity marker,
+                        long time) {
+
     }
 
 }

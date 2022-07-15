@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class NodeQueueTest {
     private static Node[] ordered(int amount) {
         Node[] nodes = new Node[amount];
-        for(int i = 0; i < amount; i++) {
+        for (int i = 0; i < amount; i++) {
             nodes[i] = new Node(Vec3I.of(i, i, i), i, i, null);
         }
 
@@ -24,12 +24,12 @@ class NodeQueueTest {
         List<Node> nodesShuffled = new ArrayList<>(Arrays.asList(nodes));
         Collections.shuffle(nodesShuffled, new Random(69420));
 
-        for(Node node : nodesShuffled) {
+        for (Node node : nodesShuffled) {
             queue.enqueue(node);
         }
 
         int i = 0;
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             assertEquals(0, nodes[i++].compareTo(queue.dequeue()));
         }
     }

@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.commons.component;
 
-import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
@@ -17,13 +16,15 @@ public interface KeyedConfigRegistry {
     /**
      * Registers the provided processor under the specified key. If a processor is already registered, an exception
      * will be thrown.
-     * @param key the key uniquely identifying this processor
+     *
+     * @param key       the key uniquely identifying this processor
      * @param processor the processor to associate with the key
      */
     void registerProcessor(@NotNull Key key, @NotNull KeyedConfigProcessor<? extends Keyed> processor);
 
     /**
      * Determines if this registry has a processor registered under the given key.
+     *
      * @param type the processor key to check for
      * @return true if a processor has been registered under this key, false otherwise
      */
@@ -32,6 +33,7 @@ public interface KeyedConfigRegistry {
     /**
      * Attempts to deserialize the provided {@link ConfigNode} to a {@link Keyed} object. The node is expected to
      * provide a properly-formatted {@link Key} string under the name {@link KeyedConfigProcessor#SERIAL_KEY_NAME}.
+     *
      * @param node the node to deserialize
      * @return the deserialized data
      * @throws ConfigProcessException if an error occurred during config processing
@@ -40,6 +42,7 @@ public interface KeyedConfigRegistry {
 
     /**
      * Serializes the provided data to a generic ConfigNode.
+     *
      * @param data the data to serialize
      * @return the serialized data
      * @throws ConfigProcessException if an error occurred during serialization

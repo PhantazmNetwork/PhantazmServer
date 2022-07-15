@@ -13,8 +13,8 @@ public final class ReflectionUtils {
 
     public static @Nullable Method declaredMethodMatching(@NotNull Class<?> inspect,
                                                           @NotNull Predicate<? super Method> predicate) {
-        for(Method method : inspect.getDeclaredMethods()) {
-            if(predicate.test(method)) {
+        for (Method method : inspect.getDeclaredMethods()) {
+            if (predicate.test(method)) {
                 return method;
             }
         }

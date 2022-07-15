@@ -14,7 +14,7 @@ public interface ReloadActionBarChooser {
     /**
      * Chooses a {@link Component} to send to an {@link Audience} based on the gun's reload progress.
      *
-     * @param state The state of the gun
+     * @param state    The state of the gun
      * @param progress The gun's reload progress
      * @return The {@link Component} to send to the {@link Audience}
      */

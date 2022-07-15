@@ -14,7 +14,8 @@ public interface TargetTester {
 
     /**
      * Test whether an {@link Entity} target should be considered as an actual target.
-     * @param target The {@link Entity} target to test
+     *
+     * @param target       The {@link Entity} target to test
      * @param previousHits A {@link Collection} of previously hit {@link UUID}s
      * @return Whether the {@link Entity} target should be considered as an actual target
      */

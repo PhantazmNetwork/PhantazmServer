@@ -10,6 +10,7 @@ class BasicVec3D extends Vec3DBase {
 
     /**
      * Creates a new instance of this class from the given double triplet.
+     *
      * @param x the x-coordinate
      * @param y the y-coordinate
      * @param z the z-coordinate
