@@ -5,7 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.metadata.other.MarkerMeta;
+import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +19,7 @@ import java.util.Objects;
  */
 public class InstanceHologram extends AbstractList<Component> implements Hologram {
     private static final double MESSAGE_HEIGHT = 0.25;
-    private final ArrayList<Entity> markers;
+    private final ArrayList<Entity> armorStands;
     private final ArrayList<Component> components;
     private final double gap;
     private Instance instance;
@@ -33,7 +33,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      */
     public InstanceHologram(@NotNull Vec3D location, double gap) {
         this.location = Objects.requireNonNull(location, "location");
-        markers = new ArrayList<>();
+        armorStands = new ArrayList<>();
         components = new ArrayList<>();
         this.gap = gap;
     }
@@ -48,7 +48,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         Objects.requireNonNull(location, "location");
         if (!location.equals(this.location)) {
             this.location = location;
-            updateMarkers();
+            updateArmorStands();
         }
     }
 
@@ -57,42 +57,42 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         Objects.requireNonNull(instance, "instance");
         if (this.instance != instance) {
             this.instance = instance;
-            updateMarkers();
+            updateArmorStands();
         }
     }
 
     @Override
     public void trimToSize() {
-        markers.trimToSize();
+        armorStands.trimToSize();
         components.trimToSize();
     }
 
     @Override
     public @NotNull Component remove(int index) {
-        markers.remove(index).remove();
+        armorStands.remove(index).remove();
         Component component = components.remove(index);
-        updateMarkers();
+        updateArmorStands();
         return component;
     }
 
     @Override
     public @NotNull Component set(int index, @NotNull Component element) {
-        markers.get(index).setCustomName(element);
+        armorStands.get(index).setCustomName(element);
         return components.set(index, Objects.requireNonNull(element, "element"));
     }
 
     public void add(int index, @NotNull Component component) {
         components.add(index, Objects.requireNonNull(component, "component"));
-        markers.add(makeMarker(component));
-        updateMarkers();
+        armorStands.add(makeArmorStand(component));
+        updateArmorStands();
     }
 
     @Override
     public void clear() {
-        for (Entity entity : markers) {
+        for (Entity entity : armorStands) {
             entity.remove();
         }
-        markers.clear();
+        armorStands.clear();
         components.clear();
     }
 
@@ -106,30 +106,31 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         return components.size();
     }
 
-    private void updateMarkers() {
+    private void updateArmorStands() {
         if (instance == null) {
             return;
         }
 
-        int markerCount = markers.size();
-        double totalHeight = gap * (markerCount - 1) + markerCount * MESSAGE_HEIGHT;
+        int armorStandCount = armorStands.size();
+        double totalHeight = gap * (armorStandCount - 1) + armorStandCount * MESSAGE_HEIGHT;
         double topCornerHeight = location.getY() + totalHeight / 2;
 
-        for (int i = 0; i < markerCount; i++) {
-            Entity marker = markers.get(i);
+        for (int i = 0; i < armorStandCount; i++) {
+            Entity armorStand = armorStands.get(i);
             Pos pos = new Pos(location.getX(), topCornerHeight - (i * (gap + MESSAGE_HEIGHT)), location.getZ());
-            if (marker.getInstance() == instance) {
-                marker.teleport(pos);
+            if (armorStand.getInstance() == instance) {
+                armorStand.teleport(pos);
             }
             else {
-                marker.setInstance(instance, pos);
+                armorStand.setInstance(instance, pos);
             }
         }
     }
 
-    private Entity makeMarker(Component display) {
-        Entity stand = new Entity(EntityType.MARKER);
-        MarkerMeta meta = (MarkerMeta)stand.getEntityMeta();
+    private Entity makeArmorStand(Component display) {
+        Entity stand = new Entity(EntityType.ARMOR_STAND);
+        ArmorStandMeta meta = (ArmorStandMeta)stand.getEntityMeta();
+        meta.setMarker(true);
         meta.setHasNoGravity(true);
         meta.setCustomNameVisible(true);
         meta.setInvisible(true);
