@@ -28,14 +28,12 @@ fun ModuleDependency.exclude(provider: Provider<MinimalExternalModuleDependency>
 fun DependencyHandlerScope.addShade(dependency: ProjectDependency) {
     shade(dependency) {
         exclude(libs.fastutil)
-        exclude(libs.netty.buffer)
     }
 }
 
 dependencies {
     annotationProcessor(libs.velocity.api)
 
-    implementation(libs.netty.buffer)
     implementation(libs.velocity.api)
 
     addShade(projects.phantazmCommons)

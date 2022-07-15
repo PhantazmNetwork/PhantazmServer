@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.velocity.listener;
 import com.github.phantazmnetwork.messaging.packet.PacketSerializer;
 import com.github.phantazmnetwork.messaging.proxy.ForwardProtocolVersionPacket;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.ConnectionHandshakeEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
@@ -33,6 +34,10 @@ public class ProtocolVersionForwarder {
 
             connection.sendPluginMessage(identifier, bytes);
         });
+    }
+
+    public void onPlayer(ConnectionHandshakeEvent event) {
+
     }
 
 }
