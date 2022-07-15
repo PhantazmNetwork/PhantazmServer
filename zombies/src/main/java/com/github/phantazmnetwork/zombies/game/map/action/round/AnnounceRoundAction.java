@@ -56,12 +56,12 @@ public class AnnounceRoundAction implements Action<Round> {
     private final Audience audience;
 
     /**
-     * Creates a new instance of this class from the provided data, which will announce to the given {@link Audience}.
+     * Creates a new instance of this class from the provided contextual data.
      *
      * @param data    the data defining the behavior of ths {@link Action}
-     * @param context the context of this round
+     * @param context the context of this action
      */
-    public AnnounceRoundAction(@NotNull Data data, @NotNull ZombiesMap.Context context) {
+    public AnnounceRoundAction(@NotNull Data data, @NotNull ZombiesMap.ObjectContext context) {
         this.data = Objects.requireNonNull(data, "data");
         this.audience = Objects.requireNonNull(context.instance(), "context.instance");
     }

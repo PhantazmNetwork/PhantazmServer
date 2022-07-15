@@ -25,10 +25,10 @@ import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
     @ComponentDependency("zombies.dependency.map.context")
-    public record Context(@NotNull Instance instance,
-                          @NotNull MobSpawner spawner,
-                          @NotNull ClientBlockHandler blockHandler,
-                          @NotNull SpawnDistributor spawnDistributor) {
+    public record ObjectContext(@NotNull Instance instance,
+                                @NotNull MobSpawner spawner,
+                                @NotNull ClientBlockHandler blockHandler,
+                                @NotNull SpawnDistributor spawnDistributor) {
         public static final Key DEPENDENCY_KEY = Key.key(Namespaces.PHANTAZM, "zombies.dependency.map.context");
     }
 
@@ -54,11 +54,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                       @NotNull SpawnDistributor spawnDistributor) {
         super(info, info.settings().origin(), instance);
 
-        Context context = new Context(instance, mobSpawner, blockHandler, spawnDistributor);
-        Map<Key, Object> dependencyMap = new HashMap<>(1);
-        dependencyMap.put(Context.DEPENDENCY_KEY, context);
-
-        DependencyProvider provider = DependencyProvider.lazy(dependencyMap::get);
+        ObjectContext context = new ObjectContext(instance, mobSpawner, blockHandler, spawnDistributor);
+        DependencyProvider provider = DependencyProvider.ofDependencies(context);
 
         List<RoomInfo> roomData = info.rooms();
         List<DoorInfo> doorData = info.doors();

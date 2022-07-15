@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import javax.naming.OperationNotSupportedException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ class ReflectiveComponentBuilderTest {
     void explicitDependencyConstructorFactory() throws ComponentException {
         ComponentBuilder builder =
                 new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
-        assertDoesNotThrow(() -> builder.registerComponentClass(DependencyConstructorFactory.class));
+        assertDoesNotThrow(() -> builder.registerComponentClass(ExplicitDependencyConstructorFactory.class));
 
         ConfigNode node = new LinkedConfigNode(1);
         node.putString("serialKey", "phantazm:test");
@@ -91,21 +92,67 @@ class ReflectiveComponentBuilderTest {
 
         DependencyProvider deps = new LazyDependencyProvider(depMap::get);
 
-        DependencyConstructorFactory component = builder.makeComponent(node, deps);
+        ExplicitDependencyConstructorFactory component = builder.makeComponent(node, deps);
         assertEquals(69420, component.value);
     }
 
+    @Test
+    void implicitDependencyConstructorFactory() throws ComponentException {
+        ComponentBuilder builder =
+                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+        assertDoesNotThrow(() -> builder.registerComponentClass(ImplicitDependencyConstructorFactory.class));
+
+        ConfigNode node = new LinkedConfigNode(1);
+        node.putString("serialKey", "phantazm:test");
+
+        Map<Key, Object> depMap = new HashMap<>();
+        depMap.put(Key.key("phantazm:test.value"), new ImplicitDependencyConstructorFactory.Dependency(42069));
+
+        DependencyProvider deps = new LazyDependencyProvider(depMap::get);
+
+        ImplicitDependencyConstructorFactory component = builder.makeComponent(node, deps);
+        assertEquals(42069, component.dependency.value);
+    }
+
     @ComponentModel("phantazm:test")
-    public static class DependencyConstructorFactory {
+    public static class ImplicitDependencyConstructorFactory {
+        @ComponentDependency("phantazm:test.value")
+        public record Dependency(int value) {
+
+        }
+
         @ComponentProcessor
         public static KeyedConfigProcessor<?> processor() {
             return KeyedConfigProcessor.fromSupplier(Data::new);
         }
 
-        private int value;
+        private final Dependency dependency;
 
         @ComponentFactory
-        public DependencyConstructorFactory(@NotNull Data data, @ComponentDependency("phantazm:test.value") int value) {
+        public ImplicitDependencyConstructorFactory(@NotNull Data data, @NotNull Dependency dependency) {
+            this.dependency = dependency;
+        }
+
+        private record Data() implements Keyed {
+            @Override
+            public @NotNull Key key() {
+                return Key.key("phantazm:test");
+            }
+        }
+    }
+
+    @ComponentModel("phantazm:test")
+    public static class ExplicitDependencyConstructorFactory {
+        @ComponentProcessor
+        public static KeyedConfigProcessor<?> processor() {
+            return KeyedConfigProcessor.fromSupplier(Data::new);
+        }
+
+        private final int value;
+
+        @ComponentFactory
+        public ExplicitDependencyConstructorFactory(@NotNull Data data,
+                                                    @ComponentDependency("phantazm:test.value") int value) {
             this.value = value;
         }
 
@@ -133,7 +180,7 @@ class ReflectiveComponentBuilderTest {
 
             @Override
             public @NotNull Key key() {
-                return null;
+                throw new UnsupportedOperationException();
             }
         }
     }

@@ -1,8 +1,14 @@
 package com.github.phantazmnetwork.commons.component;
 
+import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentDependency;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -19,6 +25,34 @@ public interface DependencyProvider {
      */
     static @NotNull DependencyProvider lazy(@NotNull Function<? super Key, ?> dependencyFunction) {
         return new LazyDependencyProvider(dependencyFunction);
+    }
+
+    static @NotNull DependencyProvider ofDependencies(Object... objects) {
+        if (objects == null || objects.length == 0) {
+            return new LazyDependencyProvider(key -> null);
+        }
+
+        Map<Key, Object> mappings = new HashMap<>(objects.length);
+        for (Object object : objects) {
+            if (object instanceof Keyed keyed) {
+                mappings.putIfAbsent(keyed.key(), object);
+                continue;
+            }
+
+            ComponentDependency dependencyAnnotation = object.getClass().getAnnotation(ComponentDependency.class);
+            if (dependencyAnnotation == null) {
+                throw new IllegalArgumentException("Dependency " + object + " does not implement Keyed or provide a " +
+                                                   "ComponentDependency annotation");
+            }
+
+            @Subst(Namespaces.PHANTAZM + ":test")
+            String value = dependencyAnnotation.value();
+
+            Key key = Key.key(value);
+            mappings.putIfAbsent(key, object);
+        }
+
+        return lazy(mappings::get);
     }
 
     /**
