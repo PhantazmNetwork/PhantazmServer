@@ -1,22 +1,30 @@
 package com.github.phantazmnetwork.messaging.packet;
 
-import com.github.phantazmnetwork.messaging.proxy.ForwardProtocolVersionPacket;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Creates common {@link PacketSerializer}s.
+ */
 public final class PacketSerializers {
 
     private static final Map<Byte, Function<DataReader, Packet>> proxyDeserializers;
 
     static {
-        proxyDeserializers = new HashMap<>(1);
-        proxyDeserializers.put(ForwardProtocolVersionPacket.ID, ForwardProtocolVersionPacket::new);
+        proxyDeserializers = Collections.emptyMap();
     }
 
+    /**
+     * Creates a {@link PacketSerializer} for proxy packets.
+     *
+     * @param writerCreator A creator for the {@link PacketSerializer}'s {@link DataWriter}s
+     * @param readerCreator A creator for the {@link PacketSerializer}'s {@link DataReader}s
+     * @return A new {@link PacketSerializer}
+     */
     public static @NotNull PacketSerializer createProxySerializer(@NotNull Supplier<DataWriter> writerCreator,
                                                                   @NotNull Function<byte[], DataReader> readerCreator) {
         return new PacketSerializer(proxyDeserializers, writerCreator, readerCreator);

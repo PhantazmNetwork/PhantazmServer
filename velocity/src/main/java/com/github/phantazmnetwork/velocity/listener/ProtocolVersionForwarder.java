@@ -1,43 +1,31 @@
 package com.github.phantazmnetwork.velocity.listener;
 
-import com.github.phantazmnetwork.messaging.packet.PacketSerializer;
-import com.github.phantazmnetwork.messaging.proxy.ForwardProtocolVersionPacket;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.ConnectionHandshakeEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
+import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
-import org.jetbrains.annotations.NotNull;
+import com.velocitypowered.api.util.GameProfile;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Forwards a player's actual protocol version through game profile properties.
+ */
 public class ProtocolVersionForwarder {
 
-    private final ChannelIdentifier identifier;
-
-    private final PacketSerializer packetSerializer;
-
-    public ProtocolVersionForwarder(@NotNull ChannelIdentifier identifier, @NotNull PacketSerializer packetSerializer) {
-        this.identifier = Objects.requireNonNull(identifier, "identifier");
-        this.packetSerializer = Objects.requireNonNull(packetSerializer, "packetSerializer");
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
+    /**
+     * Handles player logins and adds their protocol version to their profile properties.
+     *
+     * @param event The triggering {@link LoginEvent}
+     */
     @Subscribe
-    public void onPlayerConnected(ServerPostConnectEvent event) {
-        event.getPlayer().getCurrentServer().ifPresent(connection -> {
-            Player player = event.getPlayer();
-            int protocol = player.getProtocolVersion().getProtocol();
-
-            ForwardProtocolVersionPacket packet = new ForwardProtocolVersionPacket(protocol);
-            byte[] bytes = packetSerializer.serializePacket(packet);
-
-            connection.sendPluginMessage(identifier, bytes);
-        });
-    }
-
-    public void onPlayer(ConnectionHandshakeEvent event) {
-
+    public void onPlayerLogin(LoginEvent event) {
+        Player player = event.getPlayer();
+        List<GameProfile.Property> properties = player.getGameProfileProperties();
+        List<GameProfile.Property> newProperties = new ArrayList<>(properties);
+        int protocol = player.getProtocolVersion().getProtocol();
+        newProperties.add(new GameProfile.Property("protocolVersion", String.valueOf(protocol), ""));
+        player.setGameProfileProperties(newProperties);
     }
 
 }

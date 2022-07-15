@@ -6,10 +6,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A {@link DataWriter} that wraps around a {@link ByteArrayDataOutput}.
+ */
 public class ByteArrayOutputDataWriter implements DataWriter {
 
     private final ByteArrayDataOutput output;
 
+    /**
+     * Creates a {@link ByteArrayOutputDataWriter}.
+     *
+     * @param output The delegate {@link ByteArrayDataOutput}
+     */
     public ByteArrayOutputDataWriter(@NotNull ByteArrayDataOutput output) {
         this.output = Objects.requireNonNull(output, "output");
     }

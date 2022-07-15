@@ -153,7 +153,7 @@ public final class PhantazmServer {
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
-        Messaging.initialize(global, viewProvider);
+        Messaging.initialize(global, viewProvider, serverConfig.serverInfoConfig().authType());
         Neuron.initialize(global, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner());
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
