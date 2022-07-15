@@ -13,8 +13,8 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.monster.GuardianMeta;
+import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.play.DestroyEntitiesPacket;
@@ -82,33 +82,35 @@ public class GuardianBeamShotHandler implements ShotHandler {
             return;
         }
 
-        Entity marker = new Entity(EntityType.MARKER);
-        EntityMeta markerMeta = marker.getEntityMeta();
-        markerMeta.setInvisible(true);
+        Entity armorStand = new Entity(EntityType.ARMOR_STAND);
+        ArmorStandMeta armorStandMeta = (ArmorStandMeta)armorStand.getEntityMeta();
+        armorStandMeta.setMarker(true);
+        armorStandMeta.setInvisible(true);
 
         Entity guardian = new Entity(data.entityType());
         GuardianMeta guardianMeta = (GuardianMeta)guardian.getEntityMeta();
-        guardianMeta.setTarget(marker);
+        guardianMeta.setTarget(armorStand);
         guardian.setInvisible(true);
 
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
-        ServerPacket markerSpawnPacket =
-                new SpawnLivingEntityPacket(marker.getEntityId(), marker.getUuid(), marker.getEntityType().id(),
-                                            Pos.fromPoint(shot.end()), 0.0F, (short)0, (short)0, (short)0
-                );
-        ServerPacket markerMetaPacket = marker.getMetadataPacket();
+        ServerPacket armorStandSpawnPacket = new SpawnLivingEntityPacket(armorStand.getEntityId(), armorStand.getUuid(),
+                                                                         armorStand.getEntityType().id(),
+                                                                         Pos.fromPoint(shot.end()), 0.0F, (short)0,
+                                                                         (short)0, (short)0
+        );
+        ServerPacket armorStandMetaPacket = armorStand.getMetadataPacket();
         ServerPacket guardianSpawnPacket =
                 new SpawnLivingEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(),
                                             start, start.yaw(), (short)0, (short)0, (short)0
                 );
         ServerPacket guardianMetaPacket = guardian.getMetadataPacket();
 
-        instance.sendGroupedPacket(markerSpawnPacket);
-        instance.sendGroupedPacket(markerMetaPacket);
+        instance.sendGroupedPacket(armorStandSpawnPacket);
+        instance.sendGroupedPacket(armorStandMetaPacket);
         instance.sendGroupedPacket(guardianSpawnPacket);
         instance.sendGroupedPacket(guardianMetaPacket);
 
-        removalQueue.add(new Beam(new WeakReference<>(instance), guardian, marker, System.currentTimeMillis()));
+        removalQueue.add(new Beam(new WeakReference<>(instance), guardian, armorStand, System.currentTimeMillis()));
     }
 
     @Override
@@ -118,8 +120,8 @@ public class GuardianBeamShotHandler implements ShotHandler {
             removalQueue.remove();
             Instance instance = beam.instance().get();
             if (instance != null) {
-                instance.sendGroupedPacket(
-                        new DestroyEntitiesPacket(List.of(beam.marker().getEntityId(), beam.guardian().getEntityId())));
+                instance.sendGroupedPacket(new DestroyEntitiesPacket(
+                        List.of(beam.armorStand().getEntityId(), beam.guardian().getEntityId())));
             }
         }
     }
@@ -155,7 +157,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
     private record Beam(@NotNull Reference<Instance> instance,
                         @NotNull Entity guardian,
-                        @NotNull Entity marker,
+                        @NotNull Entity armorStand,
                         long time) {
 
     }
