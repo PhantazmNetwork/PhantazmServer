@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.api.hologram.Hologram;
-import com.github.phantazmnetwork.api.hologram.InstanceHologram;
+import com.github.phantazmnetwork.core.hologram.Hologram;
+import com.github.phantazmnetwork.core.hologram.InstanceHologram;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;

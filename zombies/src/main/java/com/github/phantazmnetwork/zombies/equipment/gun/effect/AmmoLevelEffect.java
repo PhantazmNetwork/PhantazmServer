@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;

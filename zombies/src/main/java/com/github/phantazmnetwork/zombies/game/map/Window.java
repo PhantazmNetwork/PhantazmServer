@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.api.ClientBlockHandler;
-import com.github.phantazmnetwork.api.VecUtils;
+import com.github.phantazmnetwork.core.ClientBlockHandler;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;

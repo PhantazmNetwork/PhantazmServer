@@ -1,13 +1,13 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.game.scene.*;
-import com.github.phantazmnetwork.api.game.scene.fallback.CompositeFallback;
-import com.github.phantazmnetwork.api.game.scene.fallback.KickFallback;
-import com.github.phantazmnetwork.api.game.scene.fallback.SceneFallback;
-import com.github.phantazmnetwork.api.game.scene.lobby.*;
-import com.github.phantazmnetwork.api.instance.AnvilFileSystemInstanceLoader;
-import com.github.phantazmnetwork.api.instance.InstanceLoader;
-import com.github.phantazmnetwork.api.player.PlayerViewProvider;
+import com.github.phantazmnetwork.core.game.scene.*;
+import com.github.phantazmnetwork.core.game.scene.fallback.CompositeFallback;
+import com.github.phantazmnetwork.core.game.scene.fallback.KickFallback;
+import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
+import com.github.phantazmnetwork.core.game.scene.lobby.*;
+import com.github.phantazmnetwork.core.instance.AnvilFileSystemInstanceLoader;
+import com.github.phantazmnetwork.core.instance.InstanceLoader;
+import com.github.phantazmnetwork.core.player.PlayerViewProvider;
 import com.github.phantazmnetwork.neuron.bindings.minestom.chunk.NeuralChunk;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.lobby.LobbyConfig;

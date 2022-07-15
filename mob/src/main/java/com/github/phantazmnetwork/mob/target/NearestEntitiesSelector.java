@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.mob.target;
 
-import com.github.phantazmnetwork.api.target.TargetSelectorInstance;
+import com.github.phantazmnetwork.core.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;

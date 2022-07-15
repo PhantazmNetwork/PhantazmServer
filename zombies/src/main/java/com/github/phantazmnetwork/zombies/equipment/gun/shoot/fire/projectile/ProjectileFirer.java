@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile;
 
-import com.github.phantazmnetwork.api.config.processor.MinestomConfigProcessors;
+import com.github.phantazmnetwork.core.config.processor.MinestomConfigProcessors;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;

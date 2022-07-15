@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.chat.ChatChannel;
-import com.github.phantazmnetwork.api.chat.InstanceChatChannel;
-import com.github.phantazmnetwork.api.chat.SelfChatChannel;
-import com.github.phantazmnetwork.api.chat.command.ChatCommand;
-import com.github.phantazmnetwork.api.player.PlayerView;
-import com.github.phantazmnetwork.api.player.PlayerViewProvider;
+import com.github.phantazmnetwork.core.chat.ChatChannel;
+import com.github.phantazmnetwork.core.chat.InstanceChatChannel;
+import com.github.phantazmnetwork.core.chat.SelfChatChannel;
+import com.github.phantazmnetwork.core.chat.command.ChatCommand;
+import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.phantazmnetwork.core.player.PlayerViewProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandManager;

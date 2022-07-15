@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.config.processor.ItemStackConfigProcessors;
-import com.github.phantazmnetwork.api.particle.ParticleWrapper;
-import com.github.phantazmnetwork.api.particle.data.ParticleData;
-import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.core.config.processor.ItemStackConfigProcessors;
+import com.github.phantazmnetwork.core.particle.ParticleWrapper;
+import com.github.phantazmnetwork.core.particle.data.ParticleData;
+import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.commons.config.ComplexData;
 import com.github.phantazmnetwork.commons.config.ComplexDataConfigProcessor;
 import com.github.phantazmnetwork.commons.factory.DependencyProvider;

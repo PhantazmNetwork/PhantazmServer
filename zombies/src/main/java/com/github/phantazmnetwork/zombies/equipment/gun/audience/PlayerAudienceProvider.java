@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.audience;
 
-import com.github.phantazmnetwork.api.player.PlayerView;
+import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;

@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.server.config.lobby;
 
+import com.github.phantazmnetwork.core.game.scene.lobby.Lobby;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.instance.Instance;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Config for the server's {@link com.github.phantazmnetwork.api.game.scene.lobby.Lobby}s.
+ * Config for the server's {@link Lobby}s.
  *
  * @param instancesPath The path where {@link Instance}s are located
  * @param kickMessage   A {@link Component} used to display a message to the player when they are kicked when no valid lobby exists to route them to

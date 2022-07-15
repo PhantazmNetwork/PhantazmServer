@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.api.config.InstanceConfig;
+import com.github.phantazmnetwork.core.config.InstanceConfig;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.lobby.LobbyConfig;

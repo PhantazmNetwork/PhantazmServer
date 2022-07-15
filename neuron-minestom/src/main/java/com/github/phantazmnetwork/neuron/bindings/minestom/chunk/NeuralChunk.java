@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.chunk;
 
-import com.github.phantazmnetwork.api.PhysicsUtils;
+import com.github.phantazmnetwork.core.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.bindings.minestom.solid.SolidProvider;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import net.minestom.server.collision.Shape;

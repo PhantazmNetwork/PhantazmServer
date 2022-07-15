@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
-import com.github.phantazmnetwork.api.VecUtils;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.commons.HashStrategies;
 import com.github.phantazmnetwork.neuron.bindings.minestom.solid.SolidProvider;
 import com.github.phantazmnetwork.neuron.engine.*;

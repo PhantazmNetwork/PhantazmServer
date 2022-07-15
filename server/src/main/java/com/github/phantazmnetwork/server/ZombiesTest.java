@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.api.ClientBlockHandler;
-import com.github.phantazmnetwork.api.InstanceClientBlockHandler;
-import com.github.phantazmnetwork.api.hologram.Hologram;
-import com.github.phantazmnetwork.api.hologram.InstanceHologram;
+import com.github.phantazmnetwork.core.ClientBlockHandler;
+import com.github.phantazmnetwork.core.InstanceClientBlockHandler;
+import com.github.phantazmnetwork.core.hologram.Hologram;
+import com.github.phantazmnetwork.core.hologram.InstanceHologram;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;

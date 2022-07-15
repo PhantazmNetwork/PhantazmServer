@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.server.config.lobby;
 
-import com.github.phantazmnetwork.api.config.InstanceConfig;
-import com.github.phantazmnetwork.api.game.scene.lobby.Lobby;
+import com.github.phantazmnetwork.core.config.InstanceConfig;
+import com.github.phantazmnetwork.core.game.scene.lobby.Lobby;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
