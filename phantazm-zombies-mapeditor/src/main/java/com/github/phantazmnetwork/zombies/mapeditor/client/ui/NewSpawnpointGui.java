@@ -39,10 +39,7 @@ public class NewSpawnpointGui extends NamedObjectGui {
 
             Vec3I origin = currentMap.info().origin();
 
-            currentMap.spawnpoints().add(new SpawnpointInfo(
-                    Vec3I.of(firstSelected.getX() - origin.getX(), firstSelected.getY() - origin.getY(),
-                             firstSelected.getZ() - origin.getZ()
-                    ), spawnruleKey));
+            currentMap.spawnpoints().add(new SpawnpointInfo(firstSelected.sub(origin), spawnruleKey));
             session.refreshSpawnpoints();
             ScreenUtils.closeCurrentScreen();
         });
