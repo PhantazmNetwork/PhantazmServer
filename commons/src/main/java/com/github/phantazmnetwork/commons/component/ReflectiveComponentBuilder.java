@@ -2,10 +2,7 @@ package com.github.phantazmnetwork.commons.component;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.ReflectionUtils;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentDependency;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
+import com.github.phantazmnetwork.commons.component.annotation.*;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.kyori.adventure.key.InvalidKeyException;
@@ -138,21 +135,11 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
 
         Parameter[] parameters = declaredConstructor.getParameters();
         if (parameters.length == 0) {
-            throw new ComponentException("Zero-length factory constructor found in " + component.getTypeName());
-        }
-
-        Parameter data = parameters[0];
-        Class<?> dataClass = data.getType();
-        if (!Keyed.class.isAssignableFrom(dataClass)) {
-            throw new ComponentException(
-                    "Found data argument that did not subclass Keyed in " + component.getTypeName());
-        }
-
-        if (parameters.length == 1) {
+            //zero-length constructor needs no data or dependencies
             return new KeyedFactory<>() {
                 @Override
                 public @NotNull Object make(@NotNull DependencyProvider dependencyProvider, @NotNull Keyed keyed) {
-                    return tryInvokeConstructor(declaredConstructor, keyed);
+                    return tryInvokeConstructor(declaredConstructor);
                 }
 
                 @Override
@@ -162,33 +149,57 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
             };
         }
 
-        List<Key> dependencyKeys = new ArrayList<>(parameters.length - 1);
+        int dataParameterIndex = -1;
+        List<Key> dependencyKeys = new ArrayList<>(parameters.length);
         List<Key> unmodifiableView = Collections.unmodifiableList(dependencyKeys);
-        for (int i = 1; i < parameters.length; i++) {
+        for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            ComponentDependency dependency = parameter.getAnnotation(ComponentDependency.class);
-            if (dependency == null) {
-                dependency = parameter.getType().getAnnotation(ComponentDependency.class);
-
-                //look on the dependency type as a fallback to find out its key
-                if (dependency == null) {
-                    throw new ComponentException(
-                            "Found component dependency without the ComponentDependency annotation in " +
-                            component.getTypeName());
+            //check for ComponentData
+            if (parameter.isAnnotationPresent(ComponentData.class) ||
+                parameter.getType().isAnnotationPresent(ComponentData.class)) {
+                if (dataParameterIndex != -1) {
+                    throw new ComponentException("Type " + component.getTypeName() + " has more than one " +
+                                                 "ComponentData in its factory constructor");
                 }
+                dataParameterIndex = i;
             }
+            else {
+                ComponentDependency dependency = parameter.getAnnotation(ComponentDependency.class);
+                if (dependency == null) {
+                    dependency = parameter.getType().getAnnotation(ComponentDependency.class);
+                    if (dependency == null) {
+                        throw new ComponentException("Missing ComponentDependency annotation of parameter of factor " +
+                                                     "constructor for type " + component.getTypeName());
+                    }
+                }
 
-            Key dependencyKey = getKey(component, dependency.value());
-            dependencyKeys.add(dependencyKey);
+                dependencyKeys.add(getKey(component, dependency.value()));
+            }
         }
+
+        int finalDataParameterIndex = dataParameterIndex;
 
         return new KeyedFactory<>() {
             @Override
             public @NotNull Object make(@NotNull DependencyProvider dependencyProvider, @NotNull Keyed keyed) {
-                Object[] args = new Object[dependencyKeys.size() + 1];
-                args[0] = keyed;
-                for (int i = 1; i < args.length; i++) {
-                    args[i] = dependencyProvider.provide(dependencyKeys.get(i - 1));
+                Object[] args;
+                if (finalDataParameterIndex == -1) {
+                    //no data parameter, object is entirely dependencies
+                    args = new Object[dependencyKeys.size()];
+                    for (int i = 0; i < dependencyKeys.size(); i++) {
+                        args[i] = dependencyProvider.provide(dependencyKeys.get(i));
+                    }
+                }
+                else {
+                    args = new Object[dependencyKeys.size() - 1];
+                    args[finalDataParameterIndex] = keyed;
+                    for (int i = 0; i < finalDataParameterIndex; i++) {
+                        args[i] = dependencyProvider.provide(dependencyKeys.get(i));
+                    }
+
+                    for (int i = finalDataParameterIndex + 1; i < parameters.length; i++) {
+                        args[i] = dependencyKeys.get(i - 1);
+                    }
                 }
 
                 return tryInvokeConstructor(declaredConstructor, args);

@@ -299,18 +299,24 @@ public final class MapProcessors {
                     AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("breakSound"));
             Sound breakAllSound =
                     AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("breakAllSound"));
-            return new WindowInfo(frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound);
+            ConfigList repairActions = element.getListOrThrow("repairActions");
+            ConfigList breakActions = element.getListOrThrow("breakActions");
+            return new WindowInfo(frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound,
+                                  repairActions, breakActions
+            );
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull WindowInfo windowData) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(6);
+            ConfigNode node = new LinkedConfigNode(8);
             node.put("frameRegion", VectorConfigProcessors.region3I().elementFromData(windowData.frameRegion()));
             node.put("repairBlocks", stringList.elementFromData(windowData.repairBlocks()));
             node.put("repairSound", AdventureConfigProcessors.sound().elementFromData(windowData.repairSound()));
             node.put("repairAllSound", AdventureConfigProcessors.sound().elementFromData(windowData.repairAllSound()));
             node.put("breakSound", AdventureConfigProcessors.sound().elementFromData(windowData.breakSound()));
             node.put("breakAllSound", AdventureConfigProcessors.sound().elementFromData(windowData.breakAllSound()));
+            node.put("repairActions", windowData.repairActions());
+            node.put("breakActions", windowData.breakActions());
             return node;
         }
     };

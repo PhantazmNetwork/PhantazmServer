@@ -24,6 +24,8 @@ fabric-loader = { module = "net.fabricmc:fabric-loader", version = "0.14.8" }
 
 fastutil = { module = "it.unimi.dsi:fastutil", version = "8.5.8" }
 
+guice = { module = "com.google.inject:guice", version = "5.1.0" }
+
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.0" }
 
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }

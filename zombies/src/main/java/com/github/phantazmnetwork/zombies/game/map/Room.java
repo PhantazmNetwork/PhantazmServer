@@ -8,10 +8,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Room extends PositionalMapObject<RoomInfo> {
     private final List<Action<Room>> openActions;
@@ -28,9 +25,8 @@ public class Room extends PositionalMapObject<RoomInfo> {
     public Room(@NotNull RoomInfo roomInfo, @NotNull Vec3I origin, @NotNull Instance instance,
                 @NotNull List<Action<Room>> openActions) {
         super(roomInfo, origin, instance);
-        this.openActions = Objects.requireNonNull(openActions, "openActions");
-
-        Collections.sort(openActions);
+        this.openActions = new ArrayList<>(openActions);
+        this.openActions.sort(Comparator.reverseOrder());
 
         List<Region3I> list = new ArrayList<>(roomInfo.regions().size());
         for (Region3I region : roomInfo.regions()) {

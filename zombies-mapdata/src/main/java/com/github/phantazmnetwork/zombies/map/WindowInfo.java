@@ -1,6 +1,8 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.vector.Region3I;
+import com.github.steanky.ethylene.core.collection.ArrayConfigList;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +18,9 @@ public record WindowInfo(@NotNull Region3I frameRegion,
                          @NotNull Sound repairSound,
                          @NotNull Sound repairAllSound,
                          @NotNull Sound breakSound,
-                         @NotNull Sound breakAllSound) {
+                         @NotNull Sound breakAllSound,
+                         @NotNull ConfigList repairActions,
+                         @NotNull ConfigList breakActions) {
     /**
      * The default "repair" sound used when a single block is repaired.
      */
@@ -58,6 +62,8 @@ public record WindowInfo(@NotNull Region3I frameRegion,
         Objects.requireNonNull(repairAllSound, "repairAllSound");
         Objects.requireNonNull(breakSound, "breakSound");
         Objects.requireNonNull(breakAllSound, "breakAllSound");
+        Objects.requireNonNull(repairActions, "repairActions");
+        Objects.requireNonNull(breakActions, "breakActions");
     }
 
     /**
@@ -68,7 +74,7 @@ public record WindowInfo(@NotNull Region3I frameRegion,
      */
     public WindowInfo(@NotNull Region3I frameRegion, @NotNull List<String> repairBlocks) {
         this(frameRegion, repairBlocks, DEFAULT_REPAIR_SOUND, DEFAULT_REPAIR_ALL_SOUND, DEFAULT_BREAK_SOUND,
-             DEFAULT_BREAK_ALL_SOUND
+             DEFAULT_BREAK_ALL_SOUND, new ArrayConfigList(0), new ArrayConfigList(0)
         );
     }
 }
