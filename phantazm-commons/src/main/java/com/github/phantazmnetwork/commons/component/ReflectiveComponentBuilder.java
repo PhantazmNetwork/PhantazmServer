@@ -1,11 +1,13 @@
 package com.github.phantazmnetwork.commons.component;
 
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.ReflectionUtils;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.intellij.lang.annotations.Subst;
@@ -84,10 +86,16 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
             throw new IllegalStateException(e);
         }
 
-
-        @Subst("phantazm:test")
+        @Subst(Namespaces.PHANTAZM + ":test")
         String value = annotation.value();
-        Key componentKey = Key.key(value);
+
+        Key componentKey;
+        try {
+            componentKey = Key.key(value);
+        }
+        catch (InvalidKeyException e) {
+            throw new IllegalStateException("Invalid component name for class " + component.getTypeName(), e);
+        }
 
         configRegistry.registerProcessor(componentKey, processor);
         factoryRegistry.registerFactory(componentKey, factory);
@@ -107,8 +115,8 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         Key dataKey = data.key();
         KeyedFactory<TData, ?> factory = factoryRegistry.getFactory(dataKey);
 
-        if (!provider.prepare(factory.dependencies())) {
-            throw new IllegalStateException("Unable to prepare dependencies");
+        if (!provider.load(factory.dependencies())) {
+            throw new IllegalStateException("Unable to prepare dependencies for data " + dataKey);
         }
 
         //noinspection unchecked

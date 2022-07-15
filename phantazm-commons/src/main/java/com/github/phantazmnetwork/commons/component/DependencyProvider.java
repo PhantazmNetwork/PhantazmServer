@@ -37,5 +37,7 @@ public interface DependencyProvider {
      * @param dependencies the dependencies to resolve
      * @return true if all dependencies were prepared successfully, false if there is a missing dependency
      */
-    boolean prepare(@NotNull Iterable<? extends Key> dependencies);
+    boolean load(@NotNull Iterable<? extends Key> dependencies);
+
+    boolean hasLoaded(@NotNull Key key);
 }
