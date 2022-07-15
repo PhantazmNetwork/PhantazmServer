@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.MojangIdentitySource;
-import com.github.phantazmnetwork.core.player.PlayerViewProvider;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.AuthType;
@@ -147,13 +146,14 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
                                            LobbiesConfig lobbiesConfig) {
-        PlayerViewProvider viewProvider =
+        BasicPlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
                                             MinecraftServer.getConnectionManager()
                 );
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
+        Messaging.initialize(global, viewProvider, serverConfig.serverInfoConfig().authType());
         Neuron.initialize(global, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner());
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());

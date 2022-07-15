@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation(projects.phantazmCore)
+    implementation(projects.phantazmMessaging)
     implementation(projects.phantazmMob)
     implementation(projects.phantazmNeuronMinestom)
     implementation(projects.phantazmZombiesMapdata)
