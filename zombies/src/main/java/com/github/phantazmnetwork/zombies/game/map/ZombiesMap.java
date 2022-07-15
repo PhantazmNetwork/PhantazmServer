@@ -24,12 +24,11 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
-    @ComponentDependency("zombies.dependency.map.context")
+    @ComponentDependency("phantazm:zombies.dependency.map.context")
     public record ObjectContext(@NotNull Instance instance,
                                 @NotNull MobSpawner spawner,
                                 @NotNull ClientBlockHandler blockHandler,
                                 @NotNull SpawnDistributor spawnDistributor) {
-        public static final Key DEPENDENCY_KEY = Key.key(Namespaces.PHANTAZM, "zombies.dependency.map.context");
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);

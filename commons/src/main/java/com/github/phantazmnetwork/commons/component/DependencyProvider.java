@@ -27,6 +27,15 @@ public interface DependencyProvider {
         return new LazyDependencyProvider(dependencyFunction);
     }
 
+    /**
+     * Creates a new {@link DependencyProvider} implementation capable of providing the objects in the given array as
+     * dependencies. Each object must either implement {@link Keyed}, or supply the ComponentDependency annotation with
+     * an appropriately formatted key string. If multiple dependencies have the same key, only the first object will be
+     * used.
+     *
+     * @param objects the objects to use as dependencies
+     * @return a new DependencyProvider that can provide the given objects as dependencies
+     */
     static @NotNull DependencyProvider ofDependencies(Object... objects) {
         if (objects == null || objects.length == 0) {
             return new LazyDependencyProvider(key -> null);
@@ -52,7 +61,7 @@ public interface DependencyProvider {
             mappings.putIfAbsent(key, object);
         }
 
-        return lazy(mappings::get);
+        return new LazyDependencyProvider(mappings::get);
     }
 
     /**
@@ -73,5 +82,11 @@ public interface DependencyProvider {
      */
     boolean load(@NotNull Iterable<? extends Key> dependencies);
 
+    /**
+     * Determines if this DependencyProvider has a dependency with the given key name.
+     *
+     * @param key the dependency to check for
+     * @return true if the dependency exists and is loaded, false otherwise
+     */
     boolean hasLoaded(@NotNull Key key);
 }

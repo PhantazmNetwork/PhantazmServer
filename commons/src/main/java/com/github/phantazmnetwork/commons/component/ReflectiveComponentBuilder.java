@@ -61,19 +61,15 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         String value = annotation.value();
 
         Key componentKey = getKey(component, value);
-        if (configRegistry.hasProcessor(componentKey)) {
-            throw new ComponentException("Component already registered under " + componentKey);
+        if (!configRegistry.hasProcessor(componentKey)) {
+            KeyedConfigProcessor<?> processor = getProcessor(component);
+            configRegistry.registerProcessor(componentKey, processor);
         }
 
         if (factoryRegistry.hasFactory(componentKey)) {
-            throw new ComponentException("Factory already registered under " + componentKey);
+            KeyedFactory<?, ?> factory = getFactory(component);
+            factoryRegistry.registerFactory(componentKey, factory);
         }
-
-        KeyedConfigProcessor<?> processor = getProcessor(component);
-        KeyedFactory<?, ?> factory = getFactory(component);
-
-        configRegistry.registerProcessor(componentKey, processor);
-        factoryRegistry.registerFactory(componentKey, factory);
     }
 
     @Override
