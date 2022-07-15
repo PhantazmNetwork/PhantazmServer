@@ -39,6 +39,10 @@ class BasicPlayerView implements PlayerView {
     private volatile CompletableFuture<String> usernameRequest;
     private volatile String username;
 
+    private PlayerInfo playerInfo = null;
+
+    private int protocolVersion = -1;
+
     /**
      * Creates a basic {@link PlayerView}.
      *
@@ -121,6 +125,35 @@ class BasicPlayerView implements PlayerView {
         player = connectionManager.getPlayer(uuid);
         playerReference = new WeakReference<>(player);
         return Optional.ofNullable(player);
+    }
+
+    @Override
+    public @NotNull Optional<PlayerInfo> getPlayerInfo() {
+        Optional<Player> playerOptional = getPlayer();
+        if (playerOptional.isEmpty()) {
+            invalidatePlayerInfo();
+            return Optional.empty();
+        }
+
+        if (playerInfo != null) {
+            return Optional.of(playerInfo);
+        }
+
+        if (protocolVersion == -1) {
+            return Optional.empty();
+        }
+
+        playerInfo = new PlayerInfo(playerOptional.get(), protocolVersion);
+        return Optional.of(playerInfo);
+    }
+
+    public void invalidatePlayerInfo() {
+        playerInfo = null;
+        protocolVersion = -1;
+    }
+
+    public void setProtocolVersion(int protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     @Override

@@ -24,7 +24,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
-    private final Cache<UUID, PlayerView> uuidToView;
+    private final Cache<UUID, BasicPlayerView> uuidToView;
     private final Cache<String, UUID> nameToUuid;
 
     /**
@@ -97,7 +97,20 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     @Override
     public @NotNull PlayerView fromPlayer(@NotNull Player player) {
+        return fromPlayerInternal(player);
+    }
+
+    private @NotNull BasicPlayerView fromPlayerInternal(@NotNull Player player) {
         Objects.requireNonNull(player, "player");
         return uuidToView.get(player.getUuid(), key -> new BasicPlayerView(identitySource, connectionManager, player));
     }
+
+    public void invalidatePlayerInfo(@NotNull Player player) {
+        fromPlayerInternal(player).invalidatePlayerInfo();
+    }
+
+    public void updateProtocolVersion(@NotNull Player player, int protocolVersion) {
+        fromPlayerInternal(player).setProtocolVersion(protocolVersion);
+    }
+
 }

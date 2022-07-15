@@ -37,7 +37,11 @@ minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "903e1338
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
 
+netty-buffer = { module = "io.netty:netty-buffer", version = "4.1.77.Final" }
+
 renderer = { module = "com.github.0x3C50:Renderer", version = "51f5a72" }
+
+velocity-api = { module = "com.velocitypowered:velocity-api", version = "3.1.1" }
 
 yarn-mappings = { module = "net.fabricmc:yarn", version = "1.18.2+build.3" }
 
@@ -46,3 +50,5 @@ fabric = ["fabric-api", "fabric-loader"]
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version = "0.12.54" }
+
+shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }

@@ -45,6 +45,8 @@ public interface PlayerView {
      */
     @NotNull Optional<Player> getPlayer();
 
+    @NotNull Optional<PlayerInfo> getPlayerInfo();
+
     /**
      * Gets the {@link Component} display name of the player. May perform an IO operation to determine the player's username.
      *
