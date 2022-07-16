@@ -98,7 +98,7 @@ public class BasicComponentBuilder implements ComponentBuilder {
         }
 
         if (!provider.load(factory.dependencies())) {
-            throw new ComponentException("Unable to prepare dependencies for data " + dataKey);
+            throw new ComponentException("Unable to load dependencies for data " + dataKey);
         }
 
         //noinspection unchecked
