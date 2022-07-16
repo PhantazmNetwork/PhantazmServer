@@ -111,11 +111,110 @@ class ReflectiveComponentBuilderTest {
         assertEquals(42069, component.dependency.value);
     }
 
+    @Test
+    void noDependenciesOrData() throws ComponentException {
+        ComponentBuilder builder =
+                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+        assertDoesNotThrow(() -> builder.registerComponentClass(NoDependenciesOrData.class));
+
+        ConfigNode node = new LinkedConfigNode(1);
+        node.putString("serialKey", "phantazm:test");
+
+        NoDependenciesOrData comp = builder.makeComponent(node, DependencyProvider.EMPTY);
+        assertEquals("test_string", comp.internal);
+    }
+
+    @Test
+    void justDependencies() throws ComponentException {
+        ComponentBuilder builder =
+                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+        assertDoesNotThrow(() -> builder.registerComponentClass(JustDependencies.class));
+
+        ConfigNode node = new LinkedConfigNode(1);
+        node.putString("serialKey", "phantazm:test");
+
+        Map<Key, Object> depMap = new HashMap<>(2);
+        depMap.put(Key.key("phantazm:dependency1"), 42069);
+        depMap.put(Key.key("phantazm:dependency2"), "test");
+
+        DependencyProvider deps = new LazyDependencyProvider(depMap::get);
+        JustDependencies component = builder.makeComponent(node, deps);
+
+        assertEquals(42069, component.dependency1);
+        assertEquals("test", component.dependency2);
+    }
+
+    @Test
+    void justData() throws ComponentException {
+        ComponentBuilder builder =
+                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+        assertDoesNotThrow(() -> builder.registerComponentClass(JustData.class));
+
+        ConfigNode node = new LinkedConfigNode(2);
+        node.putString("serialKey", "phantazm:test");
+        node.putNumber("data", 69);
+
+        JustData data = builder.makeComponent(node, DependencyProvider.EMPTY);
+
+        assertEquals(new JustData.Data(69), data.data);
+    }
+
+    @ComponentModel("phantazm:test")
+    public static class JustData {
+        @ComponentProcessor
+        public static KeyedConfigProcessor<?> processor() {
+            return new KeyedConfigProcessor<Data>() {
+                @Override
+                public @NotNull Data dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException {
+                    return new Data(node.getNumberOrThrow("data").intValue());
+                }
+
+                @Override
+                public @NotNull ConfigNode nodeFromData(@NotNull Data data) {
+                    ConfigNode node = new LinkedConfigNode(1);
+                    node.putNumber("data", data.data);
+                    return node;
+                }
+            };
+        }
+
+        @ComponentData
+        public record Data(int data) implements Keyed {
+
+            @Override
+            public @NotNull Key key() {
+                return Key.key("phantazm:just_data");
+            }
+        }
+
+        private final Data data;
+
+        @ComponentFactory
+        public JustData(Data data) {
+            this.data = data;
+        }
+    }
+
+    @ComponentModel("phantazm:test")
+    public static class JustDependencies {
+        private final int dependency1;
+        private final String dependency2;
+
+        @ComponentFactory
+        public JustDependencies(@ComponentDependency("phantazm:dependency1") int dependency1,
+                                @ComponentDependency("phantazm:dependency2") String dependency2) {
+            this.dependency1 = dependency1;
+            this.dependency2 = dependency2;
+        }
+    }
+
     @ComponentModel("phantazm:test")
     public static class NoDependenciesOrData {
+        private final String internal;
+
         @ComponentFactory
         public NoDependenciesOrData() {
-
+            this.internal = "test_string";
         }
     }
 
