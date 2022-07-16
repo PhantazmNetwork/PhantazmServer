@@ -97,10 +97,6 @@ public class BasicComponentBuilder implements ComponentBuilder {
             throw new ComponentException("Unable to find a suitable factory for " + dataKey);
         }
 
-        if (!provider.load(factory.dependencies())) {
-            throw new ComponentException("Unable to load dependencies for data " + dataKey);
-        }
-
         //noinspection unchecked
         return (TComponent)factory.make(provider, data);
     }
@@ -156,7 +152,7 @@ public class BasicComponentBuilder implements ComponentBuilder {
                 }
 
                 @Override
-                public @Unmodifiable @NotNull List<Key> dependencies() {
+                public @Unmodifiable @NotNull List<Key> computeDependencies(@NotNull Keyed data) {
                     return Collections.emptyList();
                 }
             };
@@ -229,7 +225,7 @@ public class BasicComponentBuilder implements ComponentBuilder {
             }
 
             @Override
-            public @Unmodifiable @NotNull List<Key> dependencies() {
+            public @Unmodifiable @NotNull List<Key> computeDependencies(@NotNull Keyed data) {
                 return unmodifiableView;
             }
         };

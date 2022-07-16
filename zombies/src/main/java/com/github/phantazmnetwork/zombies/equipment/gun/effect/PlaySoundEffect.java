@@ -2,6 +2,10 @@ package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.component.DependencyProvider;
+import com.github.phantazmnetwork.commons.component.KeyedFactory;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -13,14 +17,17 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
  * A {@link GunEffect} that plays a {@link Sound}.
  */
+@ComponentModel("phantazm:gun.effect.play_sound")
 public class PlaySoundEffect implements GunEffect {
 
     private final Data data;

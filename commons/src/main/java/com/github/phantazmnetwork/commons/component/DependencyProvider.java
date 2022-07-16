@@ -24,16 +24,6 @@ public interface DependencyProvider {
         public <TDependency> TDependency provide(@NotNull Key key) {
             throw new IllegalArgumentException();
         }
-
-        @Override
-        public boolean load(@NotNull Iterable<? extends Key> dependencies) {
-            return !dependencies.iterator().hasNext();
-        }
-
-        @Override
-        public boolean hasLoaded(@NotNull Key key) {
-            return false;
-        }
     };
 
     /**
@@ -85,28 +75,11 @@ public interface DependencyProvider {
     }
 
     /**
-     * Attempts to provide the following named dependency. If the dependency is not prepared, an exception will be
-     * thrown.
+     * Attempts to provide the following named dependency.
      *
      * @param key           the identifier of the dependency
      * @param <TDependency> the runtime type of the dependency
      * @return the dependency
      */
     <TDependency> TDependency provide(@NotNull Key key);
-
-    /**
-     * Prepares all the given dependencies. If a dependency cannot be resolved, this method will return false.
-     *
-     * @param dependencies the dependencies to resolve
-     * @return true if all dependencies were prepared successfully, false if there is a missing dependency
-     */
-    boolean load(@NotNull Iterable<? extends Key> dependencies);
-
-    /**
-     * Determines if this DependencyProvider has a dependency with the given key name.
-     *
-     * @param key the dependency to check for
-     * @return true if the dependency exists and is loaded, false otherwise
-     */
-    boolean hasLoaded(@NotNull Key key);
 }

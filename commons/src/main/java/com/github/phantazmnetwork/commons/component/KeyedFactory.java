@@ -24,9 +24,9 @@ public interface KeyedFactory<TData extends Keyed, TComponent> {
     @NotNull TComponent make(@NotNull DependencyProvider dependencyProvider, TData data);
 
     /**
-     * Returns a representative list of all the dependencies this factory needs to use when creating components.
+     * Computes all the dependencies needed by this factory.
      *
-     * @return the static list of dependencies needed by this factory
+     * @return the dependencies needed by this factory
      */
-    @Unmodifiable @NotNull List<Key> dependencies();
+    @Unmodifiable @NotNull List<Key> computeDependencies(@NotNull TData data);
 }

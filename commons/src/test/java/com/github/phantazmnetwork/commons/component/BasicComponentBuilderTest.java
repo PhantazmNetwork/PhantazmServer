@@ -10,36 +10,33 @@ import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class BasicComponentBuilderTest {
     @Test
     void throwsWhenNoComponentModel() {
-        ComponentBuilder builder = new BasicComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
-                                                             Mockito.mock(KeyedFactoryRegistry.class)
-        );
+        ComponentBuilder builder =
+                new BasicComponentBuilder(mock(KeyedConfigRegistry.class), mock(KeyedFactoryRegistry.class));
         assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoComponentModel.class));
     }
 
     @Test
     void throwsWhenNoFactory() {
-        ComponentBuilder builder = new BasicComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
-                                                             Mockito.mock(KeyedFactoryRegistry.class)
-        );
+        ComponentBuilder builder =
+                new BasicComponentBuilder(mock(KeyedConfigRegistry.class), mock(KeyedFactoryRegistry.class));
         assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoFactoryModel.class));
     }
 
     @Test
     void throwsWhenNoProcessor() {
-        ComponentBuilder builder = new BasicComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
-                                                             Mockito.mock(KeyedFactoryRegistry.class)
-        );
+        ComponentBuilder builder =
+                new BasicComponentBuilder(mock(KeyedConfigRegistry.class), mock(KeyedFactoryRegistry.class));
         assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoProcessorModel.class));
     }
 
@@ -55,7 +52,7 @@ class BasicComponentBuilderTest {
         componentData.putString("string", "vegetals");
 
         Map<Key, Object> dependencyMap = new HashMap<>(1);
-        dependencyMap.put(TestComponent.FACTORY.dependencies().get(0), 420);
+        dependencyMap.put(Key.key(Namespaces.PHANTAZM, "test.dependency.number"), 420);
 
         DependencyProvider provider = DependencyProvider.lazy(dependencyMap::get);
 
@@ -354,7 +351,7 @@ class BasicComponentBuilderTest {
             }
 
             @Override
-            public @Unmodifiable @NotNull List<Key> dependencies() {
+            public @Unmodifiable @NotNull List<Key> computeDependencies(@NotNull Data data) {
                 return DEPENDENCIES;
             }
         };

@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.commons.component;
 
+import com.github.phantazmnetwork.commons.config.ComplexData;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,30 +35,21 @@ class LazyDependencyProvider implements DependencyProvider {
 
     @Override
     public <TDependency> TDependency provide(@NotNull Key key) {
+        TDependency dependency;
         if (loadedDependencies.containsKey(key)) {
             //noinspection unchecked
-            return (TDependency)loadedDependencies.get(key);
+            dependency = (TDependency)loadedDependencies.get(key);
         }
-
-        throw new IllegalArgumentException("No dependency available for key " + key);
-    }
-
-    @Override
-    public boolean load(@NotNull Iterable<? extends Key> dependencies) {
-        for (Key key : dependencies) {
-            Object dependency = dependencyFunction.apply(key);
-            if (dependency == null) {
-                return false;
+        else {
+            Object newDependency = dependencyFunction.apply(key);
+            if (newDependency == null) {
+                throw new IllegalArgumentException("Failed to resolve dependency " + key);
             }
 
-            loadedDependencies.putIfAbsent(key, dependency);
+            //noinspection unchecked
+            loadedDependencies.put(key, dependency = (TDependency)newDependency);
         }
 
-        return true;
-    }
-
-    @Override
-    public boolean hasLoaded(@NotNull Key key) {
-        return loadedDependencies.containsKey(key);
+        return dependency;
     }
 }
