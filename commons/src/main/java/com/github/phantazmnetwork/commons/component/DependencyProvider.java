@@ -17,6 +17,26 @@ import java.util.function.Function;
  */
 public interface DependencyProvider {
     /**
+     * The shared, always-empty DependencyProvider implementation.
+     */
+    DependencyProvider EMPTY = new DependencyProvider() {
+        @Override
+        public <TDependency> TDependency provide(@NotNull Key key) {
+            throw new IllegalArgumentException();
+        }
+
+        @Override
+        public boolean load(@NotNull Iterable<? extends Key> dependencies) {
+            return !dependencies.iterator().hasNext();
+        }
+
+        @Override
+        public boolean hasLoaded(@NotNull Key key) {
+            return false;
+        }
+    };
+
+    /**
      * Creates a new {@link DependencyProvider} implementation that will lazily resolve dependencies using the given
      * function during the "prepare" phase.
      *

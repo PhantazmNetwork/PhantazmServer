@@ -17,19 +17,20 @@ import java.util.function.Supplier;
 public class BasicSpawnDistributor implements SpawnDistributor {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicSpawnDistributor.class);
 
-    private final Function<Key, MobModel> modelFunction;
-    private final Supplier<List<Spawnpoint>> candidateGenerator;
+    private final Function<? super Key, ? extends MobModel> modelFunction;
+    private final Supplier<? extends List<Spawnpoint>> candidateGenerator;
     private final Random random;
 
-    public BasicSpawnDistributor(@NotNull Function<Key, MobModel> modelFunction,
-                                 @NotNull Supplier<List<Spawnpoint>> candidateGenerator, @NotNull Random random) {
+    public BasicSpawnDistributor(@NotNull Function<? super Key, ? extends MobModel> modelFunction,
+                                 @NotNull Supplier<? extends List<Spawnpoint>> candidateGenerator,
+                                 @NotNull Random random) {
         this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
         this.candidateGenerator = Objects.requireNonNull(candidateGenerator, "candidateGenerator");
         this.random = Objects.requireNonNull(random, "random");
     }
 
     @Override
-    public @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<SpawnInfo> spawns) {
+    public @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<? extends SpawnInfo> spawns) {
         List<Pair<MobModel, Key>> spawnList = new ArrayList<>(spawns.size());
         for (SpawnInfo spawnInfo : spawns) {
             Key id = spawnInfo.id();

@@ -49,14 +49,14 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         }
 
         this.unmodifiableWaves = Collections.unmodifiableList(waves);
-        this.startActions = Objects.requireNonNull(startActions, "startActions");
-        this.endActions = Objects.requireNonNull(endActions, "endActions");
+        this.startActions = new ArrayList<>(startActions);
+        this.endActions = new ArrayList<>(endActions);
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnHandler");
         this.spawnedMobs = new ArrayList<>();
         this.unmodifiableSpawnedMobs = Collections.unmodifiableList(spawnedMobs);
 
-        startActions.sort(Comparator.reverseOrder());
-        endActions.sort(Comparator.reverseOrder());
+        this.startActions.sort(Comparator.reverseOrder());
+        this.endActions.sort(Comparator.reverseOrder());
     }
 
     public void removeMob(@NotNull PhantazmMob mob) {

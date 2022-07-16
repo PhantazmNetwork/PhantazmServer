@@ -8,5 +8,5 @@ import java.util.Collection;
 import java.util.List;
 
 public interface SpawnDistributor {
-    @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<SpawnInfo> spawns);
+    @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<? extends SpawnInfo> spawns);
 }

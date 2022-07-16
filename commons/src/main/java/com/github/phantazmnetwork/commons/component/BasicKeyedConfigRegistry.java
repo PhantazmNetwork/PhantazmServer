@@ -61,6 +61,12 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
         return element.asNode();
     }
 
+    @Override
+    public @NotNull Key extractKey(@NotNull ConfigNode data) throws ConfigProcessException {
+        return AdventureConfigProcessors.key()
+                                        .dataFromElement(data.getElementOrThrow(KeyedConfigProcessor.SERIAL_KEY_NAME));
+    }
+
     private static void check(KeyedConfigProcessor<?> obj, Key key) throws ConfigProcessException {
         if (obj == null) {
             throw new ConfigProcessException("No processor found for key " + key);
