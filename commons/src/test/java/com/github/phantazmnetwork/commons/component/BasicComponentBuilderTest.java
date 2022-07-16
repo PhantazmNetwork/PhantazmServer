@@ -12,34 +12,33 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.naming.OperationNotSupportedException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ReflectiveComponentBuilderTest {
+class BasicComponentBuilderTest {
     @Test
     void throwsWhenNoComponentModel() {
-        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
-                                                                  Mockito.mock(KeyedFactoryRegistry.class)
+        ComponentBuilder builder = new BasicComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
+                                                             Mockito.mock(KeyedFactoryRegistry.class)
         );
         assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoComponentModel.class));
     }
 
     @Test
     void throwsWhenNoFactory() {
-        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
-                                                                  Mockito.mock(KeyedFactoryRegistry.class)
+        ComponentBuilder builder = new BasicComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
+                                                             Mockito.mock(KeyedFactoryRegistry.class)
         );
         assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoFactoryModel.class));
     }
 
     @Test
     void throwsWhenNoProcessor() {
-        ComponentBuilder builder = new ReflectiveComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
-                                                                  Mockito.mock(KeyedFactoryRegistry.class)
+        ComponentBuilder builder = new BasicComponentBuilder(Mockito.mock(KeyedConfigRegistry.class),
+                                                             Mockito.mock(KeyedFactoryRegistry.class)
         );
         assertThrows(ComponentException.class, () -> builder.registerComponentClass(NoProcessorModel.class));
     }
@@ -47,7 +46,7 @@ class ReflectiveComponentBuilderTest {
     @Test
     void basicComponent() throws ComponentException {
         ComponentBuilder builder =
-                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
         builder.registerComponentClass(TestComponent.class);
 
         ConfigNode componentData = new LinkedConfigNode(2);
@@ -71,14 +70,14 @@ class ReflectiveComponentBuilderTest {
     @Test
     void justDataInferredFactory() {
         ComponentBuilder builder =
-                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
         assertDoesNotThrow(() -> builder.registerComponentClass(JustDataInferredFactoryModel.class));
     }
 
     @Test
     void explicitDependencyConstructorFactory() throws ComponentException {
         ComponentBuilder builder =
-                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
         assertDoesNotThrow(() -> builder.registerComponentClass(ExplicitDependencyConstructorFactory.class));
 
         ConfigNode node = new LinkedConfigNode(1);
@@ -96,7 +95,7 @@ class ReflectiveComponentBuilderTest {
     @Test
     void implicitDependencyConstructorFactory() throws ComponentException {
         ComponentBuilder builder =
-                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
         assertDoesNotThrow(() -> builder.registerComponentClass(ImplicitDependencyConstructorFactory.class));
 
         ConfigNode node = new LinkedConfigNode(1);
@@ -114,7 +113,7 @@ class ReflectiveComponentBuilderTest {
     @Test
     void noDependenciesOrData() throws ComponentException {
         ComponentBuilder builder =
-                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
         assertDoesNotThrow(() -> builder.registerComponentClass(NoDependenciesOrData.class));
 
         ConfigNode node = new LinkedConfigNode(1);
@@ -127,7 +126,7 @@ class ReflectiveComponentBuilderTest {
     @Test
     void justDependencies() throws ComponentException {
         ComponentBuilder builder =
-                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
         assertDoesNotThrow(() -> builder.registerComponentClass(JustDependencies.class));
 
         ConfigNode node = new LinkedConfigNode(1);
@@ -147,7 +146,7 @@ class ReflectiveComponentBuilderTest {
     @Test
     void justData() throws ComponentException {
         ComponentBuilder builder =
-                new ReflectiveComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
         assertDoesNotThrow(() -> builder.registerComponentClass(JustData.class));
 
         ConfigNode node = new LinkedConfigNode(2);

@@ -23,7 +23,7 @@ import java.util.function.Predicate;
  * Standard reflection-based implementation of {@link ComponentBuilder}. This is the main entrypoint of the component
  * framework.
  */
-public class ReflectiveComponentBuilder implements ComponentBuilder {
+public class BasicComponentBuilder implements ComponentBuilder {
     private static final Predicate<Method> BASE_METHOD = method -> {
         int modifiers = method.getModifiers();
         return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && method.getParameterCount() == 0;
@@ -41,8 +41,8 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
      * @param configRegistry  the {@link KeyedConfigRegistry} used to register configuration processors
      * @param factoryRegistry the {@link KeyedFactoryRegistry} used to register component factories
      */
-    public ReflectiveComponentBuilder(@NotNull KeyedConfigRegistry configRegistry,
-                                      @NotNull KeyedFactoryRegistry factoryRegistry) {
+    public BasicComponentBuilder(@NotNull KeyedConfigRegistry configRegistry,
+                                 @NotNull KeyedFactoryRegistry factoryRegistry) {
         this.configRegistry = Objects.requireNonNull(configRegistry, "configRegistry");
         this.factoryRegistry = Objects.requireNonNull(factoryRegistry, "factoryRegistry");
     }
@@ -77,8 +77,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
     }
 
     @Override
-    public <TData extends Keyed, TComponent> TComponent makeComponent(@NotNull ConfigNode node,
-                                                                      @NotNull DependencyProvider provider)
+    public <TComponent> TComponent makeComponent(@NotNull ConfigNode node, @NotNull DependencyProvider provider)
             throws ComponentException {
         Key dataKey;
         Keyed data = null;
@@ -93,7 +92,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
             throw new ComponentException(e);
         }
 
-        KeyedFactory<TData, ?> factory = factoryRegistry.getFactory(dataKey);
+        KeyedFactory<Keyed, ?> factory = factoryRegistry.getFactory(dataKey);
         if (factory == null) {
             throw new ComponentException("Unable to find a suitable factory for " + dataKey);
         }
@@ -103,7 +102,7 @@ public class ReflectiveComponentBuilder implements ComponentBuilder {
         }
 
         //noinspection unchecked
-        return (TComponent)factory.make(provider, (TData)data);
+        return (TComponent)factory.make(provider, data);
     }
 
     private static Key getKey(Class<?> component, @Subst(Namespaces.PHANTAZM + ":test") String value)

@@ -33,12 +33,10 @@ public interface ComponentBuilder {
      *
      * @param node         the node used to define the object's data
      * @param provider     the DependencyProvider used to provide arbitrary data to the factory
-     * @param <TData>      the type of data accepted by the component's factory, defined for use by implementations
      * @param <TComponent> the component object type
      * @return the component
      */
-    <TData extends Keyed, TComponent> TComponent makeComponent(@NotNull ConfigNode node,
-                                                               @NotNull DependencyProvider provider)
+    <TComponent> TComponent makeComponent(@NotNull ConfigNode node, @NotNull DependencyProvider provider)
             throws ComponentException;
 
     default <TComponent, TCollection extends Collection<TComponent>> @NotNull TCollection makeComponents(

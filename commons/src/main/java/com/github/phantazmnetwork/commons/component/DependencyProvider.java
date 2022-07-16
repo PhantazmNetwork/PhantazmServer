@@ -58,7 +58,7 @@ public interface DependencyProvider {
      */
     static @NotNull DependencyProvider ofDependencies(Object... objects) {
         if (objects == null || objects.length == 0) {
-            return new LazyDependencyProvider(key -> null);
+            return EMPTY;
         }
 
         Map<Key, Object> mappings = new HashMap<>(objects.length);

@@ -37,8 +37,7 @@ public class BasicKeyedConfigRegistry implements KeyedConfigRegistry {
 
     @Override
     public @NotNull Keyed deserialize(@NotNull ConfigNode node) throws ConfigProcessException {
-        Key key = AdventureConfigProcessors.key().dataFromElement(
-                node.getElementOrThrow(KeyedConfigProcessor.SERIAL_KEY_NAME));
+        Key key = extractKey(node);
         KeyedConfigProcessor<? extends Keyed> processor = processors.get(key);
         check(processor, key);
 
