@@ -23,6 +23,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     private final SpawnDistributor spawnDistributor;
     private final List<PhantazmMob> spawnedMobs;
     private final List<PhantazmMob> unmodifiableSpawnedMobs;
+    
     private boolean isActive;
     private long waveStartTime;
     private long time;
@@ -67,6 +68,10 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
 
     public @UnmodifiableView @NotNull List<PhantazmMob> getSpawnedMobs() {
         return unmodifiableSpawnedMobs;
+    }
+
+    public int getTotalMobCount() {
+        return totalMobCount;
     }
 
     public @UnmodifiableView @NotNull List<Wave> getWaves() {

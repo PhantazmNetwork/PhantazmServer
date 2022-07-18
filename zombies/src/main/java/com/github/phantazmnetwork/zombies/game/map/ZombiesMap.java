@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.game.map;
 
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.component.ComponentBuilder;
+import com.github.phantazmnetwork.commons.component.ComponentException;
 import com.github.phantazmnetwork.commons.component.DependencyProvider;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentDependency;
 import com.github.phantazmnetwork.commons.vector.Region3I;
@@ -13,6 +14,7 @@ import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.map.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
@@ -73,30 +75,39 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
-        /*
         try {
             for (RoomInfo roomInfo : roomData) {
                 rooms.add(new Room(roomInfo, getOrigin(), instance,
-                                   builder.makeComponents(roomInfo.openActions(), provider, ArrayList::new,
-                                                          e -> LOGGER.warn("Error initializing room actions for {}: {}",
-                                                                           roomInfo, e
-                                                          )
+                                   builder.makeComponentsFromData(roomInfo.openActions(), provider, ArrayList::new,
+                                                                  e -> LOGGER.warn(
+                                                                          "Error initializing room actions for {}: {}",
+                                                                          roomInfo, e
+                                                                  )
                                    )
                 ));
             }
 
             for (DoorInfo doorInfo : doorData) {
                 doors.add(new Door(doorInfo, origin, instance, Block.AIR,
-                                   builder.makeComponents(doorInfo.openActions(), provider, ArrayList::new,
-                                                          e -> LOGGER.warn("Error initializing door actions for {}: {}",
-                                                                           doorInfo, e
-                                                          )
+                                   builder.makeComponentsFromData(doorInfo.openActions(), provider, ArrayList::new,
+                                                                  e -> LOGGER.warn(
+                                                                          "Error initializing door actions for {}: {}",
+                                                                          doorInfo, e
+                                                                  )
                                    )
                 ));
             }
 
             for (WindowInfo windowInfo : windowData) {
-                windows.add(new Window(instance, windowInfo, origin, blockHandler));
+                windows.add(new Window(instance, windowInfo, origin, blockHandler,
+                                       builder.makeComponentsFromData(windowInfo.repairActions(), provider,
+                                                                      ArrayList::new, e -> LOGGER.warn(
+                                                       "Error initializing repair actions for {}: {}", windowInfo, e)
+                                       ), builder.makeComponentsFromData(windowInfo.breakActions(), provider,
+                                                                         ArrayList::new, e -> LOGGER.warn(
+                                "Error initializing break actions for {}: {}", windowInfo, e)
+                )
+                ));
             }
 
             for (SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
@@ -109,23 +120,23 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
             for (RoundInfo roundInfo : roundData) {
                 rounds.add(new Round(roundInfo, instance,
-                                     builder.makeComponents(roundInfo.startActions(), provider, ArrayList::new,
-                                                            e -> LOGGER.warn(
-                                                                    "Error initializing round start actions for {}: {}",
-                                                                    roundInfo, e
-                                                            )
-                                     ), builder.makeComponents(roundInfo.endActions(), provider, ArrayList::new,
-                                                               e -> LOGGER.warn(
-                                                                       "Error initializing round end actions for {}: {}",
-                                                                       roundInfo, e
-                                                               )
+                                     builder.makeComponentsFromData(roundInfo.startActions(), provider, ArrayList::new,
+                                                                    e -> LOGGER.warn(
+                                                                            "Error initializing round start actions for {}: {}",
+                                                                            roundInfo, e
+                                                                    )
+                                     ), builder.makeComponentsFromData(roundInfo.endActions(), provider, ArrayList::new,
+                                                                       e -> LOGGER.warn(
+                                                                               "Error initializing round end actions for {}: {}",
+                                                                               roundInfo, e
+                                                                       )
                 ), spawnDistributor
                 ));
             }
         }
         catch (ComponentException e) {
             LOGGER.warn("Uncaught ComponentException when constructing map {}: {}", info.settings().id(), e);
-        }*/
+        }
     }
 
     public @UnmodifiableView @NotNull List<Room> getRooms() {

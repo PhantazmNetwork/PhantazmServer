@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.VecUtils;
+import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
@@ -36,6 +37,9 @@ public class Window extends PositionalMapObject<WindowInfo> {
     private final int volume;
     private final ArrayList<Block> repairBlocks;
 
+    private final List<Action<Window>> repairActions;
+    private final List<Action<Window>> breakActions;
+
     private int index;
 
     /**
@@ -47,9 +51,18 @@ public class Window extends PositionalMapObject<WindowInfo> {
      * @param clientBlockHandler the {@link ClientBlockHandler} used to set client-only barrier blocks
      */
     public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull Vec3I origin,
-                  @NotNull ClientBlockHandler clientBlockHandler) {
+                  @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
+                  @NotNull List<Action<Window>> breakActions) {
         super(data, origin, instance);
+
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
+
+        repairActions.sort(Comparator.reverseOrder());
+        breakActions.sort(Comparator.reverseOrder());
+
+        this.repairActions = new ArrayList<>(repairActions);
+        this.breakActions = new ArrayList<>(breakActions);
+
         Region3I frame = data.frameRegion();
         Vec3I min = frame.origin();
 
@@ -173,6 +186,10 @@ public class Window extends PositionalMapObject<WindowInfo> {
                 instance.setBlock(VecUtils.toPoint(breakLocation), Block.AIR);
                 clientBlockHandler.setClientBlock(Block.BARRIER, breakLocation);
             }
+
+            for (Action<Window> breakAction : breakActions) {
+                breakAction.perform(this);
+            }
         }
         else {
             //play the repair sound
@@ -184,6 +201,10 @@ public class Window extends PositionalMapObject<WindowInfo> {
                 Vec3I repairLocation = indexToCoordinate(i);
                 instance.setBlock(VecUtils.toPoint(repairLocation), repairBlocks.get(i));
                 clientBlockHandler.removeClientBlock(repairLocation);
+            }
+
+            for (Action<Window> repairAction : repairActions) {
+                repairAction.perform(this);
             }
         }
 

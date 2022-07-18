@@ -1,10 +1,13 @@
 package com.github.phantazmnetwork.commons.component;
 
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.IntFunction;
 
 /**
@@ -62,5 +65,19 @@ public interface ComponentBuilder {
         }
 
         return out;
+    }
+
+    default <TComponent, TCollection extends Collection<TComponent>> @NotNull TCollection makeComponentsFromData(
+            @NotNull Collection<? extends ConfigElement> list, @NotNull DependencyProvider provider,
+            @NotNull IntFunction<? extends TCollection> collectionIntFunction,
+            @NotNull ComponentConsumer<? super ComponentException> exceptionHandler) throws ComponentException {
+        List<Keyed> data = new ArrayList<>(list.size());
+        for (ConfigElement element : list) {
+            if (element.isNode()) {
+                data.add(makeData(element.asNode()));
+            }
+        }
+
+        return makeComponents(data, provider, collectionIntFunction, exceptionHandler);
     }
 }

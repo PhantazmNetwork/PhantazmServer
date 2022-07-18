@@ -96,26 +96,28 @@ public class Door extends PositionalMapObject<DoorInfo> {
      * Permanently opens this door, removing its blocks. If the door is already open, this method will do nothing.
      */
     public void open() {
-        if (!isOpen) {
-            isOpen = true;
+        if (isOpen) {
+            return;
+        }
 
-            for (Region3I region : regions) {
-                for (Vec3I block : region) {
-                    instance.setBlock(block.getX(), block.getY(), block.getZ(), fillBlock);
-                }
+        isOpen = true;
+
+        for (Region3I region : regions) {
+            for (Vec3I block : region) {
+                instance.setBlock(block.getX(), block.getY(), block.getZ(), fillBlock);
             }
+        }
 
-            for (Hologram hologram : holograms) {
-                hologram.clear();
-                hologram.trimToSize();
-            }
+        for (Hologram hologram : holograms) {
+            hologram.clear();
+            hologram.trimToSize();
+        }
 
-            holograms.clear();
-            holograms.trimToSize();
+        holograms.clear();
+        holograms.trimToSize();
 
-            for (Action<Door> action : openActions) {
-                action.perform(this);
-            }
+        for (Action<Door> action : openActions) {
+            action.perform(this);
         }
     }
 
