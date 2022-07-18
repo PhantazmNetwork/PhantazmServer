@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.component.ComponentBuilder;
 import com.github.phantazmnetwork.commons.component.ComponentException;
 import com.github.phantazmnetwork.commons.component.DependencyProvider;
@@ -16,7 +15,6 @@ import com.github.phantazmnetwork.zombies.map.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.binary.BinaryReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
@@ -77,6 +75,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
+        /*
         try {
             for (RoomInfo roomInfo : roomData) {
                 rooms.add(new Room(roomInfo, getOrigin(), instance,
@@ -128,7 +127,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         }
         catch (ComponentException e) {
             LOGGER.warn("Uncaught ComponentException when constructing map {}: {}", info.settings().id(), e);
-        }
+        }*/
     }
 
     public @UnmodifiableView @NotNull List<Room> getRooms() {

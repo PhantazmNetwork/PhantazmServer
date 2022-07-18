@@ -10,6 +10,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.lang.reflect.*;
@@ -77,21 +78,24 @@ public class BasicComponentBuilder implements ComponentBuilder {
     }
 
     @Override
-    public <TComponent> TComponent makeComponent(@NotNull ConfigNode node, @NotNull DependencyProvider provider)
-            throws ComponentException {
-        Key dataKey;
-        Keyed data = null;
+    public @NotNull Keyed makeData(@NotNull ConfigNode node) throws ComponentException {
         try {
-            dataKey = configRegistry.extractKey(node);
-
-            if (configRegistry.hasProcessor(dataKey)) {
-                data = configRegistry.deserialize(node);
+            Key key = configRegistry.extractKey(node);
+            if (configRegistry.hasProcessor(key)) {
+                return configRegistry.deserialize(node);
             }
+
+            return () -> key;
         }
         catch (ConfigProcessException e) {
             throw new ComponentException(e);
         }
+    }
 
+    @Override
+    public <TComponent> TComponent makeComponent(@NotNull Keyed data, @NotNull DependencyProvider provider)
+            throws ComponentException {
+        Key dataKey = data.key();
         KeyedFactory<Keyed, ?> factory = factoryRegistry.getFactory(dataKey);
         if (factory == null) {
             throw new ComponentException("Unable to find a suitable factory for " + dataKey);
@@ -168,7 +172,7 @@ public class BasicComponentBuilder implements ComponentBuilder {
                 parameter.getType().isAnnotationPresent(ComponentData.class)) {
                 if (dataParameterIndex != -1) {
                     throw new ComponentException("Type " + component.getTypeName() + " has more than one " +
-                                                 "ComponentData in its factory constructor");
+                                                 "ComponentData annotation in its factory constructor");
                 }
                 dataParameterIndex = i;
             }

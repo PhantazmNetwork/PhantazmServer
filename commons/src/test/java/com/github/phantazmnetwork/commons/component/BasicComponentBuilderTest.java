@@ -56,7 +56,7 @@ class BasicComponentBuilderTest {
 
         DependencyProvider provider = DependencyProvider.lazy(dependencyMap::get);
 
-        TestComponent component = builder.makeComponent(componentData, provider);
+        TestComponent component = builder.makeComponent(builder.makeData(componentData), provider);
         TestComponent.Data data = component.data;
 
         assertEquals(69, data.number);
@@ -85,7 +85,7 @@ class BasicComponentBuilderTest {
 
         DependencyProvider deps = new LazyDependencyProvider(depMap::get);
 
-        ExplicitDependencyConstructorFactory component = builder.makeComponent(node, deps);
+        ExplicitDependencyConstructorFactory component = builder.makeComponent(builder.makeData(node), deps);
         assertEquals(69420, component.value);
     }
 
@@ -103,7 +103,7 @@ class BasicComponentBuilderTest {
 
         DependencyProvider deps = new LazyDependencyProvider(depMap::get);
 
-        ImplicitDependencyConstructorFactory component = builder.makeComponent(node, deps);
+        ImplicitDependencyConstructorFactory component = builder.makeComponent(builder.makeData(node), deps);
         assertEquals(42069, component.dependency.value);
     }
 
@@ -116,7 +116,7 @@ class BasicComponentBuilderTest {
         ConfigNode node = new LinkedConfigNode(1);
         node.putString("serialKey", "phantazm:test");
 
-        NoDependenciesOrData comp = builder.makeComponent(node, DependencyProvider.EMPTY);
+        NoDependenciesOrData comp = builder.makeComponent(builder.makeData(node), DependencyProvider.EMPTY);
         assertEquals("test_string", comp.internal);
     }
 
@@ -134,7 +134,7 @@ class BasicComponentBuilderTest {
         depMap.put(Key.key("phantazm:dependency2"), "test");
 
         DependencyProvider deps = new LazyDependencyProvider(depMap::get);
-        JustDependencies component = builder.makeComponent(node, deps);
+        JustDependencies component = builder.makeComponent(builder.makeData(node), deps);
 
         assertEquals(42069, component.dependency1);
         assertEquals("test", component.dependency2);
@@ -147,15 +147,15 @@ class BasicComponentBuilderTest {
         assertDoesNotThrow(() -> builder.registerComponentClass(JustData.class));
 
         ConfigNode node = new LinkedConfigNode(2);
-        node.putString("serialKey", "phantazm:test");
+        node.putString("serialKey", "phantazm:just_data");
         node.putNumber("data", 69);
 
-        JustData data = builder.makeComponent(node, DependencyProvider.EMPTY);
+        JustData data = builder.makeComponent(builder.makeData(node), DependencyProvider.EMPTY);
 
         assertEquals(new JustData.Data(69), data.data);
     }
 
-    @ComponentModel("phantazm:test")
+    @ComponentModel("phantazm:just_data")
     public static class JustData {
         @ComponentProcessor
         public static KeyedConfigProcessor<?> processor() {

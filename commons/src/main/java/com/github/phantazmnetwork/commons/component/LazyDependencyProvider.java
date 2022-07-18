@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.commons.component;
 
-import com.github.phantazmnetwork.commons.config.ComplexData;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,12 +15,12 @@ class LazyDependencyProvider implements DependencyProvider {
     /**
      * The dependency function used to instantiate new dependencies.
      */
-    protected final Function<? super Key, ?> dependencyFunction;
+    private final Function<? super Key, ?> dependencyFunction;
 
     /**
      * The map of currently loaded dependencies.
      */
-    protected final Map<Key, Object> loadedDependencies;
+    private final Map<Key, Object> loadedDependencies;
 
     /**
      * Creates a new instance of this class using the provided dependency creation function.
