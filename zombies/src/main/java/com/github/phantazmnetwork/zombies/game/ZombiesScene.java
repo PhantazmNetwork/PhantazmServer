@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.zombies.game;
 
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.game.scene.InstanceScene;
 import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import net.kyori.adventure.text.Component;
@@ -21,7 +20,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
 
-    private final ZombiesMap map;
+    private final MapSettingsInfo mapSettingsInfo;
 
     private final StageTransition stageTransition;
 
@@ -32,13 +31,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private boolean joinable;
 
     public ZombiesScene(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
-                        @NotNull SceneFallback fallback, @NotNull ZombiesMap map,
+                        @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
                         @NotNull StageTransition stageTransition,
                         @NotNull Function<PlayerView, ZombiesPlayer> playerCreator, @NotNull Random random) {
         super(instance, fallback);
 
         this.zombiesPlayers = zombiesPlayers;
-        this.map = Objects.requireNonNull(map, "map");
+        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
         this.random = Objects.requireNonNull(random, "random");
@@ -55,7 +54,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             newPlayers.add(player);
         }
 
-        MapSettingsInfo mapSettingsInfo = map.getData().settings();
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
             return new RouteResult(false, Optional.of(Component.text("Too many players!", NamedTextColor.RED)));
         }

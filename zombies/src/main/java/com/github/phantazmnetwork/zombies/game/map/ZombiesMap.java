@@ -1,22 +1,20 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.component.ComponentBuilder;
 import com.github.phantazmnetwork.commons.component.ComponentException;
 import com.github.phantazmnetwork.commons.component.DependencyProvider;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentDependency;
-import com.github.phantazmnetwork.core.ClientBlockHandler;
-import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.map.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.binary.BinaryReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
@@ -220,7 +218,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                     currentRound.startRound();
                 }
                 else {
-                    //TODO end of game code
+                    //TODO end of game code (mostly handled elsewhere, but maybe some stuff should run here?)
+                    currentRound = null;
                 }
             }
         }
