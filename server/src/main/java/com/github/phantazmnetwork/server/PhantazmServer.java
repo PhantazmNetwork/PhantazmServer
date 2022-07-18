@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.server;
 
+import com.github.phantazmnetwork.commons.component.*;
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.MojangIdentitySource;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
@@ -145,11 +146,14 @@ public final class PhantazmServer {
     }
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
-                                           LobbiesConfig lobbiesConfig) {
+                                           LobbiesConfig lobbiesConfig) throws ComponentException {
         BasicPlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
                                             MinecraftServer.getConnectionManager()
                 );
+
+        ComponentBuilder componentBuilder =
+                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
@@ -161,6 +165,7 @@ public final class PhantazmServer {
                                     new YamlCodec(() -> new Load(LoadSettings.builder().build()), () -> new Dump(
                                             DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()))
         );
+        ZombiesFeature.initialize(componentBuilder);
         ZombiesTest.initialize(global);
     }
 

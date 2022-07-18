@@ -22,7 +22,7 @@ import java.util.function.Function;
 public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Spawnpoint.class);
 
-    private final Function<Key, SpawnruleInfo> spawnrules;
+    private final Function<? super Key, ? extends SpawnruleInfo> spawnrules;
     private final MobSpawner mobSpawner;
 
     /**
@@ -35,7 +35,8 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
      * @param mobSpawner        the function used to actually spawn mobs in the world
      */
     public Spawnpoint(@NotNull SpawnpointInfo spawnInfo, @NotNull Vec3I origin, @NotNull Instance instance,
-                      @NotNull Function<Key, SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner) {
+                      @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction,
+                      @NotNull MobSpawner mobSpawner) {
         super(spawnInfo, origin, instance);
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");

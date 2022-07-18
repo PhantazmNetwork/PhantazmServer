@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.RoundInfo;
+import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import com.github.phantazmnetwork.zombies.map.WaveInfo;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +24,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     private final SpawnDistributor spawnDistributor;
     private final List<PhantazmMob> spawnedMobs;
     private final List<PhantazmMob> unmodifiableSpawnedMobs;
-    
+
     private boolean isActive;
     private long waveStartTime;
     private long time;
@@ -123,6 +124,20 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         spawnedMobs.clear();
     }
 
+    public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo) {
+        return spawnMobs(spawnInfo, spawnDistributor);
+    }
+
+    public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
+                                                @NotNull SpawnDistributor spawnDistributor) {
+        List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnInfo);
+        spawnedMobs.addAll(spawns);
+
+        //adjust for mobs that may have failed to spawn
+        totalMobCount -= currentWave.mobCount() - spawns.size();
+        return spawns;
+    }
+
     @Override
     public void tick(long time) {
         this.time = time;
@@ -135,11 +150,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
 
             long timeSinceLastWave = time - waveStartTime;
             if (waveIndex < unmodifiableWaves.size() && timeSinceLastWave > currentWave.data.delayTicks()) {
-                List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(currentWave.data.spawns());
-                spawnedMobs.addAll(spawns);
-
-                //adjust for mobs that may have failed to spawn this wave
-                totalMobCount -= currentWave.mobCount() - spawns.size();
+                spawnMobs(currentWave.data.spawns());
 
                 waveStartTime = time;
                 if (++waveIndex >= unmodifiableWaves.size()) {

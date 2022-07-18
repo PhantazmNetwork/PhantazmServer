@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 
+@FunctionalInterface
 public interface SpawnDistributor {
     @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<? extends SpawnInfo> spawns);
 }

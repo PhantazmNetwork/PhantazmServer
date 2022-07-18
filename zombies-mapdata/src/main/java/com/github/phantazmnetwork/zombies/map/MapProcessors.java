@@ -25,22 +25,22 @@ import java.util.Set;
  * objects.
  */
 public final class MapProcessors {
-    private static final ConfigProcessor<ShopPositionInfo> shopInfo = new ConfigProcessor<>() {
+    private static final ConfigProcessor<ShopInfo> shopInfo = new ConfigProcessor<>() {
         @Override
-        public ShopPositionInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+        public ShopInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Vec3I triggerLocation =
                     VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("triggerLocation"));
-            return new ShopPositionInfo(id, triggerLocation);
+            ConfigNode handler = element.getNodeOrThrow("handler");
+            return new ShopInfo(id, triggerLocation, handler);
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(ShopPositionInfo shopPositionInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(2);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(shopPositionInfo.id()));
-            node.put("triggerLocation",
-                     VectorConfigProcessors.vec3I().elementFromData(shopPositionInfo.triggerLocation())
-            );
+        public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(3);
+            node.put("id", AdventureConfigProcessors.key().elementFromData(shopInfo.id()));
+            node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
+            node.put("handler", shopInfo.handler());
             return node;
         }
     };
@@ -353,11 +353,11 @@ public final class MapProcessors {
     }
 
     /**
-     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link ShopPositionInfo} objects.
+     * Returns the {@link ConfigProcessor} used for serializing/deserializing {@link ShopInfo} objects.
      *
-     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link ShopPositionInfo} objects
+     * @return the {@link ConfigProcessor} used for serializing/deserializing {@link ShopInfo} objects
      */
-    public static @NotNull ConfigProcessor<ShopPositionInfo> shopInfo() {
+    public static @NotNull ConfigProcessor<ShopInfo> shopInfo() {
         return shopInfo;
     }
 
