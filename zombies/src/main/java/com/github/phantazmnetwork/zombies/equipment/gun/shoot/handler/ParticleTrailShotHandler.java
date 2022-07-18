@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.core.particle.ParticleWrapper;
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.core.particle.ParticleWrapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.steanky.ethylene.core.ConfigElement;

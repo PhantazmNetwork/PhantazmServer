@@ -1,20 +1,18 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
+import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.component.ComponentBuilder;
-import com.github.phantazmnetwork.commons.component.ComponentException;
 import com.github.phantazmnetwork.commons.component.DependencyProvider;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentDependency;
-import com.github.phantazmnetwork.core.ClientBlockHandler;
-import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.map.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;

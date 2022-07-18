@@ -1,14 +1,14 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.core.config.processor.ItemStackConfigProcessors;
-import com.github.phantazmnetwork.core.particle.ParticleWrapper;
-import com.github.phantazmnetwork.core.particle.data.ParticleData;
-import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.commons.config.ComplexData;
 import com.github.phantazmnetwork.commons.config.ComplexDataConfigProcessor;
 import com.github.phantazmnetwork.commons.factory.DependencyProvider;
 import com.github.phantazmnetwork.commons.factory.Factory;
 import com.github.phantazmnetwork.commons.factory.FactoryDependencyProvider;
+import com.github.phantazmnetwork.core.config.processor.ItemStackConfigProcessors;
+import com.github.phantazmnetwork.core.particle.ParticleWrapper;
+import com.github.phantazmnetwork.core.particle.data.ParticleData;
+import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;

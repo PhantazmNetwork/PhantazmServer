@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.steanky.ethylene.core.collection.ConfigList;
-import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

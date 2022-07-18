@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.core.config.InstanceConfig;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.core.config.InstanceConfig;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.lobby.LobbyConfig;
 import com.github.steanky.ethylene.core.ConfigElement;

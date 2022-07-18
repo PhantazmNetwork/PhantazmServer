@@ -8,7 +8,10 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class Room extends PositionalMapObject<RoomInfo> {
     private final List<Action<Room>> openActions;

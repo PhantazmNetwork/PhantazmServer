@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.core.game.scene;
 
-import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.commons.Tickable;
+import com.github.phantazmnetwork.core.player.PlayerView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 

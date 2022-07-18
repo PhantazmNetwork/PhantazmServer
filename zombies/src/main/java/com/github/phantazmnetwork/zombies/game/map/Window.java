@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.core.ClientBlockHandler;
-import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.core.ClientBlockHandler;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.WindowInfo;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;

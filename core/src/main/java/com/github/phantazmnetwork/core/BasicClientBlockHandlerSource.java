@@ -9,10 +9,10 @@ import java.util.WeakHashMap;
 import java.util.function.Function;
 
 /**
- * Standard implementation of {@link ClientBlockHandlerSource}.
+ * Standard implementation of {@link ClientBlockHandlerSource}. Does not maintain strong references to Instance objects.
  */
 public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
-    private final Function<Instance, ClientBlockHandler> blockHandlerFunction;
+    private final Function<? super Instance, ? extends ClientBlockHandler> blockHandlerFunction;
     private final Map<Instance, ClientBlockHandler> map;
 
     /**
@@ -21,7 +21,8 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
      *
      * @param handlerFunction the handler function, which should never return null
      */
-    public BasicClientBlockHandlerSource(@NotNull Function<Instance, ClientBlockHandler> handlerFunction) {
+    public BasicClientBlockHandlerSource(
+            @NotNull Function<? super Instance, ? extends ClientBlockHandler> handlerFunction) {
         this.blockHandlerFunction = Objects.requireNonNull(handlerFunction, "handlerFunction");
         this.map = new WeakHashMap<>();
     }

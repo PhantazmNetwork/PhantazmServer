@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.zombies.game;
 
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.game.scene.InstanceScene;
 import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;

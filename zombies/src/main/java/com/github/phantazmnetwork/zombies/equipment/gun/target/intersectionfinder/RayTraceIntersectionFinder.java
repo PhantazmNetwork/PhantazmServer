@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder;
 
-import com.github.phantazmnetwork.core.RayUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.core.RayUtils;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;

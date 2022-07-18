@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
 import com.github.phantazmnetwork.neuron.engine.PathContext;

@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;

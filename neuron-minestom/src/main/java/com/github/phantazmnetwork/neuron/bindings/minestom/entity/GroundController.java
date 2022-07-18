@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.core.PhysicsUtils;
 import com.github.phantazmnetwork.commons.MathUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.core.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.node.Node;
 import net.minestom.server.MinecraftServer;

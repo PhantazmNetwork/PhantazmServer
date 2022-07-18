@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.solid;
 
-import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.commons.HashStrategies;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.neuron.world.Solid;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.minestom.server.collision.Shape;

@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.commons.component;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.function.IntFunction;
@@ -40,7 +39,7 @@ public interface ComponentBuilder {
 
     default <TComponent, TCollection extends Collection<TComponent>> @NotNull TCollection makeComponents(
             @NotNull Collection<? extends Keyed> list, @NotNull DependencyProvider provider,
-            @NotNull IntFunction<TCollection> collectionIntFunction,
+            @NotNull IntFunction<? extends TCollection> collectionIntFunction,
             @NotNull ComponentConsumer<? super ComponentException> exceptionHandler) throws ComponentException {
         TCollection out = collectionIntFunction.apply(list.size());
         ComponentException root = null;
