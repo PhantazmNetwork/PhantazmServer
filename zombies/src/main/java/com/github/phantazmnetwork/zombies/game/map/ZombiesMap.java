@@ -217,7 +217,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                     currentRound.startRound();
                 }
                 else {
-                    //TODO end of game code
+                    //TODO end of game code (mostly handled elsewhere, but maybe some stuff should run here?)
+                    currentRound = null;
                 }
             }
         }
