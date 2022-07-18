@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.core.inventory.InventoryProfileSwitcher;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -11,19 +12,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final PlayerView playerView;
 
     private final PlayerCoins coins;
 
+    private final PlayerKills kills;
+
     private final InventoryProfileSwitcher profileSwitcher;
 
-    public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull PlayerCoins coins,
+    private boolean crouching = false;
+
+    private boolean inGame = false;
+
+    public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull PlayerCoins coins, @NotNull PlayerKills kills,
                               @NotNull InventoryProfileSwitcher profileSwitcher) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.coins = Objects.requireNonNull(coins, "coins");
+        this.kills = Objects.requireNonNull(kills, "kills");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
     }
 
@@ -33,13 +40,33 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     }
 
     @Override
-    public void setCrouching(boolean crouching) {
+    public boolean isCrouching() {
+        return crouching;
+    }
 
+    @Override
+    public void setCrouching(boolean crouching) {
+        this.crouching = crouching;
+    }
+
+    @Override
+    public boolean isInGame() {
+        return inGame;
+    }
+
+    @Override
+    public void setInGame(boolean inGame) {
+        this.inGame = inGame;
     }
 
     @Override
     public @NotNull PlayerCoins getCoins() {
         return coins;
+    }
+
+    @Override
+    public @NotNull PlayerKills getKills() {
+        return kills;
     }
 
     @Override

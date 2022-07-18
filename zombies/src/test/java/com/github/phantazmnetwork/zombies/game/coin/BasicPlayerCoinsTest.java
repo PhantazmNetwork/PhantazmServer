@@ -13,19 +13,16 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 public class BasicPlayerCoinsTest {
 
     private PlayerCoins coins;
 
-    private ComponentSender componentSender;
-
     private void setup(int initialCoins) {
         Audience audience = mock(Audience.class);
         AudienceProvider audienceProvider = () -> Optional.of(audience);
-        componentSender = mock(ComponentSender.class);
+        ComponentSender componentSender = mock(ComponentSender.class);
         TransactionComponentCreator componentCreator = mock(TransactionComponentCreator.class);
 
         coins = new BasicPlayerCoins(audienceProvider, componentSender, componentCreator, initialCoins);
@@ -35,7 +32,7 @@ public class BasicPlayerCoinsTest {
     public void testAdd() {
         setup(0);
         int delta = 10;
-        coins.runTransaction(new Transaction(Collections.emptyList(), delta), true);
+        coins.runTransaction(new Transaction(Collections.emptyList(), delta));
         assertEquals(delta, coins.getCoins());
     }
 
@@ -43,7 +40,7 @@ public class BasicPlayerCoinsTest {
     public void testRemove() {
         setup(0);
         int delta = -10;
-        coins.runTransaction(new Transaction(Collections.emptyList(), delta), true);
+        coins.runTransaction(new Transaction(Collections.emptyList(), delta));
         assertEquals(delta, coins.getCoins());
     }
 
@@ -54,7 +51,7 @@ public class BasicPlayerCoinsTest {
         assertEquals(initialCoins, coins.getCoins());
 
         int delta = 10;
-        coins.runTransaction(new Transaction(Collections.emptyList(), delta), true);
+        coins.runTransaction(new Transaction(Collections.emptyList(), delta));
         assertEquals(initialCoins + delta, coins.getCoins());
     }
 
@@ -77,7 +74,7 @@ public class BasicPlayerCoinsTest {
             public int getPriority() {
                 return 0;
             }
-        }), delta), true);
+        }), delta));
         assertEquals(delta * 2, coins.getCoins());
     }
 
@@ -118,16 +115,8 @@ public class BasicPlayerCoinsTest {
                 return 1;
             }
         };
-        coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta), true);
+        coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta));
         assertEquals(changedValue + delta, coins.getCoins());
-    }
-
-    @Test
-    public void testNotSilent() {
-        setup(0);
-        int delta = 10;
-        coins.runTransaction(new Transaction(Collections.emptyList(), delta), false);
-        verify(componentSender, times(1)).send(any(), any());
     }
 
 }

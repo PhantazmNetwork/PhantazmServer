@@ -63,6 +63,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         List<Component> messages = mapSettingsInfo.introMessages();
         for (PlayerView view : newPlayers) {
             ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+            zombiesPlayer.setInGame(true);
             zombiesPlayers.put(view.getUUID(), zombiesPlayer);
             players.put(view.getUUID(), view);
 

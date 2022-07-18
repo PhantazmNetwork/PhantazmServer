@@ -30,7 +30,7 @@ public class BasicPlayerCoins implements PlayerCoins {
     }
 
     @Override
-    public void runTransaction(@NotNull Transaction transaction, boolean silent) {
+    public void runTransaction(@NotNull Transaction transaction) {
         List<Transaction.Modifier> modifiers = new ArrayList<>(transaction.modifiers());
         modifiers.sort(Comparator.comparingInt(Transaction.Modifier::getPriority).reversed());
 
@@ -40,7 +40,7 @@ public class BasicPlayerCoins implements PlayerCoins {
         }
 
         coins += change;
-        if (change != 0 && !silent) {
+        if (change != 0) {
             int finalChange = change;
             audienceProvider.provideAudience().ifPresent(audience -> {
                 Component message = componentCreator.createTransactionComponent(modifiers, finalChange);

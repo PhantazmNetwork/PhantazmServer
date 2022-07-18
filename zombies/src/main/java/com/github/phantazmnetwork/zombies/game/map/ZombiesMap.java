@@ -39,8 +39,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     private final List<Spawnpoint> unmodifiableSpawnpoints;
     private final List<Round> unmodifiableRounds;
 
-    private int roundIndex = 0;
-    private Round currentRound;
+    private int roundIndex = -1;
+    private Round currentRound = null;
 
     /**
      * Constructs a new instance of this class.
@@ -162,6 +162,10 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
     public Round currentRound() {
         return currentRound;
+    }
+
+    public int getRoundIndex() {
+        return roundIndex;
     }
 
     public void startRound(int roundIndex) {
