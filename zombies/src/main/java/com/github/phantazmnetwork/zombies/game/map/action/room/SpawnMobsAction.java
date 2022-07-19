@@ -52,9 +52,9 @@ public class SpawnMobsAction implements Action<Room> {
     private final Supplier<? extends Round> currentRound;
 
     @ComponentFactory
-    public SpawnMobsAction(@NotNull Data data, @NotNull ZombiesMap.ObjectContext context) {
+    public SpawnMobsAction(@NotNull Data data, @NotNull ZombiesMap.Context context) {
         this.data = Objects.requireNonNull(data, "data");
-        this.currentRound = Objects.requireNonNull(context.currentRoundSupplier(), "currentRound");
+        this.currentRound = context.map()::currentRound;
     }
 
     @Override

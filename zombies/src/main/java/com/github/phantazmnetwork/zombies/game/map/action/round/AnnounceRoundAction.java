@@ -63,9 +63,9 @@ public class AnnounceRoundAction implements Action<Round> {
      * @param context the context of this action
      */
     @ComponentFactory
-    public AnnounceRoundAction(@NotNull Data data, @NotNull ZombiesMap.ObjectContext context) {
+    public AnnounceRoundAction(@NotNull Data data, @NotNull ZombiesMap.Context context) {
         this.data = Objects.requireNonNull(data, "data");
-        this.audience = Objects.requireNonNull(context.instance(), "context.instance");
+        this.audience = Objects.requireNonNull(context.map().getInstance(), "context.instance");
     }
 
     @Override

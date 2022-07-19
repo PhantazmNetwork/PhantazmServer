@@ -20,12 +20,8 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
         this.handler = Objects.requireNonNull(handler, "handler");
     }
 
-    public void initialize() {
-        handler.initialize();
-    }
-
-    public void doInteract(@NotNull PlayerInteraction interaction) {
-        handler.handleInteraction(interaction);
+    public @NotNull ShopHandler getHandler() {
+        return handler;
     }
 
     @Override

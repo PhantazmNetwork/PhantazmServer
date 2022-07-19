@@ -25,10 +25,7 @@ import java.util.function.Supplier;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
     @ComponentDependency("phantazm:zombies.dependency.map.context")
-    public record ObjectContext(@NotNull Instance instance,
-                                @NotNull MobSpawner spawner,
-                                @NotNull ClientBlockHandler blockHandler,
-                                @NotNull Supplier<? extends Round> currentRoundSupplier) {
+    public record Context(@NotNull ZombiesMap map) {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
@@ -53,7 +50,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                       @NotNull SpawnDistributor spawnDistributor) {
         super(info, info.settings().origin(), instance);
 
-        ObjectContext context = new ObjectContext(instance, mobSpawner, blockHandler, this::currentRound);
+        Context context = new Context(this);
         DependencyProvider provider = DependencyProvider.ofDependencies(context);
 
         List<RoomInfo> roomData = info.rooms();
