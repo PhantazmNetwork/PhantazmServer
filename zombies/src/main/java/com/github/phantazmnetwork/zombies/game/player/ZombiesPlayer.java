@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
+import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -28,6 +29,8 @@ public interface ZombiesPlayer extends Tickable {
     @NotNull @UnmodifiableView Collection<Equipment> getEquipment();
 
     @NotNull InventoryProfileSwitcher getProfileSwitcher();
+
+    @NotNull PlayerStateSwitcher getStateSwitcher();
 
     @NotNull PlayerView getPlayerView();
 

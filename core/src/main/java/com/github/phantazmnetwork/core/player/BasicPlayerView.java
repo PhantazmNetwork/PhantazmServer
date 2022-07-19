@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.core.player;
 
-import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
@@ -121,25 +120,6 @@ class BasicPlayerView implements PlayerView {
         player = connectionManager.getPlayer(uuid);
         playerReference = new WeakReference<>(player);
         return Optional.ofNullable(player);
-    }
-
-    @Override
-    public @NotNull CompletableFuture<Component> getDisplayName() {
-        Optional<Player> playerOptional = getPlayer();
-        if (playerOptional.isPresent()) {
-            Player player = playerOptional.get();
-            if (player.getDisplayName() != null) {
-                return CompletableFuture.completedFuture(player.getDisplayName());
-            }
-        }
-
-        return getUsername().handle((name, t) -> {
-            if (t != null) {
-                return Component.text(uuid.toString());
-            }
-
-            return Component.text(name);
-        });
     }
 
 }

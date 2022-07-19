@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class PlayerDamageMobListener implements ZombiesPlayerListener<EntityDamageEvent> {
+public class PlayerDamageMobListener implements ZombiesPlayerEventListener<EntityDamageEvent> {
 
     private final MobStore mobStore;
 

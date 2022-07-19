@@ -12,15 +12,18 @@ import java.util.Objects;
 
 public class ZombieKillsSidebarUpdater extends SidebarUpdaterBase {
 
-    private static final String ZOMBIE_KILLS_LINE_NAME = "zombie-kills-display";
-
     private final PlayerKills playerKills;
 
     private int killCount = -1;
 
-    public ZombieKillsSidebarUpdater(@NotNull SidebarLineChooser lineChooser, @NotNull PlayerKills playerKills) {
-        super(ZOMBIE_KILLS_LINE_NAME, lineChooser);
+    public ZombieKillsSidebarUpdater(@NotNull String lineName, @NotNull SidebarLineChooser lineChooser,
+                                     @NotNull PlayerKills playerKills) {
+        super(lineName, lineChooser);
         this.playerKills = Objects.requireNonNull(playerKills, "playerKills");
+    }
+
+    public ZombieKillsSidebarUpdater(@NotNull SidebarLineChooser lineChooser, @NotNull PlayerKills playerKills) {
+        this("zombie-kills-display", lineChooser, playerKills);
     }
 
     @Override
@@ -30,7 +33,7 @@ public class ZombieKillsSidebarUpdater extends SidebarUpdaterBase {
             Component message = Component.textOfChildren(Component.text("Zombie Kills: "),
                                                          Component.text(killCount, NamedTextColor.GREEN)
             );
-            sidebar.updateLineContent(ZOMBIE_KILLS_LINE_NAME, message);
+            sidebar.updateLineContent(getLineName(), message);
         }
     }
 }

@@ -23,4 +23,9 @@ public abstract class SidebarUpdaterBase implements SidebarUpdater {
         int line = lineChooser.chooseLine(sidebar);
         sidebar.createLine(new Sidebar.ScoreboardLine(lineName, Component.empty(), line));
     }
+
+    protected @NotNull String getLineName() {
+        return lineName;
+    }
+
 }

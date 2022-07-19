@@ -12,15 +12,18 @@ import java.util.Objects;
 
 public class RoundSidebarUpdater extends SidebarUpdaterBase {
 
-    private static final String ROUND_LINE_NAME = "round-display";
-
     private final ZombiesMap map;
 
     private int lastRoundIndex = -1;
 
-    public RoundSidebarUpdater(@NotNull SidebarLineChooser lineChooser, @NotNull ZombiesMap map) {
-        super(ROUND_LINE_NAME, lineChooser);
+    public RoundSidebarUpdater(@NotNull String lineName, @NotNull SidebarLineChooser lineChooser,
+                               @NotNull ZombiesMap map) {
+        super(lineName, lineChooser);
         this.map = Objects.requireNonNull(map, "map");
+    }
+
+    public RoundSidebarUpdater(@NotNull SidebarLineChooser lineChooser, @NotNull ZombiesMap map) {
+        this("round-display", lineChooser, map);
     }
 
     @Override
@@ -28,7 +31,7 @@ public class RoundSidebarUpdater extends SidebarUpdaterBase {
         if (lastRoundIndex == -1 || lastRoundIndex != map.getRoundIndex()) {
             lastRoundIndex = map.getRoundIndex();
             Component message = Component.text("Round " + lastRoundIndex + 1, NamedTextColor.RED);
-            sidebar.updateLineContent(ROUND_LINE_NAME, message);
+            sidebar.updateLineContent(getLineName(), message);
         }
     }
 
