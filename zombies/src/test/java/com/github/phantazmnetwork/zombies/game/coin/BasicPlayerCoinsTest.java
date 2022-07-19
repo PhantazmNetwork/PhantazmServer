@@ -29,53 +29,51 @@ public class BasicPlayerCoinsTest {
     }
 
     @Test
+    public void testRespectInitialCoins() {
+        int initialCoins = 10;
+        setup(initialCoins);
+        assertEquals(initialCoins, coins.getCoins());
+    }
+
+    @Test
     public void testAdd() {
         setup(0);
         int delta = 10;
-        coins.runTransaction(new Transaction(Collections.emptyList(), delta));
-        assertEquals(delta, coins.getCoins());
+        TransactionResult result = coins.runTransaction(new Transaction(Collections.emptyList(), delta));
+        assertEquals(delta, result.change());
+        assertEquals(0, coins.getCoins());
     }
 
     @Test
     public void testRemove() {
         setup(0);
         int delta = -10;
-        coins.runTransaction(new Transaction(Collections.emptyList(), delta));
-        assertEquals(delta, coins.getCoins());
-    }
-
-    @Test
-    public void testRespectInitialCoins() {
-        int initialCoins = 10;
-        setup(initialCoins);
-        assertEquals(initialCoins, coins.getCoins());
-
-        int delta = 10;
-        coins.runTransaction(new Transaction(Collections.emptyList(), delta));
-        assertEquals(initialCoins + delta, coins.getCoins());
+        TransactionResult result = coins.runTransaction(new Transaction(Collections.emptyList(), delta));
+        assertEquals(delta, result.change());
     }
 
     @Test
     public void testOneModifier() {
         setup(0);
         int delta = 10;
-        coins.runTransaction(new Transaction(Collections.singletonList(new Transaction.Modifier() {
-            @Override
-            public @NotNull Component getDisplayName() {
-                return Component.empty();
-            }
+        TransactionResult result =
+                coins.runTransaction(new Transaction(Collections.singletonList(new Transaction.Modifier() {
+                    @Override
+                    public @NotNull Component getDisplayName() {
+                        return Component.empty();
+                    }
 
-            @Override
-            public int modify(int change) {
-                return change + delta;
-            }
+                    @Override
+                    public int modify(int change) {
+                        return change + delta;
+                    }
 
-            @Override
-            public int getPriority() {
-                return 0;
-            }
-        }), delta));
-        assertEquals(delta * 2, coins.getCoins());
+                    @Override
+                    public int getPriority() {
+                        return 0;
+                    }
+                }), delta));
+        assertEquals(delta * 2, result.change());
     }
 
     @Test
@@ -115,8 +113,8 @@ public class BasicPlayerCoinsTest {
                 return 1;
             }
         };
-        coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta));
-        assertEquals(changedValue + delta, coins.getCoins());
+        TransactionResult result = coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta));
+        assertEquals(changedValue + delta, result.change());
     }
 
 }
