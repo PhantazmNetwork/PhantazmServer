@@ -19,7 +19,7 @@ public abstract class SidebarUpdaterBase implements SidebarUpdater {
     }
 
     @Override
-    public void initializeSidebar(@NotNull Sidebar sidebar) {
+    public final void initializeSidebar(@NotNull Sidebar sidebar) {
         int line = lineChooser.chooseLine(sidebar);
         sidebar.createLine(new Sidebar.ScoreboardLine(lineName, Component.empty(), line));
     }

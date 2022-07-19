@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesSceneState;
+import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.linechooser.SidebarLineChooser;
 import net.kyori.adventure.text.Component;
@@ -27,7 +27,7 @@ public class RoundSidebarUpdater extends SidebarUpdaterBase {
     }
 
     @Override
-    public void tick(@NotNull ZombiesSceneState state, @NotNull Sidebar sidebar) {
+    public void tick(@NotNull ZombiesScene scene, @NotNull Sidebar sidebar) {
         if (lastRoundIndex == -1 || lastRoundIndex != map.getRoundIndex()) {
             lastRoundIndex = map.getRoundIndex();
             Component message = Component.text("Round " + lastRoundIndex + 1, NamedTextColor.RED);

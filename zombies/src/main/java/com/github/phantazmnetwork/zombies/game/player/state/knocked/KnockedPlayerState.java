@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.player.state.knocked;
 
 import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -29,7 +30,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     public interface ReviveTickable {
 
-        void tick(long time, @NotNull PlayerView reviver, long ticksUntilRevive);
+        void tick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive);
 
         void end();
 
@@ -43,7 +44,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     private final Consumer<? super Player> knockedAction;
 
-    private final Supplier<? extends PlayerView> reviverSupplier;
+    private final Supplier<? extends ZombiesPlayer> reviverSupplier;
 
     private final Supplier<? extends ZombiesPlayerState> deathStateSupplier;
 
@@ -57,7 +58,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     private final long reviveTime;
 
-    private PlayerView reviver = null;
+    private ZombiesPlayer reviver = null;
 
     private long ticksUntilDeath;
 
@@ -68,7 +69,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
                               @NotNull Supplier<? extends ZombiesPlayerState> deathStateSupplier,
                               @NotNull Supplier<? extends ZombiesPlayerState> defaultStateSupplier,
                               @NotNull Consumer<? super Player> knockedAction,
-                              @NotNull Supplier<? extends PlayerView> reviverSupplier,
+                              @NotNull Supplier<? extends ZombiesPlayer> reviverSupplier,
                               @NotNull Collection<? extends DeathTickable> deathTickables,
                               @NotNull Collection<? extends ReviveTickable> reviveTickables, long deathTime,
                               long reviveTime) {
@@ -118,9 +119,10 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             }
             else {
                 ticksUntilDeath = deathTime;
+                reviver.setReviving(true);
             }
         }
-        else if (reviver.getPlayer().isEmpty()) {
+        else if (reviver.getPlayerView().getPlayer().isEmpty()) {
             reviver = null;
             ticksUntilRevive = reviveTime;
         }
@@ -140,6 +142,9 @@ public class KnockedPlayerState implements ZombiesPlayerState {
         }
         for (ReviveTickable tickable : reviveTickables) {
             tickable.end();
+        }
+        if (reviver != null) {
+            reviver.setReviving(false);
         }
     }
 
