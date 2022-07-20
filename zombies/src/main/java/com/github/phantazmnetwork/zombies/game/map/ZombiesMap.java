@@ -140,7 +140,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                                                                                "Error initializing round end actions for {}: {}",
                                                                                roundInfo, e
                                                                        )
-                ), spawnDistributor
+                ), spawnDistributor, this::getSpawnpoints
                 ));
             }
         }

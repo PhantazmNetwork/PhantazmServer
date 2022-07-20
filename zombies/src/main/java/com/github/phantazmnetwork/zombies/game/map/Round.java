@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
@@ -22,6 +23,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     private final List<Action<Round>> startActions;
     private final List<Action<Round>> endActions;
     private final SpawnDistributor spawnDistributor;
+    private final Supplier<? extends List<Spawnpoint>> spawnpointSupplier;
     private final List<PhantazmMob> spawnedMobs;
     private final List<PhantazmMob> unmodifiableSpawnedMobs;
 
@@ -38,7 +40,8 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
      * @param roundInfo the backing data object
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull Instance instance, @NotNull List<Action<Round>> startActions,
-                 @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor) {
+                 @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
+                 @NotNull Supplier<? extends List<Spawnpoint>> spawnpointSupplier) {
         super(roundInfo, instance);
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.size() == 0) {
@@ -53,10 +56,10 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         this.unmodifiableWaves = Collections.unmodifiableList(waves);
         this.startActions = new ArrayList<>(startActions);
         this.endActions = new ArrayList<>(endActions);
-        this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnHandler");
+        this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
         this.spawnedMobs = new ArrayList<>();
         this.unmodifiableSpawnedMobs = Collections.unmodifiableList(spawnedMobs);
-
+        this.spawnpointSupplier = Objects.requireNonNull(spawnpointSupplier, "spawnpointSupplier");
         this.startActions.sort(Comparator.reverseOrder());
         this.endActions.sort(Comparator.reverseOrder());
     }
@@ -130,7 +133,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
 
     public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
                                                 @NotNull SpawnDistributor spawnDistributor) {
-        List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnInfo);
+        List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnpointSupplier.get(), spawnInfo);
         spawnedMobs.addAll(spawns);
 
         //adjust for mobs that may have failed to spawn

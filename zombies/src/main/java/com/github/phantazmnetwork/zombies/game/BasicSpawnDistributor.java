@@ -6,6 +6,9 @@ import com.github.phantazmnetwork.zombies.game.map.Spawnpoint;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.PlayerInventoryItemChangeEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,19 +21,21 @@ public class BasicSpawnDistributor implements SpawnDistributor {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicSpawnDistributor.class);
 
     private final Function<? super Key, ? extends MobModel> modelFunction;
-    private final Supplier<? extends List<Spawnpoint>> candidateGenerator;
     private final Random random;
 
     public BasicSpawnDistributor(@NotNull Function<? super Key, ? extends MobModel> modelFunction,
-                                 @NotNull Supplier<? extends List<Spawnpoint>> candidateGenerator,
                                  @NotNull Random random) {
         this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
-        this.candidateGenerator = Objects.requireNonNull(candidateGenerator, "candidateGenerator");
         this.random = Objects.requireNonNull(random, "random");
     }
 
     @Override
-    public @NotNull List<PhantazmMob> distributeSpawns(@NotNull Collection<? extends SpawnInfo> spawns) {
+    public @NotNull List<PhantazmMob> distributeSpawns(@NotNull List<? extends Spawnpoint> spawnpoints,
+                                                       @NotNull Collection<? extends SpawnInfo> spawns) {
+        if (spawnpoints.isEmpty()) {
+            return new ArrayList<>(0);
+        }
+
         List<Pair<MobModel, Key>> spawnList = new ArrayList<>(spawns.size());
         for (SpawnInfo spawnInfo : spawns) {
             Key id = spawnInfo.id();
@@ -50,12 +55,6 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             return Collections.emptyList();
         }
 
-        List<Spawnpoint> candidates = candidateGenerator.get();
-        if (candidates == null || candidates.isEmpty()) {
-            LOGGER.warn("Spawnpoint candidate generator returned a null or empty list");
-            return Collections.emptyList();
-        }
-
         Collections.shuffle(spawnList, random);
 
         List<PhantazmMob> spawnedMobs = new ArrayList<>(spawnList.size());
@@ -66,9 +65,9 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             Key spawnType = spawnEntry.second();
 
             boolean spawned = false;
-            for (int j = 0; j < candidates.size(); j++) {
-                Spawnpoint candidate = candidates.get(candidateIndex++);
-                candidateIndex %= candidates.size();
+            for (int j = 0; j < spawnpoints.size(); j++) {
+                Spawnpoint candidate = spawnpoints.get(candidateIndex++);
+                candidateIndex %= spawnpoints.size();
 
                 if (candidate.canSpawn(model, spawnType)) {
                     spawnedMobs.add(candidate.spawn(model));
