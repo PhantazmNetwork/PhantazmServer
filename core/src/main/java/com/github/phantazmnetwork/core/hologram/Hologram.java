@@ -12,6 +12,14 @@ import java.util.List;
  * {@link Component} list this object represents.
  */
 public interface Hologram extends List<Component> {
+    enum Alignment {
+        UPPER,
+        CENTERED,
+        LOWER
+    }
+
+    void setAlignment(@NotNull Alignment alignment);
+
     /**
      * Gets the current location of the hologram. This is the center of all the hologram lines to be displayed.
      *

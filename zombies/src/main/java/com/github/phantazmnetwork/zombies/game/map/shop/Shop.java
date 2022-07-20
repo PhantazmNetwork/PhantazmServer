@@ -10,22 +10,33 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
-    private final ShopInfo info;
-    private final ShopHandler handler;
+    private final ShopInteractor interactor;
+    private final ShopDisplay display;
 
     public Shop(@NotNull ShopInfo info, @NotNull Vec3I origin, @NotNull Instance instance,
-                @NotNull ShopHandler handler) {
+                @NotNull ShopInteractor interactor, @NotNull ShopDisplay display) {
         super(info, origin, instance);
-        this.info = Objects.requireNonNull(info, "info");
-        this.handler = Objects.requireNonNull(handler, "handler");
+        this.interactor = Objects.requireNonNull(interactor, "interactionHandler");
+        this.display = Objects.requireNonNull(display, "display");
     }
 
-    public @NotNull ShopHandler getHandler() {
-        return handler;
+    public @NotNull ShopInteractor getInteractor() {
+        return interactor;
+    }
+
+    public @NotNull ShopDisplay getDisplay() {
+        return display;
+    }
+
+    public void handleInteraction(@NotNull PlayerInteraction interaction) {
+        if (interactor.handleInteraction(this, interaction)) {
+            display.update(this, interaction);
+        }
     }
 
     @Override
     public void tick(long time) {
-        handler.tick(time);
+        interactor.tick(time);
+        display.tick(time);
     }
 }

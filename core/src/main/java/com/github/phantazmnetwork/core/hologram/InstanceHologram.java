@@ -22,8 +22,17 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     private final ArrayList<Entity> armorStands;
     private final ArrayList<Component> components;
     private final double gap;
+    private Alignment alignment;
     private Instance instance;
     private Vec3D location;
+
+    public InstanceHologram(@NotNull Vec3D location, double gap, @NotNull Alignment alignment) {
+        this.alignment = alignment;
+        this.location = Objects.requireNonNull(location, "location");
+        armorStands = new ArrayList<>();
+        components = new ArrayList<>();
+        this.gap = gap;
+    }
 
     /**
      * Creates a new instance of this class, whose holograms will be rendered at the given location.
@@ -32,10 +41,15 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * @param gap      the distance between separate hologram messages
      */
     public InstanceHologram(@NotNull Vec3D location, double gap) {
-        this.location = Objects.requireNonNull(location, "location");
-        armorStands = new ArrayList<>();
-        components = new ArrayList<>();
-        this.gap = gap;
+        this(location, gap, Alignment.UPPER);
+    }
+
+    @Override
+    public void setAlignment(@NotNull Alignment alignment) {
+        if (alignment != this.alignment) {
+            this.alignment = alignment;
+            updateArmorStands();
+        }
     }
 
     @Override
@@ -118,6 +132,11 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         for (int i = 0; i < armorStandCount; i++) {
             Entity armorStand = armorStands.get(i);
             Pos pos = new Pos(location.getX(), topCornerHeight - (i * (gap + MESSAGE_HEIGHT)), location.getZ());
+            switch (alignment) {
+                case CENTERED -> pos = pos.add(0, totalHeight / 2, 0);
+                case LOWER -> pos = pos.add(0, totalHeight, 0);
+            }
+
             if (armorStand.getInstance() == instance) {
                 armorStand.teleport(pos);
             }

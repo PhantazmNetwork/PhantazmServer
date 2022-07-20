@@ -31,8 +31,9 @@ public final class MapProcessors {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Vec3I triggerLocation =
                     VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("triggerLocation"));
-            ConfigNode handler = element.getNodeOrThrow("handler");
-            return new ShopInfo(id, triggerLocation, handler);
+            ConfigNode displayHandler = element.getNodeOrThrow("displayHandler");
+            ConfigNode interactionHandler = element.getNodeOrThrow("interactionHandler");
+            return new ShopInfo(id, triggerLocation, displayHandler, interactionHandler);
         }
 
         @Override
@@ -40,7 +41,8 @@ public final class MapProcessors {
             ConfigNode node = new LinkedConfigNode(3);
             node.put("id", AdventureConfigProcessors.key().elementFromData(shopInfo.id()));
             node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
-            node.put("handler", shopInfo.handler());
+            node.put("displayHandler", shopInfo.displayHandler());
+            node.put("interactionHandler", shopInfo.interactionHandler());
             return node;
         }
     };
