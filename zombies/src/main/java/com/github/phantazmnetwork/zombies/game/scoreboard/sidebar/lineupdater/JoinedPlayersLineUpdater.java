@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -30,7 +29,7 @@ public class JoinedPlayersLineUpdater implements SidebarLineUpdater {
     }
 
     @Override
-    public @NotNull Optional<Component> tick(long time, @NotNull ZombiesScene scene) {
+    public @NotNull Optional<Component> tick(long time) {
         if (currentPlayers == -1 || currentPlayers != zombiesPlayers.size()) {
             currentPlayers = zombiesPlayers.size();
             return Optional.of(Component.textOfChildren(Component.text("Players: "),

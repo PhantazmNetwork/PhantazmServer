@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
+import com.github.phantazmnetwork.zombies.game.stage.Stage;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -41,6 +42,22 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
         this.random = Objects.requireNonNull(random, "random");
+    }
+
+    public @NotNull Map<UUID, ZombiesPlayer> getZombiesPlayers() {
+        return Map.copyOf(zombiesPlayers);
+    }
+
+    public @NotNull MapSettingsInfo getMapSettingsInfo() {
+        return mapSettingsInfo;
+    }
+
+    public Stage getCurrentStage() {
+        return stageTransition.getCurrentStage();
+    }
+
+    public boolean isComplete() {
+        return stageTransition.isComplete();
     }
 
     @Override
@@ -94,7 +111,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         for (UUID leaver : leavers) {
             players.remove(leaver);
 
-            if (!stageTransition.getCurrentStage().hasPermanentPlayers()) {
+            Stage stage = getCurrentStage();
+            if (stage == null || !stage.hasPermanentPlayers()) {
                 zombiesPlayers.remove(leaver);
             }
         }
@@ -104,7 +122,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public int getJoinWeight(@NotNull ZombiesJoinRequest request) {
-        if (stageTransition.getCurrentStage().hasPermanentPlayers()) {
+        Stage stage = getCurrentStage();
+        if (stage == null || stage.hasPermanentPlayers()) {
             return Integer.MIN_VALUE;
         }
 

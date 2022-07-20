@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -25,7 +24,7 @@ public class ZombieKillsSidebarLineUpdater implements SidebarLineUpdater {
     }
 
     @Override
-    public @NotNull Optional<Component> tick(long time, @NotNull ZombiesScene scene) {
+    public @NotNull Optional<Component> tick(long time) {
         if (killCount == -1 || killCount != playerKills.getKills()) {
             killCount = playerKills.getKills();
             return Optional.of(Component.textOfChildren(Component.text("Zombie Kills: "),

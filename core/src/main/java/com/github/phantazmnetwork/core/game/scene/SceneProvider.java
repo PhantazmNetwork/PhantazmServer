@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.Tickable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -26,7 +27,7 @@ public interface SceneProvider<TScene extends Scene<TRequest>, TRequest extends 
      *
      * @return A view of the {@link Scene}s
      */
-    @UnmodifiableView @NotNull Iterable<TScene> getScenes();
+    @UnmodifiableView @NotNull Collection<TScene> getScenes();
 
     /**
      * Shuts down the scene provider.

@@ -13,7 +13,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
     private final Collection<TScene> scenes = new ArrayList<>();
 
-    private final Iterable<TScene> unmodifiableScenes = Collections.unmodifiableCollection(scenes);
+    private final Collection<TScene> unmodifiableScenes = Collections.unmodifiableCollection(scenes);
 
     private final int maximumScenes;
 
@@ -41,7 +41,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
     }
 
     @Override
-    public @UnmodifiableView @NotNull Iterable<TScene> getScenes() {
+    public @UnmodifiableView @NotNull Collection<TScene> getScenes() {
         return unmodifiableScenes;
     }
 

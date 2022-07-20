@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -25,10 +24,10 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
     }
 
     @Override
-    public @NotNull Optional<Component> tick(long time, @NotNull ZombiesScene scene) {
+    public @NotNull Optional<Component> tick(long time) {
         for (Pair<BooleanSupplier, SidebarLineUpdater> subUpdater : subUpdaters) {
             if (subUpdater.left().getAsBoolean()) {
-                return subUpdater.right().tick(, scene);
+                return subUpdater.right().tick(time);
             }
         }
 

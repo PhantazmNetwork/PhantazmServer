@@ -13,6 +13,6 @@ public interface SidebarSection {
 
     int getSize(@NotNull ZombiesScene scene);
 
-    @NotNull List<Optional<Component>> tick(long time, @NotNull ZombiesScene scene);
+    @NotNull List<Optional<Component>> tick(long time);
 
 }

@@ -32,11 +32,9 @@ public class SidebarUpdater {
         this.indexToLineId = Objects.requireNonNull(indexToLineId, "indexToLineId");
     }
 
-    public void tick(long time, @NotNull ZombiesScene scene) {
-        refreshSections(Objects.requireNonNull(scene, "scene"));
-
+    public void tick(long time) {
         for (int i = 0; i < sections.size(); i++) {
-            List<Optional<Component>> newLines = sections.get(i).tick(time, scene);
+            List<Optional<Component>> newLines = sections.get(i).tick(time);
             for (int j = 0; j < newLines.size(); j++) {
                 int index = i + j;
                 newLines.get(j).ifPresent(newLine -> {
@@ -52,6 +50,11 @@ public class SidebarUpdater {
             for (int i = 0; i < sizes.length; i++) {
                 sizes[i] = sections.get(i).getSize(scene);
             }
+
+            for (SidebarSection section : sections) {
+                section.invalidateCache();
+            }
+
             initialized = true;
         }
         else {

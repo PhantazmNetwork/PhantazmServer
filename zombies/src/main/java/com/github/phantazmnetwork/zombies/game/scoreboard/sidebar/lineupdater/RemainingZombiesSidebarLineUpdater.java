@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import com.github.phantazmnetwork.zombies.game.map.Round;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,7 +25,7 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
     }
 
     @Override
-    public @NotNull Optional<Component> tick(long time, @NotNull ZombiesScene scene) {
+    public @NotNull Optional<Component> tick(long time) {
         Round round = roundSupplier.get();
         if (round != null && (lastRemainingZombies == -1 || lastRemainingZombies != round.getTotalMobCount())) {
             lastRemainingZombies = round.getTotalMobCount();

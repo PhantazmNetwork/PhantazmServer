@@ -38,27 +38,24 @@ public class StageTransition implements Tickable {
         return currentStageIndex == stages.size();
     }
 
-    public int getCurrentStageIndex() {
-        return currentStageIndex;
-    }
-
     public void setCurrentStageIndex(int currentStageIndex) {
-        if (currentStageIndex < 0 || currentStageIndex >= stages.size()) {
+        if (currentStageIndex < 0 || currentStageIndex > stages.size()) {
             throw new IllegalArgumentException("Invalid stage index: " + currentStageIndex);
         }
 
         this.currentStageIndex = currentStageIndex;
         currentStage.end();
 
-        currentStage = stages.get(currentStageIndex);
-        currentStage.start();
+        if (currentStageIndex != stages.size()) {
+            currentStage = stages.get(currentStageIndex);
+            currentStage.start();
+        }
+        else {
+            currentStage = null;
+        }
     }
 
-    public @NotNull Stage getCurrentStage() {
+    public Stage getCurrentStage() {
         return currentStage;
-    }
-
-    public int getStageCount() {
-        return stages.size();
     }
 }

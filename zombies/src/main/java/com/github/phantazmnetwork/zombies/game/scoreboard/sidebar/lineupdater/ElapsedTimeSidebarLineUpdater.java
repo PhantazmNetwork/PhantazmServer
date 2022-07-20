@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import com.github.phantazmnetwork.zombies.game.stage.InGameStage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,7 +23,7 @@ public class ElapsedTimeSidebarLineUpdater implements SidebarLineUpdater {
     }
 
     @Override
-    public @NotNull Optional<Component> tick(long time, @NotNull ZombiesScene scene) {
+    public @NotNull Optional<Component> tick(long time) {
         // no variable caching since time is expected to change each tick
         long elapsedSeconds = inGameStage.getTicksSinceStart() / MinecraftServer.TICK_PER_SECOND;
         long hours = elapsedSeconds / 3600;
