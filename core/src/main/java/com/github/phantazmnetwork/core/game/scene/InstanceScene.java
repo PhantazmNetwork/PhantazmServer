@@ -71,6 +71,5 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
 
     @Override
     public void tick(long time) {
-        // NO-OP
     }
 }

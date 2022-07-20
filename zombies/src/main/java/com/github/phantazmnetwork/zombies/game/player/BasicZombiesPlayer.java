@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -27,6 +28,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private boolean crouching = false;
 
+    private boolean reviving = false;
+
     private boolean inGame = false;
 
     public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull PlayerCoins coins, @NotNull PlayerKills kills,
@@ -37,6 +40,9 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
         this.kills = Objects.requireNonNull(kills, "kills");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
+        playerView.getPlayer().ifPresent(player -> {
+            this.crouching = player.getPose() == Entity.Pose.SNEAKING;
+        });
     }
 
     @Override
@@ -51,6 +57,16 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public void setCrouching(boolean crouching) {
         this.crouching = crouching;
+    }
+
+    @Override
+    public void setReviving(boolean reviving) {
+        this.reviving = reviving;
+    }
+
+    @Override
+    public boolean isReviving() {
+        return reviving;
     }
 
     @Override

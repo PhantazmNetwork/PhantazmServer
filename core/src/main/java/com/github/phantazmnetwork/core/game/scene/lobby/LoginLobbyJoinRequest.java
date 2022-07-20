@@ -52,7 +52,6 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      * has spawned for the first time.
      */
     public void onPlayerLoginComplete() {
-        // NO-OP
     }
 
 }
