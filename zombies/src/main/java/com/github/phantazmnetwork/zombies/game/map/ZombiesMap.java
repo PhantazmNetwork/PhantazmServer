@@ -11,6 +11,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
+import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
@@ -31,6 +32,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
 
     private final List<Room> unmodifiableRooms;
+    private final List<Shop> unmodifiableShops;
     private final List<Door> unmodifiableDoors;
     private final List<Window> unmodifiableWindows;
     private final List<Spawnpoint> unmodifiableSpawnpoints;
@@ -54,6 +56,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         DependencyProvider provider = DependencyProvider.ofDependencies(context);
 
         List<RoomInfo> roomData = info.rooms();
+        List<ShopInfo> shopData = info.shops();
         List<DoorInfo> doorData = info.doors();
         List<WindowInfo> windowData = info.windows();
         List<SpawnpointInfo> spawnpointData = info.spawnpoints();
@@ -61,6 +64,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         List<RoundInfo> roundData = info.rounds();
 
         List<Room> rooms = new ArrayList<>(roomData.size());
+        List<Shop> shops = new ArrayList<>(shopData.size());
         List<Door> doors = new ArrayList<>(doorData.size());
         List<Window> windows = new ArrayList<>(windowData.size());
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointData.size());
@@ -68,6 +72,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         Map<Key, SpawnruleInfo> spawnruleMap = new HashMap<>(spawnruleData.size());
 
         this.unmodifiableRooms = Collections.unmodifiableList(rooms);
+        this.unmodifiableShops = Collections.unmodifiableList(shops);
         this.unmodifiableDoors = Collections.unmodifiableList(doors);
         this.unmodifiableWindows = Collections.unmodifiableList(windows);
         this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
@@ -82,6 +87,13 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                                                                           roomInfo, e
                                                                   )
                                    )
+                ));
+            }
+
+            for (ShopInfo shopInfo : shopData) {
+                shops.add(new Shop(shopInfo, getOrigin(), instance,
+                                   builder.makeComponentFromData(shopInfo.displayHandler(), provider),
+                                   builder.makeComponentFromData(shopInfo.interactionHandler(), provider)
                 ));
             }
 
@@ -139,6 +151,10 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
     public @UnmodifiableView @NotNull List<Room> getRooms() {
         return unmodifiableRooms;
+    }
+
+    public @UnmodifiableView @NotNull List<Shop> getShops() {
+        return unmodifiableShops;
     }
 
     public @UnmodifiableView @NotNull List<Spawnpoint> getSpawnpoints() {
@@ -209,6 +225,16 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                         return Optional.of(door);
                     }
                 }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public @NotNull Optional<Shop> shopAt(@NotNull Vec3I block) {
+        for (Shop shop : unmodifiableShops) {
+            if (block.equals(shop.data.triggerLocation())) {
+                return Optional.of(shop);
             }
         }
 

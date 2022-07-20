@@ -67,6 +67,12 @@ public interface ComponentBuilder {
         return out;
     }
 
+    default <TComponent> @NotNull TComponent makeComponentFromData(@NotNull ConfigNode node,
+                                                                   @NotNull DependencyProvider provider)
+            throws ComponentException {
+        return makeComponent(makeData(node), provider);
+    }
+
     default <TComponent, TCollection extends Collection<TComponent>> @NotNull TCollection makeComponentsFromData(
             @NotNull Collection<? extends ConfigElement> list, @NotNull DependencyProvider provider,
             @NotNull IntFunction<? extends TCollection> collectionIntFunction,

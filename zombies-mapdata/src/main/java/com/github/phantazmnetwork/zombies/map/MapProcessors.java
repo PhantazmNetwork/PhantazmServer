@@ -416,4 +416,8 @@ public final class MapProcessors {
     public static @NotNull ConfigProcessor<SpawnInfo> spawnInfo() {
         return spawnInfo;
     }
+
+    public static @NotNull ConfigProcessor<HologramInfo> hologramInfo() {
+        return hologramInfo;
+    }
 }

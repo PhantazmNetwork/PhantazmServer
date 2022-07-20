@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.game.map.shop;
+package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.map.ShopInfo;

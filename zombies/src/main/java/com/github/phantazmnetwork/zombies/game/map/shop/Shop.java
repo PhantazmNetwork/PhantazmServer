@@ -3,6 +3,8 @@ package com.github.phantazmnetwork.zombies.game.map.shop;
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.game.map.PositionalMapObject;
+import com.github.phantazmnetwork.zombies.game.map.shop.display.ShopDisplay;
+import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShopInteractor;
 import com.github.phantazmnetwork.zombies.map.ShopInfo;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;

@@ -7,6 +7,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractList;
@@ -19,6 +20,7 @@ import java.util.Objects;
  */
 public class InstanceHologram extends AbstractList<Component> implements Hologram {
     private static final double MESSAGE_HEIGHT = 0.25;
+
     private final ArrayList<Entity> armorStands;
     private final ArrayList<Component> components;
     private final double gap;
@@ -26,8 +28,16 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     private Instance instance;
     private Vec3D location;
 
+    /**
+     * Creates a new instance of this class, whose holograms will be rendered at the given location, using the given
+     * alignment.
+     *
+     * @param location  the location of the instance
+     * @param gap       the distance between separate hologram messages
+     * @param alignment the alignment method
+     */
     public InstanceHologram(@NotNull Vec3D location, double gap, @NotNull Alignment alignment) {
-        this.alignment = alignment;
+        this.alignment = Objects.requireNonNull(alignment, "alignment");
         this.location = Objects.requireNonNull(location, "location");
         armorStands = new ArrayList<>();
         components = new ArrayList<>();
@@ -35,7 +45,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     /**
-     * Creates a new instance of this class, whose holograms will be rendered at the given location.
+     * Creates a new instance of this class, whose holograms will be rendered at the given location, using the default
+     * alignment {@link Alignment#UPPER}.
      *
      * @param location the location to render holograms
      * @param gap      the distance between separate hologram messages

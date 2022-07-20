@@ -12,6 +12,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 
 final class ZombiesTest {
@@ -20,7 +21,6 @@ final class ZombiesTest {
     }
 
     static void initialize(@NotNull EventNode<Event> global) {
-
         global.addListener(PlayerLoginEvent.class, event -> {
             Instance spawnInstance = event.getSpawningInstance();
             if (spawnInstance != null) {

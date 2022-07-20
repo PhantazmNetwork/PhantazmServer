@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.component.ComponentBuilder;
 import com.github.phantazmnetwork.commons.component.ComponentException;
 import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
+import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramShopDisplay;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +22,13 @@ public final class ZombiesFeature {
 
     private static void registerComponentClasses(ComponentBuilder builder) throws ComponentException {
         LOGGER.info("Registering component classes...");
+        //actions
         builder.registerComponentClass(AnnounceRoundAction.class);
         builder.registerComponentClass(SpawnMobsAction.class);
+
+        //shops
+        builder.registerComponentClass(StaticHologramShopDisplay.class);
+
         LOGGER.info("Registered component classes.");
     }
 

@@ -30,6 +30,11 @@ public interface ClientBlockHandler {
     void setClientBlock(@NotNull Block type, int x, int y, int z);
 
     /**
+     * Removes all client blocks.
+     */
+    void clearClientBlocks();
+
+    /**
      * Convenience overload for {@link ClientBlockHandler#setClientBlock(Block, int, int, int)}.
      *
      * @param type          the kind of block to set

@@ -70,10 +70,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
     @Override
     public void setClientBlock(@NotNull Block type, int x, int y, int z) {
-        Instance instance = this.instance.get();
-        if (instance == null) {
-            return;
-        }
+        Instance instance = requireInstance();
 
         int cx = ChunkUtils.getChunkCoordinate(x);
         int cz = ChunkUtils.getChunkCoordinate(z);
@@ -102,16 +99,37 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     @Override
-    public void removeClientBlock(int x, int y, int z) {
-        Instance instance = this.instance.get();
-        if (instance == null) {
-            return;
+    public void clearClientBlocks() {
+        Instance instance = requireInstance();
+        synchronized (clientBlocks) {
+            for (Long2ObjectMap.Entry<ObjectOpenHashSet<PositionedBlock>> entry : clientBlocks.long2ObjectEntrySet()) {
+                long index = entry.getLongKey();
+                int x = ChunkUtils.getChunkCoordX(index);
+                int z = ChunkUtils.getChunkCoordZ(index);
+
+                Chunk chunk = instance.getChunkAt(x, z);
+                ObjectOpenHashSet<PositionedBlock> blocks = entry.getValue();
+                if (chunk != null) {
+                    for (PositionedBlock block : blocks) {
+                        Block serverBlock = chunk.getBlock(block.getX(), block.getY(), block.getZ());
+                        chunk.sendPacketToViewers(new BlockChangePacket(VecUtils.toPoint(block.position), serverBlock));
+                    }
+                }
+
+                blocks.clear();
+            }
+
+            clientBlocks.clear();
         }
+    }
+
+    @Override
+    public void removeClientBlock(int x, int y, int z) {
+        Instance instance = requireInstance();
 
         int cx = ChunkUtils.getChunkCoordinate(x);
         int cz = ChunkUtils.getChunkCoordinate(z);
         long index = ChunkUtils.getChunkIndex(cx, cz);
-
         synchronized (clientBlocks) {
             ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
 
@@ -133,9 +151,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPrePlayerStartDigging(PrePlayerStartDiggingEvent event) {
-        if (this.instance.get() == null) {
-            return;
-        }
+        requireInstance();
 
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
@@ -157,9 +173,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPlayerBlockBreak(PlayerBlockBreakEvent event) {
-        if (this.instance.get() == null) {
-            return;
-        }
+        requireInstance();
 
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
@@ -175,9 +189,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPreBlockChange(PreBlockChangeEvent event) {
-        if (this.instance.get() == null) {
-            return;
-        }
+        requireInstance();
 
         Point blockPosition = event.blockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
@@ -195,9 +207,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPlayerChunkLoad(PlayerChunkLoadEvent event) {
-        if (this.instance.get() == null) {
-            return;
-        }
+        requireInstance();
 
         int cx = event.getChunkX();
         int cz = event.getChunkZ();
@@ -220,6 +230,15 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         if (packets != null) {
             event.getPlayer().sendPackets(packets);
         }
+    }
+
+    private Instance requireInstance() {
+        Instance instance = this.instance.get();
+        if (instance == null) {
+            throw new IllegalStateException("InstanceClientBlockHandler tied to an unregistered instance");
+        }
+
+        return instance;
     }
 
     private static class PositionedBlock extends Vec3IBase {
