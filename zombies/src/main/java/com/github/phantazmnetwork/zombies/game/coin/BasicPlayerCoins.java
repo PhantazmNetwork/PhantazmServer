@@ -30,27 +30,50 @@ public class BasicPlayerCoins implements PlayerCoins {
     }
 
     @Override
-    public void runTransaction(@NotNull Transaction transaction) {
+    public @NotNull TransactionResult runTransaction(@NotNull Transaction transaction) {
         List<Transaction.Modifier> modifiers = new ArrayList<>(transaction.modifiers());
         modifiers.sort(Comparator.comparingInt(Transaction.Modifier::getPriority).reversed());
 
+        List<Component> modifierNames = new ArrayList<>(modifiers.size());
         int change = transaction.initialChange();
         for (Transaction.Modifier modifier : modifiers) {
-            change = modifier.modify(change);
+            int newChange = modifier.modify(change);
+            if (change != newChange) {
+                modifierNames.add(modifier.getDisplayName());
+            }
+
+            change = newChange;
         }
 
-        coins += change;
-        if (change != 0) {
-            int finalChange = change;
-            audienceProvider.provideAudience().ifPresent(audience -> {
-                Component message = componentCreator.createTransactionComponent(modifiers, finalChange);
-                componentSender.send(audience, message);
-            });
+        int coinsUntilMax = Integer.MAX_VALUE - coins;
+        if (coinsUntilMax < change) {
+            change = coinsUntilMax;
         }
+        else {
+            int coinsUntilMin = Integer.MIN_VALUE - coins;
+            if (coinsUntilMin > change) {
+                change = coinsUntilMin;
+            }
+        }
+
+        return new TransactionResult(modifierNames, change);
     }
 
     @Override
     public int getCoins() {
         return coins;
+    }
+
+    @Override
+    public void addCoins(@NotNull TransactionResult result) {
+        if (result.change() == 0) {
+            return;
+        }
+
+        coins += result.change();
+        audienceProvider.provideAudience().ifPresent(audience -> {
+            Component message = componentCreator.createTransactionComponent(result.modifierNames(), result.change());
+            componentSender.send(audience, message);
+        });
     }
 }

@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.core.chat.command;
 
 import com.github.phantazmnetwork.core.chat.ChatChannel;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
@@ -88,19 +87,19 @@ public class ChatCommand extends Command {
             String previousChannelName =
                     playerChannels.computeIfAbsent(player.getUuid(), uuid -> defaultChannelNameSupplier.get());
 
-            JoinConfiguration joinConfiguration = JoinConfiguration.separator(Component.space());
             if (channelName.equals(previousChannelName)) {
-                Component message = Component.join(joinConfiguration, Component.text("You are already in the"),
-                                                   channelNameComponent, Component.text("channel!")
-                ).color(NamedTextColor.RED);
+                Component message = Component.text()
+                                             .append(Component.text("You are already in the "), channelNameComponent,
+                                                     Component.text(" channel!")
+                                             ).color(NamedTextColor.RED).build();
                 sender.sendMessage(message);
                 return;
             }
 
             playerChannels.put(player.getUuid(), channelName);
-            Component message = Component.textOfChildren(Component.text("Set chat channel to "), channelNameComponent,
-                                                         Component.text(".")
-            ).color(NamedTextColor.GREEN);
+            Component message = Component.text().append(Component.text("Set chat channel to "), channelNameComponent,
+                                                        Component.text(".")
+            ).color(NamedTextColor.GREEN).build();
             player.sendMessage(message);
         }, channelNameArgument);
     }

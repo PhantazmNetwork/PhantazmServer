@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.core.config.InstanceConfig;
 import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -63,10 +62,6 @@ public class LobbyTest {
                 return Optional.of(player);
             }
 
-            @Override
-            public @NotNull CompletableFuture<Component> getDisplayName() {
-                return CompletableFuture.completedFuture(Component.empty());
-            }
         };
 
         RouteResult result = lobby.join(new BasicLobbyJoinRequest(Collections.singleton(playerView)));

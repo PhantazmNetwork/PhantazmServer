@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.core.player;
 
-import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,12 +43,5 @@ public interface PlayerView {
      * @return An {@link Optional} of the player which is empty when the player is offline
      */
     @NotNull Optional<Player> getPlayer();
-
-    /**
-     * Gets the {@link Component} display name of the player. May perform an IO operation to determine the player's username.
-     *
-     * @return The {@link Component} display name of the player
-     */
-    @NotNull CompletableFuture<Component> getDisplayName();
 
 }

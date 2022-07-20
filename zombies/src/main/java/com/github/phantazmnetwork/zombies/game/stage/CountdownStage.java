@@ -59,4 +59,8 @@ public class CountdownStage implements Stage {
     public boolean hasPermanentPlayers() {
         return false;
     }
+
+    public long getCountdownTicksRemaining() {
+        return countdownTicksRemaining;
+    }
 }

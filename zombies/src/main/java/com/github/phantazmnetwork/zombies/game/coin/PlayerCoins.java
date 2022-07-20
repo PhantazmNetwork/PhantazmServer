@@ -4,8 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 public interface PlayerCoins {
 
-    void runTransaction(@NotNull Transaction transaction);
+    @NotNull TransactionResult runTransaction(@NotNull Transaction transaction);
 
     int getCoins();
+
+    void addCoins(@NotNull TransactionResult result);
 
 }

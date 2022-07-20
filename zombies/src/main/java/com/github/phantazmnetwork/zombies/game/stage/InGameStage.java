@@ -14,6 +14,8 @@ public class InGameStage implements Stage {
 
     private final ZombiesMap map;
 
+    private long ticksSinceStart = 0L;
+
     public InGameStage(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull ZombiesMap map) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.map = Objects.requireNonNull(map, "map");
@@ -22,16 +24,18 @@ public class InGameStage implements Stage {
     @Override
     public void tick(long time) {
         map.tick(time);
+        ticksSinceStart++;
     }
 
     @Override
     public void start() {
         map.startRound(0);
+        ticksSinceStart = 0L;
     }
 
     @Override
     public void end() {
-
+        ticksSinceStart = -1L;
     }
 
     @Override
@@ -42,5 +46,9 @@ public class InGameStage implements Stage {
     @Override
     public boolean hasPermanentPlayers() {
         return true;
+    }
+
+    public long getTicksSinceStart() {
+        return ticksSinceStart;
     }
 }

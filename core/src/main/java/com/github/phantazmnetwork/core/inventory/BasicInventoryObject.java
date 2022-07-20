@@ -33,7 +33,6 @@ public class BasicInventoryObject implements InventoryObject {
 
     @Override
     public void tick(long time) {
-        // Computes the maximum amount of information possible using all of silly weed man's brain cells
     }
 
 }

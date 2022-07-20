@@ -5,6 +5,8 @@ import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
+import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -22,21 +24,29 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final InventoryProfileSwitcher profileSwitcher;
 
+    private final PlayerStateSwitcher stateSwitcher;
+
     private boolean crouching = false;
+
+    private boolean reviving = false;
 
     private boolean inGame = false;
 
     public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull PlayerCoins coins, @NotNull PlayerKills kills,
-                              @NotNull InventoryProfileSwitcher profileSwitcher) {
+                              @NotNull InventoryProfileSwitcher profileSwitcher,
+                              @NotNull PlayerStateSwitcher stateSwitcher) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.coins = Objects.requireNonNull(coins, "coins");
         this.kills = Objects.requireNonNull(kills, "kills");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
+        this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
+        playerView.getPlayer().ifPresent(player -> {
+            this.crouching = player.getPose() == Entity.Pose.SNEAKING;
+        });
     }
 
     @Override
     public void tick(long time) {
-
     }
 
     @Override
@@ -47,6 +57,16 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public void setCrouching(boolean crouching) {
         this.crouching = crouching;
+    }
+
+    @Override
+    public void setReviving(boolean reviving) {
+        this.reviving = reviving;
+    }
+
+    @Override
+    public boolean isReviving() {
+        return reviving;
     }
 
     @Override
@@ -77,6 +97,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public @NotNull InventoryProfileSwitcher getProfileSwitcher() {
         return profileSwitcher;
+    }
+
+    @Override
+    public @NotNull PlayerStateSwitcher getStateSwitcher() {
+        return stateSwitcher;
     }
 
     @Override
