@@ -34,7 +34,7 @@ public class SidebarUpdater {
 
     public void tick(long time) {
         for (int i = 0; i < sections.size(); i++) {
-            List<Optional<Component>> newLines = sections.get(i).tick(time);
+            List<Optional<Component>> newLines = sections.get(i).update(time);
             for (int j = 0; j < newLines.size(); j++) {
                 int index = i + j;
                 newLines.get(j).ifPresent(newLine -> {

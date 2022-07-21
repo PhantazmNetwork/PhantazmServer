@@ -65,7 +65,7 @@ public class BasicPlayerCoins implements PlayerCoins {
     }
 
     @Override
-    public void addCoins(@NotNull TransactionResult result) {
+    public void applyTransaction(@NotNull TransactionResult result) {
         if (result.change() == 0) {
             return;
         }

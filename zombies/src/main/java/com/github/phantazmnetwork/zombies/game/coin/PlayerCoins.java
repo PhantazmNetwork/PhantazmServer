@@ -8,6 +8,6 @@ public interface PlayerCoins {
 
     int getCoins();
 
-    void addCoins(@NotNull TransactionResult result);
+    void applyTransaction(@NotNull TransactionResult result);
 
 }
