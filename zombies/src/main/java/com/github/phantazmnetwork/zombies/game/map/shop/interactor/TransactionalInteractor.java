@@ -30,7 +30,7 @@ public abstract class TransactionalInteractor implements ShopInteractor {
         TransactionResult result = coins.runTransaction(transaction.first());
 
         if (coins.getCoins() + result.change() > 0) {
-            coins.addCoins(result);
+            coins.applyTransaction(result);
             transaction.second().accept(result);
             return true;
         }
