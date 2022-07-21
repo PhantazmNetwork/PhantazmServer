@@ -31,9 +31,7 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
     }
 
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        if (interactor.handleInteraction(this, interaction)) {
-            display.update(this, interaction);
-        }
+        display.update(this, interaction, interactor.handleInteraction(this, interaction));
     }
 
     @Override

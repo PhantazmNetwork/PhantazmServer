@@ -47,10 +47,9 @@ public class StaticHologramShopDisplay extends HologramShopDisplayBase {
 
     @Override
     public void initialize(@NotNull Shop shop) {
+        super.initialize(shop);
         hologram.clear();
         hologram.addAll(data.info.text());
-
-        super.initialize(shop);
     }
 
     @ComponentData

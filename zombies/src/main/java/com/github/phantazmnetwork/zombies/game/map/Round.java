@@ -23,7 +23,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     private final List<Action<Round>> startActions;
     private final List<Action<Round>> endActions;
     private final SpawnDistributor spawnDistributor;
-    private final Supplier<? extends List<Spawnpoint>> spawnpointSupplier;
+    private final Supplier<List<Spawnpoint>> spawnpointSupplier;
     private final List<PhantazmMob> spawnedMobs;
     private final List<PhantazmMob> unmodifiableSpawnedMobs;
 
@@ -41,7 +41,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull Instance instance, @NotNull List<Action<Round>> startActions,
                  @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-                 @NotNull Supplier<? extends List<Spawnpoint>> spawnpointSupplier) {
+                 @NotNull Supplier<List<Spawnpoint>> spawnpointSupplier) {
         super(roundInfo, instance);
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.size() == 0) {
@@ -76,6 +76,10 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
 
     public int getTotalMobCount() {
         return totalMobCount;
+    }
+
+    public void setTotalMobCount(int count) {
+        this.totalMobCount = count;
     }
 
     public @UnmodifiableView @NotNull List<Wave> getWaves() {
@@ -128,16 +132,22 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     }
 
     public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo) {
-        return spawnMobs(spawnInfo, spawnDistributor);
+        return spawnMobs(spawnInfo, spawnDistributor, false);
     }
 
     public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
-                                                @NotNull SpawnDistributor spawnDistributor) {
+                                                @NotNull SpawnDistributor spawnDistributor, boolean syncCount) {
         List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnpointSupplier.get(), spawnInfo);
         spawnedMobs.addAll(spawns);
 
-        //adjust for mobs that may have failed to spawn
-        totalMobCount -= currentWave.mobCount() - spawns.size();
+        if (syncCount) {
+            //adjust for mobs that may have failed to spawn
+            totalMobCount -= currentWave.mobCount() - spawns.size();
+        }
+        else {
+            totalMobCount += spawns.size();
+        }
+
         return spawns;
     }
 
@@ -153,7 +163,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
 
             long timeSinceLastWave = time - waveStartTime;
             if (waveIndex < unmodifiableWaves.size() && timeSinceLastWave > currentWave.data.delayTicks()) {
-                spawnMobs(currentWave.data.spawns());
+                spawnMobs(currentWave.data.spawns(), spawnDistributor, true);
 
                 waveStartTime = time;
                 if (++waveIndex >= unmodifiableWaves.size()) {

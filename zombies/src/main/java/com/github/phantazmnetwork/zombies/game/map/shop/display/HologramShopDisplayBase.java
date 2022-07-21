@@ -21,7 +21,7 @@ public abstract class HologramShopDisplayBase implements ShopDisplay {
     }
 
     @Override
-    public void update(@NotNull Shop shop, @NotNull PlayerInteraction interaction) {
+    public void update(@NotNull Shop shop, @NotNull PlayerInteraction interaction, boolean interactionResult) {
     }
 
     @Override
