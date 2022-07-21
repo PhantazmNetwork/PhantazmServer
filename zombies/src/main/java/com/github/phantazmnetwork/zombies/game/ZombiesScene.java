@@ -115,6 +115,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             if (stage == null || !stage.hasPermanentPlayers()) {
                 zombiesPlayers.remove(leaver);
             }
+            else {
+                ZombiesPlayer zombiesPlayer = zombiesPlayers.get(leaver);
+                if (zombiesPlayer != null) {
+                    zombiesPlayer.setInGame(false);
+                }
+            }
         }
 
         return new RouteResult(true, Optional.empty());

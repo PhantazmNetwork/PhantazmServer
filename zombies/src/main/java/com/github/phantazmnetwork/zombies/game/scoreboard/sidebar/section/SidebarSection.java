@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +10,7 @@ public interface SidebarSection {
 
     void invalidateCache();
 
-    int getSize(@NotNull ZombiesScene scene);
+    int getSize();
 
     @NotNull List<Optional<Component>> update(long time);
 

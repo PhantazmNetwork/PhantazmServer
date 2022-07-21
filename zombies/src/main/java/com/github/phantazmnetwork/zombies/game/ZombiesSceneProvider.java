@@ -12,6 +12,7 @@ import com.github.phantazmnetwork.core.inventory.BasicInventoryProfileSwitcher;
 import com.github.phantazmnetwork.core.inventory.InventoryProfileSwitcher;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.mob.MobModel;
+import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.audience.ChatComponentSender;
 import com.github.phantazmnetwork.zombies.game.coin.BasicPlayerCoins;
@@ -19,6 +20,7 @@ import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.coin.component.BasicTransactionComponentCreator;
 import com.github.phantazmnetwork.zombies.game.kill.BasicPlayerKills;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
+import com.github.phantazmnetwork.zombies.game.listener.*;
 import com.github.phantazmnetwork.zombies.game.player.BasicZombiesPlayer;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.game.player.state.AlivePlayerState;
@@ -30,6 +32,13 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.entity.EntityDamageEvent;
+import net.minestom.server.event.player.PlayerBlockInteractEvent;
+import net.minestom.server.event.player.PlayerEntityInteractEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.utils.chunk.ChunkUtils;
@@ -49,6 +58,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private final SceneFallback sceneFallback;
 
+    private final EventNode<Event> eventNode;
+
+    private final MobStore mobStore;
+
     private final MobSpawner mobSpawner;
 
     private final Map<Key, MobModel> mobModels;
@@ -57,6 +70,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
                                 @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
+                                @NotNull EventNode<Event> eventNode, @NotNull MobStore mobStore,
                                 @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
                                 @NotNull ClientBlockHandlerSource clientBlockHandlerSource) {
         super(maximumScenes);
@@ -64,6 +78,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
         this.sceneFallback = Objects.requireNonNull(sceneFallback, "sceneFallback");
+        this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
         this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource, "clientBlockHandlerSource");
@@ -129,6 +145,23 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         };
         Random random = new Random();
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
+        EventNode<Event> sceneNode = EventNode.all(instance.getUniqueId().toString());
+        //sceneNode.addListener(EntityDeathEvent.class, new PhantazmMobDeathListener(instance, mobStore,
+        //                                                                            map::currentRound));
+        sceneNode.addListener(EntityDamageEvent.class, new PlayerDamageMobListener(instance, mobStore, zombiesPlayers));
+        PlayerRightClickListener rightClickListener = new PlayerRightClickListener();
+        sceneNode.addListener(PlayerBlockInteractEvent.class,
+                              new PlayerInteractBlockListener(instance, zombiesPlayers, rightClickListener)
+        );
+        sceneNode.addListener(PlayerEntityInteractEvent.class,
+                              new PlayerInteractEntityListener(instance, zombiesPlayers, rightClickListener)
+        );
+        sceneNode.addListener(PlayerUseItemEvent.class,
+                              new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener)
+        );
+        sceneNode.addListener(PlayerUseItemOnBlockEvent.class,
+                              new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener)
+        );
         /*ComponentBuilder componentBuilder = new BasicComponentBuilder();
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, , random);
         ZombiesMap map = new ZombiesMap(mapInfo, componentBuilder, instance, mobSpawner, blockHandler, );
