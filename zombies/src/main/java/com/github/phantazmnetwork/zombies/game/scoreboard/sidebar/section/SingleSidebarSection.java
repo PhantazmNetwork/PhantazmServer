@@ -29,7 +29,7 @@ public class SingleSidebarSection implements SidebarSection {
     }
 
     @Override
-    public @NotNull List<Optional<Component>> tick(long time) {
+    public @NotNull List<Optional<Component>> update(long time) {
         return Collections.singletonList(sidebarLineUpdater.tick(time));
     }
 }
