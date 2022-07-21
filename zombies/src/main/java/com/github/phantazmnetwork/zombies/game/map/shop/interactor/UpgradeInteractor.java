@@ -11,6 +11,7 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.Upgradable;
 import com.github.phantazmnetwork.zombies.game.coin.Transaction;
 import com.github.phantazmnetwork.zombies.game.coin.TransactionResult;
+import com.github.phantazmnetwork.zombies.game.map.shop.InteractionTypes;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -32,7 +33,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 @ComponentModel("phantazm:zombies.map.shop.interactor.equipment")
-public class UpgradeShopInteractor extends TransactionalInteractor {
+public class UpgradeInteractor extends TransactionalInteractor {
     private static final KeyedConfigProcessor<Data> PROCESSOR = new KeyedConfigProcessor<>() {
         private static final ConfigProcessor<Object2IntMap<Key>> MAP_PROCESSOR =
                 ConfigProcessor.mapProcessor(AdventureConfigProcessors.key(), ConfigProcessor.INTEGER,
@@ -61,23 +62,25 @@ public class UpgradeShopInteractor extends TransactionalInteractor {
     }
 
     @ComponentFactory
-    public UpgradeShopInteractor(@NotNull Data data) {
+    public UpgradeInteractor(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
     public @Nullable Pair<Transaction, Consumer<TransactionResult>> getTransactionHook(@NotNull Shop shop,
                                                                                        @NotNull PlayerInteraction interaction) {
-        Optional<Equipment> equipmentOptional = interaction.getPlayer().getHeldEquipment();
-        if (equipmentOptional.isPresent()) {
-            Equipment equipment = equipmentOptional.get();
-            if (equipment instanceof Upgradable upgradable) {
-                Set<Key> possibleUpgrades = upgradable.getSuggestedUpgrades();
-                for (Key key : possibleUpgrades) {
-                    if (data.costMap.containsKey(key)) {
-                        return Pair.of(new Transaction(Collections.emptyList(), -data.costMap.getInt(key)),
-                                       result -> upgradable.setLevel(key)
-                        );
+        if (interaction.key().equals(InteractionTypes.RIGHT_CLICK)) {
+            Optional<Equipment> equipmentOptional = interaction.getPlayer().getHeldEquipment();
+            if (equipmentOptional.isPresent()) {
+                Equipment equipment = equipmentOptional.get();
+                if (equipment instanceof Upgradable upgradable) {
+                    Set<Key> possibleUpgrades = upgradable.getSuggestedUpgrades();
+                    for (Key key : possibleUpgrades) {
+                        if (data.costMap.containsKey(key)) {
+                            return Pair.of(new Transaction(Collections.emptyList(), -data.costMap.getInt(key)),
+                                           result -> upgradable.setLevel(key)
+                            );
+                        }
                     }
                 }
             }

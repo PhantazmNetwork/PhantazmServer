@@ -13,6 +13,7 @@ import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.*;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -37,6 +38,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     private final List<Window> unmodifiableWindows;
     private final List<Spawnpoint> unmodifiableSpawnpoints;
     private final List<Round> unmodifiableRounds;
+
+    private final Set<Key> flags;
 
     private int roundIndex = -1;
     private Round currentRound = null;
@@ -77,6 +80,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         this.unmodifiableWindows = Collections.unmodifiableList(windows);
         this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
+
+        this.flags = new HashSet<>();
 
         try {
             for (RoomInfo roomInfo : roomData) {
@@ -171,6 +176,21 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
     public @UnmodifiableView @NotNull List<Round> getRounds() {
         return unmodifiableRounds;
+    }
+
+    public boolean hasFlag(@NotNull Key flag) {
+        Objects.requireNonNull(flag, "flag");
+        return flags.contains(flag);
+    }
+
+    public void setFlag(@NotNull Key flag) {
+        Objects.requireNonNull(flag, "flag");
+        flags.add(flag);
+    }
+
+    public void removeFlag(@NotNull Key flag) {
+        Objects.requireNonNull(flag, "flag");
+        flags.remove(flag);
     }
 
     public Round currentRound() {

@@ -8,6 +8,6 @@ public final class InteractionTypes {
         throw new UnsupportedOperationException();
     }
 
-    public static final Key RIGHT_CLICK_BLOCK =
+    public static final Key RIGHT_CLICK =
             Key.key(Namespaces.PHANTAZM, "zombies.map.shop.interaction.right_click_block");
 }
