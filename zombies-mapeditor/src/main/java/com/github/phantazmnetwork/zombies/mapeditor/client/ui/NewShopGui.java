@@ -2,9 +2,11 @@ package com.github.phantazmnetwork.zombies.mapeditor.client.ui;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.zombies.map.Evaluation;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.map.ShopInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
+import com.github.steanky.ethylene.core.collection.ArrayConfigList;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -37,9 +39,10 @@ public class NewShopGui extends NamedObjectGui {
             Key typeKey = Key.key(Namespaces.PHANTAZM, value);
             Vec3I origin = currentMap.settings().origin();
 
-            currentMap.shops().add(new ShopInfo(typeKey, firstSelected.sub(origin), new LinkedConfigNode(0),
-                                                new LinkedConfigNode()
-            ));
+            currentMap.shops()
+                      .add(new ShopInfo(typeKey, firstSelected.sub(origin), Evaluation.ALL_TRUE, new ArrayConfigList(0),
+                                        new ArrayConfigList(0), new ArrayConfigList(0)
+                      ));
             session.refreshShops();
             ScreenUtils.closeCurrentScreen();
         });

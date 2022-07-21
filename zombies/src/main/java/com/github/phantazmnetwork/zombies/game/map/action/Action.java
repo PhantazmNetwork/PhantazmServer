@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.action;
 
+import com.github.phantazmnetwork.commons.Prioritized;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -8,13 +9,6 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <TData> the type of data object this action acts on
  */
-public interface Action<TData> extends Comparable<Action<?>> {
+public interface Action<TData> extends Prioritized {
     void perform(@NotNull TData data);
-
-    int priority();
-
-    @Override
-    default int compareTo(@NotNull Action<?> o) {
-        return Integer.compare(priority(), o.priority());
-    }
 }

@@ -95,12 +95,13 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                 ));
             }
 
+            /*
             for (ShopInfo shopInfo : shopData) {
                 shops.add(new Shop(shopInfo, getOrigin(), instance,
                                    builder.makeComponentFromData(shopInfo.displayHandler(), provider),
                                    builder.makeComponentFromData(shopInfo.interactionHandler(), provider)
                 ));
-            }
+            }*/
 
             for (DoorInfo doorInfo : doorData) {
                 doors.add(new Door(doorInfo, origin, instance, Block.AIR,

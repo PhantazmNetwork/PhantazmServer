@@ -31,9 +31,12 @@ public final class MapProcessors {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Vec3I triggerLocation =
                     VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("triggerLocation"));
-            ConfigNode displayHandler = element.getNodeOrThrow("displayHandler");
-            ConfigNode interactionHandler = element.getNodeOrThrow("interactionHandler");
-            return new ShopInfo(id, triggerLocation, displayHandler, interactionHandler);
+            Evaluation predicateEvaluation =
+                    evaluation.dataFromElement(element.getElementOrThrow("predicateEvaluation"));
+            ConfigList predicates = element.getListOrThrow("predicates");
+            ConfigList interactors = element.getListOrThrow("interactors");
+            ConfigList displays = element.getListOrThrow("displays");
+            return new ShopInfo(id, triggerLocation, predicateEvaluation, predicates, interactors, displays);
         }
 
         @Override
@@ -41,8 +44,10 @@ public final class MapProcessors {
             ConfigNode node = new LinkedConfigNode(3);
             node.put("id", AdventureConfigProcessors.key().elementFromData(shopInfo.id()));
             node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
-            node.put("displayHandler", shopInfo.displayHandler());
-            node.put("interactionHandler", shopInfo.interactionHandler());
+            node.put("predicateEvaluation", evaluation.elementFromData(shopInfo.predicateEvaluation()));
+            node.put("predicates", shopInfo.predicates());
+            node.put("interactors", shopInfo.interactors());
+            node.put("displays", shopInfo.displays());
             return node;
         }
     };
@@ -323,6 +328,8 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<Evaluation> evaluation = ConfigProcessor.enumProcessor(Evaluation.class);
+
     private MapProcessors() {
         throw new UnsupportedOperationException();
     }
@@ -419,5 +426,9 @@ public final class MapProcessors {
 
     public static @NotNull ConfigProcessor<HologramInfo> hologramInfo() {
         return hologramInfo;
+    }
+
+    public static @NotNull ConfigProcessor<Evaluation> evaluation() {
+        return evaluation;
     }
 }
