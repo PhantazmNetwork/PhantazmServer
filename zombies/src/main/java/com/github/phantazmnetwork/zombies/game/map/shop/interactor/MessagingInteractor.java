@@ -4,34 +4,39 @@ import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.component.KeyedConfigProcessor;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentData;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
-import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-@ComponentModel("phantazm:zombies.map.shop.interactor.flag_setting")
-public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.Data> {
-    private static final PrioritizedProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
+import java.util.List;
+
+@ComponentModel("phantazm:zombies.map.shop.interactor.messaging")
+public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data> {
+    private static final KeyedConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
         @Override
         public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-            Key flag = AdventureConfigProcessors.key().dataFromElement(node.getElementOrThrow("flag"));
-            return new Data(priority, flag);
+            List<Component> messages = AdventureConfigProcessors.component().listProcessor()
+                                                                .dataFromElement(node.getElementOrThrow("messages"));
+            boolean broadcast = node.getBooleanOrThrow("broadcast");
+            return new Data(priority, messages, broadcast);
         }
 
         @Override
         public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(1);
-            node.put("flag", AdventureConfigProcessors.key().elementFromData(data.flag));
+            ConfigNode node = new LinkedConfigNode(2);
+            node.put("messages", AdventureConfigProcessors.component().listProcessor().elementFromData(data.messages));
+            node.putBoolean("broadcast", data.broadcast);
             return node;
         }
     };
@@ -42,18 +47,30 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
     }
 
     @ComponentFactory
-    public FlagSettingInteractor(@NotNull Data data, ZombiesMap.@NotNull Context context) {
+    public MessagingInteractor(@NotNull Data data, ZombiesMap.@NotNull Context context) {
         super(data, context);
     }
 
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        context.map().setFlag(data.flag);
+        if (data.broadcast) {
+            sendMessages(context.map().getInstance());
+        }
+        else {
+            interaction.getPlayer().getPlayerView().getPlayer().ifPresent(this::sendMessages);
+        }
     }
 
-    @ComponentData
-    public record Data(int priority, @NotNull Key flag) implements Keyed, Prioritized {
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.shop.interactor.flag_setting");
+    private void sendMessages(Audience audience) {
+        for (Component component : data.messages) {
+            audience.sendMessage(component);
+        }
+    }
+
+    public record Data(int priority, @NotNull List<Component> messages, boolean broadcast)
+            implements Keyed, Prioritized {
+
+        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.shop.interactor.messaging");
 
         @Override
         public @NotNull Key key() {

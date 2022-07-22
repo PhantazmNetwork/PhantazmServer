@@ -180,7 +180,7 @@ public class BasicComponentBuilder implements ComponentBuilder {
                 if (dependency == null) {
                     dependency = parameter.getType().getAnnotation(ComponentDependency.class);
                     if (dependency == null) {
-                        throw new ComponentException("Missing ComponentDependency annotation of parameter of factor " +
+                        throw new ComponentException("Missing ComponentDependency annotation of parameter of factory " +
                                                      "constructor for type " + component.getTypeName());
                     }
                 }

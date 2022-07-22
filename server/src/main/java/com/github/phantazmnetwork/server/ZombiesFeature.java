@@ -6,6 +6,8 @@ import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramShopDisplay;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.FlagSettingInteractor;
+import com.github.phantazmnetwork.zombies.game.map.shop.interactor.MessagingInteractor;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.FlagPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.StaticCostPredicate;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -29,9 +31,17 @@ public final class ZombiesFeature {
         builder.registerComponentClass(SpawnMobsAction.class);
 
         //shops
-        builder.registerComponentClass(StaticHologramShopDisplay.class);
+
+        //predicate
         builder.registerComponentClass(StaticCostPredicate.class);
+        builder.registerComponentClass(FlagPredicate.class);
+
+        //interactor
         builder.registerComponentClass(FlagSettingInteractor.class);
+        builder.registerComponentClass(MessagingInteractor.class);
+
+        //display
+        builder.registerComponentClass(StaticHologramShopDisplay.class);
 
         LOGGER.info("Registered component classes.");
     }

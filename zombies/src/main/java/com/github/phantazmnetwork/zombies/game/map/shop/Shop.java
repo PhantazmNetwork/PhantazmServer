@@ -39,7 +39,7 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
         boolean interact = callPredicates(data.predicateEvaluation(), interaction);
         if (interact) {
             for (ShopInteractor interactor : interactors) {
-                interactor.handleInteraction(this, interaction);
+                interactor.handleInteraction(interaction);
             }
         }
 
@@ -52,7 +52,7 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
         switch (evaluation) {
             case ALL_TRUE -> {
                 for (ShopPredicate predicate : predicates) {
-                    if (!predicate.canHandleInteraction(this, interaction)) {
+                    if (!predicate.canHandleInteraction(interaction)) {
                         return false;
                     }
                 }
@@ -62,7 +62,7 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
             case ANY_TRUE -> {
                 boolean foundTrue = false;
                 for (ShopPredicate predicate : predicates) {
-                    if (predicate.canHandleInteraction(this, interaction)) {
+                    if (predicate.canHandleInteraction(interaction)) {
                         foundTrue = true;
                         break;
                     }
