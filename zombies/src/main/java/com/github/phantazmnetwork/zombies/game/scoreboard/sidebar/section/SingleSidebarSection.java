@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.SidebarLineUpdater;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +23,7 @@ public class SingleSidebarSection implements SidebarSection {
     }
 
     @Override
-    public int getSize(@NotNull ZombiesScene scene) {
+    public int getSize() {
         return 1;
     }
 

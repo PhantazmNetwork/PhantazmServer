@@ -6,7 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record ZombiesPlayerEvent<TEvent extends Event>(@NotNull ZombiesPlayer zombiesPlayer, @NotNull TEvent event) {
+public record ZombiesPlayerEvent<TEvent extends Event>(@NotNull ZombiesPlayer zombiesPlayer, @NotNull TEvent event)
+        implements Event {
 
     public ZombiesPlayerEvent {
         Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");

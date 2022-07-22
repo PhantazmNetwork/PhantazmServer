@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar;
 
-import com.github.phantazmnetwork.zombies.game.ZombiesScene;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section.SidebarSection;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import net.kyori.adventure.text.Component;
@@ -33,6 +32,7 @@ public class SidebarUpdater {
     }
 
     public void tick(long time) {
+        refreshSections();
         for (int i = 0; i < sections.size(); i++) {
             List<Optional<Component>> newLines = sections.get(i).update(time);
             for (int j = 0; j < newLines.size(); j++) {
@@ -45,10 +45,10 @@ public class SidebarUpdater {
         }
     }
 
-    private void refreshSections(@NotNull ZombiesScene scene) {
+    private void refreshSections() {
         if (!initialized) {
             for (int i = 0; i < sizes.length; i++) {
-                sizes[i] = sections.get(i).getSize(scene);
+                sizes[i] = sections.get(i).getSize();
             }
 
             for (SidebarSection section : sections) {
@@ -60,7 +60,7 @@ public class SidebarUpdater {
         else {
             boolean shouldInvalidate = false;
             for (int i = 0; i < sizes.length; i++) {
-                int newSize = sections.get(i).getSize(scene);
+                int newSize = sections.get(i).getSize();
                 if (sizes[i] != newSize) {
                     shouldInvalidate = true;
                     sizes[i] = newSize;

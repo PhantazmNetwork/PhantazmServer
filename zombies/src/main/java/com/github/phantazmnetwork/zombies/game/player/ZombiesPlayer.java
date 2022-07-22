@@ -19,8 +19,6 @@ public interface ZombiesPlayer extends Tickable {
 
     boolean isCrouching();
 
-    void setCrouching(boolean crouching);
-
     boolean isInGame();
 
     void setInGame(boolean inGame);
