@@ -5,6 +5,8 @@ import com.github.phantazmnetwork.commons.component.ComponentException;
 import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramShopDisplay;
+import com.github.phantazmnetwork.zombies.game.map.shop.interactor.FlagSettingInteractor;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.StaticCostPredicate;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,8 @@ public final class ZombiesFeature {
 
         //shops
         builder.registerComponentClass(StaticHologramShopDisplay.class);
+        builder.registerComponentClass(StaticCostPredicate.class);
+        builder.registerComponentClass(FlagSettingInteractor.class);
 
         LOGGER.info("Registered component classes.");
     }
