@@ -7,10 +7,10 @@ import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class HologramShopDisplayBase implements ShopDisplay {
+public abstract class HologramDisplayBase implements ShopDisplay {
     protected final Hologram hologram;
 
-    public HologramShopDisplayBase() {
+    public HologramDisplayBase() {
         //initial origin does not matter, the location will be set in initialize
         this.hologram = new InstanceHologram(Vec3D.ORIGIN, 0, Hologram.Alignment.LOWER);
     }

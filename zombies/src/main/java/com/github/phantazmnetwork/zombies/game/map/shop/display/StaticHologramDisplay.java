@@ -19,7 +19,7 @@ import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 @ComponentModel("phantazm:zombies.map.shop.display.static_hologram")
-public class StaticHologramShopDisplay extends HologramShopDisplayBase {
+public class StaticHologramDisplay extends HologramDisplayBase {
     private final Data data;
 
     private static final KeyedConfigProcessor<Data> PROCESSOR = new KeyedConfigProcessor<>() {
@@ -43,7 +43,7 @@ public class StaticHologramShopDisplay extends HologramShopDisplayBase {
     }
 
     @ComponentFactory
-    public StaticHologramShopDisplay(@NotNull Data data) {
+    public StaticHologramDisplay(@NotNull Data data) {
         this.data = data;
     }
 
