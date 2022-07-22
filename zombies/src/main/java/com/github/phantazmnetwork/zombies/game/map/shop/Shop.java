@@ -76,6 +76,16 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
 
     @Override
     public void tick(long time) {
+        if (!interactors.isEmpty()) {
+            for (ShopInteractor interactor : interactors) {
+                interactor.tick(time);
+            }
+        }
 
+        if (!displays.isEmpty()) {
+            for (ShopDisplay display : displays) {
+                display.tick(time);
+            }
+        }
     }
 }

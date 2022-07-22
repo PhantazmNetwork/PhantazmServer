@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.component.KeyedConfigProcessor;
+import com.github.phantazmnetwork.commons.component.annotation.ComponentData;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
@@ -67,6 +68,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
         }
     }
 
+    @ComponentData
     public record Data(int priority, @NotNull List<Component> messages, boolean broadcast)
             implements Keyed, Prioritized {
 
