@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAct
 import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramDisplay;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.FlagSettingInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.MessagingInteractor;
+import com.github.phantazmnetwork.zombies.game.map.shop.interactor.PlaySoundInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.FlagPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.StaticCostPredicate;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +40,7 @@ public final class ZombiesFeature {
         //interactor
         builder.registerComponentClass(FlagSettingInteractor.class);
         builder.registerComponentClass(MessagingInteractor.class);
+        builder.registerComponentClass(PlaySoundInteractor.class);
 
         //display
         builder.registerComponentClass(StaticHologramDisplay.class);

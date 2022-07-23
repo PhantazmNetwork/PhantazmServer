@@ -54,7 +54,7 @@ class BasicComponentBuilderTest {
         Map<Key, Object> dependencyMap = new HashMap<>(1);
         dependencyMap.put(Key.key(Namespaces.PHANTAZM, "test.dependency.number"), 420);
 
-        DependencyProvider provider = DependencyProvider.lazy(dependencyMap::get);
+        DependencyProvider provider = DependencyProvider.memoizing(dependencyMap::get);
 
         TestComponent component = builder.makeComponent(builder.makeData(componentData), provider);
         TestComponent.Data data = component.data;
@@ -83,7 +83,7 @@ class BasicComponentBuilderTest {
         Map<Key, Object> depMap = new HashMap<>();
         depMap.put(Key.key("phantazm:test.value"), 69420);
 
-        DependencyProvider deps = new LazyDependencyProvider(depMap::get);
+        DependencyProvider deps = new MemoizingDependencyProvider(depMap::get);
 
         ExplicitDependencyConstructorFactory component = builder.makeComponent(builder.makeData(node), deps);
         assertEquals(69420, component.value);
@@ -101,7 +101,7 @@ class BasicComponentBuilderTest {
         Map<Key, Object> depMap = new HashMap<>();
         depMap.put(Key.key("phantazm:test.value"), new ImplicitDependencyConstructorFactory.Dependency(42069));
 
-        DependencyProvider deps = new LazyDependencyProvider(depMap::get);
+        DependencyProvider deps = new MemoizingDependencyProvider(depMap::get);
 
         ImplicitDependencyConstructorFactory component = builder.makeComponent(builder.makeData(node), deps);
         assertEquals(42069, component.dependency.value);
@@ -133,7 +133,7 @@ class BasicComponentBuilderTest {
         depMap.put(Key.key("phantazm:dependency1"), 42069);
         depMap.put(Key.key("phantazm:dependency2"), "test");
 
-        DependencyProvider deps = new LazyDependencyProvider(depMap::get);
+        DependencyProvider deps = new MemoizingDependencyProvider(depMap::get);
         JustDependencies component = builder.makeComponent(builder.makeData(node), deps);
 
         assertEquals(42069, component.dependency1);

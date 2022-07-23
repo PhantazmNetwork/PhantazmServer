@@ -28,13 +28,13 @@ public interface DependencyProvider {
 
     /**
      * Creates a new {@link DependencyProvider} implementation that will lazily resolve dependencies using the given
-     * function during the "prepare" phase.
+     * function.
      *
      * @param dependencyFunction the function used to create dependencies
      * @return a new DependencyProvider implementation
      */
-    static @NotNull DependencyProvider lazy(@NotNull Function<? super Key, ?> dependencyFunction) {
-        return new LazyDependencyProvider(dependencyFunction);
+    static @NotNull DependencyProvider memoizing(@NotNull Function<? super Key, ?> dependencyFunction) {
+        return new MemoizingDependencyProvider(dependencyFunction);
     }
 
     /**
@@ -71,7 +71,7 @@ public interface DependencyProvider {
             mappings.putIfAbsent(key, object);
         }
 
-        return new LazyDependencyProvider(mappings::get);
+        return new MemoizingDependencyProvider(mappings::get);
     }
 
     /**

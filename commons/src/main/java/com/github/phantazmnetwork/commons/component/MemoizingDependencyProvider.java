@@ -11,7 +11,7 @@ import java.util.function.Function;
 /**
  * Lazily-initializing implementation of {@link DependencyProvider}.
  */
-class LazyDependencyProvider implements DependencyProvider {
+class MemoizingDependencyProvider implements DependencyProvider {
     /**
      * The dependency function used to instantiate new dependencies.
      */
@@ -27,7 +27,7 @@ class LazyDependencyProvider implements DependencyProvider {
      *
      * @param dependencyFunction the dependency creation function
      */
-    LazyDependencyProvider(@NotNull Function<? super Key, ?> dependencyFunction) {
+    MemoizingDependencyProvider(@NotNull Function<? super Key, ?> dependencyFunction) {
         this.dependencyFunction = Objects.requireNonNull(dependencyFunction, "dependencyFunction");
         this.loadedDependencies = new HashMap<>(8);
     }
