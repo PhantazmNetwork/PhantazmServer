@@ -11,7 +11,6 @@ import com.github.phantazmnetwork.commons.component.annotation.ComponentProcesso
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
-import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;

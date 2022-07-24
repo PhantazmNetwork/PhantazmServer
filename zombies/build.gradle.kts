@@ -10,4 +10,5 @@ dependencies {
     implementation(projects.phantazmCore)
     implementation(projects.phantazmMob)
     implementation(projects.phantazmZombiesMapdata)
+    implementation(libs.element.core)
 }

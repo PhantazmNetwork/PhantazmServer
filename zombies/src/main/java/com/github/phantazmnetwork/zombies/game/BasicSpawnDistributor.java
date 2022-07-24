@@ -6,16 +6,12 @@ import com.github.phantazmnetwork.zombies.game.map.Spawnpoint;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.inventory.PlayerInventoryItemChangeEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class BasicSpawnDistributor implements SpawnDistributor {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicSpawnDistributor.class);
