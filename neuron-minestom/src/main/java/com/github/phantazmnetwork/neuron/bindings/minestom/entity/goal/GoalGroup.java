@@ -31,7 +31,6 @@ public class GoalGroup implements Tickable {
         }
         else if (activeGroup.shouldEnd()) {
             activeGroup.end();
-            ;
             activeGroup = null;
         }
         else {

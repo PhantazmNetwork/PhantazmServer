@@ -10,7 +10,7 @@ public final class MessageChannels {
     /**
      * The message channel between a server and the proxy.
      */
-    public static String PROXY = "proxy";
+    public static final String PROXY = "proxy";
 
     private MessageChannels() {
         throw new UnsupportedOperationException();

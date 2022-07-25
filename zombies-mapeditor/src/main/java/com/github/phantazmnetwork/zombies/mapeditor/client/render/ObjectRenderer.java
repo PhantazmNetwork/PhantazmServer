@@ -121,29 +121,29 @@ public interface ObjectRenderer {
         /**
          * How this object should be rendered.
          */
-        public RenderType type;
+        public final RenderType type;
 
         /**
          * The {@link Color} of this object.
          */
-        public Color color;
+        public final Color color;
 
         /**
          * If this object should render. If true, this object is visible. If false, this object is invisible.
          */
-        public boolean shouldRender;
+        public final boolean shouldRender;
 
         /**
          * If true, this object should be visible even through opaque blocks. If false, this object will be blocked from
          * view when behind opaque objects.
          */
-        public boolean renderThroughWalls;
+        public final boolean renderThroughWalls;
 
         /**
          * An array of {@link Vec3d} objects representing the corners of all bounding boxes to be displayed by this
          * object.
          */
-        public Vec3d[] bounds;
+        public final Vec3d[] bounds;
 
         /**
          * Creates a new instance of this class, with the specified initial values.
