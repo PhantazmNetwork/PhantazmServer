@@ -2,18 +2,18 @@ package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentData;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
+import com.github.steanky.element.core.annotation.ElementData;
+import com.github.steanky.element.core.annotation.ElementModel;
+import com.github.steanky.element.core.annotation.FactoryMethod;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-@ComponentModel("phantazm:zombies.map.shop.predicate.equipment_cost")
+@ElementModel("zombies.map.shop.predicate.equipment_cost")
 public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate.Data> {
-    @ComponentFactory
+    @FactoryMethod
     public EquipmentCostPredicate(@NotNull Data data) {
         super(data);
     }
@@ -23,7 +23,7 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
         return false;
     }
 
-    @ComponentData
+    @ElementData
     public record Data(int priority, @NotNull Key equipment, @NotNull Object2IntMap<Key> upgradeCosts)
             implements Keyed, Prioritized {
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.shop.predicate.equipment_cost");

@@ -8,6 +8,7 @@ plugins {
 repositories {
     maven("https://jitpack.io")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://dl.cloudsmith.io/public/steank-f1g/element-QiJ/maven/")
 }
 
 dependencies {
@@ -21,6 +22,7 @@ dependencies {
     implementation(libs.adventure.text.minimessage)
     implementation(libs.ethylene.toml)
     implementation(libs.ethylene.yaml)
+    implementation(libs.element.core)
 }
 
 tasks.getByName<CopyLibs>("copyLibs") {

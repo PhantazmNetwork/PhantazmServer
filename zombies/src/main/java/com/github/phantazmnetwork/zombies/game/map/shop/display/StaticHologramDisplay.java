@@ -1,48 +1,51 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.display;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.component.KeyedConfigProcessor;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentData;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentFactory;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentModel;
-import com.github.phantazmnetwork.commons.component.annotation.ComponentProcessor;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import com.github.phantazmnetwork.zombies.map.MapProcessors;
+import com.github.steanky.element.core.annotation.ElementData;
+import com.github.steanky.element.core.annotation.ElementModel;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-@ComponentModel("phantazm:zombies.map.shop.display.static_hologram")
+@ElementModel("zombies.map.shop.display.static_hologram")
 public class StaticHologramDisplay extends HologramDisplayBase {
-    private final Data data;
+    private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
+        private static final ConfigProcessor<HologramInfo> HOLOGRAM_PROCESSOR = MapProcessors.hologramInfo();
 
-    private static final KeyedConfigProcessor<Data> PROCESSOR = new KeyedConfigProcessor<>() {
         @Override
-        public @NotNull Data dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException {
-            HologramInfo info = MapProcessors.hologramInfo().dataFromElement(node.getElementOrThrow("hologramInfo"));
+        public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
+            HologramInfo info = HOLOGRAM_PROCESSOR.dataFromElement(node.getElementOrThrow("hologramInfo"));
             return new Data(info);
         }
 
         @Override
-        public @NotNull ConfigNode nodeFromData(@NotNull Data data) throws ConfigProcessException {
+        public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(1);
-            node.put("hologramInfo", MapProcessors.hologramInfo().elementFromData(data.info));
+            node.put("hologramInfo", HOLOGRAM_PROCESSOR.elementFromData(data.info));
             return node;
         }
     };
 
-    @ComponentProcessor
-    public static @NotNull KeyedConfigProcessor<Data> processor() {
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
         return PROCESSOR;
     }
 
-    @ComponentFactory
+    private final Data data;
+
+    @FactoryMethod
     public StaticHologramDisplay(@NotNull Data data) {
         this.data = data;
     }
@@ -62,7 +65,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
         hologram.addAll(data.info.text());
     }
 
-    @ComponentData
+    @ElementData
     public record Data(@NotNull HologramInfo info) implements Keyed {
         public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.shop.display.static_hologram");
 

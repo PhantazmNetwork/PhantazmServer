@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.commons.component.*;
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.MojangIdentitySource;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
@@ -8,9 +8,14 @@ import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
+import com.github.steanky.element.core.*;
+import com.github.steanky.element.core.key.BasicKeyParser;
+import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -146,14 +151,21 @@ public final class PhantazmServer {
     }
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
-                                           LobbiesConfig lobbiesConfig) throws ComponentException {
+                                           LobbiesConfig lobbiesConfig) {
         BasicPlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
                                             MinecraftServer.getConnectionManager()
                 );
+        KeyParser phantazmParser = new BasicKeyParser(Namespaces.PHANTAZM);
+        KeyExtractor phantazmExtractor = new BasicKeyExtractor("serialKey", phantazmParser);
+        ElementInspector phantazmInspector = new BasicElementInspector(phantazmParser);
+        Registry<ConfigProcessor<? extends Keyed>> processorRegistry = new HashRegistry<>();
+        Registry<ElementFactory<?, ?>> factoryRegistry = new HashRegistry<>();
 
-        ComponentBuilder componentBuilder =
-                new BasicComponentBuilder(new BasicKeyedConfigRegistry(), new BasicKeyedFactoryRegistry());
+        ElementBuilder builder =
+                new BasicElementBuilder(phantazmParser, phantazmExtractor, phantazmInspector, processorRegistry,
+                                        factoryRegistry
+                );
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
@@ -165,7 +177,7 @@ public final class PhantazmServer {
                                     new YamlCodec(() -> new Load(LoadSettings.builder().build()), () -> new Dump(
                                             DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()))
         );
-        ZombiesFeature.initialize(componentBuilder);
+        ZombiesFeature.initialize(builder);
         ZombiesTest.initialize(global);
     }
 

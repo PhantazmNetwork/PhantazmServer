@@ -4,6 +4,7 @@ plugins {
 
 repositories {
     maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
+    maven("https://dl.cloudsmith.io/public/steank-f1g/element-QiJ/maven/")
 }
 
 dependencies {

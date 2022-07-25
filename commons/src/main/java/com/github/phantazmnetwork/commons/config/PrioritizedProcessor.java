@@ -1,27 +1,28 @@
 package com.github.phantazmnetwork.commons.config;
 
 import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.commons.component.KeyedConfigProcessor;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * {@link KeyedConfigProcessor} implementation designed for serializing/deserializing {@link Prioritized} objects.
+ * {@link ConfigProcessor} implementation designed for serializing/deserializing {@link Prioritized} objects.
  *
  * @param <TData> the type of data to process
  */
-public abstract class PrioritizedProcessor<TData extends Prioritized & Keyed> extends KeyedConfigProcessor<TData> {
+public abstract class PrioritizedProcessor<TData extends Prioritized & Keyed> implements ConfigProcessor<TData> {
     @Override
-    public final @NotNull TData dataFromNode(@NotNull ConfigNode node) throws ConfigProcessException {
+    public final @NotNull TData dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
         int priority = node.getNumberOrThrow("priority").intValue();
-        return finishData(node, priority);
+        return finishData(node.asNode(), priority);
     }
 
     @Override
-    public final @NotNull ConfigNode nodeFromData(@NotNull TData data) throws ConfigProcessException {
+    public final @NotNull ConfigNode elementFromData(@NotNull TData data) throws ConfigProcessException {
         ConfigNode node = finishNode(data);
 
         ConfigNode newNode = new LinkedConfigNode(node.size() + 1);

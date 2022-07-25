@@ -60,6 +60,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         this.spawnedMobs = new ArrayList<>();
         this.unmodifiableSpawnedMobs = Collections.unmodifiableList(spawnedMobs);
         this.spawnpointSupplier = Objects.requireNonNull(spawnpointSupplier, "spawnpointSupplier");
+        
         this.startActions.sort(Comparator.reverseOrder());
         this.endActions.sort(Comparator.reverseOrder());
     }
