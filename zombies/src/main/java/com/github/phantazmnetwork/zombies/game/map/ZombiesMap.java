@@ -8,10 +8,12 @@ import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
+import com.github.phantazmnetwork.zombies.game.map.shop.display.ShopDisplay;
+import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShopInteractor;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.steanky.element.core.ElementBuilder;
 import com.github.steanky.element.core.annotation.DependencySupplier;
-import com.github.steanky.element.core.annotation.ElementDependency;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
@@ -115,6 +117,29 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
             ));
         }
 
+        for (ShopInfo shopInfo : shopData) {
+            List<ShopPredicate> predicates = builder.loadAllElements(selectNodes(shopInfo.predicates()), provider,
+                                                                     e -> LOGGER.warn(
+                                                                             "Error initializing shop predicates for {}: {}",
+                                                                             shopInfo, e
+                                                                     )
+            );
+
+            List<ShopInteractor> interactors = builder.loadAllElements(selectNodes(shopInfo.interactors()), provider,
+                                                                       e -> LOGGER.warn("Error initializing shop " +
+                                                                                        "interactors for {}: {}",
+                                                                                        shopInfo, e
+                                                                       )
+            );
+            List<ShopDisplay> displays = builder.loadAllElements(selectNodes(shopInfo.interactors()), provider,
+                                                                 e -> LOGGER.warn(
+                                                                         "Error initializing shop displays for {}: {}",
+                                                                         shopInfo, e
+                                                                 )
+            );
+            shops.add(new Shop(shopInfo, origin, instance, predicates, interactors, displays));
+        }
+
         for (WindowInfo windowInfo : windowData) {
             windows.add(new Window(instance, windowInfo, origin, blockHandler,
                                    builder.loadAllElements(selectNodes(windowInfo.repairActions()), provider,
@@ -156,7 +181,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         }
     }
 
-    private @NotNull List<ConfigNode> selectNodes(@NotNull ConfigList list) {
+    private static @NotNull List<ConfigNode> selectNodes(@NotNull ConfigList list) {
         List<ConfigNode> nodes = new ArrayList<>(list.size());
         for (ConfigElement element : list) {
             if (element.isNode()) {

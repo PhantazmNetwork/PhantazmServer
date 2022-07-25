@@ -60,7 +60,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         this.spawnedMobs = new ArrayList<>();
         this.unmodifiableSpawnedMobs = Collections.unmodifiableList(spawnedMobs);
         this.spawnpointSupplier = Objects.requireNonNull(spawnpointSupplier, "spawnpointSupplier");
-        
+
         this.startActions.sort(Comparator.reverseOrder());
         this.endActions.sort(Comparator.reverseOrder());
     }
@@ -138,6 +138,10 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
 
     public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
                                                 @NotNull SpawnDistributor spawnDistributor, boolean syncCount) {
+        if (!isActive) {
+            throw new IllegalStateException("Round must be active to spawn mobs");
+        }
+
         List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnpointSupplier.get(), spawnInfo);
         spawnedMobs.addAll(spawns);
 
@@ -148,6 +152,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         else {
             totalMobCount += spawns.size();
         }
+
 
         return spawns;
     }
