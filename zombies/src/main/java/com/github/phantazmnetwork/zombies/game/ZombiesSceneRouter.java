@@ -82,8 +82,8 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
 
         SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider = sceneProviders.get(routeRequest.targetMap());
         if (sceneProvider == null) {
-            return new RouteResult(false, Optional.of(
-                    Component.text("No games exist with key " + routeRequest.targetMap() + ".")));
+            return new RouteResult(false,
+                    Optional.of(Component.text("No games exist with key " + routeRequest.targetMap() + ".")));
         }
 
         ZombiesJoinRequest joinRequest = routeRequest.joinRequest();
@@ -112,8 +112,8 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID uuid : leavers) {
             if (!playerSceneMap.containsKey(uuid)) {
-                return new RouteResult(false, Optional.of(
-                        Component.text(uuid + " is not part of a game in the zombies router.")));
+                return new RouteResult(false,
+                        Optional.of(Component.text(uuid + " is not part of a game in the zombies router.")));
             }
         }
 

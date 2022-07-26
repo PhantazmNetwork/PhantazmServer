@@ -64,10 +64,43 @@ public final class NeuralEntity extends LivingEntity implements Agent {
     }
 
     @Override
+    public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+        return super.setInstance(instance, spawnPosition).thenRun(() -> {
+            PathContext context = provider.provideContext(instance);
+
+            cancelNavigation();
+            navigator = descriptor.makeNavigator(context, this);
+            controller = descriptor.makeController(this);
+
+            explorer = new TranslationExplorer(null, descriptor, descriptor.makeTranslator(instance, context));
+        });
+    }
+
+    @Override
+    public void remove() {
+        super.remove();
+        cancelNavigation();
+    }
+
+    @Override
     public void update(long time) {
         aiTick(time);
 
         super.update(time);
+    }
+
+    @Override
+    public void kill() {
+        super.kill();
+
+        if (removalAnimationDelay > 0) {
+            // Needed for proper death animation (wait for it to finish before destroying the entity)
+            scheduleRemove(Duration.of(removalAnimationDelay, TimeUnit.MILLISECOND));
+        }
+        else {
+            // Instant removal without animation playback
+            remove();
+        }
     }
 
     /**
@@ -96,8 +129,8 @@ public final class NeuralEntity extends LivingEntity implements Agent {
         Instance instance = this.instance;
         Chunk currentChunk = this.currentChunk;
         return instance != null && currentChunk != null && !isDead() && instance.getWorldBorder().isInside(this) &&
-               !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null &&
-               descriptor.canPathfind(this);
+                !instance.isInVoid(getPosition()) && currentChunk.isLoaded() && vehicle == null &&
+                descriptor.canPathfind(this);
     }
 
     @Override
@@ -147,39 +180,6 @@ public final class NeuralEntity extends LivingEntity implements Agent {
         else {
             navigator.setDestination(() -> descriptor.computeTargetPosition(target));
         }
-    }
-
-    @Override
-    public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        return super.setInstance(instance, spawnPosition).thenRun(() -> {
-            PathContext context = provider.provideContext(instance);
-
-            cancelNavigation();
-            navigator = descriptor.makeNavigator(context, this);
-            controller = descriptor.makeController(this);
-
-            explorer = new TranslationExplorer(null, descriptor, descriptor.makeTranslator(instance, context));
-        });
-    }
-
-    @Override
-    public void kill() {
-        super.kill();
-
-        if (removalAnimationDelay > 0) {
-            // Needed for proper death animation (wait for it to finish before destroying the entity)
-            scheduleRemove(Duration.of(removalAnimationDelay, TimeUnit.MILLISECOND));
-        }
-        else {
-            // Instant removal without animation playback
-            remove();
-        }
-    }
-
-    @Override
-    public void remove() {
-        super.remove();
-        cancelNavigation();
     }
 
     /**

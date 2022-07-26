@@ -40,8 +40,8 @@ public class BasicPathOperation implements PathOperation {
      * @throws NullPointerException if any of the arguments are null
      */
     public BasicPathOperation(@NotNull Vec3I start, @NotNull Vec3I destination,
-                              @NotNull Predicate<? super Vec3I> successPredicate, @NotNull Calculator calculator,
-                              @NotNull Explorer explorer, float xOffset, float zOffset) {
+            @NotNull Predicate<? super Vec3I> successPredicate, @NotNull Calculator calculator,
+            @NotNull Explorer explorer, float xOffset, float zOffset) {
         this.destination = Objects.requireNonNull(destination, "destination");
         this.successPredicate = Objects.requireNonNull(successPredicate, "successPredicate");
         this.calculator = Objects.requireNonNull(calculator, "calculator");
@@ -108,11 +108,8 @@ public class BasicPathOperation implements PathOperation {
                 ordering), node objects are safe for use as keys because comparison-changing values are final
                  */
                 Node neighbor = graph.computeIfAbsent(Vec3I.of(x, y, z),
-                                                      (Vec3I key) -> new Node(key, Float.POSITIVE_INFINITY,
-                                                                              calculator.heuristic(key, destination),
-                                                                              current
-                                                      )
-                );
+                        (Vec3I key) -> new Node(key, Float.POSITIVE_INFINITY, calculator.heuristic(key, destination),
+                                current));
 
                 if (neighbor == initial) {
                     //when re-visiting the first node, reset the offset value as we should be at the center

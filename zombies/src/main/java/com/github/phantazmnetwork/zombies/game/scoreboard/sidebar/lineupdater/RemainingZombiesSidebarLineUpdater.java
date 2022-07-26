@@ -30,8 +30,7 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
         if (round != null && (lastRemainingZombies == -1 || lastRemainingZombies != round.getTotalMobCount())) {
             lastRemainingZombies = round.getTotalMobCount();
             return Optional.of(Component.textOfChildren(Component.text("Remaining Zombies: "),
-                                                        Component.text(lastRemainingZombies, NamedTextColor.GREEN)
-            ));
+                    Component.text(lastRemainingZombies, NamedTextColor.GREEN)));
         }
 
         return Optional.empty();

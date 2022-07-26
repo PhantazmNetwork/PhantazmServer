@@ -43,14 +43,14 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
         }
     };
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
-    }
-
     @FactoryMethod
     public StaticCostPredicate(@NotNull Data data) {
         super(data);
+    }
+
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return PROCESSOR;
     }
 
     @Override

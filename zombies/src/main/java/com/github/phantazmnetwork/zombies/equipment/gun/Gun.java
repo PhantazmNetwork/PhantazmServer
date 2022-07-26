@@ -53,8 +53,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
         GunStats stats = level.stats();
         this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats.reloadSpeed(), stats.maxAmmo(),
-                                  stats.maxClip(), false, 0
-        );
+                stats.maxClip(), false, 0);
     }
 
     /**

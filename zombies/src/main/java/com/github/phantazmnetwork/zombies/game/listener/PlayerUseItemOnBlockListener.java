@@ -15,7 +15,7 @@ public class PlayerUseItemOnBlockListener extends ZombiesPlayerEventListener<Pla
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerUseItemOnBlockListener(@NotNull Instance instance, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
-                                        @NotNull PlayerRightClickListener rightClickListener) {
+            @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
         this.rightClickListener = Objects.requireNonNull(rightClickListener, "rightClickListener");
     }

@@ -37,8 +37,7 @@ class ShapeSolid extends PointSolid {
             List<Solid> childSolids = new ArrayList<>(children.size());
             for (BoundingBox boundingBox : children) {
                 childSolids.add(new PointSolid(VecUtils.toFloat(boundingBox.relativeStart()),
-                                               VecUtils.toFloat(boundingBox.relativeEnd())
-                ));
+                        VecUtils.toFloat(boundingBox.relativeEnd())));
             }
 
             this.hasChildren = true;

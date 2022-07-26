@@ -32,7 +32,7 @@ public interface Space {
      * @return a SolidIterable which will iterate all solids present in the AABB
      */
     @NotNull SolidSource solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
-                                           @NotNull Order order);
+            @NotNull Order order);
 
     /**
      * Values used to communicate the order by which solids should be iterated. For example, {@link Order#XYZ} signals
@@ -48,41 +48,36 @@ public interface Space {
          * {@code y}-first, then {@code x}, then {@code z} iteration order.
          */
         YXZ((f, s, t, space) -> space.solidAt(s, f, t),
-            (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
-                    yOrg, xOrg, zOrg, yInc, xInc, zInc, yEnd, xEnd, zEnd)
-        ),
+                (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
+                        yOrg, xOrg, zOrg, yInc, xInc, zInc, yEnd, xEnd, zEnd)),
 
         /**
          * {@code y}-first, then {@code z}, then {@code x} iteration order.
          */
         YZX((f, s, t, space) -> space.solidAt(t, f, s),
-            (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
-                    yOrg, zOrg, xOrg, yInc, zInc, xInc, yEnd, zEnd, xEnd)
-        ),
+                (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
+                        yOrg, zOrg, xOrg, yInc, zInc, xInc, yEnd, zEnd, xEnd)),
 
         /**
          * {@code z}-first, then {@code y}, then {@code x} iteration order.
          */
         ZYX((f, s, t, space) -> space.solidAt(t, s, f),
-            (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
-                    zOrg, yOrg, xOrg, zInc, yInc, xInc, zEnd, yEnd, xEnd)
-        ),
+                (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
+                        zOrg, yOrg, xOrg, zInc, yInc, xInc, zEnd, yEnd, xEnd)),
 
         /**
          * {@code z}-first, then {@code x}, then {@code y} iteration order.
          */
         ZXY((f, s, t, space) -> space.solidAt(s, t, f),
-            (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
-                    zOrg, xOrg, yOrg, zInc, xInc, yInc, zEnd, xEnd, yEnd)
-        ),
+                (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
+                        zOrg, xOrg, yOrg, zInc, xInc, yInc, zEnd, xEnd, yEnd)),
 
         /**
          * {@code x}-first, then {@code z}, then {@code y} iteration order.
          */
         XZY((f, s, t, space) -> space.solidAt(f, t, s),
-            (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
-                    xOrg, zOrg, yOrg, xInc, zInc, yInc, xEnd, zEnd, yEnd)
-        );
+                (int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd, int yEnd, int zEnd) -> new IterationVariables(
+                        xOrg, zOrg, yOrg, xInc, zInc, yInc, xEnd, zEnd, yEnd));
 
         private final SpaceAccessor accessor;
         private final IterationVariablesSupplier variablesSupplier;
@@ -153,7 +148,7 @@ public interface Space {
              * @return a new IterationVariables instance
              */
             @NotNull IterationVariables make(int xOrg, int yOrg, int zOrg, int xInc, int yInc, int zInc, int xEnd,
-                                             int yEnd, int zEnd);
+                    int yEnd, int zEnd);
         }
 
         /**

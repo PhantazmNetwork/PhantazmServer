@@ -234,8 +234,7 @@ final class EquipmentFeature {
         gunProcessors.put(WallshotBlockIteration.Data.SERIAL_KEY, WallshotBlockIteration.processor());
         gunProcessors.put(HitScanFirer.Data.SERIAL_KEY, HitScanFirer.processor());
         gunProcessors.put(PhantazmMobProjectileCollisionFilter.Data.SERIAL_KEY,
-                          PhantazmMobProjectileCollisionFilter.processor()
-        );
+                PhantazmMobProjectileCollisionFilter.processor());
         gunProcessors.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.processor());
         gunProcessors.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.processor());
         gunProcessors.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.processor());
@@ -313,7 +312,7 @@ final class EquipmentFeature {
      * @return A new {@link Gun}
      */
     public static @NotNull Gun createGun(@NotNull Key key, @NotNull EventNode<Event> node, @NotNull MobStore store,
-                                         @NotNull PlayerView playerView, @NotNull Random random) {
+            @NotNull PlayerView playerView, @NotNull Random random) {
         List<ComplexData> complexDataList = gunLevelMap.get(key);
         if (complexDataList == null) {
             throw new IllegalArgumentException("No gun level data found for key " + key);
@@ -333,8 +332,7 @@ final class EquipmentFeature {
             Collection<GunStackMapper> gunStackMappers = provider.getDependencies(data.gunStackMappers());
 
             return new GunLevel(data.upgrades(), data.stack(), stats, shootTester, reloadTester, firer, activateEffects,
-                                shootEffects, reloadEffects, tickEffects, noAmmoEffects, gunStackMappers
-            );
+                    shootEffects, reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
         };
         Factory<EntityInstanceAudienceProvider.Data, EntityInstanceAudienceProvider> entityInstanceAudienceProvider =
                 (provider, data) -> new EntityInstanceAudienceProvider(playerView::getPlayer);
@@ -392,8 +390,7 @@ final class EquipmentFeature {
 
             ProjectileFirer firer =
                     new ProjectileFirer(data, playerView::getPlayer, playerView.getUUID(), endSelector, targetFinder,
-                                        collisionFilter, shotHandlers
-                    );
+                            collisionFilter, shotHandlers);
             node.addListener(ProjectileCollideWithBlockEvent.class, firer::onProjectileCollision);
             node.addListener(ProjectileCollideWithEntityEvent.class, firer::onProjectileCollision);
 

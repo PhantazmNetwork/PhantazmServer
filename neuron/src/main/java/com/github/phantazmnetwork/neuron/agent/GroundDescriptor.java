@@ -18,8 +18,7 @@ public interface GroundDescriptor extends PhysicalDescriptor {
     Collection<? extends Vec3I> DEFAULT_WALK_DIRECTIONS =
             List.of(Vec3I.of(1, 0, 0), Vec3I.of(0, 0, 1), Vec3I.of(-1, 0, 0), Vec3I.of(0, 0, -1),
 
-                    Vec3I.of(1, 0, 1), Vec3I.of(-1, 0, 1), Vec3I.of(1, 0, -1), Vec3I.of(-1, 0, -1)
-            );
+                    Vec3I.of(1, 0, 1), Vec3I.of(-1, 0, 1), Vec3I.of(1, 0, -1), Vec3I.of(-1, 0, -1));
 
     /**
      * Returns the jump height for this agent.
@@ -37,13 +36,8 @@ public interface GroundDescriptor extends PhysicalDescriptor {
     float getFallTolerance();
 
     @Override
-    default @NotNull Collection<? extends Vec3I> stepDirections() {
-        return DEFAULT_WALK_DIRECTIONS;
-    }
-
-    @Override
     default boolean shouldInvalidate(@NotNull Iterable<? extends Vec3I> cached, @NotNull Vec3I origin,
-                                     @NotNull Vec3I update, @NotNull Solid oldSolid, @NotNull Solid newSolid) {
+            @NotNull Vec3I update, @NotNull Solid oldSolid, @NotNull Solid newSolid) {
         if (oldSolid.equals(newSolid)) {
             //don't invalidate if no change occurred
             return false;
@@ -56,8 +50,7 @@ public interface GroundDescriptor extends PhysicalDescriptor {
             }
 
             steps.removeIf(vector -> vector.getX() == (int)Math.signum(step.getX()) &&
-                                     vector.getY() == (int)Math.signum(step.getY()) &&
-                                     vector.getZ() == (int)Math.signum(step.getZ()));
+                    vector.getY() == (int)Math.signum(step.getY()) && vector.getZ() == (int)Math.signum(step.getZ()));
         }
 
         for (Vec3I step : steps) {
@@ -67,6 +60,11 @@ public interface GroundDescriptor extends PhysicalDescriptor {
         }
 
         return false;
+    }
+
+    @Override
+    default @NotNull Collection<? extends Vec3I> stepDirections() {
+        return DEFAULT_WALK_DIRECTIONS;
     }
 
     private boolean overlaps(Vec3I origin, Vec3I step, Vec3I update) {

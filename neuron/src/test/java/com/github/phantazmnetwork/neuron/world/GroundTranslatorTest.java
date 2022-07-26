@@ -21,9 +21,8 @@ class GroundTranslatorTest {
     }
 
     private static GroundTranslator mockTranslator(float agentHeight, float agentWidth, float jumpHeight,
-                                                   float fallTolerance, Map<Vec3I, Double> heightMap,
-                                                   Iterable<Double> highestCollisions,
-                                                   Iterable<Double> lowestCollisions) {
+            float fallTolerance, Map<Vec3I, Double> heightMap, Iterable<Double> highestCollisions,
+            Iterable<Double> lowestCollisions) {
         GroundDescriptor mockDescriptor = mock(GroundDescriptor.class);
         when(mockDescriptor.getHeight()).thenReturn(agentHeight);
         when(mockDescriptor.getWidth()).thenReturn(agentWidth);
@@ -44,8 +43,7 @@ class GroundTranslatorTest {
 
         OngoingStubbing<Double> highest =
                 when(mockCollider.highestCollisionAlong(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(),
-                                                        anyDouble(), anyDouble(), anyDouble(), anyDouble()
-                ));
+                        anyDouble(), anyDouble(), anyDouble(), anyDouble()));
         for (Double collision : highestCollisions) {
             highest = highest.thenReturn(collision);
         }
@@ -53,8 +51,7 @@ class GroundTranslatorTest {
 
         OngoingStubbing<Double> lowest =
                 when(mockCollider.lowestCollisionAlong(anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(),
-                                                       anyDouble(), anyDouble(), anyDouble(), anyDouble()
-                ));
+                        anyDouble(), anyDouble(), anyDouble(), anyDouble()));
         for (Double collision : lowestCollisions) {
             lowest = lowest.thenReturn(collision);
         }
@@ -71,8 +68,7 @@ class GroundTranslatorTest {
             void walkNoCollision() {
                 GroundTranslator translator =
                         mockTranslator(1, 1, 0, 0, Collections.emptyMap(), List.of(Double.NEGATIVE_INFINITY, 0D),
-                                       Collections.emptyList()
-                        );
+                                Collections.emptyList());
                 assertEquals(Vec3I.of(1, 0, 0), translator.translate(makeNode(0, 0, 0), 1, 0, 0));
             }
 
@@ -121,8 +117,7 @@ class GroundTranslatorTest {
             void jumpVeryHigh() {
                 GroundTranslator translator =
                         mockTranslator(1, 1, 69, 0, Collections.emptyMap(), List.of(1D, 2D, 3D, 4D, 5D),
-                                       Collections.emptyList()
-                        );
+                                Collections.emptyList());
                 Vec3I translate = translator.translate(makeNode(0, 0, 0), 1, 0, 0);
                 assertEquals(Vec3I.of(1, 5, 0), translate);
             }
@@ -134,8 +129,7 @@ class GroundTranslatorTest {
             void singleBlock() {
                 GroundTranslator translator =
                         mockTranslator(1, 1, 0, 1, Collections.emptyMap(), List.of(Double.NEGATIVE_INFINITY, -1D),
-                                       Collections.emptyList()
-                        );
+                                Collections.emptyList());
                 assertEquals(Vec3I.of(1, -1, 0), translator.translate(makeNode(0, 0, 0), 1, 0, 0));
             }
         }

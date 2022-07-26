@@ -111,8 +111,8 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID uuid : leavers) {
             if (!playerLobbyMap.containsKey(uuid)) {
-                return new RouteResult(false, Optional.of(
-                        Component.text(uuid + " is not part of a scene in the lobby router.")));
+                return new RouteResult(false,
+                        Optional.of(Component.text(uuid + " is not part of a scene in the lobby router.")));
             }
         }
 

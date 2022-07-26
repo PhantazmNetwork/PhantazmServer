@@ -32,33 +32,16 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
-    public static class Module implements DependencyModule {
-        private final ZombiesMap map;
-
-        private Module(@NotNull ZombiesMap map) {
-            this.map = Objects.requireNonNull(map);
-        }
-
-        @DependencySupplier("zombies.dependency.map")
-        public @NotNull ZombiesMap provideMap() {
-            return map;
-        }
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
-
     private final List<Room> unmodifiableRooms;
     private final List<Shop> unmodifiableShops;
     private final List<Door> unmodifiableDoors;
     private final List<Window> unmodifiableWindows;
     private final List<Spawnpoint> unmodifiableSpawnpoints;
     private final List<Round> unmodifiableRounds;
-
     private final Set<Key> flags;
-
     private int roundIndex = -1;
     private Round currentRound = null;
-
     /**
      * Constructs a new instance of this class.
      *
@@ -66,8 +49,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
      * @param instance the instance which this MapObject is in
      */
     public ZombiesMap(@NotNull MapInfo info, @NotNull ElementBuilder builder, @NotNull Instance instance,
-                      @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler blockHandler,
-                      @NotNull SpawnDistributor spawnDistributor, @NotNull KeyParser keyParser) {
+            @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler blockHandler,
+            @NotNull SpawnDistributor spawnDistributor, @NotNull KeyParser keyParser) {
         super(info, info.settings().origin(), instance);
 
         DependencyProvider provider = new ModuleDependencyProvider(new Module(this), keyParser);
@@ -99,61 +82,33 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
         for (RoomInfo roomInfo : roomData) {
             rooms.add(new Room(roomInfo, getOrigin(), instance,
-                               builder.loadAllElements(selectNodes(roomInfo.openActions()), provider,
-                                                       e -> LOGGER.warn("Error initializing room actions for {}: {}",
-                                                                        roomInfo, e
-                                                       )
-                               )
-            ));
+                    builder.loadAllElements(selectNodes(roomInfo.openActions()), provider,
+                            e -> LOGGER.warn("Error initializing room actions for {}: {}", roomInfo, e))));
         }
 
         for (DoorInfo doorInfo : doorData) {
             doors.add(new Door(doorInfo, origin, instance, Block.AIR,
-                               builder.loadAllElements(selectNodes(doorInfo.openActions()), provider,
-                                                       e -> LOGGER.warn("Error initializing door actions for {}: {}",
-                                                                        doorInfo, e
-                                                       )
-                               )
-            ));
+                    builder.loadAllElements(selectNodes(doorInfo.openActions()), provider,
+                            e -> LOGGER.warn("Error initializing door actions for {}: {}", doorInfo, e))));
         }
 
         for (ShopInfo shopInfo : shopData) {
             List<ShopPredicate> predicates = builder.loadAllElements(selectNodes(shopInfo.predicates()), provider,
-                                                                     e -> LOGGER.warn(
-                                                                             "Error initializing shop predicates for {}: {}",
-                                                                             shopInfo, e
-                                                                     )
-            );
+                    e -> LOGGER.warn("Error initializing shop predicates for {}: {}", shopInfo, e));
 
             List<ShopInteractor> interactors = builder.loadAllElements(selectNodes(shopInfo.interactors()), provider,
-                                                                       e -> LOGGER.warn("Error initializing shop " +
-                                                                                        "interactors for {}: {}",
-                                                                                        shopInfo, e
-                                                                       )
-            );
+                    e -> LOGGER.warn("Error initializing shop " + "interactors for {}: {}", shopInfo, e));
             List<ShopDisplay> displays = builder.loadAllElements(selectNodes(shopInfo.interactors()), provider,
-                                                                 e -> LOGGER.warn(
-                                                                         "Error initializing shop displays for {}: {}",
-                                                                         shopInfo, e
-                                                                 )
-            );
+                    e -> LOGGER.warn("Error initializing shop displays for {}: {}", shopInfo, e));
             shops.add(new Shop(shopInfo, origin, instance, predicates, interactors, displays));
         }
 
         for (WindowInfo windowInfo : windowData) {
             windows.add(new Window(instance, windowInfo, origin, blockHandler,
-                                   builder.loadAllElements(selectNodes(windowInfo.repairActions()), provider,
-                                                           e -> LOGGER.warn(
-                                                                   "Error initializing repair actions for {}: {}",
-                                                                   windowInfo, e
-                                                           )
-                                   ), builder.loadAllElements(selectNodes(windowInfo.breakActions()), provider,
-                                                              e -> LOGGER.warn(
-                                                                      "Error initializing break actions for {}: {}",
-                                                                      windowInfo, e
-                                                              )
-            )
-            ));
+                    builder.loadAllElements(selectNodes(windowInfo.repairActions()), provider,
+                            e -> LOGGER.warn("Error initializing repair actions for {}: {}", windowInfo, e)),
+                    builder.loadAllElements(selectNodes(windowInfo.breakActions()), provider,
+                            e -> LOGGER.warn("Error initializing break actions for {}: {}", windowInfo, e))));
         }
 
         for (SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
@@ -166,18 +121,11 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
         for (RoundInfo roundInfo : roundData) {
             rounds.add(new Round(roundInfo, instance,
-                                 builder.loadAllElements(selectNodes(roundInfo.startActions()), provider,
-                                                         e -> LOGGER.warn(
-                                                                 "Error initializing round start actions for {}: {}",
-                                                                 roundInfo, e
-                                                         )
-                                 ), builder.loadAllElements(selectNodes(roundInfo.endActions()), provider,
-                                                            e -> LOGGER.warn(
-                                                                    "Error initializing round end actions for {}: {}",
-                                                                    roundInfo, e
-                                                            )
-            ), spawnDistributor, this::getSpawnpoints
-            ));
+                    builder.loadAllElements(selectNodes(roundInfo.startActions()), provider,
+                            e -> LOGGER.warn("Error initializing round start actions for {}: {}", roundInfo, e)),
+                    builder.loadAllElements(selectNodes(roundInfo.endActions()), provider,
+                            e -> LOGGER.warn("Error initializing round end actions for {}: {}", roundInfo, e)),
+                    spawnDistributor, this::getSpawnpoints));
         }
     }
 
@@ -318,6 +266,19 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                     currentRound = null;
                 }
             }
+        }
+    }
+
+    public static class Module implements DependencyModule {
+        private final ZombiesMap map;
+
+        private Module(@NotNull ZombiesMap map) {
+            this.map = Objects.requireNonNull(map);
+        }
+
+        @DependencySupplier("zombies.dependency.map")
+        public @NotNull ZombiesMap provideMap() {
+            return map;
         }
     }
 }

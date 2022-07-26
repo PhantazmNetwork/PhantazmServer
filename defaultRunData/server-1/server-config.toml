@@ -1,14 +1,14 @@
 [serverInfo]
-    serverIP = "0.0.0.0"
-    port = 25567
-    optifineEnabled = true
-    authType = "BUNGEE"
-    proxySecret = "default"
+serverIP = "0.0.0.0"
+port = 25567
+optifineEnabled = true
+authType = "BUNGEE"
+proxySecret = "default"
 
 [pingList]
-    description = "A Phantazm Server"
+description = "A Phantazm Server"
 
 [pathfinder]
-    threads = 4
-    cacheSize = 2048
-    updateQueueCapacity = 1024
+threads = 4
+cacheSize = 2048
+updateQueueCapacity = 1024

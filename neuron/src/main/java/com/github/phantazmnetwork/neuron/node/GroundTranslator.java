@@ -84,8 +84,7 @@ public class GroundTranslator implements NodeTranslator {
                 }
 
                 double ceiling = Math.min(collider.lowestCollisionAlong(oX, oY, oZ, vX, vY, vZ, 0, jump, 0) - height,
-                                          highestJumpY
-                );
+                        highestJumpY);
 
                 while (highestY <= ceiling) {
                     oY = highestY + EPSILON;
@@ -104,7 +103,6 @@ public class GroundTranslator implements NodeTranslator {
     @Override
     public void initializeNode(@NotNull Node node) {
         node.setOffset(node.getXOffset(), (float)MathUtils.floorOffset(collider.heightAt(node.getPosition())),
-                       node.getZOffset()
-        );
+                node.getZOffset());
     }
 }

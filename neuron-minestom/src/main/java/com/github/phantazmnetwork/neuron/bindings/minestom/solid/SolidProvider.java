@@ -109,9 +109,7 @@ public final class SolidProvider {
         Point start = tallShape.relativeStart();
         Point end = tallShape.relativeEnd();
         Solid[] newSplit = new Solid[] {fromPoints(VecUtils.toFloat(start), Vec3F.ofDouble(end.x(), 1, end.z())),
-                                        fromPoints(Vec3F.ofDouble(start.x(), 0, start.z()),
-                                                   Vec3F.ofDouble(end.x(), end.y() - 1, end.z())
-                                        )};
+                fromPoints(Vec3F.ofDouble(start.x(), 0, start.z()), Vec3F.ofDouble(end.x(), end.y() - 1, end.z()))};
 
         synchronized (SPLIT_MAP) {
             SPLIT_MAP.put(tallShape, newSplit);

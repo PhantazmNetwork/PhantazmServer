@@ -21,15 +21,13 @@ class CompositeSolid extends PointSolid {
      */
     CompositeSolid(@NotNull Solid first, @NotNull Solid second) {
         super(computePoint(first.getMin(), second.getMin(), Math::min),
-              computePoint(first.getMax(), second.getMax(), Math::max)
-        );
+                computePoint(first.getMax(), second.getMax(), Math::max));
         this.children = Set.of(first, second);
     }
 
     private static Vec3F computePoint(Vec3F first, Vec3F second, FloatToDoubleBiFunction selector) {
         return Vec3F.ofDouble(selector.apply(first.getX(), second.getX()), selector.apply(first.getY(), second.getY()),
-                              selector.apply(first.getZ(), second.getZ())
-        );
+                selector.apply(first.getZ(), second.getZ()));
     }
 
     @Override

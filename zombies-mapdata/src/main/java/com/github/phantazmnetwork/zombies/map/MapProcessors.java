@@ -25,32 +25,6 @@ import java.util.Set;
  * objects.
  */
 public final class MapProcessors {
-    private static final ConfigProcessor<ShopInfo> shopInfo = new ConfigProcessor<>() {
-        @Override
-        public ShopInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
-            Vec3I triggerLocation =
-                    VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("triggerLocation"));
-            Evaluation predicateEvaluation =
-                    evaluation.dataFromElement(element.getElementOrThrow("predicateEvaluation"));
-            ConfigList predicates = element.getListOrThrow("predicates");
-            ConfigList interactors = element.getListOrThrow("interactors");
-            ConfigList displays = element.getListOrThrow("displays");
-            return new ShopInfo(id, triggerLocation, predicateEvaluation, predicates, interactors, displays);
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(3);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(shopInfo.id()));
-            node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
-            node.put("predicateEvaluation", evaluation.elementFromData(shopInfo.predicateEvaluation()));
-            node.put("predicates", shopInfo.predicates());
-            node.put("interactors", shopInfo.interactors());
-            node.put("displays", shopInfo.displays());
-            return node;
-        }
-    };
     private static final ConfigProcessor<SpawnInfo> spawnInfo = new ConfigProcessor<>() {
         @Override
         public SpawnInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -127,32 +101,6 @@ public final class MapProcessors {
         }
     };
     private static final ConfigProcessor<List<HologramInfo>> hologramInfoList = hologramInfo.listProcessor();
-    private static final ConfigProcessor<DoorInfo> doorInfo = new ConfigProcessor<>() {
-        @Override
-        public DoorInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
-            List<Key> opensTo = keyList.dataFromElement(element.getElementOrThrow("opensTo"));
-            List<Integer> costs = integerList.dataFromElement(element.getElementOrThrow("costs"));
-            List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow("holograms"));
-            List<Region3I> regions = regionInfoList.dataFromElement(element.getListOrThrow("regions"));
-            Sound openSound = AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("openSound"));
-            ConfigList openActions = element.getListOrThrow("openActions");
-            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound, openActions);
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(6);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(doorInfo.id()));
-            node.put("opensTo", keyList.elementFromData(doorInfo.opensTo()));
-            node.put("costs", integerList.elementFromData(doorInfo.costs()));
-            node.put("holograms", hologramInfoList.elementFromData(doorInfo.holograms()));
-            node.put("regions", regionInfoList.elementFromData(doorInfo.regions()));
-            node.put("openSound", AdventureConfigProcessors.sound().elementFromData(doorInfo.openSound()));
-            node.put("openActions", doorInfo.openActions());
-            return node;
-        }
-    };
     private static final ConfigProcessor<List<Region3I>> regionInfoList =
             VectorConfigProcessors.region3I().listProcessor();
     private static final ConfigProcessor<RoomInfo> roomInfo = new ConfigProcessor<>() {
@@ -215,6 +163,32 @@ public final class MapProcessors {
         }
     };
     private static final ConfigProcessor<List<Integer>> integerList = ConfigProcessor.INTEGER.listProcessor();
+    private static final ConfigProcessor<DoorInfo> doorInfo = new ConfigProcessor<>() {
+        @Override
+        public DoorInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            List<Key> opensTo = keyList.dataFromElement(element.getElementOrThrow("opensTo"));
+            List<Integer> costs = integerList.dataFromElement(element.getElementOrThrow("costs"));
+            List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow("holograms"));
+            List<Region3I> regions = regionInfoList.dataFromElement(element.getListOrThrow("regions"));
+            Sound openSound = AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("openSound"));
+            ConfigList openActions = element.getListOrThrow("openActions");
+            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound, openActions);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(6);
+            node.put("id", AdventureConfigProcessors.key().elementFromData(doorInfo.id()));
+            node.put("opensTo", keyList.elementFromData(doorInfo.opensTo()));
+            node.put("costs", integerList.elementFromData(doorInfo.costs()));
+            node.put("holograms", hologramInfoList.elementFromData(doorInfo.holograms()));
+            node.put("regions", regionInfoList.elementFromData(doorInfo.regions()));
+            node.put("openSound", AdventureConfigProcessors.sound().elementFromData(doorInfo.openSound()));
+            node.put("openActions", doorInfo.openActions());
+            return node;
+        }
+    };
     private static final ConfigProcessor<MapSettingsInfo> mapInfo = new ConfigProcessor<>() {
         @Override
         public MapSettingsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -227,8 +201,8 @@ public final class MapProcessors {
                     AdventureConfigProcessors.component().dataFromElement(element.getElementOrThrow("displayName"));
             String displayItemTag = element.getStringOrThrow("displayItemSnbt");
             List<Component> introMessages = componentList.dataFromElement(element.getElementOrThrow("introMessages"));
-            Component scoreboardHeader = AdventureConfigProcessors.component().dataFromElement(
-                    element.getElementOrThrow("scoreboardHeader"));
+            Component scoreboardHeader = AdventureConfigProcessors.component()
+                    .dataFromElement(element.getElementOrThrow("scoreboardHeader"));
             Vec3I leaderboardPosition =
                     VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("leaderboardPosition"));
             int leaderboardLength = element.getNumberOrThrow("leaderboardLength").intValue();
@@ -248,11 +222,9 @@ public final class MapProcessors {
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             List<Key> defaultEquipment = keyList.dataFromElement(element.getElementOrThrow("defaultEquipment"));
             return new MapSettingsInfo(id, origin, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
-                                       scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers,
-                                       minPlayers, startingCoins, repairCoins, windowRepairRadius, windowRepairTicks,
-                                       corpseDeathTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks,
-                                       rollsPerChest, milestoneRounds, defaultEquipment
-            );
+                    scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
+                    startingCoins, repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius,
+                    canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
         }
 
         @Override
@@ -267,11 +239,9 @@ public final class MapProcessors {
             node.putString("displayItemSnbt", mapConfig.displayItemSnbt());
             node.put("introMessages", componentList.elementFromData(mapConfig.introMessages()));
             node.put("scoreboardHeader",
-                     AdventureConfigProcessors.component().elementFromData(mapConfig.scoreboardHeader())
-            );
+                    AdventureConfigProcessors.component().elementFromData(mapConfig.scoreboardHeader()));
             node.put("leaderboardPosition",
-                     VectorConfigProcessors.vec3I().elementFromData(mapConfig.leaderboardPosition())
-            );
+                    VectorConfigProcessors.vec3I().elementFromData(mapConfig.leaderboardPosition()));
             node.putNumber("leaderboardLength", mapConfig.leaderboardLength());
             node.putNumber("worldTime", mapConfig.worldTime());
             node.putNumber("maxPlayers", mapConfig.maxPlayers());
@@ -309,8 +279,7 @@ public final class MapProcessors {
             ConfigList repairActions = element.getListOrThrow("repairActions");
             ConfigList breakActions = element.getListOrThrow("breakActions");
             return new WindowInfo(frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound,
-                                  repairActions, breakActions
-            );
+                    repairActions, breakActions);
         }
 
         @Override
@@ -327,8 +296,33 @@ public final class MapProcessors {
             return node;
         }
     };
-
     private static final ConfigProcessor<Evaluation> evaluation = ConfigProcessor.enumProcessor(Evaluation.class);
+    private static final ConfigProcessor<ShopInfo> shopInfo = new ConfigProcessor<>() {
+        @Override
+        public ShopInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Vec3I triggerLocation =
+                    VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("triggerLocation"));
+            Evaluation predicateEvaluation =
+                    evaluation.dataFromElement(element.getElementOrThrow("predicateEvaluation"));
+            ConfigList predicates = element.getListOrThrow("predicates");
+            ConfigList interactors = element.getListOrThrow("interactors");
+            ConfigList displays = element.getListOrThrow("displays");
+            return new ShopInfo(id, triggerLocation, predicateEvaluation, predicates, interactors, displays);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(3);
+            node.put("id", AdventureConfigProcessors.key().elementFromData(shopInfo.id()));
+            node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
+            node.put("predicateEvaluation", evaluation.elementFromData(shopInfo.predicateEvaluation()));
+            node.put("predicates", shopInfo.predicates());
+            node.put("interactors", shopInfo.interactors());
+            node.put("displays", shopInfo.displays());
+            return node;
+        }
+    };
 
     private MapProcessors() {
         throw new UnsupportedOperationException();

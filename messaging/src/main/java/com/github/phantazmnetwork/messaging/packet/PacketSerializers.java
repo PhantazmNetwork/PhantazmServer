@@ -18,6 +18,10 @@ public final class PacketSerializers {
         proxyDeserializers = Collections.emptyMap();
     }
 
+    private PacketSerializers() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Creates a {@link PacketSerializer} for proxy packets.
      *
@@ -26,12 +30,8 @@ public final class PacketSerializers {
      * @return A new {@link PacketSerializer}
      */
     public static @NotNull PacketSerializer createProxySerializer(@NotNull Supplier<DataWriter> writerCreator,
-                                                                  @NotNull Function<byte[], DataReader> readerCreator) {
+            @NotNull Function<byte[], DataReader> readerCreator) {
         return new PacketSerializer(proxyDeserializers, writerCreator, readerCreator);
-    }
-
-    private PacketSerializers() {
-        throw new UnsupportedOperationException();
     }
 
 }

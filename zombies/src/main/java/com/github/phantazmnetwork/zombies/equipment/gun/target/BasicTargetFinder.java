@@ -48,8 +48,8 @@ public class BasicTargetFinder implements TargetFinder {
      * @param targetLimiter      A {@link TargetLimiter} which limits the number of targets found
      */
     public BasicTargetFinder(@NotNull DirectionalEntityFinder entityFinder, @NotNull TargetTester targetTester,
-                             @NotNull IntersectionFinder intersectionFinder, @NotNull HeadshotTester headshotTester,
-                             @NotNull TargetLimiter targetLimiter) {
+            @NotNull IntersectionFinder intersectionFinder, @NotNull HeadshotTester headshotTester,
+            @NotNull TargetLimiter targetLimiter) {
         this.entityFinder = Objects.requireNonNull(entityFinder, "entityFinder");
         this.targetTester = Objects.requireNonNull(targetTester, "targetTester");
         this.intersectionFinder = Objects.requireNonNull(intersectionFinder, "intersectionFinder");
@@ -76,8 +76,7 @@ public class BasicTargetFinder implements TargetFinder {
                 Key targetLimiterKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetLimiterKey"));
 
                 return new Data(entityFinderKey, targetTesterKey, intersectionFinderKey, headshotTesterKey,
-                                targetLimiterKey
-                );
+                        targetLimiterKey);
             }
 
             @Override
@@ -110,7 +109,7 @@ public class BasicTargetFinder implements TargetFinder {
 
     @Override
     public @NotNull Result findTarget(@NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
-                                      @NotNull Collection<UUID> previousHits) {
+            @NotNull Collection<UUID> previousHits) {
         Instance instance = shooter.getInstance();
         if (instance == null) {
             return new Result(Collections.emptyList(), Collections.emptyList());
@@ -121,7 +120,7 @@ public class BasicTargetFinder implements TargetFinder {
         for (LivingEntity entity : nearbyEntities) {
             if (targetTester.useTarget(entity, previousHits)) {
                 intersectionFinder.getHitLocation(entity, start)
-                                  .ifPresent(intersection -> locations.add(Pair.of(entity, intersection)));
+                        .ifPresent(intersection -> locations.add(Pair.of(entity, intersection)));
             }
         }
         List<Pair<? extends LivingEntity, Vec>> adjustedLocations = targetLimiter.limitTargets(start, locations);

@@ -25,7 +25,7 @@ public interface Collider {
      * the translation vector
      */
     double highestCollisionAlong(double x, double y, double z, double width, double height, double depth, double dX,
-                                 double dY, double dZ);
+            double dY, double dZ);
 
     /**
      * Locates the lowest solid that the given bounding box would collide with, if it were to translate itself by the
@@ -44,7 +44,7 @@ public interface Collider {
      * the translation vector
      */
     double lowestCollisionAlong(double x, double y, double z, double width, double height, double depth, double dX,
-                                double dY, double dZ);
+            double dY, double dZ);
 
     /**
      * Returns the y-coordinate of the highest face out of all collisions present in an origin-vector bounding box (x,

@@ -65,7 +65,7 @@ public class AroundEndFinder implements DirectionalEntityFinder {
 
     @Override
     public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
-                                                          @NotNull Point end) {
+            @NotNull Point end) {
         Collection<Entity> entities = instance.getNearbyEntities(end, data.range());
         Collection<LivingEntity> livingEntities = new ArrayList<>(entities.size());
         for (Entity entity : entities) {

@@ -11,5 +11,5 @@ import java.util.List;
 @FunctionalInterface
 public interface SpawnDistributor {
     @NotNull List<PhantazmMob> distributeSpawns(@NotNull List<? extends Spawnpoint> spawnpoints,
-                                                @NotNull Collection<? extends SpawnInfo> spawns);
+            @NotNull Collection<? extends SpawnInfo> spawns);
 }

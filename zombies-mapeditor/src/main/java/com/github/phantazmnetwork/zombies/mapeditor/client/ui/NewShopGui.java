@@ -7,7 +7,6 @@ import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.map.ShopInfo;
 import com.github.phantazmnetwork.zombies.mapeditor.client.EditorSession;
 import com.github.steanky.ethylene.core.collection.ArrayConfigList;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,9 +39,8 @@ public class NewShopGui extends NamedObjectGui {
             Vec3I origin = currentMap.settings().origin();
 
             currentMap.shops()
-                      .add(new ShopInfo(typeKey, firstSelected.sub(origin), Evaluation.ALL_TRUE, new ArrayConfigList(0),
-                                        new ArrayConfigList(0), new ArrayConfigList(0)
-                      ));
+                    .add(new ShopInfo(typeKey, firstSelected.sub(origin), Evaluation.ALL_TRUE, new ArrayConfigList(0),
+                            new ArrayConfigList(0), new ArrayConfigList(0)));
             session.refreshShops();
             ScreenUtils.closeCurrentScreen();
         });

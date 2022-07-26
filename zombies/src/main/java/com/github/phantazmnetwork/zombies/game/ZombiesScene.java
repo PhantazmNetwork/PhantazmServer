@@ -32,9 +32,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private boolean joinable;
 
     public ZombiesScene(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
-                        @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
-                        @NotNull StageTransition stageTransition,
-                        @NotNull Function<PlayerView, ZombiesPlayer> playerCreator, @NotNull Random random) {
+            @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
+            @NotNull StageTransition stageTransition, @NotNull Function<PlayerView, ZombiesPlayer> playerCreator,
+            @NotNull Random random) {
         super(instance, fallback);
 
         this.zombiesPlayers = zombiesPlayers;
@@ -103,8 +103,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID leaver : leavers) {
             if (!players.containsKey(leaver)) {
-                return new RouteResult(false, Optional.of(
-                        Component.text("Not all players are within the scene.", NamedTextColor.RED)));
+                return new RouteResult(false,
+                        Optional.of(Component.text("Not all players are within the scene.", NamedTextColor.RED)));
             }
         }
 
@@ -127,16 +127,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     }
 
     @Override
-    public int getJoinWeight(@NotNull ZombiesJoinRequest request) {
-        Stage stage = getCurrentStage();
-        if (stage == null || stage.hasPermanentPlayers()) {
-            return Integer.MIN_VALUE;
-        }
-
-        return 0;
-    }
-
-    @Override
     public boolean isJoinable() {
         return joinable;
     }
@@ -144,6 +134,16 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     @Override
     public void setJoinable(boolean joinable) {
         this.joinable = joinable;
+    }
+
+    @Override
+    public int getJoinWeight(@NotNull ZombiesJoinRequest request) {
+        Stage stage = getCurrentStage();
+        if (stage == null || stage.hasPermanentPlayers()) {
+            return Integer.MIN_VALUE;
+        }
+
+        return 0;
     }
 
     @Override

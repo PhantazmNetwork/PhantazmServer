@@ -80,7 +80,7 @@ public class PlaySoundEffect implements GunEffect {
     @Override
     public void apply(@NotNull GunState state) {
         audienceProvider.provideAudience()
-                        .ifPresent(audience -> audience.playSound(data.sound(), Sound.Emitter.self()));
+                .ifPresent(audience -> audience.playSound(data.sound(), Sound.Emitter.self()));
     }
 
     @Override

@@ -19,8 +19,7 @@ public class InventoryProfileTest {
         inventoryProfile.setInventoryObject(slot, inventoryObject);
 
         assertThrowsExactly(IllegalArgumentException.class,
-                            () -> inventoryProfile.setInventoryObject(slot, inventoryObject)
-        );
+                () -> inventoryProfile.setInventoryObject(slot, inventoryObject));
     }
 
     @Test

@@ -59,8 +59,7 @@ public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData
                 KEY_COLLECTION_PROCESSOR.dataFromElement(element.getElementOrThrow("gunStackMappers"));
 
         return new GunLevelData(upgrades, stack, stats, shootTester, reloadTester, firer, activateEffects, shootEffects,
-                                reloadEffects, tickEffects, noAmmoEffects, gunStackMappers
-        );
+                reloadEffects, tickEffects, noAmmoEffects, gunStackMappers);
     }
 
     @Override

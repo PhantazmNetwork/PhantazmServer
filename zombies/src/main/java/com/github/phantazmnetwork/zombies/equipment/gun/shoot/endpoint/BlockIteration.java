@@ -27,6 +27,6 @@ public interface BlockIteration {
      * @return The end {@link Vec} of the iteration
      */
     @NotNull Optional<Vec> findEnd(@NotNull Instance instance, @NotNull Entity shooter, @NotNull Pos start,
-                                   @NotNull Iterator<Point> it);
+            @NotNull Iterator<Point> it);
 
 }

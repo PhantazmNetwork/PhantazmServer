@@ -55,20 +55,17 @@ public class MapeditorClient implements ClientModInitializer {
 
         EditorSession editorSession =
                 new BasicEditorSession(renderer, new FileSystemMapLoader(defaultMapDirectory, codec),
-                                       defaultMapDirectory
-                );
+                        defaultMapDirectory);
         editorSession.loadMapsFromDisk();
 
         UseBlockCallback.EVENT.register(editorSession::handleBlockUse);
 
         KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M,
-                               TranslationKeys.CATEGORY_MAPEDITOR_ALL
-                ));
+                        TranslationKeys.CATEGORY_MAPEDITOR_ALL));
         KeyBinding newObject = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
-                               TranslationKeys.CATEGORY_MAPEDITOR_ALL
-                ));
+                        TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (mapeditorBinding.wasPressed()) {
@@ -82,8 +79,7 @@ public class MapeditorClient implements ClientModInitializer {
 
                 if (!editorSession.hasMap()) {
                     player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP),
-                                       true
-                    );
+                            true);
                     return;
                 }
 

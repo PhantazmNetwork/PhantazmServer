@@ -62,7 +62,7 @@ public interface Descriptor {
      * @see PathCache
      */
     default boolean shouldInvalidate(@NotNull Iterable<? extends Vec3I> cached, @NotNull Vec3I origin,
-                                     @NotNull Vec3I update, @NotNull Solid oldSolid, @NotNull Solid newSolid) {
+            @NotNull Vec3I update, @NotNull Solid oldSolid, @NotNull Solid newSolid) {
         return true;
     }
 

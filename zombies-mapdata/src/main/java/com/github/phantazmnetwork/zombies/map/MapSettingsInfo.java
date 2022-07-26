@@ -91,9 +91,8 @@ public record MapSettingsInfo(@NotNull Key id,
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
         this(id, origin, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
-             "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0), Component.text(id.value()),
-             Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 20, 500, 2, false, false, 30, 5, new ArrayList<>(0),
-             new ArrayList<>(0)
-        );
+                "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0),
+                Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 20, 500, 2, false, false, 30, 5,
+                new ArrayList<>(0), new ArrayList<>(0));
     }
 }

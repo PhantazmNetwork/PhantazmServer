@@ -31,7 +31,7 @@ public class RayUtils {
      */
     @SuppressWarnings({"DuplicatedCode", "UnstableApiUsage"})
     public static @NotNull Optional<Vec> rayTrace(@NotNull Shape shape, @NotNull Point shapeLocation,
-                                                  @NotNull Pos start) {
+            @NotNull Pos start) {
         Point shapeStart = shape.relativeStart();
         Point shapeEnd = shape.relativeEnd();
         double minX = shapeStart.x() + shapeLocation.x();
@@ -120,7 +120,7 @@ public class RayUtils {
      */
     @SuppressWarnings("UnstableApiUsage")
     public static @NotNull Optional<Vec> getIntersectionPosition(@NotNull Shape shape, @NotNull Point shapeLocation,
-                                                                 @NotNull Pos start) {
+            @NotNull Pos start) {
         return RayUtils.rayTrace(shape, shapeLocation, start).map(trace -> {
             if (shape.childBounds().isEmpty()) {
                 return trace;

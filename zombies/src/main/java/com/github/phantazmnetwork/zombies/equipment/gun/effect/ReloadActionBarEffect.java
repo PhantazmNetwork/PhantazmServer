@@ -42,7 +42,7 @@ public class ReloadActionBarEffect implements GunEffect {
      * @param chooser          The {@link ReloadActionBarChooser} to choose an action bar to send to the {@link Audience}
      */
     public ReloadActionBarEffect(@NotNull GunStats stats, @NotNull AudienceProvider audienceProvider,
-                                 @NotNull ReloadTester reloadTester, @NotNull ReloadActionBarChooser chooser) {
+            @NotNull ReloadTester reloadTester, @NotNull ReloadActionBarChooser chooser) {
         this.stats = Objects.requireNonNull(stats, "stats");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
@@ -103,7 +103,7 @@ public class ReloadActionBarEffect implements GunEffect {
         if (reloadTester.isReloading(state) && state.isMainEquipment()) {
             float progress = (float)state.ticksSinceLastReload() / stats.reloadSpeed();
             audienceProvider.provideAudience()
-                            .ifPresent(audience -> audience.sendActionBar(chooser.choose(state, progress)));
+                    .ifPresent(audience -> audience.sendActionBar(chooser.choose(state, progress)));
             active = true;
         }
         else if (active) {

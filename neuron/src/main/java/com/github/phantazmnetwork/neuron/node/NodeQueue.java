@@ -78,6 +78,20 @@ public class NodeQueue implements PriorityQueue<Node> {
     }
 
     @Override
+    public int size() {
+        return size;
+    }
+
+    @Override
+    public void clear() {
+        for (int i = 0; i < size; i++) {
+            heap[i].setHeapIndex(-1);
+            heap[i] = null;
+        }
+        size = 0;
+    }
+
+    @Override
     public Node first() {
         if (size == 0) {
             throw new NoSuchElementException();
@@ -89,6 +103,11 @@ public class NodeQueue implements PriorityQueue<Node> {
     @Override
     public void changed() {
         NodeHeaps.downHeap(heap, size, 0);
+    }
+
+    @Override
+    public Comparator<? super Node> comparator() {
+        return null;
     }
 
     /**
@@ -124,25 +143,6 @@ public class NodeQueue implements PriorityQueue<Node> {
 
         int newPos = NodeHeaps.upHeap(heap, pos);
         NodeHeaps.downHeap(heap, size, newPos);
-    }
-
-    @Override
-    public Comparator<? super Node> comparator() {
-        return null;
-    }
-
-    @Override
-    public int size() {
-        return size;
-    }
-
-    @Override
-    public void clear() {
-        for (int i = 0; i < size; i++) {
-            heap[i].setHeapIndex(-1);
-            heap[i] = null;
-        }
-        size = 0;
     }
 
     /**

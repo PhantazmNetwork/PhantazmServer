@@ -74,7 +74,6 @@ public record WindowInfo(@NotNull Region3I frameRegion,
      */
     public WindowInfo(@NotNull Region3I frameRegion, @NotNull List<String> repairBlocks) {
         this(frameRegion, repairBlocks, DEFAULT_REPAIR_SOUND, DEFAULT_REPAIR_ALL_SOUND, DEFAULT_BREAK_SOUND,
-             DEFAULT_BREAK_ALL_SOUND, new ArrayConfigList(0), new ArrayConfigList(0)
-        );
+                DEFAULT_BREAK_ALL_SOUND, new ArrayConfigList(0), new ArrayConfigList(0));
     }
 }

@@ -40,7 +40,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
      * @param blockIteration A {@link BlockIteration} method to find the endpoint with
      */
     public BasicShotEndpointSelector(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-                                     @NotNull BlockIteration blockIteration) {
+            @NotNull BlockIteration blockIteration) {
         this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "playerView");
         this.blockIteration = Objects.requireNonNull(blockIteration, "blockIteration");

@@ -43,8 +43,8 @@ public class HitScanFirer implements Firer {
      * @param shotHandlers   The {@link HitScanFirer}'s {@link ShotHandler}s
      */
     public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-                        @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
-                        @NotNull Collection<ShotHandler> shotHandlers) {
+            @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
+            @NotNull Collection<ShotHandler> shotHandlers) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
@@ -115,8 +115,7 @@ public class HitScanFirer implements Firer {
             }
             for (ShotHandler shotHandler : shotHandlers) {
                 shotHandler.handle(state, player, previousHits,
-                                   new GunShot(start, end, target.regular(), target.headshot())
-                );
+                        new GunShot(start, end, target.regular(), target.headshot()));
             }
         });
     }

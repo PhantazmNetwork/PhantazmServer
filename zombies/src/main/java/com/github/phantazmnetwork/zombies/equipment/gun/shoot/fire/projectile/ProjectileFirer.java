@@ -61,9 +61,8 @@ public class ProjectileFirer implements Firer {
      * @param shotHandlers    The {@link ShotHandler}s of the {@link ProjectileFirer}
      */
     public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-                           @NotNull UUID shooterUUID, @NotNull ShotEndpointSelector endSelector,
-                           @NotNull TargetFinder targetFinder, @NotNull ProjectileCollisionFilter collisionFilter,
-                           @NotNull Collection<ShotHandler> shotHandlers) {
+            @NotNull UUID shooterUUID, @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
+            @NotNull ProjectileCollisionFilter collisionFilter, @NotNull Collection<ShotHandler> shotHandlers) {
         this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.shooterUUID = Objects.requireNonNull(shooterUUID, "shooterUUID");
@@ -102,8 +101,7 @@ public class ProjectileFirer implements Firer {
                 }
 
                 return new Data(endSelectorKey, targetFinderKey, collisionFilterKey, shotHandlerKeys, entityType, power,
-                                spread, hasGravity, maxAliveTime
-                );
+                        spread, hasGravity, maxAliveTime);
             }
 
             @Override
@@ -150,7 +148,7 @@ public class ProjectileFirer implements Firer {
                 EntityProjectile projectile = new EntityProjectile(entity, data.entityType());
                 projectile.setNoGravity(!data.hasGravity());
                 projectile.setInstance(instance, start)
-                          .thenRun(() -> projectile.shoot(end, data.power(), data.spread()));
+                        .thenRun(() -> projectile.shoot(end, data.power(), data.spread()));
 
                 firedShots.put(projectile.getUuid(), new FiredShot(state, start, previousHits));
                 removalQueue.add(new AliveProjectile(new WeakReference<>(projectile), System.currentTimeMillis()));
@@ -161,8 +159,8 @@ public class ProjectileFirer implements Firer {
     @Override
     public void tick(@NotNull GunState state, long time) {
         for (AliveProjectile aliveProjectile = removalQueue.peek();
-             aliveProjectile != null && (time - aliveProjectile.time()) / 50 > data.maxAliveTime();
-             aliveProjectile = removalQueue.peek()) {
+                aliveProjectile != null && (time - aliveProjectile.time()) / 50 > data.maxAliveTime();
+                aliveProjectile = removalQueue.peek()) {
             EntityProjectile projectile = aliveProjectile.projectile().get();
             if (projectile == null) {
                 return;
@@ -207,7 +205,7 @@ public class ProjectileFirer implements Firer {
      */
     public void onProjectileCollision(@NotNull ProjectileCollideWithEntityEvent event) {
         if (!(event.getEntity() instanceof EntityProjectile projectile &&
-              collisionFilter.shouldExplode(event.getTarget()))) {
+                collisionFilter.shouldExplode(event.getTarget()))) {
             return;
         }
 
@@ -220,7 +218,7 @@ public class ProjectileFirer implements Firer {
     }
 
     private void onProjectileCollision(@NotNull FiredShot firedShot, @NotNull EntityProjectile projectile,
-                                       @NotNull Point collision) {
+            @NotNull Point collision) {
         Entity shooter = projectile.getShooter();
         if (shooter != null && shooter.getUuid().equals(shooterUUID)) {
             TargetFinder.Result target =

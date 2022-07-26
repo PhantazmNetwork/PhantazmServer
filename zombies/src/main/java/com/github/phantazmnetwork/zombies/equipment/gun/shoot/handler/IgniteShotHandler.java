@@ -68,7 +68,7 @@ public class IgniteShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-                       @NotNull GunShot shot) {
+            @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
             target.entity().setFireForDuration(data.duration());
         }

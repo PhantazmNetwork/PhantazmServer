@@ -29,8 +29,8 @@ public record GunState(long ticksSinceLastShot,
      */
     public @NotNull GunState.Builder toBuilder() {
         return new Builder().setTicksSinceLastShot(ticksSinceLastShot).setTicksSinceLastFire(ticksSinceLastFire)
-                            .setTicksSinceLastReload(ticksSinceLastReload).setAmmo(ammo).setClip(clip)
-                            .setMainEquipment(isMainEquipment).setQueuedShots(queuedShots);
+                .setTicksSinceLastReload(ticksSinceLastReload).setAmmo(ammo).setClip(clip)
+                .setMainEquipment(isMainEquipment).setQueuedShots(queuedShots);
     }
 
     /**
@@ -199,8 +199,7 @@ public record GunState(long ticksSinceLastShot,
          */
         public @NotNull GunState build() {
             return new GunState(ticksSinceLastShot, ticksSinceLastFire, ticksSinceLastReload, ammo, clip,
-                                isMainEquipment, queuedShots
-            );
+                    isMainEquipment, queuedShots);
         }
 
     }

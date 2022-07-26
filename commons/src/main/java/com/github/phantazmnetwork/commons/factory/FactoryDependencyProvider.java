@@ -48,8 +48,7 @@ public class FactoryDependencyProvider implements DependencyProvider {
 
             Factory<Keyed, ?> factory = (Factory<Keyed, ?>)factories.get(data.key());
             loadedObjects.put(key,
-                              Objects.requireNonNull(object = factory.make(this, data), "factory produced null object")
-            );
+                    Objects.requireNonNull(object = factory.make(this, data), "factory produced null object"));
         }
 
         return (T)object;

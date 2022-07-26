@@ -34,12 +34,10 @@ final class NeuronTest {
             if (instance != null) {
                 switch (msg) {
                     case "T" -> spawner.spawnEntity(instance, player.getPosition().add(5, 0, 0), testDescriptor,
-                                                    neuralEntity -> {
-                                                        //neuralEntity.setGravity(0, 0.2);
-                                                        neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED)
-                                                                    .setBaseValue(0.1F);
-                                                    }
-                    ).setTarget(player);
+                            neuralEntity -> {
+                                //neuralEntity.setGravity(0, 0.2);
+                                neuralEntity.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
+                            }).setTarget(player);
                     case "TT" -> {
                         for (int i = 0; i < 500; i++) {
                             spawner.spawnEntity(instance, player.getPosition(), testDescriptor).setTarget(player);
@@ -59,8 +57,8 @@ final class NeuronTest {
                         EntityCreature creature = new EntityCreature(EntityType.ZOMBIE);
                         creature.setInstance(instance, player.getPosition().add(5, 0, 0));
 
-                        global.addListener(PlayerMoveEvent.class, moveEvent -> creature.getNavigator().setPathTo(
-                                moveEvent.getPlayer().getPosition()));
+                        global.addListener(PlayerMoveEvent.class,
+                                moveEvent -> creature.getNavigator().setPathTo(moveEvent.getPlayer().getPosition()));
                     }
                     case "V" -> {
                         Set<Entity> entities = instance.getEntities();

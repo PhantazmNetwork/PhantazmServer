@@ -28,7 +28,7 @@ public class TranslationExplorer extends CachingExplorer {
      * @param translator the translator used by this explorer
      */
     public TranslationExplorer(@Nullable PathCache cache, @NotNull Descriptor descriptor,
-                               @NotNull NodeTranslator translator) {
+            @NotNull NodeTranslator translator) {
         super(cache, descriptor);
         this.translator = Objects.requireNonNull(translator, "translator");
     }
@@ -41,7 +41,7 @@ public class TranslationExplorer extends CachingExplorer {
     @Override
     public @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current) {
         return Pipe.from(descriptor.stepDirections())
-                   .map(delta -> translator.translate(current, delta.getX(), delta.getY(), delta.getZ()))
-                   .filter(delta -> !delta.equals(Vec3I.ORIGIN));
+                .map(delta -> translator.translate(current, delta.getX(), delta.getY(), delta.getZ()))
+                .filter(delta -> !delta.equals(Vec3I.ORIGIN));
     }
 }

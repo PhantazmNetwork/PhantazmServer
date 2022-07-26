@@ -22,7 +22,7 @@ public class MinimalFakePlayer extends Entity {
     private final PlayerSkin skin;
 
     public MinimalFakePlayer(@NotNull SchedulerManager schedulerManager, @NotNull String username,
-                             @NotNull PlayerSkin skin) {
+            @NotNull PlayerSkin skin) {
         super(EntityType.PLAYER, UUID.randomUUID());
 
         this.schedulerManager = Objects.requireNonNull(schedulerManager, "schedulerManager");
@@ -56,7 +56,7 @@ public class MinimalFakePlayer extends Entity {
     private void removeFromTabList(@NotNull PlayerConnection connection) {
         Objects.requireNonNull(connection, "connection");
         schedulerManager.buildTask(() -> connection.sendPacket(getRemovePlayerPacket())).delay(20, TimeUnit.SERVER_TICK)
-                        .schedule();
+                .schedule();
     }
 
     private @NotNull PlayerInfoPacket getAddPlayerPacket() {
@@ -77,8 +77,7 @@ public class MinimalFakePlayer extends Entity {
 
     private @NotNull PlayerInfoPacket getRemovePlayerPacket() {
         return new PlayerInfoPacket(PlayerInfoPacket.Action.REMOVE_PLAYER,
-                                    new PlayerInfoPacket.RemovePlayer(getUuid())
-        );
+                new PlayerInfoPacket.RemovePlayer(getUuid()));
     }
 
 }

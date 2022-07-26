@@ -46,7 +46,7 @@ class BasicPlayerView implements PlayerView {
      * @param uuid              The {@link UUID} of the {@link Player} to store
      */
     BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
-                    @NotNull UUID uuid) {
+            @NotNull UUID uuid) {
         this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.uuid = Objects.requireNonNull(uuid, "player");
@@ -61,7 +61,7 @@ class BasicPlayerView implements PlayerView {
      * @param player            the player, whose UUID and username will be cached immediately
      */
     BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
-                    @NotNull Player player) {
+            @NotNull Player player) {
         this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.uuid = player.getUuid();

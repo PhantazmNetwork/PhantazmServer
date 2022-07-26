@@ -21,8 +21,7 @@ public class InventoryProfileSwitcherTest {
         inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile);
 
         assertThrowsExactly(IllegalArgumentException.class,
-                            () -> inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile)
-        );
+                () -> inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile));
     }
 
     @Test

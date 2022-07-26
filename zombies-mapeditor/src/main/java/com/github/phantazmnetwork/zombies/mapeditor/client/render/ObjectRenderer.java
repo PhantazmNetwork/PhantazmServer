@@ -157,13 +157,18 @@ public interface ObjectRenderer {
          *                           object
          */
         public RenderObject(@NotNull Key key, @NotNull RenderType type, @NotNull Color color, boolean shouldRender,
-                            boolean renderThroughWalls, Vec3d... bounds) {
+                boolean renderThroughWalls, Vec3d... bounds) {
             this.key = Objects.requireNonNull(key, "key");
             this.type = Objects.requireNonNull(type, "type");
             this.color = Objects.requireNonNull(color, "color");
             this.shouldRender = shouldRender;
             this.renderThroughWalls = renderThroughWalls;
             this.bounds = Objects.requireNonNull(bounds, "bounds");
+        }
+
+        @Override
+        public int hashCode() {
+            return key.hashCode();
         }
 
         @Override
@@ -181,11 +186,6 @@ public interface ObjectRenderer {
             }
 
             return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return key.hashCode();
         }
     }
 }

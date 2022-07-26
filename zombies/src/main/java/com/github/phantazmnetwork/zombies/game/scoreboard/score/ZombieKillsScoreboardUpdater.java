@@ -18,7 +18,7 @@ public class ZombieKillsScoreboardUpdater implements ScoreboardUpdater {
     private int killCount = -1;
 
     public ZombieKillsScoreboardUpdater(@NotNull Scoreboard scoreboard, @NotNull PlayerView playerView,
-                                        @NotNull PlayerKills kills) {
+            @NotNull PlayerKills kills) {
         this.scoreboard = Objects.requireNonNull(scoreboard, "scoreboard");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.kills = Objects.requireNonNull(kills, "kills");

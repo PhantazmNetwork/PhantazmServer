@@ -40,7 +40,7 @@ public class WallshotBlockIteration implements BlockIteration {
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public @NotNull Optional<Vec> findEnd(@NotNull Instance instance, @NotNull Entity shooter, @NotNull Pos start,
-                                          @NotNull Iterator<Point> it) {
+            @NotNull Iterator<Point> it) {
         Point blockLocation = null;
         Block block = null;
 

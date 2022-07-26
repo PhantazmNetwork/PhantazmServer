@@ -26,7 +26,7 @@ public class Room extends PositionalMapObject<RoomInfo> {
      * @param instance the instance which this MapObject is in
      */
     public Room(@NotNull RoomInfo roomInfo, @NotNull Vec3I origin, @NotNull Instance instance,
-                @NotNull List<Action<Room>> openActions) {
+            @NotNull List<Action<Room>> openActions) {
         super(roomInfo, origin, instance);
         this.openActions = new ArrayList<>(openActions);
         this.openActions.sort(Comparator.reverseOrder());

@@ -29,8 +29,7 @@ public final class Neuron {
     static void initialize(@NotNull EventNode<Event> globalNode, @NotNull PathfinderConfig pathfinderConfig) {
         spawner = new ContextualSpawner(
                 new BasicContextProvider(globalNode, Executors.newWorkStealingPool(pathfinderConfig.threads()),
-                                         pathfinderConfig.cacheSize(), pathfinderConfig.updateQueueCapacity()
-                ));
+                        pathfinderConfig.cacheSize(), pathfinderConfig.updateQueueCapacity()));
     }
 
     /**

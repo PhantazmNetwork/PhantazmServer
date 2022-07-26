@@ -7,7 +7,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractList;
@@ -93,11 +92,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     @Override
-    public @NotNull Component remove(int index) {
-        armorStands.remove(index).remove();
-        Component component = components.remove(index);
-        updateArmorStands();
-        return component;
+    public @NotNull Component get(int index) {
+        return components.get(index);
     }
 
     @Override
@@ -113,17 +109,20 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     @Override
+    public @NotNull Component remove(int index) {
+        armorStands.remove(index).remove();
+        Component component = components.remove(index);
+        updateArmorStands();
+        return component;
+    }
+
+    @Override
     public void clear() {
         for (Entity entity : armorStands) {
             entity.remove();
         }
         armorStands.clear();
         components.clear();
-    }
-
-    @Override
-    public @NotNull Component get(int index) {
-        return components.get(index);
     }
 
     @Override

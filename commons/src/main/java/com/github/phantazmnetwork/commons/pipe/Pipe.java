@@ -85,7 +85,7 @@ public interface Pipe<TValue> extends Iterator<TValue> {
      * @return a new pipe which will iterate until the given predicate returns false
      */
     static <TValue> @NotNull Pipe<TValue> whileTrue(@NotNull Predicate<Wrapper<TValue>> predicate,
-                                                    @Nullable TValue initialValue) {
+            @Nullable TValue initialValue) {
         return new Advancing<>() {
             private final Wrapper<TValue> value = Wrapper.of(initialValue);
 

@@ -9,13 +9,10 @@ import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
 import com.github.phantazmnetwork.zombies.map.Evaluation;
 import com.github.phantazmnetwork.zombies.map.ShopInfo;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
     private final List<ShopPredicate> predicates;
@@ -23,8 +20,8 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
     private final List<ShopDisplay> displays;
 
     public Shop(@NotNull ShopInfo info, @NotNull Vec3I origin, @NotNull Instance instance,
-                @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> interactors,
-                @NotNull List<ShopDisplay> displays) {
+            @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> interactors,
+            @NotNull List<ShopDisplay> displays) {
         super(info, origin, instance);
 
         predicates.sort(Comparator.reverseOrder());

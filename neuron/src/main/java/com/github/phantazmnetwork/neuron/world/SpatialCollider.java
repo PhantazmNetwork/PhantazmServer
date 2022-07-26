@@ -24,8 +24,7 @@ public class SpatialCollider implements Collider {
     }
 
     private static boolean checkSolid(SolidPipe overlapping, Solid component, double centerX, double centerY,
-                                      double centerZ, double adjustedXZ, double adjustedXY, double adjustedYZ,
-                                      double dX, double dY, double dZ) {
+            double centerZ, double adjustedXZ, double adjustedXY, double adjustedYZ, double dX, double dY, double dZ) {
         Vec3F componentMin = component.getMin();
         Vec3F componentMax = component.getMax();
 
@@ -38,12 +37,12 @@ public class SpatialCollider implements Collider {
         double maxZ = overlapping.getSecond() + componentMax.getZ() - centerZ;
 
         return checkAxis(adjustedXZ, dX, dZ, minX, minZ, maxX, maxZ) &&
-               checkAxis(adjustedXY, dX, dY, minX, minY, maxX, maxY) &&
-               checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY);
+                checkAxis(adjustedXY, dX, dY, minX, minY, maxX, maxY) &&
+                checkAxis(adjustedYZ, dZ, dY, minZ, minY, maxZ, maxY);
     }
 
     private static boolean checkAxis(double size, double dA, double dB, double minA, double minB, double maxA,
-                                     double maxB) {
+            double maxB) {
         if (dA == 0 && dB == 0) {
             return true;
         }
@@ -54,7 +53,7 @@ public class SpatialCollider implements Collider {
     }
 
     private static boolean checkPlanes(double size, double dA, double dB, double minA, double minB, double maxA,
-                                       double maxB) {
+            double maxB) {
         double bMinusAMin = (minB * dA) - (minA * dB);
         if (bMinusAMin >= size) { //!minInFirst
             return (maxB * dA) - (maxA * dB) < size;  //... && maxInFirst
@@ -69,9 +68,8 @@ public class SpatialCollider implements Collider {
     }
 
     private double collisionCheck(double x, double y, double z, double width, double height, double depth, double dX,
-                                  double dY, double dZ, double initialBest, ValueFunction valueFunction,
-                                  DoubleBiPredicate betterThan, Predicate<Solid> bestThisLayer,
-                                  DoublePredicate fastExit) {
+            double dY, double dZ, double initialBest, ValueFunction valueFunction, DoubleBiPredicate betterThan,
+            Predicate<Solid> bestThisLayer, DoublePredicate fastExit) {
         //bounding box of collision which will be directionally expanded this is necessary to obtain an iterable of
         //candidate solids to collision check
         double eoX = x;
@@ -162,16 +160,14 @@ public class SpatialCollider implements Collider {
                         //stop checking this solid if any of its sub-solids overlap original bounds
                         //noinspection AssignmentUsedAsCondition
                         if (hit = checkSolid(overlapping, component, centerX, centerY, centerZ, adjustedXZ, adjustedXY,
-                                             adjustedYZ, dX, dY, dZ
-                        )) {
+                                adjustedYZ, dX, dY, dZ)) {
                             break;
                         }
                     }
                 }
                 else {
                     hit = checkSolid(overlapping, candidate, centerX, centerY, centerZ, adjustedXZ, adjustedXY,
-                                     adjustedYZ, dX, dY, dZ
-                    );
+                            adjustedYZ, dX, dY, dZ);
                 }
 
                 if (hit) {
@@ -207,20 +203,18 @@ public class SpatialCollider implements Collider {
 
     @Override
     public double highestCollisionAlong(double x, double y, double z, double width, double height, double depth,
-                                        double dX, double dY, double dZ) {
+            double dX, double dY, double dZ) {
         return collisionCheck(x, y, z, width, height, depth, dX, dY, dZ, Double.NEGATIVE_INFINITY,
-                              (solid, val) -> val + solid.getMax().getY(), (value, best) -> value > best,
-                              solid -> solid.getMax().getY() == 1.0F, val -> val < 0
-        );
+                (solid, val) -> val + solid.getMax().getY(), (value, best) -> value > best,
+                solid -> solid.getMax().getY() == 1.0F, val -> val < 0);
     }
 
     @Override
     public double lowestCollisionAlong(double x, double y, double z, double width, double height, double depth,
-                                       double dX, double dY, double dZ) {
+            double dX, double dY, double dZ) {
         return collisionCheck(x, y, z, width, height, depth, dX, dY, dZ, Double.POSITIVE_INFINITY,
-                              (solid, val) -> val + solid.getMin().getY(), (value, best) -> value < best,
-                              solid -> solid.getMin().getY() == 0.0F, val -> val > 0
-        );
+                (solid, val) -> val + solid.getMin().getY(), (value, best) -> value < best,
+                solid -> solid.getMin().getY() == 0.0F, val -> val > 0);
     }
 
     @Override

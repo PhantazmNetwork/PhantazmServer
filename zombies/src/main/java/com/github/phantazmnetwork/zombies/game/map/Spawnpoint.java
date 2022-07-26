@@ -35,8 +35,7 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
      * @param mobSpawner        the function used to actually spawn mobs in the world
      */
     public Spawnpoint(@NotNull SpawnpointInfo spawnInfo, @NotNull Vec3I origin, @NotNull Instance instance,
-                      @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction,
-                      @NotNull MobSpawner mobSpawner) {
+            @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner) {
         super(spawnInfo, origin, instance);
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");

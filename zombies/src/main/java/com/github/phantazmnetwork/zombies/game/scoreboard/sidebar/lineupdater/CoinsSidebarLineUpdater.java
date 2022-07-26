@@ -16,7 +16,7 @@ public class CoinsSidebarLineUpdater implements SidebarLineUpdater {
     private Component playerName = null;
 
     public CoinsSidebarLineUpdater(@NotNull CompletableFuture<? extends Component> playerNameFuture,
-                                   @NotNull PlayerCoins coins) {
+            @NotNull PlayerCoins coins) {
         this.coins = Objects.requireNonNull(coins, "coins");
         playerNameFuture.thenAccept(playerName -> {
             this.playerName = playerName;
@@ -35,7 +35,6 @@ public class CoinsSidebarLineUpdater implements SidebarLineUpdater {
         }
 
         return Optional.of(Component.textOfChildren(playerName, Component.text(": "),
-                                                    Component.text(coins.getCoins(), NamedTextColor.GOLD)
-        ));
+                Component.text(coins.getCoins(), NamedTextColor.GOLD)));
     }
 }

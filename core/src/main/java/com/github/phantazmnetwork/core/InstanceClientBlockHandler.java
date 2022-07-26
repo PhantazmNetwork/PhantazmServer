@@ -59,13 +59,13 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         };
 
         globalNode.addListener(EventListener.builder(PlayerChunkLoadEvent.class).filter(filter).expireWhen(expire)
-                                            .handler(this::onPlayerChunkLoad).build());
+                .handler(this::onPlayerChunkLoad).build());
         globalNode.addListener(EventListener.builder(PreBlockChangeEvent.class).filter(filter).expireWhen(expire)
-                                            .handler(this::onPreBlockChange).build());
+                .handler(this::onPreBlockChange).build());
         globalNode.addListener(EventListener.builder(PlayerBlockBreakEvent.class).filter(filter).expireWhen(expire)
-                                            .handler(this::onPlayerBlockBreak).build());
+                .handler(this::onPlayerBlockBreak).build());
         globalNode.addListener(EventListener.builder(PrePlayerStartDiggingEvent.class).filter(filter).expireWhen(expire)
-                                            .handler(this::onPrePlayerStartDigging).build());
+                .handler(this::onPrePlayerStartDigging).build());
     }
 
     @Override

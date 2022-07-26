@@ -35,7 +35,7 @@ public interface PathCache {
      * possibly caching them
      */
     @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull Descriptor descriptor,
-                                        @NotNull Iterator<Vec3I> steps);
+            @NotNull Iterator<Vec3I> steps);
 
     /**
      * Called when a solid is updated at the given location. Invalidates the appropriate entries in the internal cache.

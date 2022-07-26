@@ -1,12 +1,15 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Velocity" type="JarApplication">
-    <option name="JAR_PATH" value="$PROJECT_DIR$/run/velocity/velocity.jar" />
-    <option name="VM_PARAMETERS" value="-Xms512M -Xmx512M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -Dfile.encoding=UTF-8" />
-    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$\run\velocity" />
-    <option name="ALTERNATIVE_JRE_PATH" />
-    <method v="2">
-      <option name="Gradle.BeforeRunTask" enabled="false" tasks="setupServer" externalProjectPath="$PROJECT_DIR$/server" vmOptions="" scriptParameters="" />
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="copyJar" externalProjectPath="$PROJECT_DIR$/velocity" vmOptions="" scriptParameters="" />
-    </method>
-  </configuration>
+    <configuration default="false" name="Run Velocity" type="JarApplication">
+        <option name="JAR_PATH" value="$PROJECT_DIR$/run/velocity/velocity.jar"/>
+        <option name="VM_PARAMETERS"
+                value="-Xms512M -Xmx512M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -Dfile.encoding=UTF-8"/>
+        <option name="WORKING_DIRECTORY" value="$ProjectFileDir$\run\velocity"/>
+        <option name="ALTERNATIVE_JRE_PATH"/>
+        <method v="2">
+            <option name="Gradle.BeforeRunTask" enabled="false" tasks="setupServer"
+                    externalProjectPath="$PROJECT_DIR$/server" vmOptions="" scriptParameters=""/>
+            <option name="Gradle.BeforeRunTask" enabled="true" tasks="copyJar"
+                    externalProjectPath="$PROJECT_DIR$/velocity" vmOptions="" scriptParameters=""/>
+        </method>
+    </configuration>
 </component>

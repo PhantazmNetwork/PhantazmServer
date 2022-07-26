@@ -79,8 +79,7 @@ public record ParticleWrapper(@NotNull Particle particle,
                 int particleCount = element.getNumberOrThrow("particleCount").intValue();
 
                 return new ParticleWrapper(particle, data, distance, offsetX, offsetY, offsetZ, particleData,
-                                           particleCount
-                );
+                        particleCount);
             }
 
             @Override

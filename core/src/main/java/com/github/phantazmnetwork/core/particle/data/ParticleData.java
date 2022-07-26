@@ -24,11 +24,10 @@ public interface ParticleData extends Keyed {
     static @NotNull ConfigProcessor<ParticleData> processor(@NotNull ConfigProcessor<ItemStack> stackProcessor) {
         return new VariantConfigProcessor<>(
                 Map.of(BlockParticleData.SERIAL_KEY, BlockParticleData.processor(), DustParticleData.SERIAL_KEY,
-                       DustParticleData.processor(), ItemStackParticleData.SERIAL_KEY,
-                       ItemStackParticleData.processor(stackProcessor), NoParticleData.SERIAL_KEY,
-                       NoParticleData.processor(), TransitionDustParticleData.SERIAL_KEY,
-                       TransitionDustParticleData.processor()
-                )::get);
+                        DustParticleData.processor(), ItemStackParticleData.SERIAL_KEY,
+                        ItemStackParticleData.processor(stackProcessor), NoParticleData.SERIAL_KEY,
+                        NoParticleData.processor(), TransitionDustParticleData.SERIAL_KEY,
+                        TransitionDustParticleData.processor())::get);
     }
 
     /**

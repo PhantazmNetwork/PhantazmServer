@@ -49,8 +49,7 @@ public record ServerInfoConfig(@NotNull String serverIP,
      */
     public static final ServerInfoConfig DEFAULT =
             new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT, DEFAULT_OPTIFINE_ENABLED, DEFAULT_AUTH_TYPE,
-                                 DEFAULT_PROXY_SECRET
-            );
+                    DEFAULT_PROXY_SECRET);
 
     /**
      * Creates config regarding server settings.

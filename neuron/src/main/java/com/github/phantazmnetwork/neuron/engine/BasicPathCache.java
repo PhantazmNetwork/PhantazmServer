@@ -69,8 +69,7 @@ public class BasicPathCache implements PathCache {
                     Update update;
                     while (iterator.hasNext() && (update = iterator.next()).id > mostRecent) {
                         if (descriptor.shouldInvalidate(entry.steps, origin, update.position, update.oldSolid,
-                                                        update.newSolid
-                        )) {
+                                update.newSolid)) {
                             positionalCache.invalidate(origin);
                             return Optional.empty();
                         }
@@ -86,7 +85,7 @@ public class BasicPathCache implements PathCache {
 
     @Override
     public @NotNull Iterator<Vec3I> watchSteps(@NotNull Vec3I origin, @NotNull Descriptor descriptor,
-                                               @NotNull Iterator<Vec3I> steps) {
+            @NotNull Iterator<Vec3I> steps) {
         long update;
         synchronized (updateQueue) {
             update = this.update;
@@ -94,10 +93,8 @@ public class BasicPathCache implements PathCache {
 
         ArrayList<Vec3I> list = new ArrayList<>(8);
         return Pipe.from(steps).listen(list::add).forLast(ignored -> positionalCache.get(origin,
-                                                                                         ignored2 -> Object2ObjectMaps.synchronize(
-                                                                                                 new Object2ObjectOpenHashMap<>(
-                                                                                                         INITIAL_HASHMAP_CAPACITY))
-        ).put(descriptor.getID(), new CacheEntry(getView(list), update)));
+                        ignored2 -> Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>(INITIAL_HASHMAP_CAPACITY)))
+                .put(descriptor.getID(), new CacheEntry(getView(list), update)));
     }
 
     @Override

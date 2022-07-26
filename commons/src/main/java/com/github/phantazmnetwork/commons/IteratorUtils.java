@@ -73,7 +73,7 @@ public final class IteratorUtils {
      * @return true if the iterators are equal, false otherwise
      */
     public static <T> boolean iteratorEquals(@NotNull Iterator<? extends T> first,
-                                             @NotNull Iterator<? extends T> second) {
+            @NotNull Iterator<? extends T> second) {
         while (true) {
             boolean firstHasNext = first.hasNext();
             boolean secondHasNext = second.hasNext();

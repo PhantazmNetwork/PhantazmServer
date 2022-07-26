@@ -84,7 +84,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
-                                                @NotNull BlockHitResult blockHitResult) {
+            @NotNull BlockHitResult blockHitResult) {
         if (!enabled || !player.getInventory().getMainHandStack().getItem().equals(Items.STICK)) {
             return ActionResult.PASS;
         }
@@ -100,13 +100,9 @@ public class BasicEditorSession implements EditorSession {
             }
             else {
                 Vec3i min = new Vec3i(Math.min(newSelection.getX(), first.getX()),
-                                      Math.min(newSelection.getY(), first.getY()),
-                                      Math.min(newSelection.getZ(), first.getZ())
-                );
+                        Math.min(newSelection.getY(), first.getY()), Math.min(newSelection.getZ(), first.getZ()));
                 Vec3i max = new Vec3i(Math.max(newSelection.getX(), first.getX()),
-                                      Math.max(newSelection.getY(), first.getY()),
-                                      Math.max(newSelection.getZ(), first.getZ())
-                );
+                        Math.max(newSelection.getY(), first.getY()), Math.max(newSelection.getZ(), first.getZ()));
 
                 secondSelected = firstSelected;
                 firstSelected = newSelection;
@@ -167,8 +163,7 @@ public class BasicEditorSession implements EditorSession {
     @Override
     public @NotNull Region3I getSelection() {
         return Region3I.encompassing(getFirstSelection(), getSecondSelection(),
-                                     currentMap != null ? currentMap.settings().origin() : Vec3I.ORIGIN
-        );
+                currentMap != null ? currentMap.settings().origin() : Vec3I.ORIGIN);
     }
 
     @Override
@@ -287,11 +282,8 @@ public class BasicEditorSession implements EditorSession {
         for (RoomInfo room : currentMap.rooms()) {
             renderer.putObject(
                     new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "room." + room.id().value()),
-                                                    ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true, false,
-                                                    RenderUtils.arrayFromRegions(room.regions(),
-                                                                                 currentMap.settings().origin()
-                                                    )
-                    ));
+                            ObjectRenderer.RenderType.FILLED, ROOM_COLOR, true, false,
+                            RenderUtils.arrayFromRegions(room.regions(), currentMap.settings().origin())));
         }
     }
 
@@ -303,11 +295,8 @@ public class BasicEditorSession implements EditorSession {
         for (DoorInfo door : currentMap.doors()) {
             renderer.putObject(
                     new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "door." + door.id().value()),
-                                                    ObjectRenderer.RenderType.FILLED, DOOR_COLOR, true, false,
-                                                    RenderUtils.arrayFromRegions(door.regions(),
-                                                                                 currentMap.settings().origin()
-                                                    )
-                    ));
+                            ObjectRenderer.RenderType.FILLED, DOOR_COLOR, true, false,
+                            RenderUtils.arrayFromRegions(door.regions(), currentMap.settings().origin())));
         }
     }
 
@@ -319,13 +308,9 @@ public class BasicEditorSession implements EditorSession {
         int i = 0;
         for (WindowInfo window : currentMap.windows()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "window." + i++),
-                                                               ObjectRenderer.RenderType.FILLED, WINDOW_COLOR, true,
-                                                               false, RenderUtils.arrayFromRegion(window.frameRegion(),
-                                                                                                  currentMap.settings()
-                                                                                                            .origin(),
-                                                                                                  new Vec3d[2], 0
-            )
-            ));
+                    ObjectRenderer.RenderType.FILLED, WINDOW_COLOR, true, false,
+                    RenderUtils.arrayFromRegion(window.frameRegion(), currentMap.settings().origin(), new Vec3d[2],
+                            0)));
         }
     }
 
@@ -337,12 +322,9 @@ public class BasicEditorSession implements EditorSession {
         int i = 0;
         for (SpawnpointInfo spawnpointInfo : currentMap.spawnpoints()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "spawnpoint." + i++),
-                                                               ObjectRenderer.RenderType.FILLED, SPAWNPOINT_COLOR, true,
-                                                               false, RenderUtils.arrayFromRegion(
-                    Region3I.normalized(spawnpointInfo.position(), Vec3I.of(1, 1, 1)), currentMap.settings().origin(),
-                    new Vec3d[2], 0
-            )
-            ));
+                    ObjectRenderer.RenderType.FILLED, SPAWNPOINT_COLOR, true, false,
+                    RenderUtils.arrayFromRegion(Region3I.normalized(spawnpointInfo.position(), Vec3I.of(1, 1, 1)),
+                            currentMap.settings().origin(), new Vec3d[2], 0)));
         }
     }
 
@@ -354,12 +336,9 @@ public class BasicEditorSession implements EditorSession {
         int i = 0;
         for (ShopInfo shopInfo : currentMap.shops()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "shop." + i++),
-                                                               ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true,
-                                                               false, RenderUtils.arrayFromRegion(
-                    Region3I.normalized(shopInfo.triggerLocation(), Vec3I.of(1, 1, 1)), currentMap.settings().origin(),
-                    new Vec3d[2], 0
-            )
-            ));
+                    ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true, false,
+                    RenderUtils.arrayFromRegion(Region3I.normalized(shopInfo.triggerLocation(), Vec3I.of(1, 1, 1)),
+                            currentMap.settings().origin(), new Vec3d[2], 0)));
         }
     }
 
@@ -381,20 +360,19 @@ public class BasicEditorSession implements EditorSession {
     private Map<Key, MapInfo> loadMaps() throws IOException {
         Map<Key, MapInfo> newMaps = new HashMap<>();
         FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory() && !path.equals(mapFolder),
-                                      mapFolder -> {
-                                          LOGGER.info("Trying to load map from " + mapFolder);
-                                          String name = mapFolder.getFileName().toString();
+                mapFolder -> {
+                    LOGGER.info("Trying to load map from " + mapFolder);
+                    String name = mapFolder.getFileName().toString();
 
-                                          try {
-                                              MapInfo map = loader.load(name);
-                                              newMaps.put(map.settings().id(), map);
-                                              LOGGER.info("Successfully loaded map " + name);
-                                          }
-                                          catch (IOException e) {
-                                              LOGGER.warn("IOException when loading map " + name, e);
-                                          }
-                                      }
-        );
+                    try {
+                        MapInfo map = loader.load(name);
+                        newMaps.put(map.settings().id(), map);
+                        LOGGER.info("Successfully loaded map " + name);
+                    }
+                    catch (IOException e) {
+                        LOGGER.warn("IOException when loading map " + name, e);
+                    }
+                });
 
         return newMaps;
     }
@@ -409,11 +387,8 @@ public class BasicEditorSession implements EditorSession {
         MapSettingsInfo info = currentMap.settings();
         renderer.putObject(
                 new ObjectRenderer.RenderObject(ORIGIN_KEY, ObjectRenderer.RenderType.FILLED, ORIGIN_COLOR, true, true,
-                                                RenderUtils.arrayFromRegion(
-                                                        Region3I.normalized(info.origin(), Vec3I.of(1, 1, 1)),
-                                                        Vec3I.ORIGIN, new Vec3d[2], 0
-                                                )
-                ));
+                        RenderUtils.arrayFromRegion(Region3I.normalized(info.origin(), Vec3I.of(1, 1, 1)), Vec3I.ORIGIN,
+                                new Vec3d[2], 0)));
 
         refreshRooms();
         refreshDoors();
@@ -424,26 +399,20 @@ public class BasicEditorSession implements EditorSession {
 
     private void updateSelectionRender(Vec3i areaStart, Vec3i dimensions, Vec3i clicked) {
         Vec3d startVec = new Vec3d(areaStart.getX() - ObjectRenderer.EPSILON, areaStart.getY() - ObjectRenderer.EPSILON,
-                                   areaStart.getZ() - ObjectRenderer.EPSILON
-        );
+                areaStart.getZ() - ObjectRenderer.EPSILON);
         Vec3d dimensionsVec = new Vec3d(dimensions.getX() + ObjectRenderer.DOUBLE_EPSILON,
-                                        dimensions.getY() + ObjectRenderer.DOUBLE_EPSILON,
-                                        dimensions.getZ() + ObjectRenderer.DOUBLE_EPSILON
-        );
+                dimensions.getY() + ObjectRenderer.DOUBLE_EPSILON, dimensions.getZ() + ObjectRenderer.DOUBLE_EPSILON);
         Vec3d clickedVec = new Vec3d(clicked.getX(), clicked.getY(), clicked.getZ());
 
         renderer.putObject(
                 new ObjectRenderer.RenderObject(SELECTION_KEY, ObjectRenderer.RenderType.FILLED, SELECTION_COLOR, true,
-                                                false, startVec, dimensionsVec
-                ));
+                        false, startVec, dimensionsVec));
         renderer.putObject(
                 new ObjectRenderer.RenderObject(OUTLINE_KEY, ObjectRenderer.RenderType.OUTLINE, OUTLINE_COLOR, true,
-                                                false, startVec, dimensionsVec
-                ));
+                        false, startVec, dimensionsVec));
         renderer.putObject(
                 new ObjectRenderer.RenderObject(CURSOR_KEY, ObjectRenderer.RenderType.OUTLINE, CURSOR_COLOR, true, true,
-                                                clickedVec.add(0.25, 0.25, 0.25), HALF
-                ));
+                        clickedVec.add(0.25, 0.25, 0.25), HALF));
     }
 
     private void requireMap() {

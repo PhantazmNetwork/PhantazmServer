@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.game.listener;
 
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,7 @@ public class PlayerInteractEntityListener extends ZombiesPlayerEventListener<Pla
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerInteractEntityListener(@NotNull Instance instance, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
-                                        @NotNull PlayerRightClickListener rightClickListener) {
+            @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
         this.rightClickListener = Objects.requireNonNull(rightClickListener, "rightClickListener");
     }

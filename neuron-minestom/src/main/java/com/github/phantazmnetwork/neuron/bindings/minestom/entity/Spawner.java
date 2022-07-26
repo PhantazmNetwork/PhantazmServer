@@ -22,8 +22,7 @@ public interface Spawner {
      * @return a freshly-spawned NeuralEntity with its instance set
      */
     @NotNull NeuralEntity spawnEntity(@NotNull Instance instance, @NotNull Point point,
-                                      @NotNull MinestomDescriptor type,
-                                      @NotNull Consumer<? super NeuralEntity> settings);
+            @NotNull MinestomDescriptor type, @NotNull Consumer<? super NeuralEntity> settings);
 
     /**
      * Convenience overload for {@code spawnEntity} that does not apply any settings.
@@ -34,7 +33,7 @@ public interface Spawner {
      * @return a freshly-spawned NeuralEntity with its instance set
      */
     default @NotNull NeuralEntity spawnEntity(@NotNull Instance instance, @NotNull Point point,
-                                              @NotNull MinestomDescriptor type) {
+            @NotNull MinestomDescriptor type) {
         return spawnEntity(instance, point, type, ignored -> {
         });
     }

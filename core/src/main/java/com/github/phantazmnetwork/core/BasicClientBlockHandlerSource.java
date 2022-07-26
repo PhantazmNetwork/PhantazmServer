@@ -30,7 +30,6 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
     @Override
     public @NotNull ClientBlockHandler forInstance(@NotNull Instance instance) {
         return map.computeIfAbsent(Objects.requireNonNull(instance, "instance"),
-                                   world -> Objects.requireNonNull(this.blockHandlerFunction.apply(world), "handler")
-        );
+                world -> Objects.requireNonNull(this.blockHandlerFunction.apply(world), "handler"));
     }
 }

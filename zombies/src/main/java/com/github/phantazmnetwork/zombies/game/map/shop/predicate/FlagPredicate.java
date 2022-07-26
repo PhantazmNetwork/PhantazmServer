@@ -39,12 +39,6 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
             return node;
         }
     };
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
-    }
-
     private final ZombiesMap map;
 
     @FactoryMethod
@@ -53,12 +47,17 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
         this.map = Objects.requireNonNull(map, "map");
     }
 
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return PROCESSOR;
+    }
+
     @Override
     public boolean canHandleInteraction(@NotNull PlayerInteraction interaction) {
         boolean result = map.hasFlag(data.flag) != data.requireAbsent;
         if (!result) {
             interaction.getPlayer().getPlayerView().getPlayer()
-                       .ifPresent(presentPlayer -> presentPlayer.sendMessage(data.message));
+                    .ifPresent(presentPlayer -> presentPlayer.sendMessage(data.message));
         }
 
         return result;

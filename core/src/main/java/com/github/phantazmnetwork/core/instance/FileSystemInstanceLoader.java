@@ -37,7 +37,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager,
-                                          @UnmodifiableView @NotNull List<String> subPaths) {
+            @UnmodifiableView @NotNull List<String> subPaths) {
         Path path = rootPath;
         for (String subPath : subPaths) {
             path = path.resolve(subPath);

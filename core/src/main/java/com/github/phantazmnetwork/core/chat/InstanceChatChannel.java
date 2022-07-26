@@ -32,8 +32,7 @@ public class InstanceChatChannel extends BasicChatChannel {
         Instance instance = player.getInstance();
         if (instance == null) {
             return Pair.of(null,
-                           ObjectBooleanPair.of(Component.text("You are not in an instance.", NamedTextColor.RED), true)
-            );
+                    ObjectBooleanPair.of(Component.text("You are not in an instance.", NamedTextColor.RED), true));
         }
 
         return Pair.of((ForwardingAudience)() -> List.of(instance), null);

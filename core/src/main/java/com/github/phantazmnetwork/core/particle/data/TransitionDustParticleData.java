@@ -76,11 +76,9 @@ public class TransitionDustParticleData implements ParticleData {
                     @NotNull TransitionDustParticleData transitionDustParticleData) throws ConfigProcessException {
                 TextColor from =
                         TextColor.color(transitionDustParticleData.fromRed, transitionDustParticleData.fromGreen,
-                                        transitionDustParticleData.fromBlue
-                        );
+                                transitionDustParticleData.fromBlue);
                 TextColor to = TextColor.color(transitionDustParticleData.toRed, transitionDustParticleData.toGreen,
-                                               transitionDustParticleData.toBlue
-                );
+                        transitionDustParticleData.toBlue);
 
                 LinkedConfigNode node = new LinkedConfigNode(3);
                 node.put("from", rgbProcessor.elementFromData(from));

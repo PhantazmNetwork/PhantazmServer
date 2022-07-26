@@ -37,12 +37,6 @@ public class StaticHologramDisplay extends HologramDisplayBase {
             return node;
         }
     };
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
-    }
-
     private final Data data;
 
     @FactoryMethod
@@ -50,13 +44,17 @@ public class StaticHologramDisplay extends HologramDisplayBase {
         this.data = data;
     }
 
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return PROCESSOR;
+    }
+
     @Override
     public void initialize(@NotNull Shop shop) {
         Vec3I location = shop.getData().triggerLocation();
         Vec3D offset = data.info.position();
         Vec3D center = Vec3D.of(location.getX() + 0.5 + offset.getX(), location.getY() + 0.5 + offset.getY(),
-                                location.getZ() + 0.5 + offset.getZ()
-        );
+                location.getZ() + 0.5 + offset.getZ());
 
         hologram.setLocation(center);
         hologram.setInstance(shop.getInstance());

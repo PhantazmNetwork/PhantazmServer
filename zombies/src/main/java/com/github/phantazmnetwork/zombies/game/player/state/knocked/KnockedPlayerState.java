@@ -20,59 +20,28 @@ import java.util.function.Supplier;
 
 public class KnockedPlayerState implements ZombiesPlayerState {
 
-    public interface DeathTickable {
-
-        void tick(long time, long ticksUntilDeath);
-
-        void end();
-
-    }
-
-    public interface ReviveTickable {
-
-        void tick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive);
-
-        void end();
-
-    }
-
     private final Reference<Instance> instanceReference;
-
     private final PlayerView playerView;
-
     private final CompletableFuture<? extends Component> knockMessageFuture;
-
     private final Consumer<? super Player> knockedAction;
-
     private final Supplier<? extends ZombiesPlayer> reviverSupplier;
-
     private final Supplier<? extends ZombiesPlayerState> deathStateSupplier;
-
     private final Supplier<? extends ZombiesPlayerState> defaultStateSupplier;
-
     private final Collection<? extends DeathTickable> deathTickables;
-
     private final Collection<? extends ReviveTickable> reviveTickables;
-
     private final long deathTime;
-
     private final long reviveTime;
-
     private ZombiesPlayer reviver = null;
-
     private long ticksUntilDeath;
-
     private long ticksUntilRevive;
 
     public KnockedPlayerState(@NotNull Instance instance, @NotNull PlayerView playerView,
-                              @NotNull CompletableFuture<? extends Component> knockMessageFuture,
-                              @NotNull Supplier<? extends ZombiesPlayerState> deathStateSupplier,
-                              @NotNull Supplier<? extends ZombiesPlayerState> defaultStateSupplier,
-                              @NotNull Consumer<? super Player> knockedAction,
-                              @NotNull Supplier<? extends ZombiesPlayer> reviverSupplier,
-                              @NotNull Collection<? extends DeathTickable> deathTickables,
-                              @NotNull Collection<? extends ReviveTickable> reviveTickables, long deathTime,
-                              long reviveTime) {
+            @NotNull CompletableFuture<? extends Component> knockMessageFuture,
+            @NotNull Supplier<? extends ZombiesPlayerState> deathStateSupplier,
+            @NotNull Supplier<? extends ZombiesPlayerState> defaultStateSupplier,
+            @NotNull Consumer<? super Player> knockedAction, @NotNull Supplier<? extends ZombiesPlayer> reviverSupplier,
+            @NotNull Collection<? extends DeathTickable> deathTickables,
+            @NotNull Collection<? extends ReviveTickable> reviveTickables, long deathTime, long reviveTime) {
         this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.knockMessageFuture = Objects.requireNonNull(knockMessageFuture, "knockMessageFuture");
@@ -151,5 +120,21 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     @Override
     public @NotNull Component getDisplayName() {
         return Component.text("KNOCKED", NamedTextColor.YELLOW);
+    }
+
+    public interface DeathTickable {
+
+        void tick(long time, long ticksUntilDeath);
+
+        void end();
+
+    }
+
+    public interface ReviveTickable {
+
+        void tick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive);
+
+        void end();
+
     }
 }

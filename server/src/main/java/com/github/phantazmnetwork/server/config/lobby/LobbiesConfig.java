@@ -45,8 +45,7 @@ public record LobbiesConfig(@NotNull Path instancesPath,
      */
     public static final LobbiesConfig DEFAULT =
             new LobbiesConfig(DEFAULT_INSTANCES_PATH, DEFAULT_KICK_MESSAGE, DEFAULT_MAIN_LOBBY_NAME,
-                              Collections.emptyMap()
-            );
+                    Collections.emptyMap());
 
     /**
      * Creates a {@link LobbiesConfig}.

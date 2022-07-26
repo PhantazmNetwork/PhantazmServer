@@ -37,15 +37,15 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
         }
     };
 
+    @FactoryMethod
+    public PlaySoundInteractor(@NotNull Data data,
+            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+        super(data, map);
+    }
+
     @ProcessorMethod
     public static @NotNull ConfigProcessor<PlaySoundInteractor.Data> processor() {
         return PROCESSOR;
-    }
-
-    @FactoryMethod
-    public PlaySoundInteractor(@NotNull Data data,
-                               @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
-        super(data, map);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
         }
         else {
             interaction.getPlayer().getPlayerView().getPlayer()
-                       .ifPresent(player -> player.playSound(data.sound, Sound.Emitter.self()));
+                    .ifPresent(player -> player.playSound(data.sound, Sound.Emitter.self()));
         }
     }
 

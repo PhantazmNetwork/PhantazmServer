@@ -20,14 +20,14 @@ public class BasicSpawnDistributor implements SpawnDistributor {
     private final Random random;
 
     public BasicSpawnDistributor(@NotNull Function<? super Key, ? extends MobModel> modelFunction,
-                                 @NotNull Random random) {
+            @NotNull Random random) {
         this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
         this.random = Objects.requireNonNull(random, "random");
     }
 
     @Override
     public @NotNull List<PhantazmMob> distributeSpawns(@NotNull List<? extends Spawnpoint> spawnpoints,
-                                                       @NotNull Collection<? extends SpawnInfo> spawns) {
+            @NotNull Collection<? extends SpawnInfo> spawns) {
         if (spawnpoints.isEmpty()) {
             return new ArrayList<>(0);
         }

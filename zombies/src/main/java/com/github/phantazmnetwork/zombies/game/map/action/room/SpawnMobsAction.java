@@ -42,19 +42,17 @@ public class SpawnMobsAction implements Action<Room> {
             return node;
         }
     };
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
-    }
-
     private final Data data;
     private final Supplier<? extends Round> currentRound;
-
     @FactoryMethod
     public SpawnMobsAction(@NotNull Data data, @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
         this.data = Objects.requireNonNull(data, "data");
         this.currentRound = map::currentRound;
+    }
+
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return PROCESSOR;
     }
 
     @Override

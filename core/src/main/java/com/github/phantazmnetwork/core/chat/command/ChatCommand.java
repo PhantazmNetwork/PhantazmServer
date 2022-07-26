@@ -35,7 +35,7 @@ public class ChatCommand extends Command {
      * @param defaultChannelNameSupplier A {@link Supplier} of the default {@link ChatChannel} name
      */
     public ChatCommand(@NotNull Map<String, ChatChannel> channels, @NotNull Map<UUID, String> playerChannels,
-                       @NotNull Supplier<String> defaultChannelNameSupplier) {
+            @NotNull Supplier<String> defaultChannelNameSupplier) {
         super(COMMAND_ID);
 
         Objects.requireNonNull(channels, "channels");
@@ -89,17 +89,16 @@ public class ChatCommand extends Command {
 
             if (channelName.equals(previousChannelName)) {
                 Component message = Component.text()
-                                             .append(Component.text("You are already in the "), channelNameComponent,
-                                                     Component.text(" channel!")
-                                             ).color(NamedTextColor.RED).build();
+                        .append(Component.text("You are already in the "), channelNameComponent,
+                                Component.text(" channel!")).color(NamedTextColor.RED).build();
                 sender.sendMessage(message);
                 return;
             }
 
             playerChannels.put(player.getUuid(), channelName);
-            Component message = Component.text().append(Component.text("Set chat channel to "), channelNameComponent,
-                                                        Component.text(".")
-            ).color(NamedTextColor.GREEN).build();
+            Component message = Component.text()
+                    .append(Component.text("Set chat channel to "), channelNameComponent, Component.text("."))
+                    .color(NamedTextColor.GREEN).build();
             player.sendMessage(message);
         }, channelNameArgument);
     }

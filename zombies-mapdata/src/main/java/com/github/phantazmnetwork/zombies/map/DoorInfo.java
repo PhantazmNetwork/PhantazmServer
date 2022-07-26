@@ -56,7 +56,6 @@ public record DoorInfo(@NotNull Key id,
      */
     public DoorInfo(@NotNull Key id, @NotNull List<Region3I> regions) {
         this(id, new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), regions, DEFAULT_OPEN_SOUND,
-             new ArrayConfigList(0)
-        );
+                new ArrayConfigList(0));
     }
 }

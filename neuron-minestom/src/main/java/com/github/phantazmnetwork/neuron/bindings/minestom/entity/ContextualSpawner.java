@@ -26,8 +26,7 @@ public class ContextualSpawner implements Spawner {
 
     @Override
     public @NotNull NeuralEntity spawnEntity(@NotNull Instance instance, @NotNull Point point,
-                                             @NotNull MinestomDescriptor type,
-                                             @NotNull Consumer<? super NeuralEntity> settings) {
+            @NotNull MinestomDescriptor type, @NotNull Consumer<? super NeuralEntity> settings) {
         NeuralEntity entity = new NeuralEntity(type, UUID.randomUUID(), contextProvider);
         settings.accept(entity);
         entity.setInstance(instance, point);

@@ -28,8 +28,7 @@ public class ZombieKillsSidebarLineUpdater implements SidebarLineUpdater {
         if (killCount == -1 || killCount != playerKills.getKills()) {
             killCount = playerKills.getKills();
             return Optional.of(Component.textOfChildren(Component.text("Zombie Kills: "),
-                                                        Component.text(killCount, NamedTextColor.GREEN)
-            ));
+                    Component.text(killCount, NamedTextColor.GREEN)));
         }
 
         return Optional.empty();

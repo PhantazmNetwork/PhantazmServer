@@ -34,15 +34,15 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
         }
     };
 
+    @FactoryMethod
+    public FlagSettingInteractor(@NotNull Data data,
+            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+        super(data, map);
+    }
+
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return PROCESSOR;
-    }
-
-    @FactoryMethod
-    public FlagSettingInteractor(@NotNull Data data,
-                                 @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
-        super(data, map);
     }
 
     @Override

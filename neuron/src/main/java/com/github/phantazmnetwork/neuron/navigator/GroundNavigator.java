@@ -53,8 +53,8 @@ public class GroundNavigator extends TrackingNavigator {
      *                                 destination changes
      */
     public GroundNavigator(@NotNull NavigationTracker tracker, @NotNull PathEngine pathEngine, @NotNull Agent agent,
-                           long immobileThreshold, long missingStartDelay,
-                           @NotNull ToLongFunction<? super PathResult> explorationDelayFunction) {
+            long immobileThreshold, long missingStartDelay,
+            @NotNull ToLongFunction<? super PathResult> explorationDelayFunction) {
         super(tracker, pathEngine, agent);
         this.immobileThreshold = immobileThreshold;
         this.missingStartDelay = missingStartDelay;
@@ -120,9 +120,8 @@ public class GroundNavigator extends TrackingNavigator {
             Vec3I nodePos = node.getPosition();
             double distance =
                     Vec3D.squaredDistance(nodePos.getX() + node.getXOffset(), nodePos.getY() + node.getYOffset(),
-                                          nodePos.getZ() + node.getZOffset(), controller.getX(), controller.getY(),
-                                          controller.getZ()
-                    );
+                            nodePos.getZ() + node.getZOffset(), controller.getX(), controller.getY(),
+                            controller.getZ());
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearest = node;

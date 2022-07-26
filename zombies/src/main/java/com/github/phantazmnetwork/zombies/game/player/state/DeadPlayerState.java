@@ -25,8 +25,8 @@ public class DeadPlayerState implements ZombiesPlayerState {
     private final Consumer<? super Player> deathAction;
 
     public DeadPlayerState(@NotNull PlayerView playerView, @NotNull Instance instance,
-                           @NotNull CompletableFuture<? extends Component> deathMessageFuture,
-                           @NotNull Consumer<? super Player> deathAction) {
+            @NotNull CompletableFuture<? extends Component> deathMessageFuture,
+            @NotNull Consumer<? super Player> deathAction) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.deathMessageFuture = Objects.requireNonNull(deathMessageFuture, "deathMessageFuture");

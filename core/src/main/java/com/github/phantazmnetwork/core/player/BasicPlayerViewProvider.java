@@ -35,7 +35,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
      * @param duration          the duration for which name-to-UUID mappings will be cached
      */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
-                                   @NotNull Duration duration) {
+            @NotNull Duration duration) {
         this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.uuidToView = Caffeine.newBuilder().weakValues().build();
@@ -50,7 +50,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
      * @param connectionManager the {@link ConnectionManager} used by this server
      */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource,
-                                   @NotNull ConnectionManager connectionManager) {
+            @NotNull ConnectionManager connectionManager) {
         this(identitySource, connectionManager, DEFAULT_TIMEOUT);
     }
 

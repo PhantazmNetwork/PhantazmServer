@@ -41,7 +41,7 @@ public final class Chat {
      * @param commandManager The {@link CommandManager} to register chat commands to
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
-                           @NotNull CommandManager commandManager) {
+            @NotNull CommandManager commandManager) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -80,10 +80,8 @@ public final class Chat {
                 player.sendMessage(failure.left());
                 if (failure.rightBoolean()) {
                     player.sendMessage(Component.text().append(Component.text("Set channel to "),
-                                                               Component.text(DEFAULT_CHAT_CHANNEL_NAME,
-                                                                              NamedTextColor.GOLD
-                                                               ), Component.text(".")
-                    ).color(NamedTextColor.GREEN));
+                                    Component.text(DEFAULT_CHAT_CHANNEL_NAME, NamedTextColor.GOLD), Component.text("."))
+                            .color(NamedTextColor.GREEN));
                     playerChannels.put(player.getUuid(), DEFAULT_CHAT_CHANNEL_NAME);
                 }
             });

@@ -62,15 +62,15 @@ class MutableVec3I extends Vec3IBase {
     }
 
     @Override
+    public boolean isMutable() {
+        return true;
+    }
+
+    @Override
     public @NotNull Vec3I op(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
         return this;
-    }
-
-    @Override
-    public boolean isMutable() {
-        return true;
     }
 }

@@ -40,8 +40,8 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
      * @param roundInfo the backing data object
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull Instance instance, @NotNull List<Action<Round>> startActions,
-                 @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-                 @NotNull Supplier<List<Spawnpoint>> spawnpointSupplier) {
+            @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
+            @NotNull Supplier<List<Spawnpoint>> spawnpointSupplier) {
         super(roundInfo, instance);
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.size() == 0) {
@@ -137,7 +137,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     }
 
     public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
-                                                @NotNull SpawnDistributor spawnDistributor, boolean syncCount) {
+            @NotNull SpawnDistributor spawnDistributor, boolean syncCount) {
         if (!isActive) {
             throw new IllegalStateException("Round must be active to spawn mobs");
         }

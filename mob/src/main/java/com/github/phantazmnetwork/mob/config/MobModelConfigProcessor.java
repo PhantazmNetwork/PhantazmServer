@@ -55,9 +55,8 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
      * @param itemStackProcessor  A {@link ConfigProcessor} for {@link ItemStack}s
      */
     public MobModelConfigProcessor(@NotNull ConfigProcessor<MinestomDescriptor> descriptorProcessor,
-                                   @NotNull ConfigProcessor<Goal> goalProcessor,
-                                   @NotNull ConfigProcessor<Skill> skillProcessor,
-                                   @NotNull ConfigProcessor<ItemStack> itemStackProcessor) {
+            @NotNull ConfigProcessor<Goal> goalProcessor, @NotNull ConfigProcessor<Skill> skillProcessor,
+            @NotNull ConfigProcessor<ItemStack> itemStackProcessor) {
         this.descriptorProcessor = Objects.requireNonNull(descriptorProcessor, "descriptorProcessor");
         this.goalProcessor = Objects.requireNonNull(goalProcessor, "goalProcessor");
         this.skillProcessor = Objects.requireNonNull(skillProcessor, "skillProcessor");

@@ -36,7 +36,7 @@ public abstract class CachingExplorer implements Explorer {
         if (cache != null && current.isCentered()) {
             Vec3I currentPos = current.getPosition();
             return cache.getSteps(currentPos, descriptor)
-                        .orElse(() -> cache.watchSteps(currentPos, descriptor, getWalkIterator(current)));
+                    .orElse(() -> cache.watchSteps(currentPos, descriptor, getWalkIterator(current)));
         }
 
         return () -> getWalkIterator(current);

@@ -103,6 +103,6 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
      * @return Whether the target is valid
      */
     protected abstract boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity,
-                                             @NotNull TReturn target);
+            @NotNull TReturn target);
 
 }

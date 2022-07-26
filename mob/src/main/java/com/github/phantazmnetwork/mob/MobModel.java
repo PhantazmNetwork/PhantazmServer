@@ -47,9 +47,9 @@ public class MobModel implements Keyed {
      * @param attributes  The mob's attributes
      */
     public MobModel(@NotNull Key key, @NotNull MinestomDescriptor descriptor,
-                    @NotNull Collection<Collection<Goal>> goalGroups, @NotNull Map<Key, Collection<Skill>> triggers,
-                    @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment,
-                    @NotNull Object2FloatMap<String> attributes) {
+            @NotNull Collection<Collection<Goal>> goalGroups, @NotNull Map<Key, Collection<Skill>> triggers,
+            @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment,
+            @NotNull Object2FloatMap<String> attributes) {
         this.key = Objects.requireNonNull(key, "key");
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.goalGroups = List.copyOf(Objects.requireNonNull(goalGroups, "goalGroups"));

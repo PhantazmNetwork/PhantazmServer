@@ -34,7 +34,7 @@ public class MaliciousPluginMessageBlocker {
     @Subscribe
     public void onPlayerMessage(PluginMessageEvent event) {
         if (event.getIdentifier().getId().equals(proxyIdentifier.getId()) &&
-            event.getSource() instanceof Player player) {
+                event.getSource() instanceof Player player) {
             event.setResult(PluginMessageEvent.ForwardResult.handled());
             player.disconnect(Component.text("Malicious plugin message.", NamedTextColor.RED));
         }

@@ -64,8 +64,7 @@ public class NewObjectGui extends SimplePanelGui {
                 //convert to world coordinate space, so we can grab the actual block
                 blockData.add(NbtHelper.fromBlockState(playerEntity.world.getBlockState(
                         new BlockPos.Mutable(position.getX() + origin.getX(), position.getY() + origin.getY(),
-                                             position.getZ() + origin.getZ()
-                        ))).toString());
+                                position.getZ() + origin.getZ()))).toString());
             }
 
             currentMap.windows().add(new WindowInfo(selected, blockData));

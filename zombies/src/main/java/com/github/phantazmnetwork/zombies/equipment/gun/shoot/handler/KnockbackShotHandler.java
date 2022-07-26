@@ -65,7 +65,7 @@ public class KnockbackShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-                       @NotNull GunShot shot) {
+            @NotNull GunShot shot) {
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
         for (GunHit target : shot.regularTargets()) {
             Entity entity = target.entity();

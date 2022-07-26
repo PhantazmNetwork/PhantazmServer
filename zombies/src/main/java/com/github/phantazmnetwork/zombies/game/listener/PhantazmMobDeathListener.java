@@ -15,7 +15,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private final Supplier<? extends Round> roundSupplier;
 
     public PhantazmMobDeathListener(@NotNull Instance instance, @NotNull MobStore mobStore,
-                                    @NotNull Supplier<? extends Round> roundSupplier) {
+            @NotNull Supplier<? extends Round> roundSupplier) {
         super(instance, mobStore);
         this.roundSupplier = Objects.requireNonNull(roundSupplier, "roundSupplier");
     }

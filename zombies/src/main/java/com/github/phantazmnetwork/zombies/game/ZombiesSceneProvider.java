@@ -69,10 +69,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final ClientBlockHandlerSource clientBlockHandlerSource;
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
-                                @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
-                                @NotNull EventNode<Event> eventNode, @NotNull MobStore mobStore,
-                                @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
-                                @NotNull ClientBlockHandlerSource clientBlockHandlerSource) {
+            @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
+            @NotNull EventNode<Event> eventNode, @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner,
+            @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource) {
         super(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
@@ -112,8 +111,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     @Override
     protected @NotNull ZombiesScene createScene(@NotNull ZombiesJoinRequest request) {
         Instance instance = instanceLoader.loadInstance(instanceManager,
-                                                        List.of(mapInfo.settings().id().toString())
-        ); // TODO:verify
+                List.of(mapInfo.settings().id().toString())); // TODO:verify
 
         Phaser phaser = new Phaser(1);
         Point spawn = VecUtils.toPoint(mapInfo.settings().spawn().add(mapInfo.settings().origin()));
@@ -126,8 +124,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Map<UUID, ZombiesPlayer> zombiesPlayers = new HashMap<>(mapInfo.settings().maxPlayers());
         Function<PlayerView, ZombiesPlayer> playerCreator = playerView -> {
             PlayerCoins coins = new BasicPlayerCoins(playerView::getPlayer, new ChatComponentSender(),
-                                                     new BasicTransactionComponentCreator(), 0
-            );
+                    new BasicTransactionComponentCreator(), 0);
             PlayerKills kills = new BasicPlayerKills();
             InventoryProfileSwitcher profileSwitcher = new BasicInventoryProfileSwitcher();
             Key profileKey = Key.key(Namespaces.PHANTAZM, "inventory.profile.default");
@@ -151,17 +148,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         sceneNode.addListener(EntityDamageEvent.class, new PlayerDamageMobListener(instance, mobStore, zombiesPlayers));
         PlayerRightClickListener rightClickListener = new PlayerRightClickListener();
         sceneNode.addListener(PlayerBlockInteractEvent.class,
-                              new PlayerInteractBlockListener(instance, zombiesPlayers, rightClickListener)
-        );
+                new PlayerInteractBlockListener(instance, zombiesPlayers, rightClickListener));
         sceneNode.addListener(PlayerEntityInteractEvent.class,
-                              new PlayerInteractEntityListener(instance, zombiesPlayers, rightClickListener)
-        );
+                new PlayerInteractEntityListener(instance, zombiesPlayers, rightClickListener));
         sceneNode.addListener(PlayerUseItemEvent.class,
-                              new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener)
-        );
+                new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener));
         sceneNode.addListener(PlayerUseItemOnBlockEvent.class,
-                              new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener)
-        );
+                new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener));
         /*ComponentBuilder componentBuilder = new BasicComponentBuilder();
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, , random);
         ZombiesMap map = new ZombiesMap(mapInfo, componentBuilder, instance, mobSpawner, blockHandler, );

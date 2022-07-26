@@ -88,27 +88,10 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
                 CollisionUtils.handlePhysics(targetEntity, new Vec(0, -computeDownwardsCheckDistance(targetEntity), 0));
         if (result.isOnGround()) {
             return VecUtils.toBlockInt(result.collidedBlockY()
-                                             .add(0, result.blockTypeY().registry().collisionShape().relativeEnd().y(),
-                                                  0
-                                             ));
+                    .add(0, result.blockTypeY().registry().collisionShape().relativeEnd().y(), 0));
         }
 
         return VecUtils.toBlockInt(targetEntity.getPosition());
-    }
-
-    /**
-     * Computes the distance that will be searched below an entity in order to determine the block it is above. This is
-     * the point to which gravity-bound entities will navigate.
-     *
-     * @param target the target entity
-     * @return the downwards check distance
-     */
-    default double computeDownwardsCheckDistance(@NotNull Entity target) {
-        if (target.isOnGround()) {
-            return 1;
-        }
-
-        return 16;
     }
 
     @Override
@@ -139,5 +122,20 @@ public interface GroundMinestomDescriptor extends MinestomDescriptor, GroundDesc
             //for successful results, use much shallower linear delay scaling
             return (long)((result.exploredCount() / 2L) * delayMultiplier);
         });
+    }
+
+    /**
+     * Computes the distance that will be searched below an entity in order to determine the block it is above. This is
+     * the point to which gravity-bound entities will navigate.
+     *
+     * @param target the target entity
+     * @return the downwards check distance
+     */
+    default double computeDownwardsCheckDistance(@NotNull Entity target) {
+        if (target.isOnGround()) {
+            return 1;
+        }
+
+        return 16;
     }
 }

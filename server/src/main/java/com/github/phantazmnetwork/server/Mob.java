@@ -67,8 +67,7 @@ public final class Mob {
         ConfigProcessor<Calculator> calculatorProcessor = new CalculatorConfigProcessor();
         ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(
                 Map.of(GroundMinestomDescriptor.SERIAL_KEY,
-                       new GroundMinestomDescriptorConfigProcessor(calculatorProcessor)
-                )::get);
+                        new GroundMinestomDescriptorConfigProcessor(calculatorProcessor))::get);
         ConfigProcessor<NearestEntitiesSelector<Player>> nearestPlayersSelectorProcessor =
                 new NearestEntitiesSelectorConfigProcessor<>() {
                     @Override
@@ -105,11 +104,9 @@ public final class Mob {
                 };
         ConfigProcessor<Goal> goalProcessor = new VariantConfigProcessor<>(
                 Map.of(UseSkillGoal.SERIAL_KEY, new UseSkillGoalConfigProcessor(skillProcessor),
-                       FollowPlayerGoal.SERIAL_KEY, followPlayerGoalProcessor
-                )::get);
+                        FollowPlayerGoal.SERIAL_KEY, followPlayerGoalProcessor)::get);
         MODEL_PROCESSOR = new MobModelConfigProcessor(descriptorProcessor, goalProcessor, skillProcessor,
-                                                      ItemStackConfigProcessors.snbt()
-        );
+                ItemStackConfigProcessors.snbt());
     }
 
     private Mob() {
@@ -118,8 +115,7 @@ public final class Mob {
 
     @SuppressWarnings("SameParameterValue")
     static void initialize(@NotNull EventNode<Event> global, @NotNull Spawner spawner,
-                           @NotNull Collection<MobTrigger<?>> triggers, @NotNull Path mobPath,
-                           @NotNull ConfigCodec codec) {
+            @NotNull Collection<MobTrigger<?>> triggers, @NotNull Path mobPath, @NotNull ConfigCodec codec) {
         mobSpawner = new BasicMobSpawner(MOB_STORE, spawner);
 
         global.addListener(EntityDeathEvent.class, MOB_STORE::onMobDeath);
@@ -132,10 +128,9 @@ public final class Mob {
 
     @SuppressWarnings("SameParameterValue")
     private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
-                                                          @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
+            @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
         node.addListener(trigger.eventClass(),
-                         event -> mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key())
-        );
+                event -> mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
     }
 
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {

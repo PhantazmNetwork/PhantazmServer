@@ -87,7 +87,7 @@ public class FeedbackShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-                       @NotNull GunShot shot) {
+            @NotNull GunShot shot) {
         audienceProvider.provideAudience().ifPresent(audience -> {
             for (GunHit ignored : shot.regularTargets()) {
                 audience.sendMessage(data.message());

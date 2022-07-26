@@ -30,7 +30,7 @@ public interface TargetFinder {
      * @return The {@link Result} of the target finding
      */
     @NotNull Result findTarget(@NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
-                               @NotNull Collection<UUID> previousHits);
+            @NotNull Collection<UUID> previousHits);
 
     /**
      * The result of a target finding.

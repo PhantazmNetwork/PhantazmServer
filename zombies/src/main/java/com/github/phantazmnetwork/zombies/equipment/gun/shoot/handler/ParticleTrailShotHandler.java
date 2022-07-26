@@ -74,7 +74,7 @@ public class ParticleTrailShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-                       @NotNull GunShot shot) {
+            @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
@@ -88,10 +88,8 @@ public class ParticleTrailShotHandler implements ShotHandler {
 
             ServerPacket packet =
                     ParticleCreator.createParticlePacket(particle.particle(), particle.distance(), start.x(), start.y(),
-                                                         start.z(), particle.offsetX(), particle.offsetY(),
-                                                         particle.offsetZ(), particle.particleData(),
-                                                         particle.particleCount(), particle.data()::write
-                    );
+                            start.z(), particle.offsetX(), particle.offsetY(), particle.offsetZ(),
+                            particle.particleData(), particle.particleCount(), particle.data()::write);
             instance.sendGroupedPacket(packet);
         }
     }

@@ -12,12 +12,6 @@ import java.util.List;
  * {@link Component} list this object represents.
  */
 public interface Hologram extends List<Component> {
-    enum Alignment {
-        UPPER,
-        CENTERED,
-        LOWER
-    }
-
     void setAlignment(@NotNull Alignment alignment);
 
     /**
@@ -45,4 +39,10 @@ public interface Hologram extends List<Component> {
      * Trims internal lists to size.
      */
     void trimToSize();
+
+    enum Alignment {
+        UPPER,
+        CENTERED,
+        LOWER
+    }
 }

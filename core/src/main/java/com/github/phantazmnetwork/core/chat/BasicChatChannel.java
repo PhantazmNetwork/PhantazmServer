@@ -35,7 +35,7 @@ public abstract class BasicChatChannel implements ChatChannel {
 
     @Override
     public void findAudience(@NotNull UUID channelMember, @NotNull Consumer<Audience> onSuccess,
-                             @NotNull Consumer<ObjectBooleanPair<Component>> onFailure) {
+            @NotNull Consumer<ObjectBooleanPair<Component>> onFailure) {
         PlayerView view = viewProvider.fromUUID(channelMember);
         Optional<Player> playerOptional = view.getPlayer();
         if (playerOptional.isPresent()) {

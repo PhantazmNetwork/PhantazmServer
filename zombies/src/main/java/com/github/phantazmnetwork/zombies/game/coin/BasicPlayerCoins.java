@@ -22,7 +22,7 @@ public class BasicPlayerCoins implements PlayerCoins {
     private int coins;
 
     public BasicPlayerCoins(@NotNull AudienceProvider audienceProvider, @NotNull ComponentSender componentSender,
-                            @NotNull TransactionComponentCreator componentCreator, int initialCoins) {
+            @NotNull TransactionComponentCreator componentCreator, int initialCoins) {
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
         this.componentSender = Objects.requireNonNull(componentSender, "componentSender");
         this.componentCreator = Objects.requireNonNull(componentCreator, "componentCreator");

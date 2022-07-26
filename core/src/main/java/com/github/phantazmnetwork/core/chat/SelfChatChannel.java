@@ -26,15 +26,14 @@ public class SelfChatChannel extends BasicChatChannel {
     }
 
     @Override
-    protected @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player) {
-        return Pair.of(player, null);
-    }
-
-    @Override
     public @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent) {
         JoinConfiguration joinConfiguration = JoinConfiguration.separator(Component.space());
         return Component.join(joinConfiguration, Component.text("self"), Component.text(">", NamedTextColor.GRAY),
-                              super.formatMessage(chatEvent)
-        );
+                super.formatMessage(chatEvent));
+    }
+
+    @Override
+    protected @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player) {
+        return Pair.of(player, null);
     }
 }

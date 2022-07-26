@@ -34,7 +34,7 @@ public abstract class TrackingNavigator implements Navigator {
      * @param agent             the {@link Agent} this navigator manages
      */
     public TrackingNavigator(@NotNull NavigationTracker navigationTracker, @NotNull PathEngine pathEngine,
-                             @NotNull Agent agent) {
+            @NotNull Agent agent) {
         this.navigationTracker = Objects.requireNonNull(navigationTracker, "pathEngine");
         this.pathEngine = Objects.requireNonNull(pathEngine, "pathEngine");
         this.agent = Objects.requireNonNull(agent, "agent");

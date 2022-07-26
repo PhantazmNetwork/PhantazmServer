@@ -35,7 +35,7 @@ public class PlaySoundSkill implements Skill {
      * @param followAudience Whether the {@link Sound} should follow the {@link Audience}
      */
     public PlaySoundSkill(@NotNull TargetSelector<? extends Audience> selector, @NotNull Sound sound,
-                          boolean followAudience) {
+            boolean followAudience) {
         this.selectorCreator = Objects.requireNonNull(selector, "selectorCreator");
         this.sound = Objects.requireNonNull(sound, "sound");
         this.followAudience = followAudience;

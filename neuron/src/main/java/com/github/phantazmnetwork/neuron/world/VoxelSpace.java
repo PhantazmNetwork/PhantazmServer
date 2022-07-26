@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class VoxelSpace implements Space {
     @Override
     public @NotNull SolidSource solidsOverlapping(double oX, double oY, double oZ, double vX, double vY, double vZ,
-                                                  @NotNull Order order) {
+            @NotNull Order order) {
         int xOrg = (int)Math.floor(oX);
         int yOrg = (int)Math.floor(oY);
         int zOrg = (int)Math.floor(oZ);

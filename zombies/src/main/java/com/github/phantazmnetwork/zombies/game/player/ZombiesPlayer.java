@@ -23,9 +23,9 @@ public interface ZombiesPlayer extends Tickable {
 
     void setInGame(boolean inGame);
 
-    void setReviving(boolean reviving);
-
     boolean isReviving();
+
+    void setReviving(boolean reviving);
 
     @NotNull PlayerCoins getCoins();
 

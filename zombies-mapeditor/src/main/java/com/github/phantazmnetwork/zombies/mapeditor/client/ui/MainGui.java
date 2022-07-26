@@ -105,9 +105,8 @@ public class MainGui extends SimplePanelGui {
             }
 
             session.addMap(new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
-                                       new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                                       new ArrayList<>(), new ArrayList<>()
-            ));
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                    new ArrayList<>()));
             session.setCurrent(mapKey);
 
             ScreenUtils.closeCurrentScreen();
@@ -118,8 +117,7 @@ public class MainGui extends SimplePanelGui {
             if (requireMap(session, feedback)) {
                 MinecraftClient.getInstance().setScreen(new CottonClientScreen(
                         new ConfirmationGui(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY),
-                                            () -> session.removeMap(session.getMap().settings().id())
-                        )));
+                                () -> session.removeMap(session.getMap().settings().id()))));
             }
         });
 
@@ -145,7 +143,6 @@ public class MainGui extends SimplePanelGui {
 
     private void updateCurrentMap(EditorSession session, WText currentMap) {
         currentMap.setText(session.hasMap() ? new TranslatableText(TranslationKeys.GUI_MAPEDITOR_CURRENT_MAP,
-                                                                   session.getMap().settings().id().value()
-        ) : new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
+                session.getMap().settings().id().value()) : new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
     }
 }

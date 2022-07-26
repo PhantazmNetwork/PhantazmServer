@@ -30,6 +30,16 @@ class PointSolid implements Solid {
     }
 
     @Override
+    public @NotNull Vec3F getMin() {
+        return min;
+    }
+
+    @Override
+    public @NotNull Vec3F getMax() {
+        return max;
+    }
+
+    @Override
     public @Unmodifiable @NotNull Set<Solid> getChildren() {
         return Collections.emptySet();
     }
@@ -37,7 +47,7 @@ class PointSolid implements Solid {
     @Override
     public boolean overlaps(double x, double y, double z, double width, double height, double depth) {
         boolean overlapsSelf = min.getX() < x + width && max.getX() > x && min.getY() < y + height && max.getY() > y &&
-                               min.getZ() < z + depth && max.getZ() > z;
+                min.getZ() < z + depth && max.getZ() > z;
 
         if (!hasChildren()) {
             return overlapsSelf;
@@ -57,16 +67,6 @@ class PointSolid implements Solid {
     }
 
     @Override
-    public @NotNull Vec3F getMin() {
-        return min;
-    }
-
-    @Override
-    public @NotNull Vec3F getMax() {
-        return max;
-    }
-
-    @Override
     public final int hashCode() {
         return Objects.hash(min, max, getChildren());
     }
@@ -83,7 +83,7 @@ class PointSolid implements Solid {
 
         if (obj instanceof Solid solid) {
             return min.equals(solid.getMin()) && max.equals(solid.getMax()) &&
-                   getChildren().equals(solid.getChildren());
+                    getChildren().equals(solid.getChildren());
         }
 
         return false;

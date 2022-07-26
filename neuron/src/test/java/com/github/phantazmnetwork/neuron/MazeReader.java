@@ -80,13 +80,11 @@ public final class MazeReader {
                         Vec3I[] correctPathElements = root.getElement("points").asList().stream().map(element -> {
                             List<ConfigElement> vectors = element.asList();
                             return Vec3I.of(vectors.get(0).asNumber().intValue(), 0,
-                                            vectors.get(1).asNumber().intValue()
-                            );
+                                    vectors.get(1).asNumber().intValue());
                         }).toArray(Vec3I[]::new);
 
                         return new Data(solids, Vec3I.of(start.getX, 0, start.getY), Vec3I.of(end.getX, 0, end.getY),
-                                        correctPathElements
-                        );
+                                correctPathElements);
                     }
                 }
 

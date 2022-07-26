@@ -49,15 +49,11 @@ public final class Configuration {
 
         ConfigCodec codec = new TomlCodec();
         handler.registerLoader(SERVER_CONFIG_KEY,
-                               new SyncFileConfigLoader<>(new ServerConfigProcessor(), ServerConfig.DEFAULT,
-                                                          SERVER_CONFIG_PATH, codec
-                               )
-        );
+                new SyncFileConfigLoader<>(new ServerConfigProcessor(), ServerConfig.DEFAULT, SERVER_CONFIG_PATH,
+                        codec));
         handler.registerLoader(LOBBIES_CONFIG_KEY,
-                               new SyncFileConfigLoader<>(new LobbiesConfigProcessor(), LobbiesConfig.DEFAULT,
-                                                          LOBBIES_CONFIG_PATH, codec
-                               )
-        );
+                new SyncFileConfigLoader<>(new LobbiesConfigProcessor(), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH,
+                        codec));
     }
 
     /**

@@ -24,7 +24,7 @@ public class SidebarUpdater {
     private boolean initialized = false;
 
     public SidebarUpdater(@NotNull Sidebar sidebar, @NotNull Collection<SidebarSection> sections,
-                          @NotNull Int2ObjectFunction<String> indexToLineId) {
+            @NotNull Int2ObjectFunction<String> indexToLineId) {
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.sections = List.copyOf(sections);
         this.sizes = new int[sections.size()];

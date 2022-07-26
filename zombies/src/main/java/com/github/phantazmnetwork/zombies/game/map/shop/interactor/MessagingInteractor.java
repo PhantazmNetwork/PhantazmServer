@@ -41,15 +41,15 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
         }
     };
 
+    @FactoryMethod
+    public MessagingInteractor(@NotNull Data data,
+            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+        super(data, map);
+    }
+
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return PROCESSOR;
-    }
-
-    @FactoryMethod
-    public MessagingInteractor(@NotNull Data data,
-                               @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
-        super(data, map);
     }
 
     @Override

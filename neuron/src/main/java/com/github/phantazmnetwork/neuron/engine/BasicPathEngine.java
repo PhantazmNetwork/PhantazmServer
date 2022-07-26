@@ -45,11 +45,9 @@ public class BasicPathEngine implements PathEngine {
                 Descriptor descriptor = agent.getDescriptor();
 
                 PathOperation operation = new BasicPathOperation(agent.getStartPosition(), destination,
-                                                                 pos -> descriptor.isComplete(pos, destination),
-                                                                 descriptor.getCalculator(), agent.getExplorer(),
-                                                                 (float)MathUtils.floorOffset(controller.getX()),
-                                                                 (float)MathUtils.floorOffset(controller.getZ())
-                );
+                        pos -> descriptor.isComplete(pos, destination), descriptor.getCalculator(), agent.getExplorer(),
+                        (float)MathUtils.floorOffset(controller.getX()),
+                        (float)MathUtils.floorOffset(controller.getZ()));
 
                 while (!operation.isComplete() && !Thread.interrupted()) {
                     //step the operation until complete or we're interrupted

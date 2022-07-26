@@ -48,15 +48,8 @@ public class AnnounceRoundAction implements Action<Round> {
             return node;
         }
     };
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
-    }
-
     private final Data data;
     private final Audience audience;
-
     /**
      * Creates a new instance of this class from the provided contextual data.
      *
@@ -65,15 +58,20 @@ public class AnnounceRoundAction implements Action<Round> {
      */
     @FactoryMethod
     public AnnounceRoundAction(@NotNull Data data,
-                               @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
         this.data = Objects.requireNonNull(data, "data");
         this.audience = map.getInstance();
     }
 
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return PROCESSOR;
+    }
+
     @Override
     public void perform(@NotNull Round round) {
-        audience.sendTitlePart(data.titlePart, MiniMessage.miniMessage().deserialize(
-                data.formatMessage.formatted(round.getData().round())));
+        audience.sendTitlePart(data.titlePart,
+                MiniMessage.miniMessage().deserialize(data.formatMessage.formatted(round.getData().round())));
     }
 
     @Override

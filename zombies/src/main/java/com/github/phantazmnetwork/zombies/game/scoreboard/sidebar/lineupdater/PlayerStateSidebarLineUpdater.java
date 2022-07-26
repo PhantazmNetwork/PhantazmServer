@@ -15,7 +15,7 @@ public class PlayerStateSidebarLineUpdater implements SidebarLineUpdater {
     private Component playerName = null;
 
     public PlayerStateSidebarLineUpdater(@NotNull CompletableFuture<? extends Component> playerNameFuture,
-                                         @NotNull PlayerStateSwitcher stateSwitcher) {
+            @NotNull PlayerStateSwitcher stateSwitcher) {
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
         playerNameFuture.thenAccept(playerName -> {
             this.playerName = playerName;

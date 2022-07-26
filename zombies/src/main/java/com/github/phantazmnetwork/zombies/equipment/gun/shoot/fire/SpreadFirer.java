@@ -102,8 +102,7 @@ public class SpreadFirer implements Firer {
             double newPitch = pitch + data.angleVariance() * (2 * random.nextDouble() - 1);
 
             Vec newDirection = new Vec(Math.cos(newYaw) * Math.cos(newPitch), Math.sin(newPitch),
-                                       Math.sin(newYaw) * Math.cos(newPitch)
-            );
+                    Math.sin(newYaw) * Math.cos(newPitch));
             subFirer.fire(state, start.withDirection(newDirection), previousHits);
         }
     }

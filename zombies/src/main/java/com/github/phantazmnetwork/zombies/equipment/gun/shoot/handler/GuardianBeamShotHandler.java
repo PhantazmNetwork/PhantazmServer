@@ -76,7 +76,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-                       @NotNull GunShot shot) {
+            @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
@@ -94,15 +94,11 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
         ServerPacket armorStandSpawnPacket = new SpawnLivingEntityPacket(armorStand.getEntityId(), armorStand.getUuid(),
-                                                                         armorStand.getEntityType().id(),
-                                                                         Pos.fromPoint(shot.end()), 0.0F, (short)0,
-                                                                         (short)0, (short)0
-        );
+                armorStand.getEntityType().id(), Pos.fromPoint(shot.end()), 0.0F, (short)0, (short)0, (short)0);
         ServerPacket armorStandMetaPacket = armorStand.getMetadataPacket();
         ServerPacket guardianSpawnPacket =
                 new SpawnLivingEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(),
-                                            start, start.yaw(), (short)0, (short)0, (short)0
-                );
+                        start, start.yaw(), (short)0, (short)0, (short)0);
         ServerPacket guardianMetaPacket = guardian.getMetadataPacket();
 
         instance.sendGroupedPacket(armorStandSpawnPacket);
@@ -116,7 +112,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
         for (Beam beam = removalQueue.peek(); beam != null && (time - beam.time()) / 50 > data.beamTime();
-             beam = removalQueue.peek()) {
+                beam = removalQueue.peek()) {
             removalQueue.remove();
             Instance instance = beam.instance().get();
             if (instance != null) {

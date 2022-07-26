@@ -44,7 +44,7 @@ public class BasicContextProvider implements ContextProvider {
      *                            prevent unnecessary cache invalidation
      */
     public BasicContextProvider(@NotNull EventNode<Event> globalEventNode, @NotNull ExecutorService executor,
-                                int instanceCache, int updateQueueCapacity) {
+            int instanceCache, int updateQueueCapacity) {
         this.contextMap =
                 Object2ObjectMaps.synchronize(new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity()));
         this.executorService = Objects.requireNonNull(executor, "executor");
@@ -58,23 +58,17 @@ public class BasicContextProvider implements ContextProvider {
     @Override
     public @NotNull PathContext provideContext(@NotNull Instance instance) {
         return contextMap.computeIfAbsent(instance,
-                                          newInstance -> new BasicPathContext(new BasicPathEngine(executorService),
-                                                                              new SpatialCollider(
-                                                                                      new InstanceSpace(newInstance)),
-                                                                              new BasicPathCache(instanceCache,
-                                                                                                 updateQueueCapacity
-                                                                              )
-                                          )
-        );
+                newInstance -> new BasicPathContext(new BasicPathEngine(executorService),
+                        new SpatialCollider(new InstanceSpace(newInstance)),
+                        new BasicPathCache(instanceCache, updateQueueCapacity)));
     }
 
     private void onBlockChange(@NotNull BlockChangeEvent event) {
         PathContext context = contextMap.get(event.getInstance());
         if (context != null) {
             context.getCache().handleUpdate(VecUtils.toBlockInt(event.blockPosition()),
-                                            SolidProvider.fromShape(event.getOldBlock().registry().collisionShape()),
-                                            SolidProvider.fromShape(event.getBlock().registry().collisionShape())
-            );
+                    SolidProvider.fromShape(event.getOldBlock().registry().collisionShape()),
+                    SolidProvider.fromShape(event.getBlock().registry().collisionShape()));
         }
     }
 

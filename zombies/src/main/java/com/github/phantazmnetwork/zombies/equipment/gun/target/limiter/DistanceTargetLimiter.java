@@ -67,7 +67,7 @@ public class DistanceTargetLimiter implements TargetLimiter {
 
     @Override
     public @NotNull List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Pos start,
-                                                                         @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
+            @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
         List<Pair<? extends Entity, Vec>> targetsCopy = new ArrayList<>(targets);
         Comparator<Pair<? extends Entity, Vec>> comparator =
                 Comparator.comparingDouble(pair -> start.distanceSquared(pair.value()));

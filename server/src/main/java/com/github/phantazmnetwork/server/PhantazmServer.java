@@ -74,38 +74,38 @@ public final class PhantazmServer {
             ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
             if (isUnsafe(args)) {
                 LOGGER.warn("""
-                                                            
-                                                            ██
-                                                          ██░░██
-                                                        ██░░░░░░██
-                                                      ██░░░░░░░░░░██
-                                                      ██░░░░░░░░░░██
-                                                    ██░░░░░░░░░░░░░░██
-                                                  ██░░░░░░██████░░░░░░██
-                                                  ██░░░░░░██████░░░░░░██
-                                                ██░░░░░░░░██████░░░░░░░░██
-                                                ██░░░░░░░░██████░░░░░░░░██
-                                              ██░░░░░░░░░░██████░░░░░░░░░░██
-                                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
-                                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
-                                          ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██
-                                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-                                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
-                                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
-                                      ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██
-                                      ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-                                        ██████████████████████████████████████████
-                                    """);
+                                                
+                                                ██
+                                              ██░░██
+                                            ██░░░░░░██
+                                          ██░░░░░░░░░░██
+                                          ██░░░░░░░░░░██
+                                        ██░░░░░░░░░░░░░░██
+                                      ██░░░░░░██████░░░░░░██
+                                      ██░░░░░░██████░░░░░░██
+                                    ██░░░░░░░░██████░░░░░░░░██
+                                    ██░░░░░░░░██████░░░░░░░░██
+                                  ██░░░░░░░░░░██████░░░░░░░░░░██
+                                ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
+                                ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
+                              ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██
+                              ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
+                            ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
+                            ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
+                          ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██
+                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
+                            ██████████████████████████████████████████
+                        """);
                 LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value " +
-                            "\"default\". Only use this option when running in a secure development environment.");
+                        "\"default\". Only use this option when running in a secure development environment.");
             }
             else if ((serverInfoConfig.authType() == AuthType.VELOCITY ||
-                      serverInfoConfig.authType() == AuthType.BUNGEE) &&
-                     serverInfoConfig.proxySecret().equals(ServerInfoConfig.DEFAULT_PROXY_SECRET)) {
+                    serverInfoConfig.authType() == AuthType.BUNGEE) &&
+                    serverInfoConfig.proxySecret().equals(ServerInfoConfig.DEFAULT_PROXY_SECRET)) {
                 LOGGER.error("When using AuthType.VELOCITY or AuthType.BUNGEE, proxySecret must be set to a value " +
-                             "other than the default for security reasons.");
+                        "other than the default for security reasons.");
                 LOGGER.error("If you are running in a development environment, you can use the 'unsafe' program " +
-                             "argument to force the server to start regardless.");
+                        "argument to force the server to start regardless.");
                 MinecraftServer.stopCleanly();
                 return;
             }
@@ -151,11 +151,10 @@ public final class PhantazmServer {
     }
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
-                                           LobbiesConfig lobbiesConfig) {
+            LobbiesConfig lobbiesConfig) {
         BasicPlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
-                                            MinecraftServer.getConnectionManager()
-                );
+                        MinecraftServer.getConnectionManager());
         KeyParser phantazmParser = new BasicKeyParser(Namespaces.PHANTAZM);
         KeyExtractor phantazmExtractor = new BasicKeyExtractor("serialKey", phantazmParser);
         ElementInspector phantazmInspector = new BasicElementInspector(phantazmParser);
@@ -164,8 +163,7 @@ public final class PhantazmServer {
 
         ElementBuilder builder =
                 new BasicElementBuilder(phantazmParser, phantazmExtractor, phantazmInspector, processorRegistry,
-                                        factoryRegistry
-                );
+                        factoryRegistry);
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
@@ -174,9 +172,8 @@ public final class PhantazmServer {
         NeuronTest.initialize(global, Neuron.getSpawner());
         Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
         EquipmentFeature.initialize(Path.of("./equipment/"),
-                                    new YamlCodec(() -> new Load(LoadSettings.builder().build()), () -> new Dump(
-                                            DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()))
-        );
+                new YamlCodec(() -> new Load(LoadSettings.builder().build()),
+                        () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())));
         ZombiesFeature.initialize(builder);
         ZombiesTest.initialize(global);
     }
@@ -198,8 +195,7 @@ public final class PhantazmServer {
         }
 
         node.addListener(ServerListPingEvent.class,
-                         event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description())
-        );
+                event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
     }

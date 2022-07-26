@@ -33,8 +33,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     private boolean inGame = false;
 
     public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull PlayerCoins coins, @NotNull PlayerKills kills,
-                              @NotNull InventoryProfileSwitcher profileSwitcher,
-                              @NotNull PlayerStateSwitcher stateSwitcher) {
+            @NotNull InventoryProfileSwitcher profileSwitcher, @NotNull PlayerStateSwitcher stateSwitcher) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.coins = Objects.requireNonNull(coins, "coins");
         this.kills = Objects.requireNonNull(kills, "kills");
@@ -58,8 +57,13 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     }
 
     @Override
-    public void setReviving(boolean reviving) {
-        this.reviving = reviving;
+    public boolean isInGame() {
+        return inGame;
+    }
+
+    @Override
+    public void setInGame(boolean inGame) {
+        this.inGame = inGame;
     }
 
     @Override
@@ -68,13 +72,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     }
 
     @Override
-    public boolean isInGame() {
-        return inGame;
-    }
-
-    @Override
-    public void setInGame(boolean inGame) {
-        this.inGame = inGame;
+    public void setReviving(boolean reviving) {
+        this.reviving = reviving;
     }
 
     @Override

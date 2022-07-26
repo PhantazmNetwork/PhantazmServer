@@ -33,10 +33,7 @@ public class JoinedPlayersLineUpdater implements SidebarLineUpdater {
         if (currentPlayers == -1 || currentPlayers != zombiesPlayers.size()) {
             currentPlayers = zombiesPlayers.size();
             return Optional.of(Component.textOfChildren(Component.text("Players: "),
-                                                        Component.text(currentPlayers + "/" + maxPlayers,
-                                                                       NamedTextColor.GREEN
-                                                        )
-            ));
+                    Component.text(currentPlayers + "/" + maxPlayers, NamedTextColor.GREEN)));
         }
 
         return Optional.empty();

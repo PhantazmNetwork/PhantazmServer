@@ -136,7 +136,7 @@ public interface Region3I extends Iterable<Vec3I> {
      * @return true if the bounding boxes overlap, false otherwise
      */
     static boolean overlaps(int oX1, int oY1, int oZ1, int lX1, int lY1, int lZ1, int oX2, int oY2, int oZ2, int lX2,
-                            int lY2, int lZ2) {
+            int lY2, int lZ2) {
         int nx1 = oX1 + lX1;
         int ny1 = oY1 + lY1;
         int nz1 = oZ1 + lZ1;
@@ -146,8 +146,8 @@ public interface Region3I extends Iterable<Vec3I> {
         int nz2 = oZ2 + lZ2;
 
         return Math.min(oX1, nx1) < Math.max(oX2, nx2) && Math.max(oX1, nx1) > Math.min(oX2, nx2) &&
-               Math.min(oY1, ny1) < Math.max(oY2, ny2) && Math.max(oY1, ny1) > Math.min(oY2, ny2) &&
-               Math.min(oZ1, nz1) < Math.max(oZ2, nz2) && Math.max(oZ1, nz1) > Math.min(oZ2, nz2);
+                Math.min(oY1, ny1) < Math.max(oY2, ny2) && Math.max(oY1, ny1) > Math.min(oY2, ny2) &&
+                Math.min(oZ1, nz1) < Math.max(oZ2, nz2) && Math.max(oZ1, nz1) > Math.min(oZ2, nz2);
     }
 
     /**
@@ -161,11 +161,10 @@ public interface Region3I extends Iterable<Vec3I> {
      * @return true if the bounding boxes overlap, false otherwise
      */
     static boolean overlaps(@NotNull Vec3I firstOrigin, @NotNull Vec3I firstLengths, @NotNull Vec3I secondOrigin,
-                            @NotNull Vec3I secondLengths) {
+            @NotNull Vec3I secondLengths) {
         return overlaps(firstOrigin.getX(), firstOrigin.getY(), firstOrigin.getZ(), firstLengths.getX(),
-                        firstLengths.getY(), firstLengths.getZ(), secondOrigin.getX(), secondOrigin.getY(),
-                        secondOrigin.getZ(), secondLengths.getX(), secondLengths.getY(), secondLengths.getZ()
-        );
+                firstLengths.getY(), firstLengths.getZ(), secondOrigin.getX(), secondOrigin.getY(), secondOrigin.getZ(),
+                secondLengths.getX(), secondLengths.getY(), secondLengths.getZ());
     }
 
     /**
@@ -213,8 +212,7 @@ public interface Region3I extends Iterable<Vec3I> {
         Vec3I lengths = lengths();
 
         return Vec3D.of(origin.getX() + ((double)lengths.getX() / 2D), origin.getY() + ((double)lengths.getY() / 2D),
-                        origin.getZ() + ((double)lengths.getZ() / 2D)
-        );
+                origin.getZ() + ((double)lengths.getZ() / 2D));
     }
 
     /**

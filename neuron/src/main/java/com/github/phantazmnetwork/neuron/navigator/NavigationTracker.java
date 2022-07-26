@@ -22,7 +22,7 @@ public interface NavigationTracker {
 
         @Override
         public void onPathfindComplete(@NotNull Navigator navigator, @NotNull Node pathStart,
-                                       @Nullable PathResult result) {
+                @Nullable PathResult result) {
         }
 
         @Override
@@ -31,7 +31,7 @@ public interface NavigationTracker {
 
         @Override
         public void onNavigationError(@NotNull Navigator navigator, @Nullable Node pathStart,
-                                      @NotNull ErrorType errorType) {
+                @NotNull ErrorType errorType) {
         }
     };
 

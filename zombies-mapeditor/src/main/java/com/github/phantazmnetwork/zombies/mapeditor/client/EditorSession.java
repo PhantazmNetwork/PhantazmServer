@@ -32,7 +32,7 @@ public interface EditorSession {
      * @return the desired {@link ActionResult}
      */
     @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
-                                         @NotNull BlockHitResult blockHitResult);
+            @NotNull BlockHitResult blockHitResult);
 
     /**
      * Queries if the editor is enabled or not.

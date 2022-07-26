@@ -51,8 +51,8 @@ public class Window extends PositionalMapObject<WindowInfo> {
      * @param clientBlockHandler the {@link ClientBlockHandler} used to set client-only barrier blocks
      */
     public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull Vec3I origin,
-                  @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
-                  @NotNull List<Action<Window>> breakActions) {
+            @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
+            @NotNull List<Action<Window>> breakActions) {
         super(data, origin, instance);
 
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
@@ -82,7 +82,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
                 String id = compound.getString("Name");
                 if (id == null) {
                     LOGGER.warn("Malformed block SNBT " + compound + ", no Name tag found in block data for window " +
-                                "at ~" + center);
+                            "at ~" + center);
                     return;
                 }
 
@@ -106,7 +106,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
                         }
                         else {
                             LOGGER.warn("Unexpected NBT value type " + objectValue.getClass().getTypeName() + "; " +
-                                        "needs to be convertable to String, in window at ~" + center);
+                                    "needs to be convertable to String, in window at ~" + center);
                         }
                     }
 
@@ -124,7 +124,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
         if (repairBlockSize != volume) {
             //try to fix the broken window data
             LOGGER.warn("Repair block list length (" + repairBlockSize + ") doesn't match window volume (" + volume +
-                        "), for window at ~" + center);
+                    "), for window at ~" + center);
 
             if (repairBlockSize < volume) {
                 //fix too-short data by padding blocks
@@ -136,7 +136,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
 
                 LOGGER.warn(
                         "Tried to fix window data by padding " + (volume - repairBlockSize) + " blocks of type " + pad +
-                        " for window at ~" + center);
+                                " for window at ~" + center);
             }
             else {
                 //fix too-long data by removing the extra entries
@@ -144,7 +144,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
                 repairBlocks.trimToSize();
 
                 LOGGER.warn("Tried to fix window data by removing " + (repairBlockSize - volume) + " additional " +
-                            "blocks in window at ~" + center);
+                        "blocks in window at ~" + center);
             }
         }
     }
@@ -178,8 +178,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
         if (newIndex < index) {
             //play the break sound
             instance.playSound(newIndex == 0 ? data.breakAllSound() : data.breakSound(), center.getX(), center.getY(),
-                               center.getZ()
-            );
+                    center.getZ());
 
             for (int i = index - 1; i >= newIndex; i--) {
                 Vec3I breakLocation = indexToCoordinate(i);
@@ -194,8 +193,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
         else {
             //play the repair sound
             instance.playSound(newIndex == volume ? data.repairAllSound() : data.repairSound(), center.getX(),
-                               center.getY(), center.getZ()
-            );
+                    center.getY(), center.getZ());
 
             for (int i = index; i < newIndex; i++) {
                 Vec3I repairLocation = indexToCoordinate(i);

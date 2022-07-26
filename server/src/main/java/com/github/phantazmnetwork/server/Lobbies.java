@@ -44,7 +44,7 @@ public final class Lobbies {
      * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
-                           @NotNull LobbiesConfig lobbiesConfig) {
+            @NotNull LobbiesConfig lobbiesConfig) {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
@@ -64,9 +64,8 @@ public final class Lobbies {
 
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
                 new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceManager,
-                                       instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
-                                       mainLobbyConfig.instanceConfig(), MinecraftServer.getChunkViewDistance()
-                );
+                        instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig(),
+                        MinecraftServer.getChunkViewDistance());
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         SceneFallback lobbyFallback = new LobbyRouterFallback(lobbyRouter, lobbiesConfig.mainLobbyName());
@@ -75,13 +74,9 @@ public final class Lobbies {
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
                 lobbyProviders.put(lobby.getKey(),
-                                   new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
-                                                          instanceManager, instanceLoader,
-                                                          lobby.getValue().lobbyPaths(), regularFallback,
-                                                          lobby.getValue().instanceConfig(),
-                                                          MinecraftServer.getChunkViewDistance()
-                                   )
-                );
+                        new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
+                                instanceManager, instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
+                                lobby.getValue().instanceConfig(), MinecraftServer.getChunkViewDistance()));
             }
         }
 

@@ -34,13 +34,13 @@ public interface MinestomDescriptor extends PhysicalDescriptor, Keyed {
     }
 
     @Override
-    default boolean isComplete(@NotNull Vec3I position, @NotNull Vec3I destination) {
-        return position.equals(destination);
+    default @NotNull Calculator getCalculator() {
+        return Calculator.SQUARED_DISTANCE;
     }
 
     @Override
-    default @NotNull Calculator getCalculator() {
-        return Calculator.SQUARED_DISTANCE;
+    default boolean isComplete(@NotNull Vec3I position, @NotNull Vec3I destination) {
+        return position.equals(destination);
     }
 
     /**

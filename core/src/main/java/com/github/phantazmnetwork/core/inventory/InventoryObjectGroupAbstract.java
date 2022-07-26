@@ -27,7 +27,7 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
      * @param unmodifiableMapper A mapper to make the provided slots as an unmodifiable view. The return type of the mapper will be the same as the object returned in {@link #getSlots()}
      */
     public InventoryObjectGroupAbstract(@NotNull InventoryProfile profile, @NotNull IntSet slots,
-                                        @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
+            @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
         this.profile = Objects.requireNonNull(profile, "profile");
         this.slots = Objects.requireNonNull(slots, "slots");
         this.unmodifiableSlots = Objects.requireNonNull(unmodifiableMapper.apply(slots), "mapped slots");

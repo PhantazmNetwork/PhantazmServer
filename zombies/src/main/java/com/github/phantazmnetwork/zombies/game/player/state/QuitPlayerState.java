@@ -18,7 +18,7 @@ public class QuitPlayerState implements ZombiesPlayerState {
     private final CompletableFuture<? extends Component> quitMessageFuture;
 
     public QuitPlayerState(@NotNull Instance instance,
-                           @NotNull CompletableFuture<? extends Component> quitMessageFuture) {
+            @NotNull CompletableFuture<? extends Component> quitMessageFuture) {
         this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.quitMessageFuture = Objects.requireNonNull(quitMessageFuture, "quitMessageFuture");
     }

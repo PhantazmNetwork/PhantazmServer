@@ -48,7 +48,7 @@ public final class RenderUtils {
      * @return {@code boundsArray}, for convenience
      */
     public static Vec3d @NotNull [] arrayFromRegion(@NotNull Region3I region, @NotNull Vec3I origin,
-                                                    Vec3d @NotNull [] boundsArray, int offset) {
+            Vec3d @NotNull [] boundsArray, int offset) {
         Objects.requireNonNull(region, "region");
         Objects.requireNonNull(origin, "origin");
         Objects.requireNonNull(boundsArray, "boundsArray");
@@ -57,13 +57,10 @@ public final class RenderUtils {
         Vec3I lengths = region.lengths();
 
         boundsArray[offset] = new Vec3d(infoOrigin.getX() + origin.getX() - ObjectRenderer.EPSILON,
-                                        infoOrigin.getY() + origin.getY() - ObjectRenderer.EPSILON,
-                                        infoOrigin.getZ() + origin.getZ() - ObjectRenderer.EPSILON
-        );
+                infoOrigin.getY() + origin.getY() - ObjectRenderer.EPSILON,
+                infoOrigin.getZ() + origin.getZ() - ObjectRenderer.EPSILON);
         boundsArray[offset + 1] = new Vec3d(lengths.getX() + ObjectRenderer.DOUBLE_EPSILON,
-                                            lengths.getY() + ObjectRenderer.DOUBLE_EPSILON,
-                                            lengths.getZ() + ObjectRenderer.DOUBLE_EPSILON
-        );
+                lengths.getY() + ObjectRenderer.DOUBLE_EPSILON, lengths.getZ() + ObjectRenderer.DOUBLE_EPSILON);
 
         return boundsArray;
     }

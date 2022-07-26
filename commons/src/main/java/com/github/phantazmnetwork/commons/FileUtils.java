@@ -31,8 +31,8 @@ public final class FileUtils {
      * @throws IOException if an IO error occurs, or if no files in root match the predicate
      */
     public static @NotNull Path findFirstOrThrow(@NotNull Path root,
-                                                 @NotNull BiPredicate<Path, BasicFileAttributes> predicate,
-                                                 @NotNull Supplier<String> messageSupplier) throws IOException {
+            @NotNull BiPredicate<Path, BasicFileAttributes> predicate, @NotNull Supplier<String> messageSupplier)
+            throws IOException {
         Objects.requireNonNull(root, "root");
         Objects.requireNonNull(predicate, "predicate");
         Objects.requireNonNull(messageSupplier, "messageSupplier");
@@ -55,8 +55,8 @@ public final class FileUtils {
      * @throws IOException if an IO error occurs
      */
     public static void forEachFileMatching(@NotNull Path root,
-                                           @NotNull BiPredicate<Path, BasicFileAttributes> predicate,
-                                           @NotNull IOConsumer<? super Path> consumer) throws IOException {
+            @NotNull BiPredicate<Path, BasicFileAttributes> predicate, @NotNull IOConsumer<? super Path> consumer)
+            throws IOException {
         Objects.requireNonNull(root, "root");
         Objects.requireNonNull(predicate, "predicate");
         Objects.requireNonNull(consumer, "consumer");

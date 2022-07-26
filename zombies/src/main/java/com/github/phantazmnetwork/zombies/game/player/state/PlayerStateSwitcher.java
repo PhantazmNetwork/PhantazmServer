@@ -18,13 +18,13 @@ public class PlayerStateSwitcher implements Tickable {
         state.tick(time).ifPresent(this::setState);
     }
 
+    public @NotNull ZombiesPlayerState getState() {
+        return state;
+    }
+
     public void setState(@NotNull ZombiesPlayerState state) {
         this.state.end();
         this.state = state;
         this.state.start();
-    }
-
-    public @NotNull ZombiesPlayerState getState() {
-        return state;
     }
 }

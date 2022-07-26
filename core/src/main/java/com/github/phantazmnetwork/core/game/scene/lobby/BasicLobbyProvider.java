@@ -45,9 +45,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
      * @param chunkViewDistance The server's chunk view distance
      */
     public BasicLobbyProvider(int maximumLobbies, int newLobbyThreshold, @NotNull InstanceManager instanceManager,
-                              @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths,
-                              @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig,
-                              int chunkViewDistance) {
+            @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback,
+            @NotNull InstanceConfig instanceConfig, int chunkViewDistance) {
         super(maximumLobbies, newLobbyThreshold);
 
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");

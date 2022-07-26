@@ -27,8 +27,7 @@ public class PacketSerializer {
      * @param readerCreator         A creator for deserialization {@link DataReader}s
      */
     public PacketSerializer(@NotNull Map<Byte, Function<DataReader, Packet>> packetDeserializerMap,
-                            @NotNull Supplier<DataWriter> writerCreator,
-                            @NotNull Function<byte[], DataReader> readerCreator) {
+            @NotNull Supplier<DataWriter> writerCreator, @NotNull Function<byte[], DataReader> readerCreator) {
         this.packetDeserializerMap = Objects.requireNonNull(packetDeserializerMap, "packetDeserializerMap");
         this.writerCreator = Objects.requireNonNull(writerCreator, "writerCreator");
         this.readerCreator = Objects.requireNonNull(readerCreator, "readerCreator");

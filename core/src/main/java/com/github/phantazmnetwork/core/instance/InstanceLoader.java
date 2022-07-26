@@ -20,6 +20,6 @@ public interface InstanceLoader {
      * @return A new {@link Instance}
      */
     @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager,
-                                   @UnmodifiableView @NotNull List<String> subPaths);
+            @UnmodifiableView @NotNull List<String> subPaths);
 
 }

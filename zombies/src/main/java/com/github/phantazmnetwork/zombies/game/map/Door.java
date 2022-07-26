@@ -42,7 +42,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
      * @param instance the instance which this MapObject is in
      */
     public Door(@NotNull DoorInfo doorInfo, @NotNull Vec3I origin, @NotNull Instance instance, @NotNull Block fillBlock,
-                @NotNull List<Action<Door>> openActions) {
+            @NotNull List<Action<Door>> openActions) {
         super(doorInfo, origin, instance);
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
@@ -72,8 +72,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
             Vec3D offset = info.position();
             Hologram hologram = new InstanceHologram(
                     Vec3D.of(center.getX() + offset.getX(), center.getY() + offset.getY(),
-                             center.getZ() + offset.getZ()
-                    ), 0.1);
+                            center.getZ() + offset.getZ()), 0.1);
             hologram.addAll(info.text());
             hologram.setInstance(instance);
             holograms.add(hologram);

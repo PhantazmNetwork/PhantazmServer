@@ -19,7 +19,7 @@ public final class Messaging {
     }
 
     static void initialize(@NotNull EventNode<Event> global, @NotNull BasicPlayerViewProvider basicPlayerViewProvider,
-                           @NotNull AuthType authType) {
+            @NotNull AuthType authType) {
         if (authType == AuthType.BUNGEE || authType == AuthType.VELOCITY) {
             global.addListener(PlayerPluginMessageEvent.class, event -> {
                 String identifier = event.getIdentifier();
