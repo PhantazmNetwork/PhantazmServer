@@ -10,7 +10,8 @@ import com.github.phantazmnetwork.core.particle.ParticleWrapper;
 import com.github.phantazmnetwork.core.particle.data.ParticleData;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.mob.MobStore;
-import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.zombies.equipment.Equipment;
+import com.github.phantazmnetwork.zombies.equipment.PlayerEquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunLevel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunModel;
@@ -301,17 +302,24 @@ final class EquipmentFeature {
         dependencyAdder.accept((TObject)object, dependencies);
     }
 
-    /**
-     * Creates a {@link Gun}.
-     *
-     * @param key        The {@link Key} of the gun type
-     * @param node       The {@link EventNode} to register events to
-     * @param store      A {@link MobStore} for registered {@link PhantazmMob}s
-     * @param playerView A {@link PlayerView} for the player that is using the gun
-     * @param random     A {@link Random} for random number generation
-     * @return A new {@link Gun}
-     */
-    public static @NotNull Gun createGun(@NotNull Key key, @NotNull EventNode<Event> node, @NotNull MobStore store,
+    public static @NotNull PlayerEquipmentCreator createEquipmentCreator(@NotNull EventNode<Event> node,
+            @NotNull MobStore store, @NotNull Random random) {
+        return new PlayerEquipmentCreator() {
+            @SuppressWarnings("unchecked")
+            @NotNull
+            @Override
+            public <TEquipment extends Equipment> Optional<TEquipment> createEquipment(@NotNull PlayerView playerView,
+                    @NotNull Key equipmentKey) {
+                if (gunLevelMap.containsKey(equipmentKey)) {
+                    return Optional.of((TEquipment)createGun(equipmentKey, node, store, playerView, random));
+                }
+
+                return Optional.empty();
+            }
+        };
+    }
+
+    private static @NotNull Gun createGun(@NotNull Key key, @NotNull EventNode<Event> node, @NotNull MobStore store,
             @NotNull PlayerView playerView, @NotNull Random random) {
         List<ComplexData> complexDataList = gunLevelMap.get(key);
         if (complexDataList == null) {
