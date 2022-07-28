@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.11.0"
 
-ethylene = "0.10.0"
+ethylene = "0.11.2"
 
 junit-jupiter = "5.9.0-M1"
 
@@ -11,7 +11,9 @@ junit-jupiter = "5.9.0-M1"
 [libraries]
 adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.0" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
+
+element-core = { module = "com.github.steanky:element-core", version = "0.0.3" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }
@@ -19,8 +21,8 @@ ethylene-json = { module = "com.github.steanky:ethylene-json", version.ref = "et
 ethylene-toml = { module = "com.github.steanky:ethylene-toml", version.ref = "ethylene" }
 ethylene-yaml = { module = "com.github.steanky:ethylene-yaml", version.ref = "ethylene" }
 
-fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.53.0+1.18.2" }
-fabric-loader = { module = "net.fabricmc:fabric-loader", version = "0.14.6" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.57.0+1.18.2" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version = "0.14.8" }
 
 fastutil = { module = "it.unimi.dsi:fastutil", version = "8.5.8" }
 
@@ -29,15 +31,17 @@ jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 
-libgui = { module = "io.github.cottonmc:LibGui", version = "5.4.1+1.18.2" }
+libgui = { module = "io.github.cottonmc:LibGui", version = "5.4.2+1.18.2" }
 
 minecraft = { module = "com.mojang:minecraft", version = "1.18.2" }
 
-minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "903e133824" }
+minestom = { module = "com.github.PhantazmNetwork:Minestom", version = "dc746fa5fa" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.5.1" }
 
-renderer = { module = "com.github.0x3C50:Renderer", version = "51f5a72f86" }
+renderer = { module = "com.github.0x3C50:Renderer", version = "51f5a72" }
+
+velocity-api = { module = "com.velocitypowered:velocity-api", version = "3.1.1" }
 
 yarn-mappings = { module = "net.fabricmc:yarn", version = "1.18.2+build.3" }
 
@@ -45,4 +49,6 @@ yarn-mappings = { module = "net.fabricmc:yarn", version = "1.18.2+build.3" }
 fabric = ["fabric-api", "fabric-loader"]
 
 [plugins]
-fabric-loom = { id = "fabric-loom", version = "0.12-SNAPSHOT" }
+fabric-loom = { id = "fabric-loom", version = "0.12.54" }
+
+shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }

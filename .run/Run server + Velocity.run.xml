@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run server + Velocity" type="CompoundRunConfigurationType">
-    <toRun name="Run server" type="JarApplication" />
-    <toRun name="Run Velocity" type="JarApplication" />
-    <method v="2" />
-  </configuration>
+    <configuration default="false" name="Run server + Velocity" type="CompoundRunConfigurationType">
+        <toRun name="Run server" type="JarApplication"/>
+        <toRun name="Run Velocity" type="JarApplication"/>
+        <method v="2"/>
+    </configuration>
 </component>
