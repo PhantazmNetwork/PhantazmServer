@@ -8,14 +8,25 @@ import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
-import com.github.steanky.element.core.*;
+import com.github.steanky.element.core.HashRegistry;
+import com.github.steanky.element.core.Registry;
+import com.github.steanky.element.core.data.BasicDataIdentifier;
+import com.github.steanky.element.core.data.BasicDataInspector;
+import com.github.steanky.element.core.data.DataIdentifier;
+import com.github.steanky.element.core.data.DataInspector;
+import com.github.steanky.element.core.element.*;
+import com.github.steanky.element.core.factory.BasicFactoryResolver;
+import com.github.steanky.element.core.factory.FactoryResolver;
+import com.github.steanky.element.core.key.BasicKeyExtractor;
 import com.github.steanky.element.core.key.BasicKeyParser;
+import com.github.steanky.element.core.key.KeyExtractor;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.element.core.processor.BasicProcessorResolver;
+import com.github.steanky.element.core.processor.ProcessorResolver;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -155,15 +166,23 @@ public final class PhantazmServer {
         BasicPlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
                         MinecraftServer.getConnectionManager());
+
         KeyParser phantazmParser = new BasicKeyParser(Namespaces.PHANTAZM);
         KeyExtractor phantazmExtractor = new BasicKeyExtractor("serialKey", phantazmParser);
-        ElementInspector phantazmInspector = new BasicElementInspector(phantazmParser);
-        Registry<ConfigProcessor<? extends Keyed>> processorRegistry = new HashRegistry<>();
+        DataInspector phantazmDataInspector = new BasicDataInspector(phantazmParser);
+        ElementTypeIdentifier phantazmTypeIdentifier = new BasicElementTypeIdentifier(phantazmParser);
+        FactoryResolver phantazmFactoryResolver =
+                new BasicFactoryResolver(phantazmParser, phantazmDataInspector, phantazmTypeIdentifier);
+        ProcessorResolver phantazmProcessorResolver = new BasicProcessorResolver();
+        ElementInspector phantazmInspector =
+                new BasicElementInspector(phantazmFactoryResolver, phantazmProcessorResolver);
+
+        DataIdentifier phantazmDataIdentifier = new BasicDataIdentifier(phantazmParser, phantazmTypeIdentifier);
+        Registry<ConfigProcessor<?>> processorRegistry = new HashRegistry<>();
         Registry<ElementFactory<?, ?>> factoryRegistry = new HashRegistry<>();
 
-        ElementBuilder builder =
-                new BasicElementBuilder(phantazmParser, phantazmExtractor, phantazmInspector, processorRegistry,
-                        factoryRegistry);
+        ElementBuilder builder = new BasicElementBuilder(phantazmExtractor, phantazmInspector, phantazmTypeIdentifier,
+                phantazmDataIdentifier, processorRegistry, factoryRegistry);
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());

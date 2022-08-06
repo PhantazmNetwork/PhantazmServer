@@ -8,7 +8,7 @@ import com.github.phantazmnetwork.zombies.game.map.shop.interactor.MessagingInte
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.PlaySoundInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.FlagPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.StaticCostPredicate;
-import com.github.steanky.element.core.ElementBuilder;
+import com.github.steanky.element.core.element.ElementBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

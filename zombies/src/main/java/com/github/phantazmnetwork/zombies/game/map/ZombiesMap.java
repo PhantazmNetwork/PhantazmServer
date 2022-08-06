@@ -12,11 +12,11 @@ import com.github.phantazmnetwork.zombies.game.map.shop.display.ShopDisplay;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShopInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
 import com.github.phantazmnetwork.zombies.map.*;
-import com.github.steanky.element.core.ElementBuilder;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
+import com.github.steanky.element.core.element.ElementBuilder;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
@@ -81,7 +81,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         this.unmodifiableSpawnpoints = Collections.unmodifiableList(spawnpoints);
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
-        this.flags = new HashSet<>();
+        this.flags = new HashSet<>(2);
 
         for (RoomInfo roomInfo : roomData) {
             rooms.add(new Room(roomInfo, getOrigin(), instance,
