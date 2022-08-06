@@ -68,12 +68,6 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     }
 
     @ElementData
-    public record Data(int priority, int cost, @NotNull Component message) implements Keyed, Prioritized {
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.shop.predicate.static_cost");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public record Data(int priority, int cost, @NotNull Component message) implements Prioritized {
     }
 }

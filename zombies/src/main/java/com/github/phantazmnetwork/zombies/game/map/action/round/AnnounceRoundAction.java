@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.action.round;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.game.map.Round;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.action.Action;
@@ -12,8 +11,6 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
@@ -90,13 +87,6 @@ public class AnnounceRoundAction implements Action<Round> {
      * @param priority      the priority of this action; actions with higher priority will be executed first
      */
     @ElementData
-    public record Data(@NotNull String formatMessage, @NotNull TitlePart<Component> titlePart, int priority)
-            implements Keyed {
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.round.action.announce");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public record Data(@NotNull String formatMessage, @NotNull TitlePart<Component> titlePart, int priority) {
     }
 }

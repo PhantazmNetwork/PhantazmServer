@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <TData> the type of data to process
  */
-public abstract class PrioritizedProcessor<TData extends Prioritized & Keyed> implements ConfigProcessor<TData> {
+public abstract class PrioritizedProcessor<TData extends Prioritized> implements ConfigProcessor<TData> {
     @Override
     public final @NotNull TData dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
         int priority = node.getNumberOrThrow("priority").intValue();

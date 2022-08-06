@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
@@ -11,8 +10,6 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,12 +57,6 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     }
 
     @ElementData
-    public record Data(int priority, @NotNull Sound sound, boolean broadcast) implements Keyed, Prioritized {
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.shop.interactor.play_sound");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public record Data(int priority, @NotNull Sound sound, boolean broadcast) implements Prioritized {
     }
 }

@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.map.action.room;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.game.map.Room;
 import com.github.phantazmnetwork.zombies.game.map.Round;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
@@ -13,8 +12,6 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -44,6 +41,7 @@ public class SpawnMobsAction implements Action<Room> {
     };
     private final Data data;
     private final Supplier<? extends Round> currentRound;
+
     @FactoryMethod
     public SpawnMobsAction(@NotNull Data data, @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
         this.data = Objects.requireNonNull(data, "data");
@@ -69,12 +67,6 @@ public class SpawnMobsAction implements Action<Room> {
     }
 
     @ElementData
-    public record Data(@NotNull List<SpawnInfo> mobSpawns, int priority) implements Keyed {
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.room.action.spawn_mobs");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public record Data(@NotNull List<SpawnInfo> mobSpawns, int priority) {
     }
 }

@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.display;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
@@ -15,9 +14,9 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 @ElementModel("zombies.map.shop.display.static_hologram")
 public class StaticHologramDisplay extends HologramDisplayBase {
@@ -41,7 +40,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
 
     @FactoryMethod
     public StaticHologramDisplay(@NotNull Data data) {
-        this.data = data;
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     @ProcessorMethod
@@ -64,12 +63,6 @@ public class StaticHologramDisplay extends HologramDisplayBase {
     }
 
     @ElementData
-    public record Data(@NotNull HologramInfo info) implements Keyed {
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.shop.display.static_hologram");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+    public record Data(@NotNull HologramInfo info) {
     }
 }

@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
@@ -12,7 +11,6 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -65,12 +63,6 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
 
     @ElementData
     public record Data(int priority, @NotNull Key flag, @NotNull Component message, boolean requireAbsent)
-            implements Keyed, Prioritized {
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "zombies.map.shop.predicate.flag_predicate");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
+            implements Prioritized {
     }
 }
