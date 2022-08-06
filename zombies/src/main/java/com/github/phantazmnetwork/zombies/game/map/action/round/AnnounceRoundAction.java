@@ -48,8 +48,10 @@ public class AnnounceRoundAction implements Action<Round> {
             return node;
         }
     };
+
     private final Data data;
     private final Audience audience;
+
     /**
      * Creates a new instance of this class from the provided contextual data.
      *

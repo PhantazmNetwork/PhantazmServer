@@ -40,8 +40,11 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     private final List<Spawnpoint> unmodifiableSpawnpoints;
     private final List<Round> unmodifiableRounds;
     private final Set<Key> flags;
+
     private int roundIndex = -1;
     private Round currentRound = null;
+    private boolean hasCompleted = false;
+
     /**
      * Constructs a new instance of this class.
      *
@@ -97,7 +100,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                     e -> LOGGER.warn("Error initializing shop predicates for {}: {}", shopInfo, e));
 
             List<ShopInteractor> interactors = builder.loadAllElements(selectNodes(shopInfo.interactors()), provider,
-                    e -> LOGGER.warn("Error initializing shop " + "interactors for {}: {}", shopInfo, e));
+                    e -> LOGGER.warn("Error initializing shop interactors for {}: {}", shopInfo, e));
             List<ShopDisplay> displays = builder.loadAllElements(selectNodes(shopInfo.interactors()), provider,
                     e -> LOGGER.warn("Error initializing shop displays for {}: {}", shopInfo, e));
             shops.add(new Shop(shopInfo, origin, instance, predicates, interactors, displays));
@@ -129,7 +132,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         }
     }
 
-    private static @NotNull List<ConfigNode> selectNodes(@NotNull ConfigList list) {
+    private static Collection<ConfigNode> selectNodes(@NotNull ConfigList list) {
         List<ConfigNode> nodes = new ArrayList<>(list.size());
         for (ConfigElement element : list) {
             if (element.isNode()) {
@@ -247,6 +250,10 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         return Optional.empty();
     }
 
+    public boolean hasCompleted() {
+        return hasCompleted;
+    }
+
     @Override
     public void tick(long time) {
         roundTick(time);
@@ -263,6 +270,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                 }
                 else {
                     //TODO end of game code (mostly handled elsewhere, but maybe some stuff should run here?)
+                    hasCompleted = true;
                     currentRound = null;
                 }
             }

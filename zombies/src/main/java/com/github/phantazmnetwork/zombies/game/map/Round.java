@@ -23,7 +23,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     private final List<Action<Round>> startActions;
     private final List<Action<Round>> endActions;
     private final SpawnDistributor spawnDistributor;
-    private final Supplier<List<Spawnpoint>> spawnpointSupplier;
+    private final Supplier<? extends List<Spawnpoint>> spawnpointSupplier;
     private final List<PhantazmMob> spawnedMobs;
     private final List<PhantazmMob> unmodifiableSpawnedMobs;
 
@@ -41,7 +41,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull Instance instance, @NotNull List<Action<Round>> startActions,
             @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-            @NotNull Supplier<List<Spawnpoint>> spawnpointSupplier) {
+            @NotNull Supplier<? extends List<Spawnpoint>> spawnpointSupplier) {
         super(roundInfo, instance);
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.size() == 0) {
@@ -137,7 +137,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     }
 
     public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
-            @NotNull SpawnDistributor spawnDistributor, boolean syncCount) {
+            @NotNull SpawnDistributor spawnDistributor, boolean isWave) {
         if (!isActive) {
             throw new IllegalStateException("Round must be active to spawn mobs");
         }
@@ -145,7 +145,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnpointSupplier.get(), spawnInfo);
         spawnedMobs.addAll(spawns);
 
-        if (syncCount) {
+        if (isWave) {
             //adjust for mobs that may have failed to spawn
             totalMobCount -= currentWave.mobCount() - spawns.size();
         }
