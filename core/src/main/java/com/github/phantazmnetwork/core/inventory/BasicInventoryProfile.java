@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.core.inventory;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -57,6 +58,12 @@ public class BasicInventoryProfile implements InventoryProfile {
     @Override
     public int getSlotCount() {
         return objects.length;
+    }
+
+    @Override
+    public @NotNull InventoryObjectGroup getGroup(@NotNull Key key) {
+        //TODO: implement this API
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
 }

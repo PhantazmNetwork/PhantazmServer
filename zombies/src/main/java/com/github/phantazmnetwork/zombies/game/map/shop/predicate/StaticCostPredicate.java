@@ -54,12 +54,10 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     }
 
     @Override
-    public boolean canHandleInteraction(@NotNull PlayerInteraction interaction) {
-        Transaction transaction = new Transaction(data.cost);
+    public boolean canInteract(@NotNull PlayerInteraction interaction) {
         ZombiesPlayer player = interaction.getPlayer();
         PlayerCoins coins = player.getCoins();
-        TransactionResult result = coins.runTransaction(transaction);
-        if (coins.getCoins() + result.change() < 0) {
+        if (!coins.modify(-data.cost).applyIfAffordable(coins)) {
             player.getPlayerView().getPlayer().ifPresent(presentPlayer -> presentPlayer.sendMessage(data.message));
             return false;
         }

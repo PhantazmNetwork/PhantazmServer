@@ -12,4 +12,14 @@ public record TransactionResult(@NotNull List<Component> modifierNames, int chan
         Objects.requireNonNull(modifierNames, "modifierNames");
     }
 
+    public boolean applyIfAffordable(@NotNull PlayerCoins coins) {
+        Objects.requireNonNull(coins, "coins");
+        boolean canAfford = coins.getCoins() + change >= 0;
+        if (canAfford) {
+            coins.applyTransaction(this);
+            return true;
+        }
+
+        return false;
+    }
 }

@@ -169,8 +169,8 @@ public final class PhantazmServer {
 
         KeyParser phantazmParser = new BasicKeyParser(Namespaces.PHANTAZM);
         KeyExtractor phantazmExtractor = new BasicKeyExtractor("serialKey", phantazmParser);
-        DataInspector phantazmDataInspector = new BasicDataInspector(phantazmParser);
         ElementTypeIdentifier phantazmTypeIdentifier = new BasicElementTypeIdentifier(phantazmParser);
+        DataInspector phantazmDataInspector = new BasicDataInspector(phantazmParser, phantazmTypeIdentifier);
         FactoryResolver phantazmFactoryResolver =
                 new BasicFactoryResolver(phantazmParser, phantazmDataInspector, phantazmTypeIdentifier);
         ProcessorResolver phantazmProcessorResolver = new BasicProcessorResolver();

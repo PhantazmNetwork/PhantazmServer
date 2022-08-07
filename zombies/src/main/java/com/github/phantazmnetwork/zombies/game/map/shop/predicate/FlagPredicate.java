@@ -51,7 +51,7 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
     }
 
     @Override
-    public boolean canHandleInteraction(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction) {
         boolean result = map.hasFlag(data.flag) != data.requireAbsent;
         if (!result) {
             interaction.getPlayer().getPlayerView().getPlayer()

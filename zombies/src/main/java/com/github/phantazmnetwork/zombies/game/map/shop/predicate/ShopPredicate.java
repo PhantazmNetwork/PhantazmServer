@@ -5,5 +5,5 @@ import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import org.jetbrains.annotations.NotNull;
 
 public interface ShopPredicate extends Prioritized {
-    boolean canHandleInteraction(@NotNull PlayerInteraction interaction);
+    boolean canInteract(@NotNull PlayerInteraction interaction);
 }
