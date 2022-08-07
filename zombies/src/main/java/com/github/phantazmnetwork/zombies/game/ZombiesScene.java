@@ -25,7 +25,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private final StageTransition stageTransition;
 
-    private final Function<PlayerView, ZombiesPlayer> playerCreator;
+    private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
 
     private final Random random;
 
@@ -33,8 +33,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     public ZombiesScene(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
             @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
-            @NotNull StageTransition stageTransition, @NotNull Function<PlayerView, ZombiesPlayer> playerCreator,
-            @NotNull Random random) {
+            @NotNull StageTransition stageTransition,
+            @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator, @NotNull Random random) {
         super(instance, fallback);
 
         this.zombiesPlayers = zombiesPlayers;
@@ -72,7 +72,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
-            return new RouteResult(false, Optional.of(Component.text("Too many players!", NamedTextColor.RED)));
+            return new RouteResult(false, Component.text("Too many players!", NamedTextColor.RED));
         }
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
@@ -96,7 +96,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             }));
         }
 
-        return new RouteResult(true, Optional.empty());
+        return RouteResult.SUCCESSFUL;
     }
 
     @Override
@@ -104,7 +104,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         for (UUID leaver : leavers) {
             if (!players.containsKey(leaver)) {
                 return new RouteResult(false,
-                        Optional.of(Component.text("Not all players are within the scene.", NamedTextColor.RED)));
+                        Component.text("Not all players are within the scene.", NamedTextColor.RED));
             }
         }
 
@@ -123,7 +123,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             }
         }
 
-        return new RouteResult(true, Optional.empty());
+        return RouteResult.SUCCESSFUL;
     }
 
     @Override

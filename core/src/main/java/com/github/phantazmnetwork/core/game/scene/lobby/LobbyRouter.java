@@ -73,16 +73,16 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
     @Override
     public @NotNull RouteResult join(@NotNull LobbyRouteRequest routeRequest) {
         if (isShutdown()) {
-            return new RouteResult(false, Optional.of(Component.text("The router is shutdown.")));
+            return new RouteResult(false, Component.text("The router is shutdown."));
         }
         if (!isJoinable()) {
-            return new RouteResult(false, Optional.of(Component.text("The router is not joinable.")));
+            return new RouteResult(false, Component.text("The router is not joinable."));
         }
 
         SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
         if (lobbyProvider == null) {
-            return new RouteResult(false, Optional.of(
-                    Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + ".")));
+            return new RouteResult(false,
+                    Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + "."));
         }
 
         LobbyJoinRequest joinRequest = routeRequest.joinRequest();
@@ -104,15 +104,14 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
             return result;
         }
 
-        return new RouteResult(false, Optional.of(Component.text("No lobbies are joinable.")));
+        return new RouteResult(false, Component.text("No lobbies are joinable."));
     }
 
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID uuid : leavers) {
             if (!playerLobbyMap.containsKey(uuid)) {
-                return new RouteResult(false,
-                        Optional.of(Component.text(uuid + " is not part of a scene in the lobby router.")));
+                return new RouteResult(false, Component.text(uuid + " is not part of a scene in the lobby router."));
             }
         }
 
@@ -120,7 +119,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
             playerLobbyMap.get(uuid).leave(Collections.singleton(uuid));
         }
 
-        return new RouteResult(true, Optional.empty());
+        return RouteResult.SUCCESSFUL;
     }
 
     @Override

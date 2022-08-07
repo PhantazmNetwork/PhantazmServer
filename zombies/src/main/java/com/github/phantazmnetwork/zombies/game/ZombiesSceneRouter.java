@@ -74,16 +74,15 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
     @Override
     public @NotNull RouteResult join(@NotNull ZombiesRouteRequest routeRequest) {
         if (isShutdown()) {
-            return new RouteResult(false, Optional.of(Component.text("The router is shutdown.")));
+            return new RouteResult(false, Component.text("The router is shutdown."));
         }
         if (!isJoinable()) {
-            return new RouteResult(false, Optional.of(Component.text("The router is not joinable.")));
+            return new RouteResult(false, Component.text("The router is not joinable."));
         }
 
         SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider = sceneProviders.get(routeRequest.targetMap());
         if (sceneProvider == null) {
-            return new RouteResult(false,
-                    Optional.of(Component.text("No games exist with key " + routeRequest.targetMap() + ".")));
+            return new RouteResult(false, Component.text("No games exist with key " + routeRequest.targetMap() + "."));
         }
 
         ZombiesJoinRequest joinRequest = routeRequest.joinRequest();
@@ -105,15 +104,14 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
             return result;
         }
 
-        return new RouteResult(false, Optional.of(Component.text("No games are joinable.")));
+        return new RouteResult(false, Component.text("No games are joinable."));
     }
 
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         for (UUID uuid : leavers) {
             if (!playerSceneMap.containsKey(uuid)) {
-                return new RouteResult(false,
-                        Optional.of(Component.text(uuid + " is not part of a game in the zombies router.")));
+                return new RouteResult(false, Component.text(uuid + " is not part of a game in the Zombies router."));
             }
         }
 
@@ -121,7 +119,7 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
             playerSceneMap.get(uuid).leave(Collections.singleton(uuid));
         }
 
-        return new RouteResult(true, Optional.empty());
+        return RouteResult.SUCCESSFUL;
     }
 
     @Override

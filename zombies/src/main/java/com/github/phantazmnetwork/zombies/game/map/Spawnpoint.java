@@ -46,8 +46,7 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
     }
 
     /**
-     * Determines if this spawnpoint may spawn a {@link MobModel}. Note that spawnpoints do not take factors outside
-     * themselves into account, they only consider their internal (black/white)list of spawn-able mobs
+     * Determines if this spawnpoint may spawn a {@link MobModel}.
      *
      * @param model          the model to spawn
      * @param spawnType      the spawntype, which must match the spawnrule's spawn type
@@ -85,11 +84,7 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
             }
         }
 
-        if (!inRange) {
-            return false;
-        }
-
-        return spawnrule.isBlacklist() != spawnrule.spawns().contains(model.key());
+        return inRange && (spawnrule.isBlacklist() != spawnrule.spawns().contains(model.key()));
     }
 
     /**

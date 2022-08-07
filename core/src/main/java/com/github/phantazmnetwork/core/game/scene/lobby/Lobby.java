@@ -36,10 +36,10 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public @NotNull RouteResult join(@NotNull LobbyJoinRequest joinRequest) {
         if (isShutdown()) {
-            return new RouteResult(false, Optional.of(Component.text("Lobby is shutdown.")));
+            return new RouteResult(false, Component.text("Lobby is shutdown."));
         }
         if (!isJoinable()) {
-            return new RouteResult(false, Optional.of(Component.text("Lobby is not joinable.")));
+            return new RouteResult(false, Component.text("Lobby is not joinable."));
         }
 
         Collection<PlayerView> playerViews = joinRequest.getPlayers();
@@ -53,7 +53,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         if (joiners.isEmpty()) {
-            return new RouteResult(false, Optional.of(Component.text("Everybody is already in the lobby.")));
+            return new RouteResult(false, Component.text("Everybody is already in the lobby."));
         }
 
         for (Pair<PlayerView, Player> player : joiners) {
@@ -61,7 +61,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
             players.put(player.first().getUUID(), player.first());
         }
 
-        return new RouteResult(true, Optional.empty());
+        return RouteResult.SUCCESSFUL;
     }
 
     @Override
@@ -75,14 +75,14 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         if (!anyInside) {
-            return new RouteResult(false, Optional.of(Component.text("None of the players are in the lobby.")));
+            return new RouteResult(false, Component.text("None of the players are in the lobby."));
         }
 
         for (UUID uuid : leavers) {
             players.remove(uuid);
         }
 
-        return new RouteResult(true, Optional.empty());
+        return RouteResult.SUCCESSFUL;
     }
 
     @Override
