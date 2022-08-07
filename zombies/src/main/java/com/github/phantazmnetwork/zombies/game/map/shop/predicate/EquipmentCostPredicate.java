@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.core.inventory.InventoryObject;
 import com.github.phantazmnetwork.core.inventory.InventoryObjectGroup;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
@@ -72,17 +71,15 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
                 }
 
                 Equipment equipment = optionalEquipment.get();
-                if (equipment instanceof InventoryObject inventoryObject) {
-                    InventoryObjectGroup group =
-                            zombiesPlayer.getProfileSwitcher().getCurrentProfile().getGroup(data.equipmentGroup);
+                InventoryObjectGroup group =
+                        zombiesPlayer.getProfileSwitcher().getCurrentProfile().getGroup(data.equipmentGroup);
 
-                    //TODO: full group message
-                    return !group.isFull();
-                }
+                //TODO: full group message
+                return !group.isFull();
 
                 //TODO: need some other way to check if players can have equipment, if that equipment is not an
                 //InventoryObject
-                return true;
+                //return true;
             }
         }
 

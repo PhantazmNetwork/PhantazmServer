@@ -1,11 +1,12 @@
 package com.github.phantazmnetwork.zombies.equipment;
 
+import com.github.phantazmnetwork.core.inventory.InventoryObject;
 import net.minestom.server.entity.Player;
 
 /**
  * Represents a piece of equipment that {@link Player}s may use.
  */
-public interface Equipment {
+public interface Equipment extends InventoryObject {
 
     /**
      * Invoked when a {@link Player} changes their slot to or from the one containing this {@link Equipment}.

@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -27,8 +28,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     private final Supplier<? extends ZombiesPlayer> reviverSupplier;
     private final Supplier<? extends ZombiesPlayerState> deathStateSupplier;
     private final Supplier<? extends ZombiesPlayerState> defaultStateSupplier;
-    private final Collection<? extends DeathTickable> deathTickables;
-    private final Collection<? extends ReviveTickable> reviveTickables;
+    private final Collection<? extends Tickable> tickables;
     private final long deathTime;
     private final long reviveTime;
     private ZombiesPlayer reviver = null;
@@ -40,8 +40,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             @NotNull Supplier<? extends ZombiesPlayerState> deathStateSupplier,
             @NotNull Supplier<? extends ZombiesPlayerState> defaultStateSupplier,
             @NotNull Consumer<? super Player> knockedAction, @NotNull Supplier<? extends ZombiesPlayer> reviverSupplier,
-            @NotNull Collection<? extends DeathTickable> deathTickables,
-            @NotNull Collection<? extends ReviveTickable> reviveTickables, long deathTime, long reviveTime) {
+            @NotNull Collection<? extends Tickable> tickables, long deathTime, long reviveTime) {
         this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.knockMessageFuture = Objects.requireNonNull(knockMessageFuture, "knockMessageFuture");
@@ -49,8 +48,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
         this.defaultStateSupplier = Objects.requireNonNull(defaultStateSupplier, "defaultStateSupplier");
         this.knockedAction = Objects.requireNonNull(knockedAction, "knockedAction");
         this.reviverSupplier = Objects.requireNonNull(reviverSupplier, "reviverSupplier");
-        this.deathTickables = Objects.requireNonNull(deathTickables, "deathTickables");
-        this.reviveTickables = Objects.requireNonNull(reviveTickables, "reviveTickables");
+        this.tickables = List.copyOf(tickables);
         this.deathTime = deathTime;
         this.reviveTime = reviveTime;
         this.ticksUntilDeath = deathTime;
@@ -66,6 +64,9 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             }
         });
         playerView.getPlayer().ifPresent(knockedAction);
+        for (Tickable tickable : tickables) {
+            tickable.start();
+        }
     }
 
     @Override
@@ -81,8 +82,8 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             reviver = reviverSupplier.get();
             if (reviver == null) {
                 if (ticksUntilDeath-- > 0) {
-                    for (DeathTickable tickable : deathTickables) {
-                        tickable.tick(time, ticksUntilDeath);
+                    for (Tickable tickable : tickables) {
+                        tickable.deathTick(time, ticksUntilDeath);
                     }
                 }
             }
@@ -96,8 +97,8 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             ticksUntilRevive = reviveTime;
         }
         else if (ticksUntilRevive-- > 0) {
-            for (ReviveTickable tickable : reviveTickables) {
-                tickable.tick(time, reviver, ticksUntilRevive);
+            for (Tickable tickable : tickables) {
+                tickable.reviveTick(time, reviver, ticksUntilRevive);
             }
         }
 
@@ -106,10 +107,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     @Override
     public void end() {
-        for (DeathTickable tickable : deathTickables) {
-            tickable.end();
-        }
-        for (ReviveTickable tickable : reviveTickables) {
+        for (Tickable tickable : tickables) {
             tickable.end();
         }
         if (reviver != null) {
@@ -122,17 +120,25 @@ public class KnockedPlayerState implements ZombiesPlayerState {
         return Component.text("KNOCKED", NamedTextColor.YELLOW);
     }
 
-    public interface DeathTickable {
-
-        void tick(long time, long ticksUntilDeath);
-
-        void end();
-
+    public Optional<ZombiesPlayer> getReviver() {
+        return Optional.ofNullable(reviver);
     }
 
-    public interface ReviveTickable {
+    public long getTicksUntilDeath() {
+        return ticksUntilDeath;
+    }
 
-        void tick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive);
+    public long getTicksUntilRevive() {
+        return ticksUntilRevive;
+    }
+
+    public interface Tickable {
+
+        void start();
+
+        void deathTick(long time, long ticksUntilDeath);
+
+        void reviveTick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive);
 
         void end();
 
