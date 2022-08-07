@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.zombies.game;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.game.map.Spawnpoint;
+import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
@@ -12,17 +13,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class BasicSpawnDistributor implements SpawnDistributor {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicSpawnDistributor.class);
 
     private final Function<? super Key, ? extends MobModel> modelFunction;
     private final Random random;
+    private final Supplier<? extends Collection<ZombiesPlayer>> playerSupplier;
 
     public BasicSpawnDistributor(@NotNull Function<? super Key, ? extends MobModel> modelFunction,
-            @NotNull Random random) {
+            @NotNull Random random, @NotNull Supplier<? extends List<ZombiesPlayer>> playerSupplier) {
         this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
         this.random = Objects.requireNonNull(random, "random");
+        this.playerSupplier = Objects.requireNonNull(playerSupplier, "playerSupplier");
     }
 
     @Override
@@ -47,7 +51,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
         }
 
         if (spawnList.isEmpty()) {
-            LOGGER.warn("Spawn distributor received empty spawn list");
+            LOGGER.warn("Received empty spawn list");
             return Collections.emptyList();
         }
 
@@ -65,7 +69,13 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 Spawnpoint candidate = spawnpoints.get(candidateIndex++);
                 candidateIndex %= spawnpoints.size();
 
-                if (candidate.canSpawn(model, spawnType)) {
+                Collection<ZombiesPlayer> players = playerSupplier.get();
+                if (players == null) {
+                    LOGGER.warn("playerSupplier returned a null collection");
+                    continue;
+                }
+
+                if (candidate.canSpawn(model, spawnType, players)) {
                     spawnedMobs.add(candidate.spawn(model));
                     spawned = true;
                     break;

@@ -123,7 +123,15 @@ public interface Vec3D extends Comparable<Vec3D> {
         return Vec3D.squaredDistance(x, y, z, getX(), getY(), getZ());
     }
 
+    default double squaredDistance(int x, int y, int z) {
+        return Vec3D.squaredDistance(x, y, z, getX(), getY(), getZ());
+    }
+
     default double squaredDistance(@NotNull Vec3D other) {
+        return squaredDistance(other.getX(), other.getY(), other.getZ());
+    }
+
+    default double squaredDistance(@NotNull Vec3I other) {
         return squaredDistance(other.getX(), other.getY(), other.getZ());
     }
 }

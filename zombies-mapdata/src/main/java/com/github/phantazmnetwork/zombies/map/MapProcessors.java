@@ -69,7 +69,8 @@ public final class MapProcessors {
             Key spawnType = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnType"));
             Set<Key> spawns = keySet.dataFromElement(element.getElementOrThrow("spawns"));
             boolean isBlacklist = element.getBooleanOrThrow("isBlacklist");
-            return new SpawnruleInfo(id, spawnType, spawns, isBlacklist);
+            int sla = element.getNumberOrThrow("sla").intValue();
+            return new SpawnruleInfo(id, spawnType, spawns, isBlacklist, sla);
         }
 
         @Override
@@ -79,6 +80,7 @@ public final class MapProcessors {
             node.put("spawnType", AdventureConfigProcessors.key().elementFromData(spawnruleInfo.spawnType()));
             node.put("spawns", keySet.elementFromData(spawnruleInfo.spawns()));
             node.putBoolean("isBlacklist", spawnruleInfo.isBlacklist());
+            node.putNumber("sla", spawnruleInfo.sla());
             return node;
         }
     };
@@ -195,6 +197,8 @@ public final class MapProcessors {
             Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("origin"));
             Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("spawn"));
+            int minimumProtocolVersion = element.getNumberOrThrow("minimumProtocolVersion").intValue();
+            int maximumProtocolVersion = element.getNumberOrThrow("maximumProtocolVersion").intValue();
             float pitch = element.getNumberOrThrow("pitch").floatValue();
             float yaw = element.getNumberOrThrow("yaw").floatValue();
             Component displayName =
@@ -221,10 +225,11 @@ public final class MapProcessors {
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             List<Key> defaultEquipment = keyList.dataFromElement(element.getElementOrThrow("defaultEquipment"));
-            return new MapSettingsInfo(id, origin, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
-                    scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
-                    startingCoins, repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius,
-                    canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
+            return new MapSettingsInfo(id, origin, minimumProtocolVersion, maximumProtocolVersion, spawn, pitch, yaw,
+                    displayName, displayItemTag, introMessages, scoreboardHeader, leaderboardPosition,
+                    leaderboardLength, worldTime, maxPlayers, minPlayers, startingCoins, repairCoins,
+                    windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius, canWallshoot,
+                    perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
         }
 
         @Override
@@ -232,6 +237,8 @@ public final class MapProcessors {
             ConfigNode node = new LinkedConfigNode(26);
             node.put("id", AdventureConfigProcessors.key().elementFromData(mapConfig.id()));
             node.put("origin", VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
+            node.putNumber("minimumProtocolVersion", mapConfig.minimumProtocolVersion());
+            node.putNumber("maximumProtocolVersion", mapConfig.maximumProtocolVersion());
             node.put("spawn", VectorConfigProcessors.vec3I().elementFromData(mapConfig.spawn()));
             node.putNumber("pitch", mapConfig.pitch());
             node.putNumber("yaw", mapConfig.yaw());

@@ -14,6 +14,8 @@ import java.util.Objects;
  */
 public record MapSettingsInfo(@NotNull Key id,
                               @NotNull Vec3I origin,
+                              int minimumProtocolVersion,
+                              int maximumProtocolVersion,
                               @NotNull Vec3I spawn,
                               float pitch,
                               float yaw,
@@ -41,33 +43,35 @@ public record MapSettingsInfo(@NotNull Key id,
     /**
      * Constructs a new instance of this record.
      *
-     * @param id                  the id of this map
-     * @param origin              the origin of this map; this is the point from which all other coordinates are relative to unless
-     *                            otherwise specified
-     * @param spawn               the spawn of the map, relative to origin
-     * @param pitch               the pitch that players should have when they spawn in
-     * @param yaw                 the yaw that players should have when they spawn in
-     * @param displayName         the display name component for this map
-     * @param displayItemSnbt     the SNBT for the item used to represent this map
-     * @param introMessages       the messages that may be sent when the game starts
-     * @param scoreboardHeader    the component displayed at the top of the scoreboard
-     * @param leaderboardPosition the position of the leaderboard, relative to origin
-     * @param leaderboardLength   the number of entries in the leaderboard
-     * @param worldTime           the time in ticks that the world should have
-     * @param maxPlayers          the maximum number of players this map can fit
-     * @param minPlayers          the minimum number of players this map needs to start
-     * @param startingCoins       the number of coins each player gets at the start of the game
-     * @param repairCoins         the base number of coins each player gets when they repair a window
-     * @param windowRepairRadius  the maximum distance away players can be from a window and still repair it
-     * @param windowRepairTicks   the number of ticks between each consecutive "repair tick"
-     * @param corpseDeathTicks    the number of ticks it takes for a downed player to fully die if they are not revived
-     * @param reviveRadius        the maximum distance away players can be from a corpse and still revive it
-     * @param canWallshoot        true if wallshooting is enabled, false otherwise
-     * @param perksLostOnDeath    true if perks are lost on death, false otherwise
-     * @param baseReviveTicks     the base number of ticks it takes to revive a player
-     * @param rollsPerChest       the number of rolls a lucky chest can have before it moves to another location
-     * @param milestoneRounds     "special" rounds whose times are recorded and saved
-     * @param defaultEquipment    the initial equipment players receive when the game starts
+     * @param id                     the id of this map
+     * @param origin                 the origin of this map; this is the point from which all other coordinates are relative to unless
+     *                               otherwise specified
+     * @param minimumProtocolVersion the minimum protocol version required to join this map (inclusive)
+     * @param maximumProtocolVersion maximum protocol version required to join this map (inclusive)
+     * @param spawn                  the spawn of the map, relative to origin
+     * @param pitch                  the pitch that players should have when they spawn in
+     * @param yaw                    the yaw that players should have when they spawn in
+     * @param displayName            the display name component for this map
+     * @param displayItemSnbt        the SNBT for the item used to represent this map
+     * @param introMessages          the messages that may be sent when the game starts
+     * @param scoreboardHeader       the component displayed at the top of the scoreboard
+     * @param leaderboardPosition    the position of the leaderboard, relative to origin
+     * @param leaderboardLength      the number of entries in the leaderboard
+     * @param worldTime              the time in ticks that the world should have
+     * @param maxPlayers             the maximum number of players this map can fit
+     * @param minPlayers             the minimum number of players this map needs to start
+     * @param startingCoins          the number of coins each player gets at the start of the game
+     * @param repairCoins            the base number of coins each player gets when they repair a window
+     * @param windowRepairRadius     the maximum distance away players can be from a window and still repair it
+     * @param windowRepairTicks      the number of ticks between each consecutive "repair tick"
+     * @param corpseDeathTicks       the number of ticks it takes for a downed player to fully die if they are not revived
+     * @param reviveRadius           the maximum distance away players can be from a corpse and still revive it
+     * @param canWallshoot           true if wallshooting is enabled, false otherwise
+     * @param perksLostOnDeath       true if perks are lost on death, false otherwise
+     * @param baseReviveTicks        the base number of ticks it takes to revive a player
+     * @param rollsPerChest          the number of rolls a lucky chest can have before it moves to another location
+     * @param milestoneRounds        "special" rounds whose times are recorded and saved
+     * @param defaultEquipment       the initial equipment players receive when the game starts
      */
     public MapSettingsInfo {
         Objects.requireNonNull(id, "id");
@@ -90,7 +94,7 @@ public record MapSettingsInfo(@NotNull Key id,
      *               otherwise specified
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
-        this(id, origin, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
+        this(id, origin, 47, 760, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0),
                 Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 20, 500, 2, false, false, 30, 5,
                 new ArrayList<>(0), new ArrayList<>(0));
