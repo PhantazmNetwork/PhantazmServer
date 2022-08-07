@@ -3,21 +3,27 @@ package com.github.phantazmnetwork.core.inventory;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Basic implementation of an {@link InventoryProfile}.
  */
 public class BasicInventoryProfile implements InventoryProfile {
 
+    private final Map<UUID, InventoryObjectGroup> groups;
+
     private final InventoryObject[] objects;
 
     /**
      * Creates a basic inventory profile.
      *
+     * @param groups    A map of {@link UUID}s to {@link InventoryObjectGroup}s that this profile holds
      * @param slotCount The number of slots held by the profile (indexed by 0)
      */
-    public BasicInventoryProfile(int slotCount) {
+    public BasicInventoryProfile(@NotNull Map<UUID, InventoryObjectGroup> groups, int slotCount) {
+        this.groups = Map.copyOf(groups);
         this.objects = new InventoryObject[slotCount];
     }
 

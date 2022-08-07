@@ -4,6 +4,8 @@ import com.github.phantazmnetwork.commons.Namespaces;
 import net.kyori.adventure.key.Key;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
@@ -16,7 +18,7 @@ public class InventoryProfileSwitcherTest {
     @Test
     public void testDuplicateRegistration() {
         InventoryProfileSwitcher inventoryProfileSwitcher = new BasicInventoryProfileSwitcher();
-        InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
+        InventoryProfile inventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), 1);
 
         inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile);
 
@@ -27,7 +29,7 @@ public class InventoryProfileSwitcherTest {
     @Test
     public void testSwitchInitialProfile() {
         InventoryProfileSwitcher inventoryProfileSwitcher = new BasicInventoryProfileSwitcher();
-        InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
+        InventoryProfile inventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), 1);
         inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile);
 
         inventoryProfileSwitcher.switchProfile(firstKey);
@@ -38,8 +40,8 @@ public class InventoryProfileSwitcherTest {
     @Test
     public void testSwitchNewProfile() {
         InventoryProfileSwitcher inventoryProfileSwitcher = new BasicInventoryProfileSwitcher();
-        InventoryProfile firstInventoryProfile = new BasicInventoryProfile(1);
-        InventoryProfile secondInventoryProfile = new BasicInventoryProfile(1);
+        InventoryProfile firstInventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), 1);
+        InventoryProfile secondInventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), 1);
         inventoryProfileSwitcher.registerProfile(firstKey, firstInventoryProfile);
         inventoryProfileSwitcher.registerProfile(secondKey, secondInventoryProfile);
 
@@ -52,7 +54,7 @@ public class InventoryProfileSwitcherTest {
     @Test
     public void testSwitchUnregisteredProfile() {
         InventoryProfileSwitcher inventoryProfileSwitcher = new BasicInventoryProfileSwitcher();
-        InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
+        InventoryProfile inventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), 1);
         inventoryProfileSwitcher.registerProfile(firstKey, inventoryProfile);
 
         inventoryProfileSwitcher.switchProfile(firstKey);

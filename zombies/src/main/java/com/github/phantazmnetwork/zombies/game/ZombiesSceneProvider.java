@@ -132,7 +132,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             PlayerKills kills = new BasicPlayerKills();
             InventoryProfileSwitcher profileSwitcher = new BasicInventoryProfileSwitcher();
             Key profileKey = Key.key(Namespaces.PHANTAZM, "inventory.profile.default");
-            profileSwitcher.registerProfile(profileKey, new BasicInventoryProfile(9));
+            profileSwitcher.registerProfile(profileKey, new BasicInventoryProfile(Collections.emptyMap(), 9));
             profileSwitcher.switchProfile(profileKey);
             ZombiesPlayerState defaultState = new AlivePlayerState(playerView, player -> {
                 player.setFlying(false);

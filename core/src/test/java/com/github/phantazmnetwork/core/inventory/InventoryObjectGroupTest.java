@@ -6,6 +6,7 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,7 +35,7 @@ public class InventoryObjectGroupTest {
     @Test
     public void testEmptyWhenEmpty() {
         IntSet slots = IntSet.of(0, 1, 2, 3, 4, 5, 6, 7, 8);
-        InventoryProfile profile = new BasicInventoryProfile(slots.size());
+        InventoryProfile profile = new BasicInventoryProfile(Collections.emptyMap(), slots.size());
         InventoryObjectGroup group = createGroup(profile, slots);
 
         assertTrue(group.isEmpty());
@@ -43,7 +44,7 @@ public class InventoryObjectGroupTest {
     @Test
     public void testEmptyWhenNotEmpty() {
         IntSet slots = IntSet.of(0, 1, 2, 3, 4, 5, 6, 7, 8);
-        InventoryProfile profile = new BasicInventoryProfile(slots.size());
+        InventoryProfile profile = new BasicInventoryProfile(Collections.emptyMap(), slots.size());
         InventoryObjectGroup group = createGroup(profile, slots);
         ItemStack stack = ItemStack.of(Material.STICK);
 

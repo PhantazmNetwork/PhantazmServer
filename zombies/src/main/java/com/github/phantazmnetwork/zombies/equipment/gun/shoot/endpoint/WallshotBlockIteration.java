@@ -2,6 +2,8 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.RayUtils;
+import com.github.phantazmnetwork.core.VecUtils;
+import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -16,6 +18,7 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -37,6 +40,12 @@ public class WallshotBlockIteration implements BlockIteration {
         return ConfigProcessor.emptyProcessor(Data::new);
     }
 
+    private final ZombiesMap map;
+
+    public WallshotBlockIteration(ZombiesMap map) {
+        this.map = Objects.requireNonNull(map, "map");
+    }
+
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public @NotNull Optional<Vec> findEnd(@NotNull Instance instance, @NotNull Entity shooter, @NotNull Pos start,
@@ -49,8 +58,7 @@ public class WallshotBlockIteration implements BlockIteration {
             blockLocation = it.next();
             block = instance.getBlock(blockLocation);
 
-            if (wallshot) {
-                instance.setBlock(blockLocation, Block.REDSTONE_BLOCK);
+            if (wallshot || map.windowAt(VecUtils.toBlockInt(blockLocation)).isPresent()) {
                 continue;
             }
 

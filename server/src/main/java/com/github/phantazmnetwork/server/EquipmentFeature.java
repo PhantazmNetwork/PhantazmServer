@@ -58,6 +58,7 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTest
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
+import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -302,8 +303,8 @@ final class EquipmentFeature {
         dependencyAdder.accept((TObject)object, dependencies);
     }
 
-    public static @NotNull PlayerEquipmentCreator createEquipmentCreator(@NotNull EventNode<Event> node,
-            @NotNull MobStore store, @NotNull Random random) {
+    public static @NotNull PlayerEquipmentCreator createEquipmentCreator(@NotNull ZombiesMap map,
+            @NotNull EventNode<Event> node, @NotNull MobStore store, @NotNull Random random) {
         return new PlayerEquipmentCreator() {
             @SuppressWarnings("unchecked")
             @NotNull
@@ -311,7 +312,7 @@ final class EquipmentFeature {
             public <TEquipment extends Equipment> Optional<TEquipment> createEquipment(@NotNull PlayerView playerView,
                     @NotNull Key equipmentKey) {
                 if (gunLevelMap.containsKey(equipmentKey)) {
-                    return Optional.of((TEquipment)createGun(equipmentKey, node, store, playerView, random));
+                    return Optional.of((TEquipment)createGun(equipmentKey, map, node, store, playerView, random));
                 }
 
                 return Optional.empty();
@@ -319,8 +320,8 @@ final class EquipmentFeature {
         };
     }
 
-    private static @NotNull Gun createGun(@NotNull Key key, @NotNull EventNode<Event> node, @NotNull MobStore store,
-            @NotNull PlayerView playerView, @NotNull Random random) {
+    private static @NotNull Gun createGun(@NotNull Key key, @NotNull ZombiesMap map, @NotNull EventNode<Event> node,
+            @NotNull MobStore store, @NotNull PlayerView playerView, @NotNull Random random) {
         List<ComplexData> complexDataList = gunLevelMap.get(key);
         if (complexDataList == null) {
             throw new IllegalArgumentException("No gun level data found for key " + key);
@@ -378,9 +379,9 @@ final class EquipmentFeature {
                     return new BasicShotEndpointSelector(data, playerView::getPlayer, blockIteration);
                 };
         Factory<RayTraceBlockIteration.Data, RayTraceBlockIteration> rayTraceBlockIteration =
-                (provider, data) -> new RayTraceBlockIteration();
+                (provider, data) -> new RayTraceBlockIteration(map);
         Factory<WallshotBlockIteration.Data, WallshotBlockIteration> wallshotBlockIteration =
-                (provider, data) -> new WallshotBlockIteration();
+                (provider, data) -> new WallshotBlockIteration(map);
         Factory<HitScanFirer.Data, HitScanFirer> hitScanFirer = (provider, data) -> {
             ShotEndpointSelector endSelector = provider.getDependency(data.endSelectorKey());
             TargetFinder targetFinder = provider.getDependency(data.targetFinderKey());
