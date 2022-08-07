@@ -14,6 +14,7 @@ import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShopInteracto
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.steanky.element.core.annotation.DependencySupplier;
+import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
@@ -235,6 +236,16 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         return Optional.empty();
     }
 
+    public @NotNull Optional<Window> windowAt(@NotNull Vec3I block) {
+        for (Window window : unmodifiableWindows) {
+            if (window.getData().frameRegion().contains(block)) {
+                return Optional.of(window);
+            }
+        }
+
+        return Optional.empty();
+    }
+
     public @NotNull Optional<Door> doorAt(@NotNull Vec3I block) {
         for (Door door : unmodifiableDoors) {
             Region3I enclosing = door.getEnclosing();
@@ -295,6 +306,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         }
 
         @DependencySupplier("zombies.dependency.map")
+        @Memoize
         public @NotNull ZombiesMap provideMap() {
             return map;
         }
