@@ -27,6 +27,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     private Instance instance;
     private Vec3D location;
 
+    private final Object sync;
+
     /**
      * Creates a new instance of this class, whose holograms will be rendered at the given location, using the given
      * alignment.
@@ -41,6 +43,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         armorStands = new ArrayList<>();
         components = new ArrayList<>();
         this.gap = gap;
+
+        this.sync = new Object();
     }
 
     /**
@@ -70,64 +74,82 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     @Override
     public void setLocation(@NotNull Vec3D location) {
         Objects.requireNonNull(location, "location");
-        if (!location.equals(this.location)) {
-            this.location = location;
-            updateArmorStands();
+        synchronized (sync) {
+            if (!location.equals(this.location)) {
+                this.location = location;
+                updateArmorStands();
+            }
         }
     }
 
     @Override
     public void setInstance(@NotNull Instance instance) {
         Objects.requireNonNull(instance, "instance");
-        if (this.instance != instance) {
-            this.instance = instance;
-            updateArmorStands();
+        synchronized (sync) {
+            if (this.instance != instance) {
+                this.instance = instance;
+                updateArmorStands();
+            }
         }
     }
 
     @Override
     public void trimToSize() {
-        armorStands.trimToSize();
-        components.trimToSize();
+        synchronized (sync) {
+            armorStands.trimToSize();
+            components.trimToSize();
+        }
     }
 
     @Override
     public @NotNull Component get(int index) {
-        return components.get(index);
+        synchronized (sync) {
+            return components.get(index);
+        }
     }
 
     @Override
     public @NotNull Component set(int index, @NotNull Component element) {
-        armorStands.get(index).setCustomName(element);
-        return components.set(index, Objects.requireNonNull(element, "element"));
+        synchronized (sync) {
+            armorStands.get(index).setCustomName(element);
+            return components.set(index, Objects.requireNonNull(element, "element"));
+        }
     }
 
     public void add(int index, @NotNull Component component) {
-        components.add(index, Objects.requireNonNull(component, "component"));
-        armorStands.add(constructEntity(component));
-        updateArmorStands();
+        synchronized (sync) {
+            components.add(index, Objects.requireNonNull(component, "component"));
+            armorStands.add(constructEntity(component));
+            updateArmorStands();
+        }
     }
 
     @Override
     public @NotNull Component remove(int index) {
-        armorStands.remove(index).remove();
-        Component component = components.remove(index);
-        updateArmorStands();
-        return component;
+        synchronized (sync) {
+            armorStands.remove(index).remove();
+            Component component = components.remove(index);
+            updateArmorStands();
+            return component;
+        }
     }
 
     @Override
     public void clear() {
-        for (Entity entity : armorStands) {
-            entity.remove();
+        synchronized (sync) {
+            for (Entity entity : armorStands) {
+                entity.remove();
+            }
+            armorStands.clear();
+            components.clear();
         }
-        armorStands.clear();
-        components.clear();
     }
 
     @Override
     public int size() {
-        return components.size();
+        synchronized (sync) {
+            return components.size();
+        }
     }
 
     private void updateArmorStands() {
@@ -148,10 +170,10 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
             }
 
             if (armorStand.getInstance() == instance) {
-                armorStand.teleport(pos);
+                armorStand.teleport(pos).join();
             }
             else {
-                armorStand.setInstance(instance, pos);
+                armorStand.setInstance(instance, pos).join();
             }
         }
     }
