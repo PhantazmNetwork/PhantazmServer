@@ -104,7 +104,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     public void add(int index, @NotNull Component component) {
         components.add(index, Objects.requireNonNull(component, "component"));
-        armorStands.add(makeArmorStand(component));
+        armorStands.add(constructEntity(component));
         updateArmorStands();
     }
 
@@ -156,7 +156,16 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         }
     }
 
-    private Entity makeArmorStand(Component display) {
+    /**
+     * Constructs the entity used for each message in this hologram. This method may be overridden to modify the
+     * entity's characteristics. The default implementation creates a marker armor stand with no gravity, a visible
+     * custom name, invisibility, and a custom name from the given component.
+     * <p>
+     * The entity's instance is expected to be unset. It will be updated as appropriate by {@link InstanceHologram}.
+     *
+     * @return the entity to be used for the hologram
+     */
+    protected @NotNull Entity constructEntity(@NotNull Component display) {
         Entity stand = new Entity(EntityType.ARMOR_STAND);
         ArmorStandMeta meta = (ArmorStandMeta)stand.getEntityMeta();
         meta.setMarker(true);
