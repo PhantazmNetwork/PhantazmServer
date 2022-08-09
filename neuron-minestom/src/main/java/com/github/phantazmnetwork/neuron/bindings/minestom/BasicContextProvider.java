@@ -1,12 +1,9 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom;
 
-import com.github.phantazmnetwork.commons.HashStrategies;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.neuron.bindings.minestom.solid.SolidProvider;
 import com.github.phantazmnetwork.neuron.engine.*;
 import com.github.phantazmnetwork.neuron.world.SpatialCollider;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.BlockChangeEvent;
@@ -16,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -45,14 +43,12 @@ public class BasicContextProvider implements ContextProvider {
      */
     public BasicContextProvider(@NotNull EventNode<Event> globalEventNode, @NotNull ExecutorService executor,
             int instanceCache, int updateQueueCapacity) {
-        this.contextMap =
-                Object2ObjectMaps.synchronize(new Object2ObjectOpenCustomHashMap<>(HashStrategies.identity()));
+        this.contextMap = new WeakHashMap<>();
         this.executorService = Objects.requireNonNull(executor, "executor");
         this.instanceCache = instanceCache;
         this.updateQueueCapacity = updateQueueCapacity;
 
         globalEventNode.addListener(BlockChangeEvent.class, this::onBlockChange);
-        globalEventNode.addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
     }
 
     @Override
@@ -70,9 +66,5 @@ public class BasicContextProvider implements ContextProvider {
                     SolidProvider.fromShape(event.getOldBlock().registry().collisionShape()),
                     SolidProvider.fromShape(event.getBlock().registry().collisionShape()));
         }
-    }
-
-    private void onInstanceUnregister(@NotNull InstanceUnregisterEvent event) {
-        contextMap.remove(event.getInstance());
     }
 }

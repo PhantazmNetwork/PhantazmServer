@@ -48,14 +48,14 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
      * @param globalNode the node to add block event listeners to
      */
     public InstanceClientBlockHandler(@NotNull Instance instance, @NotNull EventNode<Event> globalNode) {
-        //weakref likely not strictly necessary to prevent memory leaks, but could help instance objects be GC'd sooner
+        //weakref necessary as instance field will be captured by the expiration predicate
         this.instance = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.clientBlocks = new Long2ObjectOpenHashMap<>();
 
         Predicate<InstanceEvent> filter = event -> event.getInstance() == this.instance.get();
         Predicate<Object> expire = ignored -> {
             Instance current = this.instance.get();
-            return current == null || !instance.isRegistered();
+            return current == null || !current.isRegistered();
         };
 
         globalNode.addListener(EventListener.builder(PlayerChunkLoadEvent.class).filter(filter).expireWhen(expire)
@@ -70,7 +70,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
     @Override
     public void setClientBlock(@NotNull Block type, int x, int y, int z) {
-        Instance instance = requireInstance();
+        Instance instance = this.instance.get();
+        if (instance == null) {
+            return;
+        }
 
         int cx = ChunkUtils.getChunkCoordinate(x);
         int cz = ChunkUtils.getChunkCoordinate(z);
@@ -100,7 +103,11 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
     @Override
     public void clearClientBlocks() {
-        Instance instance = requireInstance();
+        Instance instance = this.instance.get();
+        if (instance == null) {
+            return;
+        }
+
         synchronized (clientBlocks) {
             for (Long2ObjectMap.Entry<ObjectOpenHashSet<PositionedBlock>> entry : clientBlocks.long2ObjectEntrySet()) {
                 long index = entry.getLongKey();
@@ -125,7 +132,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
     @Override
     public void removeClientBlock(int x, int y, int z) {
-        Instance instance = requireInstance();
+        Instance instance = this.instance.get();
+        if (instance == null) {
+            return;
+        }
 
         int cx = ChunkUtils.getChunkCoordinate(x);
         int cz = ChunkUtils.getChunkCoordinate(z);
@@ -151,8 +161,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPrePlayerStartDigging(PrePlayerStartDiggingEvent event) {
-        requireInstance();
-
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
@@ -173,8 +181,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPlayerBlockBreak(PlayerBlockBreakEvent event) {
-        requireInstance();
-
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
@@ -189,8 +195,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPreBlockChange(PreBlockChangeEvent event) {
-        requireInstance();
-
         Point blockPosition = event.blockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
@@ -207,8 +211,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     }
 
     private void onPlayerChunkLoad(PlayerChunkLoadEvent event) {
-        requireInstance();
-
         int cx = event.getChunkX();
         int cz = event.getChunkZ();
 
@@ -230,15 +232,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         if (packets != null) {
             event.getPlayer().sendPackets(packets);
         }
-    }
-
-    private Instance requireInstance() {
-        Instance instance = this.instance.get();
-        if (instance == null) {
-            throw new IllegalStateException("InstanceClientBlockHandler tied to an unregistered instance");
-        }
-
-        return instance;
     }
 
     private static class PositionedBlock extends Vec3IBase {
