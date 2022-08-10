@@ -4,10 +4,6 @@ public class BasicSlotDistributor implements SlotDistributor {
     private final int padding;
 
     public BasicSlotDistributor(int padding) {
-        if (padding < 0) {
-            throw new IllegalArgumentException("padding cannot be < 0");
-        }
-
         this.padding = padding;
     }
 
@@ -20,22 +16,19 @@ public class BasicSlotDistributor implements SlotDistributor {
         }
 
         int[] slots = new int[itemCount];
-
-        int totalWidth;
-        int totalHeight;
-        int paddingWidth = this.padding;
-        int paddingHeight = this.padding;
-
-        do {
-            totalWidth = itemCount + (paddingWidth * Math.max(0, itemCount - 1));
-        } while (totalWidth > width && paddingWidth-- > -1);
+        int totalWidth = itemCount + (padding * Math.max(0, itemCount - 1));
 
         int rows = (int)Math.ceil((double)totalWidth / (double)width);
-        do {
-            totalHeight = rows + (paddingHeight * Math.max(0, rows - 1));
-        } while (totalHeight > height && paddingHeight-- > -1);
+        int rowFactor = Math.max(0, rows - 1);
+        int totalHeight = rows + (padding * rowFactor);
 
+        int actualPadding = padding;
+        if (totalHeight > height) {
+            //calculate the smallest padding value that will allow everything to fit
+            actualPadding = (totalHeight - rows) / rowFactor;
+        }
 
+        
         return slots;
     }
 }
