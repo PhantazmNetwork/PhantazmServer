@@ -8,16 +8,34 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 
+/**
+ * Extension of {@link Inventory} designed to ease the creation of graphical user interfaces. May or may not be
+ * "dynamic". Dynamic GUIs support animations and tick all of their constituent {@link GuiItem}s.
+ */
 @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 public class Gui extends Inventory implements Tickable {
-    private final GuiItem[] items;
+    /**
+     * A {@link GuiItem} in a particular slot. Used by methods like {@link Gui#getItems()} to retain slot information.
+     *
+     * @param item the GuiItem
+     * @param slot the slot it's in
+     */
+    public record SlottedItem(@NotNull GuiItem item, int slot) {
+    }
 
-    public Gui(@NotNull InventoryType inventoryType, @NotNull Component title) {
+    private final GuiItem[] items;
+    private final boolean isDynamic;
+
+    public Gui(@NotNull InventoryType inventoryType, @NotNull Component title, boolean isDynamic) {
         super(inventoryType, title);
         items = new GuiItem[inventoryType.getSize()];
+        this.isDynamic = isDynamic;
     }
 
     public void insertItem(@NotNull GuiItem item, int slot) {
@@ -44,6 +62,22 @@ public class Gui extends Inventory implements Tickable {
             items[slot] = null;
             oldItem.onRemove(this, slot);
         }
+    }
+
+    public @NotNull Optional<GuiItem> itemAt(int slot) {
+        return Optional.ofNullable(items[slot]);
+    }
+
+    public @NotNull List<SlottedItem> getItems() {
+        ArrayList<SlottedItem> slottedItems = new ArrayList<>(items.length);
+        for (int i = 0; i < items.length; i++) {
+            GuiItem item = items[i];
+            if (item != null) {
+                slottedItems.add(new SlottedItem(item, i));
+            }
+        }
+
+        return slottedItems;
     }
 
     @Override
@@ -73,10 +107,19 @@ public class Gui extends Inventory implements Tickable {
 
     @Override
     public void tick(long time) {
+        if (!isDynamic) {
+            //non-dynamic GUI's don't update their items
+            return;
+        }
+
         for (int i = 0; i < items.length; i++) {
+            //harmless race condition, tick thread does not write unless synchronizing on GuiItem
             GuiItem item = items[i];
+
             if (item != null) {
+                //TODO: investigate potential deadlock conditions when tick thread locks on the GuiItem
                 synchronized (item) {
+                    item.tick(time);
                     ItemStack oldStack = super.itemStacks[i];
                     if (!item.getStack().equals(oldStack)) {
                         insertItem(item, i);
@@ -91,7 +134,8 @@ public class Gui extends Inventory implements Tickable {
         GuiItem item = items[slot];
         if (item != null) {
             synchronized (item) {
-                return item.handleClick(this, slot, clickType);
+                item.handleClick(this, slot, clickType);
+                return false;
             }
         }
 
