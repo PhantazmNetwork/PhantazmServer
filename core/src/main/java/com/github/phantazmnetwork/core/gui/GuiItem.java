@@ -52,9 +52,9 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
         private ItemUpdater updater = null;
 
         private Builder() {
-            this.clickHandlers = new ArrayList<>(0);
-            this.removeHandlers = new ArrayList<>(0);
-            this.replaceHandlers = new ArrayList<>(0);
+            this.clickHandlers = new ArrayList<>(1);
+            this.removeHandlers = new ArrayList<>(1);
+            this.replaceHandlers = new ArrayList<>(1);
         }
 
         /**

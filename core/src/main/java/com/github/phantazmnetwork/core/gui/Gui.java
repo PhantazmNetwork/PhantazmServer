@@ -28,7 +28,7 @@ public class Gui extends Inventory implements Tickable {
         private boolean dynamic = false;
 
         private Builder(@NotNull InventoryType type, @NotNull SlotDistributor slotDistributor) {
-            this.items = new ArrayList<>(0);
+            this.items = new ArrayList<>();
             this.type = Objects.requireNonNull(type, "type");
             this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
         }

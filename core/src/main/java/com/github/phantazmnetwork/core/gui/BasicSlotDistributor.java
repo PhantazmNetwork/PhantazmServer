@@ -82,18 +82,22 @@ public class BasicSlotDistributor implements SlotDistributor {
     }
 
     private static int computeSize(int items, int padding) {
+        //compute the length of a single row of slots of "items" items separated by "padding" empty slots
         return items + (padding * (items - 1));
     }
 
     private static int computeRows(int totalWidth, int width, int padding) {
         if (totalWidth == 1) {
+            //simple case, 1 row regardless of padding
             return 1;
         }
 
         if (padding == 0) {
+            //simple case, we don't have to worry about truncating padding
             return MathUtils.ceilDiv(totalWidth, width);
         }
 
+        //"trims" leading padding by subtracting the necessary amount from the width
         return MathUtils.ceilDiv(totalWidth - ((MathUtils.ceilDiv(width, padding + 1) * (padding + 1)) - width), width);
     }
 
