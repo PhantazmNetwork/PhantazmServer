@@ -161,7 +161,7 @@ public class Gui extends Inventory implements Tickable {
     public void insertItem(@NotNull GuiItem item, int slot) {
         Objects.requireNonNull(item, "item");
 
-        safeItemInsert(slot, item.getStack(), true);
+        safeItemInsert(slot, item.getItemStack(), true);
         GuiItem oldItem = items[slot];
 
         if (oldItem != null) {
@@ -261,8 +261,7 @@ public class Gui extends Inventory implements Tickable {
                 //TODO: investigate potential deadlock conditions when tick thread locks on the GuiItem
                 synchronized (item) {
                     item.tick(time);
-                    ItemStack oldStack = super.itemStacks[i];
-                    if (!item.getStack().equals(oldStack)) {
+                    if (item.shouldRedraw()) {
                         insertItem(item, i);
                     }
                 }

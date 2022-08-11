@@ -96,9 +96,11 @@ public class BasicSlotDistributor implements SlotDistributor {
             //simple case, we don't have to worry about truncating padding
             return MathUtils.ceilDiv(totalWidth, width);
         }
+        
+        int leadingPadding = (MathUtils.ceilDiv(width, padding + 1) * (padding + 1)) - width;
 
         //"trims" leading padding by subtracting the necessary amount from the width
-        return MathUtils.ceilDiv(totalWidth - ((MathUtils.ceilDiv(width, padding + 1) * (padding + 1)) - width), width);
+        return MathUtils.ceilDiv(totalWidth - leadingPadding, width);
     }
 
     private static int applyOffset(boolean adjust, int padding, int centerIndex, int index, int slot) {

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.core.gui;
 
-import net.minestom.server.Tickable;
+import com.github.phantazmnetwork.core.inventory.InventoryObject;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import java.util.Objects;
  * An interaction-capable item in a GUI. When present in a dynamic GUI, may be animated (its tick method will be called
  * to update its {@link ItemStack} if necessary, which will then be retrieved through getStack).
  */
-public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceHandler {
+public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, InventoryObject {
     enum ClickType {
         /**
          * Represents a left click.
@@ -122,12 +122,20 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
          */
         public @NotNull GuiItem build() {
             return new GuiItem() {
-                private ItemStack stack = Builder.this.itemStack;
+                private boolean redraw = false;
 
                 @Override
-                public @NotNull ItemStack getStack() {
+                public @NotNull ItemStack getItemStack() {
+                    redraw = false;
                     return stack;
                 }
+
+                @Override
+                public boolean shouldRedraw() {
+                    return redraw;
+                }
+
+                private ItemStack stack = Builder.this.itemStack;
 
                 @Override
                 public void handleClick(@NotNull Gui owner, @NotNull Player player, int slot,
@@ -153,11 +161,10 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
 
                 @Override
                 public void tick(long time) {
-                    if (updater == null) {
-                        return;
+                    if (updater != null && updater.hasUpdate(time, stack)) {
+                        stack = updater.update(time, stack);
+                        redraw = true;
                     }
-
-                    stack = updater.update(time, stack);
                 }
             };
         }
@@ -171,11 +178,4 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
     static Builder builder() {
         return new Builder();
     }
-
-    /**
-     * Gets the stack which should be displayed by this GuiItem.
-     *
-     * @return the {@link ItemStack} this GuiItem should display
-     */
-    @NotNull ItemStack getStack();
 }
