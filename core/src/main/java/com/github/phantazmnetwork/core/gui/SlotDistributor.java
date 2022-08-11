@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.core.gui;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * An object that can determine the arrangement of items in a rectangular inventory space.
  */
@@ -15,5 +17,5 @@ public interface SlotDistributor {
      * @return an array, of length {@code itemCount}, containing the suggested item positions
      * @throws IllegalArgumentException if {@code itemCount > width * height}
      */
-    int[] distribute(int width, int height, int itemCount);
+    int @NotNull [] distribute(int width, int height, int itemCount);
 }

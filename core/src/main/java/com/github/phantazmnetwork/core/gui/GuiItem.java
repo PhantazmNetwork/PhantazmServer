@@ -6,6 +6,7 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,9 +46,9 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
      * Builder for a GuiItem implementation.
      */
     class Builder {
-        private final List<ClickHandler> clickHandlers;
-        private final List<RemoveHandler> removeHandlers;
-        private final List<ReplaceHandler> replaceHandlers;
+        private final Collection<ClickHandler> clickHandlers;
+        private final Collection<RemoveHandler> removeHandlers;
+        private final Collection<ReplaceHandler> replaceHandlers;
         private ItemStack itemStack = ItemStack.AIR;
         private ItemUpdater updater = null;
 
