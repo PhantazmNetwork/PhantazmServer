@@ -39,7 +39,7 @@ public class BasicSlotDistributor implements SlotDistributor {
         int slotIndex = 0;
         for (int i = 0; i < rows; i++) {
             int rowStartIndex = applyOffset(adjust, actualPadding, center, i, baseOffset) * width;
-            int itemsThisRow = i < rows - 1 ? maxRowItems : itemCount % maxRowItems;
+            int itemsThisRow = i <= rows - 1 ? maxRowItems : itemCount % maxRowItems;
             fillRow(slots, slotIndex, width, actualPadding, rowStartIndex, itemsThisRow);
             slotIndex += itemsThisRow;
         }
