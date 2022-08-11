@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
-import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -143,7 +142,8 @@ public class Gui extends Inventory implements Tickable {
      *
      * @param inventoryType the type of inventory to send
      * @param title         the inventory's title text
-     * @param isDynamic     whether this GUI is "dynamic"
+     * @param isDynamic     whether this GUI is "dynamic" (supports animated {@link GuiItem}s and updates them as
+     *                      needed)
      */
     public Gui(@NotNull InventoryType inventoryType, @NotNull Component title, boolean isDynamic) {
         super(inventoryType, title);
