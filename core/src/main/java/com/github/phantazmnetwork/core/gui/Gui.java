@@ -166,7 +166,7 @@ public class Gui extends Inventory implements Tickable {
 
         if (oldItem != null) {
             synchronized (oldItem) {
-                items[slot] = null;
+                items[slot] = item;
                 oldItem.onReplace(this, item, slot);
             }
         }
@@ -262,7 +262,7 @@ public class Gui extends Inventory implements Tickable {
                 synchronized (item) {
                     item.tick(time);
                     if (item.shouldRedraw()) {
-                        insertItem(item, i);
+                        setItemStack(i, item.getItemStack());
                     }
                 }
             }
