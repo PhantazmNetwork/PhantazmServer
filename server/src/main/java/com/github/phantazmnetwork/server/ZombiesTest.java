@@ -3,16 +3,25 @@ package com.github.phantazmnetwork.server;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.InstanceClientBlockHandler;
+import com.github.phantazmnetwork.core.gui.BasicSlotDistributor;
+import com.github.phantazmnetwork.core.gui.ClickHandler;
+import com.github.phantazmnetwork.core.gui.Gui;
+import com.github.phantazmnetwork.core.gui.GuiItem;
 import com.github.phantazmnetwork.core.hologram.Hologram;
 import com.github.phantazmnetwork.core.hologram.InstanceHologram;
 import com.github.phantazmnetwork.core.hologram.ViewableHologram;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.inventory.InventoryType;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -57,5 +66,17 @@ final class ZombiesTest {
                 everyoneElseHologram.setInstance(spawnInstance);
             }
         });
+
+        global.addListener(EventListener.builder(PlayerChatEvent.class).ignoreCancelled(false).handler(event -> {
+            if (event.getMessage().equals("G")) {
+                event.getPlayer().openInventory(Gui.builder(InventoryType.CHEST_6_ROW, new BasicSlotDistributor(1))
+                        .withItem(GuiItem.builder().withItem(ItemStack.of(Material.SEAGRASS)
+                                        .withDisplayName(Component.text("Become beaned", TextColor.color(0, 255, 0))))
+                                .withClickHandler(((ClickHandler)(owner, player, slot, clickType) -> {
+                                    player.sendMessage(Component.text("get beaned you heckin' fool"));
+                                    player.closeInventory();
+                                }).filter(GuiItem.ClickType.LEFT_CLICK)).build()).build());
+            }
+        }).build());
     }
 }
