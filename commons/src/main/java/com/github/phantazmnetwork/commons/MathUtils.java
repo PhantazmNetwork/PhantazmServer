@@ -12,6 +12,10 @@ public final class MathUtils {
         throw new UnsupportedOperationException();
     }
 
+    public static int ceilDiv(double dividend, double divisor) {
+        return (int)Math.ceil(dividend / divisor);
+    }
+
     /**
      * Computes the lambertW (product logarithm) for a given real value and branch.
      *
