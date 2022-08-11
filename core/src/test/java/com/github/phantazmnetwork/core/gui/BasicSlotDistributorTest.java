@@ -139,4 +139,10 @@ class BasicSlotDistributorTest {
 
         assertArrayEquals(new int[] {3, 5}, slots);
     }
+
+    @Test
+    void throwsWhenTooBig() {
+        SlotDistributor slotDistributor = new BasicSlotDistributor(0);
+        assertThrows(IllegalArgumentException.class, () -> slotDistributor.distribute(3, 3, 10));
+    }
 }
