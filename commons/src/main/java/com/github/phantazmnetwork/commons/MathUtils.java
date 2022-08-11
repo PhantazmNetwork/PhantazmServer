@@ -16,6 +16,10 @@ public final class MathUtils {
         return (int)Math.ceil(dividend / divisor);
     }
 
+    public static int roundDiv(double dividend, double divisor) {
+        return (int)Math.round(dividend / divisor);
+    }
+
     /**
      * Computes the lambertW (product logarithm) for a given real value and branch.
      *

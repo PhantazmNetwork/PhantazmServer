@@ -18,7 +18,7 @@ public class BasicSlotDistributor implements SlotDistributor {
         }
 
         int totalWidth = computeSize(itemCount, padding);
-        int rows = MathUtils.ceilDiv(totalWidth, width);
+        int rows = computeRows(totalWidth, width, padding);
         int rowFactor = Math.max(0, rows - 1);
         int totalHeight = rows + (padding * rowFactor);
 
@@ -34,7 +34,7 @@ public class BasicSlotDistributor implements SlotDistributor {
             leftover = maxItems;
         }
 
-        boolean rowAdjust = canAdjust(actualPadding, rows, height);
+        boolean rowAdjust = canAdjust(totalHeight, height);
         int actualHeight = computeSize(rows, actualPadding);
         int rowSlot = (height - actualHeight) / 2;
         int rowCenter = (rows / 2) - 1;
@@ -50,11 +50,11 @@ public class BasicSlotDistributor implements SlotDistributor {
     }
 
     private static void fillRow(int[] slots, int slotStartIndex, int width, int padding, int rowStartIndex, int items) {
-        //true if additional adjustments should be made to necessary slots in order to keep them visually centered
-        boolean slotAdjust = canAdjust(padding, items, width);
-
         //the actual length of the row, including padding
         int actualWidth = computeSize(items, padding);
+
+        //true if additional adjustments should be made to necessary slots in order to keep them visually centered
+        boolean slotAdjust = canAdjust(actualWidth, width);
 
         //the initial offset to use in order to try and keep the row centered
         int baseOffset = (width - actualWidth) / 2;
@@ -66,15 +66,28 @@ public class BasicSlotDistributor implements SlotDistributor {
         }
     }
 
+    private static int computeSize(int items, int padding) {
+        return items + (padding * Math.max(0, items - 1));
+    }
+
+    private static int computeRows(int totalWidth, int width, int padding) {
+        if (totalWidth == 1) {
+            return 1;
+        }
+
+        if (padding == 0) {
+            return MathUtils.ceilDiv(totalWidth, width);
+        }
+
+        int itemsPerRow = MathUtils.ceilDiv(width, padding + 1);
+        return MathUtils.ceilDiv(totalWidth - ((itemsPerRow * (padding + 1)) - width), width);
+    }
+
     private static int applyOffset(boolean adjust, int padding, int centerIndex, int index, int slot) {
         return (adjust && ((padding > 0) == (index <= centerIndex))) ? slot + 1 : slot;
     }
 
-    private static boolean canAdjust(int padding, int items, int size) {
-        return (padding > 0 || items < size) && ((items % 2 == 0) == (size % 2 != 0));
-    }
-
-    private static int computeSize(int items, int padding) {
-        return items + (padding * Math.max(0, items - 1));
+    private static boolean canAdjust(int actualSize, int capacity) {
+        return (actualSize % 2 == 0) != (capacity % 2 == 0);
     }
 }
