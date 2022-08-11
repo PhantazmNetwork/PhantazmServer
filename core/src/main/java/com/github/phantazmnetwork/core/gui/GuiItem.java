@@ -50,10 +50,7 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
         private ItemStack itemStack = ItemStack.AIR;
         private ItemUpdater updater = null;
 
-        /**
-         * Creates a new, empty instance of this builder.
-         */
-        public Builder() {
+        private Builder() {
             this.clickHandlers = new ArrayList<>(0);
             this.removeHandlers = new ArrayList<>(0);
             this.replaceHandlers = new ArrayList<>(0);
@@ -165,7 +162,7 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
     }
 
     /**
-     * Shorthand for directly instantiating {@link GuiItem.Builder}.
+     * Returns a new GuiItem builder.
      *
      * @return a new instance of the builder class
      */

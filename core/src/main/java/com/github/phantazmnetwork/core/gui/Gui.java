@@ -8,10 +8,7 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 /**
@@ -20,6 +17,105 @@ import java.util.function.BiPredicate;
  */
 @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 public class Gui extends Inventory implements Tickable {
+    /**
+     * Builder for Gui instances.
+     */
+    public static class Builder {
+        private final List<GuiItem> items;
+        private final InventoryType type;
+        private final SlotDistributor slotDistributor;
+        private Component title = Component.empty();
+        private boolean dynamic = false;
+
+        private Builder(@NotNull InventoryType type, @NotNull SlotDistributor slotDistributor) {
+            this.items = new ArrayList<>(0);
+            this.type = Objects.requireNonNull(type, "type");
+            this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
+        }
+
+        /**
+         * Specifies a title for the Gui.
+         *
+         * @param component the title {@link Component}
+         */
+        public void withTitle(@NotNull Component component) {
+            this.title = Objects.requireNonNull(component, "component");
+        }
+
+        /**
+         * Specifies whether the Gui will be dynamic. Default false.
+         *
+         * @param dynamic sets whether the Gui will be dynamic
+         */
+        public void setDynamic(boolean dynamic) {
+            this.dynamic = dynamic;
+        }
+
+        /**
+         * Adds an item to the Gui. Will be positioned by the {@link SlotDistributor} when built. If there are more
+         * items than can be held by the Gui, throws an exception.
+         *
+         * @param item the item to add
+         */
+        public void withItem(@NotNull GuiItem item) {
+            items.add(Objects.requireNonNull(item, "item"));
+            if (items.size() > type.getSize()) {
+                throw new IllegalArgumentException("too many items for InventoryType " + type);
+            }
+        }
+
+        /**
+         * Adds a collection of items to the Gui. Will be positioned by the {@link SlotDistributor} when built. If there
+         * are more items than can be held by the Gui, throws an exception.
+         *
+         * @param items the items to add
+         */
+        public void withItems(@NotNull Collection<? extends GuiItem> items) {
+            this.items.addAll(items);
+            if (items.size() > type.getSize()) {
+                throw new IllegalArgumentException("too many items for InventoryType " + type);
+            }
+        }
+
+        /**
+         * Builds the Gui, positioning items according to the {@link SlotDistributor} used by this builder.
+         *
+         * @return a new Gui
+         */
+        public @NotNull Gui build() {
+            int size = type.getSize();
+
+            int width = switch (type) {
+                case CHEST_1_ROW, CHEST_2_ROW, CHEST_3_ROW, CHEST_4_ROW, CHEST_5_ROW, CHEST_6_ROW, SHULKER_BOX -> 9;
+                case WINDOW_3X3 -> 3;
+                default -> size;
+            };
+
+            int height = size / width;
+
+            int[] slots = slotDistributor.distribute(width, height, items.size());
+
+            Gui gui = new Gui(type, title, dynamic);
+            for (int i = 0; i < slots.length; i++) {
+                gui.insertItem(items.get(i), slots[i]);
+            }
+
+            return gui;
+        }
+    }
+
+    /**
+     * Creates a new instance of the builder class which may be used to more easily construct Gui instances.
+     *
+     * @param inventoryType   the type of inventory used by the Gui
+     * @param slotDistributor the {@link SlotDistributor} used to position items
+     * @return the builder instance
+     */
+    public static @NotNull Builder builder(@NotNull InventoryType inventoryType,
+            @NotNull SlotDistributor slotDistributor) {
+        return new Builder(inventoryType, slotDistributor);
+    }
+
     /**
      * A {@link GuiItem} in a particular slot. Used by methods like {@link Gui#getItems()} to retain slot information.
      *
