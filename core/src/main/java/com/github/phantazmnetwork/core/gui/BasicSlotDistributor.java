@@ -6,6 +6,10 @@ public class BasicSlotDistributor implements SlotDistributor {
     private final int padding;
 
     public BasicSlotDistributor(int padding) {
+        if (padding < 0) {
+            throw new IllegalArgumentException("padding < 0");
+        }
+
         this.padding = padding;
     }
 
@@ -18,15 +22,18 @@ public class BasicSlotDistributor implements SlotDistributor {
         }
 
         int totalWidth = computeSize(itemCount, padding);
-        int rows = computeRows(totalWidth, width, padding);
-        int rowFactor = Math.max(0, rows - 1);
-        int totalHeight = rows + (padding * rowFactor);
-
         int actualPadding = padding;
-        if (totalHeight > height) {
-            //calculate the smallest padding value that will allow everything to fit
-            actualPadding = (totalHeight - rows) / rowFactor;
+        if (totalWidth > size) {
+            //calculate the largest padding value that will allow everything to fit
+            actualPadding = (size - itemCount) / Math.max(0, itemCount);
+
+            //recompute the total width with the new padding
+            totalWidth = computeSize(itemCount, actualPadding);
         }
+
+        int rows = computeRows(totalWidth, width, actualPadding);
+        int rowFactor = Math.max(0, rows - 1);
+        int totalHeight = rows + (actualPadding * rowFactor);
 
         int maxItems = MathUtils.ceilDiv(width, actualPadding + 1);
         int leftover = itemCount % maxItems;
@@ -79,8 +86,7 @@ public class BasicSlotDistributor implements SlotDistributor {
             return MathUtils.ceilDiv(totalWidth, width);
         }
 
-        int itemsPerRow = MathUtils.ceilDiv(width, padding + 1);
-        return MathUtils.ceilDiv(totalWidth - ((itemsPerRow * (padding + 1)) - width), width);
+        return MathUtils.ceilDiv(totalWidth - ((MathUtils.ceilDiv(width, padding + 1) * (padding + 1)) - width), width);
     }
 
     private static int applyOffset(boolean adjust, int padding, int centerIndex, int index, int slot) {
