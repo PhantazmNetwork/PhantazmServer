@@ -70,10 +70,12 @@ final class ZombiesTest {
         global.addListener(EventListener.builder(PlayerChatEvent.class).ignoreCancelled(false).handler(event -> {
             if (event.getMessage().equals("G")) {
                 event.getPlayer().openInventory(Gui.builder(InventoryType.CHEST_6_ROW, new BasicSlotDistributor(1))
-                        .withItem(GuiItem.builder().withItem(ItemStack.of(Material.ACACIA_DOOR)).withClickHandler(
-                                ((ClickHandler)(owner, slot, clickType) -> event.getPlayer()
-                                        .sendMessage(Component.text("get beaned you heckin fool"))).filter(
-                                        GuiItem.ClickType.LEFT_CLICK)).build()).build());
+                        .withItem(GuiItem.builder().withItem(ItemStack.of(Material.SEAGRASS)
+                                        .withDisplayName(Component.text("Become beaned").color(TextColor.color(0, 255, 0))))
+                                .withClickHandler(((ClickHandler)(owner, player, slot, clickType) -> {
+                                    player.sendMessage(Component.text("get beaned you heckin' fool"));
+                                    player.closeInventory();
+                                }).filter(GuiItem.ClickType.LEFT_CLICK)).build()).build());
             }
         }).build());
     }

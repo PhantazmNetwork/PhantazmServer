@@ -276,7 +276,7 @@ public class Gui extends Inventory implements Tickable {
             GuiItem item = items[slot];
             if (item != null) {
                 synchronized (item) {
-                    item.handleClick(this, slot, clickType);
+                    item.handleClick(this, player, slot, clickType);
                     return false;
                 }
             }

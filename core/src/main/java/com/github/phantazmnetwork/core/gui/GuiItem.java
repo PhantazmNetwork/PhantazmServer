@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.core.gui;
 
 import net.minestom.server.Tickable;
+import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -129,9 +130,10 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
                 }
 
                 @Override
-                public void handleClick(@NotNull Gui owner, int slot, @NotNull ClickType clickType) {
+                public void handleClick(@NotNull Gui owner, @NotNull Player player, int slot,
+                        @NotNull ClickType clickType) {
                     for (ClickHandler clickHandler : clickHandlers) {
-                        clickHandler.handleClick(owner, slot, clickType);
+                        clickHandler.handleClick(owner, player, slot, clickType);
                     }
                 }
 
