@@ -72,7 +72,7 @@ public class BasicSlotDistributor implements SlotDistributor {
     }
 
     private static int computeSize(int items, int padding) {
-        return items + (padding * Math.max(0, items - 1));
+        return items + (padding * (items - 1));
     }
 
     private static int computeRows(int totalWidth, int width, int padding) {
