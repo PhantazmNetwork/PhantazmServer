@@ -28,7 +28,11 @@ public class BasicSlotDistributor implements SlotDistributor {
             actualPadding = (totalHeight - rows) / rowFactor;
         }
 
-        int rowItems = MathUtils.ceilDiv(width, actualPadding + 1);
+        int maxItems = MathUtils.ceilDiv(width, actualPadding + 1);
+        int leftover = itemCount % maxItems;
+        if (leftover == 0) {
+            leftover = maxItems;
+        }
 
         boolean rowAdjust = canAdjust(actualPadding, rows, height);
         int actualHeight = computeSize(rows, actualPadding);
@@ -36,11 +40,10 @@ public class BasicSlotDistributor implements SlotDistributor {
         int rowCenter = (rows / 2) - 1;
 
         int[] slots = new int[itemCount];
-        for (int i = 0, slotIndex = 0, itemsThisRow; i < rows;
-                i++, slotIndex += itemsThisRow, rowSlot += actualPadding + 1) {
+        for (int i = 0, slotIndex = 0, rowItems; i < rows; i++, slotIndex += rowItems, rowSlot += actualPadding + 1) {
             int rowStartIndex = applyOffset(rowAdjust, actualPadding, rowCenter, i, rowSlot) * width;
-            itemsThisRow = i < rows - 1 ? rowItems : (itemCount == rowItems ? rowItems : itemCount % rowItems);
-            fillRow(slots, slotIndex, width, actualPadding, rowStartIndex, itemsThisRow);
+            rowItems = i < rows - 1 ? maxItems : leftover;
+            fillRow(slots, slotIndex, width, actualPadding, rowStartIndex, rowItems);
         }
 
         return slots;
