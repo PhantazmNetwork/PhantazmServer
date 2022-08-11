@@ -34,6 +34,6 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 4);
 
-        assertArrayEquals(new int[] {3, 4, 5}, slots);
+        assertArrayEquals(new int[] {0, 1, 2, 7}, slots);
     }
 }

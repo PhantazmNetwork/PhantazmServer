@@ -30,18 +30,17 @@ public class BasicSlotDistributor implements SlotDistributor {
 
         int rowItems = MathUtils.ceilDiv(width, actualPadding + 1);
 
-        boolean adjust = canAdjust(actualPadding, rows, height);
+        boolean rowAdjust = canAdjust(actualPadding, rows, height);
         int actualHeight = computeSize(rows, actualPadding);
-        int baseOffset = (height - actualHeight) / 2;
-        int center = (rows / 2) - 1;
+        int rowSlot = (height - actualHeight) / 2;
+        int rowCenter = (rows / 2) - 1;
 
         int[] slots = new int[itemCount];
-        int slotIndex = 0;
-        for (int i = 0; i < rows; i++) {
-            int rowStartIndex = applyOffset(adjust, actualPadding, center, i, baseOffset) * width;
-            int itemsThisRow = i < rows - 1 ? rowItems : (itemCount == rowItems ? rowItems : itemCount % rowItems);
+        for (int i = 0, slotIndex = 0, itemsThisRow; i < rows;
+                i++, slotIndex += itemsThisRow, rowSlot += actualPadding + 1) {
+            int rowStartIndex = applyOffset(rowAdjust, actualPadding, rowCenter, i, rowSlot) * width;
+            itemsThisRow = i < rows - 1 ? rowItems : (itemCount == rowItems ? rowItems : itemCount % rowItems);
             fillRow(slots, slotIndex, width, actualPadding, rowStartIndex, itemsThisRow);
-            slotIndex += itemsThisRow;
         }
 
         return slots;
@@ -49,7 +48,7 @@ public class BasicSlotDistributor implements SlotDistributor {
 
     private static void fillRow(int[] slots, int slotStartIndex, int width, int padding, int rowStartIndex, int items) {
         //true if additional adjustments should be made to necessary slots in order to keep them visually centered
-        boolean adjust = canAdjust(padding, items, width);
+        boolean slotAdjust = canAdjust(padding, items, width);
 
         //the actual length of the row, including padding
         int actualWidth = computeSize(items, padding);
@@ -59,14 +58,13 @@ public class BasicSlotDistributor implements SlotDistributor {
 
         int slot = rowStartIndex + baseOffset;
         int center = (items / 2) - 1;
-        for (int j = 0; j < items; j++) {
-            slots[slotStartIndex++] = applyOffset(adjust, padding, center, j, slot);
-            slot += padding + 1;
+        for (int j = 0; j < items; j++, slot += padding + 1) {
+            slots[slotStartIndex++] = applyOffset(slotAdjust, padding, center, j, slot);
         }
     }
 
-    private static int applyOffset(boolean adjust, int padding, int center, int index, int slot) {
-        return (adjust && ((padding > 0) == (index <= center))) ? slot + 1 : slot;
+    private static int applyOffset(boolean adjust, int padding, int centerIndex, int index, int slot) {
+        return (adjust && ((padding > 0) == (index <= centerIndex))) ? slot + 1 : slot;
     }
 
     private static boolean canAdjust(int padding, int items, int size) {
