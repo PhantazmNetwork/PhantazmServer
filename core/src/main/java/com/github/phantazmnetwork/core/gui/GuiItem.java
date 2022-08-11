@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -49,13 +48,15 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
         private final Collection<ClickHandler> clickHandlers;
         private final Collection<RemoveHandler> removeHandlers;
         private final Collection<ReplaceHandler> replaceHandlers;
-        private ItemStack itemStack = ItemStack.AIR;
-        private ItemUpdater updater = null;
+        private ItemStack itemStack;
+        private ItemUpdater updater;
 
         private Builder() {
             this.clickHandlers = new ArrayList<>(1);
             this.removeHandlers = new ArrayList<>(1);
             this.replaceHandlers = new ArrayList<>(1);
+            this.itemStack = ItemStack.AIR;
+            this.updater = null;
         }
 
         /**
@@ -124,6 +125,7 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
         public @NotNull GuiItem build() {
             return new GuiItem() {
                 private boolean redraw = false;
+                private ItemStack stack = Builder.this.itemStack;
 
                 @Override
                 public @NotNull ItemStack getItemStack() {
@@ -135,8 +137,6 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
                 public boolean shouldRedraw() {
                     return redraw;
                 }
-
-                private ItemStack stack = Builder.this.itemStack;
 
                 @Override
                 public void handleClick(@NotNull Gui owner, @NotNull Player player, int slot,

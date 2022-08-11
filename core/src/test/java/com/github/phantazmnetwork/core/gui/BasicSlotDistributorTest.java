@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BasicSlotDistributorTest {
     @Test
-    void test3x3_1Item_padding0() {
+    void test3x3_1Item_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 1);
 
@@ -14,7 +14,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_2Items_padding0() {
+    void test3x3_2Items_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 2);
 
@@ -22,7 +22,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_3Items_padding0() {
+    void test3x3_3Items_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 3);
 
@@ -30,7 +30,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_4Items_padding0() {
+    void test3x3_4Items_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 4);
 
@@ -38,7 +38,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_5Items_padding0() {
+    void test3x3_5Items_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 5);
 
@@ -46,7 +46,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_6Items_padding0() {
+    void test3x3_6Items_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 6);
 
@@ -54,7 +54,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_7Items_padding0() {
+    void test3x3_7Items_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 7);
 
@@ -62,7 +62,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_8Items_padding0() {
+    void test3x3_8Items_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 8);
 
@@ -70,7 +70,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_9Items_padding0() {
+    void test3x3_9Items_0padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 9);
 
@@ -78,7 +78,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_1Item_paddingN() {
+    void test3x3_1Item_Npadding() {
         for (int i = 0; i < 1000; i++) {
             SlotDistributor slotDistributor = new BasicSlotDistributor(i);
             int[] slots = slotDistributor.distribute(3, 3, 1);
@@ -88,7 +88,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_2Items_padding1() {
+    void test3x3_2Items_1padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
         int[] slots = slotDistributor.distribute(3, 3, 2);
 
@@ -96,7 +96,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_3Items_padding1() {
+    void test3x3_3Items_1padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
         int[] slots = slotDistributor.distribute(3, 3, 3);
 
@@ -104,7 +104,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_4Items_padding1() {
+    void test3x3_4Items_1padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
         int[] slots = slotDistributor.distribute(3, 3, 4);
 
@@ -112,7 +112,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_4Items_paddingN() {
+    void test3x3_4Items_Npadding() {
         for (int i = 3; i < 1000; i++) {
             SlotDistributor slotDistributor = new BasicSlotDistributor(i);
             int[] slots = assertDoesNotThrow(() -> slotDistributor.distribute(3, 3, 4), "i: " + i);
@@ -122,7 +122,7 @@ class BasicSlotDistributorTest {
     }
 
     @Test
-    void test3x3_9Items_paddingN() {
+    void test3x3_9Items_Npadding() {
         for (int i = 1; i < 1000; i++) {
             SlotDistributor slotDistributor = new BasicSlotDistributor(i);
             int[] slots = assertDoesNotThrow(() -> slotDistributor.distribute(3, 3, 9), "i: " + i);
@@ -133,7 +133,7 @@ class BasicSlotDistributorTest {
 
 
     @Test
-    void test3x3_2Items_padding2() {
+    void test3x3_2Items_2padding() {
         SlotDistributor slotDistributor = new BasicSlotDistributor(2);
         int[] slots = slotDistributor.distribute(3, 3, 2);
 
