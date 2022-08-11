@@ -10,10 +10,29 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface GuiItem extends Tickable {
     enum ClickType {
+        /**
+         * Represents a left click.
+         */
         LEFT_CLICK,
+
+        /**
+         * Represents a right click.
+         */
         RIGHT_CLICK,
+
+        /**
+         * Represents a shift click.
+         */
         SHIFT_CLICK,
+
+        /**
+         * Represents a middle click.
+         */
         MIDDLE_CLICK,
+
+        /**
+         * Represents a double click.
+         */
         DOUBLE_CLICK
     }
 

@@ -2,9 +2,19 @@ package com.github.phantazmnetwork.core.gui;
 
 import com.github.phantazmnetwork.commons.MathUtils;
 
+/**
+ * Basic implementation of {@link SlotDistributor}. Tries to ensure items are centered, with horizontal and vertical
+ * symmetry.
+ */
 public class BasicSlotDistributor implements SlotDistributor {
     private final int padding;
 
+    /**
+     * Creates a new instance of this class.
+     *
+     * @param padding the number of slots that the algorithm should try to maintain between items
+     * @throws IllegalArgumentException if {@code padding < 0}
+     */
     public BasicSlotDistributor(int padding) {
         if (padding < 0) {
             throw new IllegalArgumentException("padding < 0");

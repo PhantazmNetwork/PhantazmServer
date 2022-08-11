@@ -32,12 +32,26 @@ public class Gui extends Inventory implements Tickable {
     private final GuiItem[] items;
     private final boolean isDynamic;
 
+    /**
+     * Creates a new instance of this class.
+     *
+     * @param inventoryType the type of inventory to send
+     * @param title         the inventory's title text
+     * @param isDynamic     whether this GUI is "dynamic"
+     */
     public Gui(@NotNull InventoryType inventoryType, @NotNull Component title, boolean isDynamic) {
         super(inventoryType, title);
         items = new GuiItem[inventoryType.getSize()];
         this.isDynamic = isDynamic;
     }
 
+    /**
+     * Inserts a {@link GuiItem} into the specified slot. Calls {@link GuiItem#onReplace(Gui, GuiItem, int)} on the
+     * previous item, if any is present.
+     *
+     * @param item the new item
+     * @param slot the slot to insert it at
+     */
     public void insertItem(@NotNull GuiItem item, int slot) {
         Objects.requireNonNull(item, "item");
 
@@ -52,6 +66,12 @@ public class Gui extends Inventory implements Tickable {
         }
     }
 
+    /**
+     * Removes a {@link GuiItem} from the specified slot. Calls {@link GuiItem#onRemove(Gui, int)} on the previous
+     * item, if any is present.
+     *
+     * @param slot the slot to remove the item from
+     */
     public void removeItem(int slot) {
         GuiItem oldItem = items[slot];
         if (oldItem == null) {
@@ -64,10 +84,22 @@ public class Gui extends Inventory implements Tickable {
         }
     }
 
+    /**
+     * Optionally retrieves a {@link GuiItem} from the specific slot. If none exists, the returned optional will be
+     * empty.
+     *
+     * @param slot the slot to retrieve the item from
+     * @return an optional which may contain the GuiItem
+     */
     public @NotNull Optional<GuiItem> itemAt(int slot) {
         return Optional.ofNullable(items[slot]);
     }
 
+    /**
+     * Returns a new, mutable list containing {@link SlottedItem}s for each {@link GuiItem} present in this Gui.
+     *
+     * @return a mutable list of SlottedItems
+     */
     public @NotNull List<SlottedItem> getItems() {
         ArrayList<SlottedItem> slottedItems = new ArrayList<>(items.length);
         for (int i = 0; i < items.length; i++) {
