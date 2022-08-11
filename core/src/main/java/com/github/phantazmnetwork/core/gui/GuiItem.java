@@ -123,18 +123,42 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
          * @return a new GuiItem instance
          */
         public @NotNull GuiItem build() {
-            return new BasicGuiItem(itemStack, (owner, slot, clickType) -> clickHandlers.forEach(
-                    clickHandler -> clickHandler.handleClick(owner, slot, clickType)),
-                    (owner, slot) -> removeHandlers.forEach(clickHandler -> clickHandler.onRemove(owner, slot)),
-                    (owner, newItem, slot) -> replaceHandlers.forEach(
-                            replaceHandler -> replaceHandler.onReplace(owner, newItem, slot))) {
+            return new GuiItem() {
+                private ItemStack stack = Builder.this.itemStack;
+
+                @Override
+                public @NotNull ItemStack getStack() {
+                    return stack;
+                }
+
+                @Override
+                public void handleClick(@NotNull Gui owner, int slot, @NotNull ClickType clickType) {
+                    for (ClickHandler clickHandler : clickHandlers) {
+                        clickHandler.handleClick(owner, slot, clickType);
+                    }
+                }
+
+                @Override
+                public void onRemove(@NotNull Gui owner, int slot) {
+                    for (RemoveHandler removeHandler : removeHandlers) {
+                        removeHandler.onRemove(owner, slot);
+                    }
+                }
+
+                @Override
+                public void onReplace(@NotNull Gui owner, @NotNull GuiItem newItem, int slot) {
+                    for (ReplaceHandler replaceHandler : replaceHandlers) {
+                        replaceHandler.onReplace(owner, newItem, slot);
+                    }
+                }
+
                 @Override
                 public void tick(long time) {
                     if (updater == null) {
                         return;
                     }
 
-                    super.stack = updater.update(time, super.stack);
+                    stack = updater.update(time, stack);
                 }
             };
         }
