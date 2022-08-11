@@ -37,18 +37,22 @@ public class Gui extends Inventory implements Tickable {
          * Specifies a title for the Gui.
          *
          * @param component the title {@link Component}
+         * @return this instance, for chaining
          */
-        public void withTitle(@NotNull Component component) {
+        public @NotNull Builder withTitle(@NotNull Component component) {
             this.title = Objects.requireNonNull(component, "component");
+            return this;
         }
 
         /**
          * Specifies whether the Gui will be dynamic. Default false.
          *
          * @param dynamic sets whether the Gui will be dynamic
+         * @return this instance, for chaining
          */
-        public void setDynamic(boolean dynamic) {
+        public @NotNull Builder setDynamic(boolean dynamic) {
             this.dynamic = dynamic;
+            return this;
         }
 
         /**
@@ -56,12 +60,15 @@ public class Gui extends Inventory implements Tickable {
          * items than can be held by the Gui, throws an exception.
          *
          * @param item the item to add
+         * @return this instance, for chaining
          */
-        public void withItem(@NotNull GuiItem item) {
+        public @NotNull Builder withItem(@NotNull GuiItem item) {
             items.add(Objects.requireNonNull(item, "item"));
             if (items.size() > type.getSize()) {
                 throw new IllegalArgumentException("too many items for InventoryType " + type);
             }
+
+            return this;
         }
 
         /**
@@ -69,12 +76,15 @@ public class Gui extends Inventory implements Tickable {
          * are more items than can be held by the Gui, throws an exception.
          *
          * @param items the items to add
+         * @return this instance, for chaining
          */
-        public void withItems(@NotNull Collection<? extends GuiItem> items) {
+        public @NotNull Builder withItems(@NotNull Collection<? extends GuiItem> items) {
             this.items.addAll(items);
             if (items.size() > type.getSize()) {
                 throw new IllegalArgumentException("too many items for InventoryType " + type);
             }
+
+            return this;
         }
 
         /**
@@ -160,6 +170,9 @@ public class Gui extends Inventory implements Tickable {
                 oldItem.onReplace(this, item, slot);
             }
         }
+        else {
+            items[slot] = item;
+        }
     }
 
     /**
@@ -171,7 +184,7 @@ public class Gui extends Inventory implements Tickable {
     public void removeItem(int slot) {
         GuiItem oldItem = items[slot];
         if (oldItem == null) {
-            throw new IllegalArgumentException("Tried to remove item in slot " + slot + ", but none exists");
+            throw new IllegalArgumentException("tried to remove item in slot " + slot + ", but none exists");
         }
 
         synchronized (oldItem) {
@@ -259,11 +272,13 @@ public class Gui extends Inventory implements Tickable {
 
     private boolean handleClick(Player player, int slot, BiPredicate<? super Player, Integer> superFunction,
             GuiItem.ClickType clickType) {
-        GuiItem item = items[slot];
-        if (item != null) {
-            synchronized (item) {
-                item.handleClick(this, slot, clickType);
-                return false;
+        if (slot < getInventoryType().getSize()) {
+            GuiItem item = items[slot];
+            if (item != null) {
+                synchronized (item) {
+                    item.handleClick(this, slot, clickType);
+                    return false;
+                }
             }
         }
 

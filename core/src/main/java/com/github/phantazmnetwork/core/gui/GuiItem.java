@@ -170,7 +170,6 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
         return new Builder();
     }
 
-
     /**
      * Gets the stack which should be displayed by this GuiItem.
      *
