@@ -71,7 +71,7 @@ final class ZombiesTest {
             if (event.getMessage().equals("G")) {
                 event.getPlayer().openInventory(Gui.builder(InventoryType.CHEST_6_ROW, new BasicSlotDistributor(1))
                         .withItem(GuiItem.builder().withItem(ItemStack.of(Material.SEAGRASS)
-                                        .withDisplayName(Component.text("Become beaned").color(TextColor.color(0, 255, 0))))
+                                        .withDisplayName(Component.text("Become beaned", TextColor.color(0, 255, 0))))
                                 .withClickHandler(((ClickHandler)(owner, player, slot, clickType) -> {
                                     player.sendMessage(Component.text("get beaned you heckin' fool"));
                                     player.closeInventory();
