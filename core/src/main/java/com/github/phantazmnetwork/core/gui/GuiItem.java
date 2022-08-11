@@ -164,6 +164,15 @@ public interface GuiItem extends Tickable, ClickHandler, RemoveHandler, ReplaceH
         }
     }
 
+    /**
+     * Shorthand for directly instantiating {@link GuiItem.Builder}.
+     *
+     * @return a new instance of the builder class
+     */
+    static Builder builder() {
+        return new Builder();
+    }
+
 
     /**
      * Gets the stack which should be displayed by this GuiItem.

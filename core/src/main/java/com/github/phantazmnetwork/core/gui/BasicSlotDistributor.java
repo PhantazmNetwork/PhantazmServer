@@ -1,6 +1,9 @@
 package com.github.phantazmnetwork.core.gui;
 
 import com.github.phantazmnetwork.commons.MathUtils;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Basic implementation of {@link SlotDistributor}. Tries to ensure items are centered, with horizontal and vertical
