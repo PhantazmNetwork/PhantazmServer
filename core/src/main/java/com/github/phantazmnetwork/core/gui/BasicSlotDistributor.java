@@ -21,19 +21,17 @@ public class BasicSlotDistributor implements SlotDistributor {
                     "Distributed item count " + itemCount + " cannot be greater than size " + size);
         }
 
-        int totalWidth = computeSize(itemCount, padding);
+        int totalWidth;
+        int rows;
+        int rowFactor;
+        int totalHeight;
         int actualPadding = padding;
-        if (totalWidth > size) {
-            //calculate the largest padding value that will allow everything to fit
-            actualPadding = (size - itemCount) / Math.max(0, itemCount);
-
-            //recompute the total width with the new padding
+        do {
             totalWidth = computeSize(itemCount, actualPadding);
-        }
-
-        int rows = computeRows(totalWidth, width, actualPadding);
-        int rowFactor = Math.max(0, rows - 1);
-        int totalHeight = rows + (actualPadding * rowFactor);
+            rows = computeRows(totalWidth, width, actualPadding);
+            rowFactor = Math.max(0, rows - 1);
+            totalHeight = rows + (actualPadding * rowFactor);
+        } while (totalHeight > height && --actualPadding > -1);
 
         int maxItems = MathUtils.ceilDiv(width, actualPadding + 1);
         int leftover = itemCount % maxItems;

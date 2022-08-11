@@ -120,4 +120,23 @@ class BasicSlotDistributorTest {
             assertArrayEquals(new int[] {0, 2, 6, 8}, slots, "i: " + i);
         }
     }
+
+    @Test
+    void test3x3_9Items_paddingN() {
+        for (int i = 1; i < 1000; i++) {
+            SlotDistributor slotDistributor = new BasicSlotDistributor(i);
+            int[] slots = assertDoesNotThrow(() -> slotDistributor.distribute(3, 3, 9), "i: " + i);
+
+            assertArrayEquals(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8}, slots, "i: " + i);
+        }
+    }
+
+
+    @Test
+    void test3x3_2Items_padding2() {
+        SlotDistributor slotDistributor = new BasicSlotDistributor(2);
+        int[] slots = slotDistributor.distribute(3, 3, 2);
+
+        assertArrayEquals(new int[] {3, 5}, slots);
+    }
 }
