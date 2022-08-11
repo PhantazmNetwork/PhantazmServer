@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
+import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -9,11 +10,10 @@ import net.minestom.server.entity.*;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerMoveEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.packet.client.play.ClientSteerVehiclePacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -83,6 +83,33 @@ final class NeuronTest {
             for (int i = 0; i < 100; i++) {
                 for (int j = 0; j < 100; j++) {
                     event.getSpawnInstance().setBlock(start.add(i, 0, j), Block.GOLD_BLOCK);
+                }
+            }
+        });
+
+        global.addListener(PlayerEntityInteractEvent.class, event -> {
+            Entity target = event.getTarget();
+            Entity player = event.getPlayer();
+
+            if (player.getPassengers().contains(target)) {
+                return;
+            }
+
+            if (player.getVehicle() != null) {
+                player.getVehicle().removePassenger(player);
+            }
+
+            event.getTarget().addPassenger(event.getPlayer());
+        });
+
+        global.addListener(PlayerPacketEvent.class, event -> {
+            if (event.getPlayer().getVehicle() == null) {
+                return;
+            }
+
+            if (event.getPacket() instanceof ClientSteerVehiclePacket packet) {
+                if (packet.flags() == 2) {
+                    event.getPlayer().getVehicle().removePassenger(event.getPlayer());
                 }
             }
         });
