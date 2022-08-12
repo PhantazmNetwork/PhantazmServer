@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.core.gui;
 
 import com.github.phantazmnetwork.commons.MathUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Basic implementation of {@link SlotDistributor}. Tries to ensure items are centered, with horizontal and vertical
@@ -24,21 +25,19 @@ public class BasicSlotDistributor implements SlotDistributor {
     }
 
     @Override
-    public int[] distribute(int width, int height, int itemCount) {
+    public int @NotNull [] distribute(int width, int height, int itemCount) {
         int size = width * height;
         if (itemCount > size) {
             throw new IllegalArgumentException(
                     "Distributed item count " + itemCount + " cannot be greater than size " + size);
         }
-
-        int totalWidth;
+        
         int rows;
         int rowFactor;
         int totalHeight;
         int actualPadding = padding;
         do {
-            totalWidth = computeSize(itemCount, actualPadding);
-            rows = computeRows(totalWidth, width, actualPadding);
+            rows = computeRows(width, actualPadding, itemCount);
             rowFactor = Math.max(0, rows - 1);
             totalHeight = rows + (actualPadding * rowFactor);
         } while (totalHeight > height && --actualPadding > -1);
@@ -86,21 +85,9 @@ public class BasicSlotDistributor implements SlotDistributor {
         return items + (padding * (items - 1));
     }
 
-    private static int computeRows(int totalWidth, int width, int padding) {
-        if (totalWidth == 1) {
-            //simple case, 1 row regardless of padding
-            return 1;
-        }
-
-        if (padding == 0) {
-            //simple case, we don't have to worry about truncating padding
-            return MathUtils.ceilDiv(totalWidth, width);
-        }
-        
-        int leadingPadding = (MathUtils.ceilDiv(width, padding + 1) * (padding + 1)) - width;
-
-        //"trims" leading padding by subtracting the necessary amount from the width
-        return MathUtils.ceilDiv(totalWidth - leadingPadding, width);
+    private static int computeRows(int width, int padding, int items) {
+        int itemsPerRow = MathUtils.ceilDiv(width, padding + 1);
+        return MathUtils.ceilDiv(items, itemsPerRow);
     }
 
     private static int applyOffset(boolean adjust, int padding, int centerIndex, int index, int slot) {
