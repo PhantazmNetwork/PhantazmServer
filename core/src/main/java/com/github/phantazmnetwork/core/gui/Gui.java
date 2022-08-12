@@ -8,6 +8,7 @@ import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 
 /**
@@ -134,8 +135,11 @@ public class Gui extends Inventory implements Tickable {
     public record SlottedItem(@NotNull GuiItem item, int slot) {
     }
 
-    private final GuiItem[] items;
+    private final Map<Integer, GuiItem> items;
     private final boolean isDynamic;
+
+    //cached array of items, indirectly used by the tick function, set to null whenever the map is written to
+    private volatile GuiItem[] tickItems;
 
     /**
      * Creates a new instance of this class.
@@ -147,7 +151,7 @@ public class Gui extends Inventory implements Tickable {
      */
     public Gui(@NotNull InventoryType inventoryType, @NotNull Component title, boolean isDynamic) {
         super(inventoryType, title);
-        items = new GuiItem[inventoryType.getSize()];
+        items = new ConcurrentHashMap<>(inventoryType.getSize() >> 2);
         this.isDynamic = isDynamic;
     }
 
@@ -160,18 +164,16 @@ public class Gui extends Inventory implements Tickable {
      */
     public void insertItem(@NotNull GuiItem item, int slot) {
         Objects.requireNonNull(item, "item");
-
         safeItemInsert(slot, item.getItemStack(), true);
-        GuiItem oldItem = items[slot];
 
+        items.put(slot, item);
+        tickItems = null;
+
+        GuiItem oldItem = items.get(slot);
         if (oldItem != null) {
             synchronized (oldItem) {
-                items[slot] = item;
                 oldItem.onReplace(this, item, slot);
             }
-        }
-        else {
-            items[slot] = item;
         }
     }
 
@@ -182,13 +184,15 @@ public class Gui extends Inventory implements Tickable {
      * @param slot the slot to remove the item from
      */
     public void removeItem(int slot) {
-        GuiItem oldItem = items[slot];
+        GuiItem oldItem = items.get(slot);
         if (oldItem == null) {
-            throw new IllegalArgumentException("tried to remove item in slot " + slot + ", but none exists");
+            return;
         }
 
+        items.remove(slot);
+        tickItems = null;
+
         synchronized (oldItem) {
-            items[slot] = null;
             oldItem.onRemove(this, slot);
         }
     }
@@ -201,7 +205,7 @@ public class Gui extends Inventory implements Tickable {
      * @return an optional which may contain the GuiItem
      */
     public @NotNull Optional<GuiItem> itemAt(int slot) {
-        return Optional.ofNullable(items[slot]);
+        return Optional.ofNullable(items.get(slot));
     }
 
     /**
@@ -210,12 +214,9 @@ public class Gui extends Inventory implements Tickable {
      * @return a mutable list of SlottedItems
      */
     public @NotNull List<SlottedItem> getItems() {
-        ArrayList<SlottedItem> slottedItems = new ArrayList<>(items.length);
-        for (int i = 0; i < items.length; i++) {
-            GuiItem item = items[i];
-            if (item != null) {
-                slottedItems.add(new SlottedItem(item, i));
-            }
+        List<SlottedItem> slottedItems = new ArrayList<>(items.size());
+        for (Map.Entry<Integer, GuiItem> entry : items.entrySet()) {
+            slottedItems.add(new SlottedItem(entry.getValue(), entry.getKey()));
         }
 
         return slottedItems;
@@ -253,26 +254,31 @@ public class Gui extends Inventory implements Tickable {
             return;
         }
 
-        for (int i = 0; i < items.length; i++) {
-            //harmless race condition, tick thread does not write unless synchronizing on GuiItem
-            GuiItem item = items[i];
+        GuiItem[] tickItems = getTickItems();
+        for (int i = 0; i < tickItems.length; i++) {
+            GuiItem item = tickItems[i];
 
             if (item != null) {
-                //TODO: investigate potential deadlock conditions when tick thread locks on the GuiItem
-                synchronized (item) {
-                    item.tick(time);
-                    if (item.shouldRedraw()) {
-                        setItemStack(i, item.getItemStack());
-                    }
+                item.tick(time);
+                if (item.shouldRedraw()) {
+                    setItemStack(i, item.getItemStack());
                 }
             }
         }
     }
 
+    private GuiItem[] getTickItems() {
+        if (tickItems == null) {
+            tickItems = items.values().toArray(new GuiItem[0]);
+        }
+
+        return tickItems;
+    }
+
     private boolean handleClick(Player player, int slot, BiPredicate<? super Player, Integer> superFunction,
             GuiItem.ClickType clickType) {
         if (slot < getInventoryType().getSize()) {
-            GuiItem item = items[slot];
+            GuiItem item = items.get(slot);
             if (item != null) {
                 synchronized (item) {
                     item.handleClick(this, player, slot, clickType);

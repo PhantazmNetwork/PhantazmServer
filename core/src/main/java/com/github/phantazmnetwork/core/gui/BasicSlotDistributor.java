@@ -98,7 +98,6 @@ public class BasicSlotDistributor implements SlotDistributor {
 
     private static int computePadding(int height, int width, int items) {
         return MathUtils.ceilDiv((height * width - items), (width * (items - 1) + items));
-        //return ((height * width - items) / (width * (items - 1) + items));
     }
 
     private static int computeRows(int width, int padding, int items) {
