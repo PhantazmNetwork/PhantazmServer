@@ -16,6 +16,8 @@ import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.audience.ChatComponentSender;
+import com.github.phantazmnetwork.zombies.equipment.Equipment;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.game.coin.BasicPlayerCoins;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.coin.component.BasicTransactionComponentCreator;
@@ -144,7 +146,16 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             });
             PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(defaultState);
 
-            return new BasicZombiesPlayer(playerView, coins, kills, profileSwitcher, stateSwitcher);
+            //TODO: this is a temporary fix to allow compilation, remove
+            EquipmentCreator temporaryCreator = new EquipmentCreator() {
+                @Override
+                public @NotNull <TEquipment extends Equipment> Optional<TEquipment> createEquipment(
+                        @NotNull Key equipmentKey) {
+                    return Optional.empty();
+                }
+            };
+
+            return new BasicZombiesPlayer(playerView, coins, kills, temporaryCreator, profileSwitcher, stateSwitcher);
         };
         Random random = new Random();
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
