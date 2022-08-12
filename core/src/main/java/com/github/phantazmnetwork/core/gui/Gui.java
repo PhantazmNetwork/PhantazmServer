@@ -139,7 +139,7 @@ public class Gui extends Inventory implements Tickable {
     private final boolean isDynamic;
 
     //cached array of items, indirectly used by the tick function, set to null whenever the map is written to
-    private volatile GuiItem[] tickItems;
+    private volatile SlottedItem[] tickItems;
 
     /**
      * Creates a new instance of this class.
@@ -254,22 +254,33 @@ public class Gui extends Inventory implements Tickable {
             return;
         }
 
-        GuiItem[] tickItems = getTickItems();
-        for (int i = 0; i < tickItems.length; i++) {
-            GuiItem item = tickItems[i];
+        SlottedItem[] tickItems = getTickItems();
+        for (SlottedItem slottedItem : tickItems) {
+            GuiItem item = slottedItem.item;
 
-            if (item != null) {
-                item.tick(time);
-                if (item.shouldRedraw()) {
-                    setItemStack(i, item.getItemStack());
-                }
+            item.tick(time);
+            if (item.shouldRedraw()) {
+                setItemStack(slottedItem.slot, item.getItemStack());
             }
         }
     }
 
-    private GuiItem[] getTickItems() {
+    private SlottedItem[] getTickItems() {
+        //create copy in case this.tickItems is set to null after we check for it
+        SlottedItem[] tickItems = this.tickItems;
+
         if (tickItems == null) {
-            tickItems = items.values().toArray(new GuiItem[0]);
+            //create copy of entry set, otherwise it could change while we iterate
+            //noinspection unchecked
+            Map.Entry<Integer, GuiItem>[] entries = items.entrySet().toArray(new Map.Entry[0]);
+
+            SlottedItem[] newTickItems = new SlottedItem[entries.length];
+            for (int i = 0; i < newTickItems.length; i++) {
+                Map.Entry<Integer, GuiItem> entry = entries[i];
+                newTickItems[i] = new SlottedItem(entry.getValue(), entry.getKey());
+            }
+
+            return newTickItems;
         }
 
         return tickItems;
