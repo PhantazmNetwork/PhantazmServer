@@ -31,16 +31,17 @@ public class BasicSlotDistributor implements SlotDistributor {
             throw new IllegalArgumentException(
                     "Distributed item count " + itemCount + " cannot be greater than size " + size);
         }
-        
-        int rows;
-        int rowFactor;
-        int totalHeight;
+
         int actualPadding = padding;
-        do {
+
+        int rows = computeRows(width, actualPadding, itemCount);
+        int totalHeight = computeSize(rows, actualPadding);
+
+        if (totalHeight > height) {
+            actualPadding = computePadding(height, width, itemCount);
             rows = computeRows(width, actualPadding, itemCount);
-            rowFactor = Math.max(0, rows - 1);
-            totalHeight = rows + (actualPadding * rowFactor);
-        } while (totalHeight > height && --actualPadding > -1);
+            totalHeight = computeSize(rows, actualPadding);
+        }
 
         int maxItems = MathUtils.ceilDiv(width, actualPadding + 1);
         int leftover = itemCount % maxItems;
@@ -83,6 +84,10 @@ public class BasicSlotDistributor implements SlotDistributor {
     private static int computeSize(int items, int padding) {
         //compute the length of a single row of slots of "items" items separated by "padding" empty slots
         return items + (padding * (items - 1));
+    }
+
+    private static int computePadding(int height, int width, int items) {
+        return (height * width - items) / (width * (items - 1) + items);
     }
 
     private static int computeRows(int width, int padding, int items) {
