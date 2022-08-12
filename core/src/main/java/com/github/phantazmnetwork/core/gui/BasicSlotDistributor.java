@@ -26,6 +26,10 @@ public class BasicSlotDistributor implements SlotDistributor {
 
     @Override
     public int @NotNull [] distribute(int width, int height, int itemCount) {
+        if (itemCount == 0) {
+            return new int[0];
+        }
+
         int size = width * height;
         if (itemCount > size) {
             throw new IllegalArgumentException(
@@ -38,7 +42,13 @@ public class BasicSlotDistributor implements SlotDistributor {
         int totalHeight = computeSize(rows, actualPadding);
 
         if (totalHeight > height) {
-            actualPadding = computePadding(height, width, itemCount);
+            //this function occasionally overestimates the required padding by 1
+            int newPadding = computePadding(height, width, itemCount);
+
+            //if our padding didn't change, we overestimated by 1
+            actualPadding = newPadding == actualPadding ? newPadding - 1 : newPadding;
+
+            //recompute rows and totalHeight
             rows = computeRows(width, actualPadding, itemCount);
             totalHeight = computeSize(rows, actualPadding);
         }
@@ -87,7 +97,8 @@ public class BasicSlotDistributor implements SlotDistributor {
     }
 
     private static int computePadding(int height, int width, int items) {
-        return (height * width - items) / (width * (items - 1) + items);
+        return MathUtils.ceilDiv((height * width - items), (width * (items - 1) + items));
+        //return ((height * width - items) / (width * (items - 1) + items));
     }
 
     private static int computeRows(int width, int padding, int items) {
