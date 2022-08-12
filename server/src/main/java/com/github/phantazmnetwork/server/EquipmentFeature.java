@@ -11,7 +11,7 @@ import com.github.phantazmnetwork.core.particle.data.ParticleData;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
-import com.github.phantazmnetwork.zombies.equipment.PlayerEquipmentCreator;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunLevel;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunModel;
@@ -303,14 +303,14 @@ final class EquipmentFeature {
         dependencyAdder.accept((TObject)object, dependencies);
     }
 
-    public static @NotNull PlayerEquipmentCreator createEquipmentCreator(@NotNull ZombiesMap map,
-            @NotNull EventNode<Event> node, @NotNull MobStore store, @NotNull Random random) {
-        return new PlayerEquipmentCreator() {
+    public static @NotNull EquipmentCreator createEquipmentCreator(@NotNull ZombiesMap map,
+            @NotNull PlayerView playerView, @NotNull EventNode<Event> node, @NotNull MobStore store,
+            @NotNull Random random) {
+        return new EquipmentCreator() {
             @SuppressWarnings("unchecked")
             @NotNull
             @Override
-            public <TEquipment extends Equipment> Optional<TEquipment> createEquipment(@NotNull PlayerView playerView,
-                    @NotNull Key equipmentKey) {
+            public <TEquipment extends Equipment> Optional<TEquipment> createEquipment(@NotNull Key equipmentKey) {
                 if (gunLevelMap.containsKey(equipmentKey)) {
                     return Optional.of((TEquipment)createGun(equipmentKey, map, node, store, playerView, random));
                 }

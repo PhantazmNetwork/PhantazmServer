@@ -7,9 +7,10 @@ import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.core.game.scene.SceneProviderAbstract;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.instance.InstanceLoader;
+import com.github.phantazmnetwork.core.inventory.BasicInventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.BasicInventoryProfile;
-import com.github.phantazmnetwork.core.inventory.BasicInventoryProfileSwitcher;
-import com.github.phantazmnetwork.core.inventory.InventoryProfileSwitcher;
+import com.github.phantazmnetwork.core.inventory.InventoryAccess;
+import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
@@ -130,10 +131,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             PlayerCoins coins = new BasicPlayerCoins(playerView::getPlayer, new ChatComponentSender(),
                     new BasicTransactionComponentCreator(), 0);
             PlayerKills kills = new BasicPlayerKills();
-            InventoryProfileSwitcher profileSwitcher = new BasicInventoryProfileSwitcher();
+            InventoryAccessRegistry profileSwitcher = new BasicInventoryAccessRegistry();
             Key profileKey = Key.key(Namespaces.PHANTAZM, "inventory.profile.default");
-            profileSwitcher.registerProfile(profileKey, new BasicInventoryProfile(Collections.emptyMap(), 9));
-            profileSwitcher.switchProfile(profileKey);
+            profileSwitcher.registerAccess(profileKey,
+                    new InventoryAccess(new BasicInventoryProfile(9), Collections.emptyMap()));
+            profileSwitcher.switchAccess(profileKey);
             ZombiesPlayerState defaultState = new AlivePlayerState(playerView, player -> {
                 player.setFlying(false);
                 player.setAllowFlying(false);

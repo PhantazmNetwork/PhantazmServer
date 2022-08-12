@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.core.inventory;
 
-import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -47,6 +46,4 @@ public interface InventoryProfile {
      * @return The number of slots this profile holds
      */
     int getSlotCount();
-
-    @NotNull InventoryObjectGroup getGroup(@NotNull Key key);
 }

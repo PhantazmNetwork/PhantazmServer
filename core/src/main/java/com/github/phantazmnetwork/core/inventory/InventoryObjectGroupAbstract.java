@@ -22,7 +22,7 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
     /**
      * Creates an {@link InventoryObjectGroupAbstract}.
      *
-     * @param profile            The {@link InventoryProfile} the group interacts with
+     * @param profile            The profile to which this group belongs
      * @param slots              The slots to use for the group
      * @param unmodifiableMapper A mapper to make the provided slots as an unmodifiable view. The return type of the mapper will be the same as the object returned in {@link #getSlots()}
      */
@@ -36,7 +36,7 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
     /**
      * Creates an {@link InventoryObjectGroupAbstract} which uses an unmodifiable view of an {@link IntSet}.
      *
-     * @param profile The {@link InventoryProfile} the group interacts with
+     * @param profile The profile to use for the group
      * @param slots   The slots to use for the group
      */
     public InventoryObjectGroupAbstract(@NotNull InventoryProfile profile, @NotNull IntSet slots) {

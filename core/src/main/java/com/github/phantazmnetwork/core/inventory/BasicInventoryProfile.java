@@ -5,25 +5,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Basic implementation of an {@link InventoryProfile}.
  */
 public class BasicInventoryProfile implements InventoryProfile {
 
-    private final Map<UUID, InventoryObjectGroup> groups;
-
     private final InventoryObject[] objects;
 
     /**
      * Creates a basic inventory profile.
      *
-     * @param groups    A map of {@link UUID}s to {@link InventoryObjectGroup}s that this profile holds
      * @param slotCount The number of slots held by the profile (indexed by 0)
      */
-    public BasicInventoryProfile(@NotNull Map<UUID, InventoryObjectGroup> groups, int slotCount) {
-        this.groups = Map.copyOf(groups);
+    public BasicInventoryProfile(int slotCount) {
         this.objects = new InventoryObject[slotCount];
     }
 
@@ -64,12 +59,6 @@ public class BasicInventoryProfile implements InventoryProfile {
     @Override
     public int getSlotCount() {
         return objects.length;
-    }
-
-    @Override
-    public @NotNull InventoryObjectGroup getGroup(@NotNull Key key) {
-        //TODO: implement this API
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
 }

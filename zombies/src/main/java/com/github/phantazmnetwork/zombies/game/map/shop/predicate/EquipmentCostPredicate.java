@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.core.inventory.InventoryObjectGroup;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
-import com.github.phantazmnetwork.zombies.equipment.PlayerEquipmentCreator;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.Upgradable;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
@@ -60,18 +60,17 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
                 }
             }
             else {
-                PlayerEquipmentCreator playerEquipmentCreator = map.equipmentCreator();
+                EquipmentCreator playerEquipmentCreator = zombiesPlayer.getEquipmentCreator();
 
                 //TODO: use hasEquipment(Key)
-                Optional<Equipment> optionalEquipment =
-                        playerEquipmentCreator.createEquipment(playerView, data.equipment);
+                Optional<Equipment> optionalEquipment = playerEquipmentCreator.createEquipment(data.equipment);
                 if (optionalEquipment.isEmpty()) {
                     //TODO: log missing equipment somehow (send message to player?)
                     return false;
                 }
 
                 InventoryObjectGroup group =
-                        zombiesPlayer.getProfileSwitcher().getCurrentProfile().getGroup(data.equipmentGroup);
+                        zombiesPlayer.getInventoryAccessRegistry().getCurrentAccess().groups().get(data.equipmentGroup);
 
                 //TODO: full group message
                 return !group.isFull();

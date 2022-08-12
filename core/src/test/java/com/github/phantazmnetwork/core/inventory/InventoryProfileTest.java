@@ -14,7 +14,7 @@ public class InventoryProfileTest {
     @Test
     public void testSetObjectInOccupiedSlot() {
         int slot = 0;
-        InventoryProfile inventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), slot + 1);
+        InventoryProfile inventoryProfile = new BasicInventoryProfile(slot + 1);
         ItemStack itemStack = ItemStack.of(Material.STICK);
         InventoryObject inventoryObject = new BasicInventoryObject(itemStack);
 
@@ -27,7 +27,7 @@ public class InventoryProfileTest {
     @Test
     public void testSetObjectInUnoccupiedSlot() {
         int slot = 0;
-        InventoryProfile inventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), slot + 1);
+        InventoryProfile inventoryProfile = new BasicInventoryProfile(slot + 1);
         ItemStack itemStack = ItemStack.of(Material.STICK);
         InventoryObject inventoryObject = new BasicInventoryObject(itemStack);
 
@@ -39,7 +39,7 @@ public class InventoryProfileTest {
     @Test
     public void testRemoveObjectInOccupiedSlot() {
         int slot = 0;
-        InventoryProfile inventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), slot + 1);
+        InventoryProfile inventoryProfile = new BasicInventoryProfile(slot + 1);
         ItemStack itemStack = ItemStack.of(Material.STICK);
         InventoryObject inventoryObject = new BasicInventoryObject(itemStack);
 
@@ -51,7 +51,7 @@ public class InventoryProfileTest {
 
     @Test
     public void testRemoveObjectInUnoccupiedSlot() {
-        InventoryProfile inventoryProfile = new BasicInventoryProfile(Collections.emptyMap(), 1);
+        InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
 
         assertThrowsExactly(IllegalArgumentException.class, () -> inventoryProfile.removeInventoryObject(0));
     }

@@ -6,7 +6,6 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
-import com.github.phantazmnetwork.zombies.equipment.PlayerEquipmentCreator;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.ShopDisplay;
@@ -47,8 +46,6 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     private Round currentRound = null;
     private boolean hasCompleted = false;
 
-    private final PlayerEquipmentCreator playerEquipmentCreator;
-
     /**
      * Constructs a new instance of this class.
      *
@@ -57,11 +54,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
      */
     public ZombiesMap(@NotNull MapInfo info, @NotNull ElementBuilder builder, @NotNull Instance instance,
             @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler blockHandler,
-            @NotNull SpawnDistributor spawnDistributor, @NotNull KeyParser keyParser,
-            @NotNull PlayerEquipmentCreator playerEquipmentCreator) {
+            @NotNull SpawnDistributor spawnDistributor, @NotNull KeyParser keyParser) {
         super(info, info.settings().origin(), instance);
-
-        this.playerEquipmentCreator = Objects.requireNonNull(playerEquipmentCreator, "playerEquipmentCreator");
 
         DependencyProvider provider = new ModuleDependencyProvider(new Module(this), keyParser);
 
@@ -148,10 +142,6 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         }
 
         return nodes;
-    }
-
-    public @NotNull PlayerEquipmentCreator equipmentCreator() {
-        return playerEquipmentCreator;
     }
 
     public @UnmodifiableView @NotNull List<Room> getRooms() {

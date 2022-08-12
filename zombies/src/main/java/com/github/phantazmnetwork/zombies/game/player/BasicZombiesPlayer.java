@@ -1,8 +1,9 @@
 package com.github.phantazmnetwork.zombies.game.player;
 
-import com.github.phantazmnetwork.core.inventory.InventoryProfileSwitcher;
+import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
@@ -24,7 +25,9 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final PlayerKills kills;
 
-    private final InventoryProfileSwitcher profileSwitcher;
+    private final EquipmentCreator equipmentCreator;
+
+    private final InventoryAccessRegistry profileSwitcher;
 
     private final PlayerStateSwitcher stateSwitcher;
 
@@ -33,10 +36,12 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     private boolean inGame = false;
 
     public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull PlayerCoins coins, @NotNull PlayerKills kills,
-            @NotNull InventoryProfileSwitcher profileSwitcher, @NotNull PlayerStateSwitcher stateSwitcher) {
+            @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
+            @NotNull PlayerStateSwitcher stateSwitcher) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.coins = Objects.requireNonNull(coins, "coins");
         this.kills = Objects.requireNonNull(kills, "kills");
+        this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
     }
@@ -87,12 +92,17 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     }
 
     @Override
+    public @NotNull EquipmentCreator getEquipmentCreator() {
+        return equipmentCreator;
+    }
+
+    @Override
     public @NotNull @UnmodifiableView Collection<Equipment> getEquipment() {
         return Collections.emptyList();
     }
 
     @Override
-    public @NotNull InventoryProfileSwitcher getProfileSwitcher() {
+    public @NotNull InventoryAccessRegistry getInventoryAccessRegistry() {
         return profileSwitcher;
     }
 
