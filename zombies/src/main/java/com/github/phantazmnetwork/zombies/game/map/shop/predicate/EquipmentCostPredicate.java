@@ -62,7 +62,7 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
             else {
                 PlayerEquipmentCreator playerEquipmentCreator = map.equipmentCreator();
 
-                //TODO: creating equipment just to see if it's an InventoryObject is bad
+                //TODO: use hasEquipment(Key)
                 Optional<Equipment> optionalEquipment =
                         playerEquipmentCreator.createEquipment(playerView, data.equipment);
                 if (optionalEquipment.isEmpty()) {
@@ -70,16 +70,11 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
                     return false;
                 }
 
-                Equipment equipment = optionalEquipment.get();
                 InventoryObjectGroup group =
                         zombiesPlayer.getProfileSwitcher().getCurrentProfile().getGroup(data.equipmentGroup);
 
                 //TODO: full group message
                 return !group.isFull();
-
-                //TODO: need some other way to check if players can have equipment, if that equipment is not an
-                //InventoryObject
-                //return true;
             }
         }
 
