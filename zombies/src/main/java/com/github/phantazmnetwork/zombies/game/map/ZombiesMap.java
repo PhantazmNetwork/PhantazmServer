@@ -251,6 +251,18 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         return Optional.empty();
     }
 
+    public @NotNull Optional<Room> roomAt(@NotNull Vec3I block) {
+        for (Room room : unmodifiableRooms) {
+            for (Region3I region : room.roomBounds()) {
+                if (region.contains(block)) {
+                    return Optional.of(room);
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
     public @NotNull Optional<Shop> shopAt(@NotNull Vec3I block) {
         for (Shop shop : unmodifiableShops) {
             if (block.equals(shop.data.triggerLocation())) {
