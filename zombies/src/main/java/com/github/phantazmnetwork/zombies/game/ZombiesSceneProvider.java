@@ -18,6 +18,7 @@ import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.audience.ChatComponentSender;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.BasicPlayerCoins;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.coin.component.BasicTransactionComponentCreator;
@@ -135,9 +136,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             PlayerKills kills = new BasicPlayerKills();
             InventoryAccessRegistry profileSwitcher = new BasicInventoryAccessRegistry();
             Key profileKey = Key.key(Namespaces.PHANTAZM, "inventory.profile.default");
-            profileSwitcher.registerAccess(profileKey,
-                    new InventoryAccess(new BasicInventoryProfile(9), Collections.emptyMap()));
+            InventoryAccess access = new InventoryAccess(new BasicInventoryProfile(9), Collections.emptyMap());
+            profileSwitcher.registerAccess(profileKey, access);
             profileSwitcher.switchAccess(profileKey);
+            EquipmentHandler equipmentHandler = new EquipmentHandler(access);
             ZombiesPlayerState defaultState = new AlivePlayerState(playerView, player -> {
                 player.setFlying(false);
                 player.setAllowFlying(false);
@@ -146,8 +148,12 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             });
             PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(defaultState);
 
-            //TODO: this is a temporary fix to allow compilation, remove
             EquipmentCreator temporaryCreator = new EquipmentCreator() {
+                @Override
+                public boolean hasEquipment(@NotNull Key equipmentKey) {
+                    return false;
+                }
+
                 @Override
                 public @NotNull <TEquipment extends Equipment> Optional<TEquipment> createEquipment(
                         @NotNull Key equipmentKey) {
@@ -155,7 +161,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 }
             };
 
-            return new BasicZombiesPlayer(playerView, coins, kills, temporaryCreator, profileSwitcher, stateSwitcher);
+            return new BasicZombiesPlayer(playerView, coins, kills, equipmentHandler, temporaryCreator, profileSwitcher,
+                    stateSwitcher);
         };
         Random random = new Random();
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);

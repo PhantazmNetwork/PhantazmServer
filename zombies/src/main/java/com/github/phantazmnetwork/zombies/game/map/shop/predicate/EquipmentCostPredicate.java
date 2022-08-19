@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.core.inventory.InventoryObjectGroup;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
@@ -62,18 +61,16 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
             else {
                 EquipmentCreator playerEquipmentCreator = zombiesPlayer.getEquipmentCreator();
 
-                //TODO: use hasEquipment(Key)
+                if (!playerEquipmentCreator.hasEquipment(data.equipment)) {
+                    return false;
+                }
                 Optional<Equipment> optionalEquipment = playerEquipmentCreator.createEquipment(data.equipment);
                 if (optionalEquipment.isEmpty()) {
                     //TODO: log missing equipment somehow (send message to player?)
                     return false;
                 }
 
-                InventoryObjectGroup group =
-                        zombiesPlayer.getInventoryAccessRegistry().getCurrentAccess().groups().get(data.equipmentGroup);
-
-                //TODO: full group message
-                return !group.isFull();
+                return zombiesPlayer.getEquipmentHandler().canAddEquipment(data.equipmentGroup);
             }
         }
 

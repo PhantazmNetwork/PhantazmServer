@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
@@ -25,6 +26,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final PlayerKills kills;
 
+    private final EquipmentHandler equipmentHandler;
+
     private final EquipmentCreator equipmentCreator;
 
     private final InventoryAccessRegistry profileSwitcher;
@@ -36,11 +39,12 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     private boolean inGame = false;
 
     public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull PlayerCoins coins, @NotNull PlayerKills kills,
-            @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
-            @NotNull PlayerStateSwitcher stateSwitcher) {
+            @NotNull EquipmentHandler equipmentHandler, @NotNull EquipmentCreator equipmentCreator,
+            @NotNull InventoryAccessRegistry profileSwitcher, @NotNull PlayerStateSwitcher stateSwitcher) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.coins = Objects.requireNonNull(coins, "coins");
         this.kills = Objects.requireNonNull(kills, "kills");
+        this.equipmentHandler = Objects.requireNonNull(equipmentHandler, "equipmentHandler");
         this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
@@ -89,6 +93,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public @NotNull PlayerKills getKills() {
         return kills;
+    }
+
+    @Override
+    public @NotNull EquipmentHandler getEquipmentHandler() {
+        return equipmentHandler;
     }
 
     @Override

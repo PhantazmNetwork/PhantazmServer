@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.core.inventory.InventoryObject;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
@@ -31,6 +32,8 @@ public interface ZombiesPlayer extends Tickable {
     @NotNull PlayerCoins getCoins();
 
     @NotNull PlayerKills getKills();
+
+    @NotNull EquipmentHandler getEquipmentHandler();
 
     @NotNull EquipmentCreator getEquipmentCreator();
 

@@ -5,8 +5,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-@FunctionalInterface
 public interface EquipmentCreator {
+
+    boolean hasEquipment(@NotNull Key equipmentKey);
 
     @NotNull <TEquipment extends Equipment> Optional<TEquipment> createEquipment(@NotNull Key equipmentKey);
 

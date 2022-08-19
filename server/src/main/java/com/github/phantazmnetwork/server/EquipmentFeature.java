@@ -307,6 +307,11 @@ final class EquipmentFeature {
             @NotNull PlayerView playerView, @NotNull EventNode<Event> node, @NotNull MobStore store,
             @NotNull Random random) {
         return new EquipmentCreator() {
+            @Override
+            public boolean hasEquipment(@NotNull Key equipmentKey) {
+                return gunLevelMap.containsKey(equipmentKey);
+            }
+
             @SuppressWarnings("unchecked")
             @NotNull
             @Override
