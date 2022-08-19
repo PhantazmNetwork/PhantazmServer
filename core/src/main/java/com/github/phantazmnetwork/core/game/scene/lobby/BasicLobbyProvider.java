@@ -73,4 +73,9 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         return new Lobby(instance, instanceConfig, fallback);
     }
 
+    @Override
+    protected void cleanupScene(@NotNull Lobby scene) {
+
+    }
+
 }

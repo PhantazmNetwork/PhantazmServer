@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.core.player;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
@@ -106,6 +107,13 @@ class BasicPlayerView implements PlayerView {
 
             return getUsernameRequest();
         }
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Component> getDisplayName() {
+        return getPlayer().map(player -> CompletableFuture.completedFuture(player.getDisplayName()))
+                .orElseGet(() -> getUsername().thenApply(Component::text));
+
     }
 
     @Override

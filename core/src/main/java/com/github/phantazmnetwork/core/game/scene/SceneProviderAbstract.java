@@ -62,6 +62,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
             TScene scene = iterator.next();
 
             if (scene.isShutdown()) {
+                cleanupScene(scene);
                 iterator.remove();
             }
             else {
@@ -85,5 +86,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
      * @return The new {@link Scene}
      */
     protected abstract @NotNull TScene createScene(@NotNull TRequest request);
+
+    protected abstract void cleanupScene(@NotNull TScene scene);
 
 }
