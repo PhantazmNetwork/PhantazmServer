@@ -14,6 +14,15 @@ import java.util.Objects;
  * to update its {@link ItemStack} if necessary, which will then be retrieved through getStack).
  */
 public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, InventoryObject {
+    /**
+     * Returns a new GuiItem builder.
+     *
+     * @return a new instance of the builder class
+     */
+    static Builder builder() {
+        return new Builder();
+    }
+
     enum ClickType {
         /**
          * Represents a left click.
@@ -169,14 +178,5 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
                 }
             };
         }
-    }
-
-    /**
-     * Returns a new GuiItem builder.
-     *
-     * @return a new instance of the builder class
-     */
-    static Builder builder() {
-        return new Builder();
     }
 }

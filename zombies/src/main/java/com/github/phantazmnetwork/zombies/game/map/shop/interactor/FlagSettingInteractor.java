@@ -13,7 +13,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-@ElementModel("zombies.map.shop.interactor.flag_setting")
+@Model("zombies.map.shop.interactor.flag_setting")
 public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.Data> {
     private static final ConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
         private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
@@ -33,8 +33,7 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
     };
 
     @FactoryMethod
-    public FlagSettingInteractor(@NotNull Data data,
-            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+    public FlagSettingInteractor(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         super(data, map);
     }
 
@@ -48,7 +47,7 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
         map.setFlag(data.flag);
     }
 
-    @ElementData
+    @DataObject
     public record Data(int priority, @NotNull Key flag) implements Prioritized {
     }
 }

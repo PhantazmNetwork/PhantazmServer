@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.zombies.game.listener;
 
 import com.github.phantazmnetwork.core.inventory.InventoryAccess;
+import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.InventoryObject;
 import com.github.phantazmnetwork.core.inventory.InventoryProfile;
-import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import org.jetbrains.annotations.NotNull;

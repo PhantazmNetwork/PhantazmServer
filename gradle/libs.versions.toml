@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.11.0"
 
-ethylene = "0.11.3"
+ethylene = "0.12.0"
 
 junit-jupiter = "5.9.0-M1"
 
@@ -13,7 +13,7 @@ adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", 
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
 
-element-core = { module = "com.github.steanky:element-core", version = "0.2.0" }
+element-core = { module = "com.github.steanky:element-core", version = "0.3.0" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }

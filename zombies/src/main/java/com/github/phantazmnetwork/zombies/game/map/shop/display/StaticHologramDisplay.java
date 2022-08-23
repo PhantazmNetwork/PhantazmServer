@@ -5,9 +5,9 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import com.github.phantazmnetwork.zombies.map.MapProcessors;
-import com.github.steanky.element.core.annotation.ElementData;
-import com.github.steanky.element.core.annotation.ElementModel;
+import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.ProcessorMethod;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-@ElementModel("zombies.map.shop.display.static_hologram")
+@Model("zombies.map.shop.display.static_hologram")
 public class StaticHologramDisplay extends HologramDisplayBase {
     private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
         private static final ConfigProcessor<HologramInfo> HOLOGRAM_PROCESSOR = MapProcessors.hologramInfo();
@@ -62,7 +62,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
         hologram.addAll(data.info.text());
     }
 
-    @ElementData
+    @DataObject
     public record Data(@NotNull HologramInfo info) {
     }
 }

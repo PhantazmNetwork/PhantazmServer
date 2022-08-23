@@ -11,7 +11,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
@@ -77,9 +76,6 @@ final class ZombiesTest {
                 Gui gui = Gui.builder(InventoryType.CHEST_6_ROW, new BasicSlotDistributor(1)).setDynamic(true).withItem(
                         GuiItem.builder().withItem(ItemStack.of(Material.MUSIC_DISC_PIGSTEP).withDisplayName(message))
                                 .withUpdater(new ItemUpdater() {
-                                    private long lastUpdate = 0;
-                                    private int curFrame = 0;
-
                                     private static final Component[] FRAMES =
                                             new Component[] {Component.text("Play Pigstep", TextColor.color(0, 255, 0)),
                                                     Component.text("Play Pigstep.", TextColor.color(0, 0, 255)),
@@ -89,6 +85,8 @@ final class ZombiesTest {
                                                     Component.text("Play Pigstep.....", TextColor.color(0, 255, 255)),
                                                     Component.text("Play Pigstep......",
                                                             TextColor.color(255, 255, 255))};
+                                    private long lastUpdate = 0;
+                                    private int curFrame = 0;
 
                                     @Override
                                     public @NotNull ItemStack update(long time, @NotNull ItemStack current) {

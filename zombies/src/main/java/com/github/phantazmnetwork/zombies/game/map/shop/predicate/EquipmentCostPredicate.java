@@ -8,10 +8,10 @@ import com.github.phantazmnetwork.zombies.equipment.Upgradable;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
-import com.github.steanky.element.core.annotation.ElementData;
-import com.github.steanky.element.core.annotation.ElementDependency;
-import com.github.steanky.element.core.annotation.ElementModel;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
@@ -21,13 +21,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-@ElementModel("zombies.map.shop.predicate.equipment_cost")
+@Model("zombies.map.shop.predicate.equipment_cost")
 public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate.Data> {
     private final ZombiesMap map;
 
     @FactoryMethod
-    public EquipmentCostPredicate(@NotNull Data data,
-            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+    public EquipmentCostPredicate(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         super(data);
         this.map = Objects.requireNonNull(map, "map");
     }
@@ -82,7 +81,7 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
         return false;
     }
 
-    @ElementData
+    @DataObject
     public record Data(int priority,
                        @NotNull Key equipment,
                        @NotNull Object2IntMap<Key> upgradeCosts,

@@ -24,6 +24,45 @@ public class BasicSlotDistributor implements SlotDistributor {
         this.padding = padding;
     }
 
+    private static void fillRow(int[] slots, int slotStartIndex, int width, int padding, int rowStartIndex, int items) {
+        //the actual length of the row, including padding
+        int actualWidth = computeSize(items, padding);
+
+        //true if additional adjustments should be made to necessary slots in order to keep them visually centered
+        boolean slotAdjust = canAdjust(actualWidth, width);
+
+        //the initial offset to use in order to try and keep the row centered
+        int baseOffset = (width - actualWidth) / 2;
+
+        int slot = rowStartIndex + baseOffset;
+        int center = (items / 2) - 1;
+        for (int j = 0; j < items; j++, slot += padding + 1) {
+            slots[slotStartIndex++] = applyOffset(slotAdjust, padding, center, j, slot);
+        }
+    }
+
+    private static int computeSize(int items, int padding) {
+        //compute the length of a single row of slots of "items" items separated by "padding" empty slots
+        return items + (padding * (items - 1));
+    }
+
+    private static int computePadding(int height, int width, int items) {
+        return MathUtils.ceilDiv((height * width - items), (width * (items - 1) + items));
+    }
+
+    private static int computeRows(int width, int padding, int items) {
+        int itemsPerRow = MathUtils.ceilDiv(width, padding + 1);
+        return MathUtils.ceilDiv(items, itemsPerRow);
+    }
+
+    private static int applyOffset(boolean adjust, int padding, int centerIndex, int index, int slot) {
+        return (adjust && ((padding > 0) == (index <= centerIndex))) ? slot + 1 : slot;
+    }
+
+    private static boolean canAdjust(int actualSize, int capacity) {
+        return (actualSize % 2 == 0) != (capacity % 2 == 0);
+    }
+
     @Override
     public int @NotNull [] distribute(int width, int height, int itemCount) {
         if (itemCount == 0) {
@@ -72,44 +111,5 @@ public class BasicSlotDistributor implements SlotDistributor {
         }
 
         return slots;
-    }
-
-    private static void fillRow(int[] slots, int slotStartIndex, int width, int padding, int rowStartIndex, int items) {
-        //the actual length of the row, including padding
-        int actualWidth = computeSize(items, padding);
-
-        //true if additional adjustments should be made to necessary slots in order to keep them visually centered
-        boolean slotAdjust = canAdjust(actualWidth, width);
-
-        //the initial offset to use in order to try and keep the row centered
-        int baseOffset = (width - actualWidth) / 2;
-
-        int slot = rowStartIndex + baseOffset;
-        int center = (items / 2) - 1;
-        for (int j = 0; j < items; j++, slot += padding + 1) {
-            slots[slotStartIndex++] = applyOffset(slotAdjust, padding, center, j, slot);
-        }
-    }
-
-    private static int computeSize(int items, int padding) {
-        //compute the length of a single row of slots of "items" items separated by "padding" empty slots
-        return items + (padding * (items - 1));
-    }
-
-    private static int computePadding(int height, int width, int items) {
-        return MathUtils.ceilDiv((height * width - items), (width * (items - 1) + items));
-    }
-
-    private static int computeRows(int width, int padding, int items) {
-        int itemsPerRow = MathUtils.ceilDiv(width, padding + 1);
-        return MathUtils.ceilDiv(items, itemsPerRow);
-    }
-
-    private static int applyOffset(boolean adjust, int padding, int centerIndex, int index, int slot) {
-        return (adjust && ((padding > 0) == (index <= centerIndex))) ? slot + 1 : slot;
-    }
-
-    private static boolean canAdjust(int actualSize, int capacity) {
-        return (actualSize % 2 == 0) != (capacity % 2 == 0);
     }
 }

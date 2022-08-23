@@ -1,28 +1,23 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
-import com.github.phantazmnetwork.zombies.game.coin.Transaction;
-import com.github.phantazmnetwork.zombies.game.coin.TransactionResult;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
-import com.github.steanky.element.core.annotation.ElementData;
-import com.github.steanky.element.core.annotation.ElementModel;
+import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.ProcessorMethod;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-@ElementModel("zombies.map.shop.predicate.static_cost")
+@Model("zombies.map.shop.predicate.static_cost")
 public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data> {
     private static final ConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
         private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
@@ -65,7 +60,7 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
         return true;
     }
 
-    @ElementData
+    @DataObject
     public record Data(int priority, int cost, @NotNull Component message) implements Prioritized {
     }
 }

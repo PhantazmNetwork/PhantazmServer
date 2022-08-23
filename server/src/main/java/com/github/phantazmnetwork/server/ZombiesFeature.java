@@ -8,7 +8,7 @@ import com.github.phantazmnetwork.zombies.game.map.shop.interactor.MessagingInte
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.PlaySoundInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.FlagPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.StaticCostPredicate;
-import com.github.steanky.element.core.element.ElementBuilder;
+import com.github.steanky.element.core.context.ContextManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,39 +17,39 @@ import java.util.Objects;
 
 public final class ZombiesFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
-    private static ElementBuilder mapObjectBuilder;
+    private static ContextManager contextManager;
 
-    static void initialize(@NotNull ElementBuilder builder) {
-        ZombiesFeature.mapObjectBuilder = Objects.requireNonNull(builder, "builder");
-        registerComponentClasses(builder);
+    static void initialize(@NotNull ContextManager contextManager) {
+        ZombiesFeature.contextManager = Objects.requireNonNull(contextManager, "contextManager");
+        registerComponentClasses(contextManager);
     }
 
-    private static void registerComponentClasses(ElementBuilder builder) {
+    private static void registerComponentClasses(ContextManager contextManager) {
         LOGGER.info("Registering component classes...");
         //actions
-        builder.registerElementClass(AnnounceRoundAction.class);
-        builder.registerElementClass(SpawnMobsAction.class);
+        contextManager.registerElementClass(AnnounceRoundAction.class);
+        contextManager.registerElementClass(SpawnMobsAction.class);
 
         //ShopPredicate
-        builder.registerElementClass(StaticCostPredicate.class);
-        builder.registerElementClass(FlagPredicate.class);
+        contextManager.registerElementClass(StaticCostPredicate.class);
+        contextManager.registerElementClass(FlagPredicate.class);
 
         //ShopInteractor
-        builder.registerElementClass(FlagSettingInteractor.class);
-        builder.registerElementClass(MessagingInteractor.class);
-        builder.registerElementClass(PlaySoundInteractor.class);
+        contextManager.registerElementClass(FlagSettingInteractor.class);
+        contextManager.registerElementClass(MessagingInteractor.class);
+        contextManager.registerElementClass(PlaySoundInteractor.class);
 
         //ShopDisplay
-        builder.registerElementClass(StaticHologramDisplay.class);
+        contextManager.registerElementClass(StaticHologramDisplay.class);
 
         LOGGER.info("Registered component classes.");
     }
 
-    public static @NotNull ElementBuilder mapObjectBuilder() {
-        if (mapObjectBuilder == null) {
+    public static @NotNull ContextManager mapObjectBuilder() {
+        if (contextManager == null) {
             throw new IllegalStateException("ZombiesFeature has not been initialized yet");
         }
 
-        return mapObjectBuilder;
+        return contextManager;
     }
 }

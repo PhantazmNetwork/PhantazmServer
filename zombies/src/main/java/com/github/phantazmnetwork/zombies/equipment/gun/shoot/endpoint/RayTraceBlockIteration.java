@@ -26,6 +26,12 @@ import java.util.Optional;
  */
 public class RayTraceBlockIteration implements BlockIteration {
 
+    private final ZombiesMap map;
+
+    public RayTraceBlockIteration(ZombiesMap map) {
+        this.map = Objects.requireNonNull(map, "map");
+    }
+
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s
      *
@@ -33,12 +39,6 @@ public class RayTraceBlockIteration implements BlockIteration {
      */
     public static @NotNull ConfigProcessor<Data> processor() {
         return ConfigProcessor.emptyProcessor(Data::new);
-    }
-
-    private final ZombiesMap map;
-
-    public RayTraceBlockIteration(ZombiesMap map) {
-        this.map = Objects.requireNonNull(map, "map");
     }
 
     @SuppressWarnings("UnstableApiUsage")

@@ -23,11 +23,10 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     private final ArrayList<Entity> armorStands;
     private final ArrayList<Component> components;
     private final double gap;
+    private final Object sync;
     private Alignment alignment;
     private Instance instance;
     private Vec3D location;
-
-    private final Object sync;
 
     /**
      * Creates a new instance of this class, whose holograms will be rendered at the given location, using the given

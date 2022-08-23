@@ -32,7 +32,7 @@ import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
 import com.github.phantazmnetwork.zombies.game.stage.Stage;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.steanky.element.core.element.ElementBuilder;
+import com.github.steanky.element.core.context.ContextManager;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -72,13 +72,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final Map<Key, MobModel> mobModels;
 
     private final ClientBlockHandlerSource clientBlockHandlerSource;
-    private final ElementBuilder elementBuilder;
+    private final ContextManager elementBuilder;
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> eventNode, @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-            @NotNull ElementBuilder elementBuilder) {
+            @NotNull ContextManager contextManager) {
         super(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
@@ -89,7 +89,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
         this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource, "clientBlockHandlerSource");
-        this.elementBuilder = Objects.requireNonNull(elementBuilder, "elementBuilder");
+        this.elementBuilder = Objects.requireNonNull(contextManager, "contextManager");
     }
 
     @Override

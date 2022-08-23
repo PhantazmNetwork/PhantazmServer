@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-@ElementModel("zombies.map.room.action.spawn_mobs")
+@Model("zombies.map.room.action.spawn_mobs")
 public class SpawnMobsAction implements Action<Room> {
     private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
         private static final ConfigProcessor<List<SpawnInfo>> SPAWN_INFO_LIST_PROCESSOR =
@@ -43,7 +43,7 @@ public class SpawnMobsAction implements Action<Room> {
     private final Supplier<? extends Round> currentRound;
 
     @FactoryMethod
-    public SpawnMobsAction(@NotNull Data data, @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+    public SpawnMobsAction(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         this.data = Objects.requireNonNull(data, "data");
         this.currentRound = map::currentRound;
     }
@@ -66,7 +66,7 @@ public class SpawnMobsAction implements Action<Room> {
         return data.priority;
     }
 
-    @ElementData
+    @DataObject
     public record Data(@NotNull List<SpawnInfo> mobSpawns, int priority) {
     }
 }

@@ -8,23 +8,19 @@ import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
-import com.github.phantazmnetwork.zombies.game.map.shop.display.ShopDisplay;
-import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShopInteractor;
-import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.annotation.Memoize;
+import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
-import com.github.steanky.element.core.element.ElementBuilder;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
@@ -34,6 +30,7 @@ import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
+
     private final List<Room> unmodifiableRooms;
     private final List<Shop> unmodifiableShops;
     private final List<Door> unmodifiableDoors;
@@ -52,7 +49,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
      * @param info     the backing data object
      * @param instance the instance which this MapObject is in
      */
-    public ZombiesMap(@NotNull MapInfo info, @NotNull ElementBuilder builder, @NotNull Instance instance,
+    public ZombiesMap(@NotNull MapInfo info, @NotNull ContextManager contextManager, @NotNull Instance instance,
             @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler blockHandler,
             @NotNull SpawnDistributor spawnDistributor, @NotNull KeyParser keyParser) {
         super(info, info.settings().origin(), instance);
@@ -83,54 +80,6 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         this.unmodifiableRounds = Collections.unmodifiableList(rounds);
 
         this.flags = new HashSet<>(2);
-
-        for (RoomInfo roomInfo : roomData) {
-            rooms.add(new Room(roomInfo, getOrigin(), instance,
-                    builder.loadAllElements(selectNodes(roomInfo.openActions()), provider,
-                            e -> LOGGER.warn("Error initializing room actions for {}: {}", roomInfo, e))));
-        }
-
-        for (DoorInfo doorInfo : doorData) {
-            doors.add(new Door(doorInfo, origin, instance, Block.AIR,
-                    builder.loadAllElements(selectNodes(doorInfo.openActions()), provider,
-                            e -> LOGGER.warn("Error initializing door actions for {}: {}", doorInfo, e))));
-        }
-
-        for (ShopInfo shopInfo : shopData) {
-            List<ShopPredicate> predicates = builder.loadAllElements(selectNodes(shopInfo.predicates()), provider,
-                    e -> LOGGER.warn("Error initializing shop predicates for {}: {}", shopInfo, e));
-
-            List<ShopInteractor> interactors = builder.loadAllElements(selectNodes(shopInfo.interactors()), provider,
-                    e -> LOGGER.warn("Error initializing shop interactors for {}: {}", shopInfo, e));
-            List<ShopDisplay> displays = builder.loadAllElements(selectNodes(shopInfo.interactors()), provider,
-                    e -> LOGGER.warn("Error initializing shop displays for {}: {}", shopInfo, e));
-            shops.add(new Shop(shopInfo, origin, instance, predicates, interactors, displays));
-        }
-
-        for (WindowInfo windowInfo : windowData) {
-            windows.add(new Window(instance, windowInfo, origin, blockHandler,
-                    builder.loadAllElements(selectNodes(windowInfo.repairActions()), provider,
-                            e -> LOGGER.warn("Error initializing repair actions for {}: {}", windowInfo, e)),
-                    builder.loadAllElements(selectNodes(windowInfo.breakActions()), provider,
-                            e -> LOGGER.warn("Error initializing break actions for {}: {}", windowInfo, e))));
-        }
-
-        for (SpawnpointInfo spawnpointInfo : info.spawnpoints()) {
-            spawnpoints.add(new Spawnpoint(spawnpointInfo, origin, instance, spawnruleMap::get, mobSpawner));
-        }
-
-        for (SpawnruleInfo spawnrule : spawnruleData) {
-            spawnruleMap.put(spawnrule.id(), spawnrule);
-        }
-
-        for (RoundInfo roundInfo : roundData) {
-            rounds.add(new Round(roundInfo, instance,
-                    builder.loadAllElements(selectNodes(roundInfo.startActions()), provider,
-                            e -> LOGGER.warn("Error initializing round start actions for {}: {}", roundInfo, e)),
-                    builder.loadAllElements(selectNodes(roundInfo.endActions()), provider,
-                            e -> LOGGER.warn("Error initializing round end actions for {}: {}", roundInfo, e)),
-                    spawnDistributor, this::getSpawnpoints));
-        }
     }
 
     private static Collection<ConfigNode> selectNodes(@NotNull ConfigList list) {

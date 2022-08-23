@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@ElementModel("zombies.map.shop.interactor.messaging")
+@Model("zombies.map.shop.interactor.messaging")
 public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data> {
     private static final ConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
         private static final ConfigProcessor<List<Component>> COMPONENT_LIST_PROCESSOR =
@@ -39,8 +39,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     };
 
     @FactoryMethod
-    public MessagingInteractor(@NotNull Data data,
-            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+    public MessagingInteractor(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         super(data, map);
     }
 
@@ -65,7 +64,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
         }
     }
 
-    @ElementData
+    @DataObject
     public record Data(int priority, @NotNull List<Component> messages, boolean broadcast) implements Prioritized {
     }
 }

@@ -13,7 +13,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
 
-@ElementModel("zombies.map.shop.interactor.play_sound")
+@Model("zombies.map.shop.interactor.play_sound")
 public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data> {
     private static final ConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
         private static final ConfigProcessor<Sound> SOUND_PROCESSOR = AdventureConfigProcessors.sound();
@@ -35,8 +35,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     };
 
     @FactoryMethod
-    public PlaySoundInteractor(@NotNull Data data,
-            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+    public PlaySoundInteractor(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         super(data, map);
     }
 
@@ -56,7 +55,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
         }
     }
 
-    @ElementData
+    @DataObject
     public record Data(int priority, @NotNull Sound sound, boolean broadcast) implements Prioritized {
     }
 }

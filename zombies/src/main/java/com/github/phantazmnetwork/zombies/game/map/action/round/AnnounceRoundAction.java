@@ -21,7 +21,7 @@ import java.util.Objects;
 /**
  * An {@link Action} that announces the current round.
  */
-@ElementModel("zombies.map.round.action.announce")
+@Model("zombies.map.round.action.announce")
 public class AnnounceRoundAction implements Action<Round> {
     private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
         private static final ConfigProcessor<TitlePart<Component>> TITLE_PART_CONFIG_PROCESSOR =
@@ -56,8 +56,7 @@ public class AnnounceRoundAction implements Action<Round> {
      * @param map  the current map
      */
     @FactoryMethod
-    public AnnounceRoundAction(@NotNull Data data,
-            @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+    public AnnounceRoundAction(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         this.data = Objects.requireNonNull(data, "data");
         this.audience = map.getInstance();
     }
@@ -86,7 +85,7 @@ public class AnnounceRoundAction implements Action<Round> {
      * @param titlePart     which Component-accepting {@link TitlePart} to send the message to
      * @param priority      the priority of this action; actions with higher priority will be executed first
      */
-    @ElementData
+    @DataObject
     public record Data(@NotNull String formatMessage, @NotNull TitlePart<Component> titlePart, int priority) {
     }
 }

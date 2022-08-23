@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.MojangIdentitySource;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
@@ -8,19 +7,18 @@ import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
-import com.github.steanky.element.core.HashRegistry;
-import com.github.steanky.element.core.Registry;
-import com.github.steanky.element.core.data.BasicDataIdentifier;
+import com.github.steanky.element.core.*;
+import com.github.steanky.element.core.context.BasicContextManager;
+import com.github.steanky.element.core.context.BasicElementContext;
+import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.data.BasicDataInspector;
-import com.github.steanky.element.core.data.DataIdentifier;
+import com.github.steanky.element.core.data.BasicDataLocator;
 import com.github.steanky.element.core.data.DataInspector;
-import com.github.steanky.element.core.element.*;
+import com.github.steanky.element.core.data.DataLocator;
 import com.github.steanky.element.core.factory.BasicFactoryResolver;
 import com.github.steanky.element.core.factory.FactoryResolver;
-import com.github.steanky.element.core.key.BasicKeyExtractor;
-import com.github.steanky.element.core.key.BasicKeyParser;
-import com.github.steanky.element.core.key.KeyExtractor;
-import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.element.core.key.*;
 import com.github.steanky.element.core.processor.BasicProcessorResolver;
 import com.github.steanky.element.core.processor.ProcessorResolver;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
@@ -81,7 +79,7 @@ public final class PhantazmServer {
             ConfigHandler handler = Configuration.getHandler();
             handler.writeDefaultsAndGet();
 
-            serverConfig = handler.getData(Configuration.SERVER_CONFIG_KEY);
+            serverConfig = handler.loadDataNow(Configuration.SERVER_CONFIG_KEY);
             ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
             if (isUnsafe(args)) {
                 LOGGER.warn("""
@@ -121,7 +119,7 @@ public final class PhantazmServer {
                 return;
             }
 
-            lobbiesConfig = handler.getData(Configuration.LOBBIES_CONFIG_KEY);
+            lobbiesConfig = handler.loadDataNow(Configuration.LOBBIES_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         }
         catch (ConfigProcessException e) {
@@ -167,22 +165,26 @@ public final class PhantazmServer {
                 new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
                         MinecraftServer.getConnectionManager());
 
-        KeyParser phantazmParser = new BasicKeyParser(Namespaces.PHANTAZM);
-        KeyExtractor phantazmExtractor = new BasicKeyExtractor("serialKey", phantazmParser);
-        ElementTypeIdentifier phantazmTypeIdentifier = new BasicElementTypeIdentifier(phantazmParser);
-        DataInspector phantazmDataInspector = new BasicDataInspector(phantazmParser, phantazmTypeIdentifier);
-        FactoryResolver phantazmFactoryResolver =
-                new BasicFactoryResolver(phantazmParser, phantazmDataInspector, phantazmTypeIdentifier);
-        ProcessorResolver phantazmProcessorResolver = new BasicProcessorResolver();
-        ElementInspector phantazmInspector =
-                new BasicElementInspector(phantazmFactoryResolver, phantazmProcessorResolver);
+        KeyParser keyParser = new BasicKeyParser("phantazm");
 
-        DataIdentifier phantazmDataIdentifier = new BasicDataIdentifier(phantazmParser, phantazmTypeIdentifier);
-        Registry<ConfigProcessor<?>> processorRegistry = new HashRegistry<>();
+        KeyExtractor typeExtractor = new BasicKeyExtractor("type", keyParser);
+        ElementTypeIdentifier elementTypeIdentifier = new BasicElementTypeIdentifier(keyParser);
+        DataInspector dataInspector = new BasicDataInspector(keyParser);
+
+        FactoryResolver factoryResolver = new BasicFactoryResolver(keyParser, elementTypeIdentifier, dataInspector);
+        ProcessorResolver processorResolver = new BasicProcessorResolver();
+        ElementInspector elementInspector = new BasicElementInspector(factoryResolver, processorResolver);
+
+        Registry<ConfigProcessor<?>> configRegistry = new HashRegistry<>();
         Registry<ElementFactory<?, ?>> factoryRegistry = new HashRegistry<>();
 
-        ElementBuilder builder = new BasicElementBuilder(phantazmExtractor, phantazmInspector, phantazmTypeIdentifier,
-                phantazmDataIdentifier, processorRegistry, factoryRegistry);
+        PathSplitter pathSplitter = new BasicPathSplitter();
+        DataLocator dataLocator = new BasicDataLocator(pathSplitter);
+        ElementContext.Source source =
+                new BasicElementContext.Source(configRegistry, factoryRegistry, pathSplitter, dataLocator,
+                        typeExtractor);
+
+        ContextManager contextManager = new BasicContextManager(elementInspector, elementTypeIdentifier, source);
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
@@ -193,7 +195,7 @@ public final class PhantazmServer {
         EquipmentFeature.initialize(Path.of("./equipment/"),
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())));
-        ZombiesFeature.initialize(builder);
+        ZombiesFeature.initialize(contextManager);
         ZombiesTest.initialize(global);
     }
 

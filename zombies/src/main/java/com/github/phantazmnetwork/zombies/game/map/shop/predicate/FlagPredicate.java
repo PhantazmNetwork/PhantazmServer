@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-@ElementModel("zombies.map.shop.predicate.flag_predicate")
+@Model("zombies.map.shop.predicate.flag_predicate")
 public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
     private static final ConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
         @Override
@@ -40,7 +40,7 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
     private final ZombiesMap map;
 
     @FactoryMethod
-    public FlagPredicate(@NotNull Data data, @NotNull @ElementDependency("zombies.dependency.map") ZombiesMap map) {
+    public FlagPredicate(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         super(data);
         this.map = Objects.requireNonNull(map, "map");
     }
@@ -61,7 +61,7 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
         return result;
     }
 
-    @ElementData
+    @DataObject
     public record Data(int priority, @NotNull Key flag, @NotNull Component message, boolean requireAbsent)
             implements Prioritized {
     }
