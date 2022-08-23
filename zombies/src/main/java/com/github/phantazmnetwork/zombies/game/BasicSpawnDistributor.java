@@ -13,20 +13,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class BasicSpawnDistributor implements SpawnDistributor {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicSpawnDistributor.class);
 
     private final Function<? super Key, ? extends MobModel> modelFunction;
     private final Random random;
-    private final Supplier<? extends Collection<ZombiesPlayer>> playerSupplier;
+
+    private final Collection<ZombiesPlayer> zombiesPlayers;
 
     public BasicSpawnDistributor(@NotNull Function<? super Key, ? extends MobModel> modelFunction,
-            @NotNull Random random, @NotNull Supplier<? extends List<ZombiesPlayer>> playerSupplier) {
+            @NotNull Random random, @NotNull Collection<ZombiesPlayer> zombiesPlayers) {
         this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
         this.random = Objects.requireNonNull(random, "random");
-        this.playerSupplier = Objects.requireNonNull(playerSupplier, "playerSupplier");
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }
 
     @Override
@@ -69,13 +69,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 Spawnpoint candidate = spawnpoints.get(candidateIndex++);
                 candidateIndex %= spawnpoints.size();
 
-                Collection<ZombiesPlayer> players = playerSupplier.get();
-                if (players == null) {
-                    LOGGER.warn("playerSupplier returned a null collection");
-                    continue;
-                }
-
-                if (candidate.canSpawn(model, spawnType, players)) {
+                if (candidate.canSpawn(model, spawnType, zombiesPlayers)) {
                     spawnedMobs.add(candidate.spawn(model));
                     spawned = true;
                     break;

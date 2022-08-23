@@ -31,6 +31,11 @@ public class SceneProviderAbstractTest {
                     protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
                         return (Scene<SceneJoinRequest>)mock(Scene.class);
                     }
+
+                    @Override
+                    protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
+
+                    }
                 };
 
         SceneJoinRequest request = Mockito.mock(SceneJoinRequest.class);
@@ -63,6 +68,11 @@ public class SceneProviderAbstractTest {
                         return iterator.next();
                     }
 
+                    @Override
+                    protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
+
+                    }
+
                 };
 
         SceneJoinRequest request = Mockito.mock(SceneJoinRequest.class);
@@ -92,6 +102,11 @@ public class SceneProviderAbstractTest {
                     @Override
                     protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
                         return scene;
+                    }
+
+                    @Override
+                    protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
+
                     }
                 };
 

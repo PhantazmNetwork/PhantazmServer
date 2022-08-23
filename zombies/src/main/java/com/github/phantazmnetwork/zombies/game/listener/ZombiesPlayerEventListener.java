@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.listener;
 
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
-import net.minestom.server.event.trait.PlayerInstanceEvent;
+import net.minestom.server.event.trait.EntityInstanceEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +11,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
-public class ZombiesPlayerEventListener<TEvent extends PlayerInstanceEvent> implements Consumer<TEvent> {
+public abstract class ZombiesPlayerEventListener<TEvent extends EntityInstanceEvent> implements Consumer<TEvent> {
 
     private final Instance instance;
 
@@ -28,14 +28,12 @@ public class ZombiesPlayerEventListener<TEvent extends PlayerInstanceEvent> impl
             return;
         }
 
-        ZombiesPlayer zombiesPlayer = zombiesPlayers.get(event.getPlayer().getUuid());
+        ZombiesPlayer zombiesPlayer = zombiesPlayers.get(event.getEntity().getUuid());
         if (zombiesPlayer != null) {
             accept(zombiesPlayer, event);
         }
     }
 
-    protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull TEvent event) {
-
-    }
+    protected abstract void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull TEvent event);
 
 }

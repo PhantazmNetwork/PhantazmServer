@@ -86,6 +86,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     }
 
     @Override
+    public long getReviveTime() {
+        return 30L;// todo: fast revive
+    }
+
+    @Override
     public @NotNull PlayerCoins getCoins() {
         return coins;
     }

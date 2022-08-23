@@ -25,21 +25,26 @@ import com.github.phantazmnetwork.zombies.game.coin.component.BasicTransactionCo
 import com.github.phantazmnetwork.zombies.game.kill.BasicPlayerKills;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.listener.*;
+import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.player.BasicZombiesPlayer;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.game.player.state.AlivePlayerState;
+import com.github.phantazmnetwork.zombies.game.player.state.DeadPlayerState;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
-import com.github.phantazmnetwork.zombies.game.stage.Stage;
+import com.github.phantazmnetwork.zombies.game.player.state.knocked.KnockedPlayerState;
+import com.github.phantazmnetwork.zombies.game.stage.*;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.steanky.element.core.context.ContextManager;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityDamageEvent;
+import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
@@ -50,10 +55,21 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Phaser;
 import java.util.function.Function;
 
 public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, ZombiesJoinRequest> {
+
+    private record SceneContext(@NotNull EventNode<?> node) {
+
+        public SceneContext {
+            Objects.requireNonNull(node, "node");
+        }
+
+    }
+
+    private final IdentityHashMap<ZombiesScene, SceneContext> contexts;
 
     private final MapInfo mapInfo;
 
@@ -74,12 +90,15 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final ClientBlockHandlerSource clientBlockHandlerSource;
     private final ContextManager elementBuilder;
 
+    private final KeyParser keyParser;
+
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> eventNode, @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager) {
         super(maximumScenes);
+        this.contexts = new IdentityHashMap<>(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
@@ -130,6 +149,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         phaser.arriveAndAwaitAdvance();
 
         Map<UUID, ZombiesPlayer> zombiesPlayers = new HashMap<>(mapInfo.settings().maxPlayers());
+        Function<PlayerView, ZombiesPlayerState> defaultStateSupplier =
+                playerView -> new AlivePlayerState(playerView, player -> {
+                    player.setFlying(false);
+                    player.setAllowFlying(false);
+                    player.setGameMode(GameMode.ADVENTURE);
+                    player.setInvisible(false);
+                });
         Function<PlayerView, ZombiesPlayer> playerCreator = playerView -> {
             PlayerCoins coins = new BasicPlayerCoins(playerView::getPlayer, new ChatComponentSender(),
                     new BasicTransactionComponentCreator(), 0);
@@ -140,12 +166,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             profileSwitcher.registerAccess(profileKey, access);
             profileSwitcher.switchAccess(profileKey);
             EquipmentHandler equipmentHandler = new EquipmentHandler(access);
-            ZombiesPlayerState defaultState = new AlivePlayerState(playerView, player -> {
-                player.setFlying(false);
-                player.setAllowFlying(false);
-                player.setGameMode(GameMode.ADVENTURE);
-                player.setInvisible(false);
-            });
+            ZombiesPlayerState defaultState = defaultStateSupplier.apply(playerView);
             PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(defaultState);
 
             EquipmentCreator temporaryCreator = new EquipmentCreator() {
@@ -166,10 +187,61 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         };
         Random random = new Random();
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
+        SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, zombiesPlayers.values());
+        ZombiesMap map = new ZombiesMap(mapInfo, elementBuilder, instance, mobSpawner, blockHandler, spawnDistributor,
+                keyParser);
+        StageTransition stageTransition = new StageTransition(
+                List.of(new IdleStage(zombiesPlayers), new CountdownStage(zombiesPlayers, 200L),
+                        new InGameStage(zombiesPlayers, map), new EndGameStage(zombiesPlayers, 100L)));
+
         EventNode<Event> sceneNode = EventNode.all(instance.getUniqueId().toString());
-        //sceneNode.addListener(EntityDeathEvent.class, new PhantazmMobDeathListener(instance, mobStore,
-        //                                                                            map::currentRound));
+        sceneNode.addListener(EntityDeathEvent.class,
+                new PhantazmMobDeathListener(instance, mobStore, map::currentRound));
         sceneNode.addListener(EntityDamageEvent.class, new PlayerDamageMobListener(instance, mobStore, zombiesPlayers));
+        sceneNode.addListener(EntityDamageEvent.class,
+                new PlayerDeathEventListener(instance, zombiesPlayers, (zombiesPlayer, location) -> {
+                    CompletableFuture<Component> displayNameFuture = zombiesPlayer.getPlayerView().getDisplayName();
+                    Optional<Component> knockRoom = map.roomAt(location).map(room -> room.getData().displayName());
+                    CompletableFuture<Component> knockMessageFuture;
+                    if (knockRoom.isPresent()) {
+                        knockMessageFuture = displayNameFuture.thenApply(
+                                displayName -> Component.textOfChildren(displayName,
+                                        Component.text(" was knocked down in "), knockRoom.get()));
+                    }
+                    else {
+                        knockMessageFuture = displayNameFuture.thenApply(
+                                displayName -> Component.textOfChildren(displayName,
+                                        Component.text(" was knocked down")));
+                    }
+                    return new KnockedPlayerState(instance, zombiesPlayer.getPlayerView(), knockMessageFuture, () -> {
+                        CompletableFuture<Component> deathMessageFuture;
+                        if (knockRoom.isPresent()) {
+                            deathMessageFuture = displayNameFuture.thenApply(
+                                    displayName -> Component.textOfChildren(displayName,
+                                            Component.text(" was killed in "), knockRoom.get()));
+                        }
+                        else {
+                            deathMessageFuture = displayNameFuture.thenApply(
+                                    displayName -> Component.textOfChildren(displayName,
+                                            Component.text(" was killed")));
+                        }
+                        return new DeadPlayerState(zombiesPlayer.getPlayerView(), instance, deathMessageFuture,
+                                player -> {
+                                    player.setFlying(true);
+                                    player.setAllowFlying(true);
+                                });
+                    }, () -> defaultStateSupplier.apply(zombiesPlayer.getPlayerView()), player -> {
+                        // todo knocked attrib
+                    }, () -> {
+                        for (ZombiesPlayer reviverCandidate : zombiesPlayers.values()) {
+                            if (!reviverCandidate.isReviving()) {
+                                return reviverCandidate;
+                            }
+                        }
+
+                        return null;
+                    }, Collections.emptyList(), 500L);
+                }));
         PlayerRightClickListener rightClickListener = new PlayerRightClickListener();
         sceneNode.addListener(PlayerBlockInteractEvent.class,
                 new PlayerInteractBlockListener(instance, zombiesPlayers, rightClickListener));
@@ -179,18 +251,23 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener));
         sceneNode.addListener(PlayerUseItemOnBlockEvent.class,
                 new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener));
-        /*ComponentBuilder componentBuilder = new BasicComponentBuilder();
-        SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, , random);
-        ZombiesMap map = new ZombiesMap(mapInfo, componentBuilder, instance, mobSpawner, blockHandler, );
-        StageTransition stageTransition = new StageTransition(List.of(
-                new IdleStage(zombiesPlayers),
-                new CountdownStage(zombiesPlayers, 200L),
-                new InGameStage(zombiesPlayers, map),
-                new EndGameStage(zombiesPlayers, 100L)
-        ));
+        eventNode.addChild(sceneNode);
 
-        return new ZombiesScene(zombiesPlayers, instance, sceneFallback, mapInfo.settings(), stageTransition,
-                                playerCreator, random);*/
-        return null; // TODO fix commented code
+        ZombiesScene scene =
+                new ZombiesScene(zombiesPlayers, instance, sceneFallback, mapInfo.settings(), stageTransition,
+                        playerCreator, random);
+        contexts.put(scene, new SceneContext(sceneNode));
+
+        return scene;
+    }
+
+    @Override
+    protected void cleanupScene(@NotNull ZombiesScene scene) {
+        SceneContext context = contexts.remove(scene);
+        if (context == null) {
+            return;
+        }
+
+        eventNode.removeChild(context.node());
     }
 }

@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.core.player;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,6 +36,8 @@ public interface PlayerView {
      * calling {@link UUID#toString()} on the stored UUID
      */
     @NotNull CompletableFuture<String> getUsername();
+
+    @NotNull CompletableFuture<Component> getDisplayName();
 
     /**
      * Gets an {@link Optional} which may contain the player, only if they are online. Maintaining strong references to
