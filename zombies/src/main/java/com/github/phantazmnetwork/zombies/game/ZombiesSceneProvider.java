@@ -36,6 +36,7 @@ import com.github.phantazmnetwork.zombies.game.player.state.knocked.KnockedPlaye
 import com.github.phantazmnetwork.zombies.game.stage.*;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -88,15 +89,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final Map<Key, MobModel> mobModels;
 
     private final ClientBlockHandlerSource clientBlockHandlerSource;
-    private final ContextManager elementBuilder;
-
+    private final ContextManager contextManager;
     private final KeyParser keyParser;
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> eventNode, @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-            @NotNull ContextManager contextManager) {
+            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
         super(maximumScenes);
         this.contexts = new IdentityHashMap<>(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
@@ -108,7 +108,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
         this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource, "clientBlockHandlerSource");
-        this.elementBuilder = Objects.requireNonNull(contextManager, "contextManager");
+        this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
+        this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
     }
 
     @Override
@@ -188,7 +189,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Random random = new Random();
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, zombiesPlayers.values());
-        ZombiesMap map = new ZombiesMap(mapInfo, elementBuilder, instance, mobSpawner, blockHandler, spawnDistributor,
+        ZombiesMap map = new ZombiesMap(mapInfo, contextManager, instance, mobSpawner, blockHandler, spawnDistributor,
                 keyParser);
         StageTransition stageTransition = new StageTransition(
                 List.of(new IdleStage(zombiesPlayers), new CountdownStage(zombiesPlayers, 200L),
