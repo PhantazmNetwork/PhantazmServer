@@ -24,20 +24,16 @@ import java.util.Objects;
 @Model("zombies.map.shop.predicate.static_cost")
 public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data> {
     private static final ConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
-        private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
-
         @Override
         public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
             int cost = node.getNumberOrThrow("cost").intValue();
-            Component message = COMPONENT_PROCESSOR.dataFromElement(node.getElementOrThrow("message"));
-            return new Data(priority, cost, message);
+            return new Data(priority, cost);
         }
 
         @Override
-        public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
+        public @NotNull ConfigNode finishNode(@NotNull Data data) {
             ConfigNode node = new LinkedConfigNode(1);
             node.putNumber("cost", data.cost);
-            node.put("message", COMPONENT_PROCESSOR.elementFromData(data.message));
             return node;
         }
     };
@@ -58,19 +54,11 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        ZombiesPlayer player = interaction.getPlayer();
-        PlayerCoins coins = player.getCoins();
-        TransactionResult result = coins.runTransaction(new Transaction(modifiers, -data.cost));
-
-        if (!result.isAffordable(coins)) {
-            player.getPlayerView().getPlayer().ifPresent(presentPlayer -> presentPlayer.sendMessage(data.message));
-            return false;
-        }
-
-        return true;
+        PlayerCoins coins = interaction.getPlayer().getCoins();
+        return coins.runTransaction(new Transaction(modifiers, -data.cost)).isAffordable(coins);
     }
 
     @DataObject
-    public record Data(int priority, int cost, @NotNull Component message) implements Prioritized {
+    public record Data(int priority, int cost) implements Prioritized {
     }
 }

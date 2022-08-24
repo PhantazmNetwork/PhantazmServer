@@ -21,7 +21,8 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
         @Override
         public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
             Key flag = KEY_PROCESSOR.dataFromElement(node.getElementOrThrow("flag"));
-            return new Data(priority, flag);
+            boolean remove = node.getBooleanOrThrow("remove");
+            return new Data(priority, flag, remove);
         }
 
         @Override
@@ -44,10 +45,15 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
 
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        map.setFlag(data.flag);
+        if (data.remove) {
+            map.removeFlag(data.flag);
+        }
+        else {
+            map.setFlag(data.flag);
+        }
     }
 
     @DataObject
-    public record Data(int priority, @NotNull Key flag) implements Prioritized {
+    public record Data(int priority, @NotNull Key flag, boolean remove) implements Prioritized {
     }
 }

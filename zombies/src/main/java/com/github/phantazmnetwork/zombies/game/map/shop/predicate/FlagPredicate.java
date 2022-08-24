@@ -25,14 +25,13 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
             Component message =
                     AdventureConfigProcessors.component().dataFromElement(node.getElementOrThrow("message"));
             boolean requireAbsent = node.getBooleanOrThrow("requireAbsent");
-            return new Data(priority, flag, message, requireAbsent);
+            return new Data(priority, flag, requireAbsent);
         }
 
         @Override
         public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(3);
             node.put("flag", AdventureConfigProcessors.key().elementFromData(data.flag));
-            node.put("message", AdventureConfigProcessors.component().elementFromData(data.message));
             node.putBoolean("requireAbsent", data.requireAbsent);
             return node;
         }
@@ -52,17 +51,10 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        boolean result = map.hasFlag(data.flag) != data.requireAbsent;
-        if (!result) {
-            interaction.getPlayer().getPlayerView().getPlayer()
-                    .ifPresent(presentPlayer -> presentPlayer.sendMessage(data.message));
-        }
-
-        return result;
+        return map.hasFlag(data.flag) != data.requireAbsent;
     }
 
     @DataObject
-    public record Data(int priority, @NotNull Key flag, @NotNull Component message, boolean requireAbsent)
-            implements Prioritized {
+    public record Data(int priority, @NotNull Key flag, boolean requireAbsent) implements Prioritized {
     }
 }
