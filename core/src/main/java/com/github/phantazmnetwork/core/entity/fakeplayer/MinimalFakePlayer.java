@@ -7,6 +7,7 @@ import net.minestom.server.timer.SchedulerManager;
 import net.minestom.server.utils.PacketUtils;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,12 +23,12 @@ public class MinimalFakePlayer extends Entity {
     private final PlayerSkin skin;
 
     public MinimalFakePlayer(@NotNull SchedulerManager schedulerManager, @NotNull String username,
-            @NotNull PlayerSkin skin) {
+            @Nullable PlayerSkin skin) {
         super(EntityType.PLAYER, UUID.randomUUID());
 
         this.schedulerManager = Objects.requireNonNull(schedulerManager, "schedulerManager");
         this.username = Objects.requireNonNull(username, "username");
-        this.skin = Objects.requireNonNull(skin, "skin");
+        this.skin = skin;
     }
 
     public void init() {

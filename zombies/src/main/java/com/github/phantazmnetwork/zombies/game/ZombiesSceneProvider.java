@@ -1,17 +1,23 @@
 package com.github.phantazmnetwork.zombies.game;
 
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.vector.Vec3D;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.ClientBlockHandlerSource;
 import com.github.phantazmnetwork.core.VecUtils;
+import com.github.phantazmnetwork.core.entity.fakeplayer.MinimalFakePlayer;
 import com.github.phantazmnetwork.core.game.scene.SceneProviderAbstract;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
+import com.github.phantazmnetwork.core.hologram.Hologram;
+import com.github.phantazmnetwork.core.hologram.InstanceHologram;
 import com.github.phantazmnetwork.core.instance.InstanceLoader;
 import com.github.phantazmnetwork.core.inventory.BasicInventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.BasicInventoryProfile;
 import com.github.phantazmnetwork.core.inventory.InventoryAccess;
 import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.phantazmnetwork.core.time.BasicTickFormatter;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
@@ -22,6 +28,7 @@ import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.BasicPlayerCoins;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.coin.component.BasicTransactionComponentCreator;
+import com.github.phantazmnetwork.zombies.game.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.game.kill.BasicPlayerKills;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.listener.*;
@@ -39,9 +46,13 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityDamageEvent;
@@ -150,13 +161,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         phaser.arriveAndAwaitAdvance();
 
         Map<UUID, ZombiesPlayer> zombiesPlayers = new HashMap<>(mapInfo.settings().maxPlayers());
-        Function<PlayerView, ZombiesPlayerState> defaultStateSupplier =
-                playerView -> new AlivePlayerState(playerView, player -> {
-                    player.setFlying(false);
-                    player.setAllowFlying(false);
-                    player.setGameMode(GameMode.ADVENTURE);
-                    player.setInvisible(false);
-                });
+        Function<PlayerView, ZombiesPlayerState> defaultStateSupplier = playerView -> {
+            return new AlivePlayerState(playerView, player -> {
+                player.setFlying(false);
+                player.setAllowFlying(false);
+                player.setGameMode(GameMode.ADVENTURE);
+                player.setInvisible(false);
+            });
+        };
         Function<PlayerView, ZombiesPlayer> playerCreator = playerView -> {
             PlayerCoins coins = new BasicPlayerCoins(playerView::getPlayer, new ChatComponentSender(),
                     new BasicTransactionComponentCreator(), 0);
@@ -200,8 +212,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new PhantazmMobDeathListener(instance, mobStore, map::currentRound));
         sceneNode.addListener(EntityDamageEvent.class, new PlayerDamageMobListener(instance, mobStore, zombiesPlayers));
         sceneNode.addListener(EntityDamageEvent.class,
-                new PlayerDeathEventListener(instance, zombiesPlayers, (zombiesPlayer, location) -> {
+                new PlayerDeathEventListener(instance, zombiesPlayers, (zombiesPlayer, event) -> {
                     CompletableFuture<Component> displayNameFuture = zombiesPlayer.getPlayerView().getDisplayName();
+                    Vec3I location = VecUtils.toBlockInt(event.getEntity().getPosition());
                     Optional<Component> knockRoom = map.roomAt(location).map(room -> room.getData().displayName());
                     CompletableFuture<Component> knockMessageFuture;
                     if (knockRoom.isPresent()) {
@@ -214,6 +227,17 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                                 displayName -> Component.textOfChildren(displayName,
                                         Component.text(" was knocked down")));
                     }
+
+                    //TODO
+                    Hologram hologram = new InstanceHologram(Vec3D.of(location), 1.0, Hologram.Alignment.CENTERED);
+                    StringBuilder sb = new StringBuilder(16);
+                    for (int i = 0; i < 16; i++) {
+                        sb.append((char)random.nextInt('a', 'z' + 1));
+                    }
+                    PlayerSkin skin = ((Player)event.getEntity()).getSkin();
+                    Entity entity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), sb.toString(), skin);
+                    Corpse corpse = new Corpse(hologram, entity,
+                            new BasicTickFormatter(NamedTextColor.YELLOW, NamedTextColor.YELLOW));
                     return new KnockedPlayerState(instance, zombiesPlayer.getPlayerView(), knockMessageFuture, () -> {
                         CompletableFuture<Component> deathMessageFuture;
                         if (knockRoom.isPresent()) {
@@ -230,7 +254,23 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                                 player -> {
                                     player.setFlying(true);
                                     player.setAllowFlying(true);
-                                });
+                                }, List.of(new DeadPlayerState.Tickable() {
+                            @Override
+                            public void start() {
+
+                            }
+
+                            @Override
+                            public void tick(long time) {
+
+                            }
+
+                            @Override
+                            public void end() {
+                                corpse.remove();
+                                zombiesPlayer.setCorpse(null);
+                            }
+                        }));
                     }, () -> defaultStateSupplier.apply(zombiesPlayer.getPlayerView()), player -> {
                         // todo knocked attrib
                     }, () -> {
@@ -241,7 +281,28 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         }
 
                         return null;
-                    }, Collections.emptyList(), 500L);
+                    }, List.of(new KnockedPlayerState.Tickable() {
+                        @Override
+                        public void start() {
+                            zombiesPlayer.setCorpse(corpse);
+                            corpse.start();
+                        }
+
+                        @Override
+                        public void deathTick(long time, long ticksUntilDeath) {
+                            corpse.deathTick(time, ticksUntilDeath);
+                        }
+
+                        @Override
+                        public void reviveTick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive) {
+                            corpse.reviveTick(time, reviver, ticksUntilRevive);
+                        }
+
+                        @Override
+                        public void end() {
+                            corpse.disable();
+                        }
+                    }), 500L);
                 }));
         PlayerRightClickListener rightClickListener = new PlayerRightClickListener();
         sceneNode.addListener(PlayerBlockInteractEvent.class,

@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -24,13 +26,16 @@ public class DeadPlayerState implements ZombiesPlayerState {
 
     private final Consumer<? super Player> deathAction;
 
+    private final Collection<Tickable> tickables;
+
     public DeadPlayerState(@NotNull PlayerView playerView, @NotNull Instance instance,
             @NotNull CompletableFuture<? extends Component> deathMessageFuture,
-            @NotNull Consumer<? super Player> deathAction) {
+            @NotNull Consumer<? super Player> deathAction, @NotNull Collection<Tickable> tickables) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.deathMessageFuture = Objects.requireNonNull(deathMessageFuture, "deathMessageFuture");
         this.deathAction = Objects.requireNonNull(deathAction, "deathAction");
+        this.tickables = List.copyOf(tickables);
     }
 
     @Override
@@ -58,4 +63,15 @@ public class DeadPlayerState implements ZombiesPlayerState {
     public @NotNull Component getDisplayName() {
         return Component.text("DEAD", NamedTextColor.RED);
     }
+
+    public interface Tickable {
+
+        void start();
+
+        void tick(long time);
+
+        void end();
+
+    }
+
 }

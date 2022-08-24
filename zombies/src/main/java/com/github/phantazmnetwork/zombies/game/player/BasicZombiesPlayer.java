@@ -6,11 +6,13 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.game.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collection;
@@ -33,6 +35,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     private final InventoryAccessRegistry profileSwitcher;
 
     private final PlayerStateSwitcher stateSwitcher;
+
+    private Corpse corpse = null;
 
     private boolean reviving = false;
 
@@ -128,5 +132,15 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public @NotNull PlayerView getPlayerView() {
         return playerView;
+    }
+
+    @Override
+    public @NotNull Optional<Corpse> getCorpse() {
+        return Optional.ofNullable(corpse);
+    }
+
+    @Override
+    public void setCorpse(@Nullable Corpse corpse) {
+        this.corpse = corpse;
     }
 }

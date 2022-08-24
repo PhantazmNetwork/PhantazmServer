@@ -9,9 +9,11 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.game.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collection;
@@ -64,5 +66,9 @@ public interface ZombiesPlayer extends Tickable {
     @NotNull PlayerStateSwitcher getStateSwitcher();
 
     @NotNull PlayerView getPlayerView();
+
+    @NotNull Optional<Corpse> getCorpse();
+
+    void setCorpse(@Nullable Corpse corpse);
 
 }
