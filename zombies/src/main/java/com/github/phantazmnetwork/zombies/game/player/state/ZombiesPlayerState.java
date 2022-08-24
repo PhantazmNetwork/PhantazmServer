@@ -1,11 +1,12 @@
 package com.github.phantazmnetwork.zombies.game.player.state;
 
+import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public interface ZombiesPlayerState {
+public interface ZombiesPlayerState extends Keyed {
 
     void start();
 

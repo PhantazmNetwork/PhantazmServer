@@ -201,54 +201,54 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             EquipmentHandler equipmentHandler = new EquipmentHandler(access);
             Supplier<ZombiesPlayerState> defaultStateSupplier =
                     () -> new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
-                            Collections.singleton(new BasicZombiesPlayerState.Action() {
-                                @Override
-                                public void start() {
-                                    playerView.getPlayer().ifPresent(player -> {
-                                        player.setFlying(false);
-                                        player.setAllowFlying(false);
-                                        player.setGameMode(GameMode.ADVENTURE);
-                                        player.setInvisible(false);
-                                        meta.setInGame(true);
-                                        meta.setCanRevive(true);
-                                        meta.setCanTriggerSLA(true);
-                                    });
-                                }
-                            }));
+                            ZombiesPlayerStateKeys.ALIVE, Collections.singleton(new BasicZombiesPlayerState.Action() {
+                        @Override
+                        public void start() {
+                            playerView.getPlayer().ifPresent(player -> {
+                                player.setFlying(false);
+                                player.setAllowFlying(false);
+                                player.setGameMode(GameMode.ADVENTURE);
+                                player.setInvisible(false);
+                                meta.setInGame(true);
+                                meta.setCanRevive(true);
+                                meta.setCanTriggerSLA(true);
+                            });
+                        }
+                    }));
             Supplier<ZombiesPlayerState> quitStateSupplier =
                     () -> new BasicZombiesPlayerState(Component.text("QUIT", NamedTextColor.RED),
-                            Collections.singleton(new BasicZombiesPlayerState.Action() {
-                                @Override
-                                public void start() {
-                                    Reference<Instance> instanceReference = new WeakReference<>(instance);
-                                    playerView.getDisplayName().thenAccept(displayName -> {
-                                        Instance instance = instanceReference.get();
-                                        if (instance == null) {
-                                            return;
-                                        }
-
-                                        instance.sendMessage(
-                                                Component.textOfChildren(displayName, Component.text(" has quit")));
-                                    });
-                                    meta.setInGame(false);
-                                    meta.setCanRevive(false);
-                                    meta.setCanTriggerSLA(false);
+                            ZombiesPlayerStateKeys.QUIT, Collections.singleton(new BasicZombiesPlayerState.Action() {
+                        @Override
+                        public void start() {
+                            Reference<Instance> instanceReference = new WeakReference<>(instance);
+                            playerView.getDisplayName().thenAccept(displayName -> {
+                                Instance instance = instanceReference.get();
+                                if (instance == null) {
+                                    return;
                                 }
 
-                                @Override
-                                public void end() {
-                                    Reference<Instance> instanceReference = new WeakReference<>(instance);
-                                    playerView.getDisplayName().thenAccept(displayName -> {
-                                        Instance instance = instanceReference.get();
-                                        if (instance == null) {
-                                            return;
-                                        }
+                                instance.sendMessage(
+                                        Component.textOfChildren(displayName, Component.text(" has quit")));
+                            });
+                            meta.setInGame(false);
+                            meta.setCanRevive(false);
+                            meta.setCanTriggerSLA(false);
+                        }
 
-                                        instance.sendMessage(
-                                                Component.textOfChildren(displayName, Component.text(" rejoined")));
-                                    });
+                        @Override
+                        public void end() {
+                            Reference<Instance> instanceReference = new WeakReference<>(instance);
+                            playerView.getDisplayName().thenAccept(displayName -> {
+                                Instance instance = instanceReference.get();
+                                if (instance == null) {
+                                    return;
                                 }
-                            }));
+
+                                instance.sendMessage(
+                                        Component.textOfChildren(displayName, Component.text(" rejoined")));
+                            });
+                        }
+                    }));
             BiFunction<Component, Collection<BasicZombiesPlayerState.Action>, ZombiesPlayerState> deadStateFunction =
                     (roomName, actions) -> {
                         List<BasicZombiesPlayerState.Action> actionsCopy = new ArrayList<>(actions);
@@ -282,7 +282,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                                 });
                             }
                         });
-                        return new BasicZombiesPlayerState(Component.text("DEAD", NamedTextColor.RED), actionsCopy);
+                        return new BasicZombiesPlayerState(Component.text("DEAD", NamedTextColor.RED),
+                                ZombiesPlayerStateKeys.DEAD, actionsCopy);
                     };
             Map<Key, Supplier<ZombiesPlayerState>> stateSuppliers =
                     Map.of(ZombiesPlayerStateKeys.ALIVE, defaultStateSupplier, ZombiesPlayerStateKeys.KNOCKED, () -> {

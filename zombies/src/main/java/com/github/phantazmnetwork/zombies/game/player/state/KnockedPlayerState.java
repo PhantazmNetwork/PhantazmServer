@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.player.state;
 
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
@@ -101,6 +102,11 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     @Override
     public @NotNull Component getDisplayName() {
         return Component.text("KNOCKED", NamedTextColor.YELLOW);
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return ZombiesPlayerStateKeys.KNOCKED;
     }
 
     public interface Action {
