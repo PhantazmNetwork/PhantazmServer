@@ -16,28 +16,30 @@ import java.util.List;
 
 public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
     private final List<ShopPredicate> predicates;
-    private final List<ShopInteractor> interactors;
+    private final List<ShopInteractor> successInteractors;
+    private final List<ShopInteractor> failureInteractors;
     private final List<ShopDisplay> displays;
 
     public Shop(@NotNull ShopInfo info, @NotNull Vec3I origin, @NotNull Instance instance,
-            @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> interactors,
-            @NotNull List<ShopDisplay> displays) {
+            @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
+            @NotNull List<ShopInteractor> failureInteractors, @NotNull List<ShopDisplay> displays) {
         super(info, origin, instance);
 
         predicates.sort(Comparator.reverseOrder());
-        interactors.sort(Comparator.reverseOrder());
+        successInteractors.sort(Comparator.reverseOrder());
 
         this.predicates = List.copyOf(predicates);
-        this.interactors = List.copyOf(interactors);
+        this.successInteractors = List.copyOf(successInteractors);
+        this.failureInteractors = List.copyOf(failureInteractors);
         this.displays = List.copyOf(displays);
     }
 
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         boolean interact = callPredicates(data.predicateEvaluation(), interaction);
-        if (interact) {
-            for (ShopInteractor interactor : interactors) {
-                interactor.handleInteraction(interaction);
-            }
+        List<ShopInteractor> interactorsToCall = interact ? successInteractors : failureInteractors;
+
+        for (ShopInteractor interactor : interactorsToCall) {
+            interactor.handleInteraction(interaction);
         }
 
         for (ShopDisplay display : displays) {
@@ -73,8 +75,8 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
 
     @Override
     public void tick(long time) {
-        if (!interactors.isEmpty()) {
-            for (ShopInteractor interactor : interactors) {
+        if (!successInteractors.isEmpty()) {
+            for (ShopInteractor interactor : successInteractors) {
                 interactor.tick(time);
             }
         }
