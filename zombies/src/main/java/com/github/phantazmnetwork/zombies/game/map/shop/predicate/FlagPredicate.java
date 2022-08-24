@@ -11,7 +11,6 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -32,8 +31,6 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
             @Override
             public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
                 Key flag = AdventureConfigProcessors.key().dataFromElement(node.getElementOrThrow("flag"));
-                Component message =
-                        AdventureConfigProcessors.component().dataFromElement(node.getElementOrThrow("message"));
                 boolean requireAbsent = node.getBooleanOrThrow("requireAbsent");
                 return new Data(priority, flag, requireAbsent);
             }

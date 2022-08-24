@@ -134,7 +134,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         flags.add(flag);
     }
 
-    public void removeFlag(@NotNull Key flag) {
+    public void clearFlag(@NotNull Key flag) {
         Objects.requireNonNull(flag, "flag");
         flags.remove(flag);
     }

@@ -36,6 +36,7 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
             public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(1);
                 node.put("flag", KEY_PROCESSOR.elementFromData(data.flag));
+                node.putBoolean("remove", data.remove);
                 return node;
             }
         };
@@ -44,7 +45,7 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.remove) {
-            map.removeFlag(data.flag);
+            map.clearFlag(data.flag);
         }
         else {
             map.setFlag(data.flag);
