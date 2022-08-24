@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
-import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -16,7 +15,6 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Set;
 
 @Model("zombies.map.shop.predicate.player_state")
@@ -43,7 +41,7 @@ public class PlayerStatePredicate extends PredicateBase<PlayerStatePredicate.Dat
             }
         };
     }
-    
+
     @FactoryMethod
     public PlayerStatePredicate(@NotNull Data data) {
         super(data);

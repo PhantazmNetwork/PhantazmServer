@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.player;
 
 import com.github.phantazmnetwork.commons.Activable;
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.inventory.InventoryAccess;
 import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.InventoryObject;
@@ -9,10 +10,11 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.game.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
+import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -20,7 +22,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public interface ZombiesPlayer extends Activable {
 
@@ -60,12 +62,14 @@ public interface ZombiesPlayer extends Activable {
 
     @NotNull PlayerStateSwitcher getStateSwitcher();
 
-    @NotNull Map<Key, Supplier<ZombiesPlayerState>> getStateSuppliers();
+    @NotNull Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> getStateFunctions();
 
-    default boolean setState(@NotNull Key stateKey) {
-        Supplier<ZombiesPlayerState> stateSupplier = getStateSuppliers().get(stateKey);
-        if (stateSupplier != null) {
-            getStateSwitcher().setState(stateSupplier.get());
+    @SuppressWarnings("unchecked")
+    default <TContext> boolean setState(@NotNull PlayerStateKey<TContext> stateKey, @NotNull TContext context) {
+        Function<TContext, ZombiesPlayerState> stateFunction =
+                (Function<TContext, ZombiesPlayerState>)getStateFunctions().get(stateKey);
+        if (stateFunction != null) {
+            getStateSwitcher().setState(stateFunction.apply(context));
             return true;
         }
 
@@ -75,6 +79,8 @@ public interface ZombiesPlayer extends Activable {
     @NotNull PlayerView getPlayerView();
 
     @NotNull Sidebar getSidebar();
+
+    @NotNull Wrapper<Corpse> getCorpseWrapper();
 
     void start();
 

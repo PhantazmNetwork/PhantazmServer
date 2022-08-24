@@ -1,15 +1,17 @@
 package com.github.phantazmnetwork.zombies.game.player;
 
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.game.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
+import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.scoreboard.Sidebar;
@@ -17,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class BasicZombiesPlayer implements ZombiesPlayer {
 
@@ -37,15 +39,18 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final PlayerStateSwitcher stateSwitcher;
 
-    private final Map<Key, Supplier<ZombiesPlayerState>> stateSuppliers;
+    private final Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> stateFunctions;
 
     private final Sidebar sidebar;
+
+    private final Wrapper<Corpse> corpseWrapper;
 
     public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
             @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
             @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
-            @NotNull PlayerStateSwitcher stateSwitcher, @NotNull Map<Key, Supplier<ZombiesPlayerState>> stateSuppliers,
-            @NotNull Sidebar sidebar) {
+            @NotNull PlayerStateSwitcher stateSwitcher,
+            @NotNull Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> stateFunctions, @NotNull Sidebar sidebar,
+            @NotNull Wrapper<Corpse> corpseWrapper) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -54,8 +59,9 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
         this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
-        this.stateSuppliers = Map.copyOf(stateSuppliers);
+        this.stateFunctions = Map.copyOf(stateFunctions);
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
+        this.corpseWrapper = Objects.requireNonNull(corpseWrapper, "corpseWrapper");
     }
 
     @Override
@@ -117,8 +123,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     }
 
     @Override
-    public @NotNull Map<Key, Supplier<ZombiesPlayerState>> getStateSuppliers() {
-        return stateSuppliers;
+    public @NotNull Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> getStateFunctions() {
+        return stateFunctions;
     }
 
     @Override
@@ -129,6 +135,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public @NotNull Sidebar getSidebar() {
         return sidebar;
+    }
+
+    @Override
+    public @NotNull Wrapper<Corpse> getCorpseWrapper() {
+        return corpseWrapper;
     }
 
     @Override

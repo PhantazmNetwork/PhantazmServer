@@ -37,7 +37,7 @@ public interface PlayerView {
      */
     @NotNull CompletableFuture<String> getUsername();
 
-    @NotNull CompletableFuture<Component> getDisplayName();
+    @NotNull CompletableFuture<? extends Component> getDisplayName();
 
     /**
      * Gets an {@link Optional} which may contain the player, only if they are online. Maintaining strong references to

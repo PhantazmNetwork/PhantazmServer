@@ -7,6 +7,8 @@ import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerStateKeys;
+import com.github.phantazmnetwork.zombies.game.player.state.context.DeadPlayerStateContext;
+import com.github.phantazmnetwork.zombies.game.player.state.context.NoContext;
 import com.github.phantazmnetwork.zombies.game.stage.Stage;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import net.kyori.adventure.text.Component;
@@ -85,7 +87,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         for (ZombiesPlayer zombiesPlayer : oldPlayers) {
-            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD);
+            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin(Collections.emptyList()));
         }
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
@@ -131,7 +133,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             else {
                 ZombiesPlayer zombiesPlayer = zombiesPlayers.get(leaver);
                 if (zombiesPlayer != null) {
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT);
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
                 }
             }
         }

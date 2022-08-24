@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.game;
 
+import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Wrapper;
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.ClientBlockHandlerSource;
@@ -38,6 +38,9 @@ import com.github.phantazmnetwork.zombies.game.player.BasicZombiesPlayer;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayerMeta;
 import com.github.phantazmnetwork.zombies.game.player.state.*;
+import com.github.phantazmnetwork.zombies.game.player.state.context.DeadPlayerStateContext;
+import com.github.phantazmnetwork.zombies.game.player.state.context.KnockedPlayerStateContext;
+import com.github.phantazmnetwork.zombies.game.player.state.context.NoContext;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.GroupSidebarUpdaterActivable;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.SidebarUpdater;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.*;
@@ -76,9 +79,7 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Phaser;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, ZombiesJoinRequest> {
 
@@ -207,20 +208,21 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         lineUpdaters.add(new RoundSidebarLineUpdater(map));
                         lineUpdaters.add(new RemainingZombiesSidebarLineUpdater(map::currentRound));
                         lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
-                        CompletableFuture<Component> displayNameFuture = zombiesPlayer.getPlayerView().getDisplayName();
+                        CompletableFuture<? extends Component> displayNameFuture =
+                                zombiesPlayer.getPlayerView().getDisplayName();
                         lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
                                         () -> zombiesPlayer.getStateSwitcher().getState().key()
-                                                .equals(ZombiesPlayerStateKeys.ALIVE),
+                                                .equals(ZombiesPlayerStateKeys.ALIVE.key()),
                                         new CoinsSidebarLineUpdater(displayNameFuture, zombiesPlayer.getCoins())),
                                 Pair.of(() -> true, new PlayerStateSidebarLineUpdater(displayNameFuture,
                                         zombiesPlayer.getStateSwitcher())))));
                         for (ZombiesPlayer otherZombiesPlayer : zombiesPlayers.values()) {
                             if (otherZombiesPlayer != zombiesPlayer) {
-                                CompletableFuture<Component> otherDisplayNameFuture =
+                                CompletableFuture<? extends Component> otherDisplayNameFuture =
                                         otherZombiesPlayer.getPlayerView().getDisplayName();
                                 lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
                                         () -> otherZombiesPlayer.getStateSwitcher().getState().key()
-                                                .equals(ZombiesPlayerStateKeys.ALIVE),
+                                                .equals(ZombiesPlayerStateKeys.ALIVE.key()),
                                         new CoinsSidebarLineUpdater(otherDisplayNameFuture,
                                                 otherZombiesPlayer.getCoins())), Pair.of(() -> true,
                                         new PlayerStateSidebarLineUpdater(otherDisplayNameFuture,
@@ -248,20 +250,21 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         lineUpdaters.add(new RoundSidebarLineUpdater(map));
                         lineUpdaters.add(new RemainingZombiesSidebarLineUpdater(map::currentRound));
                         lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
-                        CompletableFuture<Component> displayNameFuture = zombiesPlayer.getPlayerView().getDisplayName();
+                        CompletableFuture<? extends Component> displayNameFuture =
+                                zombiesPlayer.getPlayerView().getDisplayName();
                         lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
                                         () -> zombiesPlayer.getStateSwitcher().getState().key()
-                                                .equals(ZombiesPlayerStateKeys.ALIVE),
+                                                .equals(ZombiesPlayerStateKeys.ALIVE.key()),
                                         new CoinsSidebarLineUpdater(displayNameFuture, zombiesPlayer.getCoins())),
                                 Pair.of(() -> true, new PlayerStateSidebarLineUpdater(displayNameFuture,
                                         zombiesPlayer.getStateSwitcher())))));
                         for (ZombiesPlayer otherZombiesPlayer : zombiesPlayers.values()) {
                             if (otherZombiesPlayer != zombiesPlayer) {
-                                CompletableFuture<Component> otherDisplayNameFuture =
+                                CompletableFuture<? extends Component> otherDisplayNameFuture =
                                         otherZombiesPlayer.getPlayerView().getDisplayName();
                                 lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
                                         () -> otherZombiesPlayer.getStateSwitcher().getState().key()
-                                                .equals(ZombiesPlayerStateKeys.ALIVE),
+                                                .equals(ZombiesPlayerStateKeys.ALIVE.key()),
                                         new CoinsSidebarLineUpdater(otherDisplayNameFuture,
                                                 otherZombiesPlayer.getCoins())), Pair.of(() -> true,
                                         new PlayerStateSidebarLineUpdater(otherDisplayNameFuture,
@@ -316,31 +319,36 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             profileSwitcher.switchAccess(profileKey);
             EquipmentHandler equipmentHandler = new EquipmentHandler(access);
             Sidebar sidebar = new Sidebar(Component.text("ZOMBIES", NamedTextColor.RED));
-            Supplier<ZombiesPlayerState> defaultStateSupplier =
-                    () -> new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
-                            ZombiesPlayerStateKeys.ALIVE,
-                            Collections.singleton(new BasicZombiesPlayerState.Activable() {
-                                @Override
-                                public void start(@Nullable Key previousStateKey) {
-                                    playerView.getPlayer().ifPresent(player -> {
-                                        player.setFlying(false);
-                                        player.setAllowFlying(false);
-                                        player.setGameMode(GameMode.ADVENTURE);
-                                        player.setInvisible(false);
-                                        meta.setInGame(true);
-                                        meta.setCanRevive(true);
-                                        meta.setCanTriggerSLA(true);
-                                        if (!sidebar.getViewers().contains(player)) {
-                                            sidebar.addViewer(player);
-                                        }
-                                    });
-                                }
-                            }));
-            Supplier<ZombiesPlayerState> quitStateSupplier =
-                    () -> new BasicZombiesPlayerState(Component.text("QUIT", NamedTextColor.RED),
-                            ZombiesPlayerStateKeys.QUIT, Collections.singleton(new BasicZombiesPlayerState.Activable() {
+            Wrapper<Corpse> corpseWrapper = Wrapper.ofNull();
+            Function<NoContext, ZombiesPlayerState> aliveStateFunction =
+                    context -> new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
+                            ZombiesPlayerStateKeys.ALIVE.key(), Collections.singleton(new Activable() {
                         @Override
-                        public void start(@Nullable Key previousStateKey) {
+                        public void start() {
+                            playerView.getPlayer().ifPresent(player -> {
+                                player.setFlying(false);
+                                player.setAllowFlying(false);
+                                player.setGameMode(GameMode.ADVENTURE);
+                                player.setInvisible(false);
+                                meta.setInGame(true);
+                                meta.setCanRevive(true);
+                                meta.setCanTriggerSLA(true);
+                                if (!sidebar.getViewers().contains(player)) {
+                                    sidebar.addViewer(player);
+                                }
+                            });
+                            Corpse corpse = corpseWrapper.get();
+                            if (corpse != null) {
+                                corpse.remove();
+                                corpseWrapper.set(null);
+                            }
+                        }
+                    }));
+            Function<NoContext, ZombiesPlayerState> quitStateFunction =
+                    context -> new BasicZombiesPlayerState(Component.text("QUIT", NamedTextColor.RED),
+                            ZombiesPlayerStateKeys.QUIT.key(), Collections.singleton(new Activable() {
+                        @Override
+                        public void start() {
                             Reference<Instance> instanceReference = new WeakReference<>(instance);
                             playerView.getDisplayName().thenAccept(displayName -> {
                                 Instance instance = instanceReference.get();
@@ -356,110 +364,105 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                             meta.setCanRevive(false);
                             meta.setCanTriggerSLA(false);
                         }
-
-                        @Override
-                        public void end(@Nullable Key nextStateKey) {
-                            if (nextStateKey != null) {
-                                Reference<Instance> instanceReference = new WeakReference<>(instance);
-                                playerView.getDisplayName().thenAccept(displayName -> {
-                                    Instance instance = instanceReference.get();
-                                    if (instance == null) {
-                                        return;
-                                    }
-
-                                    instance.sendMessage(
-                                            Component.textOfChildren(displayName, Component.text(" rejoined")));
-                                });
-                            }
-                        }
                     }));
-            BiFunction<Component, Collection<BasicZombiesPlayerState.Activable>, ZombiesPlayerState> deadStateFunction =
-                    (killerName, actions) -> {
-                        List<BasicZombiesPlayerState.Activable> actionsCopy = new ArrayList<>(actions);
-                        actionsCopy.add(new BasicZombiesPlayerState.Activable() {
-                            @Override
-                            public void start(@Nullable Key previousStateKey) {
-                                Reference<Instance> instanceReference = new WeakReference<>(instance);
-                                playerView.getPlayer().ifPresent(player -> {
-                                    player.setAllowFlying(true);
-                                    player.setFlying(true);
-                                    player.setGameMode(GameMode.ADVENTURE);
-                                    player.setInvisible(true);
-                                    meta.setCanRevive(false);
-                                    meta.setCanTriggerSLA(false);
-                                    if (!sidebar.getViewers().contains(player)) {
-                                        sidebar.addViewer(player);
-                                    }
-                                });
-                                if (previousStateKey != ZombiesPlayerStateKeys.QUIT) {
-                                    playerView.getDisplayName().thenAccept(displayName -> {
-                                        Instance instance = instanceReference.get();
-                                        if (instance == null) {
-                                            return;
-                                        }
-
-                                        if (killerName != null) {
-                                            instance.sendMessage(Component.textOfChildren(displayName,
-                                                    Component.text(" was killed" + " by"), killerName));
-                                        }
-                                        else {
-                                            instance.sendMessage(Component.textOfChildren(displayName,
-                                                    Component.text(" was killed")));
-                                        }
-                                    });
-                                }
+            Function<DeadPlayerStateContext, ZombiesPlayerState> deadStateFunction = context -> {
+                List<Activable> activablesCopy = new ArrayList<>(context.getActivables());
+                activablesCopy.add(new Activable() {
+                    @Override
+                    public void start() {
+                        Reference<Instance> instanceReference = new WeakReference<>(instance);
+                        playerView.getPlayer().ifPresent(player -> {
+                            player.setAllowFlying(true);
+                            player.setFlying(true);
+                            player.setGameMode(GameMode.ADVENTURE);
+                            player.setInvisible(true);
+                            meta.setCanRevive(false);
+                            meta.setCanTriggerSLA(false);
+                            if (!sidebar.getViewers().contains(player)) {
+                                sidebar.addViewer(player);
                             }
                         });
-                        return new BasicZombiesPlayerState(Component.text("DEAD", NamedTextColor.RED),
-                                ZombiesPlayerStateKeys.DEAD, actionsCopy);
-                    };
-            Function<Component, ZombiesPlayerState> knockedStateFunction = killerName -> {
-                Point minestomLocation = null;
-                Vec3I location = null;
-                Component roomName = null;
-                Optional<Player> playerOptional = playerView.getPlayer();
-                if (playerOptional.isPresent()) {
-                    minestomLocation = playerOptional.get().getPosition();
-                    location = VecUtils.toBlockInt(minestomLocation);
-                    roomName = map.roomAt(location).map(room -> room.getData().displayName()).orElse(null);
-                }
-                Component finalRoomName = roomName;
-                ArrayList<KnockedPlayerState.Activable> knockedActions = new ArrayList<>(2);
-                TickFormatter tickFormatter = new PrecisionSecondTickFormatter(NamedTextColor.YELLOW, 1);
-                knockedActions.add(new KnockedPlayerState.Activable() {
-
-                    private final CompletableFuture<? extends Component> displayNameFuture =
-                            playerView.getDisplayName();
-
-                    @Override
-                    public void start(@Nullable Key previousStateKey) {
-                        Reference<Instance> instanceReference = new WeakReference<>(instance);
                         playerView.getDisplayName().thenAccept(displayName -> {
                             Instance instance = instanceReference.get();
                             if (instance == null) {
                                 return;
                             }
 
-                            if (finalRoomName != null) {
-                                if (killerName != null) {
+                            if (context.isRejoin()) {
+                                instance.sendMessage(
+                                        Component.textOfChildren(displayName, Component.text(" has rejoined")));
+                            }
+                            else if (context.getDeathRoomName().isPresent()) {
+                                if (context.getKiller().isPresent()) {
                                     instance.sendMessage(
-                                            Component.textOfChildren(displayName, Component.text(" was killed by "),
-                                                    killerName, Component.text(" in "), finalRoomName));
+                                            Component.textOfChildren(displayName, Component.text(" was knocked by "),
+                                                    context.getKiller().get(), Component.text(" in "),
+                                                    context.getDeathRoomName().get()));
                                 }
                                 else {
                                     instance.sendMessage(
-                                            Component.textOfChildren(displayName, Component.text(" was killed in "),
-                                                    finalRoomName));
+                                            Component.textOfChildren(displayName, Component.text(" was knocked in "),
+                                                    context.getDeathRoomName().get()));
                                 }
                             }
-                            else if (killerName != null) {
+                            else if (context.getKiller().isPresent()) {
                                 instance.sendMessage(
-                                        Component.textOfChildren(displayName, Component.text(" was killed by "),
-                                                killerName));
+                                        Component.textOfChildren(displayName, Component.text(" was knocked by "),
+                                                context.getKiller().get()));
                             }
                             else {
                                 instance.sendMessage(
-                                        Component.textOfChildren(displayName, Component.text(" was killed ")));
+                                        Component.textOfChildren(displayName, Component.text(" was knocked")));
+                            }
+                        });
+                    }
+                });
+                return new BasicZombiesPlayerState(Component.text("DEAD", NamedTextColor.RED),
+                        ZombiesPlayerStateKeys.DEAD.key(), activablesCopy);
+            };
+            Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateFunction = context -> {
+                ArrayList<KnockedPlayerState.Activable> knockedActions = new ArrayList<>(2);
+                TickFormatter tickFormatter = new PrecisionSecondTickFormatter(NamedTextColor.YELLOW, 1);
+                Vec3I location = VecUtils.toBlockInt(context.getKnockLocation());
+                Optional<Component> roomDisplayName = map.roomAt(location).map(room -> room.getData().displayName());
+                knockedActions.add(new KnockedPlayerState.Activable() {
+
+                    private final CompletableFuture<? extends Component> displayNameFuture =
+                            playerView.getDisplayName();
+
+                    private final Map<UUID, CompletableFuture<? extends Component>> reviverFutures =
+                            new HashMap<>(zombiesPlayers.size());
+
+                    @Override
+                    public void start() {
+                        Reference<Instance> instanceReference = new WeakReference<>(instance);
+                        displayNameFuture.thenAccept(displayName -> {
+                            Instance instance = instanceReference.get();
+                            if (instance == null) {
+                                return;
+                            }
+
+                            if (roomDisplayName.isPresent()) {
+                                if (context.getKiller().isPresent()) {
+                                    instance.sendMessage(
+                                            Component.textOfChildren(displayName, Component.text(" was knocked by "),
+                                                    context.getKiller().get(), Component.text(" in "),
+                                                    roomDisplayName.get()));
+                                }
+                                else {
+                                    instance.sendMessage(
+                                            Component.textOfChildren(displayName, Component.text(" was knocked in "),
+                                                    roomDisplayName.get()));
+                                }
+                            }
+                            else if (context.getKiller().isPresent()) {
+                                instance.sendMessage(
+                                        Component.textOfChildren(displayName, Component.text(" was knocked by "),
+                                                context.getKiller().get()));
+                            }
+                            else {
+                                instance.sendMessage(
+                                        Component.textOfChildren(displayName, Component.text(" was knocked")));
                             }
                         });
                         playerView.getPlayer().ifPresent(player -> {
@@ -482,18 +485,36 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
                     @Override
                     public void reviveTick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive) {
-                        playerView.getPlayer().ifPresent(player -> {
-                            player.sendActionBar(Component.textOfChildren(Component.text("You are being revived by "),
-                                    Component.empty()));
-                        }); // TODO
+                        CompletableFuture<? extends Component> reviverFuture =
+                                reviverFutures.computeIfAbsent(reviver.getPlayerView().getUUID(),
+                                        unused -> reviver.getPlayerView().getDisplayName());
+                        Component reviverName = reviverFuture.getNow(null);
+                        if (reviverName != null) {
+                            playerView.getPlayer().ifPresent(player -> {
+                                player.sendActionBar(
+                                        Component.textOfChildren(Component.text("You are being revived by "),
+                                                reviverName));
+                            });
+                        }
+
+                        reviver.getPlayerView().getPlayer().ifPresent(player -> {
+                            Component displayName = displayNameFuture.getNow(null);
+                            if (displayName != null) {
+                                player.sendActionBar(Component.textOfChildren(Component.text("Reviving "), displayName,
+                                        Component.text(" - "), tickFormatter.format(ticksUntilRevive)));
+                            }
+                        });
                     }
 
                     @Override
-                    public void end(@Nullable Key nextStateKey, @Nullable ZombiesPlayer reviver) {
+                    public void end(@Nullable ZombiesPlayer reviver) {
                         Reference<Instance> instanceReference = new WeakReference<>(instance);
                         if (reviver != null) {
-                            playerView.getDisplayName().thenCombine(reviver.getPlayerView().getDisplayName(),
-                                    (displayName, reviverDisplayName) -> {
+                            CompletableFuture<? extends Component> reviverFuture =
+                                    reviverFutures.computeIfAbsent(reviver.getPlayerView().getUUID(),
+                                            unused -> reviver.getPlayerView().getDisplayName());
+                            playerView.getDisplayName()
+                                    .thenCombine(reviverFuture, (displayName, reviverDisplayName) -> {
                                         Instance instance = instanceReference.get();
                                         if (instance == null) {
                                             return null;
@@ -509,80 +530,70 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         }
                     }
                 });
-                ArrayList<BasicZombiesPlayerState.Activable> deadActions = new ArrayList<>(1);
-                if (location != null && roomName != null) {
-                    //TODO
-                    Hologram hologram = new InstanceHologram(Vec3D.of(location), 1.0);
-                    hologram.setInstance(instance);
-                    StringBuilder usernameBuilder = new StringBuilder(16);
-                    for (int i = 0; i < 16; i++) {
-                        usernameBuilder.append((char)random.nextInt('a', 'z' + 1));
-                    }
-                    PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
-                    Entity corpseEntity =
-                            new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), usernameBuilder.toString(),
-                                    skin);
-                    corpseEntity.setInstance(instance, minestomLocation);
-                    Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
-                    knockedActions.add(new KnockedPlayerState.Activable() {
-                        @Override
-                        public void start(@Nullable Key previousStateKey) {
-                            corpse.start();
-                        }
-
-                        @Override
-                        public void deathTick(long time, long ticksUntilDeath) {
-                            corpse.deathTick(time, ticksUntilDeath);
-                        }
-
-                        @Override
-                        public void reviveTick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive) {
-                            corpse.reviveTick(time, reviver, ticksUntilRevive);
-                        }
-
-                        @Override
-                        public void end(@Nullable Key nextStateKey, @Nullable ZombiesPlayer reviver) {
-                            if (nextStateKey != null && nextStateKey.equals(ZombiesPlayerStateKeys.DEAD)) {
-                                corpse.disable();
-                            }
-                            else {
-                                corpse.remove();
-                            }
-                        }
-                    });
-                    deadActions.add(new BasicZombiesPlayerState.Activable() {
-                        @Override
-                        public void end(@Nullable Key nextStateKey) {
-                            corpse.remove();
-                        }
-                    });
+                ArrayList<Activable> deadActions = new ArrayList<>(1);
+                //TODO
+                Hologram hologram = new InstanceHologram(VecUtils.toDouble(context.getKnockLocation()), 1.0);
+                hologram.setInstance(instance);
+                StringBuilder usernameBuilder = new StringBuilder(16);
+                for (int i = 0; i < 16; i++) {
+                    usernameBuilder.append((char)random.nextInt('a', 'z' + 1));
                 }
+                PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
+                Entity corpseEntity =
+                        new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), usernameBuilder.toString(), skin);
+                corpseEntity.setInstance(instance, context.getKnockLocation());
+                Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
+                knockedActions.add(new KnockedPlayerState.Activable() {
+                    @Override
+                    public void start() {
+                        corpseWrapper.set(corpse);
+                        corpse.start();
+                    }
+
+                    @Override
+                    public void deathTick(long time, long ticksUntilDeath) {
+                        corpse.deathTick(time, ticksUntilDeath);
+                    }
+
+                    @Override
+                    public void reviveTick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive) {
+                        corpse.reviveTick(time, reviver, ticksUntilRevive);
+                    }
+
+                    @Override
+                    public void end(@Nullable ZombiesPlayer reviver) {
+                        corpse.disable();
+                    }
+                });
+                deadActions.add(new Activable() {
+                    @Override
+                    public void end() {
+                        corpse.remove();
+                        corpseWrapper.set(null);
+                    }
+                });
                 knockedActions.trimToSize();
                 deadActions.trimToSize();
-                return new KnockedPlayerState(() -> deadStateFunction.apply(null, deadActions), // TODO: killer name
-                        defaultStateSupplier, () -> {
-                    for (ZombiesPlayer otherZombiesPlayer : zombiesPlayers.values()) {
-                        ZombiesPlayerMeta otherMeta = otherZombiesPlayer.getMeta();
-                        if (playerView.getUUID() != otherZombiesPlayer.getPlayerView().getUUID() &&
-                                otherMeta.isCanRevive() && !otherMeta.isReviving() && otherMeta.isCrouching()) {
-                            return otherZombiesPlayer;
-                        }
-                    }
+                return new KnockedPlayerState(() -> deadStateFunction.apply(
+                        DeadPlayerStateContext.killed(deadActions, context.getKiller().orElse(null),
+                                roomDisplayName.orElse(null))), () -> aliveStateFunction.apply(NoContext.INSTANCE),
+                        () -> {
+                            for (ZombiesPlayer otherZombiesPlayer : zombiesPlayers.values()) {
+                                ZombiesPlayerMeta otherMeta = otherZombiesPlayer.getMeta();
+                                if (playerView.getUUID() != otherZombiesPlayer.getPlayerView().getUUID() &&
+                                        otherMeta.isCanRevive() && !otherMeta.isReviving() && otherMeta.isCrouching()) {
+                                    return otherZombiesPlayer;
+                                }
+                            }
 
-                    return null;
-                }, knockedActions, 500L);
+                            return null;
+                        }, knockedActions, 500L);
             };
-            Map<Key, Supplier<ZombiesPlayerState>> stateSuppliers =
-                    Map.of(ZombiesPlayerStateKeys.ALIVE, defaultStateSupplier, ZombiesPlayerStateKeys.KNOCKED, () -> {
-                        return knockedStateFunction.apply(null);
-                    }, ZombiesPlayerStateKeys.DEAD, () -> {
-                        Component roomName = playerView.getPlayer().map(player -> {
-                            Vec3I location = VecUtils.toBlockInt(player.getPosition());
-                            return map.roomAt(location).map(room -> room.getData().displayName()).orElse(null);
-                        }).orElse(null);
-                        return deadStateFunction.apply(roomName, Collections.emptyList());
-                    }, ZombiesPlayerStateKeys.QUIT, quitStateSupplier);
-            PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(defaultStateSupplier.get());
+            Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> stateSuppliers =
+                    Map.of(ZombiesPlayerStateKeys.ALIVE, aliveStateFunction, ZombiesPlayerStateKeys.KNOCKED,
+                            knockedStateFunction, ZombiesPlayerStateKeys.DEAD, deadStateFunction,
+                            ZombiesPlayerStateKeys.QUIT, quitStateFunction);
+            PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(aliveStateFunction.apply(NoContext.INSTANCE));
 
             EquipmentCreator temporaryCreator = new EquipmentCreator() {
                 @Override
@@ -598,7 +609,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             };
 
             return new BasicZombiesPlayer(playerView, meta, coins, kills, equipmentHandler, temporaryCreator,
-                    profileSwitcher, stateSwitcher, stateSuppliers, sidebar);
+                    profileSwitcher, stateSwitcher, stateSuppliers, sidebar, corpseWrapper);
         };
 
         ZombiesScene scene =
