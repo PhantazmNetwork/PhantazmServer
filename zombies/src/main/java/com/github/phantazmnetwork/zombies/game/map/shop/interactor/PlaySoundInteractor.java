@@ -15,25 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 @Model("zombies.map.shop.interactor.play_sound")
 public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data> {
-    private static final ConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
-        private static final ConfigProcessor<Sound> SOUND_PROCESSOR = AdventureConfigProcessors.sound();
-
-        @Override
-        public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-            Sound sound = SOUND_PROCESSOR.dataFromElement(node.getElementOrThrow("sound"));
-            boolean broadcast = node.getBooleanOrThrow("broadcast");
-            return new Data(priority, sound, broadcast);
-        }
-
-        @Override
-        public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(2);
-            node.put("sound", SOUND_PROCESSOR.elementFromData(data.sound));
-            node.putBoolean("broadcast", data.broadcast);
-            return node;
-        }
-    };
-
     @FactoryMethod
     public PlaySoundInteractor(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         super(data, map);
@@ -41,7 +22,24 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<PlaySoundInteractor.Data> processor() {
-        return PROCESSOR;
+        return new PrioritizedProcessor<>() {
+            private static final ConfigProcessor<Sound> SOUND_PROCESSOR = AdventureConfigProcessors.sound();
+
+            @Override
+            public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
+                Sound sound = SOUND_PROCESSOR.dataFromElement(node.getElementOrThrow("sound"));
+                boolean broadcast = node.getBooleanOrThrow("broadcast");
+                return new Data(priority, sound, broadcast);
+            }
+
+            @Override
+            public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(2);
+                node.put("sound", SOUND_PROCESSOR.elementFromData(data.sound));
+                node.putBoolean("broadcast", data.broadcast);
+                return node;
+            }
+        };
     }
 
     @Override

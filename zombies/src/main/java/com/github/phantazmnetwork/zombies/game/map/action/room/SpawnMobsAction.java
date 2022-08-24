@@ -20,25 +20,6 @@ import java.util.function.Supplier;
 
 @Model("zombies.map.room.action.spawn_mobs")
 public class SpawnMobsAction implements Action<Room> {
-    private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
-        private static final ConfigProcessor<List<SpawnInfo>> SPAWN_INFO_LIST_PROCESSOR =
-                MapProcessors.spawnInfo().listProcessor();
-
-        @Override
-        public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-            List<SpawnInfo> spawns = SPAWN_INFO_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("mobSpawns"));
-            int priority = node.getNumberOrThrow("priority").intValue();
-            return new Data(spawns, priority);
-        }
-
-        @Override
-        public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(2);
-            node.put("mobSpawns", SPAWN_INFO_LIST_PROCESSOR.elementFromData(data.mobSpawns));
-            node.putNumber("priority", data.priority);
-            return node;
-        }
-    };
     private final Data data;
     private final Supplier<? extends Round> currentRound;
 
@@ -50,7 +31,25 @@ public class SpawnMobsAction implements Action<Room> {
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
+        return new ConfigProcessor<>() {
+            private static final ConfigProcessor<List<SpawnInfo>> SPAWN_INFO_LIST_PROCESSOR =
+                    MapProcessors.spawnInfo().listProcessor();
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
+                List<SpawnInfo> spawns = SPAWN_INFO_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("mobSpawns"));
+                int priority = node.getNumberOrThrow("priority").intValue();
+                return new Data(spawns, priority);
+            }
+
+            @Override
+            public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(2);
+                node.put("mobSpawns", SPAWN_INFO_LIST_PROCESSOR.elementFromData(data.mobSpawns));
+                node.putNumber("priority", data.priority);
+                return node;
+            }
+        };
     }
 
     @Override

@@ -23,29 +23,6 @@ import java.util.Objects;
  */
 @Model("zombies.map.round.action.announce")
 public class AnnounceRoundAction implements Action<Round> {
-    private static final ConfigProcessor<Data> PROCESSOR = new ConfigProcessor<>() {
-        private static final ConfigProcessor<TitlePart<Component>> TITLE_PART_CONFIG_PROCESSOR =
-                AdventureConfigProcessors.componentTitlePart();
-
-        @Override
-        public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-            String formatMessage = node.getStringOrThrow("formatMessage");
-            TitlePart<Component> titlePart =
-                    TITLE_PART_CONFIG_PROCESSOR.dataFromElement(node.getElementOrThrow("titlePart"));
-            int priority = node.getNumberOrThrow("priority").intValue();
-            return new Data(formatMessage, titlePart, priority);
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(3);
-            node.putString("formatMessage", data.formatMessage);
-            node.put("titlePart", TITLE_PART_CONFIG_PROCESSOR.elementFromData(data.titlePart));
-            node.putNumber("priority", data.priority);
-            return node;
-        }
-    };
-
     private final Data data;
     private final Audience audience;
 
@@ -63,7 +40,28 @@ public class AnnounceRoundAction implements Action<Round> {
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
+        return new ConfigProcessor<>() {
+            private static final ConfigProcessor<TitlePart<Component>> TITLE_PART_CONFIG_PROCESSOR =
+                    AdventureConfigProcessors.componentTitlePart();
+
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
+                String formatMessage = node.getStringOrThrow("formatMessage");
+                TitlePart<Component> titlePart =
+                        TITLE_PART_CONFIG_PROCESSOR.dataFromElement(node.getElementOrThrow("titlePart"));
+                int priority = node.getNumberOrThrow("priority").intValue();
+                return new Data(formatMessage, titlePart, priority);
+            }
+
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(3);
+                node.putString("formatMessage", data.formatMessage);
+                node.put("titlePart", TITLE_PART_CONFIG_PROCESSOR.elementFromData(data.titlePart));
+                node.putNumber("priority", data.priority);
+                return node;
+            }
+        };
     }
 
     @Override
