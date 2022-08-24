@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.player.state;
 
 import net.kyori.adventure.key.Key;
+import com.github.phantazmnetwork.commons.Activable;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,10 +16,10 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
 
     private final Key key;
 
-    private final Collection<Action> actions;
+    private final Collection<Activable> actions;
 
     public BasicZombiesPlayerState(@NotNull Component displayName, @NotNull Key key,
-            @NotNull Collection<Action> actions) {
+            @NotNull Collection<Activable> actions) {
         this.displayName = Objects.requireNonNull(displayName, "displayName");
         this.key = Objects.requireNonNull(key, "key");
         this.actions = List.copyOf(actions);
@@ -26,14 +27,14 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
 
     @Override
     public void start() {
-        for (Action action : actions) {
+        for (Activable action : actions) {
             action.start();
         }
     }
 
     @Override
     public @NotNull Optional<ZombiesPlayerState> tick(long time) {
-        for (Action action : actions) {
+        for (Activable action : actions) {
             action.tick(time);
         }
         return Optional.empty();
@@ -41,7 +42,7 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
 
     @Override
     public void end() {
-        for (Action action : actions) {
+        for (Activable action : actions) {
             action.end();
         }
     }
@@ -55,22 +56,4 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
     public @NotNull Key key() {
         return key;
     }
-
-    public interface Action {
-
-        default void start() {
-
-        }
-
-        default void tick(long time) {
-
-        }
-
-        default void end() {
-
-        }
-
-
-    }
-
 }

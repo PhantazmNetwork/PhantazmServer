@@ -1,12 +1,8 @@
 package com.github.phantazmnetwork.zombies.game.stage;
 
-import com.github.phantazmnetwork.commons.Tickable;
+import com.github.phantazmnetwork.commons.Activable;
 
-public interface Stage extends Tickable {
-
-    void start();
-
-    void end();
+public interface Stage extends Activable {
 
     boolean shouldEnd();
 

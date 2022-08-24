@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar;
 
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section.SidebarSection;
-import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
@@ -19,16 +18,29 @@ public class SidebarUpdater {
 
     private final int[] sizes;
 
-    private final Int2ObjectFunction<String> indexToLineId;
+    private int totalSize = 0;
 
-    private boolean initialized = false;
-
-    public SidebarUpdater(@NotNull Sidebar sidebar, @NotNull Collection<SidebarSection> sections,
-            @NotNull Int2ObjectFunction<String> indexToLineId) {
+    public SidebarUpdater(@NotNull Sidebar sidebar, @NotNull Collection<SidebarSection> sections) {
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.sections = List.copyOf(sections);
         this.sizes = new int[sections.size()];
-        this.indexToLineId = Objects.requireNonNull(indexToLineId, "indexToLineId");
+    }
+
+    public void start() {
+        for (int i = 0; i < sizes.length; i++) {
+            int size = sections.get(i).getSize();
+            sizes[i] = size;
+            totalSize += size;
+        }
+
+        for (SidebarSection section : sections) {
+            section.invalidateCache();
+        }
+
+        int clampedSize = Math.min(totalSize, 15);
+        for (int i = 0; i < clampedSize; i++) {
+            sidebar.createLine(new Sidebar.ScoreboardLine(lineId(i), Component.empty(), clampedSize - i));
+        }
     }
 
     public void tick(long time) {
@@ -37,42 +49,56 @@ public class SidebarUpdater {
             List<Optional<Component>> newLines = sections.get(i).update(time);
             for (int j = 0; j < newLines.size(); j++) {
                 int index = i + j;
-                newLines.get(j).ifPresent(newLine -> {
-                    String lineId = indexToLineId.get(index);
-                    sidebar.updateLineContent(lineId, newLine);
-                });
+                if (0 <= index && index < 15) {
+                    newLines.get(j).ifPresent(newLine -> {
+                        String lineId = lineId(index);
+                        sidebar.updateLineContent(lineId, newLine);
+                    });
+                }
             }
         }
     }
 
-    private void refreshSections() {
-        if (!initialized) {
-            for (int i = 0; i < sizes.length; i++) {
-                sizes[i] = sections.get(i).getSize();
-            }
+    public void end() {
 
+    }
+
+    private void refreshSections() {
+        boolean shouldInvalidate = false;
+        int newTotalSize = 0;
+        for (int i = 0; i < sizes.length; i++) {
+            int newSize = sections.get(i).getSize();
+            if (sizes[i] != newSize) {
+                shouldInvalidate = true;
+                sizes[i] = newSize;
+            }
+            newTotalSize += newSize;
+        }
+
+        if (shouldInvalidate) {
             for (SidebarSection section : sections) {
                 section.invalidateCache();
             }
 
-            initialized = true;
-        }
-        else {
-            boolean shouldInvalidate = false;
-            for (int i = 0; i < sizes.length; i++) {
-                int newSize = sections.get(i).getSize();
-                if (sizes[i] != newSize) {
-                    shouldInvalidate = true;
-                    sizes[i] = newSize;
+            int oldClampedSize = Math.min(totalSize, 15);
+            int newClampedSize = Math.min(newTotalSize, 15);
+            if (oldClampedSize < newClampedSize) {
+                for (int i = oldClampedSize; i < newClampedSize; i++) {
+                    sidebar.createLine(new Sidebar.ScoreboardLine(lineId(i), Component.empty(), newClampedSize - i));
+                }
+            }
+            else if (oldClampedSize > newClampedSize) {
+                for (int i = oldClampedSize - 1; i >= newClampedSize; i--) {
+                    sidebar.removeLine(lineId(i));
                 }
             }
 
-            if (shouldInvalidate) {
-                for (SidebarSection section : sections) {
-                    section.invalidateCache();
-                }
-            }
+            totalSize = newTotalSize;
         }
+    }
+
+    private @NotNull String lineId(int index) {
+        return "line" + index;
     }
 
 }

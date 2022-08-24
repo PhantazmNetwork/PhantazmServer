@@ -8,13 +8,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class BasicTickFormatter implements TickFormatter {
+public class AnalogTickFormatter implements TickFormatter {
 
     private final TextColor digitColor;
 
     private final TextColor separatorColor;
 
-    public BasicTickFormatter(@NotNull TextColor digitColor, @NotNull TextColor separatorColor) {
+    public AnalogTickFormatter(@NotNull TextColor digitColor, @NotNull TextColor separatorColor) {
         this.digitColor = Objects.requireNonNull(digitColor, "digitColor");
         this.separatorColor = Objects.requireNonNull(separatorColor, "separatorColor");
     }

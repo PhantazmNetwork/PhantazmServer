@@ -1,12 +1,12 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal;
 
-import com.github.phantazmnetwork.commons.Tickable;
+import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 
 /**
  * Represents a goal for a {@link NeuralEntity} that usually controls its behavior.
  */
-public interface NeuralGoal extends Tickable {
+public interface NeuralGoal extends Activable {
 
     /**
      * Gets whether the goal should start.
@@ -16,20 +16,10 @@ public interface NeuralGoal extends Tickable {
     boolean shouldStart();
 
     /**
-     * Starts the goal.
-     */
-    void start();
-
-    /**
      * Gets whether the goal should end.
      *
      * @return Whether the goal should end
      */
     boolean shouldEnd();
-
-    /**
-     * Ends the goal.
-     */
-    void end();
 
 }

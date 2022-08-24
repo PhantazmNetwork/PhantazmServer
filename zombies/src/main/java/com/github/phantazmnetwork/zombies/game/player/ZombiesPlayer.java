@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.player;
 
-import com.github.phantazmnetwork.commons.Tickable;
+import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.core.inventory.InventoryAccess;
 import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.InventoryObject;
@@ -13,6 +13,7 @@ import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -21,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public interface ZombiesPlayer extends Tickable {
+public interface ZombiesPlayer extends Activable {
 
     @NotNull ZombiesPlayerMeta getMeta();
 
@@ -72,6 +73,8 @@ public interface ZombiesPlayer extends Tickable {
     }
 
     @NotNull PlayerView getPlayerView();
+
+    @NotNull Sidebar getSidebar();
 
     void start();
 

@@ -5,20 +5,19 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
-public class JoinedPlayersLineUpdater implements SidebarLineUpdater {
+public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
 
-    private final Map<UUID, ZombiesPlayer> zombiesPlayers;
+    private final Collection<ZombiesPlayer> zombiesPlayers;
 
     private final int maxPlayers;
 
     private int currentPlayers = -1;
 
-    public JoinedPlayersLineUpdater(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, int maxPlayers) {
+    public JoinedPlayersSidebarLineUpdater(@NotNull Collection<ZombiesPlayer> zombiesPlayers, int maxPlayers) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.maxPlayers = maxPlayers;
     }
