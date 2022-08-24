@@ -6,23 +6,23 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
-import com.github.phantazmnetwork.zombies.game.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
+import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Supplier;
 
 public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final PlayerView playerView;
+
+    private final ZombiesPlayerMeta meta;
 
     private final PlayerCoins coins;
 
@@ -36,57 +36,40 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final PlayerStateSwitcher stateSwitcher;
 
-    private Corpse corpse = null;
+    private final Map<Key, Supplier<ZombiesPlayerState>> stateSuppliers;
 
-    private boolean reviving = false;
-
-    private boolean inGame = false;
-
-    public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull PlayerCoins coins, @NotNull PlayerKills kills,
-            @NotNull EquipmentHandler equipmentHandler, @NotNull EquipmentCreator equipmentCreator,
-            @NotNull InventoryAccessRegistry profileSwitcher, @NotNull PlayerStateSwitcher stateSwitcher) {
+    public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
+            @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
+            @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
+            @NotNull PlayerStateSwitcher stateSwitcher,
+            @NotNull Map<Key, Supplier<ZombiesPlayerState>> stateSuppliers) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
         this.kills = Objects.requireNonNull(kills, "kills");
         this.equipmentHandler = Objects.requireNonNull(equipmentHandler, "equipmentHandler");
         this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
+        this.stateSuppliers = Map.copyOf(stateSuppliers);
     }
 
     @Override
     public void tick(long time) {
-    }
-
-    @Override
-    public boolean isCrouching() {
         Optional<Player> playerOptional = playerView.getPlayer();
         if (playerOptional.isPresent()) {
-            Player player = playerOptional.get();
-            return player.getPose() == Entity.Pose.SNEAKING;
+            meta.setCrouching(playerOptional.get().getPose() == Entity.Pose.SLEEPING);
+        }
+        else {
+            meta.setCrouching(false);
         }
 
-        return false;
+        stateSwitcher.tick(time);
     }
 
     @Override
-    public boolean isInGame() {
-        return inGame;
-    }
-
-    @Override
-    public void setInGame(boolean inGame) {
-        this.inGame = inGame;
-    }
-
-    @Override
-    public boolean isReviving() {
-        return reviving;
-    }
-
-    @Override
-    public void setReviving(boolean reviving) {
-        this.reviving = reviving;
+    public @NotNull ZombiesPlayerMeta getMeta() {
+        return meta;
     }
 
     @Override
@@ -130,17 +113,18 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     }
 
     @Override
+    public @NotNull Map<Key, Supplier<ZombiesPlayerState>> getStateSuppliers() {
+        return stateSuppliers;
+    }
+
+    @Override
     public @NotNull PlayerView getPlayerView() {
         return playerView;
     }
 
     @Override
-    public @NotNull Optional<Corpse> getCorpse() {
-        return Optional.ofNullable(corpse);
+    public void start() {
+        getStateSwitcher().start();
     }
 
-    @Override
-    public void setCorpse(@Nullable Corpse corpse) {
-        this.corpse = corpse;
-    }
 }

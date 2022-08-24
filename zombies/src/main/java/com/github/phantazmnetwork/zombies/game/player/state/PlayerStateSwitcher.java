@@ -13,6 +13,10 @@ public class PlayerStateSwitcher implements Tickable {
         this.state = Objects.requireNonNull(defaultState, "defaultState");
     }
 
+    public void start() {
+        state.start();
+    }
+
     @Override
     public void tick(long time) {
         state.tick(time).ifPresent(this::setState);

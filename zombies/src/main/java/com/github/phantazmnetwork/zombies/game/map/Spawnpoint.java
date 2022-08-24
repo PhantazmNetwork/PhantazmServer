@@ -6,7 +6,6 @@ import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
-import com.github.phantazmnetwork.zombies.game.player.state.AlivePlayerState;
 import com.github.phantazmnetwork.zombies.map.SpawnpointInfo;
 import com.github.phantazmnetwork.zombies.map.SpawnruleInfo;
 import net.kyori.adventure.key.Key;
@@ -75,8 +74,7 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
         double slaSquared = spawnrule.slaSquared();
         boolean inRange = false;
         for (ZombiesPlayer player : zombiesPlayers) {
-            // TODO: extract interface between this and sla check
-            if (!(player.getStateSwitcher().getState() instanceof AlivePlayerState)) {
+            if (!(player.getMeta().isCanTriggerSLA())) {
                 continue;
             }
 

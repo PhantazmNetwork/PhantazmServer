@@ -9,27 +9,21 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
-import com.github.phantazmnetwork.zombies.game.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
+import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public interface ZombiesPlayer extends Tickable {
 
-    boolean isCrouching();
-
-    boolean isInGame();
-
-    void setInGame(boolean inGame);
-
-    boolean isReviving();
-
-    void setReviving(boolean reviving);
+    @NotNull ZombiesPlayerMeta getMeta();
 
     long getReviveTime();
 
@@ -65,10 +59,20 @@ public interface ZombiesPlayer extends Tickable {
 
     @NotNull PlayerStateSwitcher getStateSwitcher();
 
+    @NotNull Map<Key, Supplier<ZombiesPlayerState>> getStateSuppliers();
+
+    default boolean setState(@NotNull Key stateKey) {
+        Supplier<ZombiesPlayerState> stateSupplier = getStateSuppliers().get(stateKey);
+        if (stateSupplier != null) {
+            getStateSwitcher().setState(stateSupplier.get());
+            return true;
+        }
+
+        return false;
+    }
+
     @NotNull PlayerView getPlayerView();
 
-    @NotNull Optional<Corpse> getCorpse();
-
-    void setCorpse(@Nullable Corpse corpse);
+    void start();
 
 }

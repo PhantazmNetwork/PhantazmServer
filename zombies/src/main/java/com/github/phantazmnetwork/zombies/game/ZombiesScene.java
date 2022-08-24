@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
+import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.game.stage.Stage;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import net.kyori.adventure.text.Component;
@@ -62,17 +63,29 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public @NotNull RouteResult join(@NotNull ZombiesJoinRequest joinRequest) {
+        Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
         Collection<PlayerView> newPlayers = new ArrayList<>(joinRequest.getPlayers().size());
         for (PlayerView player : joinRequest.getPlayers()) {
-            if (zombiesPlayers.containsKey(player.getUUID())) {
-                continue;
+            ZombiesPlayer zombiesPlayer = zombiesPlayers.get(player.getUUID());
+            if (zombiesPlayer != null) {
+                oldPlayers.add(zombiesPlayer);
             }
+            else {
+                newPlayers.add(player);
+            }
+        }
 
-            newPlayers.add(player);
+        Stage stage = getCurrentStage();
+        if (stage != null && stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
+            return new RouteResult(false, Component.text("The game is not accepting new players."));
         }
 
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
             return new RouteResult(false, Component.text("Too many players!", NamedTextColor.RED));
+        }
+
+        for (ZombiesPlayer zombiesPlayer : oldPlayers) {
+            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD);
         }
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
@@ -80,7 +93,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         List<Component> messages = mapSettingsInfo.introMessages();
         for (PlayerView view : newPlayers) {
             ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-            zombiesPlayer.setInGame(true);
+            zombiesPlayer.start();
             zombiesPlayers.put(view.getUUID(), zombiesPlayer);
             players.put(view.getUUID(), view);
 
@@ -118,7 +131,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             else {
                 ZombiesPlayer zombiesPlayer = zombiesPlayers.get(leaver);
                 if (zombiesPlayer != null) {
-                    zombiesPlayer.setInGame(false);
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT);
                 }
             }
         }
