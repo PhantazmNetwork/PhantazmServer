@@ -10,10 +10,7 @@ import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.coin.Transaction;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.*;
-import com.github.steanky.element.core.annotation.DependencySupplier;
-import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
@@ -31,6 +28,8 @@ import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
+
+    private final List<Transaction.Modifier> shopTransactionModifiers;
 
     private final List<Room> unmodifiableRooms;
     private final List<Shop> unmodifiableShops;
@@ -55,7 +54,9 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
             @NotNull SpawnDistributor spawnDistributor, @NotNull KeyParser keyParser) {
         super(info, info.settings().origin(), instance);
 
-        DependencyProvider provider = new ModuleDependencyProvider(new Module(this), keyParser);
+        DependencyProvider provider = new ModuleDependencyProvider(new ZombiesMapDependencyModule(this), keyParser);
+
+        this.shopTransactionModifiers = new ArrayList<>();
 
         List<RoomInfo> roomData = info.rooms();
         List<ShopInfo> shopData = info.shops();
@@ -92,6 +93,10 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         }
 
         return nodes;
+    }
+
+    public @NotNull List<Transaction.Modifier> getShopTransactionModifiers() {
+        return shopTransactionModifiers;
     }
 
     public @UnmodifiableView @NotNull List<Room> getRooms() {
@@ -247,28 +252,6 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
                     currentRound = null;
                 }
             }
-        }
-    }
-
-    public static class Module implements DependencyModule {
-        private final ZombiesMap map;
-        private final Collection<Transaction.Modifier> shopPurchaseModifiers;
-
-        private Module(@NotNull ZombiesMap map) {
-            this.map = map;
-            this.shopPurchaseModifiers = new ArrayList<>();
-        }
-
-        @DependencySupplier("zombies.dependency.map")
-        @Memoize
-        public @NotNull ZombiesMap provideMap() {
-            return map;
-        }
-
-        @DependencySupplier("zombies.dependency.shop.purchase_modifiers")
-        @Memoize
-        public @NotNull Collection<Transaction.Modifier> providePurchaseModifiers() {
-            return shopPurchaseModifiers;
         }
     }
 }
