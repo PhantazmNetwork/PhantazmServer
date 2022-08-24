@@ -60,7 +60,9 @@ public class SidebarUpdater {
     }
 
     public void end() {
-
+        for (Sidebar.ScoreboardLine line : sidebar.getLines()) {
+            sidebar.removeLine(line.getId());
+        }
     }
 
     private void refreshSections() {

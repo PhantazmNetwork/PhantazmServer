@@ -1,9 +1,10 @@
 package com.github.phantazmnetwork.zombies.game.player.state;
 
+import com.github.phantazmnetwork.commons.Tickable;
 import net.kyori.adventure.key.Key;
-import com.github.phantazmnetwork.commons.Activable;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,9 +27,9 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
     }
 
     @Override
-    public void start() {
+    public void start(@Nullable Key previousStateKey) {
         for (Activable action : actions) {
-            action.start();
+            action.start(previousStateKey);
         }
     }
 
@@ -41,9 +42,9 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
     }
 
     @Override
-    public void end() {
+    public void end(@Nullable Key nextStateKey) {
         for (Activable action : actions) {
-            action.end();
+            action.end(nextStateKey);
         }
     }
 
@@ -56,4 +57,22 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
     public @NotNull Key key() {
         return key;
     }
+
+    public interface Activable extends Tickable {
+
+        default void start(@Nullable Key previousStateKey) {
+
+        }
+
+        @Override
+        default void tick(long time) {
+
+        }
+
+        default void end(@Nullable Key nextStateKey) {
+
+        }
+
+    }
+
 }
