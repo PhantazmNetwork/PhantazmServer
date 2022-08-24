@@ -18,7 +18,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     private final Supplier<? extends ZombiesPlayer> reviverSupplier;
     private final Supplier<? extends ZombiesPlayerState> deathStateSupplier;
     private final Supplier<? extends ZombiesPlayerState> defaultStateSupplier;
-    private final Collection<? extends Action> actions;
+    private final Collection<? extends Activable> actions;
     private final long deathTime;
     private ZombiesPlayer reviver = null;
 
@@ -31,20 +31,20 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     public KnockedPlayerState(@NotNull Supplier<? extends ZombiesPlayerState> deathStateSupplier,
             @NotNull Supplier<? extends ZombiesPlayerState> defaultStateSupplier,
-            @NotNull Supplier<? extends ZombiesPlayer> reviverSupplier, @NotNull Collection<? extends Action> actions,
-            long deathTime) {
+            @NotNull Supplier<? extends ZombiesPlayer> reviverSupplier,
+            @NotNull Collection<? extends Activable> activables, long deathTime) {
         this.deathStateSupplier = Objects.requireNonNull(deathStateSupplier, "deathStateSupplier");
         this.defaultStateSupplier = Objects.requireNonNull(defaultStateSupplier, "defaultStateSupplier");
         this.reviverSupplier = Objects.requireNonNull(reviverSupplier, "reviverSupplier");
-        this.actions = List.copyOf(actions);
+        this.actions = List.copyOf(activables);
         this.deathTime = deathTime;
         this.ticksUntilDeath = deathTime;
     }
 
     @Override
     public void start() {
-        for (Action action : actions) {
-            action.start();
+        for (Activable activable : actions) {
+            activable.start();
         }
     }
 
@@ -63,8 +63,8 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             reviver = reviverSupplier.get();
             if (reviver == null) {
                 if (ticksUntilDeath-- > 0) {
-                    for (Action action : actions) {
-                        action.deathTick(time, ticksUntilDeath);
+                    for (Activable activable : actions) {
+                        activable.deathTick(time, ticksUntilDeath);
                     }
                 }
             }
@@ -80,8 +80,8 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             ticksUntilRevive = -1;
         }
         else if (ticksUntilRevive-- > 0) {
-            for (Action action : actions) {
-                action.reviveTick(time, reviver, ticksUntilRevive);
+            for (Activable activable : actions) {
+                activable.reviveTick(time, reviver, ticksUntilRevive);
             }
         }
 
@@ -93,8 +93,8 @@ public class KnockedPlayerState implements ZombiesPlayerState {
         if (reviver != null) {
             reviver.getMeta().setReviving(false);
         }
-        for (Action action : actions) {
-            action.end(reviver);
+        for (Activable activable : actions) {
+            activable.end(reviver);
         }
         reviver = null;
     }
@@ -109,7 +109,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
         return ZombiesPlayerStateKeys.KNOCKED;
     }
 
-    public interface Action {
+    public interface Activable {
 
         default void start() {
 

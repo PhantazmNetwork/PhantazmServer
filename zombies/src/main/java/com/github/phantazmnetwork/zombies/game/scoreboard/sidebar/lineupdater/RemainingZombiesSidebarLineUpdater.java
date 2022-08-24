@@ -27,10 +27,13 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
     @Override
     public @NotNull Optional<Component> tick(long time) {
         Round round = roundSupplier.get();
-        if (round != null && (lastRemainingZombies == -1 || lastRemainingZombies != round.getTotalMobCount())) {
-            lastRemainingZombies = round.getTotalMobCount();
-            return Optional.of(Component.textOfChildren(Component.text("Remaining Zombies: "),
-                    Component.text(lastRemainingZombies, NamedTextColor.GREEN)));
+        if (round != null) {
+            int totalMobCount = round.getTotalMobCount();
+            if ((lastRemainingZombies == -1 || lastRemainingZombies != totalMobCount)) {
+                lastRemainingZombies = totalMobCount;
+                return Optional.of(Component.textOfChildren(Component.text("Remaining Zombies: "),
+                        Component.text(lastRemainingZombies, NamedTextColor.GREEN)));
+            }
         }
 
         return Optional.empty();
