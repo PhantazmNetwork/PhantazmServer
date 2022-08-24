@@ -7,6 +7,10 @@ import com.github.phantazmnetwork.zombies.game.map.shop.interactor.FlagSettingIn
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.MessagingInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.PlaySoundInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.*;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.AndPredicate;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.NotPredicate;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.OrPredicate;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.XorPredicate;
 import com.github.steanky.element.core.context.ContextManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -37,6 +41,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(AndPredicate.class);
         contextManager.registerElementClass(OrPredicate.class);
         contextManager.registerElementClass(NotPredicate.class);
+        contextManager.registerElementClass(XorPredicate.class);
 
         //ShopInteractor
         contextManager.registerElementClass(FlagSettingInteractor.class);

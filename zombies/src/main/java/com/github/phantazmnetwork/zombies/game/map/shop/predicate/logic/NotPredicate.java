@@ -1,8 +1,10 @@
-package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
+package com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic;
 
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.PredicateBase;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -12,46 +14,40 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-@Model("zombies.map.shop.predicate.and")
-public class AndPredicate extends PredicateBase<AndPredicate.Data> {
+@Model("zombies.map.shop.predicate.not")
+public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     @ProcessorMethod
-    public static ConfigProcessor<AndPredicate.Data> processor() {
+    public static ConfigProcessor<NotPredicate.Data> processor() {
         return new PrioritizedProcessor<>() {
             @Override
             public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-                String first = node.getStringOrThrow("first");
-                String second = node.getStringOrThrow("second");
-                return new Data(priority, first, second);
+                String predicate = node.getStringOrThrow("predicate");
+                return new Data(priority, predicate);
             }
 
             @Override
             public @NotNull ConfigNode finishNode(@NotNull Data data) {
                 ConfigNode node = new LinkedConfigNode(2);
-                node.putString("first", data.first);
-                node.putString("second", data.second);
+                node.putString("predicate", data.predicate);
                 return node;
             }
         };
     }
 
-    private final ShopPredicate first;
-    private final ShopPredicate second;
+    private final ShopPredicate predicate;
 
     @FactoryMethod
-    public AndPredicate(@NotNull Data data, @DataName("first") ShopPredicate first,
-            @DataName("second") ShopPredicate second) {
+    public NotPredicate(@NotNull Data data, @DataName("predicate") ShopPredicate predicate) {
         super(data);
-        this.first = Objects.requireNonNull(first, "first");
-        this.second = Objects.requireNonNull(second, "second");
+        this.predicate = Objects.requireNonNull(predicate, "predicate");
     }
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        return first.canInteract(interaction) && second.canInteract(interaction);
+        return !predicate.canInteract(interaction);
     }
 
     @DataObject
-    public record Data(int priority, @DataPath("first") String first, @DataPath("second") String second)
-            implements Prioritized {
+    public record Data(int priority, @DataPath("predicate") String predicate) implements Prioritized {
     }
 }
