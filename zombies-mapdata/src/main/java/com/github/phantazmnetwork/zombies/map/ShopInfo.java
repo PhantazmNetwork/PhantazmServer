@@ -14,7 +14,8 @@ public record ShopInfo(@NotNull Key id,
                        @NotNull Vec3I triggerLocation,
                        @NotNull Evaluation predicateEvaluation,
                        @NotNull ConfigList predicates,
-                       @NotNull ConfigList interactors,
+                       @NotNull ConfigList successInteractors,
+                       @NotNull ConfigList failureInteractors,
                        @NotNull ConfigList displays) {
     /**
      * Creates a new instance of this record.
@@ -27,7 +28,8 @@ public record ShopInfo(@NotNull Key id,
         Objects.requireNonNull(triggerLocation, "triggerLocation");
         Objects.requireNonNull(predicateEvaluation, "predicateEvaluation");
         Objects.requireNonNull(predicates, "predicates");
-        Objects.requireNonNull(interactors, "interactors");
+        Objects.requireNonNull(successInteractors, "successInteractors");
+        Objects.requireNonNull(failureInteractors, "failureInteractors");
         Objects.requireNonNull(displays, "displays");
     }
 }
