@@ -6,8 +6,7 @@ import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramDi
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.FlagSettingInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.MessagingInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.PlaySoundInteractor;
-import com.github.phantazmnetwork.zombies.game.map.shop.predicate.FlagPredicate;
-import com.github.phantazmnetwork.zombies.game.map.shop.predicate.StaticCostPredicate;
+import com.github.phantazmnetwork.zombies.game.map.shop.predicate.*;
 import com.github.steanky.element.core.context.ContextManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -33,6 +32,11 @@ public final class ZombiesFeature {
         //ShopPredicate
         contextManager.registerElementClass(StaticCostPredicate.class);
         contextManager.registerElementClass(FlagPredicate.class);
+        contextManager.registerElementClass(PlayerStatePredicate.class);
+
+        contextManager.registerElementClass(AndPredicate.class);
+        contextManager.registerElementClass(OrPredicate.class);
+        contextManager.registerElementClass(NotPredicate.class);
 
         //ShopInteractor
         contextManager.registerElementClass(FlagSettingInteractor.class);

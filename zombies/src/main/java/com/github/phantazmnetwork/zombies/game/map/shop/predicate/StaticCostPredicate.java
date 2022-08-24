@@ -4,18 +4,22 @@ import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.game.coin.Transaction;
+import com.github.phantazmnetwork.zombies.game.coin.TransactionResult;
+import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 @Model("zombies.map.shop.predicate.static_cost")
 public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data> {
@@ -38,9 +42,13 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
         }
     };
 
+    private final Collection<Transaction.Modifier> modifiers;
+
     @FactoryMethod
-    public StaticCostPredicate(@NotNull Data data) {
+    public StaticCostPredicate(@NotNull Data data, @NotNull @Dependency("zombies.dependency.shop.purchase_modifiers")
+    Collection<Transaction.Modifier> modifiers) {
         super(data);
+        this.modifiers = Objects.requireNonNull(modifiers, "modifiers");
     }
 
     @ProcessorMethod
@@ -52,7 +60,9 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         ZombiesPlayer player = interaction.getPlayer();
         PlayerCoins coins = player.getCoins();
-        if (!coins.modify(-data.cost).applyIfAffordable(coins)) {
+        TransactionResult result = coins.runTransaction(new Transaction(modifiers, -data.cost));
+
+        if (!result.isAffordable(coins)) {
             player.getPlayerView().getPlayer().ifPresent(presentPlayer -> presentPlayer.sendMessage(data.message));
             return false;
         }

@@ -22,4 +22,9 @@ public record TransactionResult(@NotNull List<Component> modifierNames, int chan
 
         return false;
     }
+
+    public boolean isAffordable(@NotNull PlayerCoins coins) {
+        Objects.requireNonNull(coins, "coins");
+        return coins.getCoins() + change >= 0;
+    }
 }
