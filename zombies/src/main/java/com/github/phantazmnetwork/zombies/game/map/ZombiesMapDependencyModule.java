@@ -1,12 +1,10 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.zombies.game.coin.Transaction;
+import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 
 public class ZombiesMapDependencyModule implements DependencyModule {
     private final ZombiesMap map;
@@ -21,9 +19,9 @@ public class ZombiesMapDependencyModule implements DependencyModule {
         return map;
     }
 
-    @DependencySupplier("zombies.dependency.shop.purchase_modifiers")
+    @DependencySupplier("zombies.dependency.modifier_source")
     @Memoize
-    public @NotNull Collection<Transaction.Modifier> providePurchaseModifiers() {
-        return map.getShopTransactionModifiers();
+    public @NotNull ModifierSource modifierSource() {
+        return map.modifierSource();
     }
 }

@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.server;
 import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramDisplay;
+import com.github.phantazmnetwork.zombies.game.map.shop.interactor.DelayedInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.FlagSettingInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.MessagingInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.PlaySoundInteractor;
@@ -47,6 +48,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(FlagSettingInteractor.class);
         contextManager.registerElementClass(MessagingInteractor.class);
         contextManager.registerElementClass(PlaySoundInteractor.class);
+        contextManager.registerElementClass(DelayedInteractor.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);

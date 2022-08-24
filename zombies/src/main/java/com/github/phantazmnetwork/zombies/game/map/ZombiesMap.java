@@ -7,7 +7,8 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
-import com.github.phantazmnetwork.zombies.game.coin.Transaction;
+import com.github.phantazmnetwork.zombies.game.coin.BasicModifierSource;
+import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.steanky.element.core.context.ContextManager;
@@ -29,7 +30,7 @@ import java.util.*;
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
 
-    private final List<Transaction.Modifier> shopTransactionModifiers;
+    private final ModifierSource modifierSource;
 
     private final List<Room> unmodifiableRooms;
     private final List<Shop> unmodifiableShops;
@@ -56,7 +57,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
         DependencyProvider provider = new ModuleDependencyProvider(new ZombiesMapDependencyModule(this), keyParser);
 
-        this.shopTransactionModifiers = new ArrayList<>();
+        this.modifierSource = new BasicModifierSource();
 
         List<RoomInfo> roomData = info.rooms();
         List<ShopInfo> shopData = info.shops();
@@ -95,8 +96,8 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
         return nodes;
     }
 
-    public @NotNull List<Transaction.Modifier> getShopTransactionModifiers() {
-        return shopTransactionModifiers;
+    public @NotNull ModifierSource modifierSource() {
+        return modifierSource;
     }
 
     public @UnmodifiableView @NotNull List<Room> getRooms() {

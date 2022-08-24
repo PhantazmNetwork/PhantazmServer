@@ -18,26 +18,6 @@ import java.util.List;
 
 @Model("zombies.map.shop.interactor.messaging")
 public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data> {
-    private static final ConfigProcessor<Data> PROCESSOR = new PrioritizedProcessor<>() {
-        private static final ConfigProcessor<List<Component>> COMPONENT_LIST_PROCESSOR =
-                AdventureConfigProcessors.component().listProcessor();
-
-        @Override
-        public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-            List<Component> messages = COMPONENT_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("messages"));
-            boolean broadcast = node.getBooleanOrThrow("broadcast");
-            return new Data(priority, messages, broadcast);
-        }
-
-        @Override
-        public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(2);
-            node.put("messages", COMPONENT_LIST_PROCESSOR.elementFromData(data.messages));
-            node.putBoolean("broadcast", data.broadcast);
-            return node;
-        }
-    };
-
     @FactoryMethod
     public MessagingInteractor(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
         super(data, map);
@@ -45,7 +25,25 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        return PROCESSOR;
+        return new PrioritizedProcessor<>() {
+            private static final ConfigProcessor<List<Component>> COMPONENT_LIST_PROCESSOR =
+                    AdventureConfigProcessors.component().listProcessor();
+
+            @Override
+            public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
+                List<Component> messages = COMPONENT_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("messages"));
+                boolean broadcast = node.getBooleanOrThrow("broadcast");
+                return new Data(priority, messages, broadcast);
+            }
+
+            @Override
+            public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
+                ConfigNode node = new LinkedConfigNode(2);
+                node.put("messages", COMPONENT_LIST_PROCESSOR.elementFromData(data.messages));
+                node.putBoolean("broadcast", data.broadcast);
+                return node;
+            }
+        };
     }
 
     @Override
