@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
+import com.github.phantazmnetwork.zombies.game.coin.Transaction;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.steanky.element.core.annotation.DependencySupplier;
@@ -251,15 +252,23 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
 
     public static class Module implements DependencyModule {
         private final ZombiesMap map;
+        private final Collection<Transaction.Modifier> shopPurchaseModifiers;
 
         private Module(@NotNull ZombiesMap map) {
             this.map = map;
+            this.shopPurchaseModifiers = new ArrayList<>();
         }
 
         @DependencySupplier("zombies.dependency.map")
         @Memoize
         public @NotNull ZombiesMap provideMap() {
             return map;
+        }
+
+        @DependencySupplier("zombies.dependency.shop.purchase_modifiers")
+        @Memoize
+        public @NotNull Collection<Transaction.Modifier> providePurchaseModifiers() {
+            return shopPurchaseModifiers;
         }
     }
 }
