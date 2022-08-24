@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.stage;
 
 import com.github.phantazmnetwork.commons.Activable;
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,20 +16,20 @@ public class CountdownStage extends StageBase {
 
     private final long countdownDuration;
 
-    private long countdownTicksRemaining;
+    private final Wrapper<Long> countdownTicksRemaining;
 
     public CountdownStage(@NotNull Collection<Activable> activables, @NotNull Collection<ZombiesPlayer> zombiesPlayers,
-            long countdownDuration) {
+            @NotNull Wrapper<Long> countdownTicksRemaining, long countdownDuration) {
         super(activables);
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        this.countdownTicksRemaining = Objects.requireNonNull(countdownTicksRemaining, "countdownTicksRemaining");
         this.countdownDuration = countdownDuration;
-        this.countdownTicksRemaining = countdownDuration;
     }
 
     @Override
     public void tick(long time) {
         super.tick(time);
-        long previousTicks = countdownTicksRemaining--;
+        long previousTicks = countdownTicksRemaining.apply(ticks -> ticks - 1);
 
         // TODO: delegate to another class
         if (previousTicks == 400 || previousTicks == 200 || previousTicks == 100 || previousTicks == 80 ||
@@ -46,12 +47,12 @@ public class CountdownStage extends StageBase {
     @Override
     public void start() {
         super.start();
-        countdownTicksRemaining = countdownDuration;
+        countdownTicksRemaining.set(countdownDuration);
     }
 
     @Override
     public boolean shouldEnd() {
-        return countdownTicksRemaining <= 0;
+        return countdownTicksRemaining.get() <= 0;
     }
 
     @Override

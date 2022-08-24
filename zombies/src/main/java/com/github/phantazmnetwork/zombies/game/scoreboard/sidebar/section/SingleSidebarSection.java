@@ -11,15 +11,15 @@ import java.util.Optional;
 
 public class SingleSidebarSection implements SidebarSection {
 
-    private final SidebarLineUpdater sidebarLineUpdater;
+    private final SidebarLineUpdater lineUpdater;
 
-    public SingleSidebarSection(@NotNull SidebarLineUpdater sidebarLineUpdater) {
-        this.sidebarLineUpdater = Objects.requireNonNull(sidebarLineUpdater, "sidebarLineUpdater");
+    public SingleSidebarSection(@NotNull SidebarLineUpdater lineUpdater) {
+        this.lineUpdater = Objects.requireNonNull(lineUpdater, "lineUpdater");
     }
 
     @Override
     public void invalidateCache() {
-        sidebarLineUpdater.invalidateCache();
+        lineUpdater.invalidateCache();
     }
 
     @Override
@@ -29,6 +29,6 @@ public class SingleSidebarSection implements SidebarSection {
 
     @Override
     public @NotNull List<Optional<Component>> update(long time) {
-        return Collections.singletonList(sidebarLineUpdater.tick(time));
+        return Collections.singletonList(lineUpdater.tick(time));
     }
 }

@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.stage;
 
 import com.github.phantazmnetwork.commons.Activable;
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,30 +12,27 @@ public class InGameStage extends StageBase {
 
     private final ZombiesMap map;
 
-    private long ticksSinceStart = 0L;
+    private final Wrapper<Long> ticksSinceStart;
 
-    public InGameStage(@NotNull Collection<Activable> activables, @NotNull ZombiesMap map) {
+    public InGameStage(@NotNull Collection<Activable> activables, @NotNull ZombiesMap map,
+            @NotNull Wrapper<Long> ticksSinceStart) {
         super(activables);
         this.map = Objects.requireNonNull(map, "map");
+        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
     }
 
     @Override
     public void tick(long time) {
         super.tick(time);
         map.tick(time);
-        ticksSinceStart++;
+        ticksSinceStart.apply(ticks -> ticks + 1);
     }
 
     @Override
     public void start() {
         super.start();
         map.startRound(0);
-        ticksSinceStart = 0L;
-    }
-
-    @Override
-    public void end() {
-        ticksSinceStart = -1L;
+        ticksSinceStart.set(0L);
     }
 
     @Override
@@ -47,7 +45,4 @@ public class InGameStage extends StageBase {
         return true;
     }
 
-    public long getTicksSinceStart() {
-        return ticksSinceStart;
-    }
 }

@@ -6,13 +6,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ConstantLineUpdater implements SidebarLineUpdater {
+public class ConstantSidebarLineUpdater implements SidebarLineUpdater {
 
     private final Component component;
 
     private boolean componentSet = false;
 
-    public ConstantLineUpdater(@NotNull Component component) {
+    public ConstantSidebarLineUpdater(@NotNull Component component) {
         this.component = Objects.requireNonNull(component, "component");
     }
 

@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.game;
 
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
@@ -18,7 +19,9 @@ import com.github.phantazmnetwork.core.inventory.BasicInventoryProfile;
 import com.github.phantazmnetwork.core.inventory.InventoryAccess;
 import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.player.PlayerView;
-import com.github.phantazmnetwork.core.time.BasicTickFormatter;
+import com.github.phantazmnetwork.core.time.AnalogTickFormatter;
+import com.github.phantazmnetwork.core.time.DurationTickFormatter;
+import com.github.phantazmnetwork.core.time.MappedTickFormatter;
 import com.github.phantazmnetwork.core.time.TickFormatter;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
@@ -41,6 +44,8 @@ import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayerMeta;
 import com.github.phantazmnetwork.zombies.game.player.state.*;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.GroupSidebarUpdaterActivable;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.SidebarUpdater;
+import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.*;
+import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section.CollectionSidebarSection;
 import com.github.phantazmnetwork.zombies.game.stage.*;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.steanky.element.core.context.ContextManager;
@@ -173,27 +178,75 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         ZombiesMap map = new ZombiesMap(mapInfo, contextManager, instance, mobSpawner, blockHandler, spawnDistributor,
                 keyParser);
         Stage idle = new IdleStage(Collections.emptyList(), zombiesPlayers.values());
+        Wrapper<Long> countdownTicksRemaining = Wrapper.of(200L);
         Stage countdown = new CountdownStage(Collections.singleton(
                 new GroupSidebarUpdaterActivable(zombiesPlayers.values(), mapInfo.settings().maxPlayers()) {
                     @Override
                     protected @NotNull SidebarUpdater createUpdater(@NotNull ZombiesPlayer zombiesPlayer) {
-                        return new SidebarUpdater(zombiesPlayer.getSidebar(), List.of(
-
-                        ));
+                        return new SidebarUpdater(zombiesPlayer.getSidebar(), Collections.singleton(
+                                new CollectionSidebarSection(List.of(new ConstantSidebarLineUpdater(
+                                                Component.textOfChildren(Component.text("Map: "),
+                                                        mapInfo.settings().displayName())),
+                                        new JoinedPlayersSidebarLineUpdater(zombiesPlayers.values(),
+                                                mapInfo.settings().maxPlayers()),
+                                        new ConstantSidebarLineUpdater(Component.empty()),
+                                        new TicksLineUpdater(countdownTicksRemaining, new MappedTickFormatter(
+                                                new DurationTickFormatter(NamedTextColor.GREEN)) {
+                                            @Override
+                                            protected @NotNull Component map(@NotNull Component ticksComponent) {
+                                                return Component.textOfChildren(Component.text("Starting in "),
+                                                        ticksComponent);
+                                            }
+                                        })))));
                     }
-                }), zombiesPlayers.values(), 200L);
+                }), zombiesPlayers.values(), countdownTicksRemaining, countdownTicksRemaining.get());
+        Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         Stage inGame = new InGameStage(Collections.singleton(
                 new GroupSidebarUpdaterActivable(zombiesPlayers.values(), mapInfo.settings().maxPlayers()) {
                     @Override
                     protected @NotNull SidebarUpdater createUpdater(@NotNull ZombiesPlayer zombiesPlayer) {
-                        return null;
+                        List<SidebarLineUpdater> lineUpdaters = new ArrayList<>();
+                        lineUpdaters.add(new RoundSidebarLineUpdater(map));
+                        lineUpdaters.add(new RemainingZombiesSidebarLineUpdater(map::currentRound));
+                        lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
+                        lineUpdaters.add(new CoinsSidebarLineUpdater(zombiesPlayer.getPlayerView().getDisplayName(),
+                                zombiesPlayer.getCoins()));
+                        for (ZombiesPlayer player : zombiesPlayers.values()) {
+                            if (player != zombiesPlayer) {
+                                lineUpdaters.add(new CoinsSidebarLineUpdater(player.getPlayerView().getDisplayName(),
+                                        player.getCoins()));
+                            }
+                        }
+                        lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
+                        lineUpdaters.add(new ZombieKillsSidebarLineUpdater(zombiesPlayer.getKills()));
+                        lineUpdaters.add(new TicksLineUpdater(ticksSinceStart,
+                                new AnalogTickFormatter(NamedTextColor.GREEN, NamedTextColor.GREEN)));
+                        return new SidebarUpdater(zombiesPlayer.getSidebar(),
+                                Collections.singleton(new CollectionSidebarSection(lineUpdaters)));
                     }
-                }), map);
+                }), map, ticksSinceStart);
         Stage endGame = new EndGameStage(Collections.singleton(
                 new GroupSidebarUpdaterActivable(zombiesPlayers.values(), mapInfo.settings().maxPlayers()) {
                     @Override
                     protected @NotNull SidebarUpdater createUpdater(@NotNull ZombiesPlayer zombiesPlayer) {
-                        return null;
+                        List<SidebarLineUpdater> lineUpdaters = new ArrayList<>();
+                        lineUpdaters.add(new RoundSidebarLineUpdater(map));
+                        lineUpdaters.add(new RemainingZombiesSidebarLineUpdater(map::currentRound));
+                        lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
+                        lineUpdaters.add(new CoinsSidebarLineUpdater(zombiesPlayer.getPlayerView().getDisplayName(),
+                                zombiesPlayer.getCoins()));
+                        for (ZombiesPlayer player : zombiesPlayers.values()) {
+                            if (player != zombiesPlayer) {
+                                lineUpdaters.add(new CoinsSidebarLineUpdater(player.getPlayerView().getDisplayName(),
+                                        player.getCoins()));
+                            }
+                        }
+                        lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
+                        lineUpdaters.add(new ZombieKillsSidebarLineUpdater(zombiesPlayer.getKills()));
+                        lineUpdaters.add(new TicksLineUpdater(ticksSinceStart,
+                                new AnalogTickFormatter(NamedTextColor.GREEN, NamedTextColor.GREEN)));
+                        return new SidebarUpdater(zombiesPlayer.getSidebar(),
+                                Collections.singleton(new CollectionSidebarSection(lineUpdaters)));
                     }
                 }), zombiesPlayers.values(), 100L);
         StageTransition stageTransition = new StageTransition(List.of(idle, countdown, inGame, endGame));
@@ -378,7 +431,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                                     usernameBuilder.toString(), skin);
                             corpseEntity.setInstance(instance, minestomLocation);
                             TickFormatter tickFormatter =
-                                    new BasicTickFormatter(NamedTextColor.YELLOW, NamedTextColor.YELLOW);
+                                    new AnalogTickFormatter(NamedTextColor.YELLOW, NamedTextColor.YELLOW);
                             Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
                             knockedActions.add(new KnockedPlayerState.Activable() {
                                 @Override
