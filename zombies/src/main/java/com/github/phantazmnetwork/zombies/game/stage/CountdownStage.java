@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -29,19 +30,21 @@ public class CountdownStage extends StageBase {
     @Override
     public void tick(long time) {
         super.tick(time);
-        long previousTicks = countdownTicksRemaining.apply(ticks -> ticks - 1);
+        long previousTicks = countdownTicksRemaining.get();
 
         // TODO: delegate to another class
         if (previousTicks == 400 || previousTicks == 200 || previousTicks == 100 || previousTicks == 80 ||
                 previousTicks == 60 || previousTicks == 40 || previousTicks == 20) {
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                Component message =
-                        Component.text(previousTicks / 20 + " seconds until the game starts.", NamedTextColor.YELLOW);
+                Component message = Component.text(
+                        previousTicks / MinecraftServer.TICK_PER_SECOND + " seconds until the game starts.",
+                        NamedTextColor.YELLOW);
                 zombiesPlayer.getPlayerView().getPlayer().ifPresent(player -> {
                     player.sendMessage(message);
                 });
             }
         }
+        countdownTicksRemaining.apply(ticks -> ticks - 1);
     }
 
     @Override

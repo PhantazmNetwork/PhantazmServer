@@ -42,9 +42,9 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     }
 
     @Override
-    public void start() {
+    public void start(@Nullable Key previousStateKey) {
         for (Activable activable : actions) {
-            activable.start();
+            activable.start(previousStateKey);
         }
     }
 
@@ -89,12 +89,12 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     }
 
     @Override
-    public void end() {
+    public void end(@Nullable Key nextStateKey) {
         if (reviver != null) {
             reviver.getMeta().setReviving(false);
         }
         for (Activable activable : actions) {
-            activable.end(reviver);
+            activable.end(nextStateKey, reviver);
         }
         reviver = null;
     }
@@ -111,7 +111,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     public interface Activable {
 
-        default void start() {
+        default void start(@Nullable Key previousStateKey) {
 
         }
 
@@ -123,7 +123,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
         }
 
-        default void end(@Nullable ZombiesPlayer reviver) {
+        default void end(@Nullable Key nextStateKey, @Nullable ZombiesPlayer reviver) {
 
         }
 

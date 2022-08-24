@@ -25,9 +25,10 @@ public class RoundSidebarLineUpdater implements SidebarLineUpdater {
 
     @Override
     public @NotNull Optional<Component> tick(long time) {
-        if (lastRoundIndex == -1 || lastRoundIndex != map.getRoundIndex()) {
-            lastRoundIndex = map.getRoundIndex();
-            return Optional.of(Component.text("Round " + lastRoundIndex + 1, NamedTextColor.RED));
+        int newIndex = map.getRoundIndex();
+        if ((lastRoundIndex == -1 || lastRoundIndex != newIndex) && newIndex != -1) {
+            lastRoundIndex = newIndex;
+            return Optional.of(Component.text("Round " + (lastRoundIndex + 1), NamedTextColor.RED));
         }
 
         return Optional.empty();

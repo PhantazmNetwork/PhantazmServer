@@ -17,6 +17,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceManager;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,5 +109,9 @@ public final class Lobbies {
                 joinRequest.onPlayerLoginComplete();
             }
         });
+
+        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+            lobbyRouter.tick(System.currentTimeMillis());
+        }, TaskSchedule.immediate(), TaskSchedule.tick(1));
     }
 }

@@ -111,7 +111,7 @@ class BasicPlayerView implements PlayerView {
 
     @Override
     public @NotNull CompletableFuture<Component> getDisplayName() {
-        return getPlayer().map(player -> CompletableFuture.completedFuture(player.getDisplayName()))
+        return getPlayer().map(Player::getDisplayName).map(CompletableFuture::completedFuture)
                 .orElseGet(() -> getUsername().thenApply(Component::text));
 
     }

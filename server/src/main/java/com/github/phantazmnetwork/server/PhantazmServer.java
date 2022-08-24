@@ -196,7 +196,7 @@ public final class PhantazmServer {
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())));
         ZombiesFeature.initialize(contextManager);
-        ZombiesTest.initialize(global);
+        ZombiesTest.initialize(viewProvider, global);
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {

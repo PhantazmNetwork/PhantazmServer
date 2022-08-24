@@ -12,13 +12,22 @@ public class DurationTickFormatter implements TickFormatter {
 
     private final TextColor color;
 
-    public DurationTickFormatter(@NotNull TextColor color) {
+    private final boolean ceil;
+
+    public DurationTickFormatter(@NotNull TextColor color, boolean ceil) {
         this.color = Objects.requireNonNull(color, "color");
+        this.ceil = ceil;
     }
 
     @Override
     public @NotNull Component format(long ticks) {
-        long elapsedSeconds = ticks / MinecraftServer.TICK_PER_SECOND;
+        long elapsedSeconds;
+        if (ceil) {
+            elapsedSeconds = (long)Math.ceil((double)ticks / MinecraftServer.TICK_PER_SECOND);
+        }
+        else {
+            elapsedSeconds = ticks / MinecraftServer.TICK_PER_SECOND;
+        }
         long hours = elapsedSeconds / 3600;
         long minutes = (elapsedSeconds % 3600) / 60;
         long seconds = elapsedSeconds % 60;

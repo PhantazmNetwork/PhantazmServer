@@ -31,13 +31,15 @@ public class InGameStage extends StageBase {
     @Override
     public void start() {
         super.start();
-        map.startRound(0);
+        if (!map.getRounds().isEmpty()) {
+            map.startRound(0);
+        }
         ticksSinceStart.set(0L);
     }
 
     @Override
     public boolean shouldEnd() {
-        return map.currentRound() != null;
+        return map.currentRound() == null;
     }
 
     @Override

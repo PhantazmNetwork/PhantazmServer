@@ -15,6 +15,8 @@ public class CoinsSidebarLineUpdater implements SidebarLineUpdater {
 
     private Component playerName = null;
 
+    private int lastCoins = -1;
+
     public CoinsSidebarLineUpdater(@NotNull CompletableFuture<? extends Component> playerNameFuture,
             @NotNull PlayerCoins coins) {
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -25,7 +27,7 @@ public class CoinsSidebarLineUpdater implements SidebarLineUpdater {
 
     @Override
     public void invalidateCache() {
-        playerName = null;
+        lastCoins = -1;
     }
 
     @Override
@@ -34,7 +36,13 @@ public class CoinsSidebarLineUpdater implements SidebarLineUpdater {
             return Optional.empty();
         }
 
-        return Optional.of(Component.textOfChildren(playerName, Component.text(": "),
-                Component.text(coins.getCoins(), NamedTextColor.GOLD)));
+        int newCoins = coins.getCoins();
+        if (lastCoins == -1 || lastCoins != newCoins) {
+            lastCoins = newCoins;
+            return Optional.of(Component.textOfChildren(playerName, Component.text(": "),
+                    Component.text(coins.getCoins(), NamedTextColor.GOLD)));
+        }
+
+        return Optional.empty();
     }
 }
