@@ -10,6 +10,7 @@ import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.coin.BasicModifierSource;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
+import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.dependency.DependencyProvider;
@@ -52,10 +53,12 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
      */
     public ZombiesMap(@NotNull MapInfo info, @NotNull ContextManager contextManager, @NotNull Instance instance,
             @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler blockHandler,
-            @NotNull SpawnDistributor spawnDistributor, @NotNull KeyParser keyParser) {
+            @NotNull SpawnDistributor spawnDistributor, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
+            @NotNull KeyParser keyParser) {
         super(info, info.settings().origin(), instance);
 
-        DependencyProvider provider = new ModuleDependencyProvider(new ZombiesMapDependencyModule(this), keyParser);
+        DependencyProvider provider =
+                new ModuleDependencyProvider(new ZombiesMapDependencyModule(this, zombiesPlayers), keyParser);
 
         this.modifierSource = new BasicModifierSource();
 
