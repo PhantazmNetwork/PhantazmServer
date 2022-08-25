@@ -18,7 +18,7 @@ public class IdleStage extends StageBase {
 
     @Override
     public boolean shouldEnd() {
-        return zombiesPlayers.size() != 0;
+        return !zombiesPlayers.isEmpty();
     }
 
     @Override
