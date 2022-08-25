@@ -45,6 +45,7 @@ import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.GroupSidebarUp
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.SidebarUpdater;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.*;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section.CollectionSidebarSection;
+import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section.SidebarSection;
 import com.github.phantazmnetwork.zombies.game.stage.*;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.steanky.element.core.context.ContextManager;
@@ -59,6 +60,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.entity.damage.EntityDamage;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityDamageEvent;
@@ -184,11 +186,12 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     protected @NotNull SidebarUpdater createUpdater(@NotNull ZombiesPlayer zombiesPlayer) {
                         return new SidebarUpdater(zombiesPlayer.getSidebar(), Collections.singleton(
                                 new CollectionSidebarSection(List.of(new ConstantSidebarLineUpdater(
-                                                Component.textOfChildren(Component.text("Map: "),
-                                                        mapInfo.settings().displayName())),
+                                                new ConstantSidebarLineUpdater.Data(
+                                                        Component.textOfChildren(Component.text("Map: "),
+                                                                mapInfo.settings().displayName()))),
                                         new JoinedPlayersSidebarLineUpdater(zombiesPlayers.values(),
-                                                mapInfo.settings().maxPlayers()),
-                                        new ConstantSidebarLineUpdater(Component.empty()),
+                                                mapInfo.settings().maxPlayers()), new ConstantSidebarLineUpdater(
+                                                new ConstantSidebarLineUpdater.Data(Component.empty())),
                                         new TicksLineUpdater(countdownTicksRemaining, new MappedTickFormatter(
                                                 new DurationTickFormatter(NamedTextColor.GREEN, true)) {
                                             @Override
@@ -204,13 +207,15 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new GroupSidebarUpdaterActivable(zombiesPlayers.values(), mapInfo.settings().maxPlayers()) {
                     @Override
                     protected @NotNull SidebarUpdater createUpdater(@NotNull ZombiesPlayer zombiesPlayer) {
-                        List<SidebarLineUpdater> lineUpdaters = new ArrayList<>();
-                        lineUpdaters.add(new RoundSidebarLineUpdater(map));
-                        lineUpdaters.add(new RemainingZombiesSidebarLineUpdater(map::currentRound));
-                        lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
+                        List<SidebarLineUpdater> firstLineUpdaters = new ArrayList<>();
+                        firstLineUpdaters.add(new RoundSidebarLineUpdater(map));
+                        firstLineUpdaters.add(new RemainingZombiesSidebarLineUpdater(map::currentRound));
+                        firstLineUpdaters.add(
+                                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(Component.empty())));
+                        SidebarSection firstSection = new CollectionSidebarSection(firstLineUpdaters);
                         CompletableFuture<? extends Component> displayNameFuture =
                                 zombiesPlayer.getPlayerView().getDisplayName();
-                        lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
+                        firstLineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
                                         () -> zombiesPlayer.getStateSwitcher().getState().key()
                                                 .equals(ZombiesPlayerStateKeys.ALIVE.key()),
                                         new CoinsSidebarLineUpdater(displayNameFuture, zombiesPlayer.getCoins())),
@@ -220,7 +225,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                             if (otherZombiesPlayer != zombiesPlayer) {
                                 CompletableFuture<? extends Component> otherDisplayNameFuture =
                                         otherZombiesPlayer.getPlayerView().getDisplayName();
-                                lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
+                                firstLineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
                                         () -> otherZombiesPlayer.getStateSwitcher().getState().key()
                                                 .equals(ZombiesPlayerStateKeys.ALIVE.key()),
                                         new CoinsSidebarLineUpdater(otherDisplayNameFuture,
@@ -229,30 +234,91 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                                                 otherZombiesPlayer.getStateSwitcher())))));
                             }
                         }
-                        lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
-                        lineUpdaters.add(new ZombieKillsSidebarLineUpdater(zombiesPlayer.getKills()));
-                        lineUpdaters.add(new TicksLineUpdater(ticksSinceStart, new MappedTickFormatter(
+                        SidebarSection playerSection = new SidebarSection() {
+
+                            private final List<SidebarLineUpdater> lineUpdaters =
+                                    new ArrayList<>(mapInfo.settings().maxPlayers());
+
+                            {
+                                setup();
+                            }
+
+                            @Override
+                            public void invalidateCache() {
+                                lineUpdaters.clear();
+                                setup();
+                                for (SidebarLineUpdater lineUpdater : lineUpdaters) {
+                                    lineUpdater.invalidateCache();
+                                }
+                            }
+
+                            private void setup() {
+                                lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
+                                                () -> zombiesPlayer.getStateSwitcher().getState().key()
+                                                        .equals(ZombiesPlayerStateKeys.ALIVE.key()),
+                                                new CoinsSidebarLineUpdater(displayNameFuture, zombiesPlayer.getCoins())),
+                                        Pair.of(() -> true, new PlayerStateSidebarLineUpdater(displayNameFuture,
+                                                zombiesPlayer.getStateSwitcher())))));
+                                for (ZombiesPlayer otherZombiesPlayer : zombiesPlayers.values()) {
+                                    if (otherZombiesPlayer != zombiesPlayer) {
+                                        CompletableFuture<? extends Component> otherDisplayNameFuture =
+                                                otherZombiesPlayer.getPlayerView().getDisplayName();
+                                        lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
+                                                () -> otherZombiesPlayer.getStateSwitcher().getState().key()
+                                                        .equals(ZombiesPlayerStateKeys.ALIVE.key()),
+                                                new CoinsSidebarLineUpdater(otherDisplayNameFuture,
+                                                        otherZombiesPlayer.getCoins())), Pair.of(() -> true,
+                                                new PlayerStateSidebarLineUpdater(otherDisplayNameFuture,
+                                                        otherZombiesPlayer.getStateSwitcher())))));
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public int getSize() {
+                                return zombiesPlayers.size();
+                            }
+
+                            @Override
+                            public @NotNull List<Optional<Component>> update(long time) {
+                                List<Optional<Component>> results = new ArrayList<>(lineUpdaters.size());
+                                for (SidebarLineUpdater lineUpdater : lineUpdaters) {
+                                    results.add(lineUpdater.tick(time));
+                                }
+
+                                return results;
+                            }
+                        };
+                        List<SidebarLineUpdater> secondLineUpdaters = new ArrayList<>();
+                        secondLineUpdaters.add(
+                                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(Component.empty())));
+                        secondLineUpdaters.add(new ZombieKillsSidebarLineUpdater(zombiesPlayer.getKills()));
+                        secondLineUpdaters.add(new TicksLineUpdater(ticksSinceStart, new MappedTickFormatter(
                                 new AnalogTickFormatter(NamedTextColor.GREEN, NamedTextColor.GREEN, false)) {
                             @Override
                             protected @NotNull Component map(@NotNull Component ticksComponent) {
                                 return Component.textOfChildren(Component.text("Time: "), ticksComponent);
                             }
                         }));
+                        SidebarSection secondSection = new CollectionSidebarSection(secondLineUpdaters);
                         return new SidebarUpdater(zombiesPlayer.getSidebar(),
-                                Collections.singleton(new CollectionSidebarSection(lineUpdaters)));
+                                List.of(firstSection, playerSection, secondSection));
                     }
                 }), map, ticksSinceStart);
         Stage endGame = new EndGameStage(Collections.singleton(
                 new GroupSidebarUpdaterActivable(zombiesPlayers.values(), mapInfo.settings().maxPlayers()) {
                     @Override
                     protected @NotNull SidebarUpdater createUpdater(@NotNull ZombiesPlayer zombiesPlayer) {
-                        List<SidebarLineUpdater> lineUpdaters = new ArrayList<>();
-                        lineUpdaters.add(new RoundSidebarLineUpdater(map));
-                        lineUpdaters.add(new RemainingZombiesSidebarLineUpdater(map::currentRound));
-                        lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
+                        List<SidebarLineUpdater> firstLineUpdaters = new ArrayList<>();
+                        firstLineUpdaters.add(new RoundSidebarLineUpdater(map));
+                        firstLineUpdaters.add(new ConstantSidebarLineUpdater(
+                                new ConstantSidebarLineUpdater.Data(Component.text("GAME OVER"))));
+                        firstLineUpdaters.add(
+                                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(Component.empty())));
+                        SidebarSection firstSection = new CollectionSidebarSection(firstLineUpdaters);
                         CompletableFuture<? extends Component> displayNameFuture =
                                 zombiesPlayer.getPlayerView().getDisplayName();
-                        lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
+                        firstLineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
                                         () -> zombiesPlayer.getStateSwitcher().getState().key()
                                                 .equals(ZombiesPlayerStateKeys.ALIVE.key()),
                                         new CoinsSidebarLineUpdater(displayNameFuture, zombiesPlayer.getCoins())),
@@ -262,7 +328,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                             if (otherZombiesPlayer != zombiesPlayer) {
                                 CompletableFuture<? extends Component> otherDisplayNameFuture =
                                         otherZombiesPlayer.getPlayerView().getDisplayName();
-                                lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
+                                firstLineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
                                         () -> otherZombiesPlayer.getStateSwitcher().getState().key()
                                                 .equals(ZombiesPlayerStateKeys.ALIVE.key()),
                                         new CoinsSidebarLineUpdater(otherDisplayNameFuture,
@@ -271,17 +337,75 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                                                 otherZombiesPlayer.getStateSwitcher())))));
                             }
                         }
-                        lineUpdaters.add(new ConstantSidebarLineUpdater(Component.empty()));
-                        lineUpdaters.add(new ZombieKillsSidebarLineUpdater(zombiesPlayer.getKills()));
-                        lineUpdaters.add(new TicksLineUpdater(ticksSinceStart, new MappedTickFormatter(
+                        SidebarSection playerSection = new SidebarSection() {
+
+                            private final List<SidebarLineUpdater> lineUpdaters =
+                                    new ArrayList<>(mapInfo.settings().maxPlayers());
+
+                            {
+                                setup();
+                            }
+
+                            @Override
+                            public void invalidateCache() {
+                                lineUpdaters.clear();
+                                setup();
+                                for (SidebarLineUpdater lineUpdater : lineUpdaters) {
+                                    lineUpdater.invalidateCache();
+                                }
+                            }
+
+                            private void setup() {
+                                lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
+                                                () -> zombiesPlayer.getStateSwitcher().getState().key()
+                                                        .equals(ZombiesPlayerStateKeys.ALIVE.key()),
+                                                new CoinsSidebarLineUpdater(displayNameFuture, zombiesPlayer.getCoins())),
+                                        Pair.of(() -> true, new PlayerStateSidebarLineUpdater(displayNameFuture,
+                                                zombiesPlayer.getStateSwitcher())))));
+                                for (ZombiesPlayer otherZombiesPlayer : zombiesPlayers.values()) {
+                                    if (otherZombiesPlayer != zombiesPlayer) {
+                                        CompletableFuture<? extends Component> otherDisplayNameFuture =
+                                                otherZombiesPlayer.getPlayerView().getDisplayName();
+                                        lineUpdaters.add(new ConditionalSidebarLineUpdater(List.of(Pair.of(
+                                                () -> otherZombiesPlayer.getStateSwitcher().getState().key()
+                                                        .equals(ZombiesPlayerStateKeys.ALIVE.key()),
+                                                new CoinsSidebarLineUpdater(otherDisplayNameFuture,
+                                                        otherZombiesPlayer.getCoins())), Pair.of(() -> true,
+                                                new PlayerStateSidebarLineUpdater(otherDisplayNameFuture,
+                                                        otherZombiesPlayer.getStateSwitcher())))));
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public int getSize() {
+                                return zombiesPlayers.size();
+                            }
+
+                            @Override
+                            public @NotNull List<Optional<Component>> update(long time) {
+                                List<Optional<Component>> results = new ArrayList<>(lineUpdaters.size());
+                                for (SidebarLineUpdater lineUpdater : lineUpdaters) {
+                                    results.add(lineUpdater.tick(time));
+                                }
+
+                                return results;
+                            }
+                        };
+                        List<SidebarLineUpdater> secondLineUpdaters = new ArrayList<>();
+                        secondLineUpdaters.add(
+                                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(Component.empty())));
+                        secondLineUpdaters.add(new ZombieKillsSidebarLineUpdater(zombiesPlayer.getKills()));
+                        secondLineUpdaters.add(new TicksLineUpdater(ticksSinceStart, new MappedTickFormatter(
                                 new AnalogTickFormatter(NamedTextColor.GREEN, NamedTextColor.GREEN, false)) {
                             @Override
                             protected @NotNull Component map(@NotNull Component ticksComponent) {
                                 return Component.textOfChildren(Component.text("Time: "), ticksComponent);
                             }
                         }));
+                        SidebarSection secondSection = new CollectionSidebarSection(secondLineUpdaters);
                         return new SidebarUpdater(zombiesPlayer.getSidebar(),
-                                Collections.singleton(new CollectionSidebarSection(lineUpdaters)));
+                                List.of(firstSection, playerSection, secondSection));
                     }
                 }), zombiesPlayers.values(), 100L);
         StageTransition stageTransition = new StageTransition(List.of(idle, countdown, inGame, endGame));
@@ -294,7 +418,19 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
             @Override
             protected void onPlayerDeath(@NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
-                // todo: set state
+                Component killer;
+                if (event.getDamageType() instanceof EntityDamage entityDamage) {
+                    Entity source = entityDamage.getSource();
+                    Component customName = source.getCustomName();
+                    killer = (customName != null)
+                             ? customName
+                             : Component.translatable(source.getEntityType().registry().translationKey());
+                }
+                else {
+                    killer = null;
+                }
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.KNOCKED,
+                        new KnockedPlayerStateContext(event.getEntity().getPosition(), killer));
             }
         });
         PlayerRightClickListener rightClickListener = new PlayerRightClickListener();

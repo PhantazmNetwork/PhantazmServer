@@ -1,6 +1,9 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +12,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
+@Model("zombies.sidebar.lineupdater.joined_players")
 public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
 
     private final Collection<ZombiesPlayer> zombiesPlayers;
@@ -17,7 +21,11 @@ public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
 
     private int currentPlayers = -1;
 
-    public JoinedPlayersSidebarLineUpdater(@NotNull Collection<ZombiesPlayer> zombiesPlayers, int maxPlayers) {
+    @FactoryMethod
+    public JoinedPlayersSidebarLineUpdater(
+            @NotNull @Dependency(value = "java.collection", name = "zombies.players.collection")
+            Collection<ZombiesPlayer> zombiesPlayers,
+            @Dependency(value = "int", name = "zombies.map.max_players") int maxPlayers) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.maxPlayers = maxPlayers;
     }

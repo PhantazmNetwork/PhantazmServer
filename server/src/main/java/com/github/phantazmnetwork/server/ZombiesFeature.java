@@ -13,6 +13,7 @@ import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.AndPredi
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.NotPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.OrPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.XorPredicate;
+import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.*;
 import com.github.steanky.element.core.context.ContextManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -54,6 +55,16 @@ public final class ZombiesFeature {
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
+
+        //Sidebar LineUpdaters
+        contextManager.registerElementClass(CoinsSidebarLineUpdater.class);
+        contextManager.registerElementClass(ConstantSidebarLineUpdater.class);
+        contextManager.registerElementClass(JoinedPlayersSidebarLineUpdater.class);
+        contextManager.registerElementClass(PlayerStateSidebarLineUpdater.class);
+        contextManager.registerElementClass(RemainingZombiesSidebarLineUpdater.class);
+        contextManager.registerElementClass(RoundSidebarLineUpdater.class);
+        contextManager.registerElementClass(TicksLineUpdater.class);
+        contextManager.registerElementClass(ZombieKillsSidebarLineUpdater.class);
 
         LOGGER.info("Registered component classes.");
     }
