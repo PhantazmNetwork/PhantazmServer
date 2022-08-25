@@ -7,10 +7,7 @@ import com.github.phantazmnetwork.zombies.game.player.state.KnockedPlayerState;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.game.player.state.context.NoContext;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.Dependency;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -21,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Objects;
 
+@Model("zombies.map.round.action.revive_players")
 public class RevivePlayersAction implements Action<Round> {
 
     @DataObject
@@ -37,7 +35,8 @@ public class RevivePlayersAction implements Action<Round> {
     @FactoryMethod
     public RevivePlayersAction(@NotNull Data data,
             @NotNull @Dependency("zombies.dependency.players.collection") Collection<ZombiesPlayer> zombiesPlayers,
-            @NotNull @Dependency("zombies.dependency.map.respawnpoint.minestom") Pos respawnPoint) {
+            @NotNull @Dependency(value = "minestom.point.pos", name = "zombies.dependency.map.respawn_point.minestom")
+            Pos respawnPoint) {
         this.data = Objects.requireNonNull(data, "data");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.respawnPoint = Objects.requireNonNull(respawnPoint, "respawnPoint");
