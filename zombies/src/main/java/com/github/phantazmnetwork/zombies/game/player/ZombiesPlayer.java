@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.player;
 
 import com.github.phantazmnetwork.commons.Activable;
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.inventory.InventoryAccess;
 import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.InventoryObject;
@@ -10,7 +9,6 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
-import com.github.phantazmnetwork.zombies.game.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateSwitcher;
@@ -79,8 +77,6 @@ public interface ZombiesPlayer extends Activable {
     @NotNull PlayerView getPlayerView();
 
     @NotNull Sidebar getSidebar();
-
-    @NotNull Wrapper<Corpse> getCorpseWrapper();
 
     void start();
 

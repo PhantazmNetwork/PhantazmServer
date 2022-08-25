@@ -319,7 +319,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             profileSwitcher.switchAccess(profileKey);
             EquipmentHandler equipmentHandler = new EquipmentHandler(access);
             Sidebar sidebar = new Sidebar(Component.text("ZOMBIES", NamedTextColor.RED));
-            Wrapper<Corpse> corpseWrapper = Wrapper.ofNull();
             Function<NoContext, ZombiesPlayerState> aliveStateFunction =
                     context -> new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
                             ZombiesPlayerStateKeys.ALIVE.key(), Collections.singleton(new Activable() {
@@ -337,11 +336,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                                     sidebar.addViewer(player);
                                 }
                             });
-                            Corpse corpse = corpseWrapper.get();
-                            if (corpse != null) {
+                            meta.getCorpse().ifPresent(corpse -> {
                                 corpse.remove();
-                                corpseWrapper.set(null);
-                            }
+                                meta.setCorpse(null);
+                            });
                         }
                     }));
             Function<NoContext, ZombiesPlayerState> quitStateFunction =
@@ -546,7 +544,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 knockedActions.add(new KnockedPlayerState.Activable() {
                     @Override
                     public void start() {
-                        corpseWrapper.set(corpse);
+                        meta.setCorpse(corpse);
                         corpse.start();
                     }
 
@@ -569,7 +567,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     @Override
                     public void end() {
                         corpse.remove();
-                        corpseWrapper.set(null);
+                        meta.setCorpse(null);
                     }
                 });
                 knockedActions.trimToSize();
@@ -609,7 +607,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             };
 
             return new BasicZombiesPlayer(playerView, meta, coins, kills, equipmentHandler, temporaryCreator,
-                    profileSwitcher, stateSwitcher, stateSuppliers, sidebar, corpseWrapper);
+                    profileSwitcher, stateSwitcher, stateSuppliers, sidebar);
         };
 
         ZombiesScene scene =

@@ -75,7 +75,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             }
         }
         else if (!reviver.getMeta().isCanRevive() || !reviver.getMeta().isCrouching()) {
-            reviver.getMeta().setCanRevive(false);
+            reviver.getMeta().setReviving(false);
             reviver = null;
             ticksUntilRevive = -1;
         }
@@ -107,6 +107,25 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     @Override
     public @NotNull Key key() {
         return ZombiesPlayerStateKeys.KNOCKED.key();
+    }
+
+    public void setReviver(@Nullable ZombiesPlayer reviver) {
+        if (this.reviver == reviver) {
+            return;
+        }
+
+        if (this.reviver != null) {
+            this.reviver.getMeta().setReviving(false);
+        }
+        this.reviver = reviver;
+        if (reviver != null) {
+            ticksUntilDeath = deathTime;
+            reviver.getMeta().setReviving(true);
+            ticksUntilRevive = reviver.getReviveTime();
+        }
+        else {
+            ticksUntilRevive = -1;
+        }
     }
 
     public interface Activable {

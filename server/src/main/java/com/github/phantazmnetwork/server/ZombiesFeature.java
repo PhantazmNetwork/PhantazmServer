@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
+import com.github.phantazmnetwork.zombies.game.map.action.round.RevivePlayersAction;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramDisplay;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.DelayedInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.FlagSettingInteractor;
@@ -32,6 +33,7 @@ public final class ZombiesFeature {
         LOGGER.info("Registering component classes...");
         //actions
         contextManager.registerElementClass(AnnounceRoundAction.class);
+        contextManager.registerElementClass(RevivePlayersAction.class);
         contextManager.registerElementClass(SpawnMobsAction.class);
 
         //ShopPredicate

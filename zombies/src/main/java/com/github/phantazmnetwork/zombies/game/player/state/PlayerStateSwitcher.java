@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.zombies.game.player.state;
 
-import com.github.phantazmnetwork.commons.Tickable;
+import com.github.phantazmnetwork.commons.Activable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class PlayerStateSwitcher implements Tickable {
+public class PlayerStateSwitcher implements Activable {
 
     private ZombiesPlayerState state;
 
@@ -13,6 +13,7 @@ public class PlayerStateSwitcher implements Tickable {
         this.state = Objects.requireNonNull(defaultState, "defaultState");
     }
 
+    @Override
     public void start() {
         state.start();
     }
@@ -20,6 +21,11 @@ public class PlayerStateSwitcher implements Tickable {
     @Override
     public void tick(long time) {
         state.tick(time).ifPresent(this::setState);
+    }
+
+    @Override
+    public void end() {
+        state.end();
     }
 
     public @NotNull ZombiesPlayerState getState() {
