@@ -30,13 +30,9 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        boolean hasPreviousResult = false;
         boolean result = false;
-
         for (ShopPredicate predicate : predicates) {
-            boolean thisResult = predicate.canInteract(interaction);
-            result = (hasPreviousResult && result) ^ thisResult;
-            hasPreviousResult = true;
+            result = result ^ predicate.canInteract(interaction);
         }
 
         return result;
