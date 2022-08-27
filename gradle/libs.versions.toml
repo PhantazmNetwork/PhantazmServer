@@ -13,7 +13,7 @@ adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", 
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
 
-element-core = { module = "com.github.steanky:element-core", version = "0.3.0" }
+element-core = { module = "com.github.steanky:element-core", version = "0.4.0" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }

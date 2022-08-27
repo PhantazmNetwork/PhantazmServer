@@ -16,7 +16,9 @@ import com.github.steanky.element.core.data.BasicDataInspector;
 import com.github.steanky.element.core.data.BasicDataLocator;
 import com.github.steanky.element.core.data.DataInspector;
 import com.github.steanky.element.core.data.DataLocator;
+import com.github.steanky.element.core.factory.BasicCollectionCreator;
 import com.github.steanky.element.core.factory.BasicFactoryResolver;
+import com.github.steanky.element.core.factory.CollectionCreator;
 import com.github.steanky.element.core.factory.FactoryResolver;
 import com.github.steanky.element.core.key.*;
 import com.github.steanky.element.core.processor.BasicProcessorResolver;
@@ -170,8 +172,10 @@ public final class PhantazmServer {
         KeyExtractor typeExtractor = new BasicKeyExtractor("type", keyParser);
         ElementTypeIdentifier elementTypeIdentifier = new BasicElementTypeIdentifier(keyParser);
         DataInspector dataInspector = new BasicDataInspector(keyParser);
+        CollectionCreator collectionCreator = new BasicCollectionCreator();
 
-        FactoryResolver factoryResolver = new BasicFactoryResolver(keyParser, elementTypeIdentifier, dataInspector);
+        FactoryResolver factoryResolver =
+                new BasicFactoryResolver(keyParser, elementTypeIdentifier, dataInspector, collectionCreator);
         ProcessorResolver processorResolver = new BasicProcessorResolver();
         ElementInspector elementInspector = new BasicElementInspector(factoryResolver, processorResolver);
 
