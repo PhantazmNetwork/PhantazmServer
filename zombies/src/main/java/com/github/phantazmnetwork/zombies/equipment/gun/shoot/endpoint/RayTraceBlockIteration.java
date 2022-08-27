@@ -51,7 +51,7 @@ public class RayTraceBlockIteration implements BlockIteration {
             blockLocation = it.next();
             block = instance.getBlock(blockLocation);
 
-            if (map.windowAt(VecUtils.toBlockInt(blockLocation)).isPresent()) {
+            if (map.mapObjects().windowAt(VecUtils.toBlockInt(blockLocation)).isPresent()) {
                 continue;
             }
 

@@ -1,8 +1,9 @@
-package com.github.phantazmnetwork.zombies.game.map;
+package com.github.phantazmnetwork.zombies.game.map.objects;
 
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
+import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import com.github.steanky.element.core.annotation.DependencySupplier;
@@ -17,13 +18,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ZombiesMapDependencyModule implements DependencyModule {
+public class MapObjectDependencyModule implements DependencyModule {
 
     private final ZombiesMap map;
 
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
 
-    public ZombiesMapDependencyModule(@NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers) {
+    public MapObjectDependencyModule(@NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers) {
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }

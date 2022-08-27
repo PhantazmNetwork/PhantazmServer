@@ -12,15 +12,21 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 @Model("zombies.map.shop.interactor.messaging")
 public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data> {
+    private final Instance instance;
+
     @FactoryMethod
-    public MessagingInteractor(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
-        super(data, map);
+    public MessagingInteractor(@NotNull Data data,
+            @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
+        super(data);
+        this.instance = Objects.requireNonNull(instance, "instance");
     }
 
     @ProcessorMethod
@@ -49,7 +55,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.broadcast) {
-            sendMessages(map.getInstance());
+            sendMessages(instance);
         }
         else {
             interaction.getPlayer().getPlayerView().getPlayer().ifPresent(this::sendMessages);

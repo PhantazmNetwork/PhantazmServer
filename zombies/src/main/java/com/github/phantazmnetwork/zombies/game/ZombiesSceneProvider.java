@@ -176,8 +176,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Random random = new Random();
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, zombiesPlayers.values());
-        ZombiesMap map = new ZombiesMap(mapInfo, contextManager, instance, mobSpawner, blockHandler, spawnDistributor,
-                zombiesPlayers, keyParser);
+
+        //TODO
+        ZombiesMap map = null;
         Stage idle = new IdleStage(Collections.emptyList(), zombiesPlayers.values());
         Wrapper<Long> countdownTicksRemaining = Wrapper.of(200L);
         Stage countdown = new CountdownStage(Collections.singleton(

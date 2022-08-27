@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
-import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.game.map.Flaggable;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -17,20 +17,25 @@ import java.util.Objects;
 
 @Model("zombies.map.shop.predicate.flag_predicate")
 public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
-    private final ZombiesMap map;
+    private final Flaggable flaggable;
 
     @FactoryMethod
-    public FlagPredicate(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
+    public FlagPredicate(@NotNull Data data,
+            @NotNull @Dependency("zombies.dependency.map_object.flaggable") Flaggable flaggable) {
         super(data);
-        this.map = Objects.requireNonNull(map, "map");
+        this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
     }
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
+
+
         return new PrioritizedProcessor<>() {
+            private static final ConfigProcessor<Key> KEY_CONFIG_PROCESSOR = AdventureConfigProcessors.key();
+
             @Override
             public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-                Key flag = AdventureConfigProcessors.key().dataFromElement(node.getElementOrThrow("flag"));
+                Key flag = KEY_CONFIG_PROCESSOR.dataFromElement(node.getElementOrThrow("flag"));
                 boolean requireAbsent = node.getBooleanOrThrow("requireAbsent");
                 return new Data(priority, flag, requireAbsent);
             }
@@ -38,7 +43,7 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
             @Override
             public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(2);
-                node.put("flag", AdventureConfigProcessors.key().elementFromData(data.flag));
+                node.put("flag", KEY_CONFIG_PROCESSOR.elementFromData(data.flag));
                 node.putBoolean("requireAbsent", data.requireAbsent);
                 return node;
             }
@@ -47,7 +52,7 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        return map.hasFlag(data.flag) != data.requireAbsent;
+        return flaggable.hasFlag(data.flag) != data.requireAbsent;
     }
 
     @DataObject

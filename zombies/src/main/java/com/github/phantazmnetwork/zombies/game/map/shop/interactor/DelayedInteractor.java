@@ -17,6 +17,7 @@ import java.util.Objects;
 @Model("zombies.map.shop.interactor.delayed")
 public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     private final ShopInteractor target;
+
     private PlayerInteraction interaction;
     private long startTime;
 
@@ -43,9 +44,8 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     }
 
     @FactoryMethod
-    public DelayedInteractor(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map,
-            @DataName("target") ShopInteractor target) {
-        super(data, map);
+    public DelayedInteractor(@NotNull Data data, @DataName("target") ShopInteractor target) {
+        super(data);
         this.target = Objects.requireNonNull(target, "target");
     }
 

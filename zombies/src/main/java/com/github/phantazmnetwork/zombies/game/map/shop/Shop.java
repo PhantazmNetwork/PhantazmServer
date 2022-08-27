@@ -20,13 +20,14 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
     private final List<ShopInteractor> failureInteractors;
     private final List<ShopDisplay> displays;
 
-    public Shop(@NotNull ShopInfo info, @NotNull Vec3I origin, @NotNull Instance instance,
-            @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
-            @NotNull List<ShopInteractor> failureInteractors, @NotNull List<ShopDisplay> displays) {
-        super(info, origin, instance);
+    public Shop(@NotNull ShopInfo info, @NotNull Instance instance, @NotNull List<ShopPredicate> predicates,
+            @NotNull List<ShopInteractor> successInteractors, @NotNull List<ShopInteractor> failureInteractors,
+            @NotNull List<ShopDisplay> displays) {
+        super(info, info.triggerLocation(), instance);
 
         predicates.sort(Comparator.reverseOrder());
         successInteractors.sort(Comparator.reverseOrder());
+        failureInteractors.sort(Comparator.reverseOrder());
 
         this.predicates = List.copyOf(predicates);
         this.successInteractors = List.copyOf(successInteractors);
@@ -75,16 +76,12 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
 
     @Override
     public void tick(long time) {
-        if (!successInteractors.isEmpty()) {
-            for (ShopInteractor interactor : successInteractors) {
-                interactor.tick(time);
-            }
+        for (ShopInteractor interactor : successInteractors) {
+            interactor.tick(time);
         }
 
-        if (!displays.isEmpty()) {
-            for (ShopDisplay display : displays) {
-                display.tick(time);
-            }
+        for (ShopDisplay display : displays) {
+            display.tick(time);
         }
     }
 }

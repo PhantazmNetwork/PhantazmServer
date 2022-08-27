@@ -50,10 +50,9 @@ public class Window extends PositionalMapObject<WindowInfo> {
      * @param origin             the origin of the map
      * @param clientBlockHandler the {@link ClientBlockHandler} used to set client-only barrier blocks
      */
-    public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull Vec3I origin,
-            @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
-            @NotNull List<Action<Window>> breakActions) {
-        super(data, origin, instance);
+    public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull ClientBlockHandler clientBlockHandler,
+            @NotNull List<Action<Window>> repairActions, @NotNull List<Action<Window>> breakActions) {
+        super(data, data.frameRegion().origin(), instance);
 
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
 

@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.game.map.action.room;
 
 import com.github.phantazmnetwork.zombies.game.map.Room;
 import com.github.phantazmnetwork.zombies.game.map.Round;
+import com.github.phantazmnetwork.zombies.game.map.RoundHandler;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.MapProcessors;
@@ -21,12 +22,13 @@ import java.util.function.Supplier;
 @Model("zombies.map.room.action.spawn_mobs")
 public class SpawnMobsAction implements Action<Room> {
     private final Data data;
-    private final Supplier<? extends Round> currentRound;
+    private final RoundHandler roundHandler;
 
     @FactoryMethod
-    public SpawnMobsAction(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
+    public SpawnMobsAction(@NotNull Data data,
+            @NotNull @Dependency("zombies.dependency.map_object.round_handler") RoundHandler roundHandler) {
         this.data = Objects.requireNonNull(data, "data");
-        this.currentRound = map::currentRound;
+        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
     }
 
     @ProcessorMethod
@@ -54,10 +56,7 @@ public class SpawnMobsAction implements Action<Room> {
 
     @Override
     public void perform(@NotNull Room room) {
-        Round current = currentRound.get();
-        if (current != null) {
-            current.spawnMobs(data.mobSpawns);
-        }
+        roundHandler.currentRound().spawnMobs(data.mobSpawns);
     }
 
     @Override

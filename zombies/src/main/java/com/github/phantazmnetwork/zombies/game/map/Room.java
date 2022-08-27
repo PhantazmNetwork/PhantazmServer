@@ -25,9 +25,9 @@ public class Room extends PositionalMapObject<RoomInfo> {
      * @param origin   the origin vector this object's coordinates are considered relative to
      * @param instance the instance which this MapObject is in
      */
-    public Room(@NotNull RoomInfo roomInfo, @NotNull Vec3I origin, @NotNull Instance instance,
-            @NotNull List<Action<Room>> openActions) {
-        super(roomInfo, origin, instance);
+    public Room(@NotNull RoomInfo roomInfo, @NotNull Instance instance, @NotNull List<Action<Room>> openActions) {
+        super(roomInfo, Vec3I.floored(Region3I.enclosing(roomInfo.regions().toArray(new Region3I[0])).getCenter()),
+                instance);
         this.openActions = new ArrayList<>(openActions);
         this.openActions.sort(Comparator.reverseOrder());
 

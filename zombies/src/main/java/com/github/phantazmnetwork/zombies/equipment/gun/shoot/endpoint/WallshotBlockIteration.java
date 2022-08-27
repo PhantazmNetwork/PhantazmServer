@@ -58,7 +58,7 @@ public class WallshotBlockIteration implements BlockIteration {
             blockLocation = it.next();
             block = instance.getBlock(blockLocation);
 
-            if (wallshot || map.windowAt(VecUtils.toBlockInt(blockLocation)).isPresent()) {
+            if (wallshot || map.mapObjects().windowAt(VecUtils.toBlockInt(blockLocation)).isPresent()) {
                 continue;
             }
 

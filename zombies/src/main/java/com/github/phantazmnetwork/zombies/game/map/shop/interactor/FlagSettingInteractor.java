@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
+import com.github.phantazmnetwork.zombies.game.map.Flaggable;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
@@ -13,11 +14,17 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 @Model("zombies.map.shop.interactor.flag_setting")
 public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.Data> {
+    private final Flaggable flaggable;
+
     @FactoryMethod
-    public FlagSettingInteractor(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map") ZombiesMap map) {
-        super(data, map);
+    public FlagSettingInteractor(@NotNull Data data,
+            @NotNull @Dependency("zombies.dependency.map_object.flaggable") Flaggable flaggable) {
+        super(data);
+        this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
     }
 
     @ProcessorMethod
@@ -45,10 +52,10 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.remove) {
-            map.clearFlag(data.flag);
+            flaggable.clearFlag(data.flag);
         }
         else {
-            map.setFlag(data.flag);
+            flaggable.setFlag(data.flag);
         }
     }
 

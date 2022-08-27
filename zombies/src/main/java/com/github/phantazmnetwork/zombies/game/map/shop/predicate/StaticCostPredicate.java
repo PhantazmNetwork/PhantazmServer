@@ -23,7 +23,7 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
 
     @FactoryMethod
     public StaticCostPredicate(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.modifier_source") ModifierSource modifierSource) {
+            @NotNull @Dependency("zombies.dependency.map_object.modifier_source") ModifierSource modifierSource) {
         super(data);
         this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
     }

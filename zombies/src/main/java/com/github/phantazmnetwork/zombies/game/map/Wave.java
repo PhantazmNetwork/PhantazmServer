@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
+import com.github.phantazmnetwork.zombies.game.map.objects.MapObject;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import com.github.phantazmnetwork.zombies.map.WaveInfo;
 import org.jetbrains.annotations.NotNull;

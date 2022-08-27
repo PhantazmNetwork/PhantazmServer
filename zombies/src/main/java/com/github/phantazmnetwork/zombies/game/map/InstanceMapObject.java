@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
+import com.github.phantazmnetwork.zombies.game.map.objects.MapObject;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 

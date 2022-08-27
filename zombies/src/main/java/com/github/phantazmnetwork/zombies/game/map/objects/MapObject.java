@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.game.map;
+package com.github.phantazmnetwork.zombies.game.map.objects;
 
 import org.jetbrains.annotations.NotNull;
 

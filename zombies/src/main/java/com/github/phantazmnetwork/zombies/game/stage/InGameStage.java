@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.game.stage;
 
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.commons.Wrapper;
+import com.github.phantazmnetwork.zombies.game.map.RoundHandler;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,15 +32,16 @@ public class InGameStage extends StageBase {
     @Override
     public void start() {
         super.start();
-        if (!map.getRounds().isEmpty()) {
-            map.startRound(0);
+        RoundHandler roundHandler = map.roundHandler();
+        if (roundHandler.roundCount() != 0) {
+            roundHandler.setCurrentRound(0);
         }
         ticksSinceStart.set(0L);
     }
 
     @Override
     public boolean shouldEnd() {
-        return map.currentRound() == null;
+        return map.roundHandler().hasEnded();
     }
 
     @Override

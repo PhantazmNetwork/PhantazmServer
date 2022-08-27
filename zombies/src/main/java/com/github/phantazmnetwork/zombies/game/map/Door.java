@@ -41,9 +41,10 @@ public class Door extends PositionalMapObject<DoorInfo> {
      * @param origin   the origin vector to which this door's coordinates are considered relative
      * @param instance the instance which this MapObject is in
      */
-    public Door(@NotNull DoorInfo doorInfo, @NotNull Vec3I origin, @NotNull Instance instance, @NotNull Block fillBlock,
+    public Door(@NotNull DoorInfo doorInfo, @NotNull Instance instance, @NotNull Block fillBlock,
             @NotNull List<Action<Door>> openActions) {
-        super(doorInfo, origin, instance);
+        super(doorInfo, Vec3I.floored(Region3I.enclosing(doorInfo.regions().toArray(new Region3I[0])).getCenter()),
+                instance);
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
         List<Region3I> regions = doorInfo.regions();

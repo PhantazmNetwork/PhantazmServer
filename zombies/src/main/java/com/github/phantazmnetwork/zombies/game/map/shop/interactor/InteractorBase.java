@@ -8,11 +8,9 @@ import java.util.Objects;
 
 public abstract class InteractorBase<TData extends Prioritized> implements ShopInteractor {
     protected final TData data;
-    protected final ZombiesMap map;
-
-    public InteractorBase(@NotNull TData data, @NotNull ZombiesMap map) {
+    
+    public InteractorBase(@NotNull TData data) {
         this.data = Objects.requireNonNull(data, "data");
-        this.map = Objects.requireNonNull(map, "map");
     }
 
     @Override

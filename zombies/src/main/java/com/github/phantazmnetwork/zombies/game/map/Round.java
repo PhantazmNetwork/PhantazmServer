@@ -23,7 +23,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     private final List<Action<Round>> startActions;
     private final List<Action<Round>> endActions;
     private final SpawnDistributor spawnDistributor;
-    private final Supplier<? extends List<Spawnpoint>> spawnpointSupplier;
+    private final List<Spawnpoint> spawnpoints;
     private final List<PhantazmMob> spawnedMobs;
     private final List<PhantazmMob> unmodifiableSpawnedMobs;
 
@@ -41,7 +41,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull Instance instance, @NotNull List<Action<Round>> startActions,
             @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-            @NotNull Supplier<? extends List<Spawnpoint>> spawnpointSupplier) {
+            @NotNull List<Spawnpoint> spawnpoints) {
         super(roundInfo, instance);
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.size() == 0) {
@@ -59,7 +59,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
         this.spawnedMobs = new ArrayList<>();
         this.unmodifiableSpawnedMobs = Collections.unmodifiableList(spawnedMobs);
-        this.spawnpointSupplier = Objects.requireNonNull(spawnpointSupplier, "spawnpointSupplier");
+        this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
 
         this.startActions.sort(Comparator.reverseOrder());
         this.endActions.sort(Comparator.reverseOrder());
@@ -142,7 +142,7 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
             throw new IllegalStateException("Round must be active to spawn mobs");
         }
 
-        List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnpointSupplier.get(), spawnInfo);
+        List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnpoints, spawnInfo);
         spawnedMobs.addAll(spawns);
 
         if (isWave) {
@@ -168,8 +168,8 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
             }
 
             long timeSinceLastWave = time - waveStartTime;
-            if (waveIndex < unmodifiableWaves.size() && timeSinceLastWave > currentWave.data.delayTicks()) {
-                spawnMobs(currentWave.data.spawns(), spawnDistributor, true);
+            if (waveIndex < unmodifiableWaves.size() && timeSinceLastWave > currentWave.getData().delayTicks()) {
+                spawnMobs(currentWave.getData().spawns(), spawnDistributor, true);
 
                 waveStartTime = time;
                 if (++waveIndex >= unmodifiableWaves.size()) {
