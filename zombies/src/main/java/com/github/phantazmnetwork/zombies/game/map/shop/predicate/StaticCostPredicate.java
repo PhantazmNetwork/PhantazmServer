@@ -33,14 +33,14 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                int cost = element.getNumberOrThrow("cost").intValue();
+                int cost = element.getNumberOrThrow("purchaseCost").intValue();
                 Key modifierType = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("modifierType"));
                 return new Data(cost, modifierType);
             }
 
             @Override
             public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("cost", data.cost, "modifierType",
+                return ConfigNode.of("purchaseCost", data.cost, "modifierType",
                         KEY_PROCESSOR.elementFromData(data.modifierType));
             }
         };

@@ -49,6 +49,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(NotPredicate.class);
         contextManager.registerElementClass(XorPredicate.class);
 
+        contextManager.registerElementClass(EquipmentCostPredicate.class);
+
         //ShopInteractor
         contextManager.registerElementClass(FlagSettingInteractor.class);
         contextManager.registerElementClass(MessagingInteractor.class);
