@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 @Model("zombies.map.shop.interactor.delayed")
+@Cache(false)
 public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     private final ShopInteractor target;
 

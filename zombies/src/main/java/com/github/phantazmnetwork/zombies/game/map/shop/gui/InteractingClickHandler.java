@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @Model("zombies.map.shop.gui.click_handler.interacting")
+@Cache(false)
 public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHandler.Data> {
     private final ItemUpdater itemUpdater;
     private final ShopInteractor clickInteractor;
