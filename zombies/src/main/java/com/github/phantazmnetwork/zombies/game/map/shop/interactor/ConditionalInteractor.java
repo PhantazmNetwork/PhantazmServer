@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Objects;
 
-@Model("zombies.map.shop.interactor.delegating")
-public class DelegatingInteractor extends InteractorBase<DelegatingInteractor.Data> {
+@Model("zombies.map.shop.interactor.conditional")
+public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.Data> {
     private final List<ShopPredicate> predicates;
     private final List<ShopInteractor> interactors;
 
@@ -47,7 +47,7 @@ public class DelegatingInteractor extends InteractorBase<DelegatingInteractor.Da
     }
 
     @FactoryMethod
-    public DelegatingInteractor(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates,
+    public ConditionalInteractor(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates,
             @DataName("interactors") List<ShopInteractor> interactors) {
         super(data);
         this.predicates = Objects.requireNonNull(predicates, "predicates");

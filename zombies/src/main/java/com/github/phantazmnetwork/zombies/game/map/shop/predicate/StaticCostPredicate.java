@@ -8,7 +8,6 @@ import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
@@ -41,10 +40,8 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
 
             @Override
             public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.putNumber("cost", data.cost);
-                node.put("modifierType", KEY_PROCESSOR.elementFromData(data.modifierType));
-                return node;
+                return ConfigNode.of("cost", data.cost, "modifierType",
+                        KEY_PROCESSOR.elementFromData(data.modifierType));
             }
         };
     }

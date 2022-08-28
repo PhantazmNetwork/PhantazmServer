@@ -32,10 +32,8 @@ public class PlayerStatePredicate extends PredicateBase<PlayerStatePredicate.Dat
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("states", KEY_SET_PROCESSOR.elementFromData(data.states));
-                node.putBoolean("blacklist", data.blacklist);
-                return node;
+                return ConfigNode.of("states", KEY_SET_PROCESSOR.elementFromData(data.states), "blacklist",
+                        data.blacklist);
             }
         };
     }

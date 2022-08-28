@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface BooleanOperatorData {
     @NotNull List<String> paths();
 }

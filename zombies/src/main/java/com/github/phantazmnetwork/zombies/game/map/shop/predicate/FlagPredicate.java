@@ -39,10 +39,8 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("flag", KEY_CONFIG_PROCESSOR.elementFromData(data.flag));
-                node.putBoolean("requireAbsent", data.requireAbsent);
-                return node;
+                return ConfigNode.of("flag", KEY_CONFIG_PROCESSOR.elementFromData(data.flag), "requireAbsent",
+                        data.requireAbsent);
             }
         };
     }
