@@ -50,6 +50,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(XorPredicate.class);
 
         contextManager.registerElementClass(EquipmentCostPredicate.class);
+        contextManager.registerElementClass(EquipmentSpacePredicate.class);
 
         //ShopInteractor
         contextManager.registerElementClass(FlagSettingInteractor.class);
@@ -59,6 +60,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(ConditionalInteractor.class);
         contextManager.registerElementClass(OpenGuiInteractor.class);
         contextManager.registerElementClass(CloseGuiInteractor.class);
+        contextManager.registerElementClass(AddEquipmentInteractor.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);

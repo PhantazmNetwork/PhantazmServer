@@ -248,4 +248,14 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             effect.apply(state);
         }
     }
+
+    @Override
+    public @NotNull Key currentLevel() {
+        return levelKey;
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return model.rootLevel();
+    }
 }

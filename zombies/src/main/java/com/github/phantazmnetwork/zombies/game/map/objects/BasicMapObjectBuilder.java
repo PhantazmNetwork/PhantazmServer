@@ -3,6 +3,8 @@ package com.github.phantazmnetwork.zombies.game.map.objects;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.gui.SlotDistributor;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
+import com.github.phantazmnetwork.zombies.equipment.Equipment;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.game.map.*;
@@ -53,15 +55,18 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         private final ModifierSource modifierSource;
         private final SlotDistributor slotDistributor;
         private final Function<? super UUID, ? extends ZombiesPlayer> playerFunction;
+        private final EquipmentCreator equipmentCreator;
 
         private Module(Instance instance, RoundHandler roundHandler, Flaggable flaggable, ModifierSource modifierSource,
-                SlotDistributor slotDistributor, Function<? super UUID, ? extends ZombiesPlayer> playerFunction) {
+                SlotDistributor slotDistributor, Function<? super UUID, ? extends ZombiesPlayer> playerFunction,
+                EquipmentCreator equipmentCreator) {
             this.instance = Objects.requireNonNull(instance, "instance");
             this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
             this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
             this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
             this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
             this.playerFunction = Objects.requireNonNull(playerFunction, "playerFunction");
+            this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
         }
 
         @Memoize
@@ -99,6 +104,12 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         public Function<? super UUID, ? extends ZombiesPlayer> playerFunction() {
             return playerFunction;
         }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.equipment_creator")
+        public EquipmentCreator equipmentCreator() {
+            return equipmentCreator;
+        }
     }
 
     public BasicMapObjectBuilder(@NotNull ContextManager contextManager, @NotNull Instance instance,
@@ -106,7 +117,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             @NotNull SpawnDistributor spawnDistributor, @NotNull RoundHandler roundHandler,
             @NotNull Flaggable flaggable, @NotNull ModifierSource modifierSource,
             @NotNull SlotDistributor slotDistributor,
-            @NotNull Function<? super UUID, ? extends ZombiesPlayer> playerFunction, @NotNull KeyParser keyParser) {
+            @NotNull Function<? super UUID, ? extends ZombiesPlayer> playerFunction,
+            @NotNull EquipmentCreator equipmentCreator, @NotNull KeyParser keyParser) {
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
@@ -114,8 +126,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
 
         this.dependencyProvider = new ModuleDependencyProvider(
-                new Module(instance, roundHandler, flaggable, modifierSource, slotDistributor, playerFunction),
-                Objects.requireNonNull(keyParser, "keyParser"));
+                new Module(instance, roundHandler, flaggable, modifierSource, slotDistributor, playerFunction,
+                        equipmentCreator), Objects.requireNonNull(keyParser, "keyParser"));
     }
 
     @Override

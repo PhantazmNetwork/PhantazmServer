@@ -31,4 +31,5 @@ public interface Upgradable {
      */
     void setLevel(@NotNull Key key);
 
+    @NotNull Key currentLevel();
 }
