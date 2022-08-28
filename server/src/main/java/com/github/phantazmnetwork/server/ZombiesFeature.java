@@ -4,10 +4,7 @@ import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.RevivePlayersAction;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramDisplay;
-import com.github.phantazmnetwork.zombies.game.map.shop.interactor.DelayedInteractor;
-import com.github.phantazmnetwork.zombies.game.map.shop.interactor.FlagSettingInteractor;
-import com.github.phantazmnetwork.zombies.game.map.shop.interactor.MessagingInteractor;
-import com.github.phantazmnetwork.zombies.game.map.shop.interactor.PlaySoundInteractor;
+import com.github.phantazmnetwork.zombies.game.map.shop.interactor.*;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.*;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.AndPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.NotPredicate;
@@ -42,6 +39,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(FlagPredicate.class);
         contextManager.registerElementClass(PlayerStatePredicate.class);
         contextManager.registerElementClass(UuidPredicate.class);
+        contextManager.registerElementClass(DelegatingInteractor.class);
 
         contextManager.registerElementClass(AndPredicate.class);
         contextManager.registerElementClass(OrPredicate.class);

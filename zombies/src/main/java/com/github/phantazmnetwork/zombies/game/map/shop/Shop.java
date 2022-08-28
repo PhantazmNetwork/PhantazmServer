@@ -32,7 +32,7 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
     }
 
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        boolean interact = callPredicates(data.predicateEvaluation(), interaction);
+        boolean interact = data.predicateEvaluation().evaluate(predicates, interaction);
         List<ShopInteractor> interactorsToCall = interact ? successInteractors : failureInteractors;
 
         for (ShopInteractor interactor : interactorsToCall) {
@@ -41,32 +41,6 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
 
         for (ShopDisplay display : displays) {
             display.update(this, interaction, interact);
-        }
-    }
-
-    private boolean callPredicates(Evaluation evaluation, PlayerInteraction interaction) {
-        switch (evaluation) {
-            case ALL_TRUE -> {
-                for (ShopPredicate predicate : predicates) {
-                    if (!predicate.canInteract(interaction)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-            case ANY_TRUE -> {
-                boolean foundTrue = false;
-                for (ShopPredicate predicate : predicates) {
-                    if (predicate.canInteract(interaction)) {
-                        foundTrue = true;
-                        break;
-                    }
-                }
-
-                return foundTrue;
-            }
-            default -> throw new IllegalStateException();
         }
     }
 
