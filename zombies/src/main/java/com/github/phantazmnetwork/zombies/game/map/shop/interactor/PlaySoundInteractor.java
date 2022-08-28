@@ -1,10 +1,9 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
 import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -28,18 +27,18 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<PlaySoundInteractor.Data> processor() {
-        return new PrioritizedProcessor<>() {
+        return new ConfigProcessor<>() {
             private static final ConfigProcessor<Sound> SOUND_PROCESSOR = ConfigProcessors.sound();
 
             @Override
-            public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-                Sound sound = SOUND_PROCESSOR.dataFromElement(node.getElementOrThrow("sound"));
-                boolean broadcast = node.getBooleanOrThrow("broadcast");
-                return new Data(priority, sound, broadcast);
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                Sound sound = SOUND_PROCESSOR.dataFromElement(element.getElementOrThrow("sound"));
+                boolean broadcast = element.getBooleanOrThrow("broadcast");
+                return new Data(sound, broadcast);
             }
 
             @Override
-            public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.put("sound", SOUND_PROCESSOR.elementFromData(data.sound));
                 node.putBoolean("broadcast", data.broadcast);
@@ -60,6 +59,6 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     }
 
     @DataObject
-    public record Data(int priority, @NotNull Sound sound, boolean broadcast) implements Prioritized {
+    public record Data(@NotNull Sound sound, boolean broadcast) {
     }
 }

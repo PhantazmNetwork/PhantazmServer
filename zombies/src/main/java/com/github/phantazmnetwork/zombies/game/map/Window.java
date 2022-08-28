@@ -56,11 +56,8 @@ public class Window extends PositionalMapObject<WindowInfo> {
 
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
 
-        repairActions.sort(Comparator.reverseOrder());
-        breakActions.sort(Comparator.reverseOrder());
-
-        this.repairActions = new ArrayList<>(repairActions);
-        this.breakActions = new ArrayList<>(breakActions);
+        this.repairActions = List.copyOf(repairActions);
+        this.breakActions = List.copyOf(breakActions);
 
         Region3I frame = data.frameRegion();
         Vec3I min = frame.origin();

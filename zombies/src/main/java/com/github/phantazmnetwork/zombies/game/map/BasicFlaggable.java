@@ -11,7 +11,7 @@ public class BasicFlaggable implements Flaggable {
     private final Set<Key> flags;
 
     public BasicFlaggable() {
-        this.flags = new HashSet<>();
+        this(16);
     }
 
     public BasicFlaggable(int initialSize) {

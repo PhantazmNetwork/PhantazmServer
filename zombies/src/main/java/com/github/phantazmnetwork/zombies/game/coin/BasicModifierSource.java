@@ -18,23 +18,9 @@ public class BasicModifierSource implements ModifierSource {
 
         Collection<Transaction.Modifier> modifiers = modifierSources.get(key);
         if (modifiers == null) {
-            throw new IllegalArgumentException("no modifiers present for key '" + key + "'");
+            return Collections.emptyList();
         }
 
         return modifiers;
-    }
-
-    @Override
-    public void registerType(@NotNull Key key) {
-        Objects.requireNonNull(key, "key");
-        if (modifierSources.putIfAbsent(key, new ArrayList<>()) != null) {
-            throw new IllegalArgumentException("modifierType type '" + key + "' already registered");
-        }
-    }
-
-    @Override
-    public boolean hasType(@NotNull Key key) {
-        Objects.requireNonNull(key, "key");
-        return modifierSources.containsKey(key);
     }
 }

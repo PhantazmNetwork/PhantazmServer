@@ -1,13 +1,12 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -21,18 +20,18 @@ import java.util.Set;
 public class PlayerStatePredicate extends PredicateBase<PlayerStatePredicate.Data> {
     @ProcessorMethod
     public static ConfigProcessor<PlayerStatePredicate.Data> processor() {
-        return new PrioritizedProcessor<>() {
+        return new ConfigProcessor<>() {
             private static final ConfigProcessor<Set<Key>> KEY_SET_PROCESSOR = ConfigProcessors.key().setProcessor();
 
             @Override
-            public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-                Set<Key> states = KEY_SET_PROCESSOR.dataFromElement(node.getElementOrThrow("states"));
-                boolean blacklist = node.getBooleanOrThrow("blacklist");
-                return new Data(priority, states, blacklist);
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                Set<Key> states = KEY_SET_PROCESSOR.dataFromElement(element.getElementOrThrow("states"));
+                boolean blacklist = element.getBooleanOrThrow("blacklist");
+                return new Data(states, blacklist);
             }
 
             @Override
-            public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.put("states", KEY_SET_PROCESSOR.elementFromData(data.states));
                 node.putBoolean("blacklist", data.blacklist);
@@ -52,6 +51,6 @@ public class PlayerStatePredicate extends PredicateBase<PlayerStatePredicate.Dat
     }
 
     @DataObject
-    public record Data(int priority, @NotNull Set<Key> states, boolean blacklist) implements Prioritized {
+    public record Data(@NotNull Set<Key> states, boolean blacklist) {
     }
 }

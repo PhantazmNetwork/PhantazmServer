@@ -7,7 +7,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Model("zombies.map.shop.predicate.and")
@@ -22,8 +21,6 @@ public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     @FactoryMethod
     public AndPredicate(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates) {
         super(data);
-
-        predicates.sort(Comparator.reverseOrder());
         this.predicates = List.copyOf(predicates);
     }
 
@@ -39,6 +36,6 @@ public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     }
 
     @DataObject
-    public record Data(int priority, @DataPath("predicates") List<String> paths) implements BooleanOperatorData {
+    public record Data(@DataPath("predicates") List<String> paths) implements BooleanOperatorData {
     }
 }

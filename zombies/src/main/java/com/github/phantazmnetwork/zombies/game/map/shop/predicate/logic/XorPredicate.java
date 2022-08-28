@@ -22,8 +22,6 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
     @FactoryMethod
     public XorPredicate(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates) {
         super(data);
-
-        predicates.sort(Comparator.reverseOrder());
         this.predicates = List.copyOf(predicates);
     }
 
@@ -38,6 +36,6 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
     }
 
     @DataObject
-    public record Data(int priority, @DataPath("predicates") List<String> paths) implements BooleanOperatorData {
+    public record Data(@DataPath("predicates") List<String> paths) implements BooleanOperatorData {
     }
 }

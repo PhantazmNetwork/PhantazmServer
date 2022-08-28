@@ -9,17 +9,17 @@ import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import com.github.phantazmnetwork.zombies.map.WaveInfo;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
 
-    private final List<Wave> unmodifiableWaves;
+    private final List<Wave> waves;
     private final List<Action<Round>> startActions;
     private final List<Action<Round>> endActions;
     private final SpawnDistributor spawnDistributor;
@@ -39,30 +39,23 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
      *
      * @param roundInfo the backing data object
      */
-    public Round(@NotNull RoundInfo roundInfo, @NotNull Instance instance, @NotNull List<Action<Round>> startActions,
-            @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-            @NotNull List<Spawnpoint> spawnpoints) {
+    public Round(@NotNull RoundInfo roundInfo, @NotNull Instance instance, @NotNull List<Wave> waves,
+            @NotNull List<Action<Round>> startActions, @NotNull List<Action<Round>> endActions,
+            @NotNull SpawnDistributor spawnDistributor, @NotNull List<Spawnpoint> spawnpoints) {
         super(roundInfo, instance);
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.size() == 0) {
             LOGGER.warn("Round {} has no waves", roundInfo);
         }
 
-        List<Wave> waves = new ArrayList<>(waveInfo.size());
-        for (WaveInfo info : waveInfo) {
-            waves.add(new Wave(info));
-        }
-
-        this.unmodifiableWaves = Collections.unmodifiableList(waves);
-        this.startActions = new ArrayList<>(startActions);
-        this.endActions = new ArrayList<>(endActions);
+        this.waves = List.copyOf(waves);
+        this.startActions = List.copyOf(startActions);
+        this.endActions = List.copyOf(endActions);
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
+
         this.spawnedMobs = new ArrayList<>();
         this.unmodifiableSpawnedMobs = Collections.unmodifiableList(spawnedMobs);
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
-
-        this.startActions.sort(Comparator.reverseOrder());
-        this.endActions.sort(Comparator.reverseOrder());
     }
 
     public void removeMob(@NotNull PhantazmMob mob) {
@@ -83,8 +76,8 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         this.totalMobCount = count;
     }
 
-    public @UnmodifiableView @NotNull List<Wave> getWaves() {
-        return unmodifiableWaves;
+    public @Unmodifiable @NotNull List<Wave> getWaves() {
+        return waves;
     }
 
     public boolean isActive() {
@@ -101,12 +94,12 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
             action.perform(this);
         }
 
-        if (unmodifiableWaves.size() > 0) {
-            currentWave = unmodifiableWaves.get(waveIndex = 0);
+        if (waves.size() > 0) {
+            currentWave = waves.get(waveIndex = 0);
             waveStartTime = time;
 
             totalMobCount = 0;
-            for (Wave wave : unmodifiableWaves) {
+            for (Wave wave : waves) {
                 totalMobCount += wave.mobCount();
             }
         }
@@ -168,15 +161,15 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
             }
 
             long timeSinceLastWave = time - waveStartTime;
-            if (waveIndex < unmodifiableWaves.size() && timeSinceLastWave > currentWave.getData().delayTicks()) {
+            if (waveIndex < waves.size() && timeSinceLastWave > currentWave.getData().delayTicks()) {
                 spawnMobs(currentWave.getData().spawns(), spawnDistributor, true);
 
                 waveStartTime = time;
-                if (++waveIndex >= unmodifiableWaves.size()) {
+                if (++waveIndex >= waves.size()) {
                     return;
                 }
 
-                currentWave = unmodifiableWaves.get(waveIndex);
+                currentWave = waves.get(waveIndex);
             }
         }
     }

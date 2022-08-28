@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic;
 
-import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.PredicateBase;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -18,16 +17,16 @@ import java.util.Objects;
 public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     @ProcessorMethod
     public static ConfigProcessor<NotPredicate.Data> processor() {
-        return new PrioritizedProcessor<>() {
+        return new ConfigProcessor<>() {
             @Override
-            public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-                String predicate = node.getStringOrThrow("predicate");
-                return new Data(priority, predicate);
+            public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                String predicate = element.getStringOrThrow("predicate");
+                return new Data(predicate);
             }
 
             @Override
-            public @NotNull ConfigNode finishNode(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(2);
+            public @NotNull ConfigElement elementFromData(Data data) {
+                ConfigNode node = new LinkedConfigNode(1);
                 node.putString("predicate", data.predicate);
                 return node;
             }
@@ -48,6 +47,6 @@ public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     }
 
     @DataObject
-    public record Data(int priority, @DataPath("predicate") String predicate) implements Prioritized {
+    public record Data(@DataPath("predicate") String predicate) {
     }
 }

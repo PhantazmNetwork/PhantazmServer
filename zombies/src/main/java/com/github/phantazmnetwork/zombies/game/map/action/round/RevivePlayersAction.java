@@ -22,7 +22,7 @@ import java.util.Objects;
 public class RevivePlayersAction implements Action<Round> {
 
     @DataObject
-    public record Data(int priority) {
+    public record Data() {
 
     }
 
@@ -47,20 +47,14 @@ public class RevivePlayersAction implements Action<Round> {
         return new ConfigProcessor<>() {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                int priority = element.getNumberOrThrow("priority").intValue();
-                return new Data(priority);
+                return new Data();
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return ConfigNode.of("priority", data.priority());
+                return ConfigNode.of();
             }
         };
-    }
-
-    @Override
-    public int priority() {
-        return data.priority();
     }
 
     @Override

@@ -228,16 +228,22 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     private List<Round> buildRounds(List<RoundInfo> roundInfoList, List<Spawnpoint> spawnpoints) {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
+            List<WaveInfo> waveInfo = roundInfo.waves();
             ConfigList startActionInfo = roundInfo.startActions();
             ConfigList endActionInfo = roundInfo.endActions();
 
+            List<Wave> waves = new ArrayList<>(waveInfo.size());
             List<Action<Round>> startActions = new ArrayList<>(startActionInfo.size());
             List<Action<Round>> endActions = new ArrayList<>(endActionInfo.size());
 
             createElements(startActionInfo, startActions, () -> "round start action");
             createElements(endActionInfo, endActions, () -> "round end action");
 
-            rounds.add(new Round(roundInfo, instance, startActions, endActions, spawnDistributor, spawnpoints));
+            for (WaveInfo wave : roundInfo.waves()) {
+                waves.add(new Wave(wave));
+            }
+
+            rounds.add(new Round(roundInfo, instance, waves, startActions, endActions, spawnDistributor, spawnpoints));
         }
 
         return rounds;

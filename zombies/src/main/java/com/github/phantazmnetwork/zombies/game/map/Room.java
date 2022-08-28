@@ -28,8 +28,7 @@ public class Room extends PositionalMapObject<RoomInfo> {
     public Room(@NotNull RoomInfo roomInfo, @NotNull Instance instance, @NotNull List<Action<Room>> openActions) {
         super(roomInfo, Vec3I.floored(Region3I.enclosing(roomInfo.regions().toArray(new Region3I[0])).getCenter()),
                 instance);
-        this.openActions = new ArrayList<>(openActions);
-        this.openActions.sort(Comparator.reverseOrder());
+        this.openActions = List.copyOf(openActions);
 
         List<Region3I> list = new ArrayList<>(roomInfo.regions().size());
         for (Region3I region : roomInfo.regions()) {

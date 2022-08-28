@@ -1,10 +1,8 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
-import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
-import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -23,17 +21,17 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
 
     @ProcessorMethod
     public static ConfigProcessor<Data> processor() {
-        return new PrioritizedProcessor<>() {
+        return new ConfigProcessor<>() {
             @Override
-            public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-                String targetPath = node.getStringOrThrow("targetPath");
-                int delayTicks = node.getNumberOrThrow("delayTicks").intValue();
-                boolean resetOnInteract = node.getBooleanOrThrow("resetOnInteract");
-                return new Data(priority, targetPath, delayTicks, resetOnInteract);
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                String targetPath = element.getStringOrThrow("targetPath");
+                int delayTicks = element.getNumberOrThrow("delayTicks").intValue();
+                boolean resetOnInteract = element.getBooleanOrThrow("resetOnInteract");
+                return new Data(targetPath, delayTicks, resetOnInteract);
             }
 
             @Override
-            public @NotNull ConfigNode finishNode(@NotNull Data data) {
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
                 ConfigNode node = new LinkedConfigNode(3);
                 node.putString("targetPath", data.targetPath);
                 node.putNumber("delayTicks", data.delayTicks);
@@ -73,8 +71,7 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     }
 
     @DataObject
-    record Data(int priority, @DataPath("target") String targetPath, int delayTicks, boolean resetOnInteract)
-            implements Prioritized {
+    record Data(@DataPath("target") String targetPath, int delayTicks, boolean resetOnInteract) {
 
     }
 }

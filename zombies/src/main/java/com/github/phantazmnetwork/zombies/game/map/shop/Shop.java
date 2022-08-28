@@ -25,10 +25,6 @@ public class Shop extends PositionalMapObject<ShopInfo> implements Tickable {
             @NotNull List<ShopDisplay> displays) {
         super(info, info.triggerLocation(), instance);
 
-        predicates.sort(Comparator.reverseOrder());
-        successInteractors.sort(Comparator.reverseOrder());
-        failureInteractors.sort(Comparator.reverseOrder());
-
         this.predicates = List.copyOf(predicates);
         this.successInteractors = List.copyOf(successInteractors);
         this.failureInteractors = List.copyOf(failureInteractors);

@@ -1,10 +1,9 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
 import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -30,19 +29,20 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        return new PrioritizedProcessor<>() {
+        return new ConfigProcessor<>() {
             private static final ConfigProcessor<List<Component>> COMPONENT_LIST_PROCESSOR =
                     ConfigProcessors.component().listProcessor();
 
             @Override
-            public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-                List<Component> messages = COMPONENT_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("messages"));
-                boolean broadcast = node.getBooleanOrThrow("broadcast");
-                return new Data(priority, messages, broadcast);
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                List<Component> messages =
+                        COMPONENT_LIST_PROCESSOR.dataFromElement(element.getElementOrThrow("messages"));
+                boolean broadcast = element.getBooleanOrThrow("broadcast");
+                return new Data(messages, broadcast);
             }
 
             @Override
-            public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.put("messages", COMPONENT_LIST_PROCESSOR.elementFromData(data.messages));
                 node.putBoolean("broadcast", data.broadcast);
@@ -68,6 +68,6 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     }
 
     @DataObject
-    public record Data(int priority, @NotNull List<Component> messages, boolean broadcast) implements Prioritized {
+    public record Data(@NotNull List<Component> messages, boolean broadcast) {
     }
 }

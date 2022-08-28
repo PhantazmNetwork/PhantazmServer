@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.zombies.game.map.action.room;
 import com.github.phantazmnetwork.zombies.game.map.Room;
 import com.github.phantazmnetwork.zombies.game.map.Round;
 import com.github.phantazmnetwork.zombies.game.map.RoundHandler;
-import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.MapProcessors;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;
@@ -17,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 @Model("zombies.map.room.action.spawn_mobs")
 public class SpawnMobsAction implements Action<Room> {
@@ -39,16 +37,15 @@ public class SpawnMobsAction implements Action<Room> {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-                List<SpawnInfo> spawns = SPAWN_INFO_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("mobSpawns"));
-                int priority = node.getNumberOrThrow("priority").intValue();
-                return new Data(spawns, priority);
+                List<SpawnInfo> mobSpawns =
+                        SPAWN_INFO_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("mobSpawns"));
+                return new Data(mobSpawns);
             }
 
             @Override
             public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.put("mobSpawns", SPAWN_INFO_LIST_PROCESSOR.elementFromData(data.mobSpawns));
-                node.putNumber("priority", data.priority);
                 return node;
             }
         };
@@ -62,12 +59,7 @@ public class SpawnMobsAction implements Action<Room> {
         }
     }
 
-    @Override
-    public int priority() {
-        return data.priority;
-    }
-
     @DataObject
-    public record Data(@NotNull List<SpawnInfo> mobSpawns, int priority) {
+    public record Data(@NotNull List<SpawnInfo> mobSpawns) {
     }
 }

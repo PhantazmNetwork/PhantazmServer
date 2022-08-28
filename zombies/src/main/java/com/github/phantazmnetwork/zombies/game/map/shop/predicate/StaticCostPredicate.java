@@ -1,13 +1,12 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Prioritized;
-import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.coin.Transaction;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -30,18 +29,18 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        return new PrioritizedProcessor<>() {
+        return new ConfigProcessor<>() {
             private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
             @Override
-            public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {
-                int cost = node.getNumberOrThrow("cost").intValue();
-                Key modifier = KEY_PROCESSOR.dataFromElement(node.getElementOrThrow("modifierType"));
-                return new Data(priority, cost, modifier);
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                int cost = element.getNumberOrThrow("cost").intValue();
+                Key modifierType = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("modifierType"));
+                return new Data(cost, modifierType);
             }
 
             @Override
-            public @NotNull ConfigNode finishNode(@NotNull Data data) throws ConfigProcessException {
+            public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(2);
                 node.putNumber("cost", data.cost);
                 node.put("modifierType", KEY_PROCESSOR.elementFromData(data.modifierType));
@@ -53,18 +52,11 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         PlayerCoins coins = interaction.getPlayer().getCoins();
-        Transaction transaction;
-        if (!modifierSource.hasType(data.modifierType)) {
-            transaction = new Transaction(-data.cost);
-        }
-        else {
-            transaction = new Transaction(modifierSource.modifiers(data.modifierType), -data.cost);
-        }
-
-        return coins.runTransaction(transaction).isAffordable(coins);
+        return coins.runTransaction(new Transaction(modifierSource.modifiers(data.modifierType), -data.cost))
+                .isAffordable(coins);
     }
 
     @DataObject
-    public record Data(int priority, int cost, @NotNull Key modifierType) implements Prioritized {
+    public record Data(int cost, @NotNull Key modifierType) {
     }
 }

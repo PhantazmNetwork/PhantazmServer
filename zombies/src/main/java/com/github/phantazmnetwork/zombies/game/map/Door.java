@@ -79,8 +79,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
             holograms.add(hologram);
         }
 
-        this.openActions = Objects.requireNonNull(openActions, "openActions");
-        this.openActions.sort(Comparator.reverseOrder());
+        this.openActions = List.copyOf(openActions);
     }
 
     /**

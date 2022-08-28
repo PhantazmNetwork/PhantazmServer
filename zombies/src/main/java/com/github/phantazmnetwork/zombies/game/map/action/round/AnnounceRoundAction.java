@@ -49,16 +49,14 @@ public class AnnounceRoundAction implements Action<Round> {
                 String formatMessage = node.getStringOrThrow("formatMessage");
                 TitlePart<Component> titlePart =
                         TITLE_PART_CONFIG_PROCESSOR.dataFromElement(node.getElementOrThrow("titlePart"));
-                int priority = node.getNumberOrThrow("priority").intValue();
-                return new Data(formatMessage, titlePart, priority);
+                return new Data(formatMessage, titlePart);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(3);
+                ConfigNode node = new LinkedConfigNode(2);
                 node.putString("formatMessage", data.formatMessage);
                 node.put("titlePart", TITLE_PART_CONFIG_PROCESSOR.elementFromData(data.titlePart));
-                node.putNumber("priority", data.priority);
                 return node;
             }
         };
@@ -70,20 +68,14 @@ public class AnnounceRoundAction implements Action<Round> {
                 MiniMessage.miniMessage().deserialize(data.formatMessage.formatted(round.getData().round())));
     }
 
-    @Override
-    public int priority() {
-        return data.priority;
-    }
-
     /**
      * Data for an AnnounceRoundAction.
      *
      * @param formatMessage the MiniMessage-compatible string. The format specifier %i will be replaced by the current
      *                      round number (1-indexed)
      * @param titlePart     which Component-accepting {@link TitlePart} to send the message to
-     * @param priority      the priority of this action; actions with higher priority will be executed first
      */
     @DataObject
-    public record Data(@NotNull String formatMessage, @NotNull TitlePart<Component> titlePart, int priority) {
+    public record Data(@NotNull String formatMessage, @NotNull TitlePart<Component> titlePart) {
     }
 }

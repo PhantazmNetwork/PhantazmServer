@@ -22,8 +22,6 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
     @FactoryMethod
     public OrPredicate(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates) {
         super(data);
-
-        predicates.sort(Comparator.reverseOrder());
         this.predicates = List.copyOf(predicates);
     }
 
@@ -39,6 +37,6 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
     }
 
     @DataObject
-    public record Data(int priority, @DataPath("predicates") List<String> paths) implements BooleanOperatorData {
+    public record Data(@DataPath("predicates") List<String> paths) implements BooleanOperatorData {
     }
 }

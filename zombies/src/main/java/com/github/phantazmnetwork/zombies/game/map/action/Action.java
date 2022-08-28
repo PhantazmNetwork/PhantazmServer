@@ -1,14 +1,13 @@
 package com.github.phantazmnetwork.zombies.game.map.action;
 
-import com.github.phantazmnetwork.commons.Prioritized;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents an action performed on a particular object. Actions have a general concept of "priority", where if
- * multiple actions are to be executed, actions with a higher priority should be performed first.
+ * Represents an action performed on a particular object.
  *
  * @param <TData> the type of data object this action acts on
  */
-public interface Action<TData> extends Prioritized {
+@FunctionalInterface
+public interface Action<TData> {
     void perform(@NotNull TData data);
 }
