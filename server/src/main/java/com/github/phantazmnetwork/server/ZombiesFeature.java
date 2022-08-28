@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.zombies.game.map.shop.LinearUpgradePath;
+import com.github.phantazmnetwork.zombies.game.map.shop.display.IncrementalItemDisplay;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticItemDisplay;
 import com.github.phantazmnetwork.zombies.game.map.shop.gui.InteractingClickHandler;
 import com.github.phantazmnetwork.zombies.game.map.shop.gui.StaticItemUpdater;
@@ -67,6 +68,7 @@ public final class ZombiesFeature {
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
         contextManager.registerElementClass(StaticItemDisplay.class);
+        contextManager.registerElementClass(IncrementalItemDisplay.class);
 
         //Sidebar LineUpdaters
         contextManager.registerElementClass(CoinsSidebarLineUpdater.class);
