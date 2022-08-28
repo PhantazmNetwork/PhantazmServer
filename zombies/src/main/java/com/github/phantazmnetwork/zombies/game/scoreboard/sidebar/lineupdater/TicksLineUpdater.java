@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.time.TickFormatter;
 import com.github.steanky.element.core.ElementFactory;
@@ -51,8 +51,8 @@ public class TicksLineUpdater implements SidebarLineUpdater {
 
     @ProcessorMethod
     public static ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
-        return new ConfigProcessor<Data>() {
+        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
+        return new ConfigProcessor<>() {
 
             @Override
             public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.action.round;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.zombies.game.map.Round;
 import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.steanky.element.core.annotation.*;
@@ -42,7 +42,7 @@ public class AnnounceRoundAction implements Action<Round> {
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
             private static final ConfigProcessor<TitlePart<Component>> TITLE_PART_CONFIG_PROCESSOR =
-                    AdventureConfigProcessors.componentTitlePart();
+                    ConfigProcessors.componentTitlePart();
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {

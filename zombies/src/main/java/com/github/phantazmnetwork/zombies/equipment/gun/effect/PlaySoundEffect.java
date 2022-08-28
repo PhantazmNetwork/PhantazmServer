@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
@@ -43,8 +43,8 @@ public class PlaySoundEffect implements GunEffect {
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
-        ConfigProcessor<Sound> soundProcessor = AdventureConfigProcessors.sound();
+        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
+        ConfigProcessor<Sound> soundProcessor = ConfigProcessors.sound();
 
         return new ConfigProcessor<>() {
 

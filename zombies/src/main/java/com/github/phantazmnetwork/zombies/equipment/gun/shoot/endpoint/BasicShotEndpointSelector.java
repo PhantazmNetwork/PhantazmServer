@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -52,7 +52,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
 
         return new ConfigProcessor<>() {
 

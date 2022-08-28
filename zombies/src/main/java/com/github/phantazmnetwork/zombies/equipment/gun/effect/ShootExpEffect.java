@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
@@ -45,7 +45,7 @@ public class ShootExpEffect implements GunEffect {
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
 
         return new ConfigProcessor<>() {
 

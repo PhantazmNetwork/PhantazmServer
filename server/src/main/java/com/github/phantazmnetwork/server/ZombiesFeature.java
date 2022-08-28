@@ -41,6 +41,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(StaticCostPredicate.class);
         contextManager.registerElementClass(FlagPredicate.class);
         contextManager.registerElementClass(PlayerStatePredicate.class);
+        contextManager.registerElementClass(UuidPredicate.class);
 
         contextManager.registerElementClass(AndPredicate.class);
         contextManager.registerElementClass(OrPredicate.class);

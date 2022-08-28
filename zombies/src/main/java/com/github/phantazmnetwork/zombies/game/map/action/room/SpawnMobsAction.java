@@ -56,7 +56,10 @@ public class SpawnMobsAction implements Action<Room> {
 
     @Override
     public void perform(@NotNull Room room) {
-        roundHandler.currentRound().spawnMobs(data.mobSpawns);
+        Round current = roundHandler.currentRound();
+        if (current != null) {
+            current.spawnMobs(data.mobSpawns);
+        }
     }
 
     @Override

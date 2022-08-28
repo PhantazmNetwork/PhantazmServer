@@ -9,13 +9,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 @Model("zombies.map.shop.predicate.xor")
 public class XorPredicate extends PredicateBase<XorPredicate.Data> {
     @ProcessorMethod
     public static ConfigProcessor<XorPredicate.Data> processor() {
-        return new OperatorDataProcessor<>(Data::new);
+        return new BooleanOperatorDataProcessor<>(Data::new);
     }
 
     private final List<ShopPredicate> predicates;
@@ -39,6 +38,6 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
     }
 
     @DataObject
-    public record Data(int priority, @DataPath("predicates") List<String> paths) implements OperatorData {
+    public record Data(int priority, @DataPath("predicates") List<String> paths) implements BooleanOperatorData {
     }
 }

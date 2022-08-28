@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
@@ -29,7 +29,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     @ProcessorMethod
     public static @NotNull ConfigProcessor<PlaySoundInteractor.Data> processor() {
         return new PrioritizedProcessor<>() {
-            private static final ConfigProcessor<Sound> SOUND_PROCESSOR = AdventureConfigProcessors.sound();
+            private static final ConfigProcessor<Sound> SOUND_PROCESSOR = ConfigProcessors.sound();
 
             @Override
             public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {

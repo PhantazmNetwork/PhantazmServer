@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity.config;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -20,7 +20,7 @@ import java.util.Objects;
  */
 public class GroundMinestomDescriptorConfigProcessor implements ConfigProcessor<GroundMinestomDescriptor> {
 
-    private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+    private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
     private final ConfigProcessor<Calculator> calculatorProcessor;
 

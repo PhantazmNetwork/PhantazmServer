@@ -15,18 +15,20 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.RGBLike;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 /**
- * Contains static {@link ConfigProcessor} implementations used to serialize/deserialize certain objects from the
- * Adventure api ({@code net.kyori.adventure}).
+ * Contains static {@link ConfigProcessor} implementations used to serialize/deserialize certain common objects.
  */
-public final class AdventureConfigProcessors {
+public final class ConfigProcessors {
     private static final ConfigProcessor<Key> key = new ConfigProcessor<>() {
-        @SuppressWarnings("PatternValidation")
         @Override
         public Key dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             try {
+                @Subst("key")
                 String string = ConfigProcessor.STRING.dataFromElement(element);
                 if (string.contains(":")) {
                     return Key.key(string);
@@ -124,8 +126,34 @@ public final class AdventureConfigProcessors {
         }
     };
 
-    private AdventureConfigProcessors() {
+    private static final ConfigProcessor<UUID> uuid = new ConfigProcessor<>() {
+        @Override
+        public UUID dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            try {
+                return UUID.fromString(ConfigProcessor.STRING.dataFromElement(element));
+            }
+            catch (IllegalArgumentException e) {
+                throw new ConfigProcessException("invalid UUID string", e);
+            }
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(UUID uuid) {
+            return new ConfigPrimitive(uuid.toString());
+        }
+    };
+
+    private ConfigProcessors() {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link UUID} objects.
+     *
+     * @return the ConfigProcessor used to serialize/deserialize UUID instances
+     */
+    public static @NotNull ConfigProcessor<UUID> uuid() {
+        return uuid;
     }
 
     /**

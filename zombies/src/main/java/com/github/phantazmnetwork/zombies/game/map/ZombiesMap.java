@@ -1,26 +1,15 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
 import com.github.phantazmnetwork.commons.Tickable;
-import com.github.phantazmnetwork.commons.vector.Region3I;
-import com.github.phantazmnetwork.commons.vector.Vec3D;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.game.map.objects.MapObjects;
-import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigList;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable, Flaggable.Source {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesMap.class);
-
     private final ModifierSource modifierSource;
     private final Flaggable flags;
 

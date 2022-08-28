@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.data;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -33,7 +33,7 @@ public record GunData(@NotNull Key name) {
      * @return A {@link ConfigProcessor} for {@link GunData}
      */
     public static @NotNull ConfigProcessor<GunData> processor() {
-        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
         return new ConfigProcessor<>() {
             @Override
             public @NotNull GunData dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {

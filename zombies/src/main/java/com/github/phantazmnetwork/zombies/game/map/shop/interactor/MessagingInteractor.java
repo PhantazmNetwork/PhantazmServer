@@ -1,9 +1,8 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
-import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -33,7 +32,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     public static @NotNull ConfigProcessor<Data> processor() {
         return new PrioritizedProcessor<>() {
             private static final ConfigProcessor<List<Component>> COMPONENT_LIST_PROCESSOR =
-                    AdventureConfigProcessors.component().listProcessor();
+                    ConfigProcessors.component().listProcessor();
 
             @Override
             public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.config.processor.MinestomConfigProcessors;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
@@ -78,7 +78,7 @@ public class ProjectileFirer implements Firer {
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
         ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
         ConfigProcessor<EntityType> entityTypeProcessor = MinestomConfigProcessors.entityType();
 

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.data;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -19,7 +19,7 @@ import java.util.Set;
  */
 public class GunLevelDataConfigProcessor implements ConfigProcessor<GunLevelData> {
 
-    private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+    private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
     private static final ConfigProcessor<Set<Key>> KEY_SET_PROCESSOR = KEY_PROCESSOR.setProcessor();
 

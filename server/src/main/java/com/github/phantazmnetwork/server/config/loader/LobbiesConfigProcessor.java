@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.core.config.InstanceConfig;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.lobby.LobbyConfig;
@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
-    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = ConfigProcessors.component();
 
     @Override
     public @NotNull LobbiesConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -101,8 +101,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
         ConfigNode configNode = new LinkedConfigNode(4);
         configNode.putString("instancesPath", lobbiesConfig.instancesPath().toString());
-        configNode.put("kickMessage",
-                AdventureConfigProcessors.component().elementFromData(lobbiesConfig.kickMessage()));
+        configNode.put("kickMessage", ConfigProcessors.component().elementFromData(lobbiesConfig.kickMessage()));
         configNode.putString("mainLobbyName", lobbiesConfig.mainLobbyName());
         configNode.put("lobbies", lobbiesNode);
 

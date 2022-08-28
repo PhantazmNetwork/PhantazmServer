@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.core.particle.data;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -55,7 +55,7 @@ public class TransitionDustParticleData implements ParticleData {
      * @return A {@link ConfigProcessor} for {@link TransitionDustParticleData}
      */
     public static @NotNull ConfigProcessor<TransitionDustParticleData> processor() {
-        ConfigProcessor<RGBLike> rgbProcessor = AdventureConfigProcessors.rgbLike();
+        ConfigProcessor<RGBLike> rgbProcessor = ConfigProcessors.rgbLike();
 
         return new ConfigProcessor<>() {
             @Override

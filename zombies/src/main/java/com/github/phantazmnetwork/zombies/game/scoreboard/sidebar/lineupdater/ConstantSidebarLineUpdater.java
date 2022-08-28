@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -34,7 +34,7 @@ public class ConstantSidebarLineUpdater implements SidebarLineUpdater {
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Component> componentProcessor = AdventureConfigProcessors.component();
+        ConfigProcessor<Component> componentProcessor = ConfigProcessors.component();
         return new ConfigProcessor<>() {
             @Override
             public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {

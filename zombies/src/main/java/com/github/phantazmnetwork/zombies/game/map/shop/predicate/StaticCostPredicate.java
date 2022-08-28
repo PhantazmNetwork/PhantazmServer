@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
@@ -31,7 +31,7 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return new PrioritizedProcessor<>() {
-            private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+            private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
             @Override
             public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {

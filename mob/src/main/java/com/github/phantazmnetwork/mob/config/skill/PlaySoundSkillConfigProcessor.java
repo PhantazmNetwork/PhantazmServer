@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.mob.config.skill;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -19,7 +19,7 @@ import java.util.Objects;
  */
 public class PlaySoundSkillConfigProcessor implements ConfigProcessor<PlaySoundSkill> {
 
-    private static final ConfigProcessor<Sound> SOUND_PROCESSOR = AdventureConfigProcessors.sound();
+    private static final ConfigProcessor<Sound> SOUND_PROCESSOR = ConfigProcessors.sound();
 
     private final ConfigProcessor<TargetSelector<? extends Audience>> selectorProcessor;
 

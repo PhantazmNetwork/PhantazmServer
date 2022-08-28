@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
-public class OperatorDataProcessor<TData extends OperatorData> extends PrioritizedProcessor<TData> {
+public class BooleanOperatorDataProcessor<TData extends BooleanOperatorData> extends PrioritizedProcessor<TData> {
     private static final ConfigProcessor<List<String>> STRING_LIST_PROCESSOR = ConfigProcessor.STRING.listProcessor();
 
     private final BiFunction<? super Integer, ? super List<String>, ? extends TData> dataConstructor;
 
-    public OperatorDataProcessor(
+    public BooleanOperatorDataProcessor(
             @NotNull BiFunction<? super Integer, ? super List<String>, ? extends TData> dataConstructor) {
         this.dataConstructor = Objects.requireNonNull(dataConstructor, "dataConstructor");
     }

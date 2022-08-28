@@ -5,6 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface OperatorData extends Prioritized {
+public interface BooleanOperatorData extends Prioritized {
     @NotNull List<String> paths();
 }

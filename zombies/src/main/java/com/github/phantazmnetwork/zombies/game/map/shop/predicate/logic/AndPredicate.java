@@ -14,7 +14,7 @@ import java.util.List;
 public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     @ProcessorMethod
     public static ConfigProcessor<AndPredicate.Data> processor() {
-        return new OperatorDataProcessor<>(Data::new);
+        return new BooleanOperatorDataProcessor<>(Data::new);
     }
 
     private final List<ShopPredicate> predicates;
@@ -39,6 +39,6 @@ public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     }
 
     @DataObject
-    public record Data(int priority, @DataPath("predicates") List<String> paths) implements OperatorData {
+    public record Data(int priority, @DataPath("predicates") List<String> paths) implements BooleanOperatorData {
     }
 }

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.commons.config;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -20,7 +20,7 @@ import java.util.Objects;
  */
 public class ComplexDataConfigProcessor implements ConfigProcessor<ComplexData> {
 
-    private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+    private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
     private final Map<Key, ConfigProcessor<? extends Keyed>> subProcessors;
 

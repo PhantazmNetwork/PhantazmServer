@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.core.config.processor;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -21,7 +21,7 @@ import java.util.function.Function;
  */
 public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProcessor<TValue> {
 
-    private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+    private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
     private final Function<Key, ConfigProcessor<? extends TValue>> subProcessors;
 

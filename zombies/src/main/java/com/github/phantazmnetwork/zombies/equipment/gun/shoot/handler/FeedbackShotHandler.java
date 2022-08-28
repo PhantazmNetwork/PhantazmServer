@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
@@ -48,8 +48,8 @@ public class FeedbackShotHandler implements ShotHandler {
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Component> componentProcessor = AdventureConfigProcessors.component();
-        ConfigProcessor<Key> keyProcessor = AdventureConfigProcessors.key();
+        ConfigProcessor<Component> componentProcessor = ConfigProcessors.component();
+        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
 
         return new ConfigProcessor<>() {
 

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.server.config.loader;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.server.config.server.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -18,7 +18,7 @@ import java.util.Locale;
  */
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
-    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = ConfigProcessors.component();
 
     @Override
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {

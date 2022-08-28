@@ -13,10 +13,9 @@ public record BasicMapObjects(@Unmodifiable @NotNull List<Spawnpoint> spawnpoint
                               @Unmodifiable @NotNull List<Door> doors,
                               @Unmodifiable @NotNull List<Room> rooms,
                               @Unmodifiable @NotNull List<Round> rounds) implements MapObjects {
-    public BasicMapObjects(@Unmodifiable @NotNull List<Spawnpoint> spawnpoints,
-            @Unmodifiable @NotNull List<Window> windows, @Unmodifiable @NotNull List<Shop> shops,
-            @Unmodifiable @NotNull List<Door> doors, @Unmodifiable @NotNull List<Room> rooms,
-            @Unmodifiable @NotNull List<Round> rounds) {
+    public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull List<Window> windows,
+            @NotNull List<Shop> shops, @NotNull List<Door> doors, @NotNull List<Room> rooms,
+            @NotNull List<Round> rounds) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.windows = List.copyOf(windows);
         this.shops = List.copyOf(shops);

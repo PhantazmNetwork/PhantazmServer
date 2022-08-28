@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -39,8 +39,8 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Component> componentProcessor = AdventureConfigProcessors.component();
-        ConfigProcessor<RGBLike> rgbLikeProcessor = AdventureConfigProcessors.rgbLike();
+        ConfigProcessor<Component> componentProcessor = ConfigProcessors.component();
+        ConfigProcessor<RGBLike> rgbLikeProcessor = ConfigProcessors.rgbLike();
 
         return new ConfigProcessor<>() {
 

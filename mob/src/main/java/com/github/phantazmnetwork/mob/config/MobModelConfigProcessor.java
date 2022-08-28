@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.mob.config;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.goal.Goal;
 import com.github.phantazmnetwork.mob.skill.Skill;
@@ -31,9 +31,9 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
     private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR =
             ConfigProcessor.enumProcessor(EquipmentSlot.class);
 
-    private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+    private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
-    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = AdventureConfigProcessors.component();
+    private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = ConfigProcessors.component();
 
     private static final ConfigProcessor<Object2FloatMap<String>> ATTRIBUTE_MAP_PROCESSOR =
             ConfigProcessor.FLOAT.mapProcessor(Object2FloatOpenHashMap::new);

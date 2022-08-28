@@ -57,26 +57,26 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
         }
 
-        @DependencySupplier("zombies.dependency.map_object.instance")
         @Memoize
+        @DependencySupplier("zombies.dependency.map_object.instance")
         public Instance instance() {
             return instance;
         }
 
-        @DependencySupplier("zombies.dependency.map_object.round_handler")
         @Memoize
+        @DependencySupplier("zombies.dependency.map_object.round_handler")
         public RoundHandler roundHandler() {
             return roundHandler;
         }
 
-        @DependencySupplier("zombies.dependency.map_object.flaggable")
         @Memoize
+        @DependencySupplier("zombies.dependency.map_object.flaggable")
         public Flaggable flaggable() {
             return flaggable;
         }
 
-        @DependencySupplier("zombies.dependency.map_object.modifier_source")
         @Memoize
+        @DependencySupplier("zombies.dependency.map_object.modifier_source")
         public ModifierSource modifierSource() {
             return modifierSource;
         }

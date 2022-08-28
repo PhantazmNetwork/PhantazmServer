@@ -1,10 +1,9 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Prioritized;
 import com.github.phantazmnetwork.commons.config.PrioritizedProcessor;
 import com.github.phantazmnetwork.zombies.game.map.Flaggable;
-import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -30,7 +29,7 @@ public class FlagSettingInteractor extends InteractorBase<FlagSettingInteractor.
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return new PrioritizedProcessor<>() {
-            private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+            private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
             @Override
             public @NotNull Data finishData(@NotNull ConfigNode node, int priority) throws ConfigProcessException {

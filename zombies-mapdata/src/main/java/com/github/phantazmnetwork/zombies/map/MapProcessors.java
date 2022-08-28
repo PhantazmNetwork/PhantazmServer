@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
@@ -28,8 +28,8 @@ public final class MapProcessors {
     private static final ConfigProcessor<SpawnInfo> spawnInfo = new ConfigProcessor<>() {
         @Override
         public SpawnInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
-            Key spawnType = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnType"));
+            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Key spawnType = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnType"));
             int amount = element.getNumberOrThrow("amount").intValue();
             return new SpawnInfo(id, spawnType, amount);
         }
@@ -37,8 +37,8 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(SpawnInfo spawnInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(spawnInfo.id()));
-            node.put("spawnType", AdventureConfigProcessors.key().elementFromData(spawnInfo.spawnType()));
+            node.put("id", ConfigProcessors.key().elementFromData(spawnInfo.id()));
+            node.put("spawnType", ConfigProcessors.key().elementFromData(spawnInfo.spawnType()));
             node.putNumber("amount", spawnInfo.amount());
             return node;
         }
@@ -47,7 +47,7 @@ public final class MapProcessors {
         @Override
         public SpawnpointInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Vec3I position = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("position"));
-            Key spawnRule = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnRule"));
+            Key spawnRule = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnRule"));
             return new SpawnpointInfo(position, spawnRule);
         }
 
@@ -55,18 +55,17 @@ public final class MapProcessors {
         public @NotNull ConfigElement elementFromData(SpawnpointInfo spawnpointInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
             node.put("position", VectorConfigProcessors.vec3I().elementFromData(spawnpointInfo.position()));
-            node.put("spawnRule", AdventureConfigProcessors.key().elementFromData(spawnpointInfo.spawnRule()));
+            node.put("spawnRule", ConfigProcessors.key().elementFromData(spawnpointInfo.spawnRule()));
             return node;
         }
     };
-    private static final ConfigProcessor<List<Key>> keyList = AdventureConfigProcessors.key().listProcessor();
-    private static final ConfigProcessor<Set<Key>> keySet =
-            AdventureConfigProcessors.key().collectionProcessor(HashSet::new);
+    private static final ConfigProcessor<List<Key>> keyList = ConfigProcessors.key().listProcessor();
+    private static final ConfigProcessor<Set<Key>> keySet = ConfigProcessors.key().collectionProcessor(HashSet::new);
     private static final ConfigProcessor<SpawnruleInfo> spawnruleInfo = new ConfigProcessor<>() {
         @Override
         public SpawnruleInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
-            Key spawnType = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnType"));
+            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Key spawnType = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnType"));
             Set<Key> spawns = keySet.dataFromElement(element.getElementOrThrow("spawns"));
             boolean isBlacklist = element.getBooleanOrThrow("isBlacklist");
             int sla = element.getNumberOrThrow("sla").intValue();
@@ -76,16 +75,15 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(SpawnruleInfo spawnruleInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(4);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(spawnruleInfo.id()));
-            node.put("spawnType", AdventureConfigProcessors.key().elementFromData(spawnruleInfo.spawnType()));
+            node.put("id", ConfigProcessors.key().elementFromData(spawnruleInfo.id()));
+            node.put("spawnType", ConfigProcessors.key().elementFromData(spawnruleInfo.spawnType()));
             node.put("spawns", keySet.elementFromData(spawnruleInfo.spawns()));
             node.putBoolean("isBlacklist", spawnruleInfo.isBlacklist());
             node.putNumber("sla", spawnruleInfo.sla());
             return node;
         }
     };
-    private static final ConfigProcessor<List<Component>> componentList =
-            AdventureConfigProcessors.component().listProcessor();
+    private static final ConfigProcessor<List<Component>> componentList = ConfigProcessors.component().listProcessor();
     private static final ConfigProcessor<HologramInfo> hologramInfo = new ConfigProcessor<>() {
         @Override
         public HologramInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -106,12 +104,12 @@ public final class MapProcessors {
     private static final ConfigProcessor<DoorInfo> doorInfo = new ConfigProcessor<>() {
         @Override
         public DoorInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             List<Key> opensTo = keyList.dataFromElement(element.getElementOrThrow("opensTo"));
             List<Integer> costs = integerList.dataFromElement(element.getElementOrThrow("costs"));
             List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow("holograms"));
             List<Region3I> regions = regionInfoList.dataFromElement(element.getListOrThrow("regions"));
-            Sound openSound = AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("openSound"));
+            Sound openSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("openSound"));
             ConfigList openActions = element.getListOrThrow("openActions");
             return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound, openActions);
         }
@@ -119,12 +117,12 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(6);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(doorInfo.id()));
+            node.put("id", ConfigProcessors.key().elementFromData(doorInfo.id()));
             node.put("opensTo", keyList.elementFromData(doorInfo.opensTo()));
             node.put("costs", integerList.elementFromData(doorInfo.costs()));
             node.put("holograms", hologramInfoList.elementFromData(doorInfo.holograms()));
             node.put("regions", regionInfoList.elementFromData(doorInfo.regions()));
-            node.put("openSound", AdventureConfigProcessors.sound().elementFromData(doorInfo.openSound()));
+            node.put("openSound", ConfigProcessors.sound().elementFromData(doorInfo.openSound()));
             node.put("openActions", doorInfo.openActions());
             return node;
         }
@@ -134,9 +132,9 @@ public final class MapProcessors {
     private static final ConfigProcessor<RoomInfo> roomInfo = new ConfigProcessor<>() {
         @Override
         public RoomInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Component displayName =
-                    AdventureConfigProcessors.component().dataFromElement(element.getElementOrThrow("displayName"));
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("displayName"));
             List<Region3I> regions = regionInfoList.dataFromElement(element.getElementOrThrow("regions"));
             ConfigList openActions = element.getListOrThrow("openActions");
             return new RoomInfo(id, displayName, regions, openActions);
@@ -145,8 +143,8 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(RoomInfo roomInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(4);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(roomInfo.id()));
-            node.put("displayName", AdventureConfigProcessors.component().elementFromData(roomInfo.displayName()));
+            node.put("id", ConfigProcessors.key().elementFromData(roomInfo.id()));
+            node.put("displayName", ConfigProcessors.component().elementFromData(roomInfo.displayName()));
             node.put("regions", regionInfoList.elementFromData(roomInfo.regions()));
             node.put("openActions", roomInfo.openActions());
             return node;
@@ -194,7 +192,7 @@ public final class MapProcessors {
     private static final ConfigProcessor<MapSettingsInfo> mapInfo = new ConfigProcessor<>() {
         @Override
         public MapSettingsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("origin"));
             Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("spawn"));
             int minimumProtocolVersion = element.getNumberOrThrow("minimumProtocolVersion").intValue();
@@ -202,11 +200,11 @@ public final class MapProcessors {
             float pitch = element.getNumberOrThrow("pitch").floatValue();
             float yaw = element.getNumberOrThrow("yaw").floatValue();
             Component displayName =
-                    AdventureConfigProcessors.component().dataFromElement(element.getElementOrThrow("displayName"));
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("displayName"));
             String displayItemTag = element.getStringOrThrow("displayItemSnbt");
             List<Component> introMessages = componentList.dataFromElement(element.getElementOrThrow("introMessages"));
-            Component scoreboardHeader = AdventureConfigProcessors.component()
-                    .dataFromElement(element.getElementOrThrow("scoreboardHeader"));
+            Component scoreboardHeader =
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("scoreboardHeader"));
             Vec3I leaderboardPosition =
                     VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("leaderboardPosition"));
             int leaderboardLength = element.getNumberOrThrow("leaderboardLength").intValue();
@@ -235,18 +233,17 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(MapSettingsInfo mapConfig) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(26);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(mapConfig.id()));
+            node.put("id", ConfigProcessors.key().elementFromData(mapConfig.id()));
             node.put("origin", VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
             node.putNumber("minimumProtocolVersion", mapConfig.minimumProtocolVersion());
             node.putNumber("maximumProtocolVersion", mapConfig.maximumProtocolVersion());
             node.put("spawn", VectorConfigProcessors.vec3I().elementFromData(mapConfig.spawn()));
             node.putNumber("pitch", mapConfig.pitch());
             node.putNumber("yaw", mapConfig.yaw());
-            node.put("displayName", AdventureConfigProcessors.component().elementFromData(mapConfig.displayName()));
+            node.put("displayName", ConfigProcessors.component().elementFromData(mapConfig.displayName()));
             node.putString("displayItemSnbt", mapConfig.displayItemSnbt());
             node.put("introMessages", componentList.elementFromData(mapConfig.introMessages()));
-            node.put("scoreboardHeader",
-                    AdventureConfigProcessors.component().elementFromData(mapConfig.scoreboardHeader()));
+            node.put("scoreboardHeader", ConfigProcessors.component().elementFromData(mapConfig.scoreboardHeader()));
             node.put("leaderboardPosition",
                     VectorConfigProcessors.vec3I().elementFromData(mapConfig.leaderboardPosition()));
             node.putNumber("leaderboardLength", mapConfig.leaderboardLength());
@@ -275,14 +272,11 @@ public final class MapProcessors {
             Region3I frameRegion =
                     VectorConfigProcessors.region3I().dataFromElement(element.getElementOrThrow("frameRegion"));
             List<String> repairBlocks = stringList.dataFromElement(element.getElementOrThrow("repairBlocks"));
-            Sound repairSound =
-                    AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("repairSound"));
+            Sound repairSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("repairSound"));
             Sound repairAllSound =
-                    AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("repairAllSound"));
-            Sound breakSound =
-                    AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("breakSound"));
-            Sound breakAllSound =
-                    AdventureConfigProcessors.sound().dataFromElement(element.getElementOrThrow("breakAllSound"));
+                    ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("repairAllSound"));
+            Sound breakSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("breakSound"));
+            Sound breakAllSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("breakAllSound"));
             ConfigList repairActions = element.getListOrThrow("repairActions");
             ConfigList breakActions = element.getListOrThrow("breakActions");
             return new WindowInfo(frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound,
@@ -294,10 +288,10 @@ public final class MapProcessors {
             ConfigNode node = new LinkedConfigNode(8);
             node.put("frameRegion", VectorConfigProcessors.region3I().elementFromData(windowData.frameRegion()));
             node.put("repairBlocks", stringList.elementFromData(windowData.repairBlocks()));
-            node.put("repairSound", AdventureConfigProcessors.sound().elementFromData(windowData.repairSound()));
-            node.put("repairAllSound", AdventureConfigProcessors.sound().elementFromData(windowData.repairAllSound()));
-            node.put("breakSound", AdventureConfigProcessors.sound().elementFromData(windowData.breakSound()));
-            node.put("breakAllSound", AdventureConfigProcessors.sound().elementFromData(windowData.breakAllSound()));
+            node.put("repairSound", ConfigProcessors.sound().elementFromData(windowData.repairSound()));
+            node.put("repairAllSound", ConfigProcessors.sound().elementFromData(windowData.repairAllSound()));
+            node.put("breakSound", ConfigProcessors.sound().elementFromData(windowData.breakSound()));
+            node.put("breakAllSound", ConfigProcessors.sound().elementFromData(windowData.breakAllSound()));
             node.put("repairActions", windowData.repairActions());
             node.put("breakActions", windowData.breakActions());
             return node;
@@ -307,7 +301,7 @@ public final class MapProcessors {
     private static final ConfigProcessor<ShopInfo> shopInfo = new ConfigProcessor<>() {
         @Override
         public ShopInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = AdventureConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             Vec3I triggerLocation =
                     VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("triggerLocation"));
             Evaluation predicateEvaluation =
@@ -323,7 +317,7 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(3);
-            node.put("id", AdventureConfigProcessors.key().elementFromData(shopInfo.id()));
+            node.put("id", ConfigProcessors.key().elementFromData(shopInfo.id()));
             node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
             node.put("predicateEvaluation", evaluation.elementFromData(shopInfo.predicateEvaluation()));
             node.put("predicates", shopInfo.predicates());

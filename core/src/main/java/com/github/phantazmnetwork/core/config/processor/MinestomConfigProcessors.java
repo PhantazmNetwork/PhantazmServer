@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.core.config.processor;
 
-import com.github.phantazmnetwork.commons.AdventureConfigProcessors;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -96,7 +96,7 @@ public class MinestomConfigProcessors {
     private static class ProtocolObjectConfigProcessor<TObject extends ProtocolObject>
             implements ConfigProcessor<TObject> {
 
-        private static final ConfigProcessor<Key> KEY_PROCESSOR = AdventureConfigProcessors.key();
+        private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
         private final Function<NamespaceID, TObject> registryLookup;
 
