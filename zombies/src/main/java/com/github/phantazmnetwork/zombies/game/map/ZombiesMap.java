@@ -16,12 +16,6 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     private final MapObjects mapObjects;
     private final RoundHandler roundHandler;
 
-    /**
-     * Constructs a new instance of this class.
-     *
-     * @param info     the backing data object
-     * @param instance the instance which this MapObject is in
-     */
     public ZombiesMap(@NotNull MapInfo info, @NotNull Instance instance, @NotNull ModifierSource modifierSource,
             @NotNull Flaggable flags, @NotNull MapObjects mapObjects, @NotNull RoundHandler roundHandler) {
         super(info, info.settings().origin(), instance);

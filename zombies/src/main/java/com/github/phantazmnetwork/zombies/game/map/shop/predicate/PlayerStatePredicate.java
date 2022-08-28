@@ -8,7 +8,6 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.ProcessorMethod;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
@@ -45,7 +44,7 @@ public class PlayerStatePredicate extends PredicateBase<PlayerStatePredicate.Dat
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        return data.blacklist != data.states.contains(interaction.getPlayer().getStateSwitcher().getState().key());
+        return data.blacklist != data.states.contains(interaction.player().getStateSwitcher().getState().key());
     }
 
     @DataObject

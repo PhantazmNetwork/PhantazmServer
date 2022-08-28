@@ -1,5 +1,8 @@
 package com.github.phantazmnetwork.server;
 
+import com.github.phantazmnetwork.zombies.game.map.shop.gui.InteractingClickHandler;
+import com.github.phantazmnetwork.zombies.game.map.shop.gui.StaticItemUpdater;
+import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShowGuiInteractor;
 import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.RevivePlayersAction;
@@ -52,6 +55,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlaySoundInteractor.class);
         contextManager.registerElementClass(DelayedInteractor.class);
         contextManager.registerElementClass(ConditionalInteractor.class);
+        contextManager.registerElementClass(ShowGuiInteractor.class);
+        contextManager.registerElementClass(CloseGuiInteractor.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
@@ -65,6 +70,12 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(RoundSidebarLineUpdater.class);
         contextManager.registerElementClass(TicksLineUpdater.class);
         contextManager.registerElementClass(ZombieKillsSidebarLineUpdater.class);
+
+        //ClickHandlers
+        contextManager.registerElementClass(InteractingClickHandler.class);
+
+        //ItemUpdater
+        contextManager.registerElementClass(StaticItemUpdater.class);
 
         LOGGER.info("Registered component classes.");
     }

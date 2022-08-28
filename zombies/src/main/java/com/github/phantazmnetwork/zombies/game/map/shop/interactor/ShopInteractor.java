@@ -6,4 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ShopInteractor extends Tickable {
     void handleInteraction(@NotNull PlayerInteraction interaction);
+
+    @Override
+    default void tick(long time) {
+
+    }
 }

@@ -57,7 +57,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
             sendMessages(instance);
         }
         else {
-            interaction.getPlayer().getPlayerView().getPlayer().ifPresent(this::sendMessages);
+            interaction.player().getPlayerView().getPlayer().ifPresent(this::sendMessages);
         }
     }
 

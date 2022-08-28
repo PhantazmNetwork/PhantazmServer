@@ -36,6 +36,6 @@ public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@DataPath("predicates") List<String> paths) implements BooleanOperatorData {
+    public record Data(@NotNull @DataPath("predicates") List<String> paths) implements BooleanOperatorData {
     }
 }

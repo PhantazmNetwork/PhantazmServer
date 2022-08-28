@@ -53,7 +53,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
             instance.playSound(data.sound, Sound.Emitter.self());
         }
         else {
-            interaction.getPlayer().getPlayerView().getPlayer()
+            interaction.player().getPlayerView().getPlayer()
                     .ifPresent(player -> player.playSound(data.sound, Sound.Emitter.self()));
         }
     }

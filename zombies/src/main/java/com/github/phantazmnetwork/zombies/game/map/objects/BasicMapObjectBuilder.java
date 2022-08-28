@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.map.objects;
 
 import com.github.phantazmnetwork.core.ClientBlockHandler;
+import com.github.phantazmnetwork.core.gui.SlotDistributor;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
@@ -10,6 +11,7 @@ import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.ShopDisplay;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShopInteractor;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
+import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.annotation.Memoize;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicMapObjectBuilder implements MapObjectBuilder {
@@ -48,13 +51,17 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         private final RoundHandler roundHandler;
         private final Flaggable flaggable;
         private final ModifierSource modifierSource;
+        private final SlotDistributor slotDistributor;
+        private final Function<? super UUID, ? extends ZombiesPlayer> playerFunction;
 
-        private Module(Instance instance, RoundHandler roundHandler, Flaggable flaggable,
-                ModifierSource modifierSource) {
+        private Module(Instance instance, RoundHandler roundHandler, Flaggable flaggable, ModifierSource modifierSource,
+                SlotDistributor slotDistributor, Function<? super UUID, ? extends ZombiesPlayer> playerFunction) {
             this.instance = Objects.requireNonNull(instance, "instance");
             this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
             this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
             this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
+            this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
+            this.playerFunction = Objects.requireNonNull(playerFunction, "playerFunction");
         }
 
         @Memoize
@@ -80,21 +87,35 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         public ModifierSource modifierSource() {
             return modifierSource;
         }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.slot_distributor")
+        public SlotDistributor slotDistributor() {
+            return slotDistributor;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.player_function")
+        public Function<? super UUID, ? extends ZombiesPlayer> playerFunction() {
+            return playerFunction;
+        }
     }
 
     public BasicMapObjectBuilder(@NotNull ContextManager contextManager, @NotNull Instance instance,
             @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler clientBlockHandler,
             @NotNull SpawnDistributor spawnDistributor, @NotNull RoundHandler roundHandler,
-            @NotNull Flaggable flaggable, @NotNull ModifierSource modifierSource, @NotNull KeyParser keyParser) {
+            @NotNull Flaggable flaggable, @NotNull ModifierSource modifierSource,
+            @NotNull SlotDistributor slotDistributor,
+            @NotNull Function<? super UUID, ? extends ZombiesPlayer> playerFunction, @NotNull KeyParser keyParser) {
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockHandler");
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
 
-        this.dependencyProvider =
-                new ModuleDependencyProvider(new Module(instance, roundHandler, flaggable, modifierSource),
-                        Objects.requireNonNull(keyParser, "keyParser"));
+        this.dependencyProvider = new ModuleDependencyProvider(
+                new Module(instance, roundHandler, flaggable, modifierSource, slotDistributor, playerFunction),
+                Objects.requireNonNull(keyParser, "keyParser"));
     }
 
     @Override

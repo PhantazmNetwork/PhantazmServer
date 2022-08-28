@@ -6,7 +6,6 @@ import com.github.phantazmnetwork.zombies.game.map.shop.predicate.ShopPredicate;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
@@ -26,9 +25,7 @@ public class NotPredicate extends PredicateBase<NotPredicate.Data> {
 
             @Override
             public @NotNull ConfigElement elementFromData(Data data) {
-                ConfigNode node = new LinkedConfigNode(1);
-                node.putString("predicate", data.predicate);
-                return node;
+                return ConfigNode.of("predicate", data.predicate);
             }
         };
     }
@@ -47,6 +44,6 @@ public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@DataPath("predicate") String predicate) {
+    public record Data(@NotNull @DataPath("predicate") String predicate) {
     }
 }

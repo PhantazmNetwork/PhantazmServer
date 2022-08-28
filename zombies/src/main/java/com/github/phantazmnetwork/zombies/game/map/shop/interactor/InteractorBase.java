@@ -12,8 +12,4 @@ public abstract class InteractorBase<TData> implements ShopInteractor {
     public InteractorBase(@NotNull TData data) {
         this.data = Objects.requireNonNull(data, "data");
     }
-
-    @Override
-    public void tick(long time) {
-    }
 }

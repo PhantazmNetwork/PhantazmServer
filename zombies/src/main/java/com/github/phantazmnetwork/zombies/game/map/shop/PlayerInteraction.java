@@ -5,5 +5,5 @@ import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 public interface PlayerInteraction extends Keyed {
-    @NotNull ZombiesPlayer getPlayer();
+    @NotNull ZombiesPlayer player();
 }
