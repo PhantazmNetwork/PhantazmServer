@@ -49,8 +49,13 @@ public class StaticHologramDisplay extends HologramDisplayBase {
     public void initialize(@NotNull Shop shop) {
         hologram.setInstance(shop.getInstance(), shop.computeAbsolutePosition(data.info.position()));
         hologram.clear();
-        
+
         hologram.addAll(data.info.text());
+    }
+
+    @Override
+    public void destroy(@NotNull Shop shop) {
+        hologram.clear();
     }
 
     @DataObject

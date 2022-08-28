@@ -1,15 +1,13 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.zombies.game.map.shop.LinearUpgradePath;
-import com.github.phantazmnetwork.zombies.game.map.shop.display.IncrementalItemDisplay;
-import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticItemDisplay;
+import com.github.phantazmnetwork.zombies.game.map.shop.display.*;
 import com.github.phantazmnetwork.zombies.game.map.shop.gui.InteractingClickHandler;
 import com.github.phantazmnetwork.zombies.game.map.shop.gui.StaticItemUpdater;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.OpenGuiInteractor;
 import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.RevivePlayersAction;
-import com.github.phantazmnetwork.zombies.game.map.shop.display.StaticHologramDisplay;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.*;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.*;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.AndPredicate;
@@ -69,6 +67,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(StaticHologramDisplay.class);
         contextManager.registerElementClass(StaticItemDisplay.class);
         contextManager.registerElementClass(IncrementalItemDisplay.class);
+        contextManager.registerElementClass(ConditionalDisplay.class);
+        contextManager.registerElementClass(IncrementalMetaDisplay.class);
 
         //Sidebar LineUpdaters
         contextManager.registerElementClass(CoinsSidebarLineUpdater.class);

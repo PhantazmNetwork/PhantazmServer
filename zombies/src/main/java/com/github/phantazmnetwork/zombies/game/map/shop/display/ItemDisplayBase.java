@@ -22,14 +22,24 @@ public abstract class ItemDisplayBase implements ShopDisplay {
 
     @Override
     public void initialize(@NotNull Shop shop) {
-        if (itemEntity != null) {
-            itemEntity.remove();
-        }
+        removeItem();
 
         itemEntity = new ItemEntity(itemStack);
         itemEntity.setMergeable(false);
         itemEntity.setPickable(false);
         itemEntity.setNoGravity(true);
         itemEntity.setInstance(shop.getInstance(), VecUtils.toPoint(shop.computeAbsolutePosition(offset)));
+    }
+
+    @Override
+    public void destroy(@NotNull Shop shop) {
+        removeItem();
+    }
+
+    private void removeItem() {
+        if (itemEntity != null) {
+            itemEntity.remove();
+            itemEntity = null;
+        }
     }
 }

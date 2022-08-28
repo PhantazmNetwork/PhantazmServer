@@ -181,12 +181,13 @@ public final class PhantazmServer {
 
         Registry<ConfigProcessor<?>> configRegistry = new HashRegistry<>();
         Registry<ElementFactory<?, ?>> factoryRegistry = new HashRegistry<>();
+        Registry<Boolean> cacheRegistry = new HashRegistry<>();
 
         PathSplitter pathSplitter = new BasicPathSplitter();
         DataLocator dataLocator = new BasicDataLocator(pathSplitter);
         ElementContext.Source source =
-                new BasicElementContext.Source(configRegistry, factoryRegistry, pathSplitter, dataLocator,
-                        typeExtractor);
+                new BasicElementContext.Source(configRegistry, factoryRegistry, cacheRegistry, pathSplitter,
+                        dataLocator, typeExtractor);
 
         ContextManager contextManager = new BasicContextManager(elementInspector, elementTypeIdentifier, source);
 
