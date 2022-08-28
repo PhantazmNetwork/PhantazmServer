@@ -93,6 +93,19 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     @Override
+    public void setInstance(@NotNull Instance instance, @NotNull Vec3D location) {
+        Objects.requireNonNull(instance, "instance");
+        Objects.requireNonNull(location, "location");
+        synchronized (sync) {
+            if (this.instance != instance || !location.equals(this.location)) {
+                this.location = location;
+                this.instance = instance;
+                updateArmorStands();
+            }
+        }
+    }
+
+    @Override
     public void trimToSize() {
         synchronized (sync) {
             armorStands.trimToSize();

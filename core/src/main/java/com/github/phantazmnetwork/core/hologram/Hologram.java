@@ -35,6 +35,8 @@ public interface Hologram extends List<Component> {
      */
     void setInstance(@NotNull Instance instance);
 
+    void setInstance(@NotNull Instance instance, @NotNull Vec3D location);
+
     /**
      * Trims internal lists to size.
      */

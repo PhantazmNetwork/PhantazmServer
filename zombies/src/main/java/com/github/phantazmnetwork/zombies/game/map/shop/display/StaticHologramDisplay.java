@@ -1,7 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.display;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import com.github.phantazmnetwork.zombies.map.MapProcessors;
@@ -49,15 +47,9 @@ public class StaticHologramDisplay extends HologramDisplayBase {
 
     @Override
     public void initialize(@NotNull Shop shop) {
-        Vec3I location = shop.getData().triggerLocation();
-        Vec3D offset = data.info.position();
-        Vec3D center = Vec3D.of(location.getX() + 0.5 + offset.getX(), location.getY() + 0.5 + offset.getY(),
-                location.getZ() + 0.5 + offset.getZ());
-
-        hologram.setLocation(center);
-        hologram.setInstance(shop.getInstance());
-
+        hologram.setInstance(shop.getInstance(), shop.computeAbsolutePosition(data.info.position()));
         hologram.clear();
+        
         hologram.addAll(data.info.text());
     }
 

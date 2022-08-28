@@ -14,12 +14,4 @@ public abstract class HologramDisplayBase implements ShopDisplay {
         //initial origin does not matter, the location will be set in initialize
         this.hologram = new InstanceHologram(Vec3D.ORIGIN, 0, Hologram.Alignment.LOWER);
     }
-
-    @Override
-    public void tick(long time) {
-    }
-
-    @Override
-    public void update(@NotNull Shop shop, @NotNull PlayerInteraction interaction, boolean interacted) {
-    }
 }
