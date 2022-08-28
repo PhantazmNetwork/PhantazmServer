@@ -16,7 +16,7 @@ import java.util.Objects;
 @Model("zombies.map.shop.interactor.delegating")
 public class DelegatingInteractor extends InteractorBase<DelegatingInteractor.Data> {
     private final List<ShopPredicate> predicates;
-    private final ShopInteractor target;
+    private final List<ShopInteractor> interactors;
 
     @ProcessorMethod
     public static ConfigProcessor<Data> processor() {
@@ -48,16 +48,18 @@ public class DelegatingInteractor extends InteractorBase<DelegatingInteractor.Da
 
     @FactoryMethod
     public DelegatingInteractor(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates,
-            @DataName("target") ShopInteractor target) {
+            @DataName("interactors") List<ShopInteractor> interactors) {
         super(data);
         this.predicates = Objects.requireNonNull(predicates, "predicates");
-        this.target = Objects.requireNonNull(target, "target");
+        this.interactors = Objects.requireNonNull(interactors, "interactors");
     }
 
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.evaluation.evaluate(predicates, interaction)) {
-            target.handleInteraction(interaction);
+            for (ShopInteractor interactor : interactors) {
+                interactor.handleInteraction(interaction);
+            }
         }
     }
 
