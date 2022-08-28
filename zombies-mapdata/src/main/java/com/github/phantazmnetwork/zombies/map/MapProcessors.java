@@ -306,12 +306,8 @@ public final class MapProcessors {
                     VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("triggerLocation"));
             Evaluation predicateEvaluation =
                     evaluation.dataFromElement(element.getElementOrThrow("predicateEvaluation"));
-            ConfigList predicates = element.getListOrThrow("predicates");
-            ConfigList successInteractors = element.getListOrThrow("successInteractors");
-            ConfigList failureInteractors = element.getListOrThrow("failureInteractors");
-            ConfigList displays = element.getListOrThrow("displays");
-            return new ShopInfo(id, triggerLocation, predicateEvaluation, predicates, successInteractors,
-                    failureInteractors, displays);
+            ConfigNode data = element.getNodeOrThrow("data");
+            return new ShopInfo(id, triggerLocation, predicateEvaluation, data);
         }
 
         @Override
@@ -320,9 +316,7 @@ public final class MapProcessors {
             node.put("id", ConfigProcessors.key().elementFromData(shopInfo.id()));
             node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
             node.put("predicateEvaluation", evaluation.elementFromData(shopInfo.predicateEvaluation()));
-            node.put("predicates", shopInfo.predicates());
-            node.put("successInteractors", shopInfo.successInteractors());
-            node.put("displays", shopInfo.displays());
+            node.put("data", shopInfo.data());
             return node;
         }
     };

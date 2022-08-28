@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.steanky.ethylene.core.collection.ConfigList;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,10 +14,7 @@ import java.util.Objects;
 public record ShopInfo(@NotNull Key id,
                        @NotNull Vec3I triggerLocation,
                        @NotNull Evaluation predicateEvaluation,
-                       @NotNull ConfigList predicates,
-                       @NotNull ConfigList successInteractors,
-                       @NotNull ConfigList failureInteractors,
-                       @NotNull ConfigList displays) {
+                       @NotNull ConfigNode data) {
     /**
      * Creates a new instance of this record.
      *
@@ -27,9 +25,6 @@ public record ShopInfo(@NotNull Key id,
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(triggerLocation, "triggerLocation");
         Objects.requireNonNull(predicateEvaluation, "predicateEvaluation");
-        Objects.requireNonNull(predicates, "predicates");
-        Objects.requireNonNull(successInteractors, "successInteractors");
-        Objects.requireNonNull(failureInteractors, "failureInteractors");
-        Objects.requireNonNull(displays, "displays");
+        Objects.requireNonNull(data, "data");
     }
 }

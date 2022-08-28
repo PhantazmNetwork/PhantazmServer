@@ -26,6 +26,7 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -159,10 +160,31 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         LOGGER.warn("Expected ConfigNode, was {}", element);
     }
 
+    private static ConfigList extractList(ConfigNode rootNode, String path) {
+        try {
+            return rootNode.getListOrThrow(path);
+        }
+        catch (ConfigProcessException e) {
+            LOGGER.warn("Error getting ConfigList from path '" + path + "'", e);
+        }
+
+        return ConfigList.of();
+    }
+
     private <T> void createElements(ConfigList list, Collection<T> collection, Supplier<String> elementName) {
         for (ConfigElement element : list) {
             createElement(element, node -> collection.add(contextManager.makeContext(node).provide(dependencyProvider)),
                     elementName);
+        }
+    }
+
+    private <T> void createElements(ConfigList list, String basePath, ElementContext context, Collection<T> collection,
+            Supplier<String> elementName) {
+        for (int i = 0; i < list.size(); i++) {
+            ConfigElement element = list.get(i);
+
+            int finalI = i;
+            createElement(element, node -> collection.add(context.provide(basePath + "/" + finalI)), elementName);
         }
     }
 
@@ -208,20 +230,25 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     private List<Shop> buildShops(List<ShopInfo> shopInfoList) {
         List<Shop> shops = new ArrayList<>(shopInfoList.size());
         for (ShopInfo shopInfo : shopInfoList) {
-            ConfigList predicateInfo = shopInfo.predicates();
-            ConfigList successInteractorInfo = shopInfo.successInteractors();
-            ConfigList failureInteractorInfo = shopInfo.failureInteractors();
-            ConfigList displayInfo = shopInfo.displays();
+            ConfigNode rootNode = shopInfo.data();
+            ElementContext shopContext = contextManager.makeContext(rootNode);
+
+            ConfigList predicateInfo = extractList(rootNode, "predicates");
+            ConfigList successInteractorInfo = extractList(rootNode, "successInteractors");
+            ConfigList failureInteractorInfo = extractList(rootNode, "failureInteractors");
+            ConfigList displayInfo = extractList(rootNode, "displays");
 
             List<ShopPredicate> predicates = new ArrayList<>(predicateInfo.size());
             List<ShopInteractor> successInteractors = new ArrayList<>(successInteractorInfo.size());
             List<ShopInteractor> failureInteractors = new ArrayList<>(failureInteractorInfo.size());
             List<ShopDisplay> displays = new ArrayList<>(displayInfo.size());
 
-            createElements(predicateInfo, predicates, () -> "shop predicate");
-            createElements(successInteractorInfo, successInteractors, () -> "shop success interactor");
-            createElements(failureInteractorInfo, failureInteractors, () -> "shop failure interactor");
-            createElements(displayInfo, displays, () -> "shop display");
+            createElements(predicateInfo, "predicates", shopContext, predicates, () -> "shop predicate");
+            createElements(successInteractorInfo, "successInteractors", shopContext, successInteractors,
+                    () -> "shop success interactor");
+            createElements(failureInteractorInfo, "failureInteractors", shopContext, failureInteractors,
+                    () -> "shop failure interactor");
+            createElements(displayInfo, "displays", shopContext, displays, () -> "shop display");
 
             shops.add(new Shop(shopInfo, instance, predicates, successInteractors, failureInteractors, displays));
         }
