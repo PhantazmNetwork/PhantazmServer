@@ -15,6 +15,7 @@ import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.AndPredi
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.NotPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.OrPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.XorPredicate;
+import com.github.phantazmnetwork.zombies.game.perk.ExtraHealthLevel;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.*;
 import com.github.steanky.element.core.context.ContextManager;
 import org.jetbrains.annotations.NotNull;
@@ -90,6 +91,9 @@ public final class ZombiesFeature {
 
         //UpgradePath
         contextManager.registerElementClass(LinearUpgradePath.class);
+
+        //PerkLevels
+        contextManager.registerElementClass(ExtraHealthLevel.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

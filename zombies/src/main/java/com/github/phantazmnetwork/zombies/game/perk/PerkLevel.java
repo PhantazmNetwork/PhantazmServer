@@ -7,7 +7,7 @@ import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 public interface PerkLevel extends UpgradeNode, InventoryObject, Keyed {
-    void start(@NotNull ZombiesPlayer player);
+    void start(@NotNull ZombiesPlayer zombiesPlayer);
 
-    void end(@NotNull ZombiesPlayer player);
+    void end(@NotNull ZombiesPlayer zombiesPlayer);
 }

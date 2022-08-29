@@ -35,7 +35,7 @@ public abstract class UpgradeNodeDataProcessor<TData extends UpgradeNodeData> im
     }
 
     public abstract @NotNull TData upgradeNodeDataFromNode(@NotNull ConfigNode node, @NotNull Key levelKey,
-            @NotNull Set<Key> upgrades);
+            @NotNull Set<Key> upgrades) throws ConfigProcessException;
 
     public abstract @NotNull ConfigNode nodeFromUpgradeNodeData(TData data);
 }
