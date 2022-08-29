@@ -1,7 +1,5 @@
-package com.github.phantazmnetwork.zombies.game.map.shop.gui;
+package com.github.phantazmnetwork.core.item;
 
-import com.github.phantazmnetwork.core.gui.ItemUpdater;
-import com.github.phantazmnetwork.core.item.ItemAnimationFrame;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -14,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Objects;
 
-@Model("zombies.map.shop.gui.item_updater.animated")
+@Model("zombies.updating_item.animated")
 @Cache(false)
-public class AnimatedItemUpdater implements ItemUpdater {
+public class AnimatedUpdatingItem implements UpdatingItem {
     @ProcessorMethod
     public static ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
@@ -44,9 +42,13 @@ public class AnimatedItemUpdater implements ItemUpdater {
     private int currentFrameIndex;
 
     @FactoryMethod
-    public AnimatedItemUpdater(@NotNull Data data) {
+    public AnimatedUpdatingItem(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
-        this.currentFrame = data.frames.isEmpty() ? null : data.frames.get(0);
+        if (data.frames.isEmpty()) {
+            throw new IllegalArgumentException("must have at least one animation frame");
+        }
+
+        this.currentFrame = data.frames.get(0);
     }
 
     @Override
@@ -80,6 +82,11 @@ public class AnimatedItemUpdater implements ItemUpdater {
         }
 
         return false;
+    }
+
+    @Override
+    public @NotNull ItemStack currentItem() {
+        return currentFrame.itemStack();
     }
 
     @DataObject

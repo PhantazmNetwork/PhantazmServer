@@ -24,7 +24,8 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
 
     private ZombiesPlayer currentPlayer;
 
-    public Perk(@NotNull PerkInfo perkInfo, @NotNull Map<Key, PerkLevel> perkLevels) {
+    public Perk(@NotNull PerkInfo perkInfo, @NotNull Map<Key, PerkLevel> perkLevels,
+            @NotNull ZombiesPlayer currentPlayer) {
         this.perkInfo = Objects.requireNonNull(perkInfo, "perkInfo");
         this.perkLevels = Objects.requireNonNull(perkLevels, "perkLevels");
         this.unmodifiableLevels = Set.copyOf(perkLevels.keySet());
@@ -35,6 +36,19 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
             throw new IllegalArgumentException(
                     "perk with root level key '" + rootLevel + "' does not have a corresponding perk level");
         }
+
+        this.currentPlayer = Objects.requireNonNull(currentPlayer, "currentPlayer");
+    }
+
+    public void setPlayer(@NotNull ZombiesPlayer newPlayer) {
+        Objects.requireNonNull(newPlayer, "newPlayer");
+        if (newPlayer == currentPlayer) {
+            return;
+        }
+
+        end();
+        currentPlayer = newPlayer;
+        start();
     }
 
     @Override

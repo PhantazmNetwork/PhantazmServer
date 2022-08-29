@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.gui;
 
-import com.github.phantazmnetwork.core.config.processor.ItemStackConfigProcessors;
 import com.github.phantazmnetwork.core.gui.Gui;
 import com.github.phantazmnetwork.core.gui.ItemUpdater;
+import com.github.phantazmnetwork.core.item.UpdatingItem;
 import com.github.phantazmnetwork.zombies.game.map.BasicPlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.map.shop.InteractionTypes;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShopInteractor;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Model("zombies.map.shop.gui.click_handler.interacting")
 @Cache(false)
 public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHandler.Data> {
-    private final ItemUpdater itemUpdater;
+    private final ItemUpdater updatingItem;
     private final ShopInteractor clickInteractor;
 
     private ItemStack itemStack;
@@ -33,40 +33,36 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     @ProcessorMethod
     public static ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
-            private static final ConfigProcessor<ItemStack> ITEM_STACK_PROCESSOR = ItemStackConfigProcessors.snbt();
-
             private static final ConfigProcessor<Set<ClickType>> CLICK_TYPE_SET_PROCESSOR =
                     ConfigProcessor.enumProcessor(ClickType.class).setProcessor();
 
             @Override
             public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                ItemStack initialItem = ITEM_STACK_PROCESSOR.dataFromElement(element.getElementOrThrow("initialItem"));
                 Set<ClickType> clickTypes =
                         CLICK_TYPE_SET_PROCESSOR.dataFromElement(element.getElementOrThrow("clickTypes"));
                 boolean blacklist = element.getBooleanOrThrow("blacklist");
-                String itemUpdater = element.getStringOrThrow("itemUpdater");
+                String updatingItem = element.getStringOrThrow("updatingItem");
                 String clickInteractor = element.getStringOrThrow("clickInteractor");
-                return new Data(initialItem, clickTypes, blacklist, itemUpdater, clickInteractor);
+                return new Data(clickTypes, blacklist, updatingItem, clickInteractor);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(Data data) throws ConfigProcessException {
-                return ConfigNode.of("initialItem", ITEM_STACK_PROCESSOR.elementFromData(data.initialItem),
-                        "clickTypes", CLICK_TYPE_SET_PROCESSOR.elementFromData(data.clickTypes), "blacklist",
-                        data.blacklist, "itemUpdater", data.itemUpdater, "clickInteractor", data.clickInteractor);
+                return ConfigNode.of("clickTypes", CLICK_TYPE_SET_PROCESSOR.elementFromData(data.clickTypes),
+                        "blacklist", data.blacklist, "updatingItem", data.updatingItem, "clickInteractor",
+                        data.clickInteractor);
             }
         };
     }
 
     @FactoryMethod
     public InteractingClickHandler(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map_object.player_map")
-    Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull @DataName("updater") ItemUpdater itemUpdater,
-            @NotNull @DataName("interactor") ShopInteractor clickInteractor) {
+    Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull @DataName("updating_item") UpdatingItem updatingItem,
+            @NotNull @DataName("click_interactor") ShopInteractor clickInteractor) {
         super(data, playerMap);
-        this.itemUpdater = Objects.requireNonNull(itemUpdater, "itemUpdater");
+        this.updatingItem = Objects.requireNonNull(updatingItem, "updatingItem");
         this.clickInteractor = Objects.requireNonNull(clickInteractor, "clickInteractor");
-
-        this.itemStack = data.initialItem;
+        this.itemStack = updatingItem.currentItem();
     }
 
     @Override
@@ -80,8 +76,8 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
 
     @Override
     public void tick(long time) {
-        if (itemUpdater.hasUpdate(time, itemStack)) {
-            itemStack = itemUpdater.update(time, itemStack);
+        if (updatingItem.hasUpdate(time, itemStack)) {
+            itemStack = updatingItem.update(time, itemStack);
             redraw = true;
         }
     }
@@ -98,10 +94,9 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     }
 
     @DataObject
-    public record Data(@NotNull ItemStack initialItem,
-                       @NotNull Set<ClickType> clickTypes,
+    public record Data(@NotNull Set<ClickType> clickTypes,
                        boolean blacklist,
-                       @NotNull @DataPath("updater") String itemUpdater,
-                       @NotNull @DataPath("interactor") String clickInteractor) {
+                       @NotNull @DataPath("updating_item") String updatingItem,
+                       @NotNull @DataPath("click_interactor") String clickInteractor) {
     }
 }

@@ -14,7 +14,22 @@ java {
 
 repositories {
     mavenCentral()
-    maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
+        }
+        filter {
+            includeModuleByRegex("com\\.github\\.steanky", "ethylene-.+")
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steank-f1g/element-QiJ/maven/")
+        }
+        filter {
+            includeModule("com.github.steanky", "element-core")
+        }
+    }
 }
 
 val catalogs = extensions.getByType<VersionCatalogsExtension>()

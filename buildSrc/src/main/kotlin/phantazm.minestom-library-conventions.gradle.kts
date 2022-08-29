@@ -1,9 +1,20 @@
+import java.net.URI
+
 plugins {
     id("phantazm.java-library-conventions")
 }
 
 repositories {
-    maven("https://jitpack.io")
+    exclusiveContent {
+        forRepository {
+            maven("https://jitpack.io")
+        }
+        filter {
+            includeModule("com.github.PhantazmNetwork", "Minestom")
+            includeGroup("com.github.Minestom")
+            includeGroup("com.github.MadMartian")
+        }
+    }
 }
 
 val catalogs = extensions.getByType<VersionCatalogsExtension>()

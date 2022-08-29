@@ -2,9 +2,9 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.zombies.game.map.shop.LinearUpgradePath;
 import com.github.phantazmnetwork.zombies.game.map.shop.display.*;
-import com.github.phantazmnetwork.zombies.game.map.shop.gui.AnimatedItemUpdater;
+import com.github.phantazmnetwork.core.item.AnimatedUpdatingItem;
 import com.github.phantazmnetwork.zombies.game.map.shop.gui.InteractingClickHandler;
-import com.github.phantazmnetwork.zombies.game.map.shop.gui.StaticItemUpdater;
+import com.github.phantazmnetwork.core.item.StaticUpdatingItem;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.OpenGuiInteractor;
 import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.game.map.action.round.AnnounceRoundAction;
@@ -29,11 +29,11 @@ public final class ZombiesFeature {
 
     static void initialize(@NotNull ContextManager contextManager) {
         ZombiesFeature.contextManager = Objects.requireNonNull(contextManager, "contextManager");
-        registerComponentClasses(contextManager);
+        registerElementClasses(contextManager);
     }
 
-    private static void registerComponentClasses(ContextManager contextManager) {
-        LOGGER.info("Registering Zombies component classes...");
+    private static void registerElementClasses(ContextManager contextManager) {
+        LOGGER.info("Registering Zombies element classes...");
         //actions
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);
@@ -84,14 +84,14 @@ public final class ZombiesFeature {
         //ClickHandlers
         contextManager.registerElementClass(InteractingClickHandler.class);
 
-        //ItemUpdater
-        contextManager.registerElementClass(StaticItemUpdater.class);
-        contextManager.registerElementClass(AnimatedItemUpdater.class);
+        //UpdatingItem
+        contextManager.registerElementClass(StaticUpdatingItem.class);
+        contextManager.registerElementClass(AnimatedUpdatingItem.class);
 
         //UpgradePath
         contextManager.registerElementClass(LinearUpgradePath.class);
 
-        LOGGER.info("Registered Zombies component classes.");
+        LOGGER.info("Registered Zombies element classes.");
     }
 
     public static @NotNull ContextManager mapObjectBuilder() {

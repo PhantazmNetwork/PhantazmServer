@@ -2,13 +2,11 @@ import com.github.phantazmnetwork.gradle.task.CopyLibs
 import com.github.phantazmnetwork.gradle.task.SetupServer
 
 plugins {
-    id("phantazm.java-conventions")
+    id("phantazm.minestom-library-conventions")
 }
 
 repositories {
-    maven("https://jitpack.io")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
-    maven("https://dl.cloudsmith.io/public/steank-f1g/element-QiJ/maven/")
 }
 
 dependencies {
