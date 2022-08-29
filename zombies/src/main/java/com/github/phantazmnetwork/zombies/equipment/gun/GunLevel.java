@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun;
 
+import com.github.phantazmnetwork.zombies.equipment.UpgradeNode;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.ShootTester;
@@ -40,7 +41,7 @@ public record GunLevel(@NotNull Set<Key> upgrades,
                        @NotNull Collection<GunEffect> reloadEffects,
                        @NotNull Collection<GunEffect> tickEffects,
                        @NotNull Collection<GunEffect> noAmmoEffects,
-                       @NotNull Collection<GunStackMapper> gunStackMappers) {
+                       @NotNull Collection<GunStackMapper> gunStackMappers) implements UpgradeNode {
 
     /**
      * Creates a {@link GunLevel}.

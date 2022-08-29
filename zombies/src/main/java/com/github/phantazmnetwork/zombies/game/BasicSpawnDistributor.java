@@ -41,7 +41,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             Key id = spawnInfo.id();
             MobModel model = modelFunction.apply(id);
             if (model == null) {
-                LOGGER.warn("Found unrecognized mob type {}", id);
+                LOGGER.warn("Found unrecognized mob type '{}'", id);
                 continue;
             }
 

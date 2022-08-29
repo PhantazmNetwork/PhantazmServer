@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Set;
 
@@ -15,14 +16,14 @@ public interface Upgradable {
      *
      * @return A {@link Set} of {@link Key}s that represent logical next upgrades that the item suggests
      */
-    @NotNull Set<Key> getSuggestedUpgrades();
+    @Unmodifiable @NotNull Set<Key> getSuggestedUpgrades();
 
     /**
      * Gets a {@link Set} of {@link Key}s of all possible item levels.
      *
      * @return A {@link Set} of {@link Key}s of all possible item levels
      */
-    @NotNull Set<Key> getLevels();
+    @Unmodifiable @NotNull Set<Key> getLevels();
 
     /**
      * Sets the item's level.
@@ -31,5 +32,10 @@ public interface Upgradable {
      */
     void setLevel(@NotNull Key key);
 
+    /**
+     * Gets the current level of this Upgradable object.
+     *
+     * @return the current level key
+     */
     @NotNull Key currentLevel();
 }
