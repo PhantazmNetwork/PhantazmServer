@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.perk;
 
-import com.github.phantazmnetwork.zombies.equipment.upgrade.UpgradeNodeBase;
+import com.github.phantazmnetwork.zombies.upgrade.UpgradeNodeBase;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,17 +23,7 @@ public abstract class PerkLevelBase<TData extends PerkData> extends UpgradeNodeB
     }
 
     @Override
-    public void start() {
-
-    }
-
-    @Override
     public void tick(long time) {
-
-    }
-
-    @Override
-    public void end() {
 
     }
 }

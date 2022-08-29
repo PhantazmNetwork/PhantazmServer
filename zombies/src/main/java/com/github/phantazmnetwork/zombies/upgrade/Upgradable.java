@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.equipment.upgrade;
+package com.github.phantazmnetwork.zombies.upgrade;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;

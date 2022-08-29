@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
-import com.github.phantazmnetwork.zombies.equipment.upgrade.Upgradable;
+import com.github.phantazmnetwork.zombies.upgrade.Upgradable;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.map.shop.UpgradePath;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;

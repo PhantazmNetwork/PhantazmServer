@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
+import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.game.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.game.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.game.player.state.PlayerStateKey;
@@ -41,11 +42,14 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final Sidebar sidebar;
 
+    private final ModifierSource modifierSource;
+
     public BasicZombiesPlayer(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
             @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
             @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
             @NotNull PlayerStateSwitcher stateSwitcher,
-            @NotNull Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> stateFunctions, @NotNull Sidebar sidebar) {
+            @NotNull Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> stateFunctions, @NotNull Sidebar sidebar,
+            @NotNull ModifierSource modifierSource) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -56,6 +60,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
         this.stateFunctions = Map.copyOf(stateFunctions);
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
+        this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
     }
 
     @Override
@@ -134,6 +139,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public void start() {
         getStateSwitcher().start();
+    }
+
+    @Override
+    public @NotNull ModifierSource modifiers() {
+        return modifierSource;
     }
 
     @Override

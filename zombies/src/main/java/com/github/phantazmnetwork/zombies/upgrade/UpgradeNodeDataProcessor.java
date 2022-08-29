@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.equipment.upgrade;
+package com.github.phantazmnetwork.zombies.upgrade;
 
 import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.steanky.ethylene.core.ConfigElement;

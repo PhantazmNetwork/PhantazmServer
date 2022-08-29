@@ -2,7 +2,8 @@ package com.github.phantazmnetwork.zombies.game.perk;
 
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.core.inventory.InventoryObject;
-import com.github.phantazmnetwork.zombies.equipment.upgrade.Upgradable;
+import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
+import com.github.phantazmnetwork.zombies.upgrade.Upgradable;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.item.ItemStack;
@@ -20,6 +21,8 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
 
     private PerkLevel currentLevel;
     private boolean redrawFlag;
+
+    private ZombiesPlayer currentPlayer;
 
     public Perk(@NotNull PerkInfo perkInfo, @NotNull Map<Key, PerkLevel> perkLevels) {
         this.perkInfo = Objects.requireNonNull(perkInfo, "perkInfo");
@@ -62,10 +65,10 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
             throw new IllegalArgumentException("no PerkLevel named '" + key + "'");
         }
 
-        currentLevel.end();
+        currentLevel.end(currentPlayer);
         currentLevel = newLevel;
 
-        newLevel.start();
+        newLevel.start(currentPlayer);
         redrawFlag = true;
     }
 
@@ -81,7 +84,7 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
 
     @Override
     public void start() {
-        currentLevel.start();
+        currentLevel.start(currentPlayer);
     }
 
     @Override
@@ -91,6 +94,6 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
 
     @Override
     public void end() {
-        currentLevel.end();
+        currentLevel.end(currentPlayer);
     }
 }

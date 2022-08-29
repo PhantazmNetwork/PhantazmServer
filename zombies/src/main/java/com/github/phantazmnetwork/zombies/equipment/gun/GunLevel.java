@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun;
 
-import com.github.phantazmnetwork.zombies.equipment.upgrade.UpgradeNode;
+import com.github.phantazmnetwork.zombies.upgrade.UpgradeNode;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.ShootTester;
