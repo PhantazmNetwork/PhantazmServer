@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Model("zombies.map.shop.display.conditional")
+@Cache(false)
 public class ConditionalDisplay implements ShopDisplay {
     private final List<ShopDisplay> successDisplays;
     private final List<ShopDisplay> failureDisplays;
@@ -77,6 +78,7 @@ public class ConditionalDisplay implements ShopDisplay {
             for (ShopDisplay display : newDisplays) {
                 display.update(shop, interaction, interacted);
             }
+
             return;
         }
 

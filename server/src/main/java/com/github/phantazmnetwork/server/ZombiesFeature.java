@@ -66,9 +66,9 @@ public final class ZombiesFeature {
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
         contextManager.registerElementClass(StaticItemDisplay.class);
-        contextManager.registerElementClass(IncrementalItemDisplay.class);
         contextManager.registerElementClass(ConditionalDisplay.class);
         contextManager.registerElementClass(IncrementalMetaDisplay.class);
+        contextManager.registerElementClass(AnimatedItemDisplay.class);
 
         //Sidebar LineUpdaters
         contextManager.registerElementClass(CoinsSidebarLineUpdater.class);
