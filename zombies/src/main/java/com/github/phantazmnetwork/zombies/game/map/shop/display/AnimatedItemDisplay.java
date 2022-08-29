@@ -9,6 +9,7 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +68,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
             return;
         }
 
-        if (timeAtLastFrame - time > currentFrame.delay()) {
+        if (timeAtLastFrame - time > (long)currentFrame.delayTicks() * MinecraftServer.TICK_MS) {
             if (++frameIndex >= data.animationFrames.size()) {
                 frameIndex = 0;
                 loopCount++;

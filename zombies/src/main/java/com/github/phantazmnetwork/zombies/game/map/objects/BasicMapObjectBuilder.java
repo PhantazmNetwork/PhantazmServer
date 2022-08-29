@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.zombies.game.map.objects;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.gui.SlotDistributor;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
-import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicMapObjectBuilder implements MapObjectBuilder {
@@ -192,7 +190,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             ConfigElement element = list.get(i);
 
             int finalI = i;
-            createElement(element, node -> collection.add(context.provide(basePath + "/" + finalI)), elementName);
+            createElement(element, node -> collection.add(context.provide(basePath + "/" + finalI, dependencyProvider)),
+                    elementName);
         }
     }
 

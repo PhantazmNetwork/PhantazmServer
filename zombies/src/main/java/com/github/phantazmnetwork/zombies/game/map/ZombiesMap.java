@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.zombies.game.map;
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.game.map.objects.MapObjects;
+import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.*;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +41,10 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     @Override
     public void tick(long time) {
         roundHandler.tick(time);
+
+        for (Shop shop : mapObjects.shops()) {
+            shop.tick(time);
+        }
     }
 
     @Override
