@@ -16,10 +16,10 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 
 @Model("zombies.map.shop.gui.click_handler.interacting")
 @Cache(false)
@@ -59,12 +59,10 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     }
 
     @FactoryMethod
-    public InteractingClickHandler(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.player_function")
-            Function<? super UUID, ? extends ZombiesPlayer> playerFunction,
-            @NotNull @DataName("updater") ItemUpdater itemUpdater,
+    public InteractingClickHandler(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map_object.player_map")
+    Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull @DataName("updater") ItemUpdater itemUpdater,
             @NotNull @DataName("interactor") ShopInteractor clickInteractor) {
-        super(data, playerFunction);
+        super(data, playerMap);
         this.itemUpdater = Objects.requireNonNull(itemUpdater, "itemUpdater");
         this.clickInteractor = Objects.requireNonNull(clickInteractor, "clickInteractor");
 
@@ -73,7 +71,7 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
 
     @Override
     public void handleClick(@NotNull Gui owner, @NotNull Player player, int slot, @NotNull ClickType clickType) {
-        ZombiesPlayer zombiesPlayer = playerFunction.apply(player.getUuid());
+        ZombiesPlayer zombiesPlayer = playerMap.get(player.getUuid());
         if (zombiesPlayer != null && data.clickTypes.contains(clickType) != data.blacklist) {
             clickInteractor.handleInteraction(
                     new BasicPlayerInteraction(zombiesPlayer, InteractionTypes.CLICK_INVENTORY));

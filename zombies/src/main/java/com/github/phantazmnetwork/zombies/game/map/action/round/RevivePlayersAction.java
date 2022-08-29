@@ -8,64 +8,34 @@ import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.game.player.state.context.NoContext;
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 @Model("zombies.map.round.action.revive_players")
 public class RevivePlayersAction implements Action<Round> {
+    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
-    @DataObject
-    public record Data() {
-
-    }
-
-    private final Collection<ZombiesPlayer> zombiesPlayers;
-
-    private final Data data;
-
-    private final Pos respawnPoint;
+    private final Pos respawnPos;
 
     @FactoryMethod
-    public RevivePlayersAction(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.players.collection") Collection<ZombiesPlayer> zombiesPlayers,
-            @NotNull @Dependency(value = "minestom.point.pos", name = "zombies.dependency.map.respawn_point.minestom")
-            Pos respawnPoint) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.respawnPoint = Objects.requireNonNull(respawnPoint, "respawnPoint");
-    }
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                return new Data();
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return ConfigNode.of();
-            }
-        };
+    public RevivePlayersAction(@NotNull @Dependency("zombies.dependency.map_object.player_map")
+    Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull @Dependency("zombies.dependency.map_object.respawn_pos") Pos respawnPos) {
+        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+        this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPoint");
     }
 
     @Override
     public void perform(@NotNull Round round) {
-        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+        for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
             ZombiesPlayerState state = zombiesPlayer.getStateSwitcher().getState();
             if (state.key().equals(ZombiesPlayerStateKeys.DEAD.key())) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                zombiesPlayer.getPlayerView().getPlayer().ifPresent(player -> {
-                    player.teleport(respawnPoint);
-                });
+                zombiesPlayer.getPlayerView().getPlayer().ifPresent(player -> player.teleport(respawnPos));
             }
             else if (state instanceof KnockedPlayerState knockedPlayerState) {
                 knockedPlayerState.setReviver(null);

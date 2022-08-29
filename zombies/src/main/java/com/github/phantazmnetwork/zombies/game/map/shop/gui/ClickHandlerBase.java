@@ -5,18 +5,18 @@ import com.github.phantazmnetwork.core.gui.GuiItem;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
 public abstract class ClickHandlerBase<TData> implements GuiItem {
     protected final TData data;
-    protected final Function<? super UUID, ? extends ZombiesPlayer> playerFunction;
+    protected final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
-    public ClickHandlerBase(@NotNull TData data,
-            @NotNull Function<? super UUID, ? extends ZombiesPlayer> playerFunction) {
+    public ClickHandlerBase(@NotNull TData data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         this.data = Objects.requireNonNull(data, "data");
-        this.playerFunction = Objects.requireNonNull(playerFunction, "playerFunction");
+        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
     }
 
     @Override
