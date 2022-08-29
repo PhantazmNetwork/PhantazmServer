@@ -161,6 +161,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     @SuppressWarnings("UnstableApiUsage")
     @Override
     protected @NotNull ZombiesScene createScene(@NotNull ZombiesJoinRequest request) {
+
+        /*
         Instance instance =
                 instanceLoader.loadInstance(instanceManager, List.of(mapInfo.settings().id().value())); // TODO:verify
 
@@ -753,6 +755,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         contexts.put(scene, new SceneContext(sceneNode));
 
         return scene;
+        */
+        throw new IllegalStateException("not implemented");
     }
 
     @Override

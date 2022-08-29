@@ -33,7 +33,7 @@ public final class ZombiesFeature {
     }
 
     private static void registerComponentClasses(ContextManager contextManager) {
-        LOGGER.info("Registering component classes...");
+        LOGGER.info("Registering Zombies component classes...");
         //actions
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);
@@ -91,7 +91,7 @@ public final class ZombiesFeature {
         //UpgradePath
         contextManager.registerElementClass(LinearUpgradePath.class);
 
-        LOGGER.info("Registered component classes.");
+        LOGGER.info("Registered Zombies component classes.");
     }
 
     public static @NotNull ContextManager mapObjectBuilder() {

@@ -33,7 +33,6 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
      * Constructs a new instance of this class.
      *
      * @param spawnInfo         the backing data object
-     * @param origin            the origin vector this object's coordinates are considered relative to
      * @param instance          the instance which this MapObject is in
      * @param spawnruleFunction the function used to resolve {@link SpawnruleInfo} data from keys
      * @param mobSpawner        the function used to actually spawn mobs in the world

@@ -38,7 +38,6 @@ public class Door extends PositionalMapObject<DoorInfo> {
      * Constructs a new instance of this class.
      *
      * @param doorInfo the backing data object
-     * @param origin   the origin vector to which this door's coordinates are considered relative
      * @param instance the instance which this MapObject is in
      */
     public Door(@NotNull DoorInfo doorInfo, @NotNull Instance instance, @NotNull Block fillBlock,

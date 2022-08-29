@@ -47,7 +47,6 @@ public class Window extends PositionalMapObject<WindowInfo> {
      *
      * @param instance           the instance in which the window is present
      * @param data               the data defining the configurable parameters of this window
-     * @param origin             the origin of the map
      * @param clientBlockHandler the {@link ClientBlockHandler} used to set client-only barrier blocks
      */
     public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull ClientBlockHandler clientBlockHandler,
