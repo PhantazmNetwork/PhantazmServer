@@ -74,9 +74,11 @@ public class AnimatedItemUpdater implements ItemUpdater {
         }
 
         long timeSinceLastUpdate = time - lastUpdateTime;
-        if (timeSinceLastUpdate * MinecraftServer.TICK_MS > currentFrame.delayTicks()) {
+        if (timeSinceLastUpdate * MinecraftServer.TICK_MS >= currentFrame.delayTicks()) {
             lastUpdateTime = time;
+            return true;
         }
+
         return false;
     }
 

@@ -1,6 +1,9 @@
 package com.github.phantazmnetwork.core.gui;
 
 import com.github.phantazmnetwork.commons.Tickable;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
@@ -8,16 +11,17 @@ import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 
 /**
  * Extension of {@link Inventory} designed to ease the creation of graphical user interfaces. May or may not be
  * "dynamic". Dynamic GUIs support animations and tick all of their constituent {@link GuiItem}s.
  */
-@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+@SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
 public class Gui extends Inventory implements Tickable {
-    private final Map<Integer, GuiItem> items;
+    private final Int2ObjectMap.Entry<GuiItem>[] EMPTY_INT_2_OBJECT_MAP_ENTRY_ARRAY = new Int2ObjectMap.Entry[0];
+
+    private final Int2ObjectMap<GuiItem> items;
     private final boolean isDynamic;
     //cached array of items, indirectly used by the tick function, set to null whenever the map is written to
     private volatile SlottedItem[] tickItems;
@@ -32,7 +36,7 @@ public class Gui extends Inventory implements Tickable {
      */
     public Gui(@NotNull InventoryType inventoryType, @NotNull Component title, boolean isDynamic) {
         super(inventoryType, title);
-        items = new ConcurrentHashMap<>(inventoryType.getSize() >> 2);
+        items = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>(inventoryType.getSize() >> 2));
         this.isDynamic = isDynamic;
     }
 
@@ -108,8 +112,8 @@ public class Gui extends Inventory implements Tickable {
      */
     public @NotNull List<SlottedItem> getItems() {
         List<SlottedItem> slottedItems = new ArrayList<>(items.size());
-        for (Map.Entry<Integer, GuiItem> entry : items.entrySet()) {
-            slottedItems.add(new SlottedItem(entry.getValue(), entry.getKey()));
+        for (Int2ObjectMap.Entry<GuiItem> entry : items.int2ObjectEntrySet()) {
+            slottedItems.add(new SlottedItem(entry.getValue(), entry.getIntKey()));
         }
 
         return slottedItems;
@@ -164,13 +168,13 @@ public class Gui extends Inventory implements Tickable {
 
         if (tickItems == null) {
             //create copy of entry set, otherwise it could change while we iterate
-            //noinspection unchecked
-            Map.Entry<Integer, GuiItem>[] entries = items.entrySet().toArray(new Map.Entry[0]);
+            Int2ObjectMap.Entry<GuiItem>[] entries =
+                    items.int2ObjectEntrySet().toArray(EMPTY_INT_2_OBJECT_MAP_ENTRY_ARRAY);
 
             SlottedItem[] newTickItems = new SlottedItem[entries.length];
             for (int i = 0; i < newTickItems.length; i++) {
-                Map.Entry<Integer, GuiItem> entry = entries[i];
-                newTickItems[i] = new SlottedItem(entry.getValue(), entry.getKey());
+                Int2ObjectMap.Entry<GuiItem> entry = entries[i];
+                newTickItems[i] = new SlottedItem(entry.getValue(), entry.getIntKey());
             }
 
             return newTickItems;
