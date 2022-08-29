@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun;
 
 import com.github.phantazmnetwork.core.inventory.CachedInventoryObject;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
-import com.github.phantazmnetwork.zombies.equipment.Upgradable;
+import com.github.phantazmnetwork.zombies.equipment.upgrade.Upgradable;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;

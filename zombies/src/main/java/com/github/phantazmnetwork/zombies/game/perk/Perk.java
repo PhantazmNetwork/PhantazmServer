@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.zombies.game.perk;
 
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.core.inventory.InventoryObject;
-import com.github.phantazmnetwork.zombies.equipment.Upgradable;
+import com.github.phantazmnetwork.zombies.equipment.upgrade.Upgradable;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.item.ItemStack;
@@ -16,7 +16,6 @@ import java.util.Set;
 public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
     private final PerkInfo perkInfo;
     private final Map<Key, PerkLevel> perkLevels;
-
     private final Set<Key> unmodifiableLevels;
 
     private PerkLevel currentLevel;

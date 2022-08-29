@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
-import com.github.phantazmnetwork.zombies.equipment.Upgradable;
+import com.github.phantazmnetwork.zombies.equipment.upgrade.Upgradable;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.map.shop.UpgradePath;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;

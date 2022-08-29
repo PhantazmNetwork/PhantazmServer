@@ -1,28 +1,39 @@
 package com.github.phantazmnetwork.zombies.game.perk;
 
-import net.kyori.adventure.key.Key;
+import com.github.phantazmnetwork.zombies.equipment.upgrade.UpgradeNodeBase;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Objects;
-import java.util.Set;
+public abstract class PerkLevelBase<TData extends PerkData> extends UpgradeNodeBase<TData> implements PerkLevel {
+    protected ItemStack item;
 
-public abstract class PerkLevelBase implements PerkLevel {
-    private final Key levelKey;
-    private final Set<Key> upgrades;
-
-    public PerkLevelBase(@NotNull Key levelKey, @NotNull Set<Key> upgrades) {
-        this.levelKey = Objects.requireNonNull(levelKey, "levelKey");
-        this.upgrades = Set.copyOf(upgrades);
+    public PerkLevelBase(@NotNull TData data, @NotNull ItemStack item) {
+        super(data);
+        this.item = item;
     }
 
     @Override
-    public @Unmodifiable @NotNull Set<Key> upgrades() {
-        return upgrades;
+    public @NotNull ItemStack getItemStack() {
+        return item;
     }
 
     @Override
-    public @NotNull Key key() {
-        return levelKey;
+    public boolean shouldRedraw() {
+        return false;
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void tick(long time) {
+
+    }
+
+    @Override
+    public void end() {
+
     }
 }
