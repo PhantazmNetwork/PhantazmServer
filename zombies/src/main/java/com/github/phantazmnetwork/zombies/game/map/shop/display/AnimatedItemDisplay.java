@@ -19,6 +19,7 @@ import java.util.List;
 public class AnimatedItemDisplay extends ItemDisplayBase {
     private final Data data;
 
+    private int loopCount;
     private int frameIndex;
     private long timeAtLastFrame;
     private ItemAnimationFrame currentFrame;
@@ -55,7 +56,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
 
     @Override
     public void tick(long time) {
-        if (data.animationFrames.isEmpty()) {
+        if (data.animationFrames.isEmpty() || (data.loops >= 0 && loopCount > data.loops)) {
             return;
         }
 
@@ -69,6 +70,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
         if (timeAtLastFrame - time > currentFrame.delay()) {
             if (++frameIndex >= data.animationFrames.size()) {
                 frameIndex = 0;
+                loopCount++;
             }
 
             currentFrame = data.animationFrames.get(frameIndex);
@@ -80,6 +82,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
     @Override
     public void destroy(@NotNull Shop shop) {
         super.destroy(shop);
+        loopCount = 0;
         frameIndex = 0;
         timeAtLastFrame = 0;
         currentFrame = null;
