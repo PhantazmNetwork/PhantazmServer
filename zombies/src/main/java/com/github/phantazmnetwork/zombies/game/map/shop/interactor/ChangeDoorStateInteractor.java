@@ -30,6 +30,9 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
 
     @FactoryMethod
     public ChangeDoorStateInteractor(@NotNull Data data,
+
+            //todo: problem: MapObjects currently not easy to depend on, dependency module is created inside of
+            // MapObjectDependencyModule and therefore can't depend on MapObjects itself
             @NotNull @Dependency("zombies.dependency.map_object.map_objects") MapObjects mapObjects) {
         super(data);
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
