@@ -10,6 +10,7 @@ import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
@@ -31,6 +32,8 @@ public class Door extends PositionalMapObject<DoorInfo> {
 
     private final ArrayList<Hologram> holograms;
     private final List<Action<Door>> openActions;
+
+    private final Map<Vec3I, Block> blockMappings;
 
     private boolean isOpen;
 
@@ -68,6 +71,13 @@ public class Door extends PositionalMapObject<DoorInfo> {
         List<HologramInfo> hologramInfo = data.holograms();
         holograms = new ArrayList<>(hologramInfo.size());
 
+        initHolograms(hologramInfo);
+
+        this.openActions = List.copyOf(openActions);
+        this.blockMappings = new HashMap<>();
+    }
+
+    private void initHolograms(List<HologramInfo> hologramInfo) {
         for (HologramInfo info : hologramInfo) {
             Vec3D offset = info.position();
             Hologram hologram = new InstanceHologram(
@@ -77,8 +87,6 @@ public class Door extends PositionalMapObject<DoorInfo> {
             hologram.setInstance(instance);
             holograms.add(hologram);
         }
-
-        this.openActions = List.copyOf(openActions);
     }
 
     /**
@@ -91,7 +99,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
     }
 
     /**
-     * Permanently opens this door, removing its blocks. If the door is already open, this method will do nothing.
+     * Opens this door, removing its blocks. If the door is already open, this method will do nothing.
      */
     public void open() {
         if (isOpen) {
@@ -101,8 +109,10 @@ public class Door extends PositionalMapObject<DoorInfo> {
         isOpen = true;
 
         for (Region3I region : regions) {
-            for (Vec3I block : region) {
-                instance.setBlock(block.getX(), block.getY(), block.getZ(), fillBlock);
+            for (Vec3I pos : region) {
+                Block oldBlock = instance.getBlock(pos.getX(), pos.getY(), pos.getZ());
+                blockMappings.put(pos, oldBlock);
+                instance.setBlock(pos.getX(), pos.getY(), pos.getZ(), fillBlock);
             }
         }
 
@@ -117,6 +127,24 @@ public class Door extends PositionalMapObject<DoorInfo> {
         for (Action<Door> action : openActions) {
             action.perform(this);
         }
+    }
+
+    /**
+     * Closes this door. Has no effect if the door is already closed.
+     */
+    public void close() {
+        if (!isOpen) {
+            return;
+        }
+
+        isOpen = false;
+        for (Map.Entry<Vec3I, Block> blockEntry : blockMappings.entrySet()) {
+            Vec3I pos = blockEntry.getKey();
+            instance.setBlock(pos.getX(), pos.getY(), pos.getZ(), blockEntry.getValue());
+        }
+
+        initHolograms(data.holograms());
+        blockMappings.clear();
     }
 
     public @Unmodifiable @NotNull List<Region3I> regions() {
