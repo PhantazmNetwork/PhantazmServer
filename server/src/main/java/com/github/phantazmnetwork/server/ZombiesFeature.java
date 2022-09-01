@@ -64,6 +64,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(OpenGuiInteractor.class);
         contextManager.registerElementClass(CloseGuiInteractor.class);
         contextManager.registerElementClass(AddEquipmentInteractor.class);
+        contextManager.registerElementClass(ChangeDoorStateInteractor.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
