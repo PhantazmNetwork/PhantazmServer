@@ -1,78 +1,92 @@
 package com.github.phantazmnetwork.mob.goal;
 
-import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.skill.Skill;
-import com.github.phantazmnetwork.mob.skill.SkillInstance;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
-import net.kyori.adventure.key.Key;
+import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 /**
- * A {@link Goal} that periodically uses a {@link Skill}.
- *
- * @param skill  The {@link Skill} to use
- * @param period The period between uses
+ * A {@link NeuralGoal} that periodically uses a {@link Skill}.
  */
-public record UseSkillGoal(@NotNull Skill skill, long period) implements Goal {
+@Model("mob.goal.use_skill")
+public class UseSkillGoal implements NeuralGoal {
 
-    /**
-     * The serial {@link Key} for {@link UseSkillGoal}s.
-     */
-    public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "goal.use_skill");
+    @DataObject
+    public record Data(@NotNull @DataPath("skill") String skillPath, long period) {
+
+        public Data {
+            Objects.requireNonNull(skillPath, "skillPath");
+        }
+    }
+
+    private final Data data;
+
+    private final Skill skill;
+
+    private long lastUsage = System.currentTimeMillis();
 
     /**
      * Creates a {@link UseSkillGoal}.
      *
-     * @param skill  The {@link Skill} to use
-     * @param period The period between uses
+     * @param skill The {@link Skill} to use
      */
-    public UseSkillGoal {
-        Objects.requireNonNull(skill, "skill");
+    @FactoryMethod
+    public UseSkillGoal(@NotNull Data data, @NotNull @DataName("skill") Skill skill) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.skill = Objects.requireNonNull(skill, "skill");
     }
 
-    @Override
-    public @NotNull NeuralGoal createGoal(@NotNull PhantazmMob mob) {
-        return new NeuralGoal() {
-
-            private final SkillInstance skillInstance = skill().createSkill(mob);
-
-            private long lastUsage = System.currentTimeMillis();
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
+        return new ConfigProcessor<>() {
 
             @Override
-            public boolean shouldStart() {
-                return true;
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                String skillPath = element.getStringOrThrow("skillPath");
+                long period = element.getNumberOrThrow("period").longValue();
+
+                return new Data(skillPath, period);
             }
 
             @Override
-            public void start() {
-
-            }
-
-            @Override
-            public boolean shouldEnd() {
-                return false;
-            }
-
-            @Override
-            public void end() {
-
-            }
-
-            @Override
-            public void tick(long time) {
-                if (time - lastUsage >= period) {
-                    skillInstance.use();
-                    lastUsage = time;
-                }
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
+                return ConfigNode.of("skillPath", data.skillPath(), "period", data.period());
             }
         };
     }
 
     @Override
-    public @NotNull Key key() {
-        return SERIAL_KEY;
+    public boolean shouldStart() {
+        return true;
     }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public boolean shouldEnd() {
+        return false;
+    }
+
+    @Override
+    public void end() {
+
+    }
+
+    @Override
+    public void tick(long time) {
+        if (time - lastUsage >= data.period()) {
+            skill.use();
+            lastUsage = time;
+        }
+    }
+
 }

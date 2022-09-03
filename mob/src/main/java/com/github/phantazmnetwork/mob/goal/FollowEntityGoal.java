@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.mob.goal;
 
-import com.github.phantazmnetwork.core.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -11,55 +11,51 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
- * A {@link Goal} that makes a {@link PhantazmMob} follow {@link Entity}s
+ * A {@link NeuralGoal} that makes a {@link PhantazmMob} follow {@link Entity}s
  *
  * @param <TEntity> The type of {@link Entity} to follow
  */
-public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
+public abstract class FollowEntityGoal<TEntity extends Entity> implements NeuralGoal {
 
-    private final @NotNull TargetSelector<TEntity> selectorCreator;
+    private final NeuralEntity entity;
+
+    private final @NotNull TargetSelector<TEntity> selector;
 
     /**
      * Creates a {@link FollowEntityGoal}.
      *
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
-    public FollowEntityGoal(@NotNull TargetSelector<TEntity> selector) {
-        this.selectorCreator = Objects.requireNonNull(selector, "selector");
+    public FollowEntityGoal(@NotNull NeuralEntity entity, @NotNull TargetSelector<TEntity> selector) {
+        this.entity = Objects.requireNonNull(entity, "entity");
+        this.selector = Objects.requireNonNull(selector, "selector");
     }
 
     @Override
-    public @NotNull NeuralGoal createGoal(@NotNull PhantazmMob mob) {
-        TargetSelectorInstance<TEntity> selector = selectorCreator.createSelector(mob);
+    public boolean shouldStart() {
+        return true;
+    }
 
-        return new NeuralGoal() {
-            @Override
-            public boolean shouldStart() {
-                return true;
-            }
+    @Override
+    public void start() {
+        MinestomDescriptor descriptor = (MinestomDescriptor)entity.getDescriptor();
+        entity.getNavigator()
+                .setDestination(() -> selector.selectTarget().map(descriptor::computeTargetPosition).orElse(null));
+    }
 
-            @Override
-            public void start() {
-                MinestomDescriptor descriptor = (MinestomDescriptor)mob.entity().getDescriptor();
-                mob.entity().getNavigator().setDestination(
-                        () -> selector.selectTarget().map(descriptor::computeTargetPosition).orElse(null));
-            }
+    @Override
+    public boolean shouldEnd() {
+        return false;
+    }
 
-            @Override
-            public boolean shouldEnd() {
-                return false;
-            }
+    @Override
+    public void end() {
 
-            @Override
-            public void end() {
+    }
 
-            }
+    @Override
+    public void tick(long time) {
 
-            @Override
-            public void tick(long time) {
-
-            }
-        };
     }
 
     /**
@@ -68,7 +64,7 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Goal {
      * @return The {@link TargetSelector} used to select {@link Entity}s
      */
     public @NotNull TargetSelector<TEntity> getSelector() {
-        return selectorCreator;
+        return selector;
     }
 
 }

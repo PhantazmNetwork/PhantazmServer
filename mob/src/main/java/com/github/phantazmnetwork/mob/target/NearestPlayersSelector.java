@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.mob.target;
 
-import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.mob.PhantazmMob;
-import net.kyori.adventure.key.Key;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -12,21 +12,19 @@ import java.util.Optional;
 /**
  * A {@link TargetSelector} that selects nearby players.
  */
+@Model("mob.selector.nearest_players")
 public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
 
-    /**
-     * The serial {@link Key} for {@link NearestPlayersSelector}s.
-     */
-    public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "selector.nearest_players");
+    @DataObject
+    public record Data(double range, int targetLimit) {
+
+    }
 
     /**
      * Creates a {@link NearestPlayersSelector}.
-     *
-     * @param range       The euclidean distance range of the selector
-     * @param targetLimit The maximum number of targets to select
      */
-    public NearestPlayersSelector(double range, int targetLimit) {
-        super(range, targetLimit);
+    public NearestPlayersSelector(@NotNull Data data, @NotNull @Dependency("mob.entity.entity") Entity entity) {
+        super(entity, data.range(), data.targetLimit());
     }
 
     @Override
@@ -39,12 +37,8 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
     }
 
     @Override
-    protected boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity, @NotNull Player target) {
+    protected boolean isTargetValid(@NotNull Entity targetEntity, @NotNull Player target) {
         return true;
     }
 
-    @Override
-    public @NotNull Key key() {
-        return SERIAL_KEY;
-    }
 }

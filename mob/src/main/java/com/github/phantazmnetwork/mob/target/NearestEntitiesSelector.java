@@ -1,7 +1,5 @@
 package com.github.phantazmnetwork.mob.target;
 
-import com.github.phantazmnetwork.core.target.TargetSelectorInstance;
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -11,9 +9,11 @@ import java.util.*;
 /**
  * A {@link TargetSelector} that selects nearby {@link Entity}s.
  *
- * @param <TReturn> A mapped type of the target {@link Entity}
+ * @param <TTarget>> A mapped type of the target {@link Entity}
  */
-public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector<Iterable<TReturn>> {
+public abstract class NearestEntitiesSelector<TTarget> implements TargetSelector<Iterable<TTarget>> {
+
+    private final Entity entity;
 
     private final double range;
 
@@ -25,47 +25,46 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
      * @param range       The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      */
-    public NearestEntitiesSelector(double range, int targetLimit) {
+    public NearestEntitiesSelector(@NotNull Entity entity, double range, int targetLimit) {
+        this.entity = Objects.requireNonNull(entity, "entity");
         this.range = range;
         this.targetLimit = targetLimit;
     }
 
     @Override
-    public @NotNull TargetSelectorInstance<Iterable<TReturn>> createSelector(@NotNull PhantazmMob mob) {
-        return () -> {
-            Instance instance = mob.entity().getInstance();
-            if (instance == null) {
-                throw new IllegalStateException("Instance unset");
+    public @NotNull Optional<Iterable<TTarget>> selectTarget() {
+        Instance instance = entity.getInstance();
+        if (instance == null) {
+            throw new IllegalStateException("Instance unset");
+        }
+
+        Collection<Entity> entities = instance.getNearbyEntities(entity.getPosition(), range);
+        Map<UUID, TTarget> targetMap = new HashMap<>(entities.size());
+        List<Entity> potentialTargets = new ArrayList<>(entities.size());
+        for (Entity entity : entities) {
+            Optional<TTarget> targetOptional = mapTarget(entity);
+            if (targetOptional.isEmpty()) {
+                continue;
             }
 
-            Collection<Entity> entities = instance.getNearbyEntities(mob.entity().getPosition(), range);
-            Map<UUID, TReturn> targetMap = new HashMap<>(entities.size());
-            List<Entity> potentialTargets = new ArrayList<>(entities.size());
-            for (Entity entity : entities) {
-                Optional<TReturn> targetOptional = mapTarget(entity);
-                if (targetOptional.isEmpty()) {
-                    continue;
-                }
-
-                TReturn target = targetOptional.get();
-                if (!isTargetValid(mob, entity, target)) {
-                    continue;
-                }
-
-                targetMap.put(entity.getUuid(), targetOptional.get());
-                potentialTargets.add(entity);
+            TTarget target = targetOptional.get();
+            if (!isTargetValid(entity, target)) {
+                continue;
             }
 
-            potentialTargets.sort(Comparator.comparingDouble(entity -> mob.entity().getDistanceSquared(entity)));
+            targetMap.put(entity.getUuid(), targetOptional.get());
+            potentialTargets.add(entity);
+        }
 
-            int targetCount = Math.min(potentialTargets.size(), targetLimit);
-            Collection<TReturn> targets = new ArrayList<>(targetCount);
-            for (int i = 0; i < targetCount; i++) {
-                targets.add(targetMap.get(potentialTargets.get(i).getUuid()));
-            }
+        potentialTargets.sort(Comparator.comparingDouble(entity -> entity.getDistanceSquared(entity)));
 
-            return Optional.of(targets);
-        };
+        int targetCount = Math.min(potentialTargets.size(), targetLimit);
+        Collection<TTarget> targets = new ArrayList<>(targetCount);
+        for (int i = 0; i < targetCount; i++) {
+            targets.add(targetMap.get(potentialTargets.get(i).getUuid()));
+        }
+
+        return Optional.of(targets);
     }
 
     /**
@@ -92,17 +91,15 @@ public abstract class NearestEntitiesSelector<TReturn> implements TargetSelector
      * @param entity The {@link Entity} to map
      * @return The mapped target
      */
-    protected abstract @NotNull Optional<TReturn> mapTarget(@NotNull Entity entity);
+    protected abstract @NotNull Optional<TTarget> mapTarget(@NotNull Entity entity);
 
     /**
      * Checks if a target is valid.
      *
-     * @param mob          The mob using the {@link NearestPlayersSelector}
      * @param targetEntity The target {@link Entity}
      * @param target       The mapped target
      * @return Whether the target is valid
      */
-    protected abstract boolean isTargetValid(@NotNull PhantazmMob mob, @NotNull Entity targetEntity,
-            @NotNull TReturn target);
+    protected abstract boolean isTargetValid(@NotNull Entity targetEntity, @NotNull TTarget target);
 
 }

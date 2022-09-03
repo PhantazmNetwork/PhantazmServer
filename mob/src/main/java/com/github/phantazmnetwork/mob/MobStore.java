@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.mob;
 
 import com.github.phantazmnetwork.mob.skill.Skill;
-import com.github.phantazmnetwork.mob.skill.SkillInstance;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.entity.EntityDeathEvent;
@@ -17,7 +16,7 @@ public class MobStore {
 
     private final Map<UUID, PhantazmMob> uuidToMob = new HashMap<>();
 
-    private final Map<UUID, Map<Key, Collection<SkillInstance>>> uuidToTriggers = new HashMap<>();
+    private final Map<UUID, Map<Key, Collection<Skill>>> uuidToTriggers = new HashMap<>();
 
     /**
      * Attempts to activate triggers for an {@link Entity}.
@@ -26,12 +25,12 @@ public class MobStore {
      * @param key    The {@link Key} of the {@link net.minestom.server.event.Event} that triggered the activation
      */
     public void useTrigger(@NotNull Entity entity, @NotNull Key key) {
-        Map<Key, Collection<SkillInstance>> triggers = uuidToTriggers.get(entity.getUuid());
+        Map<Key, Collection<Skill>> triggers = uuidToTriggers.get(entity.getUuid());
         if (triggers != null) {
-            Collection<SkillInstance> triggerInstance = triggers.get(key);
+            Collection<Skill> triggerInstance = triggers.get(key);
             if (triggerInstance != null) {
-                for (SkillInstance skillInstance : triggerInstance) {
-                    skillInstance.use();
+                for (Skill skill : triggerInstance) {
+                    skill.use();
                 }
             }
         }
@@ -62,7 +61,7 @@ public class MobStore {
         }
 
         uuidToMob.put(uuid, mob);
-        uuidToTriggers.put(uuid, createTriggerInstances(mob));
+        uuidToTriggers.put(uuid, mob.triggers());
     }
 
     /**
@@ -83,20 +82,6 @@ public class MobStore {
      */
     public boolean hasMob(@NotNull UUID uuid) {
         return uuidToMob.containsKey(Objects.requireNonNull(uuid, "uuid"));
-    }
-
-    private @NotNull Map<Key, Collection<SkillInstance>> createTriggerInstances(@NotNull PhantazmMob mob) {
-        Map<Key, Collection<SkillInstance>> triggerInstances = new HashMap<>(mob.model().getTriggers().size());
-        for (Map.Entry<Key, Collection<Skill>> entry : mob.model().getTriggers().entrySet()) {
-            Collection<SkillInstance> skillInstances = new ArrayList<>(entry.getValue().size());
-            for (Skill skill : entry.getValue()) {
-                skillInstances.add(skill.createSkill(mob));
-            }
-
-            triggerInstances.put(entry.getKey(), skillInstances);
-        }
-
-        return triggerInstances;
     }
 
 }
