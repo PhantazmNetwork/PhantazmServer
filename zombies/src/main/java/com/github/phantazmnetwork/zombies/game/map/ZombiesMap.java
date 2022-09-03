@@ -41,10 +41,7 @@ public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable
     @Override
     public void tick(long time) {
         roundHandler.tick(time);
-
-        for (Shop shop : mapObjects.shops()) {
-            shop.tick(time);
-        }
+        mapObjects.tick(time);
     }
 
     @Override

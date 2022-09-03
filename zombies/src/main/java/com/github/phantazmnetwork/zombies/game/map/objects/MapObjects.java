@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.objects;
 
+import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.Optional;
 
-public interface MapObjects {
+public interface MapObjects extends Tickable {
     @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
 
     @Unmodifiable @NotNull List<Window> windows();

@@ -23,4 +23,11 @@ public record BasicMapObjects(@Unmodifiable @NotNull List<Spawnpoint> spawnpoint
         this.rooms = List.copyOf(rooms);
         this.rounds = List.copyOf(rounds);
     }
+
+    @Override
+    public void tick(long time) {
+        for (Shop shop : shops) {
+            shop.tick(time);
+        }
+    }
 }

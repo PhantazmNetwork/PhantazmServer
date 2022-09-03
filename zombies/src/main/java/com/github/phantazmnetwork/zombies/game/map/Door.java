@@ -45,7 +45,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
      */
     public Door(@NotNull DoorInfo doorInfo, @NotNull Instance instance, @NotNull Block fillBlock,
             @NotNull List<Action<Door>> openActions) {
-        super(doorInfo, Vec3I.floored(Region3I.enclosing(doorInfo.regions().toArray(new Region3I[0])).getCenter()),
+        super(doorInfo, Vec3I.floored(Region3I.enclosing(doorInfo.regions().toArray(EMPTY_REGION_ARRAY)).getCenter()),
                 instance);
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
