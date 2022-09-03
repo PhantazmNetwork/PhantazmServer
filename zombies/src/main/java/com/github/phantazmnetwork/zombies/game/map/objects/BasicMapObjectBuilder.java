@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map.objects;
 
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.gui.SlotDistributor;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
@@ -46,8 +47,14 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     private final MobSpawner mobSpawner;
     private final ClientBlockHandler clientBlockHandler;
     private final SpawnDistributor spawnDistributor;
-
-    private final DependencyProvider dependencyProvider;
+    private final RoundHandler roundHandler;
+    private final Flaggable flaggable;
+    private final ModifierSource modifierSource;
+    private final SlotDistributor slotDistributor;
+    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final EquipmentCreator equipmentCreator;
+    private final Pos respawnPos;
+    private final KeyParser keyParser;
 
     public static class Module implements DependencyModule {
         private final Instance instance;
@@ -58,10 +65,11 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
         private final EquipmentCreator equipmentCreator;
         private final Pos respawnPos;
+        private final Supplier<? extends MapObjects> mapObjectsSupplier;
 
         private Module(Instance instance, RoundHandler roundHandler, Flaggable flaggable, ModifierSource modifierSource,
                 SlotDistributor slotDistributor, Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-                EquipmentCreator equipmentCreator, Pos respawnPos) {
+                EquipmentCreator equipmentCreator, Pos respawnPos, Supplier<? extends MapObjects> mapObjectsSupplier) {
             this.instance = Objects.requireNonNull(instance, "instance");
             this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
             this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
@@ -70,6 +78,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
             this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
             this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPos");
+            this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier, "mapObjectsSupplier");
         }
 
         @Memoize
@@ -119,6 +128,12 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         public @NotNull Pos respawnPos() {
             return respawnPos;
         }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.map_objects")
+        public @NotNull Supplier<? extends MapObjects> mapObjectsSupplier() {
+            return mapObjectsSupplier;
+        }
     }
 
     public BasicMapObjectBuilder(@NotNull ContextManager contextManager, @NotNull Instance instance,
@@ -132,23 +147,35 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockHandler");
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
-
-        this.dependencyProvider = new ModuleDependencyProvider(
-                new Module(instance, roundHandler, flaggable, modifierSource, slotDistributor, playerMap,
-                        equipmentCreator, respawnPos), Objects.requireNonNull(keyParser, "keyParser"));
+        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
+        this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
+        this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
+        this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
+        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+        this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
+        this.respawnPos = Objects.requireNonNull(respawnPos);
+        this.keyParser = Objects.requireNonNull(keyParser);
     }
 
     @Override
     public @NotNull MapObjects build(@NotNull MapInfo mapInfo) {
+        Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
+        DependencyProvider provider = new ModuleDependencyProvider(
+                new Module(instance, roundHandler, flaggable, modifierSource, slotDistributor, playerMap,
+                        equipmentCreator, respawnPos, mapObjectsWrapper), keyParser);
+
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
         List<Spawnpoint> spawnpoints = buildSpawnpoints(mapInfo.spawnpoints(), spawnruleInfoMap);
-        List<Window> windows = buildWindows(mapInfo.windows());
-        List<Shop> shops = buildShops(mapInfo.shops());
-        List<Door> doors = buildDoors(mapInfo.doors());
-        List<Room> rooms = buildRooms(mapInfo.rooms());
-        List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints);
+        List<Window> windows = buildWindows(mapInfo.windows(), provider);
+        List<Shop> shops = buildShops(mapInfo.shops(), provider);
+        List<Door> doors = buildDoors(mapInfo.doors(), provider);
+        List<Room> rooms = buildRooms(mapInfo.rooms(), provider);
+        List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider);
 
-        return new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds);
+        MapObjects mapObjects = new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds);
+        mapObjectsWrapper.set(mapObjects);
+
+        return mapObjects;
     }
 
     private static void createElement(ConfigElement element, Consumer<ConfigNode> action,
@@ -177,7 +204,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return ConfigList.of();
     }
 
-    private <T> void createElements(ConfigList list, Collection<T> collection, Supplier<String> elementName) {
+    private <T> void createElements(ConfigList list, Collection<T> collection, Supplier<String> elementName,
+            DependencyProvider dependencyProvider) {
         for (ConfigElement element : list) {
             createElement(element, node -> collection.add(contextManager.makeContext(node).provide(dependencyProvider)),
                     elementName);
@@ -185,7 +213,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     }
 
     private <T> void createElements(ConfigList list, String basePath, ElementContext context, Collection<T> collection,
-            Supplier<String> elementName) {
+            Supplier<String> elementName, DependencyProvider dependencyProvider) {
         for (int i = 0; i < list.size(); i++) {
             ConfigElement element = list.get(i);
 
@@ -216,7 +244,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return spawnpoints;
     }
 
-    private List<Window> buildWindows(List<WindowInfo> windowInfoList) {
+    private List<Window> buildWindows(List<WindowInfo> windowInfoList, DependencyProvider dependencyProvider) {
         List<Window> windows = new ArrayList<>(windowInfoList.size());
         for (WindowInfo windowInfo : windowInfoList) {
             ConfigList repairActionInfo = windowInfo.repairActions();
@@ -225,8 +253,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             List<Action<Window>> repairActions = new ArrayList<>(repairActionInfo.size());
             List<Action<Window>> breakActions = new ArrayList<>(breakActionInfo.size());
 
-            createElements(repairActionInfo, repairActions, () -> "window repair action");
-            createElements(breakActionInfo, breakActions, () -> "window break action");
+            createElements(repairActionInfo, repairActions, () -> "window repair action", dependencyProvider);
+            createElements(breakActionInfo, breakActions, () -> "window break action", dependencyProvider);
 
             windows.add(new Window(instance, windowInfo, clientBlockHandler, repairActions, breakActions));
         }
@@ -234,7 +262,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return windows;
     }
 
-    private List<Shop> buildShops(List<ShopInfo> shopInfoList) {
+    private List<Shop> buildShops(List<ShopInfo> shopInfoList, DependencyProvider dependencyProvider) {
         List<Shop> shops = new ArrayList<>(shopInfoList.size());
         for (ShopInfo shopInfo : shopInfoList) {
             ConfigNode rootNode = shopInfo.data();
@@ -250,12 +278,13 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             List<ShopInteractor> failureInteractors = new ArrayList<>(failureInteractorInfo.size());
             List<ShopDisplay> displays = new ArrayList<>(displayInfo.size());
 
-            createElements(predicateInfo, "predicates", shopContext, predicates, () -> "shop predicate");
+            createElements(predicateInfo, "predicates", shopContext, predicates, () -> "shop predicate",
+                    dependencyProvider);
             createElements(successInteractorInfo, "successInteractors", shopContext, successInteractors,
-                    () -> "shop success interactor");
+                    () -> "shop success interactor", dependencyProvider);
             createElements(failureInteractorInfo, "failureInteractors", shopContext, failureInteractors,
-                    () -> "shop failure interactor");
-            createElements(displayInfo, "displays", shopContext, displays, () -> "shop display");
+                    () -> "shop failure interactor", dependencyProvider);
+            createElements(displayInfo, "displays", shopContext, displays, () -> "shop display", dependencyProvider);
 
             shops.add(new Shop(shopInfo, instance, predicates, successInteractors, failureInteractors, displays));
         }
@@ -263,14 +292,14 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return shops;
     }
 
-    private List<Door> buildDoors(List<DoorInfo> doorInfoList) {
+    private List<Door> buildDoors(List<DoorInfo> doorInfoList, DependencyProvider dependencyProvider) {
         List<Door> doors = new ArrayList<>(doorInfoList.size());
         for (DoorInfo doorInfo : doorInfoList) {
             ConfigList openActionInfo = doorInfo.openActions();
 
             List<Action<Door>> openActions = new ArrayList<>(openActionInfo.size());
 
-            createElements(openActionInfo, openActions, () -> "door open action");
+            createElements(openActionInfo, openActions, () -> "door open action", dependencyProvider);
 
             doors.add(new Door(doorInfo, instance, Block.AIR, openActions));
         }
@@ -278,14 +307,14 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return doors;
     }
 
-    private List<Room> buildRooms(List<RoomInfo> roomInfoList) {
+    private List<Room> buildRooms(List<RoomInfo> roomInfoList, DependencyProvider dependencyProvider) {
         List<Room> rooms = new ArrayList<>(roomInfoList.size());
         for (RoomInfo roomInfo : roomInfoList) {
             ConfigList openActionInfo = roomInfo.openActions();
 
             List<Action<Room>> openActions = new ArrayList<>(openActionInfo.size());
 
-            createElements(openActionInfo, openActions, () -> "room open action");
+            createElements(openActionInfo, openActions, () -> "room open action", dependencyProvider);
 
             rooms.add(new Room(roomInfo, instance, openActions));
         }
@@ -293,7 +322,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return rooms;
     }
 
-    private List<Round> buildRounds(List<RoundInfo> roundInfoList, List<Spawnpoint> spawnpoints) {
+    private List<Round> buildRounds(List<RoundInfo> roundInfoList, List<Spawnpoint> spawnpoints,
+            DependencyProvider dependencyProvider) {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
             List<WaveInfo> waveInfo = roundInfo.waves();
@@ -304,8 +334,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             List<Action<Round>> startActions = new ArrayList<>(startActionInfo.size());
             List<Action<Round>> endActions = new ArrayList<>(endActionInfo.size());
 
-            createElements(startActionInfo, startActions, () -> "round start action");
-            createElements(endActionInfo, endActions, () -> "round end action");
+            createElements(startActionInfo, startActions, () -> "round start action", dependencyProvider);
+            createElements(endActionInfo, endActions, () -> "round end action", dependencyProvider);
 
             for (WaveInfo wave : roundInfo.waves()) {
                 waves.add(new Wave(wave));

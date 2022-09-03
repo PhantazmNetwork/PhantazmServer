@@ -8,7 +8,6 @@ import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
@@ -17,23 +16,22 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Model("zombies.map.shop.interactor.door_state")
 @Cache(false)
 public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInteractor.Data> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChangeDoorStateInteractor.class);
 
-    private final MapObjects mapObjects;
+    private final Supplier<? extends MapObjects> mapObjects;
 
     private Door door;
     private boolean searchedDoor;
 
     @FactoryMethod
     public ChangeDoorStateInteractor(@NotNull Data data,
-
-            //todo: problem: MapObjects currently not easy to depend on, dependency module is created inside of
-            // MapObjectDependencyModule and therefore can't depend on MapObjects itself
-            @NotNull @Dependency("zombies.dependency.map_object.map_objects") MapObjects mapObjects) {
+            @NotNull @Dependency("zombies.dependency.map_object.map_objects")
+            Supplier<? extends MapObjects> mapObjects) {
         super(data);
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }
@@ -63,7 +61,7 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
         if (!searchedDoor) {
             searchedDoor = true;
 
-            Optional<Door> doorOptional = mapObjects.doorAt(data.doorPosition);
+            Optional<Door> doorOptional = mapObjects.get().doorAt(data.doorPosition);
             boolean isPresent = doorOptional.isPresent();
             if (isPresent) {
                 door = doorOptional.get();
