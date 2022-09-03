@@ -33,7 +33,7 @@ public class PlayerDamageMobListener extends PhantazmMobEventListener<EntityDama
         }
 
         if (event.getDamage() >= event.getEntity().getHealth()) {
-            zombiesPlayer.getKills().onKill(mob);
+            zombiesPlayer.getModule().getKills().onKill(mob);
         }
     }
 }

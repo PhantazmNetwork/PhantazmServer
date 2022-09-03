@@ -70,12 +70,12 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             }
             else {
                 ticksUntilDeath = deathTime;
-                reviver.getMeta().setReviving(true);
+                reviver.getModule().getMeta().setReviving(true);
                 ticksUntilRevive = reviver.getReviveTime();
             }
         }
-        else if (!reviver.getMeta().isCanRevive() || !reviver.getMeta().isCrouching()) {
-            reviver.getMeta().setReviving(false);
+        else if (!reviver.getModule().getMeta().isCanRevive() || !reviver.getModule().getMeta().isCrouching()) {
+            reviver.getModule().getMeta().setReviving(false);
             reviver = null;
             ticksUntilRevive = -1;
         }
@@ -91,7 +91,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     @Override
     public void end() {
         if (reviver != null) {
-            reviver.getMeta().setReviving(false);
+            reviver.getModule().getMeta().setReviving(false);
         }
         for (Activable activable : actions) {
             activable.end(reviver);
@@ -115,12 +115,12 @@ public class KnockedPlayerState implements ZombiesPlayerState {
         }
 
         if (this.reviver != null) {
-            this.reviver.getMeta().setReviving(false);
+            this.reviver.getModule().getMeta().setReviving(false);
         }
         this.reviver = reviver;
         if (reviver != null) {
             ticksUntilDeath = deathTime;
-            reviver.getMeta().setReviving(true);
+            reviver.getModule().getMeta().setReviving(true);
             ticksUntilRevive = reviver.getReviveTime();
         }
         else {

@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
@@ -73,11 +72,11 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
         double slaSquared = spawnrule.slaSquared();
         boolean inRange = false;
         for (ZombiesPlayer player : zombiesPlayers) {
-            if (!(player.getMeta().isCanTriggerSLA())) {
+            if (!(player.getModule().getMeta().isCanTriggerSLA())) {
                 continue;
             }
 
-            Optional<Player> playerOptional = player.getPlayerView().getPlayer();
+            Optional<Player> playerOptional = player.getModule().getPlayerView().getPlayer();
             if (playerOptional.isPresent()) {
                 if (VecUtils.toDouble(playerOptional.get().getPosition()).squaredDistance(this.data.position()) <
                         slaSquared) {

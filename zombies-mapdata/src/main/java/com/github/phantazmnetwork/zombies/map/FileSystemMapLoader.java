@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.FileUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.steanky.ethylene.core.bridge.ConfigBridges;
 import com.github.steanky.ethylene.core.codec.ConfigCodec;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class FileSystemMapLoader implements MapLoader {
     private static final String ROUNDS_PATH = "rounds";
     private static final String SPAWNRULES_PATH = "spawnrules";
     private static final String SPAWNPOINTS_PATH = "spawnpoints";
+    private static final String SCOREBOARD_PATH = "scoreboard";
     private final String mapInfoName;
     private final BiPredicate<Path, BasicFileAttributes> configPredicate;
     private final Path root;
@@ -83,6 +85,7 @@ public class FileSystemMapLoader implements MapLoader {
         List<RoundInfo> rounds = new ArrayList<>();
         List<SpawnruleInfo> spawnrules = new ArrayList<>();
         List<SpawnpointInfo> spawnpoints = new ArrayList<>();
+        ConfigNode scoreboard;
 
         FileUtils.forEachFileMatching(paths.rooms, configPredicate,
                 file -> rooms.add(ConfigBridges.read(file, codec, MapProcessors.roomInfo())));
@@ -98,6 +101,7 @@ public class FileSystemMapLoader implements MapLoader {
 
         FileUtils.forEachFileMatching(paths.rounds, configPredicate,
                 file -> rounds.add(ConfigBridges.read(file, codec, MapProcessors.roundInfo())));
+        rounds.sort(Comparator.comparingInt(RoundInfo::round));
 
         FileUtils.forEachFileMatching(paths.spawnrules, configPredicate,
                 file -> spawnrules.add(ConfigBridges.read(file, codec, MapProcessors.spawnruleInfo())));
@@ -105,9 +109,12 @@ public class FileSystemMapLoader implements MapLoader {
         FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate,
                 file -> spawnpoints.add(ConfigBridges.read(file, codec, MapProcessors.spawnpointInfo())));
 
-        rounds.sort(Comparator.comparingInt(RoundInfo::round));
+        String scoreboardSettingsPath =
+                "settings" + (codec.getPreferredExtensions().isEmpty() ? "" : codec.getPreferredExtensions().get(0));
+        scoreboard =
+                ConfigBridges.read(paths.scoreboard.resolve(scoreboardSettingsPath), codec, MapProcessors.scoreboard());
 
-        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints);
+        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, scoreboard);
     }
 
     @Override
@@ -128,6 +135,7 @@ public class FileSystemMapLoader implements MapLoader {
         FileUtils.deleteRecursivelyIfExists(paths.rounds);
         FileUtils.deleteRecursivelyIfExists(paths.spawnrules);
         FileUtils.deleteRecursivelyIfExists(paths.spawnpoints);
+        FileUtils.deleteRecursivelyIfExists(paths.scoreboard);
 
         Files.createDirectories(paths.rooms);
         Files.createDirectories(paths.doors);
@@ -136,6 +144,7 @@ public class FileSystemMapLoader implements MapLoader {
         Files.createDirectories(paths.rounds);
         Files.createDirectories(paths.spawnrules);
         Files.createDirectories(paths.spawnpoints);
+        Files.createDirectories(paths.scoreboard);
 
         String extension = codec.getPreferredExtensions().isEmpty() ? "" : codec.getPreferredExtensions().get(0);
 
@@ -180,6 +189,8 @@ public class FileSystemMapLoader implements MapLoader {
                     paths.spawnpoints.resolve(getPositionString(spawnpoint.position()) + "-" + i + extension),
                     MapProcessors.spawnpointInfo().elementFromData(spawnpoint), codec);
         }
+
+        ConfigBridges.write(paths.scoreboard.resolve("settings" + extension), data.scoreboard(), codec);
     }
 
     private String getPositionString(Vec3I position) {
@@ -192,11 +203,12 @@ public class FileSystemMapLoader implements MapLoader {
                                Path windows,
                                Path rounds,
                                Path spawnrules,
-                               Path spawnpoints) {
+                               Path spawnpoints,
+                               Path scoreboard) {
         private FolderPaths(Path root) {
             this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH),
                     root.resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH),
-                    root.resolve(SPAWNPOINTS_PATH));
+                    root.resolve(SPAWNPOINTS_PATH), root.resolve(SCOREBOARD_PATH));
         }
     }
 }

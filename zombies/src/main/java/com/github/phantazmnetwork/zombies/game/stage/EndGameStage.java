@@ -37,7 +37,7 @@ public class EndGameStage extends StageBase {
         endGameTicksRemaining = endGameDuration;
         Sound sound = Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH.key(), Sound.Source.MASTER, 1.0F, 1.0F);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            zombiesPlayer.getPlayerView().getPlayer().ifPresent(player -> {
+            zombiesPlayer.getModule().getPlayerView().getPlayer().ifPresent(player -> {
                 player.playSound(sound);
             });
         }

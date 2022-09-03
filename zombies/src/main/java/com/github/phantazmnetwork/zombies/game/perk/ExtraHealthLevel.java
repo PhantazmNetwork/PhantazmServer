@@ -42,13 +42,13 @@ public class ExtraHealthLevel extends PerkLevelBase<ExtraHealthLevel.Data> {
     @Override
     public void start(@NotNull ZombiesPlayer zombiesPlayer) {
         //TODO: API for modifying health on ZombiesPlayer?
-        zombiesPlayer.getPlayerView().getPlayer()
+        zombiesPlayer.getModule().getPlayerView().getPlayer()
                 .ifPresent(player -> player.getLivingEntityMeta().setHealth(BASE_HEALTH + data.bonusHealth));
     }
 
     @Override
     public void end(@NotNull ZombiesPlayer zombiesPlayer) {
-        zombiesPlayer.getPlayerView().getPlayer()
+        zombiesPlayer.getModule().getPlayerView().getPlayer()
                 .ifPresent(player -> player.getLivingEntityMeta().setHealth(BASE_HEALTH));
     }
 

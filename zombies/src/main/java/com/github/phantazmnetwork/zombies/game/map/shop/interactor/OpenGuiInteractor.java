@@ -61,7 +61,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
 
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        interaction.player().getPlayerView().getPlayer().ifPresent(player -> player.openInventory(
+        interaction.player().getModule().getPlayerView().getPlayer().ifPresent(player -> player.openInventory(
                 Gui.builder(data.inventoryType, slotDistributor).setDynamic(data.dynamic).withItems(guiItems)
                         .withTitle(data.title).build()));
     }
