@@ -29,6 +29,8 @@ public class MobModel implements Keyed {
 
     private final ConfigNode node;
 
+    private final ConfigNode metaNode;
+
     private final Component displayName;
 
     private final Map<EquipmentSlot, ItemStack> equipment;
@@ -45,11 +47,12 @@ public class MobModel implements Keyed {
      * @param attributes  The mob's attributes
      */
     public MobModel(@NotNull Key key, @NotNull MinestomDescriptor descriptor, @NotNull ConfigNode node,
-            @Nullable Component displayName, @NotNull Map<EquipmentSlot, ItemStack> equipment,
-            @NotNull Object2FloatMap<String> attributes) {
+            @NotNull ConfigNode metaNode, @Nullable Component displayName,
+            @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
         this.key = Objects.requireNonNull(key, "key");
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
         this.node = Objects.requireNonNull(node, "node");
+        this.metaNode = Objects.requireNonNull(metaNode, "metaNode");
         this.displayName = displayName;
         this.equipment = Map.copyOf(Objects.requireNonNull(equipment, "equipment"));
         this.attributes = Object2FloatMaps.unmodifiable(Objects.requireNonNull(attributes, "attributes"));
@@ -76,6 +79,10 @@ public class MobModel implements Keyed {
 
     public @NotNull ConfigNode getNode() {
         return node;
+    }
+
+    public @NotNull ConfigNode getMetaNode() {
+        return metaNode;
     }
 
     /**

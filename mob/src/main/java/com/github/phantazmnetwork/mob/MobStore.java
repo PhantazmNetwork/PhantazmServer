@@ -16,8 +16,6 @@ public class MobStore {
 
     private final Map<UUID, PhantazmMob> uuidToMob = new HashMap<>();
 
-    private final Map<UUID, Map<Key, Collection<Skill>>> uuidToTriggers = new HashMap<>();
-
     /**
      * Attempts to activate triggers for an {@link Entity}.
      *
@@ -25,9 +23,9 @@ public class MobStore {
      * @param key    The {@link Key} of the {@link net.minestom.server.event.Event} that triggered the activation
      */
     public void useTrigger(@NotNull Entity entity, @NotNull Key key) {
-        Map<Key, Collection<Skill>> triggers = uuidToTriggers.get(entity.getUuid());
-        if (triggers != null) {
-            Collection<Skill> triggerInstance = triggers.get(key);
+        PhantazmMob mob = uuidToMob.get(entity.getUuid());
+        if (mob != null) {
+            Collection<Skill> triggerInstance = mob.triggers().get(key);
             if (triggerInstance != null) {
                 for (Skill skill : triggerInstance) {
                     skill.use();
@@ -44,7 +42,6 @@ public class MobStore {
     public void onMobDeath(@NotNull EntityDeathEvent event) {
         UUID uuid = event.getEntity().getUuid();
         uuidToMob.remove(uuid);
-        uuidToTriggers.remove(uuid);
     }
 
     /**
@@ -61,7 +58,6 @@ public class MobStore {
         }
 
         uuidToMob.put(uuid, mob);
-        uuidToTriggers.put(uuid, mob.triggers());
     }
 
     /**

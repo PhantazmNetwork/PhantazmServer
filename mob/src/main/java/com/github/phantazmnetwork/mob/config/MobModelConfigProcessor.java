@@ -65,9 +65,11 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
         MinestomDescriptor descriptor = descriptorProcessor.dataFromElement(element.getElement("descriptor"));
 
+        ConfigNode metaNode = element.getNodeOrThrow("meta");
+
         Component displayName;
         ConfigElement displayNameElement = element.getElementOrDefault(() -> new ConfigPrimitive(null), "displayName");
-        if (element.isNull()) {
+        if (displayNameElement.isNull()) {
             displayName = null;
         }
         else {
@@ -85,7 +87,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Object2FloatMap<String> attributes =
                 ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
 
-        return new MobModel(key, descriptor, node, displayName, equipment, attributes);
+        return new MobModel(key, descriptor, node, metaNode, displayName, equipment, attributes);
     }
 
     @Override
@@ -117,6 +119,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ConfigNode element = new LinkedConfigNode(7);
         element.put("key", key);
         element.put("descriptor", descriptor);
+        element.put("meta", model.getMetaNode());
         element.put("displayName", displayNameElement);
         element.put("equipment", equipmentNode);
         element.put("attributes", attributes);

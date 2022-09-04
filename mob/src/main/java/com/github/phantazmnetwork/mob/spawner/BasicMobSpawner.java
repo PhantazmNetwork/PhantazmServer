@@ -7,7 +7,6 @@ import com.github.phantazmnetwork.mob.skill.Skill;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
-import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
@@ -15,24 +14,35 @@ import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EquipmentSlot;
+import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.util.*;
 
 /**
  * Basic implementation of a {@link MobSpawner}.
  */
 public class BasicMobSpawner implements MobSpawner {
+
+    private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
 
     private final MobStore mobStore;
 
@@ -42,8 +52,7 @@ public class BasicMobSpawner implements MobSpawner {
 
     private final KeyParser keyParser;
 
-    @SuppressWarnings("ClassCanBeRecord")
-    private static class Module implements DependencyModule {
+    public static class Module implements DependencyModule {
 
         private final NeuralEntity entity;
 
@@ -69,8 +78,10 @@ public class BasicMobSpawner implements MobSpawner {
      * @param mobStore      The {@link MobStore} to register new {@link PhantazmMob}s to
      * @param neuralSpawner The {@link Spawner} to spawn backing {@link NeuralEntity}s
      */
-    public BasicMobSpawner(@NotNull MobStore mobStore, @NotNull Spawner neuralSpawner,
-            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
+    public BasicMobSpawner(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
+            @NotNull MobStore mobStore, @NotNull Spawner neuralSpawner, @NotNull ContextManager contextManager,
+            @NotNull KeyParser keyParser) {
+        this.processorMap = Map.copyOf(processorMap);
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.neuralSpawner = Objects.requireNonNull(neuralSpawner, "neuralSpawner");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
@@ -97,10 +108,65 @@ public class BasicMobSpawner implements MobSpawner {
     }
 
     private void setDisplayName(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
-        model.getDisplayName().ifPresent(displayName -> {
-            neuralEntity.setCustomName(displayName);
-            neuralEntity.setCustomNameVisible(true);
-        });
+        EntityMeta meta = neuralEntity.getEntityMeta();
+        ConfigNode metaNode = model.getMetaNode();
+        for (Method method : meta.getClass().getMethods()) {
+            if (!Modifier.isPublic(method.getModifiers()) || method.getReturnType() != void.class) {
+                continue;
+            }
+
+            Parameter[] parameters = method.getParameters();
+            if (parameters.length != 1) {
+                continue;
+            }
+
+            String methodName = method.getName();
+            if (!methodName.startsWith("set")) {
+                continue;
+            }
+            String key;
+            if (methodName.length() > 3) {
+                key = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
+            }
+            else {
+                key = methodName.substring(3);
+            }
+
+            ConfigElement element = metaNode.getElementOrDefault((ConfigElement)null, key);
+            if (element == null) {
+                continue;
+            }
+
+            Parameter parameter = parameters[0];
+            NotNull[] notNulls = parameter.getAnnotationsByType(NotNull.class);
+            Nullable[] nullables = parameter.getAnnotationsByType(Nullable.class);
+            Class<?> type = parameter.getType();
+            boolean optional = !type.isPrimitive() && nullables.length != 0 || notNulls.length < 1;
+
+            ConfigProcessor<?> processor = processorMap.get(BooleanObjectPair.of(optional, type.getName()));
+            if (processor == null) {
+                continue;
+            }
+
+            Object data;
+            try {
+                data = processor.dataFromElement(element);
+            }
+            catch (ConfigProcessException e) {
+                e.printStackTrace();
+                continue;
+            }
+            if (data instanceof Optional<?> dataOptional) {
+                data = dataOptional.orElse(null);
+            }
+            try {
+                method.invoke(meta, data);
+            }
+            catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
     }
 
     private void setEquipment(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
@@ -125,16 +191,17 @@ public class BasicMobSpawner implements MobSpawner {
 
     private void addGoals(@NotNull ElementContext context, @NotNull DependencyProvider dependencyProvider,
             @NotNull NeuralEntity entity, @NotNull MobModel model) {
-        Collection<Collection<NeuralGoal>> goalGroups = context.provide("goalGroups", dependencyProvider);
+        Collection<GoalGroup> goalGroups =
+                true ? Collections.emptyList() : context.provide("goalGroups", dependencyProvider);
 
-        for (Collection<NeuralGoal> group : goalGroups) {
-            entity.addGoalGroup(new GoalGroup(group));
+        for (GoalGroup group : goalGroups) {
+            entity.addGoalGroup(group);
         }
     }
 
     private @NotNull Map<Key, Collection<Skill>> createTriggers(@NotNull ElementContext context,
             @NotNull DependencyProvider dependencyProvider, @NotNull NeuralEntity entity, @NotNull MobModel model) {
-        return context.provide("triggers", dependencyProvider);
+        return true ? Collections.emptyMap() : context.provide("triggers", dependencyProvider);
     }
 
 }

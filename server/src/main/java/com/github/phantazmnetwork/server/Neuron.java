@@ -4,7 +4,9 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.BasicContextProvider;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.ContextualSpawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
+import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
 import com.github.phantazmnetwork.server.config.server.PathfinderConfig;
+import com.github.steanky.element.core.context.ContextManager;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
@@ -26,10 +28,17 @@ public final class Neuron {
      *
      * @param pathfinderConfig the {@link PathfinderConfig} instance used to configure pathfinding behavior
      */
-    static void initialize(@NotNull EventNode<Event> globalNode, @NotNull PathfinderConfig pathfinderConfig) {
+    static void initialize(@NotNull EventNode<Event> globalNode, @NotNull ContextManager contextManager,
+            @NotNull PathfinderConfig pathfinderConfig) {
+        registerElementClasses(contextManager);
+
         spawner = new ContextualSpawner(
                 new BasicContextProvider(globalNode, Executors.newWorkStealingPool(pathfinderConfig.threads()),
                         pathfinderConfig.cacheSize(), pathfinderConfig.updateQueueCapacity()));
+    }
+
+    private static void registerElementClasses(@NotNull ContextManager contextManager) {
+        contextManager.registerElementClass(GoalGroup.class);
     }
 
     /**
