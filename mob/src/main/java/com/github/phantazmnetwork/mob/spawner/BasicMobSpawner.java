@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup;
 import com.github.steanky.element.core.annotation.DependencySupplier;
+import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyModule;
@@ -30,6 +31,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,6 +44,8 @@ import java.util.*;
  * Basic implementation of a {@link MobSpawner}.
  */
 public class BasicMobSpawner implements MobSpawner {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicMobSpawner.class);
 
     private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
 
@@ -61,11 +66,13 @@ public class BasicMobSpawner implements MobSpawner {
         }
 
         @DependencySupplier("mob.entity.entity")
+        @Memoize
         public @NotNull Entity getEntity() {
             return entity;
         }
 
         @DependencySupplier("mob.entity.neural_entity")
+        @Memoize
         public @NotNull NeuralEntity getNeuralEntity() {
             return entity;
         }
@@ -121,27 +128,21 @@ public class BasicMobSpawner implements MobSpawner {
             }
 
             String methodName = method.getName();
-            if (!methodName.startsWith("set")) {
+            if (!methodName.startsWith("set") || methodName.length() < 4) {
                 continue;
             }
-            String key;
-            if (methodName.length() > 3) {
-                key = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
-            }
-            else {
-                key = methodName.substring(3);
-            }
+            String key = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
 
-            ConfigElement element = metaNode.getElementOrDefault((ConfigElement)null, key);
+            ConfigElement element = metaNode.getElement(key);
             if (element == null) {
                 continue;
             }
 
             Parameter parameter = parameters[0];
-            NotNull[] notNulls = parameter.getAnnotationsByType(NotNull.class);
-            Nullable[] nullables = parameter.getAnnotationsByType(Nullable.class);
+            NotNull notNull = parameter.getAnnotation(NotNull.class);
+            Nullable nullable = parameter.getAnnotation(Nullable.class);
             Class<?> type = parameter.getType();
-            boolean optional = !type.isPrimitive() && nullables.length != 0 || notNulls.length < 1;
+            boolean optional = !type.isPrimitive() && (nullable != null || notNull == null);
 
             ConfigProcessor<?> processor = processorMap.get(BooleanObjectPair.of(optional, type.getName()));
             if (processor == null) {
@@ -153,7 +154,7 @@ public class BasicMobSpawner implements MobSpawner {
                 data = processor.dataFromElement(element);
             }
             catch (ConfigProcessException e) {
-                e.printStackTrace();
+                LOGGER.warn("Failed to process meta config for meta key '{}'", key, e);
                 continue;
             }
             if (data instanceof Optional<?> dataOptional) {
@@ -163,7 +164,7 @@ public class BasicMobSpawner implements MobSpawner {
                 method.invoke(meta, data);
             }
             catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
+                LOGGER.warn("Failed to set meta value for meta key '{}' and method name '{}'", key, methodName, e);
             }
         }
     }

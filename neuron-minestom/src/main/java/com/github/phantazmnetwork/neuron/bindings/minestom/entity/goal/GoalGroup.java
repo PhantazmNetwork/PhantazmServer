@@ -47,17 +47,20 @@ public class GoalGroup implements Tickable {
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Collection<String>> pathProcessor = ConfigProcessor.STRING.collectionProcessor();
-        return new ConfigProcessor<Data>() {
+        return new ConfigProcessor<>() {
+
+            private static final ConfigProcessor<Collection<String>> PATH_PROCESSOR =
+                    ConfigProcessor.STRING.collectionProcessor();
+
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Collection<String> goalPaths = pathProcessor.dataFromElement(element.getElementOrThrow("goalPaths"));
+                Collection<String> goalPaths = PATH_PROCESSOR.dataFromElement(element.getElementOrThrow("goalPaths"));
                 return new Data(goalPaths);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(Data data) throws ConfigProcessException {
-                return ConfigNode.of("goalPaths", pathProcessor.elementFromData(data.goalPaths()));
+                return ConfigNode.of("goalPaths", PATH_PROCESSOR.elementFromData(data.goalPaths()));
             }
         };
     }

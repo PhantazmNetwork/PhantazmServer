@@ -19,7 +19,7 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Neural
 
     private final NeuralEntity entity;
 
-    private final @NotNull TargetSelector<TEntity> selector;
+    private final TargetSelector<TEntity> selector;
 
     /**
      * Creates a {@link FollowEntityGoal}.

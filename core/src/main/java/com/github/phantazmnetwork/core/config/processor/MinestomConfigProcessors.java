@@ -62,16 +62,16 @@ public class MinestomConfigProcessors {
     };
     private static final ConfigProcessor<Point> POINT = new ConfigProcessor<>() {
 
-        private final ConfigProcessor<Vec3D> vectorProcessor = VectorConfigProcessors.vec3D();
+        private static final ConfigProcessor<Vec3D> VECTOR_PROCESSOR = VectorConfigProcessors.vec3D();
 
         @Override
         public @NotNull Point dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            return VecUtils.toPoint(vectorProcessor.dataFromElement(element));
+            return VecUtils.toPoint(VECTOR_PROCESSOR.dataFromElement(element));
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Point point) throws ConfigProcessException {
-            return vectorProcessor.elementFromData(VecUtils.toDouble(point));
+            return VECTOR_PROCESSOR.elementFromData(VecUtils.toDouble(point));
         }
     };
     private static final ConfigProcessor<NBT> NBT = new ConfigProcessor<>() {
@@ -96,22 +96,22 @@ public class MinestomConfigProcessors {
     };
     private static final ConfigProcessor<VillagerMeta.VillagerData> VILLAGER_DATA = new ConfigProcessor<>() {
 
-        private final ConfigProcessor<VillagerMeta.Type> typeProcessor =
+        private static final ConfigProcessor<VillagerMeta.Type> TYPE_PROCESSOR =
                 ConfigProcessor.enumProcessor(VillagerMeta.Type.class);
 
-        private final ConfigProcessor<VillagerMeta.Profession> professionProcessor =
+        private static final ConfigProcessor<VillagerMeta.Profession> PROFESSION_PROCESSOR =
                 ConfigProcessor.enumProcessor(VillagerMeta.Profession.class);
 
-        private final ConfigProcessor<VillagerMeta.Level> levelProcessor =
+        private static final ConfigProcessor<VillagerMeta.Level> LEVEL_PROCESSOR =
                 ConfigProcessor.enumProcessor(VillagerMeta.Level.class);
 
         @Override
         public @NotNull VillagerMeta.VillagerData dataFromElement(@NotNull ConfigElement element)
                 throws ConfigProcessException {
-            VillagerMeta.Type type = typeProcessor.dataFromElement(element.getElementOrThrow("type"));
+            VillagerMeta.Type type = TYPE_PROCESSOR.dataFromElement(element.getElementOrThrow("type"));
             VillagerMeta.Profession profession =
-                    professionProcessor.dataFromElement(element.getElementOrThrow("profession"));
-            VillagerMeta.Level level = levelProcessor.dataFromElement(element.getElementOrThrow("level"));
+                    PROFESSION_PROCESSOR.dataFromElement(element.getElementOrThrow("profession"));
+            VillagerMeta.Level level = LEVEL_PROCESSOR.dataFromElement(element.getElementOrThrow("level"));
 
             return new VillagerMeta.VillagerData(type, profession, level);
         }
@@ -119,9 +119,9 @@ public class MinestomConfigProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull VillagerMeta.VillagerData villagerData)
                 throws ConfigProcessException {
-            return ConfigNode.of("type", typeProcessor.elementFromData(villagerData.getType()), "profession",
-                    professionProcessor.elementFromData(villagerData.getProfession()), "level",
-                    levelProcessor.elementFromData(villagerData.getLevel()));
+            return ConfigNode.of("type", TYPE_PROCESSOR.elementFromData(villagerData.getType()), "profession",
+                    PROFESSION_PROCESSOR.elementFromData(villagerData.getProfession()), "level",
+                    LEVEL_PROCESSOR.elementFromData(villagerData.getLevel()));
         }
     };
 

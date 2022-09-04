@@ -13,6 +13,28 @@ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
  */
 public class ItemStackConfigProcessors {
 
+    private static final ConfigProcessor<ItemStack> SNBT = new ConfigProcessor<>() {
+
+        private static final ConfigProcessor<NBT> NBT_COMPOUND_PROCESSOR = MinestomConfigProcessors.nbt();
+
+        @SuppressWarnings("UnstableApiUsage")
+        @Override
+        public ItemStack dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            NBT nbt = NBT_COMPOUND_PROCESSOR.dataFromElement(element);
+            if (!(nbt instanceof NBTCompound compound)) {
+                throw new ConfigProcessException("NBT is not a compound");
+            }
+
+            return ItemStack.fromItemNBT(compound);
+        }
+
+        @SuppressWarnings("UnstableApiUsage")
+        @Override
+        public @NotNull ConfigElement elementFromData(@NotNull ItemStack itemStack) throws ConfigProcessException {
+            return NBT_COMPOUND_PROCESSOR.elementFromData(itemStack.toItemNBT());
+        }
+    };
+
     private ItemStackConfigProcessors() {
         throw new UnsupportedOperationException();
     }
@@ -23,27 +45,7 @@ public class ItemStackConfigProcessors {
      * @return A new {@link ConfigProcessor} for {@link ItemStack}s based on String NBT format
      */
     public static @NotNull ConfigProcessor<ItemStack> snbt() {
-        return new ConfigProcessor<>() {
-
-            private final ConfigProcessor<NBT> nbtCompoundProcessor = MinestomConfigProcessors.nbt();
-
-            @SuppressWarnings("UnstableApiUsage")
-            @Override
-            public ItemStack dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                NBT nbt = nbtCompoundProcessor.dataFromElement(element);
-                if (!(nbt instanceof NBTCompound compound)) {
-                    throw new ConfigProcessException("NBT is not a compound");
-                }
-
-                return ItemStack.fromItemNBT(compound);
-            }
-
-            @SuppressWarnings("UnstableApiUsage")
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull ItemStack itemStack) throws ConfigProcessException {
-                return nbtCompoundProcessor.elementFromData(itemStack.toItemNBT());
-            }
-        };
+        return SNBT;
     }
 
 }

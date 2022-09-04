@@ -36,7 +36,7 @@ public class NearestPlayerSelector extends FirstTargetSelector<Player> {
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<Data>() {
+        return new ConfigProcessor<>() {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 String selectorPath = element.getStringOrThrow("selectorPath");
