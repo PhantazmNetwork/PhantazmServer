@@ -194,9 +194,10 @@ public final class PhantazmServer {
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
         Messaging.initialize(global, viewProvider, serverConfig.serverInfoConfig().authType());
-        Neuron.initialize(global, serverConfig.pathfinderConfig());
+        Neuron.initialize(global, contextManager, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner());
-        Mob.initialize(global, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"), new YamlCodec());
+        Mob.initialize(global, contextManager, keyParser, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"),
+                new YamlCodec());
         EquipmentFeature.initialize(Path.of("./equipment/"),
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())));

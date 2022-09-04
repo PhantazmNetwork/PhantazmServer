@@ -44,7 +44,7 @@ public class SidebarUpdater {
 
     @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<Data>() {
+        return new ConfigProcessor<>() {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 Collection<String> sectionPaths = ConfigProcessor.STRING.collectionProcessor()

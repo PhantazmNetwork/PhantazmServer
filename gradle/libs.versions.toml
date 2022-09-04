@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.11.0"
 
-ethylene = "0.12.1"
+ethylene = "0.12.4"
 
 junit-jupiter = "5.9.0-M1"
 

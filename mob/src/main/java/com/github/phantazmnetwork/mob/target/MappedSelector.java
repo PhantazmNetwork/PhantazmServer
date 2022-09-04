@@ -1,11 +1,9 @@
 package com.github.phantazmnetwork.mob.target;
 
-import com.github.phantazmnetwork.core.target.TargetSelectorInstance;
-import com.github.phantazmnetwork.mob.PhantazmMob;
-import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A {@link TargetSelector} that maps target types.
@@ -36,14 +34,8 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
     }
 
     @Override
-    public @NotNull Key key() {
-        return delegate.key();
-    }
-
-    @Override
-    public @NotNull TargetSelectorInstance<TTo> createSelector(@NotNull PhantazmMob mob) {
-        TargetSelectorInstance<TFrom> delegateSelector = delegate.createSelector(mob);
-        return () -> delegateSelector.selectTarget().map(this::map);
+    public @NotNull Optional<TTo> selectTarget() {
+        return delegate.selectTarget().map(this::map);
     }
 
     /**
