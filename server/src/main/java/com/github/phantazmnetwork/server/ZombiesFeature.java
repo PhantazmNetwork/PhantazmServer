@@ -33,8 +33,7 @@ public final class ZombiesFeature {
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
-        LOGGER.info("Registering element classes...");
-
+        LOGGER.info("Registering Zombies element classes...");
         //actions
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);

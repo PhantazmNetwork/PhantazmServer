@@ -175,8 +175,8 @@ public final class NeuralEntity extends LivingEntity implements Agent {
      * @param target the target entity to follow
      */
     public void setTarget(@Nullable Entity target) {
-        Navigator navigator = getNavigator();
         this.target = target;
+        Navigator navigator = getNavigator();
         if (target == null) {
             navigator.setDestination(null);
         }

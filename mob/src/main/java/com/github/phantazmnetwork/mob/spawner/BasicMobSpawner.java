@@ -91,7 +91,7 @@ public class BasicMobSpawner implements MobSpawner {
     @Override
     public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Point point, @NotNull MobModel model) {
         NeuralEntity neuralEntity = neuralSpawner.spawnEntity(instance, point, model.getDescriptor());
-        setDisplayName(neuralEntity, model);
+        setEntityMeta(neuralEntity, model);
         setEquipment(neuralEntity, model);
         setAttributes(neuralEntity, model);
         setHealth(neuralEntity, model);
@@ -107,7 +107,7 @@ public class BasicMobSpawner implements MobSpawner {
         return mob;
     }
 
-    private void setDisplayName(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
+    private void setEntityMeta(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
         EntityMeta meta = neuralEntity.getEntityMeta();
         ConfigNode metaNode = model.getMetaNode();
         for (Method method : meta.getClass().getMethods()) {
@@ -164,7 +164,6 @@ public class BasicMobSpawner implements MobSpawner {
             }
             catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
-                continue;
             }
         }
     }
