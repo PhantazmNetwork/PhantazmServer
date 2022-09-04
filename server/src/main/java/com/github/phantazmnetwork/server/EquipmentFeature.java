@@ -10,6 +10,7 @@ import com.github.phantazmnetwork.core.particle.ParticleWrapper;
 import com.github.phantazmnetwork.core.particle.data.ParticleData;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.mob.MobStore;
+import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.gun.Gun;
@@ -237,7 +238,7 @@ final class EquipmentFeature {
         gunProcessors.put(HitScanFirer.Data.SERIAL_KEY, HitScanFirer.processor());
         gunProcessors.put(PhantazmMobProjectileCollisionFilter.Data.SERIAL_KEY,
                 PhantazmMobProjectileCollisionFilter.processor());
-        gunProcessors.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.processor());
+        gunProcessors.put(ProjectileFirer.Data.SERIAL_KEY, ProjectileFirer.processor(Mob.getModelProcessor()));
         gunProcessors.put(SpreadFirer.Data.SERIAL_KEY, SpreadFirer.processor());
         gunProcessors.put(ChainShotHandler.Data.SERIAL_KEY, ChainShotHandler.processor());
         gunProcessors.put(DamageShotHandler.Data.SERIAL_KEY, DamageShotHandler.processor());
@@ -304,8 +305,8 @@ final class EquipmentFeature {
     }
 
     public static @NotNull EquipmentCreator createEquipmentCreator(@NotNull ZombiesMap map,
-            @NotNull PlayerView playerView, @NotNull EventNode<Event> node, @NotNull MobStore store,
-            @NotNull Random random) {
+            @NotNull PlayerView playerView, @NotNull EventNode<Event> node, @NotNull MobSpawner mobSpawner,
+            @NotNull MobStore store, @NotNull Random random) {
         return new EquipmentCreator() {
             @Override
             public boolean hasEquipment(@NotNull Key equipmentKey) {
@@ -317,7 +318,8 @@ final class EquipmentFeature {
             @Override
             public <TEquipment extends Equipment> Optional<TEquipment> createEquipment(@NotNull Key equipmentKey) {
                 if (gunLevelMap.containsKey(equipmentKey)) {
-                    return Optional.of((TEquipment)createGun(equipmentKey, map, node, store, playerView, random));
+                    return Optional.of(
+                            (TEquipment)createGun(equipmentKey, map, node, mobSpawner, store, playerView, random));
                 }
 
                 return Optional.empty();
@@ -326,7 +328,8 @@ final class EquipmentFeature {
     }
 
     private static @NotNull Gun createGun(@NotNull Key key, @NotNull ZombiesMap map, @NotNull EventNode<Event> node,
-            @NotNull MobStore store, @NotNull PlayerView playerView, @NotNull Random random) {
+            @NotNull MobSpawner mobSpawner, @NotNull MobStore store, @NotNull PlayerView playerView,
+            @NotNull Random random) {
         List<ComplexData> complexDataList = gunLevelMap.get(key);
         if (complexDataList == null) {
             throw new IllegalArgumentException("No gun level data found for key " + key);
@@ -404,7 +407,7 @@ final class EquipmentFeature {
 
             ProjectileFirer firer =
                     new ProjectileFirer(data, playerView::getPlayer, playerView.getUUID(), endSelector, targetFinder,
-                            collisionFilter, shotHandlers);
+                            collisionFilter, shotHandlers, mobSpawner);
             node.addListener(ProjectileCollideWithBlockEvent.class, firer::onProjectileCollision);
             node.addListener(ProjectileCollideWithEntityEvent.class, firer::onProjectileCollision);
 

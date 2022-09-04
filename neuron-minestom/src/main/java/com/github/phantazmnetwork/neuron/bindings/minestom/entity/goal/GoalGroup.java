@@ -38,6 +38,10 @@ public class GoalGroup implements Tickable {
      */
     @FactoryMethod
     public GoalGroup(@NotNull Data data, @NotNull @DataName("goals") Collection<NeuralGoal> goals) {
+        this(goals);
+    }
+
+    public GoalGroup(@NotNull Collection<NeuralGoal> goals) {
         this.goals = Objects.requireNonNull(goals, "goals");
     }
 
