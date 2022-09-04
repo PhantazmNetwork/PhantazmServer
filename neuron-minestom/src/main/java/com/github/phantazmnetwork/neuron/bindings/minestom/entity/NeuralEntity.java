@@ -42,6 +42,8 @@ public final class NeuralEntity extends LivingEntity implements Agent {
     private Controller controller;
     private Explorer explorer;
 
+    private Entity target = null;
+
     private int removalAnimationDelay;
 
     /**
@@ -174,12 +176,17 @@ public final class NeuralEntity extends LivingEntity implements Agent {
      */
     public void setTarget(@Nullable Entity target) {
         Navigator navigator = getNavigator();
+        this.target = target;
         if (target == null) {
             navigator.setDestination(null);
         }
         else {
             navigator.setDestination(() -> descriptor.computeTargetPosition(target));
         }
+    }
+
+    public Entity getTarget() {
+        return target;
     }
 
     /**

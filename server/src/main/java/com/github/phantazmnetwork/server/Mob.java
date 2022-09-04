@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
 import com.github.phantazmnetwork.mob.goal.FollowPlayerGoal;
+import com.github.phantazmnetwork.mob.goal.MeleeAttackGoal;
 import com.github.phantazmnetwork.mob.goal.UseSkillGoal;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
 import com.github.phantazmnetwork.mob.spawner.BasicMobSpawner;
@@ -145,6 +146,7 @@ public final class Mob {
         //mob goals
         contextManager.registerElementClass(FollowPlayerGoal.class);
         contextManager.registerElementClass(UseSkillGoal.class);
+        contextManager.registerElementClass(MeleeAttackGoal.class);
 
         //mob skills
         contextManager.registerElementClass(PlaySoundSkill.class);
