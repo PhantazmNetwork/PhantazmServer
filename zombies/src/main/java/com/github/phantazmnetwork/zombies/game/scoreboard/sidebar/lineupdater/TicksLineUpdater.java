@@ -29,7 +29,7 @@ public class TicksLineUpdater implements SidebarLineUpdater {
 
     private static final ElementFactory<Data, TicksLineUpdater> FACTORY = (objectData, context, dependencyProvider) -> {
         Wrapper<Long> ticksWrapper = dependencyProvider.provide(Key.key("wrapper.long"));
-        TickFormatter tickFormatter = context.provide(objectData.tickFormatterPath(), dependencyProvider);
+        TickFormatter tickFormatter = context.provide(objectData.tickFormatterPath(), dependencyProvider, false);
         return new TicksLineUpdater(ticksWrapper, tickFormatter);
     };
 

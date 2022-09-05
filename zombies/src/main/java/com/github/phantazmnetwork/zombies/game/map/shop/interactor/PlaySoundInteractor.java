@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.sound.Sound;
@@ -39,10 +38,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("sound", SOUND_PROCESSOR.elementFromData(data.sound));
-                node.putBoolean("broadcast", data.broadcast);
-                return node;
+                return ConfigNode.of("sound", SOUND_PROCESSOR.elementFromData(data.sound), "broadcast", data.broadcast);
             }
         };
     }

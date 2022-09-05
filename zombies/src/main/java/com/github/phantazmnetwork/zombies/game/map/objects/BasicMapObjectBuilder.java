@@ -218,7 +218,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             ConfigElement element = list.get(i);
 
             int finalI = i;
-            createElement(element, node -> collection.add(context.provide(basePath + "/" + finalI, dependencyProvider)),
+            createElement(element,
+                    node -> collection.add(context.provide(basePath + "/" + finalI, dependencyProvider, true)),
                     elementName);
         }
     }
