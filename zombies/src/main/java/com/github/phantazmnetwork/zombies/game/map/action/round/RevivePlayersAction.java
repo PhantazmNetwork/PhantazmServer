@@ -32,10 +32,10 @@ public class RevivePlayersAction implements Action<Round> {
     @Override
     public void perform(@NotNull Round round) {
         for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-            ZombiesPlayerState state = zombiesPlayer.getStateSwitcher().getState();
+            ZombiesPlayerState state = zombiesPlayer.getModule().getStateSwitcher().getState();
             if (state.key().equals(ZombiesPlayerStateKeys.DEAD.key())) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                zombiesPlayer.getPlayerView().getPlayer().ifPresent(player -> player.teleport(respawnPos));
+                zombiesPlayer.getModule().getPlayerView().getPlayer().ifPresent(player -> player.teleport(respawnPos));
             }
             else if (state instanceof KnockedPlayerState knockedPlayerState) {
                 knockedPlayerState.setReviver(null);

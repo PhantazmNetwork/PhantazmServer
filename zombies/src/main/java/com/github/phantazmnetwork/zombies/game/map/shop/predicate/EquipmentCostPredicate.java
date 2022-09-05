@@ -61,7 +61,7 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         ZombiesPlayer player = interaction.player();
-        PlayerCoins coins = interaction.player().getCoins();
+        PlayerCoins coins = interaction.player().getModule().getCoins();
         Optional<Equipment> equipmentOptional = player.getHeldEquipment();
         if (equipmentOptional.isEmpty()) {
             return coins.runTransaction(

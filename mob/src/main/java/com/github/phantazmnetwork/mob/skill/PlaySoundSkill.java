@@ -1,11 +1,13 @@
 package com.github.phantazmnetwork.mob.skill;
 
-import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.core.target.TargetSelectorInstance;
-import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
+import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,75 +16,68 @@ import java.util.Objects;
 /**
  * A {@link Skill} that plays a {@link Sound}.
  */
+@Model("mob.skill.play_sound")
 public class PlaySoundSkill implements Skill {
 
-    /**
-     * The serial {@link Key} for {@link PlaySoundSkill}s.
-     */
-    public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "skill.play_sound");
+    @DataObject
+    public record Data(@NotNull @DataPath("selector") String selectorPath,
+                       @NotNull Sound sound,
+                       boolean followAudience) {
 
-    private final TargetSelector<? extends Audience> selectorCreator;
+        public Data {
+            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(sound, "sound");
+        }
 
-    private final Sound sound;
+    }
 
-    private final boolean followAudience;
+    private final Data data;
+
+    private final TargetSelector<? extends Audience> selector;
 
     /**
      * Creates a {@link PlaySoundSkill}.
      *
-     * @param selector       The {@link TargetSelector} used to select {@link Audience}s
-     * @param sound          The {@link Sound} to play
-     * @param followAudience Whether the {@link Sound} should follow the {@link Audience}
+     * @param selector The {@link TargetSelector} used to select {@link Audience}s
      */
-    public PlaySoundSkill(@NotNull TargetSelector<? extends Audience> selector, @NotNull Sound sound,
-            boolean followAudience) {
-        this.selectorCreator = Objects.requireNonNull(selector, "selectorCreator");
-        this.sound = Objects.requireNonNull(sound, "sound");
-        this.followAudience = followAudience;
+    @FactoryMethod
+    public PlaySoundSkill(@NotNull Data data,
+            @NotNull @DataName("selector") TargetSelector<? extends Audience> selector) {
+        this.data = Objects.requireNonNull(data, "data");
+        this.selector = Objects.requireNonNull(selector, "selector");
     }
 
-    /**
-     * Gets the {@link TargetSelector} used to select {@link Audience}s.
-     *
-     * @return The {@link TargetSelector} used to select {@link Audience}s
-     */
-    public @NotNull TargetSelector<? extends Audience> getSelector() {
-        return selectorCreator;
-    }
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
+        ConfigProcessor<Sound> soundProcessor = ConfigProcessors.sound();
+        return new ConfigProcessor<>() {
+            @Override
+            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+                String selectorPath = element.getStringOrThrow("selectorPath");
+                Sound sound = soundProcessor.dataFromElement(element.getElementOrThrow("sound"));
+                boolean followAudience = element.getBooleanOrThrow("followAudience");
 
-    /**
-     * Gets the {@link Sound} to play.
-     *
-     * @return The {@link Sound} to play
-     */
-    public @NotNull Sound getSound() {
-        return sound;
-    }
+                return new Data(selectorPath, sound, followAudience);
+            }
 
-    /**
-     * Gets whether the {@link Sound} should follow the {@link Audience}.
-     *
-     * @return Whether the {@link Sound} should follow the {@link Audience}
-     */
-    public boolean shouldFollowAudience() {
-        return followAudience;
+            @Override
+            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
+                return ConfigNode.of("selectorPath", data.selectorPath(), "sound",
+                        soundProcessor.elementFromData(data.sound()), "followAudience", data.followAudience());
+            }
+        };
     }
 
     @Override
-    public @NotNull SkillInstance createSkill(@NotNull PhantazmMob sender) {
-        TargetSelectorInstance<? extends Audience> selector = selectorCreator.createSelector(sender);
-        return () -> selector.selectTarget().ifPresent(audience -> {
-            if (followAudience) {
-                audience.playSound(sound, Sound.Emitter.self());
+    public void use() {
+        selector.selectTarget().ifPresent(audience -> {
+            if (data.followAudience()) {
+                audience.playSound(data.sound(), Sound.Emitter.self());
             }
             else {
-                audience.playSound(sound);
+                audience.playSound(data.sound());
             }
         });
     }
 
-    @Override
-    public @NotNull Key key() {
-        return SERIAL_KEY;
-    }
 }

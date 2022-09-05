@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerRightClickListener {
 
     public void onRightClick(@NotNull ZombiesPlayer player, int slot) {
-        InventoryAccessRegistry profileSwitcher = player.getInventoryAccessRegistry();
+        InventoryAccessRegistry profileSwitcher = player.getModule().getInventoryAccessRegistry();
         if (!profileSwitcher.hasCurrentAccess()) {
             return;
         }

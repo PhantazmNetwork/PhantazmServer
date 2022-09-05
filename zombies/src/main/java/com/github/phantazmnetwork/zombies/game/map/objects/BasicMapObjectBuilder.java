@@ -118,6 +118,12 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         }
 
         @Memoize
+        @DependencySupplier("zombies.dependency.map_object.player_collection")
+        public @NotNull Collection<? extends ZombiesPlayer> playerCollection() {
+            return playerMap.values();
+        }
+
+        @Memoize
         @DependencySupplier("zombies.dependency.map_object.equipment_creator")
         public @NotNull EquipmentCreator equipmentCreator() {
             return equipmentCreator;

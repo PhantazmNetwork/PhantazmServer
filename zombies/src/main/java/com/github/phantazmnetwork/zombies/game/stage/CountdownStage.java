@@ -39,7 +39,7 @@ public class CountdownStage extends StageBase {
                 Component message = Component.text(
                         previousTicks / MinecraftServer.TICK_PER_SECOND + " seconds until the game starts.",
                         NamedTextColor.YELLOW);
-                zombiesPlayer.getPlayerView().getPlayer().ifPresent(player -> {
+                zombiesPlayer.getModule().getPlayerView().getPlayer().ifPresent(player -> {
                     player.sendMessage(message);
                 });
             }

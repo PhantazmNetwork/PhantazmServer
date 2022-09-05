@@ -2,22 +2,22 @@ package com.github.phantazmnetwork.mob.target;
 
 import com.github.phantazmnetwork.core.target.TargetSelectorInstance;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 /**
  * Creates {@link TargetSelectorInstance}s from an associated {@link PhantazmMob}
  *
  * @param <TTarget> The type of the target to select
  */
-public interface TargetSelector<TTarget> extends Keyed {
+public interface TargetSelector<TTarget> {
 
     /**
-     * Creates a {@link TargetSelectorInstance}
+     * Selects a target.
      *
-     * @param mob The {@link PhantazmMob} associated with the selector
-     * @return The new {@link TargetSelectorInstance}
+     * @return An {@link Optional} of the target that is empty if no target could be found
      */
-    @NotNull TargetSelectorInstance<TTarget> createSelector(@NotNull PhantazmMob mob);
+    @NotNull Optional<TTarget> selectTarget();
 
 }

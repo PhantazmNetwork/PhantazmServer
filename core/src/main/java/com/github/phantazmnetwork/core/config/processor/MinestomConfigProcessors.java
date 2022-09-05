@@ -1,20 +1,30 @@
 package com.github.phantazmnetwork.core.config.processor;
 
 import com.github.phantazmnetwork.commons.ConfigProcessors;
+import com.github.phantazmnetwork.commons.vector.Vec3D;
+import com.github.phantazmnetwork.commons.vector.VectorConfigProcessors;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.metadata.villager.VillagerMeta;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.registry.ProtocolObject;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBT;
+import org.jglrxavpok.hephaistos.nbt.NBTException;
+import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
+import java.io.StringReader;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -48,6 +58,70 @@ public class MinestomConfigProcessors {
             node.putNumber("duration", potion.duration());
 
             return node;
+        }
+    };
+    private static final ConfigProcessor<Point> POINT = new ConfigProcessor<>() {
+
+        private static final ConfigProcessor<Vec3D> VECTOR_PROCESSOR = VectorConfigProcessors.vec3D();
+
+        @Override
+        public @NotNull Point dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            return VecUtils.toPoint(VECTOR_PROCESSOR.dataFromElement(element));
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(@NotNull Point point) throws ConfigProcessException {
+            return VECTOR_PROCESSOR.elementFromData(VecUtils.toDouble(point));
+        }
+    };
+    private static final ConfigProcessor<NBT> NBT = new ConfigProcessor<>() {
+        @Override
+        public @NotNull NBT dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String nbtString = ConfigProcessor.STRING.dataFromElement(element);
+            NBT nbt;
+            try {
+                nbt = new SNBTParser(new StringReader(nbtString)).parse();
+            }
+            catch (NBTException e) {
+                throw new ConfigProcessException(e);
+            }
+
+            return nbt;
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(@NotNull NBT compound) {
+            return new ConfigPrimitive(compound.toSNBT());
+        }
+    };
+    private static final ConfigProcessor<VillagerMeta.VillagerData> VILLAGER_DATA = new ConfigProcessor<>() {
+
+        private static final ConfigProcessor<VillagerMeta.Type> TYPE_PROCESSOR =
+                ConfigProcessor.enumProcessor(VillagerMeta.Type.class);
+
+        private static final ConfigProcessor<VillagerMeta.Profession> PROFESSION_PROCESSOR =
+                ConfigProcessor.enumProcessor(VillagerMeta.Profession.class);
+
+        private static final ConfigProcessor<VillagerMeta.Level> LEVEL_PROCESSOR =
+                ConfigProcessor.enumProcessor(VillagerMeta.Level.class);
+
+        @Override
+        public @NotNull VillagerMeta.VillagerData dataFromElement(@NotNull ConfigElement element)
+                throws ConfigProcessException {
+            VillagerMeta.Type type = TYPE_PROCESSOR.dataFromElement(element.getElementOrThrow("type"));
+            VillagerMeta.Profession profession =
+                    PROFESSION_PROCESSOR.dataFromElement(element.getElementOrThrow("profession"));
+            VillagerMeta.Level level = LEVEL_PROCESSOR.dataFromElement(element.getElementOrThrow("level"));
+
+            return new VillagerMeta.VillagerData(type, profession, level);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(@NotNull VillagerMeta.VillagerData villagerData)
+                throws ConfigProcessException {
+            return ConfigNode.of("type", TYPE_PROCESSOR.elementFromData(villagerData.getType()), "profession",
+                    PROFESSION_PROCESSOR.elementFromData(villagerData.getProfession()), "level",
+                    LEVEL_PROCESSOR.elementFromData(villagerData.getLevel()));
         }
     };
 
@@ -90,6 +164,18 @@ public class MinestomConfigProcessors {
      */
     public static @NotNull ConfigProcessor<Potion> potion() {
         return POTION;
+    }
+
+    public static @NotNull ConfigProcessor<Point> point() {
+        return POINT;
+    }
+
+    public static @NotNull ConfigProcessor<NBT> nbt() {
+        return NBT;
+    }
+
+    public static @NotNull ConfigProcessor<VillagerMeta.VillagerData> villagerData() {
+        return VILLAGER_DATA;
     }
 
     @SuppressWarnings("ClassCanBeRecord")

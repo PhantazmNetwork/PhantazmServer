@@ -48,7 +48,7 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        PlayerCoins coins = interaction.player().getCoins();
+        PlayerCoins coins = interaction.player().getModule().getCoins();
         return coins.runTransaction(new Transaction(modifierSource.modifiers(data.modifierType), -data.cost))
                 .isAffordable(coins);
     }

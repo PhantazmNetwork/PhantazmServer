@@ -1,19 +1,32 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section;
 
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.SidebarLineUpdater;
+import com.github.steanky.element.core.annotation.DataName;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+@Model("zombies.sidebar.section.collection")
 public class CollectionSidebarSection implements SidebarSection {
 
     private final Collection<SidebarLineUpdater> lineUpdaters;
 
-    public CollectionSidebarSection(@NotNull Collection<SidebarLineUpdater> lineUpdaters) {
+    @DataObject
+    public record Data(@NotNull @DataName("line_updaters") Collection<String> lineUpdaterPaths) {
+
+        public Data {
+            Objects.requireNonNull(lineUpdaterPaths, "lineUpdaters");
+        }
+
+    }
+
+    @FactoryMethod
+    public CollectionSidebarSection(@NotNull Data data,
+            @NotNull @DataName("line_updaters") Collection<? extends SidebarLineUpdater> lineUpdaters) {
         this.lineUpdaters = List.copyOf(lineUpdaters);
     }
 

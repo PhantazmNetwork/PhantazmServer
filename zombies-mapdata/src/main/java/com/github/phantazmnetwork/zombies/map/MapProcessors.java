@@ -321,6 +321,22 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<ConfigNode> scoreboard = new ConfigProcessor<ConfigNode>() {
+        @Override
+        public @NotNull ConfigNode dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            if (!element.isNode()) {
+                throw new ConfigProcessException("element must be a node");
+            }
+
+            return element.asNode();
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(@NotNull ConfigNode configNode) throws ConfigProcessException {
+            return configNode;
+        }
+    };
+
     private MapProcessors() {
         throw new UnsupportedOperationException();
     }
@@ -421,5 +437,9 @@ public final class MapProcessors {
 
     public static @NotNull ConfigProcessor<Evaluation> evaluation() {
         return evaluation;
+    }
+
+    public static @NotNull ConfigProcessor<ConfigNode> scoreboard() {
+        return scoreboard;
     }
 }
