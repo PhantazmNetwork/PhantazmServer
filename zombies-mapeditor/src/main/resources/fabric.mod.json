@@ -7,8 +7,12 @@
     "authors": [
         "Steank"
     ],
-    "license": "GPLv3",
-    "icon": "assets/zombies-mapeditor/icon.png",
+    "contact": {
+        "issues": "https://github.com/PhantazmNetwork/PhantazmServer/issues",
+        "sources": "https://github.com/PhantazmNetwork/PhantazmServer.git"
+    },
+    "license": "AGPL-3.0-or-later",
+    "icon": "assets/mapeditor/icon.png",
     "environment": "client",
     "entrypoints": {
         "client": [

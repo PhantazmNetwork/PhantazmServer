@@ -72,7 +72,7 @@ public class MinimalFakePlayer extends Entity {
         }
 
         PlayerInfoPacket.Entry entry =
-                new PlayerInfoPacket.AddPlayer(getUuid(), username, properties, GameMode.SURVIVAL, 0, null);
+                new PlayerInfoPacket.AddPlayer(getUuid(), username, properties, GameMode.SURVIVAL, 0, null, null);
         return new PlayerInfoPacket(PlayerInfoPacket.Action.ADD_PLAYER, entry);
     }
 

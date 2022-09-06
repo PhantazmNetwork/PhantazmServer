@@ -18,7 +18,7 @@ import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.play.DestroyEntitiesPacket;
-import net.minestom.server.network.packet.server.play.SpawnLivingEntityPacket;
+import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.Reference;
@@ -93,12 +93,13 @@ public class GuardianBeamShotHandler implements ShotHandler {
         guardian.setInvisible(true);
 
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
-        ServerPacket armorStandSpawnPacket = new SpawnLivingEntityPacket(armorStand.getEntityId(), armorStand.getUuid(),
-                armorStand.getEntityType().id(), Pos.fromPoint(shot.end()), 0.0F, (short)0, (short)0, (short)0);
+        ServerPacket armorStandSpawnPacket =
+                new SpawnEntityPacket(armorStand.getEntityId(), armorStand.getUuid(), armorStand.getEntityType().id(),
+                        Pos.fromPoint(shot.end()), 0F, 0, (short)0, (short)0, (short)0);
         ServerPacket armorStandMetaPacket = armorStand.getMetadataPacket();
         ServerPacket guardianSpawnPacket =
-                new SpawnLivingEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(),
-                        start, start.yaw(), (short)0, (short)0, (short)0);
+                new SpawnEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(), start,
+                        start.yaw(), 0, (short)0, (short)0, (short)0);
         ServerPacket guardianMetaPacket = guardian.getMetadataPacket();
 
         instance.sendGroupedPacket(armorStandSpawnPacket);

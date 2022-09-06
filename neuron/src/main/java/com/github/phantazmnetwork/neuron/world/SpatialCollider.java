@@ -214,7 +214,7 @@ public class SpatialCollider implements Collider {
             double dX, double dY, double dZ) {
         return collisionCheck(x, y, z, width, height, depth, dX, dY, dZ, Double.POSITIVE_INFINITY,
                 (solid, val) -> val + solid.getMin().getY(), (value, best) -> value < best,
-                solid -> solid.getMin().getY() == 0.0F, val -> val > 0);
+                solid -> solid.getMin().getY() == 0F, val -> val > 0);
     }
 
     @Override
