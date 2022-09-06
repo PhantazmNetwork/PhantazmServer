@@ -39,6 +39,11 @@ dependencies {
     }
 
     sequenceOf(
+        "fabric-networking-api-v1" // LibGui incompatibility
+    ).forEach {
+        modRuntimeOnly(fabricApi.module(it, fabricApiVersion))
+    }
+    sequenceOf(
         "fabric-events-interaction-v0",
         "fabric-key-binding-api-v1"
     ).forEach {

@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -359,6 +360,7 @@ public class BasicEditorSession implements EditorSession {
 
     private Map<Key, MapInfo> loadMaps() throws IOException {
         Map<Key, MapInfo> newMaps = new HashMap<>();
+        Files.createDirectories(mapFolder);
         FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory() && !path.equals(mapFolder),
                 mapFolder -> {
                     LOGGER.info("Trying to load map from " + mapFolder);
