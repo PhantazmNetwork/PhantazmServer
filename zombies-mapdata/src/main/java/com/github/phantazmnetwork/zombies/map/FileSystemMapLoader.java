@@ -109,8 +109,8 @@ public class FileSystemMapLoader implements MapLoader {
         FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate,
                 file -> spawnpoints.add(ConfigBridges.read(file, codec, MapProcessors.spawnpointInfo())));
 
-        String scoreboardSettingsPath =
-                "settings" + (codec.getPreferredExtensions().isEmpty() ? "" : codec.getPreferredExtensions().get(0));
+        String scoreboardSettingsPath = "settings" +
+                (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtensions().get(0));
         scoreboard =
                 ConfigBridges.read(paths.scoreboard.resolve(scoreboardSettingsPath), codec, MapProcessors.scoreboard());
 
@@ -146,7 +146,7 @@ public class FileSystemMapLoader implements MapLoader {
         Files.createDirectories(paths.spawnpoints);
         Files.createDirectories(paths.scoreboard);
 
-        String extension = codec.getPreferredExtensions().isEmpty() ? "" : codec.getPreferredExtensions().get(0);
+        String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtensions().get(0);
 
         for (RoomInfo room : data.rooms()) {
             ConfigBridges.write(paths.rooms.resolve(room.id().value() + extension), codec, MapProcessors.roomInfo(),
