@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.RenderUtils;
+import me.x150.renderer.renderer.color.Color;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -22,7 +23,6 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -210,8 +210,7 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public @UnmodifiableView
-    @NotNull Map<Key, MapInfo> mapView() {
+    public @UnmodifiableView @NotNull Map<Key, MapInfo> mapView() {
         return unmodifiableMaps;
     }
 

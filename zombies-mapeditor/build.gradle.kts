@@ -1,15 +1,12 @@
 // https://youtrack.jetbrains.com/issue/KTIJ-19369/False-positive-can-t-be-called-in-this-context-by-implicit-recei
-@Suppress(
-    "DSL_SCOPE_VIOLATION",
-    "MISSING_DEPENDENCY_CLASS",
-    "UNRESOLVED_REFERENCE_WRONG_RECEIVER",
-    "FUNCTION_CALL_EXPECTED"
-)
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("phantazm.java-library-conventions")
 
     alias(libs.plugins.fabric.loom)
 }
+
+version = "1.1.0-SNAPSHOT"
 
 base {
     archivesName.set("phantazm-zombies-mapeditor")
@@ -18,17 +15,20 @@ base {
 repositories {
     maven("https://jitpack.io")
     maven("https://server.bbkr.space/artifactory/libs-release")
+    maven("https://ladysnake.jfrog.io/artifactory/mods") {
+        name = "Ladysnake Mods"
+        content {
+            includeGroup("io.github.ladysnake")
+            includeGroupByRegex("io\\.github\\.onyxstudios.*")
+        }
+    }
 }
 
-fun Configuration.exclude(provider: Provider<MinimalExternalModuleDependency>) {
-    val module = provider.get().module
-    exclude(module.group, module.name)
+loom {
+    clientOnlyMinecraftJar()
 }
 
-val includeTransitive: Configuration by configurations.creating {
-    exclude(libs.fabric.loader)
-    exclude(libs.fastutil)
-}
+val fabricApiVersion: String by project
 
 dependencies {
     minecraft(libs.minecraft)
@@ -38,39 +38,44 @@ dependencies {
         }
     }
 
-    modImplementation(libs.bundles.fabric)
+    sequenceOf(
+        "fabric-events-interaction-v0",
+        "fabric-key-binding-api-v1"
+    ).forEach {
+        modImplementation(fabricApi.module(it, fabricApiVersion))
+    }
+    modImplementation(libs.fabric.loader)
     modImplementation(libs.libgui)
-    modImplementation(libs.renderer)
+    modImplementation(libs.renderer) {
+        exclude("net.fabricmc.fabric-api", "fabric-api") // Satin includes the entire Fabric API
+    }
 
     implementation(projects.phantazmCommons)
     implementation(projects.phantazmZombiesMapdata)
     implementation(libs.ethylene.yaml)
 
-    @Suppress("UnstableApiUsage")
-    includeTransitive(libs.renderer)
-    includeTransitive(projects.phantazmCommons)
-    includeTransitive(projects.phantazmZombiesMapdata)
-    @Suppress("UnstableApiUsage")
-    includeTransitive(libs.ethylene.yaml)
+    include(libs.libgui)
+    include(libs.renderer)
+    include(libs.satin)
 
-    val resolutionResult = includeTransitive.incoming.resolutionResult
-    resolutionResult.allComponents {
-        when (val idCopy = id) {
-            resolutionResult.root.id -> {
-                return@allComponents
-            }
-            is ModuleComponentIdentifier -> {
-                include(idCopy.group, idCopy.module, idCopy.version)
-            }
-            is ProjectComponentIdentifier -> {
-                include(project(idCopy.projectPath))
-            }
-        }
-    }
+    include(projects.phantazmCommons)
+    include(projects.phantazmZombiesMapdata)
+    include(libs.adventure.api)
+    include(libs.adventure.key)
+    include(libs.adventure.text.minimessage)
+    include(libs.ethylene.core)
+    include(libs.ethylene.yaml)
+    include(libs.examination.api)
+    include(libs.examination.string)
+    include(libs.snakeyaml)
 }
 
 tasks.processResources {
     inputs.property("version", project.version)
+
+    filesMatching("fabric.mod.json") {
+        expand("version" to project.version)
+    }
 }
 
 tasks.compileJava {

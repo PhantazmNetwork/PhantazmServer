@@ -1,10 +1,5 @@
 // https://youtrack.jetbrains.com/issue/KTIJ-19369/False-positive-can-t-be-called-in-this-context-by-implicit-recei
-@Suppress(
-    "DSL_SCOPE_VIOLATION",
-    "MISSING_DEPENDENCY_CLASS",
-    "UNRESOLVED_REFERENCE_WRONG_RECEIVER",
-    "FUNCTION_CALL_EXPECTED"
-)
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("phantazm.java-library-conventions")
 
@@ -13,7 +8,7 @@ plugins {
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/") {
-        name = "papermc"
+        name = "PaperMC"
     }
 }
 

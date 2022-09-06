@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client.render;
 
+import me.x150.renderer.renderer.color.Color;
 import net.kyori.adventure.key.Key;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;

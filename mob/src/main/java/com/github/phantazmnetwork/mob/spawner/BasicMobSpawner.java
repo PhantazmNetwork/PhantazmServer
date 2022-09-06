@@ -16,7 +16,9 @@ import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigEntry;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
@@ -29,6 +31,7 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -101,13 +104,13 @@ public class BasicMobSpawner implements MobSpawner {
         setEntityMeta(neuralEntity, model);
         setEquipment(neuralEntity, model);
         setAttributes(neuralEntity, model);
-        setHealth(neuralEntity, model);
+        setHealth(neuralEntity);
 
         Module module = new Module(neuralEntity);
         DependencyProvider dependencyProvider = new ModuleDependencyProvider(module, keyParser);
         ElementContext context = contextManager.makeContext(model.getNode());
-        addGoals(context, dependencyProvider, neuralEntity, model);
-        Map<Key, Collection<Skill>> triggers = createTriggers(context, dependencyProvider, neuralEntity, model);
+        addGoals(context, dependencyProvider, neuralEntity);
+        Map<Key, Collection<Skill>> triggers = createTriggers(context, dependencyProvider);
 
         PhantazmMob mob = new PhantazmMob(model, neuralEntity, triggers);
         mobStore.registerMob(mob);
@@ -184,15 +187,14 @@ public class BasicMobSpawner implements MobSpawner {
         }
     }
 
-    private void setHealth(@NotNull NeuralEntity entity, @NotNull MobModel model) {
+    private void setHealth(@NotNull NeuralEntity entity) {
         entity.setHealth(entity.getAttributeValue(Attribute.MAX_HEALTH));
     }
 
 
     private void addGoals(@NotNull ElementContext context, @NotNull DependencyProvider dependencyProvider,
-            @NotNull NeuralEntity entity, @NotNull MobModel model) {
-        Collection<GoalGroup> goalGroups =
-                true ? Collections.emptyList() : context.provide("goalGroups", dependencyProvider);
+            @NotNull NeuralEntity entity) {
+        Collection<GoalGroup> goalGroups = context.provideCollection("goalGroups", dependencyProvider);
 
         for (GoalGroup group : goalGroups) {
             entity.addGoalGroup(group);
@@ -200,8 +202,21 @@ public class BasicMobSpawner implements MobSpawner {
     }
 
     private @NotNull Map<Key, Collection<Skill>> createTriggers(@NotNull ElementContext context,
-            @NotNull DependencyProvider dependencyProvider, @NotNull NeuralEntity entity, @NotNull MobModel model) {
-        return true ? Collections.emptyMap() : context.provide("triggers", dependencyProvider);
+            @NotNull DependencyProvider dependencyProvider) {
+        ConfigNode node = context.rootNode().getNodeOrDefault(LinkedConfigNode::new, "triggers");
+        Map<Key, Collection<Skill>> skills = new HashMap<>(node.size());
+        for (ConfigEntry entry : node.entryCollection()) {
+            @Subst("key")
+            String stringKey = entry.getKey();
+            if (!keyParser.isValidKey(stringKey)) {
+                continue;
+            }
+
+            Key key = keyParser.parseKey(stringKey);
+            skills.put(key, context.provideCollection("triggers/" + stringKey, dependencyProvider));
+        }
+
+        return skills;
     }
 
 }

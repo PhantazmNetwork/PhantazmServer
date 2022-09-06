@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.zombies.mapeditor.client.TextPredicates;
 import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WTextField;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +33,7 @@ public class NamedObjectGui extends SimplePanelGui {
         super(100, 150);
 
         textFieldName = new WTextField();
-        buttonAdd = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_ADD));
+        buttonAdd = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_ADD));
 
         textFieldName.setMaxLength(512);
         textFieldName.setTextPredicate(TextPredicates.validKeyPredicate());

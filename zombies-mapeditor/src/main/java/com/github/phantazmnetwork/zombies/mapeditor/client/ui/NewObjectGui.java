@@ -11,7 +11,7 @@ import io.github.cottonmc.cotton.gui.widget.WButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,11 +33,11 @@ public class NewObjectGui extends SimplePanelGui {
 
         Objects.requireNonNull(session, "session");
 
-        WButton newRoom = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_ROOM));
-        WButton newDoor = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_DOOR));
-        WButton newWindow = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_WINDOW));
-        WButton newSpawnpoint = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_SPAWNPOINT));
-        WButton newShop = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NEW_SHOP));
+        WButton newRoom = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NEW_ROOM));
+        WButton newDoor = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NEW_DOOR));
+        WButton newWindow = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NEW_WINDOW));
+        WButton newSpawnpoint = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NEW_SPAWNPOINT));
+        WButton newShop = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NEW_SHOP));
 
         gridPanelRoot.add(newRoom, 0, 0, 5, 1);
         gridPanelRoot.add(newDoor, 0, 1, 5, 1);

@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.zombies.mapeditor.client.TranslationKeys;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -26,8 +25,8 @@ public class ConfirmationGui extends SimplePanelGui {
         Objects.requireNonNull(onConfirm, "onConfirm");
 
         WText display = new WText(message);
-        WButton confirm = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_YES));
-        WButton deny = new WButton(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_NO));
+        WButton confirm = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_YES));
+        WButton deny = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NO));
 
         gridPanelRoot.add(display, 0, 0, 7, 1);
         gridPanelRoot.add(confirm, 0, 1, 3, 1);

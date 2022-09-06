@@ -24,7 +24,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -78,13 +78,12 @@ public class MapeditorClient implements ClientModInitializer {
                 }
 
                 if (!editorSession.hasMap()) {
-                    player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP),
-                            true);
+                    player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP), true);
                     return;
                 }
 
                 if (!editorSession.hasSelection()) {
-                    player.sendMessage(new TranslatableText(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION), true);
+                    player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION), true);
                     return;
                 }
 
@@ -101,7 +100,7 @@ public class MapeditorClient implements ClientModInitializer {
         private boolean renderThroughWalls = false;
         private RenderObject[] baked;
 
-        @EventListener(shift = Shift.POST, type = EventType.WORLD_RENDER)
+        @EventListener(value = EventType.WORLD_RENDER, shift = Shift.POST)
         void worldRender(@NotNull RenderEvent event) {
             if (!enabled) {
                 return;
@@ -131,12 +130,14 @@ public class MapeditorClient implements ClientModInitializer {
                 switch (object.type) {
                     case FILLED -> {
                         for (int i = 0; i < object.bounds.length; i += 2) {
-                            Renderer3d.renderFilled(stack, object.bounds[i], object.bounds[i + 1], object.color);
+                            Renderer3d.renderFilled(object.bounds[i], object.bounds[i + 1], object.color)
+                                    .drawWithoutVBO(stack);
                         }
                     }
                     case OUTLINE -> {
                         for (int i = 0; i < object.bounds.length; i += 2) {
-                            Renderer3d.renderOutline(stack, object.bounds[i], object.bounds[i + 1], object.color);
+                            Renderer3d.renderOutline(object.bounds[i], object.bounds[i + 1], object.color)
+                                    .drawWithoutVBO(stack);
                         }
                     }
                 }
