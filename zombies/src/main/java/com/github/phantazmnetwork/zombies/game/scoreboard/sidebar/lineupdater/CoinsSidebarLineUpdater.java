@@ -22,8 +22,9 @@ public class CoinsSidebarLineUpdater implements SidebarLineUpdater {
     private int lastCoins = -1;
 
     @FactoryMethod
-    public CoinsSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.player.name_future")
-    CompletableFuture<? extends Component> playerNameFuture,
+    public CoinsSidebarLineUpdater(
+            @NotNull @Dependency(value = "java.completable_future", name = "zombies.dependency.player.name_future")
+            CompletableFuture<? extends Component> playerNameFuture,
             @NotNull @Dependency("zombies.dependency.player.coins") PlayerCoins coins) {
         this.playerNameFuture = Objects.requireNonNull(playerNameFuture, "playerNameFuture");
         this.coins = Objects.requireNonNull(coins, "coins");

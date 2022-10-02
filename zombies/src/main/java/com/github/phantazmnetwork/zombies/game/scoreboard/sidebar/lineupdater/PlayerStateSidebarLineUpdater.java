@@ -19,8 +19,9 @@ public class PlayerStateSidebarLineUpdater implements SidebarLineUpdater {
     private final PlayerStateSwitcher stateSwitcher;
 
     @FactoryMethod
-    public PlayerStateSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.player.name_future")
-    CompletableFuture<? extends Component> playerNameFuture,
+    public PlayerStateSidebarLineUpdater(
+            @NotNull @Dependency(value = "java.completable_future", name = "zombies.dependency.player.name_future")
+            CompletableFuture<? extends Component> playerNameFuture,
             @NotNull @Dependency("zombies.dependency.player.state_switcher") PlayerStateSwitcher stateSwitcher) {
         this.playerNameFuture = Objects.requireNonNull(playerNameFuture, "playerNameFuture");
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
