@@ -45,7 +45,7 @@ public class TicksLineUpdater implements SidebarLineUpdater {
     }
 
     @FactoryMethod
-    public static ElementFactory<Data, TicksLineUpdater> factory() {
+    public static @NotNull ElementFactory<Data, TicksLineUpdater> factory() {
         return FACTORY;
     }
 

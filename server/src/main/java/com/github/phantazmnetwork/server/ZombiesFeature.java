@@ -16,6 +16,7 @@ import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.OrPredic
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.XorPredicate;
 import com.github.phantazmnetwork.zombies.game.perk.ExtraHealthLevel;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.*;
+import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.condition.AliveCondition;
 import com.github.steanky.element.core.context.ContextManager;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -74,6 +75,9 @@ public final class ZombiesFeature {
 
         //Sidebar LineUpdaters
         contextManager.registerElementClass(CoinsSidebarLineUpdater.class);
+        contextManager.registerElementClass(ConditionalSidebarLineUpdater.class);
+        contextManager.registerElementClass(ConditionalSidebarLineUpdater.ChildUpdater.class);
+        contextManager.registerElementClass(AliveCondition.class);
         contextManager.registerElementClass(ConstantSidebarLineUpdater.class);
         contextManager.registerElementClass(JoinedPlayersSidebarLineUpdater.class);
         contextManager.registerElementClass(PlayerStateSidebarLineUpdater.class);

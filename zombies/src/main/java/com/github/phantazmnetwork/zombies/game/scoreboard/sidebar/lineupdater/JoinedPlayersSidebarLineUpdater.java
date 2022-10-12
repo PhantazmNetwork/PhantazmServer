@@ -25,7 +25,7 @@ public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
     public JoinedPlayersSidebarLineUpdater(
             @NotNull @Dependency(value = "java.collection", name = "zombies.players.collection")
             Collection<ZombiesPlayer> zombiesPlayers,
-            @Dependency(value = "int", name = "zombies.map.max_players") int maxPlayers) {
+            @Dependency(value = "int", name = "zombies.dependency.map.max_players") int maxPlayers) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.maxPlayers = maxPlayers;
     }

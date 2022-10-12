@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar;
 
+import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section.SidebarSection;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -16,7 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Model("zombies.sidebar.updater")
-public class SidebarUpdater {
+public class SidebarUpdater implements Activable {
 
     @DataObject
     private record Data(@NotNull @DataPath("sections") Collection<String> sectionPaths) {
@@ -36,7 +37,8 @@ public class SidebarUpdater {
     private int totalSize = 0;
 
     @FactoryMethod
-    public SidebarUpdater(@NotNull Sidebar sidebar, @NotNull Collection<SidebarSection> sections) {
+    public SidebarUpdater(@NotNull Sidebar sidebar,
+            @NotNull @DataName("sections") Collection<SidebarSection> sections) {
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.sections = List.copyOf(sections);
         this.sizes = new int[sections.size()];
@@ -60,6 +62,7 @@ public class SidebarUpdater {
         };
     }
 
+    @Override
     public void start() {
         for (int i = 0; i < sizes.length; i++) {
             int size = sections.get(i).getSize();
@@ -77,6 +80,7 @@ public class SidebarUpdater {
         }
     }
 
+    @Override
     public void tick(long time) {
         refreshSections();
         for (int i = 0; i < sections.size(); i++) {
@@ -93,6 +97,7 @@ public class SidebarUpdater {
         }
     }
 
+    @Override
     public void end() {
         for (Sidebar.ScoreboardLine line : sidebar.getLines()) {
             sidebar.removeLine(line.getId());
