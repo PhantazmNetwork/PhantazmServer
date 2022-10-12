@@ -20,28 +20,6 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     private PlayerInteraction interaction;
     private long startTime;
 
-    @ProcessorMethod
-    public static ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String targetPath = element.getStringOrThrow("targetPath");
-                int delayTicks = element.getNumberOrThrow("delayTicks").intValue();
-                boolean resetOnInteract = element.getBooleanOrThrow("resetOnInteract");
-                return new Data(targetPath, delayTicks, resetOnInteract);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(3);
-                node.putString("targetPath", data.targetPath);
-                node.putNumber("delayTicks", data.delayTicks);
-                node.putBoolean("resetOnInteract", data.resetOnInteract);
-                return node;
-            }
-        };
-    }
-
     @FactoryMethod
     public DelayedInteractor(@NotNull Data data, @DataName("target") ShopInteractor target) {
         super(data);

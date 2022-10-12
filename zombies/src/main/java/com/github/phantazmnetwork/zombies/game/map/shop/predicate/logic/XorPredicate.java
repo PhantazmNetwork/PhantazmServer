@@ -11,11 +11,6 @@ import java.util.List;
 
 @Model("zombies.map.shop.predicate.xor")
 public class XorPredicate extends PredicateBase<XorPredicate.Data> {
-    @ProcessorMethod
-    public static ConfigProcessor<XorPredicate.Data> processor() {
-        return new BooleanOperatorDataProcessor<>(Data::new);
-    }
-
     private final List<ShopPredicate> predicates;
 
     @FactoryMethod
@@ -35,6 +30,6 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("predicates") List<String> paths) implements BooleanOperatorData {
+    public record Data(@NotNull @DataPath("predicates") List<String> paths) {
     }
 }

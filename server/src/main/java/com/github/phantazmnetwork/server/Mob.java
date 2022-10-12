@@ -25,10 +25,9 @@ import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.node.config.CalculatorConfigProcessor;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.core.bridge.ConfigBridges;
-import com.github.steanky.ethylene.core.codec.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
@@ -121,7 +120,7 @@ public final class Mob {
             @Override
             public @NotNull ConfigElement elementFromData(@Nullable Integer integer) throws ConfigProcessException {
                 if (integer == null) {
-                    return ConfigPrimitive.nil();
+                    return ConfigPrimitive.NULL;
                 }
 
                 return delegate.elementFromData(integer);
@@ -172,13 +171,13 @@ public final class Mob {
             Files.createDirectories(mobPath);
 
             try (Stream<Path> paths = Files.list(mobPath)) {
-                String ending =
-                        codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtensions().get(0);
+                String ending = codec.getPreferredExtension();
                 PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {
                         try {
-                            MobModel model = ConfigBridges.read(path, codec, getModelProcessor());
+                            MobModel model = com.github.steanky.ethylene.core.bridge.Configuration.read(path, codec,
+                                    getModelProcessor());
                             if (loadedModels.containsKey(model.key())) {
                                 LOGGER.warn("Duplicate key ({}), skipping...", model.key());
                             }

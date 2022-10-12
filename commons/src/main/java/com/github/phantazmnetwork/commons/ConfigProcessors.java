@@ -45,9 +45,9 @@ public final class ConfigProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(Key key) {
             if (key.namespace().equals(Namespaces.PHANTAZM)) {
-                return new ConfigPrimitive(key.value());
+                return ConfigPrimitive.of(key.value());
             }
-            return new ConfigPrimitive(key.asString());
+            return ConfigPrimitive.of(key.asString());
         }
     };
     private static final ConfigProcessor<Component> component = new ConfigProcessor<>() {
@@ -58,7 +58,7 @@ public final class ConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Component component) {
-            return new ConfigPrimitive(MiniMessage.miniMessage().serialize(component));
+            return ConfigPrimitive.of(MiniMessage.miniMessage().serialize(component));
         }
     };
     private static final ConfigProcessor<RGBLike> rgbLike = new ConfigProcessor<>() {
@@ -75,7 +75,7 @@ public final class ConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull RGBLike rgbLike) {
-            return new ConfigPrimitive(TextColor.color(rgbLike).asHexString());
+            return ConfigPrimitive.of(TextColor.color(rgbLike).asHexString());
         }
     };
     private static final ConfigProcessor<TitlePart<Component>> componentTitlePart = new ConfigProcessor<>() {
@@ -93,10 +93,10 @@ public final class ConfigProcessors {
         public @NotNull ConfigElement elementFromData(TitlePart<Component> componentTitlePart)
                 throws ConfigProcessException {
             if (componentTitlePart.equals(TitlePart.TITLE)) {
-                return new ConfigPrimitive("TITLE");
+                return ConfigPrimitive.of("TITLE");
             }
             else if (componentTitlePart.equals(TitlePart.SUBTITLE)) {
-                return new ConfigPrimitive("SUBTITLE");
+                return ConfigPrimitive.of("SUBTITLE");
             }
 
             throw new ConfigProcessException("Unrecognized TitlePart " + componentTitlePart);
@@ -139,7 +139,7 @@ public final class ConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(UUID uuid) {
-            return new ConfigPrimitive(uuid.toString());
+            return ConfigPrimitive.of(uuid.toString());
         }
     };
 

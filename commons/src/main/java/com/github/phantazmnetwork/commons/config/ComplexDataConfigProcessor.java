@@ -59,7 +59,7 @@ public class ComplexDataConfigProcessor implements ConfigProcessor<ComplexData> 
             }
 
             ConfigNode node = value.asNode();
-            Key name = KEY_PROCESSOR.dataFromElement(new ConfigPrimitive(dependencyElement.getKey()));
+            Key name = KEY_PROCESSOR.dataFromElement(ConfigPrimitive.of(dependencyElement.getKey()));
             Key serialKey = KEY_PROCESSOR.dataFromElement(value.getElementOrThrow("serialKey"));
 
             ConfigProcessor<? extends Keyed> subprocessor = subProcessors.get(serialKey);

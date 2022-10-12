@@ -27,6 +27,7 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -175,7 +176,10 @@ public final class PhantazmServer {
         CollectionCreator collectionCreator = new BasicCollectionCreator();
 
         FactoryResolver factoryResolver =
-                new BasicFactoryResolver(keyParser, elementTypeIdentifier, dataInspector, collectionCreator);
+                new BasicFactoryResolver(keyParser, elementTypeIdentifier, dataInspector, collectionCreator,
+                        MappingProcessorSource.builder().build());
+
+
         ProcessorResolver processorResolver = new BasicProcessorResolver();
         ElementInspector elementInspector = new BasicElementInspector(factoryResolver, processorResolver);
 
@@ -183,7 +187,7 @@ public final class PhantazmServer {
         Registry<ElementFactory<?, ?>> factoryRegistry = new HashRegistry<>();
         Registry<Boolean> cacheRegistry = new HashRegistry<>();
 
-        PathSplitter pathSplitter = new BasicPathSplitter();
+        PathSplitter pathSplitter = BasicPathSplitter.INSTANCE;
         DataLocator dataLocator = new BasicDataLocator(pathSplitter);
         ElementContext.Source source =
                 new BasicElementContext.Source(configRegistry, factoryRegistry, cacheRegistry, pathSplitter,

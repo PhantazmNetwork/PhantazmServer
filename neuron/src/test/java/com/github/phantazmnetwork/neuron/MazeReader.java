@@ -2,9 +2,9 @@ package com.github.phantazmnetwork.neuron;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
+import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.bridge.ConfigBridges;
-import com.github.steanky.ethylene.core.codec.ConfigCodec;
+import com.github.steanky.ethylene.core.bridge.Configuration;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -74,7 +74,7 @@ public final class MazeReader {
                 if (correctPath != null) {
                     try (correctPath) {
                         ConfigCodec configCodec = new TomlCodec();
-                        ConfigElement root = ConfigBridges.read(correctPath, configCodec);
+                        ConfigElement root = Configuration.read(correctPath, configCodec);
 
                         //converts list of points to Vec3I array
                         Vec3I[] correctPathElements = root.getElement("points").asList().stream().map(element -> {

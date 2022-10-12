@@ -91,7 +91,7 @@ public class MinestomConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull NBT compound) {
-            return new ConfigPrimitive(compound.toSNBT());
+            return ConfigPrimitive.of(compound.toSNBT());
         }
     };
     private static final ConfigProcessor<VillagerMeta.VillagerData> VILLAGER_DATA = new ConfigProcessor<>() {

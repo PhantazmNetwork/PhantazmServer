@@ -60,8 +60,8 @@ import com.github.phantazmnetwork.zombies.equipment.gun.visual.ClipStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.ReloadStackMapper;
 import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
-import com.github.steanky.ethylene.core.bridge.ConfigBridges;
-import com.github.steanky.ethylene.core.codec.ConfigCodec;
+import com.github.steanky.ethylene.core.ConfigCodec;
+import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
@@ -107,7 +107,7 @@ final class EquipmentFeature {
             ending = "";
         }
         else {
-            ending = "." + codec.getPreferredExtensions().get(0);
+            ending = "." + codec.getPreferredExtension();
         }
         PathMatcher matcher = equipmentPath.getFileSystem().getPathMatcher("glob:**" + ending);
 
@@ -133,7 +133,7 @@ final class EquipmentFeature {
 
                 String infoFileName = codec.getPreferredExtensions().isEmpty()
                                       ? "settings"
-                                      : "settings." + codec.getPreferredExtensions().get(0);
+                                      : "settings." + codec.getPreferredExtension();
                 Path infoPath = gunDirectory.resolve(infoFileName);
                 if (!Files.isRegularFile(infoPath)) {
                     LOGGER.warn("No gun settings file at {}.", infoPath);
@@ -142,7 +142,7 @@ final class EquipmentFeature {
 
                 GunData gunData;
                 try {
-                    gunData = ConfigBridges.read(infoPath, codec, gunDataProcessor);
+                    gunData = Configuration.read(infoPath, codec, gunDataProcessor);
                 }
                 catch (ConfigProcessException e) {
                     LOGGER.warn("Failed to read gun settings file at {}.", infoPath, e);
@@ -160,7 +160,7 @@ final class EquipmentFeature {
                         }
 
                         try {
-                            ComplexData data = ConfigBridges.read(levelFile, codec, gunLevelProcessor);
+                            ComplexData data = Configuration.read(levelFile, codec, gunLevelProcessor);
 
                             Set<Key> required = new HashSet<>();
                             for (Keyed object : data.objects().values()) {

@@ -14,22 +14,6 @@ import java.util.Objects;
 
 @Model("zombies.map.shop.predicate.not")
 public class NotPredicate extends PredicateBase<NotPredicate.Data> {
-    @ProcessorMethod
-    public static ConfigProcessor<NotPredicate.Data> processor() {
-        return new ConfigProcessor<>() {
-            @Override
-            public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String predicate = element.getStringOrThrow("predicate");
-                return new Data(predicate);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(Data data) {
-                return ConfigNode.of("predicate", data.predicate);
-            }
-        };
-    }
-
     private final ShopPredicate predicate;
 
     @FactoryMethod

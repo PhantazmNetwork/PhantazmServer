@@ -2,8 +2,8 @@ package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.FileUtils;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.steanky.ethylene.core.bridge.ConfigBridges;
-import com.github.steanky.ethylene.core.codec.ConfigCodec;
+import com.github.steanky.ethylene.core.ConfigCodec;
+import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,10 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 /**
@@ -45,7 +42,7 @@ public class FileSystemMapLoader implements MapLoader {
         this.root = Objects.requireNonNull(root, "root");
         this.codec = Objects.requireNonNull(codec, "codec");
 
-        List<String> preferredExtensions = codec.getPreferredExtensions();
+        Set<String> preferredExtensions = codec.getPreferredExtensions();
         if (preferredExtensions.isEmpty()) {
             this.configPredicate = (path, attrs) -> true;
             this.mapInfoName = "settings";
@@ -64,7 +61,7 @@ public class FileSystemMapLoader implements MapLoader {
 
                 return false;
             };
-            this.mapInfoName = "settings." + preferredExtensions.get(0);
+            this.mapInfoName = "settings." + codec.getPreferredExtension();
         }
     }
 
@@ -76,7 +73,7 @@ public class FileSystemMapLoader implements MapLoader {
 
         Path mapInfoFile = mapDirectory.resolve(mapInfoName);
 
-        MapSettingsInfo mapSettingsInfo = ConfigBridges.read(mapInfoFile, codec, MapProcessors.mapInfo());
+        MapSettingsInfo mapSettingsInfo = Configuration.read(mapInfoFile, codec, MapProcessors.mapInfo());
         FolderPaths paths = new FolderPaths(mapDirectory);
         List<RoomInfo> rooms = new ArrayList<>();
         List<DoorInfo> doors = new ArrayList<>();
@@ -88,31 +85,31 @@ public class FileSystemMapLoader implements MapLoader {
         ConfigNode scoreboard;
 
         FileUtils.forEachFileMatching(paths.rooms, configPredicate,
-                file -> rooms.add(ConfigBridges.read(file, codec, MapProcessors.roomInfo())));
+                file -> rooms.add(Configuration.read(file, codec, MapProcessors.roomInfo())));
 
         FileUtils.forEachFileMatching(paths.doors, configPredicate,
-                file -> doors.add(ConfigBridges.read(file, codec, MapProcessors.doorInfo())));
+                file -> doors.add(Configuration.read(file, codec, MapProcessors.doorInfo())));
 
         FileUtils.forEachFileMatching(paths.shops, configPredicate,
-                file -> shops.add(ConfigBridges.read(file, codec, MapProcessors.shopInfo())));
+                file -> shops.add(Configuration.read(file, codec, MapProcessors.shopInfo())));
 
         FileUtils.forEachFileMatching(paths.windows, configPredicate,
-                file -> windows.add(ConfigBridges.read(file, codec, MapProcessors.windowInfo())));
+                file -> windows.add(Configuration.read(file, codec, MapProcessors.windowInfo())));
 
         FileUtils.forEachFileMatching(paths.rounds, configPredicate,
-                file -> rounds.add(ConfigBridges.read(file, codec, MapProcessors.roundInfo())));
+                file -> rounds.add(Configuration.read(file, codec, MapProcessors.roundInfo())));
         rounds.sort(Comparator.comparingInt(RoundInfo::round));
 
         FileUtils.forEachFileMatching(paths.spawnrules, configPredicate,
-                file -> spawnrules.add(ConfigBridges.read(file, codec, MapProcessors.spawnruleInfo())));
+                file -> spawnrules.add(Configuration.read(file, codec, MapProcessors.spawnruleInfo())));
 
         FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate,
-                file -> spawnpoints.add(ConfigBridges.read(file, codec, MapProcessors.spawnpointInfo())));
+                file -> spawnpoints.add(Configuration.read(file, codec, MapProcessors.spawnpointInfo())));
 
-        String scoreboardSettingsPath = "settings" +
-                (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtensions().get(0));
+        String scoreboardSettingsPath =
+                "settings" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         scoreboard =
-                ConfigBridges.read(paths.scoreboard.resolve(scoreboardSettingsPath), codec, MapProcessors.scoreboard());
+                Configuration.read(paths.scoreboard.resolve(scoreboardSettingsPath), codec, MapProcessors.scoreboard());
 
         return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, scoreboard);
     }
@@ -123,7 +120,7 @@ public class FileSystemMapLoader implements MapLoader {
         Files.createDirectories(mapDirectory);
 
         MapSettingsInfo mapSettingsInfo = data.settings();
-        ConfigBridges.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapSettingsInfo),
+        Configuration.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapSettingsInfo),
                 codec);
 
         FolderPaths paths = new FolderPaths(mapDirectory);
@@ -146,20 +143,20 @@ public class FileSystemMapLoader implements MapLoader {
         Files.createDirectories(paths.spawnpoints);
         Files.createDirectories(paths.scoreboard);
 
-        String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtensions().get(0);
+        String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension();
 
         for (RoomInfo room : data.rooms()) {
-            ConfigBridges.write(paths.rooms.resolve(room.id().value() + extension), codec, MapProcessors.roomInfo(),
+            Configuration.write(paths.rooms.resolve(room.id().value() + extension), codec, MapProcessors.roomInfo(),
                     room);
         }
 
         for (DoorInfo door : data.doors()) {
-            ConfigBridges.write(paths.doors.resolve(door.id().value() + extension),
+            Configuration.write(paths.doors.resolve(door.id().value() + extension),
                     MapProcessors.doorInfo().elementFromData(door), codec);
         }
 
         for (ShopInfo shop : data.shops()) {
-            ConfigBridges.write(paths.shops.resolve(
+            Configuration.write(paths.shops.resolve(
                             getPositionString(shop.triggerLocation()) + "-" + shop.id().value() + extension),
                     MapProcessors.shopInfo().elementFromData(shop), codec);
         }
@@ -167,30 +164,30 @@ public class FileSystemMapLoader implements MapLoader {
         List<WindowInfo> windows = data.windows();
         for (int i = 0; i < windows.size(); i++) {
             WindowInfo window = windows.get(i);
-            ConfigBridges.write(
+            Configuration.write(
                     paths.windows.resolve(getPositionString(window.frameRegion().origin()) + "-" + i + extension),
                     MapProcessors.windowInfo().elementFromData(window), codec);
         }
 
         for (RoundInfo round : data.rounds()) {
-            ConfigBridges.write(paths.rounds.resolve(round.round() + extension),
+            Configuration.write(paths.rounds.resolve(round.round() + extension),
                     MapProcessors.roundInfo().elementFromData(round), codec);
         }
 
         for (SpawnruleInfo spawnrule : data.spawnrules()) {
-            ConfigBridges.write(paths.spawnrules.resolve(spawnrule.id().value() + extension),
+            Configuration.write(paths.spawnrules.resolve(spawnrule.id().value() + extension),
                     MapProcessors.spawnruleInfo().elementFromData(spawnrule), codec);
         }
 
         List<SpawnpointInfo> spawnpoints = data.spawnpoints();
         for (int i = 0; i < spawnpoints.size(); i++) {
             SpawnpointInfo spawnpoint = spawnpoints.get(i);
-            ConfigBridges.write(
+            Configuration.write(
                     paths.spawnpoints.resolve(getPositionString(spawnpoint.position()) + "-" + i + extension),
                     MapProcessors.spawnpointInfo().elementFromData(spawnpoint), codec);
         }
 
-        ConfigBridges.write(paths.scoreboard.resolve("settings" + extension), data.scoreboard(), codec);
+        Configuration.write(paths.scoreboard.resolve("settings" + extension), data.scoreboard(), codec);
     }
 
     private String getPositionString(Vec3I position) {

@@ -68,7 +68,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ConfigNode metaNode = element.getNodeOrThrow("meta");
 
         Component displayName;
-        ConfigElement displayNameElement = element.getElementOrDefault(() -> new ConfigPrimitive(null), "displayName");
+        ConfigElement displayNameElement = element.getElementOrDefault(() -> ConfigPrimitive.NULL, "displayName");
         if (displayNameElement.isNull()) {
             displayName = null;
         }
@@ -80,7 +80,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Map<EquipmentSlot, ItemStack> equipment = new HashMap<>(equipmentNode.size());
         for (Map.Entry<String, ConfigElement> entry : equipmentNode.entrySet()) {
             EquipmentSlot equipmentSlot =
-                    EQUIPMENT_SLOT_PROCESSOR.dataFromElement(new ConfigPrimitive(entry.getKey().toUpperCase()));
+                    EQUIPMENT_SLOT_PROCESSOR.dataFromElement(ConfigPrimitive.of(entry.getKey().toUpperCase()));
             equipment.put(equipmentSlot, itemStackProcessor.dataFromElement(entry.getValue()));
         }
 
@@ -102,7 +102,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             displayNameElement = COMPONENT_PROCESSOR.elementFromData(displayName.get());
         }
         else {
-            displayNameElement = new ConfigPrimitive(null);
+            displayNameElement = ConfigPrimitive.NULL;
         }
 
         ConfigNode equipmentNode = new LinkedConfigNode(model.getEquipment().entrySet().size());

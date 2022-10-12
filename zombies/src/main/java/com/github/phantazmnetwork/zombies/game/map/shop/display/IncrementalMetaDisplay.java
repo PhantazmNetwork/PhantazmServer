@@ -28,27 +28,6 @@ public class IncrementalMetaDisplay implements ShopDisplay {
         this.displayIndex = 0;
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<List<String>> LIST_STRING_PROCESSOR =
-                    ConfigProcessor.STRING.listProcessor();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-                List<String> displays = LIST_STRING_PROCESSOR.dataFromElement(node.getElementOrThrow("displays"));
-                boolean cycle = node.getBooleanOrThrow("cycle");
-                return new Data(displays, cycle);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("displays", LIST_STRING_PROCESSOR.elementFromData(data.displays), "cycle",
-                        data.cycle);
-            }
-        };
-    }
-
     @Override
     public void initialize(@NotNull Shop shop) {
         if (!displays.isEmpty() && currentDisplay == null) {

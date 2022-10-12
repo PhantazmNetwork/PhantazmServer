@@ -11,11 +11,6 @@ import java.util.List;
 
 @Model("zombies.map.shop.predicate.and")
 public class AndPredicate extends PredicateBase<AndPredicate.Data> {
-    @ProcessorMethod
-    public static ConfigProcessor<AndPredicate.Data> processor() {
-        return new BooleanOperatorDataProcessor<>(Data::new);
-    }
-
     private final List<ShopPredicate> predicates;
 
     @FactoryMethod
@@ -36,6 +31,6 @@ public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("predicates") List<String> paths) implements BooleanOperatorData {
+    public record Data(@NotNull @DataPath("predicates") List<String> paths) {
     }
 }

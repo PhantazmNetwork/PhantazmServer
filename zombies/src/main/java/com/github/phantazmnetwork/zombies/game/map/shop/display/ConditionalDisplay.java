@@ -28,29 +28,6 @@ public class ConditionalDisplay implements ShopDisplay {
         this.failureDisplays = Objects.requireNonNull(failureDisplays, "failureDisplays");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<List<String>> STRING_LIST_PROCESSOR =
-                    ConfigProcessor.STRING.listProcessor();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-                List<String> successDisplays =
-                        STRING_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("successDisplays"));
-                List<String> failureDisplays =
-                        STRING_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("failureDisplays"));
-                return new Data(successDisplays, failureDisplays);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("successDisplays", STRING_LIST_PROCESSOR.elementFromData(data.successDisplays),
-                        "failureDisplays", STRING_LIST_PROCESSOR.elementFromData(data.failureDisplays));
-            }
-        };
-    }
-
     @Override
     public void initialize(@NotNull Shop shop) {
         if (activeDisplays != null) {

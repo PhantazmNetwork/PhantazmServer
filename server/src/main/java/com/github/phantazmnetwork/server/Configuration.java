@@ -6,9 +6,9 @@ import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
+import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
-import com.github.steanky.ethylene.core.codec.ConfigCodec;
-import com.github.steanky.ethylene.core.processor.SyncFileConfigLoader;
+import com.github.steanky.ethylene.core.loader.SyncFileConfigLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
