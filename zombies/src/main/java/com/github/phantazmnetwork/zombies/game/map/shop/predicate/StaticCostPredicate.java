@@ -26,26 +26,6 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
         this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                int cost = element.getNumberOrThrow("purchaseCost").intValue();
-                Key modifierType = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("modifierType"));
-                return new Data(cost, modifierType);
-            }
-
-            @Override
-            public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("purchaseCost", data.cost, "modifierType",
-                        KEY_PROCESSOR.elementFromData(data.modifierType));
-            }
-        };
-    }
-
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         PlayerCoins coins = interaction.player().getModule().getCoins();

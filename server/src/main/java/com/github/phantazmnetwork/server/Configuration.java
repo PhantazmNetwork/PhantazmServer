@@ -62,10 +62,6 @@ public final class Configuration {
      * @return the global ConfigHandler
      */
     public static @NotNull ConfigHandler getHandler() {
-        if (handler == null) {
-            throw new IllegalStateException("Configuration has not been initialized yet");
-        }
-
-        return handler;
+        return FeatureUtils.check(handler);
     }
 }

@@ -26,27 +26,6 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
         this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key equipmentKey = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("equipmentKey"));
-                Key groupKey = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("groupKey"));
-                String upgradePath = element.getStringOrThrow("upgradePath");
-                return new Data(equipmentKey, groupKey, upgradePath);
-            }
-
-            @Override
-            public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("equipmentKey", KEY_PROCESSOR.elementFromData(data.equipmentKey),
-                        KEY_PROCESSOR.elementFromData(data.groupKey), "upgradePath", data.upgradePath);
-            }
-        };
-    }
-
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         ZombiesPlayer player = interaction.player();

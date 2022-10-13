@@ -226,7 +226,7 @@ public final class Mob {
      * @return The global {@link MobSpawner}.
      */
     public static @NotNull MobSpawner getMobSpawner() {
-        return requireInitialized(mobSpawner);
+        return FeatureUtils.check(mobSpawner);
     }
 
     /**
@@ -236,15 +236,6 @@ public final class Mob {
      */
     @SuppressWarnings("unused")
     public static @NotNull @Unmodifiable Map<Key, MobModel> getModels() {
-        return requireInitialized(models);
+        return FeatureUtils.check(models);
     }
-
-    private static <TObject> @NotNull TObject requireInitialized(TObject object) {
-        if (object == null) {
-            throw new IllegalStateException("PhantazmMob has not been initialized yet");
-        }
-
-        return object;
-    }
-
 }

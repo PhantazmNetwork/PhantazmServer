@@ -24,26 +24,6 @@ public class FlagPredicate extends PredicateBase<FlagPredicate.Data> {
         this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key flag = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("flag"));
-                boolean requireAbsent = element.getBooleanOrThrow("requireAbsent");
-                return new Data(flag, requireAbsent);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("flag", KEY_PROCESSOR.elementFromData(data.flag), "requireAbsent",
-                        data.requireAbsent);
-            }
-        };
-    }
-
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         return flaggable.hasFlag(data.flag) != data.requireAbsent;

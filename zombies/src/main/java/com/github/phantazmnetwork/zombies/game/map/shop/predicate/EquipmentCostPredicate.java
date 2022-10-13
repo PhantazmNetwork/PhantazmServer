@@ -33,31 +33,6 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
         this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
-            private static final ConfigProcessor<Object2IntMap<Key>> KEY_INT_MAP_PROCESSOR =
-                    ConfigProcessor.mapProcessor(KEY_PROCESSOR, ConfigProcessor.INTEGER, Object2IntOpenHashMap::new);
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                int purchaseCost = element.getNumberOrThrow("purchaseCost").intValue();
-                Key modifierType = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("modifierType"));
-                Object2IntMap<Key> upgradeCosts =
-                        KEY_INT_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("upgradeCosts"));
-                return new Data(purchaseCost, modifierType, upgradeCosts);
-            }
-
-            @Override
-            public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("purchaseCost", data.purchaseCost, "modifierType",
-                        KEY_PROCESSOR.elementFromData(data.modifierType), "upgradeCosts",
-                        KEY_INT_MAP_PROCESSOR.elementFromData(data.upgradeCosts));
-            }
-        };
-    }
-
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         ZombiesPlayer player = interaction.player();

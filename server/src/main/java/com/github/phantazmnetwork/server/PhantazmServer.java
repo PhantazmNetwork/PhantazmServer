@@ -7,26 +7,11 @@ import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
-import com.github.steanky.element.core.*;
-import com.github.steanky.element.core.context.BasicContextManager;
-import com.github.steanky.element.core.context.BasicElementContext;
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.context.ElementContext;
-import com.github.steanky.element.core.data.BasicDataInspector;
-import com.github.steanky.element.core.data.BasicDataLocator;
-import com.github.steanky.element.core.data.DataInspector;
-import com.github.steanky.element.core.data.DataLocator;
-import com.github.steanky.element.core.factory.BasicCollectionCreator;
-import com.github.steanky.element.core.factory.BasicFactoryResolver;
-import com.github.steanky.element.core.factory.CollectionCreator;
-import com.github.steanky.element.core.factory.FactoryResolver;
 import com.github.steanky.element.core.key.*;
-import com.github.steanky.element.core.processor.BasicProcessorResolver;
-import com.github.steanky.element.core.processor.ProcessorResolver;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
@@ -164,47 +149,31 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
             LobbiesConfig lobbiesConfig) {
+        Ethylene.initialize();
+
+        MappingProcessorSource mappingProcessorSource = Ethylene.getMappingProcessorSource();
+        Element.initialize(mappingProcessorSource);
+
+        ContextManager contextManager = Element.getContextManager();
+        KeyParser keyParser = Element.getKeyParser();
+
         BasicPlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
                         MinecraftServer.getConnectionManager());
 
-        KeyParser keyParser = new BasicKeyParser("phantazm");
-
-        KeyExtractor typeExtractor = new BasicKeyExtractor("type", keyParser);
-        ElementTypeIdentifier elementTypeIdentifier = new BasicElementTypeIdentifier(keyParser);
-        DataInspector dataInspector = new BasicDataInspector(keyParser);
-        CollectionCreator collectionCreator = new BasicCollectionCreator();
-
-        FactoryResolver factoryResolver =
-                new BasicFactoryResolver(keyParser, elementTypeIdentifier, dataInspector, collectionCreator,
-                        MappingProcessorSource.builder().build());
-
-
-        ProcessorResolver processorResolver = new BasicProcessorResolver();
-        ElementInspector elementInspector = new BasicElementInspector(factoryResolver, processorResolver);
-
-        Registry<ConfigProcessor<?>> configRegistry = new HashRegistry<>();
-        Registry<ElementFactory<?, ?>> factoryRegistry = new HashRegistry<>();
-        Registry<Boolean> cacheRegistry = new HashRegistry<>();
-
-        PathSplitter pathSplitter = BasicPathSplitter.INSTANCE;
-        DataLocator dataLocator = new BasicDataLocator(pathSplitter);
-        ElementContext.Source source =
-                new BasicElementContext.Source(configRegistry, factoryRegistry, cacheRegistry, pathSplitter,
-                        dataLocator, typeExtractor);
-
-        ContextManager contextManager = new BasicContextManager(elementInspector, elementTypeIdentifier, source);
-
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
         Messaging.initialize(global, viewProvider, serverConfig.serverInfoConfig().authType());
+
         Neuron.initialize(global, contextManager, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner());
+
         Mob.initialize(global, contextManager, keyParser, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"),
                 new YamlCodec());
         EquipmentFeature.initialize(Path.of("./equipment/"),
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())));
+
         ZombiesFeature.initialize(contextManager);
         ZombiesTest.initialize(global);
     }
