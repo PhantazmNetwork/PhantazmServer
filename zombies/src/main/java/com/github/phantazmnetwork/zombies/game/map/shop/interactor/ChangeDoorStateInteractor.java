@@ -36,26 +36,6 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<ChangeDoorStateInteractor.Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<Vec3I> VECTOR_PROCESSOR = VectorConfigProcessors.vec3I();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Vec3I doorPosition = VECTOR_PROCESSOR.dataFromElement(element.getElementOrThrow("doorPosition"));
-                boolean open = element.getBooleanOrThrow("open");
-                return new Data(doorPosition, open);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("doorPosition", VECTOR_PROCESSOR.elementFromData(data.doorPosition), "open",
-                        data.open);
-            }
-        };
-    }
-
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         if (!searchedDoor) {

@@ -27,30 +27,6 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
         this.instance = Objects.requireNonNull(instance, "instance");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<List<Component>> COMPONENT_LIST_PROCESSOR =
-                    ConfigProcessors.component().listProcessor();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                List<Component> messages =
-                        COMPONENT_LIST_PROCESSOR.dataFromElement(element.getElementOrThrow("messages"));
-                boolean broadcast = element.getBooleanOrThrow("broadcast");
-                return new Data(messages, broadcast);
-            }
-
-            @Override
-            public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("messages", COMPONENT_LIST_PROCESSOR.elementFromData(data.messages));
-                node.putBoolean("broadcast", data.broadcast);
-                return node;
-            }
-        };
-    }
-
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.broadcast) {

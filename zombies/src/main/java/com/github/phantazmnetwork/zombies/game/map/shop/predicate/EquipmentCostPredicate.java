@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.upgrade.Upgradable;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
@@ -9,12 +8,7 @@ import com.github.phantazmnetwork.zombies.game.coin.Transaction;
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
