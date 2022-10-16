@@ -11,7 +11,6 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -56,15 +55,15 @@ public class ChainShotHandler implements ShotHandler {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String finderKey = element.getStringOrThrow("entityFinderPath");
-                String firerKey = element.getStringOrThrow("firerPath");
+                String finderPath = element.getStringOrThrow("entityFinderPath");
+                String firerPath = element.getStringOrThrow("firerPath");
                 boolean ignorePreviousHits = element.getBooleanOrThrow("ignorePreviousHits");
                 int fireAttempts = element.getNumberOrThrow("fireAttempts").intValue();
                 if (fireAttempts < 0) {
                     throw new ConfigProcessException("fireAttempts must be greater than or equal to 0");
                 }
 
-                return new Data(finderKey, firerKey, ignorePreviousHits, fireAttempts);
+                return new Data(finderPath, firerPath, ignorePreviousHits, fireAttempts);
             }
 
             @Override

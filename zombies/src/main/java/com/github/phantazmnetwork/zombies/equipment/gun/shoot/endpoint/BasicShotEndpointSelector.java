@@ -61,13 +61,13 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String blockIterationKey = element.getStringOrThrow("blockIterationPath");
+                String blockIterationPath = element.getStringOrThrow("blockIterationPath");
                 int maxDistance = element.getNumberOrThrow("maxDistance").intValue();
                 if (maxDistance < 0) {
                     throw new ConfigProcessException("maxDistance must be greater than or equal to 0");
                 }
 
-                return new Data(blockIterationKey, maxDistance);
+                return new Data(blockIterationPath, maxDistance);
             }
 
             @Override

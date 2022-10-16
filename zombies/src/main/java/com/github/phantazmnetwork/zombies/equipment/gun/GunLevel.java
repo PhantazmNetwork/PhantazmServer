@@ -47,7 +47,6 @@ public record GunLevel(@NotNull Data data,
 
     @DataObject
     public record Data(@NotNull Key key,
-                       @NotNull @DataPath("stack") String stackPath,
                        @NotNull @DataPath("stats") String statsPath,
                        @NotNull @DataPath("shoot_tester") String shootTesterPath,
                        @NotNull @DataPath("reload_tester") String reloadTesterPath,
@@ -63,7 +62,6 @@ public record GunLevel(@NotNull Data data,
 
         public Data {
             Objects.requireNonNull(key, "key");
-            Objects.requireNonNull(stackPath, "stackPath");
             Objects.requireNonNull(statsPath, "statsPath");
             Objects.requireNonNull(shootTesterPath, "shootTesterPath");
             Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
