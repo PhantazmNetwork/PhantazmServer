@@ -19,7 +19,10 @@ import java.util.Objects;
  * These are handled by individual {@link ShotHandler}s.
  */
 @Model("zombies.gun.stats")
-public record GunStats(@NotNull Data data) {
+public final class GunStats {
+
+    private final Data data;
+
 
     /**
      * Underlying data for the {@link GunStats}.
@@ -32,13 +35,13 @@ public record GunStats(@NotNull Data data) {
      * @param shotInterval The interval between gun fire
      */
     @DataObject
-    private record Data(long shootSpeed, long reloadSpeed, int maxAmmo, int maxClip, int shots, long shotInterval) {
+    public record Data(long shootSpeed, long reloadSpeed, int maxAmmo, int maxClip, int shots, long shotInterval) {
 
     }
 
     @FactoryMethod
-    public GunStats {
-        Objects.requireNonNull(data, "data");
+    public GunStats(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     /**
@@ -118,5 +121,6 @@ public record GunStats(@NotNull Data data) {
     public long shotInterval() {
         return data.shotInterval();
     }
+
 
 }

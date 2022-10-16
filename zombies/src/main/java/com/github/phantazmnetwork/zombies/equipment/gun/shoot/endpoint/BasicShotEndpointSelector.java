@@ -103,19 +103,19 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
             while (it.hasNext()) {
                 blockLocation = it.next();
                 block = instance.getBlock(blockLocation);
-                Shape shape = block.registry().collisionShape();
 
                 for (BlockIteration.Context context : contexts) {
-                    if (!context.isValidEndpoint(blockLocation, shape)) {
+                    if (!context.isValidEndpoint(blockLocation, block)) {
                         continue blockLoop;
                     }
                 }
 
+                Shape shape = block.registry().collisionShape();
                 Optional<Vec> intersectionOptional = RayUtils.getIntersectionPosition(shape, blockLocation, start);
                 if (intersectionOptional.isPresent()) {
                     Vec intersection = intersectionOptional.get();
                     for (BlockIteration.Context context : contexts) {
-                        if (!context.isValidIntersection(intersection, shape)) {
+                        if (!context.isValidIntersection(intersection, block)) {
                             continue blockLoop;
                         }
 

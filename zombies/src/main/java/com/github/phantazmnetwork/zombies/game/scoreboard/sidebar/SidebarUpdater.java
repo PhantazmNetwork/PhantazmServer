@@ -20,7 +20,7 @@ import java.util.Optional;
 public class SidebarUpdater implements Activable {
 
     @DataObject
-    private record Data(@NotNull @DataPath("sections") Collection<String> sectionPaths) {
+    public record Data(@NotNull @DataPath("sections") Collection<String> sectionPaths) {
 
         public Data {
             Objects.requireNonNull(sectionPaths, "sectionPaths");

@@ -2,9 +2,9 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration;
 
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -23,13 +23,12 @@ public class BasicBlockIteration implements BlockIteration {
         return new Context() {
             @SuppressWarnings("UnstableApiUsage")
             @Override
-            public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Shape shape) {
-                return !shape.relativeEnd().isZero();
+            public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block) {
+                return !block.registry().collisionShape().relativeEnd().isZero();
             }
 
-            @SuppressWarnings("UnstableApiUsage")
             @Override
-            public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Shape shape) {
+            public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Block block) {
                 return true;
             }
         };

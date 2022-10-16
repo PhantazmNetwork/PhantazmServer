@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration;
 
-import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,11 +16,9 @@ public interface BlockIteration {
 
     interface Context {
 
-        @SuppressWarnings("UnstableApiUsage")
-        boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Shape shape);
+        boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block);
 
-        @SuppressWarnings("UnstableApiUsage")
-        boolean isValidIntersection(@NotNull Vec intersection, @NotNull Shape shape);
+        boolean isValidIntersection(@NotNull Vec intersection, @NotNull Block block);
 
     }
 

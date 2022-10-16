@@ -1,11 +1,16 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration;
 
+import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.collision.Shape;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A {@link BlockIteration} method that employs a technique called "wallshooting".
@@ -18,9 +23,11 @@ import org.jetbrains.annotations.NotNull;
 @Model("zombies.gun.block_iteration.wallshot")
 public class WallshotBlockIteration implements BlockIteration {
 
-    @FactoryMethod
-    public WallshotBlockIteration() {
+    private final Data data;
 
+    @FactoryMethod
+    public WallshotBlockIteration(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
@@ -29,24 +36,29 @@ public class WallshotBlockIteration implements BlockIteration {
 
             private boolean wallshot = false;
 
-            @SuppressWarnings("UnstableApiUsage")
             @Override
-            public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Shape shape) {
+            public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block) {
                 return !wallshot;
             }
 
             @SuppressWarnings("UnstableApiUsage")
             @Override
-            public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Shape shape) {
-                if (shape.relativeEnd().equals(Vec.ONE)) {
-                    return true;
+            public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Block block) {
+                if (!block.registry().collisionShape().relativeEnd().equals(Vec.ONE) ||
+                        data.passableBlocks().contains(block.key())) {
+                    wallshot = true;
+                    return false;
                 }
 
-                wallshot = true;
-                return false;
+                return true;
             }
 
         };
+    }
+
+    @DataObject
+    public record Data(@NotNull Collection<Key> passableBlocks) {
+
     }
 
 }

@@ -5,9 +5,9 @@ import com.github.phantazmnetwork.zombies.game.map.objects.MapObjects;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -27,15 +27,13 @@ public class WindowBlockIteration implements BlockIteration {
     @Override
     public @NotNull Context createContext() {
         return new Context() {
-            @SuppressWarnings("UnstableApiUsage")
             @Override
-            public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Shape shape) {
+            public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block) {
                 return true;
             }
 
-            @SuppressWarnings("UnstableApiUsage")
             @Override
-            public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Shape shape) {
+            public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Block block) {
                 return mapObjects.get().windowAt(VecUtils.toBlockInt(intersection)).isEmpty();
             }
         };
