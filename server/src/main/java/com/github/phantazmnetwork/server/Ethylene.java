@@ -14,10 +14,16 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.TitlePart;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTException;
+import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,7 +42,8 @@ public final class Ethylene {
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(vec3F())
                         .withCustomSignature(sound()).withCustomSignature(vec3D()).withScalarSignature(key())
-                        .withScalarSignature(uuid()).withScalarSignature(component())
+                        .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
+                        .withScalarSignature(titlePartComponent())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withStandardSignatures().withStandardTypeImplementations().build();
 
@@ -74,6 +81,31 @@ public final class Ethylene {
                         Map.entry("name", Token.ofClass(Key.class)), Map.entry("source", Token.ofClass(Sound.Source.class)),
                         Map.entry("volume", Token.PRIMITIVE_FLOAT), Map.entry("pitch", Token.PRIMITIVE_FLOAT)).matchingNames()
                 .matchingTypeHints().build();
+    }
+
+    private static ScalarSignature<ItemStack> itemStack() {
+        return ScalarSignature.of(Token.ofClass(ItemStack.class), element -> {
+            try {
+                return ItemStack.fromItemNBT((NBTCompound)new SNBTParser(new StringReader(element.asString())).parse());
+            }
+            catch (NBTException e) {
+                throw new RuntimeException(e);
+            }
+        }, itemStack -> itemStack == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));
+    }
+
+    private static ScalarSignature<TitlePart<Component>> titlePartComponent() {
+        return ScalarSignature.of(new Token<>() {
+        }, element -> {
+            String value = element.asString();
+            return switch (value) {
+                case "TITLE" -> TitlePart.TITLE;
+                case "SUBTITLE" -> TitlePart.SUBTITLE;
+                default -> throw new IllegalArgumentException("Unexpected TitlePart '" + value + "'");
+            };
+        }, titlePart -> titlePart == null
+                        ? ConfigPrimitive.NULL
+                        : titlePart == TitlePart.TITLE ? ConfigPrimitive.of("TITLE") : ConfigPrimitive.of("SUBTITLE"));
     }
 
     public static @NotNull MappingProcessorSource getMappingProcessorSource() {

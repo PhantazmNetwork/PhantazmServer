@@ -21,27 +21,6 @@ public class StaticItemDisplay extends ItemDisplayBase {
         super(data.displayItem, data.offset);
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<Vec3D> VEC3D_PROCESSOR = VectorConfigProcessors.vec3D();
-            private static final ConfigProcessor<ItemStack> ITEM_STACK_PROCESSOR = ItemStackConfigProcessors.snbt();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-                Vec3D offset = VEC3D_PROCESSOR.dataFromElement(node.getElementOrThrow("offset"));
-                ItemStack displayItem = ITEM_STACK_PROCESSOR.dataFromElement(node.getElementOrThrow("displayItem"));
-                return new Data(offset, displayItem);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("offset", VEC3D_PROCESSOR.elementFromData(data.offset), "displayItem",
-                        ITEM_STACK_PROCESSOR.elementFromData(data.displayItem));
-            }
-        };
-    }
-
     @DataObject
     public record Data(@NotNull Vec3D offset, @NotNull ItemStack displayItem) {
     }

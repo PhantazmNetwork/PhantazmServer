@@ -8,10 +8,6 @@ import com.github.phantazmnetwork.zombies.game.map.shop.InteractionTypes;
 import com.github.phantazmnetwork.zombies.game.map.shop.interactor.ShopInteractor;
 import com.github.phantazmnetwork.zombies.game.player.ZombiesPlayer;
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -29,31 +25,6 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
 
     private ItemStack itemStack;
     private boolean redraw;
-
-    @ProcessorMethod
-    public static ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<Set<ClickType>> CLICK_TYPE_SET_PROCESSOR =
-                    ConfigProcessor.enumProcessor(ClickType.class).setProcessor();
-
-            @Override
-            public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Set<ClickType> clickTypes =
-                        CLICK_TYPE_SET_PROCESSOR.dataFromElement(element.getElementOrThrow("clickTypes"));
-                boolean blacklist = element.getBooleanOrThrow("blacklist");
-                String updatingItem = element.getStringOrThrow("updatingItem");
-                String clickInteractor = element.getStringOrThrow("clickInteractor");
-                return new Data(clickTypes, blacklist, updatingItem, clickInteractor);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(Data data) throws ConfigProcessException {
-                return ConfigNode.of("clickTypes", CLICK_TYPE_SET_PROCESSOR.elementFromData(data.clickTypes),
-                        "blacklist", data.blacklist, "updatingItem", data.updatingItem, "clickInteractor",
-                        data.clickInteractor);
-            }
-        };
-    }
 
     @FactoryMethod
     public InteractingClickHandler(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map_object.player_map")
