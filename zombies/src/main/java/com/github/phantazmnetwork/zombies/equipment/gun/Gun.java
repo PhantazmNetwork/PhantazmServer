@@ -2,10 +2,10 @@ package com.github.phantazmnetwork.zombies.equipment.gun;
 
 import com.github.phantazmnetwork.core.inventory.CachedInventoryObject;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
-import com.github.phantazmnetwork.zombies.upgrade.Upgradable;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
+import com.github.phantazmnetwork.zombies.upgrade.Upgradable;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;

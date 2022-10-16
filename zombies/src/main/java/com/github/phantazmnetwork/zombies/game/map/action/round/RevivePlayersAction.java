@@ -7,7 +7,9 @@ import com.github.phantazmnetwork.zombies.game.player.state.KnockedPlayerState;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerState;
 import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.game.player.state.context.NoContext;
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 

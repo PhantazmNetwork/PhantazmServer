@@ -10,7 +10,6 @@ import com.github.phantazmnetwork.zombies.map.DoorInfo;
 import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;

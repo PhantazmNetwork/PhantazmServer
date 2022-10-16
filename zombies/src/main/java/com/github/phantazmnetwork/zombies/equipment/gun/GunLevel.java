@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.zombies.equipment.gun;
 
-import com.github.phantazmnetwork.zombies.upgrade.UpgradeNode;
 import com.github.phantazmnetwork.zombies.equipment.gun.effect.GunEffect;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.ShootTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
+import com.github.phantazmnetwork.zombies.upgrade.UpgradeNode;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;

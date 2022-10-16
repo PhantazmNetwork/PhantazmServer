@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.map;
 
 import net.minestom.server.Tickable;
-import org.jetbrains.annotations.NotNull;
 
 public interface RoundHandler extends Tickable {
     int roundCount();

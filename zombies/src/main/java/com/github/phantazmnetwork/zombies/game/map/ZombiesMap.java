@@ -3,12 +3,11 @@ package com.github.phantazmnetwork.zombies.game.map;
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.zombies.game.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.game.map.objects.MapObjects;
-import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
-import com.github.phantazmnetwork.zombies.map.*;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Objects;
 
 public class ZombiesMap extends PositionalMapObject<MapInfo> implements Tickable, Flaggable.Source {
     private final ModifierSource modifierSource;

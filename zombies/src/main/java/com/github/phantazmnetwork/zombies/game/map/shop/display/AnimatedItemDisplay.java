@@ -1,14 +1,12 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.display;
 
 import com.github.phantazmnetwork.commons.vector.Vec3D;
-import com.github.phantazmnetwork.commons.vector.VectorConfigProcessors;
 import com.github.phantazmnetwork.core.item.ItemAnimationFrame;
 import com.github.phantazmnetwork.zombies.game.map.shop.Shop;
-import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -29,30 +27,6 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
     public AnimatedItemDisplay(@NotNull Data data) {
         super(data.frames.isEmpty() ? ItemStack.AIR : data.frames.get(0).itemStack(), data.offset);
         this.data = data;
-    }
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<Vec3D> VEC3D_PROCESSOR = VectorConfigProcessors.vec3D();
-            private static final ConfigProcessor<List<ItemAnimationFrame>> ITEM_ANIMATION_LIST_PROCESSOR =
-                    ItemAnimationFrame.processor().listProcessor();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-                Vec3D offset = VEC3D_PROCESSOR.dataFromElement(node.getElementOrThrow("offset"));
-                List<ItemAnimationFrame> animationFrames =
-                        ITEM_ANIMATION_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("frames"));
-                int loops = node.getNumberOrThrow("loops").intValue();
-                return new Data(offset, animationFrames, loops);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("offset", VEC3D_PROCESSOR.elementFromData(data.offset), "frames",
-                        ITEM_ANIMATION_LIST_PROCESSOR.elementFromData(data.frames), "loops", data.loops);
-            }
-        };
     }
 
     @Override

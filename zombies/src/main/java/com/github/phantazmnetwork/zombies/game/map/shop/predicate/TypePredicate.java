@@ -1,7 +1,9 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.predicate;
 
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 

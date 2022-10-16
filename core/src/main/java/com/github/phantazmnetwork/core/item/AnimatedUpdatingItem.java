@@ -1,10 +1,9 @@
 package com.github.phantazmnetwork.core.item;
 
-import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -15,26 +14,6 @@ import java.util.Objects;
 @Model("zombies.updating_item.animated")
 @Cache(false)
 public class AnimatedUpdatingItem implements UpdatingItem {
-    @ProcessorMethod
-    public static ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<List<ItemAnimationFrame>> ITEM_ANIMATION_LIST_PROCESSOR =
-                    ItemAnimationFrame.processor().listProcessor();
-
-            @Override
-            public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                List<ItemAnimationFrame> frames =
-                        ITEM_ANIMATION_LIST_PROCESSOR.dataFromElement(element.getElementOrThrow("frames"));
-                return new Data(frames);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(Data data) throws ConfigProcessException {
-                return ConfigNode.of("frames", ITEM_ANIMATION_LIST_PROCESSOR.elementFromData(data.frames));
-            }
-        };
-    }
-
     private final Data data;
 
     private long lastUpdateTime;

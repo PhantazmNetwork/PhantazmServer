@@ -1,7 +1,8 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

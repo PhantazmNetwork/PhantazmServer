@@ -1,7 +1,10 @@
 package com.github.phantazmnetwork.zombies.game.map.shop.interactor;
 
 import com.github.phantazmnetwork.zombies.game.map.shop.PlayerInteraction;
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;

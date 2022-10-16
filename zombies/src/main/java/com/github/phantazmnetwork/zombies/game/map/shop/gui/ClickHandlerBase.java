@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Function;
 
 public abstract class ClickHandlerBase<TData> implements GuiItem {
     protected final TData data;
