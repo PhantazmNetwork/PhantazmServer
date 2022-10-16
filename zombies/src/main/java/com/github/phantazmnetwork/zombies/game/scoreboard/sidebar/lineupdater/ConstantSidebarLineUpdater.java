@@ -21,6 +21,10 @@ public class ConstantSidebarLineUpdater implements SidebarLineUpdater {
     @DataObject
     public record Data(@NotNull Component component) {
 
+        public Data {
+            Objects.requireNonNull(component, "component");
+        }
+
     }
 
     private final Data data;

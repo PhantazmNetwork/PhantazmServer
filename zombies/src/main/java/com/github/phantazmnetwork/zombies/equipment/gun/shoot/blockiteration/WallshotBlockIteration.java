@@ -59,6 +59,10 @@ public class WallshotBlockIteration implements BlockIteration {
     @DataObject
     public record Data(@NotNull Collection<Key> passableBlocks) {
 
+        public Data {
+            Objects.requireNonNull(passableBlocks, "passableBlocks");
+        }
+
     }
 
 }

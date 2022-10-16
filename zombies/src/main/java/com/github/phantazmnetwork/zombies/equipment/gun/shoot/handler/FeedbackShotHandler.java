@@ -6,7 +6,6 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -66,6 +65,12 @@ public class FeedbackShotHandler implements ShotHandler {
     public record Data(@NotNull @DataPath("audience_provider") String audienceProviderPath,
                        @NotNull Component message,
                        @NotNull Component headshotMessage) {
+
+        public Data {
+            Objects.requireNonNull(audienceProviderPath, "audienceProviderPath");
+            Objects.requireNonNull(message, "message");
+            Objects.requireNonNull(headshotMessage, "headshotMessage");
+        }
 
     }
 
