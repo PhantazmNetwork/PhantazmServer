@@ -1,32 +1,24 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.ShotHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.TargetFinder;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
  * A {@link Firer} that fires using "hit scan". Targets will be immediately found and shot.
  */
+@Model("zombies.gun.firer.hit_scan")
 public class HitScanFirer implements Firer {
 
     private final Supplier<Optional<? extends Entity>> entitySupplier;
@@ -42,59 +34,16 @@ public class HitScanFirer implements Firer {
      * @param targetFinder   The {@link HitScanFirer}'s {@link TargetFinder}
      * @param shotHandlers   The {@link HitScanFirer}'s {@link ShotHandler}s
      */
-    public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-            @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
-            @NotNull Collection<ShotHandler> shotHandlers) {
+    @FactoryMethod
+    public HitScanFirer(@NotNull Data data, @NotNull @Dependency("zombies.dependency.gun.shooter.supplier")
+    Supplier<Optional<? extends Entity>> entitySupplier,
+            @NotNull @DataName("end_selector") ShotEndpointSelector endSelector,
+            @NotNull @DataName("target_finder") TargetFinder targetFinder,
+            @NotNull @DataName("shot_handlers") Collection<ShotHandler> shotHandlers) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
         this.shotHandlers = List.copyOf(shotHandlers);
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
-        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
-
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key endSelectorKey = keyProcessor.dataFromElement(element.getElementOrThrow("endSelectorKey"));
-                Key targetFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetFinderKey"));
-                Collection<Key> shotHandlerKeys =
-                        collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlerKeys"));
-
-                return new Data(endSelectorKey, targetFinderKey, shotHandlerKeys);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(3);
-                node.put("endSelectorKey", keyProcessor.elementFromData(data.endSelectorKey()));
-                node.put("targetFinderKey", keyProcessor.elementFromData(data.targetFinderKey()));
-                node.put("shotHandlerKeys", collectionProcessor.elementFromData(data.shotHandlerKeys()));
-
-                return node;
-            }
-        };
-    }
-
-    /**
-     * Creates a dependency consumer for {@link Data}s.
-     *
-     * @return A dependency consumer for {@link Data}s
-     */
-    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.endSelectorKey());
-            keys.add(data.targetFinderKey());
-            keys.addAll(data.shotHandlerKeys());
-        };
     }
 
     @Override
@@ -130,36 +79,28 @@ public class HitScanFirer implements Firer {
     /**
      * Data for a {@link HitScanFirer}.
      *
-     * @param endSelectorKey  A {@link Key} to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
-     * @param targetFinderKey A {@link Key} to the {@link HitScanFirer}'s {@link TargetFinder}
-     * @param shotHandlerKeys A {@link Key} to the {@link HitScanFirer}'s {@link ShotHandler}s
+     * @param endSelectorPath  A path to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinderPath A path to the {@link HitScanFirer}'s {@link TargetFinder}
+     * @param shotHandlerPaths A path to the {@link HitScanFirer}'s {@link ShotHandler}s
      */
-    public record Data(@NotNull Key endSelectorKey,
-                       @NotNull Key targetFinderKey,
-                       @NotNull Collection<Key> shotHandlerKeys) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.hit_scan");
+    @DataObject
+    public record Data(@NotNull @DataPath("end_selector") String endSelectorPath,
+                       @NotNull @DataPath("target_finder") String targetFinderPath,
+                       @NotNull @DataPath("shot_handlers") Collection<String> shotHandlerPaths) {
 
         /**
          * Creates a {@link Data}.
          *
-         * @param endSelectorKey  A {@link Key} to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
-         * @param targetFinderKey A {@link Key} to the {@link HitScanFirer}'s {@link TargetFinder}
-         * @param shotHandlerKeys A {@link Key} to the {@link HitScanFirer}'s {@link ShotHandler}s
+         * @param endSelectorPath  A path to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
+         * @param targetFinderPath A path to the {@link HitScanFirer}'s {@link TargetFinder}
+         * @param shotHandlerPaths A path to the {@link HitScanFirer}'s {@link ShotHandler}s
          */
         public Data {
-            Objects.requireNonNull(endSelectorKey, "endSelectorKey");
-            Objects.requireNonNull(targetFinderKey, "targetFinderKey");
-            Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
+            Objects.requireNonNull(endSelectorPath, "endSelectorPath");
+            Objects.requireNonNull(targetFinderPath, "targetFinderPath");
+            Objects.requireNonNull(shotHandlerPaths, "shotHandlerPaths");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

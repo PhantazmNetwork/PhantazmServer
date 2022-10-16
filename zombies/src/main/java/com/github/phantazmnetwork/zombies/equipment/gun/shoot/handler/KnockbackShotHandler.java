@@ -1,16 +1,11 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -23,6 +18,7 @@ import java.util.UUID;
 /**
  * A {@link ShotHandler} which applies knocback to {@link Entity}s.
  */
+@Model("zombies.gun.shot_handler.knockback")
 public class KnockbackShotHandler implements ShotHandler {
 
     private final Data data;
@@ -32,35 +28,9 @@ public class KnockbackShotHandler implements ShotHandler {
      *
      * @param data The {@link KnockbackShotHandler}'s {@link Data}
      */
+    @FactoryMethod
     public KnockbackShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                double knockback = element.getNumberOrThrow("knockback").doubleValue();
-                double headshotKnockback = element.getNumberOrThrow("headshotKnockback").doubleValue();
-
-                return new Data(knockback, headshotKnockback);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.putNumber("knockback", data.knockback());
-                node.putNumber("headshotKnockback", data.headshotKnockback());
-
-                return node;
-            }
-        };
     }
 
     @Override
@@ -90,17 +60,9 @@ public class KnockbackShotHandler implements ShotHandler {
      * @param knockback         The knockback to apply to regular targets
      * @param headshotKnockback The knockback to apply to headshots
      */
-    public record Data(double knockback, double headshotKnockback) implements Keyed {
+    @DataObject
+    public record Data(double knockback, double headshotKnockback) {
 
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.knockback");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

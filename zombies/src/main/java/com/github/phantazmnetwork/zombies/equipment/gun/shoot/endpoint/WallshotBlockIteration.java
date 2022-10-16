@@ -1,12 +1,11 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.RayUtils;
 import com.github.phantazmnetwork.core.VecUtils;
-import com.github.phantazmnetwork.zombies.game.map.ZombiesMap;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.phantazmnetwork.zombies.game.map.objects.MapObjects;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
@@ -20,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A {@link BlockIteration} method that employs a technique called "wallshooting".
@@ -29,21 +29,15 @@ import java.util.Optional;
  * However, if this gun does not pass directly through a non-cube block, it will act the same as
  * a {@link RayTraceBlockIteration}.
  */
+@Model("zombies.gun.block_iteration.wallshot")
 public class WallshotBlockIteration implements BlockIteration {
 
-    private final ZombiesMap map;
+    private final Supplier<? extends MapObjects> mapObjects;
 
-    public WallshotBlockIteration(ZombiesMap map) {
-        this.map = Objects.requireNonNull(map, "map");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return ConfigProcessor.emptyProcessor(Data::new);
+    @FactoryMethod
+    public WallshotBlockIteration(@NotNull @Dependency("zombies.dependency.map_object.map_objects")
+    Supplier<? extends MapObjects> mapObjects) {
+        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }
 
     @Override
@@ -58,7 +52,7 @@ public class WallshotBlockIteration implements BlockIteration {
             blockLocation = it.next();
             block = instance.getBlock(blockLocation);
 
-            if (wallshot || map.mapObjects().windowAt(VecUtils.toBlockInt(blockLocation)).isPresent()) {
+            if (wallshot || mapObjects.get().windowAt(VecUtils.toBlockInt(blockLocation)).isPresent()) {
                 continue;
             }
 
@@ -80,22 +74,6 @@ public class WallshotBlockIteration implements BlockIteration {
         }
 
         return Optional.empty();
-    }
-
-    /**
-     * Data for a {@link WallshotBlockIteration}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.block_iteration.wallshot");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

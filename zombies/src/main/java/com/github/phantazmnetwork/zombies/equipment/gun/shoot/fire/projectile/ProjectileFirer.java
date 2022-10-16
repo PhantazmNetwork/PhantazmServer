@@ -1,7 +1,5 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.goal.ProjectileMovementGoal;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
@@ -14,17 +12,15 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.ShotEndpo
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.ShotHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.TargetFinder;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.element.core.ElementFactory;
+import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityProjectile;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.instance.Instance;
@@ -33,13 +29,39 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
  * A {@link Firer} that works by firing projectiles.
  */
+@Model("zombies.gun.firer.projectile")
 public class ProjectileFirer implements Firer {
+
+    private static final ElementFactory<Data, ProjectileFirer> FACTORY = (objectData, context, dependencyProvider) -> {
+        EventNode<Event> node = dependencyProvider.provide(Key.key("zombies.dependency.event.instance_node"));
+
+        Supplier<Optional<? extends Entity>> entitySupplier =
+                dependencyProvider.provide(Key.key("zombies.dependency" + ".gun.shooter.supplier"));
+        UUID shooterUUID = dependencyProvider.provide(Key.key("zombies.dependency.gun.firer.projectile.shooter.uuid"));
+        ShotEndpointSelector endpointSelector =
+                context.provide(objectData.endSelectorPath(), dependencyProvider, false);
+        TargetFinder targetFinder = context.provide(objectData.targetFinderPath(), dependencyProvider, false);
+        ProjectileCollisionFilter collisionFilter =
+                context.provide(objectData.collisionFilterPath(), dependencyProvider, false);
+        Collection<ShotHandler> shotHandlers = new ArrayList<>(objectData.shotHandlerPaths().size());
+        for (String shotHandlerPath : objectData.shotHandlerPaths()) {
+            shotHandlers.add(context.provide(shotHandlerPath, dependencyProvider, false));
+        }
+        MobSpawner spawner = dependencyProvider.provide(Key.key("zombies.dependency.mob.spawner"));
+
+        ProjectileFirer firer =
+                new ProjectileFirer(objectData, entitySupplier, shooterUUID, endpointSelector, targetFinder,
+                        collisionFilter, shotHandlers, spawner);
+        node.addListener(ProjectileCollideWithBlockEvent.class, firer::onProjectileCollision);
+        node.addListener(ProjectileCollideWithEntityEvent.class, firer::onProjectileCollision);
+
+        return firer;
+    };
 
     private final PriorityQueue<AliveProjectile> removalQueue =
             new PriorityQueue<>(Comparator.comparingLong(AliveProjectile::time));
@@ -79,67 +101,9 @@ public class ProjectileFirer implements Firer {
         this.spawner = Objects.requireNonNull(spawner, "spawner");
     }
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor(@NotNull ConfigProcessor<MobModel> modelProcessor) {
-        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
-        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
-
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key endSelectorKey = keyProcessor.dataFromElement(element.getElementOrThrow("endSelector"));
-                Key targetFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetFinder"));
-                Key collisionFilterKey = keyProcessor.dataFromElement(element.getElementOrThrow("collisionFilter"));
-                Collection<Key> shotHandlerKeys =
-                        collectionProcessor.dataFromElement(element.getElementOrThrow("shotHandlers"));
-                MobModel model = modelProcessor.dataFromElement(element.getElementOrThrow("model"));
-                double power = element.getNumberOrThrow("power").doubleValue();
-                double spread = element.getNumberOrThrow("spread").doubleValue();
-                boolean hasGravity = element.getBooleanOrThrow("hasGravity");
-                long maxAliveTime = element.getNumberOrThrow("maxAliveTime").longValue();
-                if (maxAliveTime < 0) {
-                    throw new ConfigProcessException("maxAliveTime must be greater than or equal to 0");
-                }
-
-                return new Data(endSelectorKey, targetFinderKey, collisionFilterKey, shotHandlerKeys, model, power,
-                        spread, hasGravity, maxAliveTime);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(9);
-                node.put("endSelector", keyProcessor.elementFromData(data.endSelectorKey()));
-                node.put("targetFinder", keyProcessor.elementFromData(data.targetFinderKey()));
-                node.put("shotHandlers", collectionProcessor.elementFromData(data.shotHandlerKeys()));
-                node.put("collisionFilter", keyProcessor.elementFromData(data.collisionFilterKey()));
-                node.put("model", modelProcessor.elementFromData(data.model()));
-                node.putNumber("power", data.power());
-                node.putNumber("spread", data.spread());
-                node.putBoolean("hasGravity", data.hasGravity());
-                node.putNumber("maxAliveTime", data.maxAliveTime());
-
-                return node;
-            }
-        };
-    }
-
-    /**
-     * Creates a dependency consumer for {@link Data}s.
-     *
-     * @return A dependency consumer for {@link Data}s
-     */
-    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.endSelectorKey());
-            keys.add(data.targetFinderKey());
-            keys.add(data.collisionFilterKey());
-            keys.addAll(data.shotHandlerKeys());
-        };
+    @FactoryMethod
+    public static @NotNull ElementFactory<Data, ProjectileFirer> factory() {
+        return FACTORY;
     }
 
     @Override
@@ -247,55 +211,47 @@ public class ProjectileFirer implements Firer {
     /**
      * Data for a {@link ProjectileFirer}.
      *
-     * @param endSelectorKey     A {@link Key} to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
-     * @param targetFinderKey    A {@link Key} to the {@link ProjectileFirer}'s {@link TargetFinder}
-     * @param collisionFilterKey A {@link Key} to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
-     * @param shotHandlerKeys    A {@link Collection} of {@link Key}s to the {@link ProjectileFirer}'s {@link ShotHandler}s
-     * @param power              The power of the {@link ProjectileFirer}'s projectiles
-     * @param spread             The spread of the {@link ProjectileFirer}'s projectiles
-     * @param hasGravity         Whether the {@link ProjectileFirer}'s projectiles have gravity
-     * @param maxAliveTime       The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
-     *                           before automatically exploding
+     * @param endSelectorPath     A path to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinderPath    A path to the {@link ProjectileFirer}'s {@link TargetFinder}
+     * @param collisionFilterPath A path to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
+     * @param shotHandlerPaths    A {@link Collection} of paths to the {@link ProjectileFirer}'s {@link ShotHandler}s
+     * @param power               The power of the {@link ProjectileFirer}'s projectiles
+     * @param spread              The spread of the {@link ProjectileFirer}'s projectiles
+     * @param hasGravity          Whether the {@link ProjectileFirer}'s projectiles have gravity
+     * @param maxAliveTime        The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
+     *                            before automatically exploding
      */
-    public record Data(@NotNull Key endSelectorKey,
-                       @NotNull Key targetFinderKey,
-                       @NotNull Key collisionFilterKey,
-                       @NotNull Collection<Key> shotHandlerKeys,
+    @DataObject
+    public record Data(@NotNull String endSelectorPath,
+                       @NotNull String targetFinderPath,
+                       @NotNull String collisionFilterPath,
+                       @NotNull Collection<String> shotHandlerPaths,
                        @NotNull MobModel model,
                        double power,
                        double spread,
                        boolean hasGravity,
-                       long maxAliveTime) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.projectile");
+                       long maxAliveTime) {
 
         /**
          * Creates a {@link Data}.
          *
-         * @param endSelectorKey     A {@link Key} to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
-         * @param targetFinderKey    A {@link Key} to the {@link ProjectileFirer}'s {@link TargetFinder}
-         * @param collisionFilterKey A {@link Key} to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
-         * @param shotHandlerKeys    A {@link Collection} of {@link Key}s to the {@link ProjectileFirer}'s {@link ShotHandler}s
-         * @param power              The power of the {@link ProjectileFirer}'s projectiles
-         * @param spread             The spread of the {@link ProjectileFirer}'s projectiles
-         * @param hasGravity         Whether the {@link ProjectileFirer}'s projectiles have gravity
-         * @param maxAliveTime       The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
+         * @param endSelectorPath     A path to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
+         * @param targetFinderPath    A path to the {@link ProjectileFirer}'s {@link TargetFinder}
+         * @param collisionFilterPath A path to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
+         * @param shotHandlerPaths    A {@link Collection} of paths to the {@link ProjectileFirer}'s {@link ShotHandler}s
+         * @param power               The power of the {@link ProjectileFirer}'s projectiles
+         * @param spread              The spread of the {@link ProjectileFirer}'s projectiles
+         * @param hasGravity          Whether the {@link ProjectileFirer}'s projectiles have gravity
+         * @param maxAliveTime        The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
          */
         public Data {
-            Objects.requireNonNull(endSelectorKey, "endSelectorKey");
-            Objects.requireNonNull(targetFinderKey, "targetFinderKey");
-            Objects.requireNonNull(collisionFilterKey, "collisionFilterKey");
-            Objects.requireNonNull(shotHandlerKeys, "shotHandlerKeys");
+            Objects.requireNonNull(endSelectorPath, "endSelectorPath");
+            Objects.requireNonNull(targetFinderPath, "targetFinderPath");
+            Objects.requireNonNull(collisionFilterPath, "collisionFilterPath");
+            Objects.requireNonNull(shotHandlerPaths, "shotHandlerPaths");
             Objects.requireNonNull(model, "model");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
     private record FiredShot(@NotNull GunState state,

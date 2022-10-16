@@ -21,10 +21,10 @@ import java.util.Objects;
 public class FollowPlayerGoal extends FollowEntityGoal<Player> {
 
     @DataObject
-    public record Data(@NotNull @DataPath("target_selector") String targetSelectorKey) {
+    public record Data(@NotNull @DataPath("target_selector") String targetSelectorPath) {
 
         public Data {
-            Objects.requireNonNull(targetSelectorKey, "targetSelectorKey");
+            Objects.requireNonNull(targetSelectorPath, "targetSelectorPath");
         }
 
     }
@@ -45,13 +45,13 @@ public class FollowPlayerGoal extends FollowEntityGoal<Player> {
         return new ConfigProcessor<>() {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String targetSelectorKey = element.getStringOrThrow("targetSelectorKey");
+                String targetSelectorKey = element.getStringOrThrow("targetSelectorPath");
                 return new Data(targetSelectorKey);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return ConfigNode.of("targetSelectorKey", data.targetSelectorKey());
+                return ConfigNode.of("targetSelectorPath", data.targetSelectorPath());
             }
         };
     }

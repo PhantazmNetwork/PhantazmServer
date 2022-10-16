@@ -7,12 +7,14 @@ import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
+import com.github.phantazmnetwork.zombies.equipment.gun.data.GunData;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.type.Token;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -170,9 +172,10 @@ public final class PhantazmServer {
 
         Mob.initialize(global, contextManager, keyParser, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"),
                 new YamlCodec());
-        EquipmentFeature.initialize(Path.of("./equipment/"),
+        EquipmentFeature.initialize(keyParser, contextManager, Path.of("./equipment/"),
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
-                        () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())));
+                        () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())),
+                mappingProcessorSource.processorFor(Token.ofClass(GunData.class)));
 
         ZombiesFeature.initialize(contextManager);
         ZombiesTest.initialize(global);

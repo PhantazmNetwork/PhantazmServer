@@ -1,11 +1,10 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +13,7 @@ import java.util.Objects;
 /**
  * A {@link GunEffect} that sets the level of a {@link Player} based on the ammo of a gun.
  */
+@Model("zombies.gun.effect.ammo_level")
 public class AmmoLevelEffect implements GunEffect {
 
     private final PlayerView playerView;
@@ -24,17 +24,9 @@ public class AmmoLevelEffect implements GunEffect {
      *
      * @param playerView The {@link PlayerView} of the {@link Player} to set the level of
      */
-    public AmmoLevelEffect(@NotNull PlayerView playerView) {
+    @FactoryMethod
+    public AmmoLevelEffect(@NotNull @Dependency("zombies.dependency.gun.player_view") PlayerView playerView) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return ConfigProcessor.emptyProcessor(Data::new);
     }
 
     @Override
@@ -52,22 +44,6 @@ public class AmmoLevelEffect implements GunEffect {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
-    }
-
-    /**
-     * Data for an {@link AmmoLevelEffect}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.level.ammo");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

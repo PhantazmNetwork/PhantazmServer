@@ -1,26 +1,23 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 /**
  * A {@link Firer} which delegates to multiple sub-{@link Firer}.
  * Sub-{@link Firer}s may shoot at a slightly different angle than the direction of the original shot.
  */
+@Model("zombies.gun.firer.spread")
 public class SpreadFirer implements Firer {
 
     private final Data data;
@@ -34,7 +31,9 @@ public class SpreadFirer implements Firer {
      * @param random    The {@link Random} to use for angle variance
      * @param subFirers A {@link Collection} of sub-{@link Firer}s
      */
-    public SpreadFirer(@NotNull Data data, @NotNull Random random, @NotNull Collection<Firer> subFirers) {
+    @FactoryMethod
+    public SpreadFirer(@NotNull Data data, @NotNull @Dependency("zombies.dependency.random") Random random,
+            @NotNull @DataName("sub_firers") Collection<Firer> subFirers) {
         this.data = Objects.requireNonNull(data, "data");
         this.random = Objects.requireNonNull(random, "random");
         this.subFirers = List.copyOf(subFirers);
@@ -45,16 +44,16 @@ public class SpreadFirer implements Firer {
      *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
+    @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
-        ConfigProcessor<Collection<Key>> collectionProcessor = keyProcessor.collectionProcessor();
+        ConfigProcessor<Collection<String>> collectionProcessor = ConfigProcessor.STRING.collectionProcessor();
 
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Collection<Key> subFirerKeys =
-                        collectionProcessor.dataFromElement(element.getElementOrThrow("subFirerKeys"));
+                Collection<String> subFirerKeys =
+                        collectionProcessor.dataFromElement(element.getElementOrThrow("subFirerPaths"));
                 float angleVariance = element.getNumberOrThrow("angleVariance").floatValue();
                 if (angleVariance < 0) {
                     throw new ConfigProcessException("angleVariance must be greater than or equal to 0");
@@ -66,21 +65,12 @@ public class SpreadFirer implements Firer {
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
                 ConfigNode node = new LinkedConfigNode(2);
-                node.put("subFirerKeys", collectionProcessor.elementFromData(data.subFirerKeys()));
+                node.put("subFirerPaths", collectionProcessor.elementFromData(data.subFirerPaths()));
                 node.putNumber("angleVariance", data.angleVariance());
 
                 return node;
             }
         };
-    }
-
-    /**
-     * Creates a dependency consumer for {@link Data}s.
-     *
-     * @return A dependency consumer for {@link Data}s
-     */
-    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> keys.addAll(data.subFirerKeys());
     }
 
     @Override
@@ -117,30 +107,22 @@ public class SpreadFirer implements Firer {
     /**
      * Data for a {@link SpreadFirer}.
      *
-     * @param subFirerKeys  A {@link Collection} of {@link Key}s to the {@link SpreadFirer}'s sub-{@link Firer}s
+     * @param subFirerPaths A {@link Collection} of paths to the {@link SpreadFirer}'s sub-{@link Firer}s
      * @param angleVariance The maximum angle variance for each sub-{@link Firer}
      */
-    public record Data(@NotNull Collection<Key> subFirerKeys, float angleVariance) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.firer.spread");
+    @DataObject
+    public record Data(@NotNull @DataPath("sub_firers") Collection<String> subFirerPaths, float angleVariance) {
 
         /**
          * Creates a {@link Data}.
          *
-         * @param subFirerKeys  A {@link Collection} of {@link Key}s to the {@link SpreadFirer}'s sub-{@link Firer}s
+         * @param subFirerPaths A {@link Collection} of paths to the {@link SpreadFirer}'s sub-{@link Firer}s
          * @param angleVariance The maximum angle variance for each sub-{@link Firer}
          */
         public Data {
-            Objects.requireNonNull(subFirerKeys, "subFirerKeys");
+            Objects.requireNonNull(subFirerPaths, "subFirerPaths");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

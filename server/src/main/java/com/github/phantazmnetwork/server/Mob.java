@@ -142,6 +142,8 @@ public final class Mob {
     }
 
     private static void registerElementClasses(@NotNull ContextManager contextManager) {
+        LOGGER.info("Registering Mob element classes...");
+
         //mob goals
         contextManager.registerElementClass(FollowPlayerGoal.class);
         contextManager.registerElementClass(UseSkillGoal.class);
@@ -154,6 +156,8 @@ public final class Mob {
         contextManager.registerElementClass(EntitySelector.class);
         contextManager.registerElementClass(NearestPlayerSelector.class);
         contextManager.registerElementClass(NearestPlayersSelector.class);
+
+        LOGGER.info("Registered Mob element classes.");
     }
 
     @SuppressWarnings("SameParameterValue")

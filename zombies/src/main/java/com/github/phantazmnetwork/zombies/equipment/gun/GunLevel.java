@@ -6,9 +6,11 @@ import com.github.phantazmnetwork.zombies.equipment.gun.shoot.ShootTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.Firer;
 import com.github.phantazmnetwork.zombies.equipment.gun.visual.GunStackMapper;
 import com.github.phantazmnetwork.zombies.upgrade.UpgradeNode;
+import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -17,8 +19,7 @@ import java.util.Set;
 /**
  * An individual gun level of a gun.
  *
- * @param upgrades        Suggested upgrade {@link Key}s for next levels
- * @param stack           The {@link ItemStack} for this level
+ * @param data            The extra {@link Data} for this level
  * @param stats           The gun's {@link GunStats}
  * @param shootTester     The gun's {@link ShootTester}
  * @param reloadTester    The gun's {@link ReloadTester}
@@ -30,24 +31,59 @@ import java.util.Set;
  * @param noAmmoEffects   The gun's {@link GunEffect}s that are invoked when the gun has no ammo
  * @param gunStackMappers The gun's {@link GunStackMapper}s that produce the visual {@link ItemStack} representation of the gun
  */
-public record GunLevel(@NotNull Set<Key> upgrades,
+@Model("zombies.gun.level")
+public record GunLevel(@NotNull Data data,
+                       @NotNull @DataName("stats") GunStats stats,
+                       @NotNull @DataName("shoot_tester") ShootTester shootTester,
+                       @NotNull @DataName("reload_tester") ReloadTester reloadTester,
+                       @NotNull @DataName("firer") Firer firer,
+                       @NotNull @DataName("activate_effects") Collection<GunEffect> activateEffects,
+                       @NotNull @DataName("shoot_effects") Collection<GunEffect> shootEffects,
+                       @NotNull @DataName("reload_effects") Collection<GunEffect> reloadEffects,
+                       @NotNull @DataName("tick_effects") Collection<GunEffect> tickEffects,
+                       @NotNull @DataName("no_ammo_effects") Collection<GunEffect> noAmmoEffects,
+                       @NotNull @DataName("gun_stack_mappers") Collection<GunStackMapper> gunStackMappers)
+        implements UpgradeNode {
+
+    @DataObject
+    public record Data(@NotNull Key key,
+                       @NotNull @DataPath("stack") String stackPath,
+                       @NotNull @DataPath("stats") String statsPath,
+                       @NotNull @DataPath("shoot_tester") String shootTesterPath,
+                       @NotNull @DataPath("reload_tester") String reloadTesterPath,
+                       @NotNull @DataPath("firer") String firerPath,
+                       @NotNull @DataPath("activate_effects") Collection<String> activateEffectPaths,
+                       @NotNull @DataPath("shoot_effects") Collection<String> shootEffectPaths,
+                       @NotNull @DataPath("reload_effects") Collection<String> reloadEffectPaths,
+                       @NotNull @DataPath("tick_effects") Collection<String> tickEffectPaths,
+                       @NotNull @DataPath("no_ammo_effects") Collection<String> noAmmoEffectPaths,
+                       @NotNull @DataPath("gun_stack_mappers") Collection<String> gunStackMapperPaths,
                        @NotNull ItemStack stack,
-                       @NotNull GunStats stats,
-                       @NotNull ShootTester shootTester,
-                       @NotNull ReloadTester reloadTester,
-                       @NotNull Firer firer,
-                       @NotNull Collection<GunEffect> activateEffects,
-                       @NotNull Collection<GunEffect> shootEffects,
-                       @NotNull Collection<GunEffect> reloadEffects,
-                       @NotNull Collection<GunEffect> tickEffects,
-                       @NotNull Collection<GunEffect> noAmmoEffects,
-                       @NotNull Collection<GunStackMapper> gunStackMappers) implements UpgradeNode {
+                       @NotNull Set<Key> upgrades) {
+
+        public Data {
+            Objects.requireNonNull(key, "key");
+            Objects.requireNonNull(stackPath, "stackPath");
+            Objects.requireNonNull(statsPath, "statsPath");
+            Objects.requireNonNull(shootTesterPath, "shootTesterPath");
+            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
+            Objects.requireNonNull(firerPath, "firerPath");
+            verifyCollection(activateEffectPaths, "activateEffectPaths");
+            verifyCollection(shootEffectPaths, "shootEffectPaths");
+            verifyCollection(reloadEffectPaths, "reloadEffectPaths");
+            verifyCollection(tickEffectPaths, "tickEffectPaths");
+            verifyCollection(noAmmoEffectPaths, "noAmmoEffectPaths");
+            verifyCollection(gunStackMapperPaths, "gunStackMapperPaths");
+            Objects.requireNonNull(stack, "stack");
+            verifyCollection(upgrades, "upgrades");
+        }
+
+    }
 
     /**
      * Creates a {@link GunLevel}.
      *
-     * @param upgrades        Suggested upgrade {@link Key}s for next levels
-     * @param stack           The {@link ItemStack} for this level
+     * @param data            The extra {@link Data} for this level
      * @param stats           The gun's {@link GunStats}
      * @param shootTester     The gun's {@link ShootTester}
      * @param reloadTester    The gun's {@link ReloadTester}
@@ -59,9 +95,9 @@ public record GunLevel(@NotNull Set<Key> upgrades,
      * @param noAmmoEffects   The gun's {@link GunEffect}s that are invoked when the gun has no ammo
      * @param gunStackMappers The gun's {@link GunStackMapper}s that produce the visual {@link ItemStack} representation of the gun
      */
+    @FactoryMethod
     public GunLevel {
-        verifyCollection(upgrades, "upgrades");
-        Objects.requireNonNull(stack, "stack");
+        Objects.requireNonNull(data, "data");
         Objects.requireNonNull(stats, "stats");
         Objects.requireNonNull(shootTester, "shootTester");
         Objects.requireNonNull(reloadTester, "reloadTester");
@@ -74,11 +110,16 @@ public record GunLevel(@NotNull Set<Key> upgrades,
         verifyCollection(gunStackMappers, "gunStackMappers");
     }
 
-    private void verifyCollection(@NotNull Collection<?> collection, @NotNull String name) {
+    private static void verifyCollection(@NotNull Collection<?> collection, @NotNull String name) {
         Objects.requireNonNull(collection, name);
         for (Object element : collection) {
             Objects.requireNonNull(element, name + " element");
         }
+    }
+
+    @Override
+    public @Unmodifiable @NotNull Set<Key> upgrades() {
+        return data.upgrades();
     }
 
 }

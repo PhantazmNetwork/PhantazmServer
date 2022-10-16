@@ -1,14 +1,15 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.limiter;
 
-import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.ProcessorMethod;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.Pair;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -23,6 +24,7 @@ import java.util.Objects;
 /**
  * A {@link TargetLimiter} based on distance from the shot's start position.
  */
+@Model("zombies.gun.target_limiter.distance")
 public class DistanceTargetLimiter implements TargetLimiter {
 
     private final Data data;
@@ -32,6 +34,7 @@ public class DistanceTargetLimiter implements TargetLimiter {
      *
      * @param data The {@link Data} to use
      */
+    @FactoryMethod
     public DistanceTargetLimiter(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -41,6 +44,7 @@ public class DistanceTargetLimiter implements TargetLimiter {
      *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
+    @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
             @Override
@@ -85,16 +89,8 @@ public class DistanceTargetLimiter implements TargetLimiter {
      * @param targetLimit       The maximum number of targets to select
      * @param prioritizeClosest Whether the closest targets should be prioritized or the farthest targets should be prioritized
      */
-    public record Data(int targetLimit, boolean prioritizeClosest) implements Keyed {
+    @DataObject
+    public record Data(int targetLimit, boolean prioritizeClosest) {
 
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.target_limiter.distance");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 }

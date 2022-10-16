@@ -1,16 +1,17 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.ProcessorMethod;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,7 @@ import java.util.UUID;
 /**
  * A {@link ShotHandler} that deals damage to targets.
  */
+@Model("zombies.gun.shot_handler.damage")
 public class DamageShotHandler implements ShotHandler {
 
     private final Data data;
@@ -31,6 +33,7 @@ public class DamageShotHandler implements ShotHandler {
      *
      * @param data The {@link Data} to use
      */
+    @FactoryMethod
     public DamageShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -40,6 +43,7 @@ public class DamageShotHandler implements ShotHandler {
      *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
+    @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -89,17 +93,9 @@ public class DamageShotHandler implements ShotHandler {
      * @param damage         The amount of damage to deal to regular targets
      * @param headshotDamage The amount of damage to deal to headshots
      */
-    public record Data(float damage, float headshotDamage) implements Keyed {
+    @DataObject
+    public record Data(float damage, float headshotDamage) {
 
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.damage");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }
