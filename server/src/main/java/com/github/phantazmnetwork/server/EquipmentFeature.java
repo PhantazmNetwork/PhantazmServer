@@ -11,9 +11,10 @@ import com.github.phantazmnetwork.zombies.equipment.gun.reload.StateReloadTester
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.GradientActionBarChooser;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.StaticActionBarChooser;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.StateShootTester;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration.WindowBlockIteration;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.BasicShotEndpointSelector;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.RayTraceBlockIteration;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.WallshotBlockIteration;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration.BasicBlockIteration;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration.WallshotBlockIteration;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.HitScanFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.SpreadFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.PhantazmMobProjectileCollisionFilter;
@@ -170,8 +171,9 @@ final class EquipmentFeature {
         contextManager.registerElementClass(StaticActionBarChooser.class);
         contextManager.registerElementClass(StateReloadTester.class);
         contextManager.registerElementClass(BasicShotEndpointSelector.class);
-        contextManager.registerElementClass(RayTraceBlockIteration.class);
+        contextManager.registerElementClass(BasicBlockIteration.class);
         contextManager.registerElementClass(WallshotBlockIteration.class);
+        contextManager.registerElementClass(WindowBlockIteration.class);
         contextManager.registerElementClass(PhantazmMobProjectileCollisionFilter.class);
         contextManager.registerElementClass(ProjectileFirer.class);
         contextManager.registerElementClass(HitScanFirer.class);
