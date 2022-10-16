@@ -30,6 +30,14 @@ repositories {
             includeModule("com.github.steanky", "element-core")
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steank-f1g/toolkit/maven/")
+        }
+        filter {
+            includeModuleByRegex("com\\.github\\.steanky", "toolkit-.+")
+        }
+    }
 }
 
 val catalogs = extensions.getByType<VersionCatalogsExtension>()

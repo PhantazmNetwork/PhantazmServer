@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.11.0"
 
-ethylene = "0.14.0"
+ethylene = "0.15.1"
 
 examination = "1.3.0"
 
@@ -22,7 +22,7 @@ examination-string = { module = "net.kyori:examination-string", version.ref = "e
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
 
-element-core = { module = "com.github.steanky:element-core", version = "0.7.0" }
+element-core = { module = "com.github.steanky:element-core", version = "0.8.0" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }

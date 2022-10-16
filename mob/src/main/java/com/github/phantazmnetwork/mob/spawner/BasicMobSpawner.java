@@ -107,7 +107,7 @@ public class BasicMobSpawner implements MobSpawner {
         setHealth(neuralEntity);
 
         Module module = new Module(neuralEntity);
-        DependencyProvider dependencyProvider = new ModuleDependencyProvider(module, keyParser);
+        DependencyProvider dependencyProvider = new ModuleDependencyProvider(keyParser, module);
         ElementContext context = contextManager.makeContext(model.getNode());
         addGoals(context, dependencyProvider, neuralEntity);
         Map<Key, Collection<Skill>> triggers = createTriggers(context, dependencyProvider);

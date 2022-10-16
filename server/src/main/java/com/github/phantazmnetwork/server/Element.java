@@ -39,7 +39,7 @@ public final class Element {
                 new BasicFactoryResolver(keyParser, elementTypeIdentifier, dataInspector, collectionCreator,
                         mappingProcessorSource);
 
-        ProcessorResolver processorResolver = new BasicProcessorResolver();
+        ProcessorResolver processorResolver = BasicProcessorResolver.INSTANCE;
         ElementInspector elementInspector = new BasicElementInspector(factoryResolver, processorResolver);
 
         Registry<ConfigProcessor<?>> configRegistry = new HashRegistry<>();

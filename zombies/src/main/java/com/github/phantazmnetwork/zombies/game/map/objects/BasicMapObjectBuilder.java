@@ -166,9 +166,9 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     @Override
     public @NotNull MapObjects build(@NotNull MapInfo mapInfo) {
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
-        DependencyProvider provider = new ModuleDependencyProvider(
+        DependencyProvider provider = new ModuleDependencyProvider(keyParser,
                 new Module(instance, roundHandler, flaggable, modifierSource, slotDistributor, playerMap,
-                        equipmentCreator, respawnPos, mapObjectsWrapper), keyParser);
+                        equipmentCreator, respawnPos, mapObjectsWrapper));
 
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
         List<Spawnpoint> spawnpoints = buildSpawnpoints(mapInfo.spawnpoints(), spawnruleInfoMap);
