@@ -1,9 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional;
 
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -24,6 +21,7 @@ import java.util.Objects;
  * Finds entities around the end of a shot.
  */
 @Model("zombies.gun.entity_finder.directional.around_end")
+@Cache
 public class AroundEndFinder implements DirectionalEntityFinder {
 
     private final Data data;

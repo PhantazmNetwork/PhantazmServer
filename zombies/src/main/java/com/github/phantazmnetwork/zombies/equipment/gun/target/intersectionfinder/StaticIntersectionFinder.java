@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.collision.BoundingBox;
@@ -14,6 +15,7 @@ import java.util.Optional;
  * An {@link IntersectionFinder} that always finds an intersection at the center of an {@link Entity}.
  */
 @Model("zombies.gun.intersection_finder.static")
+@Cache
 public class StaticIntersectionFinder implements IntersectionFinder {
 
     @FactoryMethod

@@ -13,6 +13,7 @@ import java.util.Objects;
  * A {@link GunEffect} that sets a {@link Player}'s exp based on the time since their last shot.
  */
 @Model("zombies.gun.effect.exp.shoot")
+@Cache(false)
 public class ShootExpEffect implements GunEffect {
 
     private final PlayerView playerView;

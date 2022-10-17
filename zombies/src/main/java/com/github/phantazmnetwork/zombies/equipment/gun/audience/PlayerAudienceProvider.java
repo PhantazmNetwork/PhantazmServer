@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.audience;
 
 import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -14,6 +15,7 @@ import java.util.Optional;
  * A {@link AudienceProvider} which returns a {@link Player}.
  */
 @Model("zombies.gun.audience_provider.player")
+@Cache(false)
 public class PlayerAudienceProvider implements AudienceProvider {
 
     private final PlayerView playerView;

@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -18,6 +19,7 @@ import java.util.UUID;
  * A {@link ShotHandler} that applies a {@link Potion} to {@link Entity} targets.
  */
 @Model("zombies.gun.shot_handler.potion")
+@Cache
 public class PotionShotHandler implements ShotHandler {
 
     private final Data data;

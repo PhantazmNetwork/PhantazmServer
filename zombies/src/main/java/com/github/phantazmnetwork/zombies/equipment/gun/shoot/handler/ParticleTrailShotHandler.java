@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 import com.github.phantazmnetwork.core.particle.ParticleWrapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -27,6 +28,7 @@ import java.util.UUID;
  * A {@link ShotHandler} that creates a trail of particles.
  */
 @Model("zombies.gun.shot_handler.particle_trail")
+@Cache
 public class ParticleTrailShotHandler implements ShotHandler {
 
     private final Data data;

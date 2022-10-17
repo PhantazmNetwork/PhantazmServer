@@ -1,9 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.limiter;
 
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -25,6 +22,7 @@ import java.util.Objects;
  * A {@link TargetLimiter} based on distance from the shot's start position.
  */
 @Model("zombies.gun.target_limiter.distance")
+@Cache
 public class DistanceTargetLimiter implements TargetLimiter {
 
     private final Data data;

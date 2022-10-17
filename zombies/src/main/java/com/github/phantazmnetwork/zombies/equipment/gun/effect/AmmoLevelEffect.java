@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -14,6 +15,7 @@ import java.util.Objects;
  * A {@link GunEffect} that sets the level of a {@link Player} based on the ammo of a gun.
  */
 @Model("zombies.gun.effect.ammo_level")
+@Cache(false)
 public class AmmoLevelEffect implements GunEffect {
 
     private final PlayerView playerView;

@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.headshot;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -13,6 +14,7 @@ import java.util.Objects;
  * A {@link HeadshotTester} that always headshots or always does not headshot.
  */
 @Model("zombies.gun.headshot_tester.static")
+@Cache
 public class StaticHeadshotTester implements HeadshotTester {
 
     private final Data data;

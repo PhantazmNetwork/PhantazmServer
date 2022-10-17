@@ -35,6 +35,7 @@ import java.util.function.Supplier;
  * A {@link Firer} that works by firing projectiles.
  */
 @Model("zombies.gun.firer.projectile")
+@Cache(false)
 public class ProjectileFirer implements Firer {
 
     private static final ElementFactory<Data, ProjectileFirer> FACTORY = (objectData, context, dependencyProvider) -> {

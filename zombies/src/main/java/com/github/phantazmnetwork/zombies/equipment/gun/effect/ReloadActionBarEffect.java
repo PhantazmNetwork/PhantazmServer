@@ -7,7 +7,6 @@ import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.ReloadActionBarChooser;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,6 +16,7 @@ import java.util.Objects;
  * A {@link GunEffect} that sends a message to an {@link Audience}'s action bar.
  */
 @Model("zombies.gun.effect.reload.action_bar")
+@Cache(false)
 public class ReloadActionBarEffect implements GunEffect {
 
     private final GunStats stats;

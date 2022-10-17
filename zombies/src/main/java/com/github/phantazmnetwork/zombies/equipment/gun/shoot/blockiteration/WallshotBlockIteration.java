@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -21,6 +22,7 @@ import java.util.Objects;
  * a {@link BasicBlockIteration}.
  */
 @Model("zombies.gun.block_iteration.wallshot")
+@Cache
 public class WallshotBlockIteration implements BlockIteration {
 
     private final Data data;

@@ -18,6 +18,7 @@ import java.util.*;
  * Sub-{@link Firer}s may shoot at a slightly different angle than the direction of the original shot.
  */
 @Model("zombies.gun.firer.spread")
+@Cache(false)
 public class SpreadFirer implements Firer {
 
     private final Data data;

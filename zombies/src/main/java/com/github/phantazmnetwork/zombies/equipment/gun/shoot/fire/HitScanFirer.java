@@ -19,6 +19,7 @@ import java.util.function.Supplier;
  * A {@link Firer} that fires using "hit scan". Targets will be immediately found and shot.
  */
 @Model("zombies.gun.firer.hit_scan")
+@Cache(false)
 public class HitScanFirer implements Firer {
 
     private final Supplier<Optional<? extends Entity>> entitySupplier;

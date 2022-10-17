@@ -1,9 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional;
 
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -21,6 +18,7 @@ import java.util.Objects;
  * A {@link PositionalEntityFinder} which finds all nearby {@link Entity}s.
  */
 @Model("zombies.gun.entity_finder.positional.nearby")
+@Cache
 public class NearbyEntityFinder implements PositionalEntityFinder {
 
     private final Data data;

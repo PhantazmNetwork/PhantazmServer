@@ -11,6 +11,7 @@ import java.util.Objects;
  * A {@link ReloadTester} based solely on {@link GunState}.
  */
 @Model("zombies.gun.reload_tester.state")
+@Cache
 public class StateReloadTester implements ReloadTester {
 
     private final GunStats stats;

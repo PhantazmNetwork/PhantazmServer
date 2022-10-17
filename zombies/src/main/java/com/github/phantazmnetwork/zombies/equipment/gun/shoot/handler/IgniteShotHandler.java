@@ -3,10 +3,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -23,6 +20,7 @@ import java.util.UUID;
  * A {@link ShotHandler} that sets {@link Entity}s on fire.
  */
 @Model("zombies.gun.shot_handler.ignite")
+@Cache
 public class IgniteShotHandler implements ShotHandler {
 
     private final Data data;

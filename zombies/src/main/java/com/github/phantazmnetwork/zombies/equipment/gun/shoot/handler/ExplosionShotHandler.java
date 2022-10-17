@@ -2,10 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -26,6 +23,7 @@ import java.util.UUID;
  * A {@link ShotHandler} which creates an explosion at the end of a shot.
  */
 @Model("zombies.gun.shot_handler.explosion")
+@Cache
 public class ExplosionShotHandler implements ShotHandler {
 
     private static final byte[] ZERO_BYTE_ARRAY = new byte[0];

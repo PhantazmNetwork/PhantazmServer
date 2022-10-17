@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
@@ -16,6 +17,7 @@ import java.util.Collection;
  * A {@link DirectionalEntityFinder} that finds entities between the start and end point of a shot.
  */
 @Model("zombies.gun.entity_finder.directional.between_points")
+@Cache
 public class BetweenPointsFinder implements DirectionalEntityFinder {
 
     @FactoryMethod

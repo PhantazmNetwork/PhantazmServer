@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar;
 
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -15,6 +16,7 @@ import java.util.Objects;
  * A {@link ReloadActionBarChooser} which colors a {@link Component} based on reload progress with a gradient between two colors.
  */
 @Model("zombies.gun.action_bar_chooser.gradient")
+@Cache
 public class GradientActionBarChooser implements ReloadActionBarChooser {
 
     private final Data data;

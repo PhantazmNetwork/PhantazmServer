@@ -1,10 +1,7 @@
 package com.github.phantazmnetwork.zombies.equipment.gun;
 
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler.ShotHandler;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -19,6 +16,7 @@ import java.util.Objects;
  * These are handled by individual {@link ShotHandler}s.
  */
 @Model("zombies.gun.stats")
+@Cache
 public final class GunStats {
 
     private final Data data;

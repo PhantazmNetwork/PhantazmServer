@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -31,6 +32,7 @@ import java.util.*;
  * A {@link ShotHandler} which creates a guardian beam.
  */
 @Model("zombies.gun.shot_handler.guardian_beam")
+@Cache(false)
 public class GuardianBeamShotHandler implements ShotHandler {
 
     private final Queue<Beam> removalQueue = new PriorityQueue<>(Comparator.comparingLong(Beam::time));

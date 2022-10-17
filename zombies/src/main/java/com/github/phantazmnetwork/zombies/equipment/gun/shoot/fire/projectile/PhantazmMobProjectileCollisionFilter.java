@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile;
 
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -14,6 +15,7 @@ import java.util.Objects;
  * A {@link ProjectileCollisionFilter} which explodes when it comes in contact with {@link PhantazmMob}s.
  */
 @Model("zombies.gun.firer.projectile.collision_filter.phantazm_mob")
+@Cache(false)
 public class PhantazmMobProjectileCollisionFilter implements ProjectileCollisionFilter {
 
     private final MobStore mobStore;

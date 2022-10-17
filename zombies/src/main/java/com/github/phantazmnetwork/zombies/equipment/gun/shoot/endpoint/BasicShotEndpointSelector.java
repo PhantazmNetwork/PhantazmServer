@@ -26,6 +26,7 @@ import java.util.function.Supplier;
  * Basic implementation of a {@link ShotEndpointSelector}.
  */
 @Model("zombies.gun.end_selector.basic")
+@Cache(false)
 public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
     private final Data data;
