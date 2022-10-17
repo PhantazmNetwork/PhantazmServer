@@ -1,13 +1,11 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional;
 
-import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -22,6 +20,8 @@ import java.util.Objects;
 /**
  * Finds entities around the end of a shot.
  */
+@Model("zombies.gun.entity_finder.directional.around_end")
+@Cache
 public class AroundEndFinder implements DirectionalEntityFinder {
 
     private final Data data;
@@ -31,6 +31,7 @@ public class AroundEndFinder implements DirectionalEntityFinder {
      *
      * @param data The {@link Data} for the {@link AroundEndFinder}
      */
+    @FactoryMethod
     public AroundEndFinder(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -40,6 +41,7 @@ public class AroundEndFinder implements DirectionalEntityFinder {
      *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
+    @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -82,17 +84,9 @@ public class AroundEndFinder implements DirectionalEntityFinder {
      *
      * @param range The euclidean distance range to search for entities
      */
-    public record Data(double range) implements Keyed {
+    @DataObject
+    public record Data(double range) {
 
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.around_end");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

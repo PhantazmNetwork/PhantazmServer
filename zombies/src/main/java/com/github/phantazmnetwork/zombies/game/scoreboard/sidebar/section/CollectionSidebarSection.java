@@ -1,10 +1,7 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section;
 
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.SidebarLineUpdater;
-import com.github.steanky.element.core.annotation.DataName;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +13,7 @@ public class CollectionSidebarSection implements SidebarSection {
     private final Collection<SidebarLineUpdater> lineUpdaters;
 
     @DataObject
-    public record Data(@NotNull @DataName("line_updaters") Collection<String> lineUpdaterPaths) {
+    public record Data(@NotNull @DataPath("line_updaters") Collection<String> lineUpdaterPaths) {
 
         public Data {
             Objects.requireNonNull(lineUpdaterPaths, "lineUpdaters");

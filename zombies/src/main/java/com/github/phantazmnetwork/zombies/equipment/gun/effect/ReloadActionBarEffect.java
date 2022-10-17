@@ -1,30 +1,22 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.effect;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.ReloadActionBarChooser;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 
 /**
  * A {@link GunEffect} that sends a message to an {@link Audience}'s action bar.
  */
+@Model("zombies.gun.effect.reload.action_bar")
+@Cache(false)
 public class ReloadActionBarEffect implements GunEffect {
 
     private final GunStats stats;
@@ -41,61 +33,15 @@ public class ReloadActionBarEffect implements GunEffect {
      * @param reloadTester     The gun's {@link ReloadTester}
      * @param chooser          The {@link ReloadActionBarChooser} to choose an action bar to send to the {@link Audience}
      */
-    public ReloadActionBarEffect(@NotNull GunStats stats, @NotNull AudienceProvider audienceProvider,
-            @NotNull ReloadTester reloadTester, @NotNull ReloadActionBarChooser chooser) {
+    @FactoryMethod
+    public ReloadActionBarEffect(@NotNull Data data, @NotNull @DataName("stats") GunStats stats,
+            @NotNull @DataName("audience_provider") AudienceProvider audienceProvider,
+            @NotNull @DataName("reload_tester") ReloadTester reloadTester,
+            @NotNull @DataName("reload_action_bar_chooser") ReloadActionBarChooser chooser) {
         this.stats = Objects.requireNonNull(stats, "stats");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
         this.chooser = Objects.requireNonNull(chooser, "chooser");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
-
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key statsKey = keyProcessor.dataFromElement(element.getElementOrThrow("statsKey"));
-                Key audienceProviderKey =
-                        keyProcessor.dataFromElement(element.getElementOrThrow("audienceProviderKey"));
-                Key reloadTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("reloadTesterKey"));
-                Key reloadActionBarChooserKey =
-                        keyProcessor.dataFromElement(element.getElementOrThrow("reloadActionBarChooserKey"));
-
-                return new Data(statsKey, audienceProviderKey, reloadTesterKey, reloadActionBarChooserKey);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(4);
-                node.put("statsKey", keyProcessor.elementFromData(data.statsKey()));
-                node.put("audienceProviderKey", keyProcessor.elementFromData(data.audienceProviderKey()));
-                node.put("reloadTesterKey", keyProcessor.elementFromData(data.reloadTesterKey()));
-                node.put("reloadActionBarChooserKey", keyProcessor.elementFromData(data.reloadActionBarChooserKey()));
-
-                return node;
-            }
-        };
-    }
-
-    /**
-     * Creates a dependency consumer for {@link Data}s.
-     *
-     * @return A dependency consumer for {@link Data}s
-     */
-    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.statsKey());
-            keys.add(data.audienceProviderKey());
-            keys.add(data.reloadTesterKey());
-            keys.add(data.reloadActionBarChooserKey());
-        };
     }
 
     @Override
@@ -120,40 +66,32 @@ public class ReloadActionBarEffect implements GunEffect {
     /**
      * Data for an {@link ReloadActionBarEffect}.
      *
-     * @param statsKey                  A {@link Key} to the guns's {@link GunStats}
-     * @param audienceProviderKey       A {@link Key} to the {@link ReloadActionBarEffect}'s {@link AudienceProvider}
-     * @param reloadTesterKey           A {@link Key} to the gun's {@link ReloadTester}
-     * @param reloadActionBarChooserKey A {@link Key} to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
+     * @param statsPath                  A path to the guns's {@link GunStats}
+     * @param audienceProviderPath       A path to the {@link ReloadActionBarEffect}'s {@link AudienceProvider}
+     * @param reloadTesterPath           A path to the gun's {@link ReloadTester}
+     * @param reloadActionBarChooserPath A path to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
      */
-    public record Data(@NotNull Key statsKey,
-                       @NotNull Key audienceProviderKey,
-                       @NotNull Key reloadTesterKey,
-                       @NotNull Key reloadActionBarChooserKey) implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.effect.action_bar.reload");
+    @DataObject
+    public record Data(@NotNull @DataPath("stats") String statsPath,
+                       @NotNull @DataPath("audience_provider") String audienceProviderPath,
+                       @NotNull @DataPath("reload_tester") String reloadTesterPath,
+                       @NotNull @DataPath("reload_action_bar_chooser") String reloadActionBarChooserPath) {
 
         /**
          * Creates a {@link Data}.
          *
-         * @param statsKey                  A {@link Key} to the guns's {@link GunStats}
-         * @param audienceProviderKey       A {@link Key} to the {@link ReloadActionBarEffect}'s {@link AudienceProvider}
-         * @param reloadTesterKey           A {@link Key} to the gun's {@link ReloadTester}
-         * @param reloadActionBarChooserKey A {@link Key} to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
+         * @param statsPath                  A path to the guns's {@link GunStats}
+         * @param audienceProviderPath       A path to the {@link ReloadActionBarEffect}'s {@link AudienceProvider}
+         * @param reloadTesterPath           A path to the gun's {@link ReloadTester}
+         * @param reloadActionBarChooserPath A path to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
          */
         public Data {
-            Objects.requireNonNull(statsKey, "statsKey");
-            Objects.requireNonNull(audienceProviderKey, "audienceProviderKey");
-            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
-            Objects.requireNonNull(reloadActionBarChooserKey, "reloadActionBarChooserKey");
+            Objects.requireNonNull(statsPath, "statsPath");
+            Objects.requireNonNull(audienceProviderPath, "audienceProviderPath");
+            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
+            Objects.requireNonNull(reloadActionBarChooserPath, "reloadActionBarChooserPath");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

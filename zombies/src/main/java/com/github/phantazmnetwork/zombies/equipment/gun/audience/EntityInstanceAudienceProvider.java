@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.audience;
 
-import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +15,8 @@ import java.util.function.Supplier;
 /**
  * An {@link AudienceProvider} which returns an {@link Entity}'s {@link Instance}.
  */
+@Model("zombies.gun.audience_provider.entity_instance")
+@Cache(false)
 public class EntityInstanceAudienceProvider implements AudienceProvider {
 
     private final Supplier<Optional<? extends Entity>> entitySupplier;
@@ -24,17 +26,10 @@ public class EntityInstanceAudienceProvider implements AudienceProvider {
      *
      * @param entitySupplier The {@link Supplier} of an {@link Entity} to retrieve the {@link Instance} of
      */
-    public EntityInstanceAudienceProvider(@NotNull Supplier<Optional<? extends Entity>> entitySupplier) {
+    @FactoryMethod
+    public EntityInstanceAudienceProvider(@NotNull @Dependency("zombies.dependency.gun.entity_supplier")
+    Supplier<Optional<? extends Entity>> entitySupplier) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return ConfigProcessor.emptyProcessor(Data::new);
     }
 
     @Override
@@ -42,19 +37,4 @@ public class EntityInstanceAudienceProvider implements AudienceProvider {
         return entitySupplier.get().map(Entity::getInstance);
     }
 
-    /**
-     * Data for an {@link EntityInstanceAudienceProvider}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.audience_provider.entity_instance");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-    }
 }

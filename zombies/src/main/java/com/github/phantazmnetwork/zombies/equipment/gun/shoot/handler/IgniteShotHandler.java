@@ -1,16 +1,14 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +19,8 @@ import java.util.UUID;
 /**
  * A {@link ShotHandler} that sets {@link Entity}s on fire.
  */
+@Model("zombies.gun.shot_handler.ignite")
+@Cache
 public class IgniteShotHandler implements ShotHandler {
 
     private final Data data;
@@ -30,6 +30,7 @@ public class IgniteShotHandler implements ShotHandler {
      *
      * @param data The {@link IgniteShotHandler}'s {@link Data}
      */
+    @FactoryMethod
     public IgniteShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -39,6 +40,7 @@ public class IgniteShotHandler implements ShotHandler {
      *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
+    @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
@@ -88,17 +90,9 @@ public class IgniteShotHandler implements ShotHandler {
      * @param duration         The duration of the fire for regular targets
      * @param headshotDuration The duration of the fire for headshots
      */
-    public record Data(int duration, int headshotDuration) implements Keyed {
+    @DataObject
+    public record Data(int duration, int headshotDuration) {
 
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.ignite");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

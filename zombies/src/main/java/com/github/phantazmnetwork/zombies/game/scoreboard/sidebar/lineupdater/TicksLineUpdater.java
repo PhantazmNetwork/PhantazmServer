@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.time.TickFormatter;
 import com.github.steanky.element.core.ElementFactory;
@@ -23,7 +22,11 @@ import java.util.Optional;
 public class TicksLineUpdater implements SidebarLineUpdater {
 
     @DataObject
-    public record Data(@NotNull Key tickDependencyReference, @NotNull String tickFormatterPath) {
+    public record Data(@NotNull String tickFormatterPath) {
+
+        public Data {
+            Objects.requireNonNull(tickFormatterPath, "tickFormatterPath");
+        }
 
     }
 
@@ -51,21 +54,17 @@ public class TicksLineUpdater implements SidebarLineUpdater {
 
     @ProcessorMethod
     public static ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
         return new ConfigProcessor<>() {
 
             @Override
             public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key tickDependencyReference =
-                        keyProcessor.dataFromElement(element.getElementOrThrow("tickDependencyReference"));
                 String tickFormatterPath = element.getStringOrThrow("tickFormatterPath");
-                return new Data(tickDependencyReference, tickFormatterPath);
+                return new Data(tickFormatterPath);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return ConfigNode.of("tickDependencyReference", data.tickDependencyReference(), "tickFormatterPath",
-                        data.tickFormatterPath());
+                return ConfigNode.of("tickFormatterPath", data.tickFormatterPath());
             }
         };
     }

@@ -155,7 +155,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
     @Override
     protected @NotNull ItemStack computeStack() {
-        ItemStack stack = level.stack();
+        ItemStack stack = level.data().stack();
         for (GunStackMapper mapper : level.gunStackMappers()) {
             stack = mapper.map(state, stack);
         }
