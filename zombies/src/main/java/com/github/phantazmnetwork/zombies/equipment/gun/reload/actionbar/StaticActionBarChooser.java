@@ -1,15 +1,10 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +13,8 @@ import java.util.Objects;
 /**
  * A {@link ReloadActionBarChooser} that sends a static {@link Component} message.
  */
+@Model("zombies.gun.action_bar_chooser.static")
+@Cache
 public class StaticActionBarChooser implements ReloadActionBarChooser {
 
     private final Data data;
@@ -27,32 +24,9 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
      *
      * @param data The {@link StaticActionBarChooser}'s {@link Data}
      */
+    @FactoryMethod
     public StaticActionBarChooser(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Component> componentProcessor = ConfigProcessors.component();
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Component message = componentProcessor.dataFromElement(element.getElementOrThrow("message"));
-                return new Data(message);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(1);
-                node.put("message", componentProcessor.elementFromData(data.message()));
-                return node;
-            }
-        };
     }
 
     @Override
@@ -65,12 +39,8 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
      *
      * @param message The message to send
      */
-    public record Data(@NotNull Component message) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.static");
+    @DataObject
+    public record Data(@NotNull Component message) {
 
         /**
          * Creates a {@link Data}.
@@ -81,10 +51,6 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
             Objects.requireNonNull(message, "message");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

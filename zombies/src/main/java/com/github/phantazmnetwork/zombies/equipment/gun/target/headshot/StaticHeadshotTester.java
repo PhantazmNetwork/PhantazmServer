@@ -1,13 +1,9 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.headshot;
 
-import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +13,8 @@ import java.util.Objects;
 /**
  * A {@link HeadshotTester} that always headshots or always does not headshot.
  */
+@Model("zombies.gun.headshot_tester.static")
+@Cache
 public class StaticHeadshotTester implements HeadshotTester {
 
     private final Data data;
@@ -26,31 +24,9 @@ public class StaticHeadshotTester implements HeadshotTester {
      *
      * @param data The {@link StaticHeadshotTester}'s {@link Data}
      */
+    @FactoryMethod
     public StaticHeadshotTester(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                return new Data(element.getBooleanOrThrow("shouldHeadshot"));
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(1);
-                node.putBoolean("shouldHeadshot", data.shouldHeadshot());
-
-                return node;
-            }
-        };
     }
 
     @Override
@@ -63,17 +39,9 @@ public class StaticHeadshotTester implements HeadshotTester {
      *
      * @param shouldHeadshot Whether the {@link StaticHeadshotTester} should always headshot
      */
-    public record Data(boolean shouldHeadshot) implements Keyed {
+    @DataObject
+    public record Data(boolean shouldHeadshot) {
 
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.headshot_tester.static");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.audience;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.player.PlayerView;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +14,8 @@ import java.util.Optional;
 /**
  * A {@link AudienceProvider} which returns a {@link Player}.
  */
+@Model("zombies.gun.audience_provider.player")
+@Cache(false)
 public class PlayerAudienceProvider implements AudienceProvider {
 
     private final PlayerView playerView;
@@ -23,17 +25,9 @@ public class PlayerAudienceProvider implements AudienceProvider {
      *
      * @param playerView The {@link PlayerView} of the {@link Player}
      */
-    public PlayerAudienceProvider(@NotNull PlayerView playerView) {
+    @FactoryMethod
+    public PlayerAudienceProvider(@NotNull @Dependency("zombies.dependency.gun.player_view") PlayerView playerView) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return ConfigProcessor.emptyProcessor(Data::new);
     }
 
     @Override
@@ -41,19 +35,4 @@ public class PlayerAudienceProvider implements AudienceProvider {
         return playerView.getPlayer();
     }
 
-    /**
-     * Data for a {@link PlayerAudienceProvider}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.audience_provider.player");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
-    }
 }

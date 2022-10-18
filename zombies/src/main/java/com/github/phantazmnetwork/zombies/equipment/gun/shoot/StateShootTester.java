@@ -1,26 +1,18 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 
 /**
  * A {@link ShootTester} based solely on {@link GunState}.
  */
+@Model("zombies.gun.shoot_tester.state")
 public class StateShootTester implements ShootTester {
 
     private final GunStats stats;
@@ -32,50 +24,11 @@ public class StateShootTester implements ShootTester {
      * @param stats        The gun's {@link GunStats}
      * @param reloadTester The gun's {@link ReloadTester}
      */
-    public StateShootTester(@NotNull GunStats stats, @NotNull ReloadTester reloadTester) {
+    @FactoryMethod
+    public StateShootTester(@NotNull Data data, @NotNull @DataName("stats") GunStats stats,
+            @NotNull @DataName("reload_tester") ReloadTester reloadTester) {
         this.stats = Objects.requireNonNull(stats, "stats");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
-
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key statsKey = keyProcessor.dataFromElement(element.getElementOrThrow("statsKey"));
-                Key reloadTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("reloadTesterKey"));
-
-                return new Data(statsKey, reloadTesterKey);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("statsKey", keyProcessor.elementFromData(data.statsKey()));
-                node.put("reloadTesterKey", keyProcessor.elementFromData(data.reloadTesterKey()));
-
-                return node;
-            }
-        };
-    }
-
-    /**
-     * Creates a dependency consumer for {@link Data}s.
-     *
-     * @return A dependency consumer for {@link Data}s
-     */
-    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.statsKey());
-            keys.add(data.reloadTesterKey());
-        };
     }
 
     @Override
@@ -101,31 +54,24 @@ public class StateShootTester implements ShootTester {
     /**
      * Data for a {@link StateShootTester}.
      *
-     * @param statsKey        A {@link Key} to the gun's {@link GunStats}
-     * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+     * @param statsPath        A path to the gun's {@link GunStats}
+     * @param reloadTesterPath A path to the gun's {@link ReloadTester}
      */
-    public record Data(@NotNull Key statsKey, @NotNull Key reloadTesterKey) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shoot_tester.state");
+    @DataObject
+    public record Data(@NotNull @DataPath("stats") String statsPath,
+                       @NotNull @DataPath("reload_tester") String reloadTesterPath) {
 
         /**
          * Creates a {@link Data}.
          *
-         * @param statsKey        A {@link Key} to the gun's {@link GunStats}
-         * @param reloadTesterKey A {@link Key} to the gun's {@link ReloadTester}
+         * @param statsPath        A path to the gun's {@link GunStats}
+         * @param reloadTesterPath A path to the gun's {@link ReloadTester}
          */
         public Data {
-            Objects.requireNonNull(statsKey, "statsKey");
-            Objects.requireNonNull(reloadTesterKey, "reloadTesterKey");
+            Objects.requireNonNull(statsPath, "statsPath");
+            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

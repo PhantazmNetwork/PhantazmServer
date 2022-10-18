@@ -1,9 +1,8 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional;
 
-import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.LivingEntity;
@@ -17,15 +16,13 @@ import java.util.Collection;
 /**
  * A {@link DirectionalEntityFinder} that finds entities between the start and end point of a shot.
  */
+@Model("zombies.gun.entity_finder.directional.between_points")
+@Cache
 public class BetweenPointsFinder implements DirectionalEntityFinder {
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return ConfigProcessor.emptyProcessor(Data::new);
+    @FactoryMethod
+    public BetweenPointsFinder() {
+
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -36,23 +33,6 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
         instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, entities::add);
 
         return entities;
-    }
-
-    /**
-     * Data for a {@link BetweenPointsFinder}.
-     */
-    public record Data() implements Keyed {
-
-        /**
-         * The serial {@link Key} for this {@link Data}.
-         */
-        public static final Key SERIAL_KEY =
-                Key.key(Namespaces.PHANTAZM, "gun.entity_finder.directional.between_points");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

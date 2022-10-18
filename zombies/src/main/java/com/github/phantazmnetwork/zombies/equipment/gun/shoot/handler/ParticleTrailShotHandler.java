@@ -1,16 +1,17 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.core.particle.ParticleWrapper;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -26,6 +27,8 @@ import java.util.UUID;
 /**
  * A {@link ShotHandler} that creates a trail of particles.
  */
+@Model("zombies.gun.shot_handler.particle_trail")
+@Cache
 public class ParticleTrailShotHandler implements ShotHandler {
 
     private final Data data;
@@ -35,6 +38,7 @@ public class ParticleTrailShotHandler implements ShotHandler {
      *
      * @param data The {@link ParticleTrailShotHandler}'s {@link Data}
      */
+    @FactoryMethod
     public ParticleTrailShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -105,12 +109,8 @@ public class ParticleTrailShotHandler implements ShotHandler {
      * @param particle   The {@link ParticleWrapper} to use for the trail
      * @param trailCount The number of particles to create in the trail
      */
-    public record Data(@NotNull ParticleWrapper particle, int trailCount) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.particle_trail");
+    @DataObject
+    public record Data(@NotNull ParticleWrapper particle, int trailCount) {
 
         /**
          * Creates a {@link Data}.
@@ -122,10 +122,6 @@ public class ParticleTrailShotHandler implements ShotHandler {
             Objects.requireNonNull(particle, "particle");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

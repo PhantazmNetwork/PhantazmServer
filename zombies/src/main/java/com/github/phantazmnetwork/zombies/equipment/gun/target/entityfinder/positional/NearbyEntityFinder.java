@@ -1,13 +1,11 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.positional;
 
-import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
@@ -19,6 +17,8 @@ import java.util.Objects;
 /**
  * A {@link PositionalEntityFinder} which finds all nearby {@link Entity}s.
  */
+@Model("zombies.gun.entity_finder.positional.nearby")
+@Cache
 public class NearbyEntityFinder implements PositionalEntityFinder {
 
     private final Data data;
@@ -28,6 +28,7 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
      *
      * @param data The {@link NearbyEntityFinder}'s {@link Data}
      */
+    @FactoryMethod
     public NearbyEntityFinder(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -37,12 +38,17 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
      *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
+    @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
                 double range = element.getNumberOrThrow("range").doubleValue();
+                if (range < 0) {
+                    throw new ConfigProcessException("range must be greater than or equal to 0");
+                }
+
                 return new Data(range);
             }
 
@@ -66,18 +72,9 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
      *
      * @param range The euclidean distance range to search for nearby {@link Entity}s
      */
-    public record Data(double range) implements Keyed {
+    @DataObject
+    public record Data(double range) {
 
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY =
-                Key.key(Namespaces.PHANTAZM, "gun.target.entity_finder.positional.nearby_entity");
-
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

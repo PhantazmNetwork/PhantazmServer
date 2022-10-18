@@ -1,15 +1,10 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.util.RGBLike;
@@ -20,6 +15,8 @@ import java.util.Objects;
 /**
  * A {@link ReloadActionBarChooser} which colors a {@link Component} based on reload progress with a gradient between two colors.
  */
+@Model("zombies.gun.action_bar_chooser.gradient")
+@Cache
 public class GradientActionBarChooser implements ReloadActionBarChooser {
 
     private final Data data;
@@ -29,40 +26,9 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
      *
      * @param data The {@link Data} to use
      */
+    @FactoryMethod
     public GradientActionBarChooser(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Component> componentProcessor = ConfigProcessors.component();
-        ConfigProcessor<RGBLike> rgbLikeProcessor = ConfigProcessors.rgbLike();
-
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Component message = componentProcessor.dataFromElement(element.getElementOrThrow("message"));
-                RGBLike from = rgbLikeProcessor.dataFromElement(element.getElementOrThrow("from"));
-                RGBLike to = rgbLikeProcessor.dataFromElement(element.getElementOrThrow("to"));
-
-                return new Data(message, from, to);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(3);
-                node.put("message", componentProcessor.elementFromData(data.message()));
-                node.put("from", rgbLikeProcessor.elementFromData(data.from()));
-                node.put("to", rgbLikeProcessor.elementFromData(data.to()));
-
-                return node;
-            }
-        };
     }
 
     @Override
@@ -77,12 +43,8 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
      * @param from    The starting color of the gradient
      * @param to      The ending color of the gradient
      */
-    public record Data(@NotNull Component message, @NotNull RGBLike from, @NotNull RGBLike to) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.action_bar.chooser.gradient");
+    @DataObject
+    public record Data(@NotNull Component message, @NotNull RGBLike from, @NotNull RGBLike to) {
 
         /**
          * Creates a {@link Data}.
@@ -97,10 +59,6 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
             Objects.requireNonNull(to, "to");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

@@ -1,21 +1,14 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.target;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunHit;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.entityfinder.directional.DirectionalEntityFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.headshot.HeadshotTester;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.intersectionfinder.IntersectionFinder;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.TargetLimiter;
 import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTester;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.element.core.annotation.*;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -25,11 +18,11 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 /**
  * Basic implementation of a {@link TargetFinder}.
  */
+@Model("zombies.gun.target_finder.basic")
 public class BasicTargetFinder implements TargetFinder {
 
     private final DirectionalEntityFinder entityFinder;
@@ -47,64 +40,18 @@ public class BasicTargetFinder implements TargetFinder {
      * @param headshotTester     A {@link HeadshotTester} which tests if a target should be headshotted
      * @param targetLimiter      A {@link TargetLimiter} which limits the number of targets found
      */
-    public BasicTargetFinder(@NotNull DirectionalEntityFinder entityFinder, @NotNull TargetTester targetTester,
-            @NotNull IntersectionFinder intersectionFinder, @NotNull HeadshotTester headshotTester,
-            @NotNull TargetLimiter targetLimiter) {
+    @FactoryMethod
+    public BasicTargetFinder(@NotNull Data data,
+            @NotNull @DataName("entity_finder") DirectionalEntityFinder entityFinder,
+            @NotNull @DataName("target_tester") TargetTester targetTester,
+            @NotNull @DataName("intersection_finder") IntersectionFinder intersectionFinder,
+            @NotNull @DataName("headshot_tester") HeadshotTester headshotTester,
+            @NotNull @DataName("target_limiter") TargetLimiter targetLimiter) {
         this.entityFinder = Objects.requireNonNull(entityFinder, "entityFinder");
         this.targetTester = Objects.requireNonNull(targetTester, "targetTester");
         this.intersectionFinder = Objects.requireNonNull(intersectionFinder, "intersectionFinder");
         this.headshotTester = Objects.requireNonNull(headshotTester, "headshotTester");
         this.targetLimiter = Objects.requireNonNull(targetLimiter, "targetLimiter");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Key> keyProcessor = ConfigProcessors.key();
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Key entityFinderKey = keyProcessor.dataFromElement(element.getElementOrThrow("entityFinderKey"));
-                Key targetTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetTesterKey"));
-                Key intersectionFinderKey =
-                        keyProcessor.dataFromElement(element.getElementOrThrow("intersectionFinderKey"));
-                Key headshotTesterKey = keyProcessor.dataFromElement(element.getElementOrThrow("headshotTesterKey"));
-                Key targetLimiterKey = keyProcessor.dataFromElement(element.getElementOrThrow("targetLimiterKey"));
-
-                return new Data(entityFinderKey, targetTesterKey, intersectionFinderKey, headshotTesterKey,
-                        targetLimiterKey);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(5);
-                node.put("entityFinderKey", keyProcessor.elementFromData(data.entityFinderKey()));
-                node.put("targetTesterKey", keyProcessor.elementFromData(data.targetTesterKey()));
-                node.put("intersectionFinderKey", keyProcessor.elementFromData(data.intersectionFinderKey()));
-                node.put("headshotTesterKey", keyProcessor.elementFromData(data.headshotTesterKey()));
-                node.put("targetLimiterKey", keyProcessor.elementFromData(data.targetLimiterKey()));
-
-                return node;
-            }
-        };
-    }
-
-    /**
-     * Creates a dependency consumer for {@link Data}s.
-     *
-     * @return A dependency consumer for {@link Data}s
-     */
-    public static @NotNull BiConsumer<Data, Collection<Key>> dependencyConsumer() {
-        return (data, keys) -> {
-            keys.add(data.entityFinderKey());
-            keys.add(data.intersectionFinderKey());
-            keys.add(data.headshotTesterKey());
-            keys.add(data.targetLimiterKey());
-        };
     }
 
     @Override
@@ -143,44 +90,36 @@ public class BasicTargetFinder implements TargetFinder {
     /**
      * Data for a {@link BasicTargetFinder}.
      *
-     * @param entityFinderKey       A {@link Key} to the {@link BasicTargetFinder}'s {@link DirectionalEntityFinder}
-     * @param targetTesterKey       A {@link Key} to the {@link BasicTargetFinder}'s {@link TargetTester}
-     * @param intersectionFinderKey A {@link Key} to the {@link BasicTargetFinder}'s {@link IntersectionFinder}
-     * @param headshotTesterKey     A {@link Key} to the {@link BasicTargetFinder}'s {@link HeadshotTester}
-     * @param targetLimiterKey      A {@link Key} to the {@link BasicTargetFinder}'s {@link TargetLimiter}
+     * @param entityFinderPath       A path to the {@link BasicTargetFinder}'s {@link DirectionalEntityFinder}
+     * @param targetTesterPath       A path to the {@link BasicTargetFinder}'s {@link TargetTester}
+     * @param intersectionFinderPath A path to the {@link BasicTargetFinder}'s {@link IntersectionFinder}
+     * @param headshotTesterPath     A path to the {@link BasicTargetFinder}'s {@link HeadshotTester}
+     * @param targetLimiterPath      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
      */
-    public record Data(@NotNull Key entityFinderKey,
-                       @NotNull Key targetTesterKey,
-                       @NotNull Key intersectionFinderKey,
-                       @NotNull Key headshotTesterKey,
-                       @NotNull Key targetLimiterKey) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.target_finder.basic");
+    @DataObject
+    public record Data(@NotNull @DataPath("entity_finder") String entityFinderPath,
+                       @NotNull @DataPath("target_tester") String targetTesterPath,
+                       @NotNull @DataPath("intersection_finder") String intersectionFinderPath,
+                       @NotNull @DataPath("headshot_tester") String headshotTesterPath,
+                       @NotNull @DataPath("target_limiter") String targetLimiterPath) {
 
         /**
          * Creates a {@link Data}.
          *
-         * @param entityFinderKey       A {@link Key} to the {@link BasicTargetFinder}'s {@link DirectionalEntityFinder}
-         * @param targetTesterKey       A {@link Key} to the {@link BasicTargetFinder}'s {@link TargetTester}
-         * @param intersectionFinderKey A {@link Key} to the {@link BasicTargetFinder}'s {@link IntersectionFinder}
-         * @param headshotTesterKey     A {@link Key} to the {@link BasicTargetFinder}'s {@link HeadshotTester}
-         * @param targetLimiterKey      A {@link Key} to the {@link BasicTargetFinder}'s {@link TargetLimiter}
+         * @param entityFinderPath       A path to the {@link BasicTargetFinder}'s {@link DirectionalEntityFinder}
+         * @param targetTesterPath       A path to the {@link BasicTargetFinder}'s {@link TargetTester}
+         * @param intersectionFinderPath A path to the {@link BasicTargetFinder}'s {@link IntersectionFinder}
+         * @param headshotTesterPath     A path to the {@link BasicTargetFinder}'s {@link HeadshotTester}
+         * @param targetLimiterPath      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
          */
         public Data {
-            Objects.requireNonNull(entityFinderKey, "entityFinderKey");
-            Objects.requireNonNull(targetTesterKey, "targetTesterKey");
-            Objects.requireNonNull(intersectionFinderKey, "intersectionFinderKey");
-            Objects.requireNonNull(headshotTesterKey, "headshotTesterKey");
-            Objects.requireNonNull(targetLimiterKey, "targetLimiterKey");
+            Objects.requireNonNull(entityFinderPath, "entityFinderPath");
+            Objects.requireNonNull(targetTesterPath, "targetTesterPath");
+            Objects.requireNonNull(intersectionFinderPath, "intersectionFinderPath");
+            Objects.requireNonNull(headshotTesterPath, "headshotTesterPath");
+            Objects.requireNonNull(targetLimiterPath, "targetLimiterPath");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
 }

@@ -1,15 +1,16 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -30,6 +31,8 @@ import java.util.*;
 /**
  * A {@link ShotHandler} which creates a guardian beam.
  */
+@Model("zombies.gun.shot_handler.guardian_beam")
+@Cache(false)
 public class GuardianBeamShotHandler implements ShotHandler {
 
     private final Queue<Beam> removalQueue = new PriorityQueue<>(Comparator.comparingLong(Beam::time));
@@ -40,6 +43,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
      *
      * @param data The data for this {@link GuardianBeamShotHandler}
      */
+    @FactoryMethod
     public GuardianBeamShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -129,12 +133,8 @@ public class GuardianBeamShotHandler implements ShotHandler {
      * @param entityType The entity type of the guardian to create a beam with
      * @param beamTime   The time in ticks the beam will last
      */
-    public record Data(@NotNull EntityType entityType, long beamTime) implements Keyed {
-
-        /**
-         * The serial {@link Key} of this {@link Data}.
-         */
-        public static final Key SERIAL_KEY = Key.key(Namespaces.PHANTAZM, "gun.shot_handler.guardian_beam");
+    @DataObject
+    public record Data(@NotNull EntityType entityType, long beamTime) {
 
         /**
          * Creates a {@link Data}.
@@ -146,10 +146,6 @@ public class GuardianBeamShotHandler implements ShotHandler {
             Objects.requireNonNull(entityType, "entityType");
         }
 
-        @Override
-        public @NotNull Key key() {
-            return SERIAL_KEY;
-        }
     }
 
     private record Beam(@NotNull Reference<Instance> instance,
