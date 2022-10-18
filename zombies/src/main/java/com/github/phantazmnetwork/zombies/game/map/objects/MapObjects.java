@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MapObjects extends Tickable {
+    
     @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
 
     @Unmodifiable @NotNull List<Window> windows();
