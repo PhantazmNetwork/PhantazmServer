@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
     exclusiveContent {
         forRepository {
-            maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
+            maven("https://dl.cloudsmith.io/public/steanky/ethylene/maven/")
         }
         filter {
             includeModuleByRegex("com\\.github\\.steanky", "ethylene-.+")
@@ -24,7 +24,7 @@ repositories {
     }
     exclusiveContent {
         forRepository {
-            maven("https://dl.cloudsmith.io/public/steank-f1g/element/maven/")
+            maven("https://dl.cloudsmith.io/public/steanky/element/maven/")
         }
         filter {
             includeModule("com.github.steanky", "element-core")
@@ -32,7 +32,7 @@ repositories {
     }
     exclusiveContent {
         forRepository {
-            maven("https://dl.cloudsmith.io/public/steank-f1g/toolkit/maven/")
+            maven("https://dl.cloudsmith.io/public/steanky/toolkit/maven/")
         }
         filter {
             includeModuleByRegex("com\\.github\\.steanky", "toolkit-.+")
