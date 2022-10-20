@@ -24,7 +24,7 @@ repositories {
     }
     exclusiveContent {
         forRepository {
-            maven("https://dl.cloudsmith.io/public/steank-f1g/element-QiJ/maven/")
+            maven("https://dl.cloudsmith.io/public/steank-f1g/element/maven/")
         }
         filter {
             includeModule("com.github.steanky", "element-core")
