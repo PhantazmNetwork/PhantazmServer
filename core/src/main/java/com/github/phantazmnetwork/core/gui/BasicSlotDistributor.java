@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * symmetry.
  */
 public class BasicSlotDistributor implements SlotDistributor {
+    private static final int[] EMPTY_INT_ARRAY = new int[0];
     private final int padding;
 
     /**
@@ -66,7 +67,7 @@ public class BasicSlotDistributor implements SlotDistributor {
     @Override
     public int @NotNull [] distribute(int width, int height, int itemCount) {
         if (itemCount == 0) {
-            return new int[0];
+            return EMPTY_INT_ARRAY;
         }
 
         int size = width * height;
