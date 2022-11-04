@@ -31,7 +31,7 @@ public class MeleeAttackGoal implements NeuralGoal {
     private long ticksSinceLastAttack = 0L;
 
     @FactoryMethod
-    public MeleeAttackGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural") NeuralEntity entity) {
+    public MeleeAttackGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity) {
         this.data = Objects.requireNonNull(data, "data");
         this.entity = Objects.requireNonNull(entity, "entity");
     }

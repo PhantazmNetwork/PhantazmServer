@@ -62,10 +62,28 @@ public class BasicMobSpawner implements MobSpawner {
 
     public static class Module implements DependencyModule {
 
+        private final MobSpawner spawner;
+
+        private final MobModel model;
+
         private final NeuralEntity entity;
 
-        public Module(@NotNull NeuralEntity entity) {
+        public Module(@NotNull MobSpawner spawner, @NotNull MobModel model, @NotNull NeuralEntity entity) {
+            this.spawner = Objects.requireNonNull(spawner, "spawner");
+            this.model = Objects.requireNonNull(model, "model");
             this.entity = Objects.requireNonNull(entity, "entity");
+        }
+
+        @DependencySupplier("mob.spawner")
+        @Memoize
+        public @NotNull MobSpawner getSpawner() {
+            return spawner;
+        }
+
+        @DependencySupplier("mob.model")
+        @Memoize
+        public @NotNull MobModel getModel() {
+            return model;
         }
 
         @DependencySupplier("mob.entity.entity")
@@ -106,7 +124,7 @@ public class BasicMobSpawner implements MobSpawner {
         setAttributes(neuralEntity, model);
         setHealth(neuralEntity);
 
-        Module module = new Module(neuralEntity);
+        Module module = new Module(this, model, neuralEntity);
         DependencyProvider dependencyProvider = new ModuleDependencyProvider(keyParser, module);
         ElementContext context = contextManager.makeContext(model.getNode());
         addGoals(context, dependencyProvider, neuralEntity);
