@@ -31,7 +31,7 @@ public class FollowPlayerGoal extends FollowEntityGoal<Player> {
      * @param selector The {@link TargetSelector} used to select {@link Player}s
      */
     @FactoryMethod
-    public FollowPlayerGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural") NeuralEntity entity,
+    public FollowPlayerGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity,
             @NotNull @DataName("target_selector") TargetSelector<Player> selector) {
         super(entity, selector);
     }

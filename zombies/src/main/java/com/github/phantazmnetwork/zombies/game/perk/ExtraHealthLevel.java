@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 
 @Model("zombies.perk.level.extra_health")
-public class ExtraHealthLevel extends PerkLevelBase<ExtraHealthLevel.Data> {
+public class ExtraHealthLevel extends PerkLevelBase {
     private static final float BASE_HEALTH = 20F;
 
     @FactoryMethod
@@ -18,10 +18,15 @@ public class ExtraHealthLevel extends PerkLevelBase<ExtraHealthLevel.Data> {
     }
 
     @Override
+    protected @NotNull Data getData() {
+        return (Data)super.getData();
+    }
+
+    @Override
     public void start(@NotNull ZombiesPlayer zombiesPlayer) {
         //TODO: API for modifying health on ZombiesPlayer?
         zombiesPlayer.getModule().getPlayerView().getPlayer()
-                .ifPresent(player -> player.getLivingEntityMeta().setHealth(BASE_HEALTH + data.bonusHealth));
+                .ifPresent(player -> player.getLivingEntityMeta().setHealth(BASE_HEALTH + getData().bonusHealth));
     }
 
     @Override
