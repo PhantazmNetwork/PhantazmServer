@@ -233,7 +233,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         accessRegistry.switchAccess(accessKey);
         EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
 
-        ZombiesGunModule gunModule = new ZombiesGunModule(playerView, mobSpawner, mobStore, random, () -> mapObjects);
+        ZombiesGunModule gunModule = new ZombiesGunModule(playerView, mobSpawner, mobStore, random, mapObjects);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(gunModule);
 
         Key aliveStateKey = Key.key(Namespaces.PHANTAZM, "zombies.player.state.alive");

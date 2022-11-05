@@ -27,10 +27,10 @@ public class ZombiesGunModule implements DependencyModule {
 
     private final Random random;
 
-    private final Supplier<? extends MapObjects> mapObjects;
+    private final MapObjects mapObjects;
 
     public ZombiesGunModule(@NotNull PlayerView playerView, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
-            @NotNull Random random, @NotNull Supplier<? extends MapObjects> mapObjects) {
+            @NotNull Random random, @NotNull MapObjects mapObjects) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
@@ -78,14 +78,14 @@ public class ZombiesGunModule implements DependencyModule {
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.random")
+    @DependencySupplier("zombies.dependency.gun.random")
     public @NotNull Random getRandom() {
         return random;
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.map_object.map_objects")
-    public @NotNull Supplier<? extends MapObjects> getMapObjects() {
+    @DependencySupplier("zombies.dependency.gun.map_objects")
+    public @NotNull MapObjects getMapObjects() {
         return mapObjects;
     }
 }

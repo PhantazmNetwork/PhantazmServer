@@ -12,7 +12,6 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 @Model("zombies.gun.block_iteration.window")
 @Cache(false)
@@ -21,8 +20,7 @@ public class WindowBlockIteration implements BlockIteration {
     private final Context context;
 
     @FactoryMethod
-    public WindowBlockIteration(@NotNull @Dependency("zombies.dependency.map_object.map_objects")
-    Supplier<? extends MapObjects> mapObjects) {
+    public WindowBlockIteration(@NotNull @Dependency("zombies.dependency.gun.map_objects") MapObjects mapObjects) {
         Objects.requireNonNull(mapObjects, "mapObjects");
         this.context = new Context() {
             @Override
@@ -32,7 +30,7 @@ public class WindowBlockIteration implements BlockIteration {
 
             @Override
             public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Block block) {
-                return mapObjects.get().windowAt(VecUtils.toBlockInt(intersection)).isEmpty();
+                return mapObjects.windowAt(VecUtils.toBlockInt(intersection)).isEmpty();
             }
         };
     }
