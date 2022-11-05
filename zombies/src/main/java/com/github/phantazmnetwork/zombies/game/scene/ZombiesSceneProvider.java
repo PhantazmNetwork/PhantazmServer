@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.game.scene;
 
+import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
@@ -163,30 +164,44 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         ModifierSource modifierSource = new BasicModifierSource();
         Flaggable flaggable = new BasicFlaggable();
         Random random = new Random();
-        MapObjects mapObjects = createMapObjects(instance, random, zombiesPlayers, flaggable, modifierSource, mapInfo);
+        Pos spawnPos = VecUtils.toPos(mapInfo.settings().origin().add(mapInfo.settings().spawn()));
+        MapObjects mapObjects =
+                createMapObjects(instance, random, zombiesPlayers, flaggable, modifierSource, spawnPos, mapInfo);
         ZombiesMap map = new ZombiesMap(mapInfo, instance, modifierSource, flaggable, mapObjects,
                 new BasicRoundHandler(mapObjects.rounds()));
 
         Stage idle = new IdleStage(Collections.emptyList(), zombiesPlayers.values());
         Stage countdown = new CountdownStage(Collections.emptyList(), zombiesPlayers.values(), Wrapper.of(400L), 400L);
-        Stage inGame = new InGameStage(Collections.emptyList(), map, Wrapper.of(0L));
-        Stage end = new EndGameStage(Collections.emptyList(), zombiesPlayers.values(), 30L);
+        Stage inGame = new InGameStage(List.of(new Activable() {
+            @Override
+            public void start() {
+                for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
+                    zombiesPlayer.getModule().getPlayerView().getPlayer().ifPresent(player -> {
+                        player.teleport(spawnPos);
+                    });
+                }
+            }
+        }), map, Wrapper.of(0L));
+        Stage end = new EndGameStage(Collections.emptyList(), zombiesPlayers.values(), 200L);
         StageTransition stageTransition = new StageTransition(List.of(idle, countdown, inGame, end));
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
             ZombiesPlayerModule module = createPlayerModule(playerView, modifierSource, random, mapObjects);
             return new BasicZombiesPlayer(module);
         };
-        return new ZombiesScene(zombiesPlayers, instance, sceneFallback, mapInfo.settings(), stageTransition,
-                playerCreator, random);
+
+        ZombiesScene scene =
+                new ZombiesScene(zombiesPlayers, instance, sceneFallback, mapInfo.settings(), stageTransition,
+                        playerCreator, random);
+        contexts.put(scene, new SceneContext(EventNode.all(UUID.randomUUID().toString())));
+        return scene;
     }
 
     private @NotNull MapObjects createMapObjects(@NotNull Instance instance, @NotNull Random random,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull Flaggable flaggable,
-            @NotNull ModifierSource modifierSource, @NotNull MapInfo mapInfo) {
+            @NotNull ModifierSource modifierSource, @NotNull Pos spawnPos, @NotNull MapInfo mapInfo) {
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, zombiesPlayers.values());
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
-        Pos spawnPos = VecUtils.toPos(mapInfo.settings().origin().add(mapInfo.settings().spawn()));
 
         return new BasicMapObjectBuilder(contextManager, instance, mobSpawner, blockHandler, spawnDistributor,
                 BasicRoundHandler::new, flaggable, modifierSource, slotDistributor, zombiesPlayers, spawnPos,

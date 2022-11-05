@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.server;
 
+import com.github.phantazmnetwork.commons.FileUtils;
 import com.github.phantazmnetwork.core.item.AnimatedUpdatingItem;
 import com.github.phantazmnetwork.core.item.StaticUpdatingItem;
 import com.github.phantazmnetwork.zombies.game.map.action.room.SpawnMobsAction;
@@ -17,20 +18,33 @@ import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.XorPredi
 import com.github.phantazmnetwork.zombies.game.perk.ExtraHealthLevel;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.*;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.condition.AliveCondition;
+import com.github.phantazmnetwork.zombies.map.FileSystemMapLoader;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
+import com.github.phantazmnetwork.zombies.map.MapLoader;
 import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.ethylene.codec.yaml.YamlCodec;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public final class ZombiesFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
+    private static final Map<Key, MapInfo> maps = new HashMap<>();
+
     private static ContextManager contextManager;
 
-    static void initialize(@NotNull ContextManager contextManager) {
+    static void initialize(@NotNull ContextManager contextManager) throws IOException {
         ZombiesFeature.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         registerElementClasses(contextManager);
+        loadMaps();
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
@@ -102,11 +116,32 @@ public final class ZombiesFeature {
         LOGGER.info("Registered Zombies element classes.");
     }
 
-    public static @NotNull ContextManager mapObjectBuilder() {
-        if (contextManager == null) {
-            throw new IllegalStateException("ZombiesFeature has not been initialized yet");
-        }
+    private static void loadMaps() throws IOException {
+        Path rootFolder = Path.of("./zombies/maps/");
+        MapLoader mapLoader = new FileSystemMapLoader(rootFolder, new YamlCodec());
 
-        return contextManager;
+        Files.createDirectories(rootFolder);
+        FileUtils.forEachFileMatching(rootFolder, (path, attr) -> attr.isDirectory() && !path.equals(rootFolder),
+                mapFolder -> {
+                    LOGGER.info("Trying to load map from " + mapFolder);
+                    String name = mapFolder.getFileName().toString();
+
+                    try {
+                        MapInfo map = mapLoader.load(name);
+                        maps.put(map.settings().id(), map);
+                        LOGGER.info("Successfully loaded map " + name);
+                    }
+                    catch (IOException e) {
+                        LOGGER.warn("IOException when loading map " + name, e);
+                    }
+                });
+    }
+
+    public static @NotNull Map<Key, MapInfo> maps() {
+        return maps;
+    }
+
+    public static @NotNull ContextManager mapObjectBuilder() {
+        return FeatureUtils.check(contextManager);
     }
 }

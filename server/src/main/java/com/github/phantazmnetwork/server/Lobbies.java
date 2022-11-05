@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,8 @@ import java.util.UUID;
  */
 public final class Lobbies {
     private static final Logger LOGGER = LoggerFactory.getLogger(Lobbies.class);
+
+    private static LobbyRouter lobbyRouter;
 
     private Lobbies() {
         throw new UnsupportedOperationException();
@@ -45,17 +49,18 @@ public final class Lobbies {
      * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
-            @NotNull LobbiesConfig lobbiesConfig) {
+            @NotNull LobbiesConfig lobbiesConfig) throws IOException {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
+        Files.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =
                 new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(), NeuralChunk::new);
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
                 new HashMap<>(lobbiesConfig.lobbies().size());
-        LobbyRouter lobbyRouter = new LobbyRouter(lobbyProviders);
+        lobbyRouter = new LobbyRouter(lobbyProviders);
         sceneStore.addScene(SceneKeys.LOBBY_ROUTER, lobbyRouter);
 
         LobbyConfig mainLobbyConfig = lobbiesConfig.lobbies().get(lobbiesConfig.mainLobbyName());
@@ -113,5 +118,9 @@ public final class Lobbies {
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             lobbyRouter.tick(System.currentTimeMillis());
         }, TaskSchedule.immediate(), TaskSchedule.tick(1));
+    }
+
+    public static @NotNull LobbyRouter getLobbyRouter() {
+        return FeatureUtils.check(lobbyRouter);
     }
 }

@@ -1,5 +1,8 @@
 package com.github.phantazmnetwork.server;
 
+import com.github.phantazmnetwork.core.game.scene.fallback.CompositeFallback;
+import com.github.phantazmnetwork.core.game.scene.fallback.KickFallback;
+import com.github.phantazmnetwork.core.game.scene.lobby.LobbyRouterFallback;
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.MojangIdentitySource;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
@@ -15,6 +18,8 @@ import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -32,6 +37,7 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 
@@ -150,7 +156,7 @@ public final class PhantazmServer {
     }
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
-            LobbiesConfig lobbiesConfig) {
+            LobbiesConfig lobbiesConfig) throws Exception {
         Ethylene.initialize();
 
         MappingProcessorSource mappingProcessorSource = Ethylene.getMappingProcessorSource();
@@ -178,7 +184,10 @@ public final class PhantazmServer {
                 mappingProcessorSource.processorFor(Token.ofClass(GunData.class)));
 
         ZombiesFeature.initialize(contextManager);
-        ZombiesTest.initialize(global);
+        ZombiesTest.initialize(global, ZombiesFeature.maps(), viewProvider, contextManager, keyParser,
+                new CompositeFallback(
+                        List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),
+                                new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
