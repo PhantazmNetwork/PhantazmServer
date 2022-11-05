@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ import java.util.Objects;
  * Defines the general settings for a map.
  */
 public record MapSettingsInfo(@NotNull Key id,
+                              @NotNull List<String> instancePath,
                               @NotNull Vec3I origin,
                               int minimumProtocolVersion,
                               int maximumProtocolVersion,
@@ -94,7 +96,7 @@ public record MapSettingsInfo(@NotNull Key id,
      *               otherwise specified
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
-        this(id, origin, 47, 760, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
+        this(id, Collections.emptyList(), origin, 47, 760, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0),
                 Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 20, 500, 2, false, false, 30, 5,
                 new ArrayList<>(0), new ArrayList<>(0));

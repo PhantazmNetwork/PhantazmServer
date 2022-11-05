@@ -20,10 +20,10 @@ public class BasicSpawnDistributor implements SpawnDistributor {
     private final Function<? super Key, ? extends MobModel> modelFunction;
     private final Random random;
 
-    private final Collection<ZombiesPlayer> zombiesPlayers;
+    private final Collection<? extends ZombiesPlayer> zombiesPlayers;
 
     public BasicSpawnDistributor(@NotNull Function<? super Key, ? extends MobModel> modelFunction,
-            @NotNull Random random, @NotNull Collection<ZombiesPlayer> zombiesPlayers) {
+            @NotNull Random random, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
         this.random = Objects.requireNonNull(random, "random");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");

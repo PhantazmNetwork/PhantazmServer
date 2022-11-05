@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.equipment;
 
-import com.github.phantazmnetwork.core.inventory.InventoryAccess;
+import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.InventoryObjectGroup;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -10,17 +10,21 @@ import java.util.Objects;
 // TODO: better name
 public class EquipmentHandler {
 
-    private final InventoryAccess access;
+    private final InventoryAccessRegistry accessRegistry;
 
-    public EquipmentHandler(@NotNull InventoryAccess access) {
-        this.access = Objects.requireNonNull(access, "access");
+    public EquipmentHandler(@NotNull InventoryAccessRegistry accessRegistry) {
+        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
     }
 
     public void addEquipment(@NotNull Equipment equipment, @NotNull Key groupKey) {
         Objects.requireNonNull(equipment, "equipment");
         Objects.requireNonNull(groupKey, "groupKey");
 
-        InventoryObjectGroup group = access.groups().get(groupKey);
+        if (!accessRegistry.hasCurrentAccess()) {
+            throw new IllegalStateException("Inventory access registry does not have current access");
+        }
+
+        InventoryObjectGroup group = accessRegistry.getCurrentAccess().groups().get(groupKey);
         if (group == null) {
             throw new IllegalArgumentException("No group with key " + groupKey);
 
@@ -36,7 +40,11 @@ public class EquipmentHandler {
     public boolean canAddEquipment(@NotNull Key groupKey) {
         Objects.requireNonNull(groupKey, "groupKey");
 
-        InventoryObjectGroup group = access.groups().get(groupKey);
+        if (!accessRegistry.hasCurrentAccess()) {
+            return false;
+        }
+
+        InventoryObjectGroup group = accessRegistry.getCurrentAccess().groups().get(groupKey);
         if (group == null) {
             throw new IllegalArgumentException("No group with key " + groupKey);
         }

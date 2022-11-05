@@ -193,6 +193,8 @@ public final class MapProcessors {
         @Override
         public MapSettingsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            List<String> instancePath =
+                    ConfigProcessor.STRING.listProcessor().dataFromElement(element.getListOrThrow("instancePath"));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("origin"));
             Vec3I spawn = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("spawn"));
             int minimumProtocolVersion = element.getNumberOrThrow("minimumProtocolVersion").intValue();
@@ -223,8 +225,8 @@ public final class MapProcessors {
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             List<Key> defaultEquipment = keyList.dataFromElement(element.getElementOrThrow("defaultEquipment"));
-            return new MapSettingsInfo(id, origin, minimumProtocolVersion, maximumProtocolVersion, spawn, pitch, yaw,
-                    displayName, displayItemTag, introMessages, scoreboardHeader, leaderboardPosition,
+            return new MapSettingsInfo(id, instancePath, origin, minimumProtocolVersion, maximumProtocolVersion, spawn,
+                    pitch, yaw, displayName, displayItemTag, introMessages, scoreboardHeader, leaderboardPosition,
                     leaderboardLength, worldTime, maxPlayers, minPlayers, startingCoins, repairCoins,
                     windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius, canWallshoot,
                     perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);

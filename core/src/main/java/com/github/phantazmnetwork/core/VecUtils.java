@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,6 +46,14 @@ public final class VecUtils {
         return Vec3D.of(point.x(), point.y(), point.z());
     }
 
+    public static @NotNull Pos toPos(@NotNull Vec3I vec) {
+        return new Pos(vec.getX(), vec.getY(), vec.getZ());
+    }
+
+    public static @NotNull Vec toVec(@NotNull Vec3I vec) {
+        return new Vec(vec.getX(), vec.getY(), vec.getZ());
+    }
+
     /**
      * Converts the given {@link Vec3I} to an equivalent {@link Point}.
      *
@@ -52,6 +61,14 @@ public final class VecUtils {
      * @return a new Point ({@link Vec}) from the components of the given Vec3I
      */
     public static @NotNull Point toPoint(@NotNull Vec3I vec) {
+        return toVec(vec);
+    }
+
+    public static @NotNull Pos toPos(@NotNull Vec3F vec) {
+        return new Pos(vec.getX(), vec.getY(), vec.getZ());
+    }
+
+    public static @NotNull Vec toVec(@NotNull Vec3F vec) {
         return new Vec(vec.getX(), vec.getY(), vec.getZ());
     }
 
@@ -62,6 +79,14 @@ public final class VecUtils {
      * @return a new Point ({@link Vec}) from the components of the given Vec3F
      */
     public static @NotNull Point toPoint(@NotNull Vec3F vec) {
+        return new Vec(vec.getX(), vec.getY(), vec.getZ());
+    }
+
+    public static @NotNull Pos toPos(@NotNull Vec3D vec) {
+        return new Pos(vec.getX(), vec.getY(), vec.getZ());
+    }
+
+    public static @NotNull Vec toVec(@NotNull Vec3D vec) {
         return new Vec(vec.getX(), vec.getY(), vec.getZ());
     }
 

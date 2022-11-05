@@ -52,7 +52,7 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
      * @return true if the mob can spawn, false otherwise
      */
     public boolean canSpawn(@NotNull MobModel model, @NotNull Key spawnType,
-            @NotNull Collection<ZombiesPlayer> zombiesPlayers) {
+            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         Objects.requireNonNull(model, "model");
         Objects.requireNonNull(spawnType, "spawnType");
 
