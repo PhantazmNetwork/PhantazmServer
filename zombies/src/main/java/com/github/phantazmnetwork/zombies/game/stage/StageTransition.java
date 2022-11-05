@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.game;
+package com.github.phantazmnetwork.zombies.game.stage;
 
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.zombies.game.stage.Stage;

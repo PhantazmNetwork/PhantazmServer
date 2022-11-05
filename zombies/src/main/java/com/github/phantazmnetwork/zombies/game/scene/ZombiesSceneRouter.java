@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.game;
+package com.github.phantazmnetwork.zombies.game.scene;
 
 import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.Scene;

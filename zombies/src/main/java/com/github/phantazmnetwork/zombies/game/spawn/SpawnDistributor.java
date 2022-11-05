@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.game;
+package com.github.phantazmnetwork.zombies.game.spawn;
 
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.game.map.Spawnpoint;

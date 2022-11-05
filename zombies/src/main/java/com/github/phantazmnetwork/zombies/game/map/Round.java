@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.zombies.game.map;
 
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.zombies.game.SpawnDistributor;
+import com.github.phantazmnetwork.zombies.game.spawn.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.game.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.RoundInfo;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;

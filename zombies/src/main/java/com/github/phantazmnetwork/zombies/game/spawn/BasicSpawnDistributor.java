@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.game;
+package com.github.phantazmnetwork.zombies.game.spawn;
 
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;

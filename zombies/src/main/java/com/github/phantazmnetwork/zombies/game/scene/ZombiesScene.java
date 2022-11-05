@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.zombies.game;
+package com.github.phantazmnetwork.zombies.game.scene;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.game.scene.InstanceScene;
@@ -10,6 +10,7 @@ import com.github.phantazmnetwork.zombies.game.player.state.ZombiesPlayerStateKe
 import com.github.phantazmnetwork.zombies.game.player.state.context.DeadPlayerStateContext;
 import com.github.phantazmnetwork.zombies.game.player.state.context.NoContext;
 import com.github.phantazmnetwork.zombies.game.stage.Stage;
+import com.github.phantazmnetwork.zombies.game.stage.StageTransition;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
