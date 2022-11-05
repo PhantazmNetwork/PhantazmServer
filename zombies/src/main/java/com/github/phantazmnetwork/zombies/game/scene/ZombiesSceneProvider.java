@@ -188,8 +188,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
         Pos spawnPos = VecUtils.toPos(mapInfo.settings().origin().add(mapInfo.settings().spawn()));
 
-        return new BasicMapObjectBuilder(contextManager, instance, mobSpawner, blockHandler, spawnDistributor, null,
-                flaggable, modifierSource, slotDistributor, zombiesPlayers, spawnPos, keyParser).build(mapInfo);
+        return new BasicMapObjectBuilder(contextManager, instance, mobSpawner, blockHandler, spawnDistributor,
+                BasicRoundHandler::new, flaggable, modifierSource, slotDistributor, zombiesPlayers, spawnPos,
+                keyParser).build(mapInfo);
     }
 
     private @NotNull ZombiesPlayerModule createPlayerModule(@NotNull PlayerView playerView,

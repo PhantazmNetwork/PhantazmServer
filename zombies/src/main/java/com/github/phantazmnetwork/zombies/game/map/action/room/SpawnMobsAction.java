@@ -16,44 +16,24 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 @Model("zombies.map.room.action.spawn_mobs")
 public class SpawnMobsAction implements Action<Room> {
     private final Data data;
-    private final RoundHandler roundHandler;
+    private final Supplier<? extends RoundHandler> roundHandlerSupplier;
 
     @FactoryMethod
     public SpawnMobsAction(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.round_handler") RoundHandler roundHandler) {
+            @NotNull @Dependency("zombies.dependency.map_object.round_handler_supplier")
+            Supplier<? extends RoundHandler> roundHandlerSupplier) {
         this.data = Objects.requireNonNull(data, "data");
-        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
-    }
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<List<SpawnInfo>> SPAWN_INFO_LIST_PROCESSOR =
-                    MapProcessors.spawnInfo().listProcessor();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-                List<SpawnInfo> mobSpawns =
-                        SPAWN_INFO_LIST_PROCESSOR.dataFromElement(node.getElementOrThrow("mobSpawns"));
-                return new Data(mobSpawns);
-            }
-
-            @Override
-            public @NotNull ConfigNode elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("mobSpawns", SPAWN_INFO_LIST_PROCESSOR.elementFromData(data.mobSpawns));
-                return node;
-            }
-        };
+        this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
     }
 
     @Override
     public void perform(@NotNull Room room) {
-        Round current = roundHandler.currentRound();
+        Round current = roundHandlerSupplier.get().currentRound();
         if (current != null) {
             current.spawnMobs(data.mobSpawns);
         }

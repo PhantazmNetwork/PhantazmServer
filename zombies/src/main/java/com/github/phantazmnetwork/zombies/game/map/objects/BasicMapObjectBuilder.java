@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicMapObjectBuilder implements MapObjectBuilder {
@@ -46,7 +47,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     private final MobSpawner mobSpawner;
     private final ClientBlockHandler clientBlockHandler;
     private final SpawnDistributor spawnDistributor;
-    private final RoundHandler roundHandler;
+    private final Function<? super List<Round>, ? extends RoundHandler> roundHandlerFunction;
     private final Flaggable flaggable;
     private final ModifierSource modifierSource;
     private final SlotDistributor slotDistributor;
@@ -56,7 +57,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
     public static class Module implements DependencyModule {
         private final Instance instance;
-        private final RoundHandler roundHandler;
+        private final Supplier<? extends RoundHandler> roundHandlerSupplier;
         private final Flaggable flaggable;
         private final ModifierSource modifierSource;
         private final SlotDistributor slotDistributor;
@@ -64,11 +65,12 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         private final Pos respawnPos;
         private final Supplier<? extends MapObjects> mapObjectsSupplier;
 
-        private Module(Instance instance, RoundHandler roundHandler, Flaggable flaggable, ModifierSource modifierSource,
-                SlotDistributor slotDistributor, Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
+        private Module(Instance instance, Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
+                ModifierSource modifierSource, SlotDistributor slotDistributor,
+                Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
                 Supplier<? extends MapObjects> mapObjectsSupplier) {
             this.instance = Objects.requireNonNull(instance, "instance");
-            this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
+            this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
             this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
             this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
             this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
@@ -84,9 +86,9 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.round_handler")
-        public @NotNull RoundHandler roundHandler() {
-            return roundHandler;
+        @DependencySupplier("zombies.dependency.map_object.round_handler_supplier")
+        public @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier() {
+            return roundHandlerSupplier;
         }
 
         @Memoize
@@ -134,7 +136,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
     public BasicMapObjectBuilder(@NotNull ContextManager contextManager, @NotNull Instance instance,
             @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler clientBlockHandler,
-            @NotNull SpawnDistributor spawnDistributor, @NotNull RoundHandler roundHandler,
+            @NotNull SpawnDistributor spawnDistributor,
+            @NotNull Function<? super List<Round>, ? extends RoundHandler> roundHandlerFunction,
             @NotNull Flaggable flaggable, @NotNull ModifierSource modifierSource,
             @NotNull SlotDistributor slotDistributor, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Pos respawnPos, @NotNull KeyParser keyParser) {
@@ -143,7 +146,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockHandler");
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
-        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
+        this.roundHandlerFunction = Objects.requireNonNull(roundHandlerFunction, "roundHandlerFunction");
         this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
         this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
         this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
@@ -155,9 +158,10 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     @Override
     public @NotNull MapObjects build(@NotNull MapInfo mapInfo) {
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
+        Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
         DependencyProvider provider = new ModuleDependencyProvider(keyParser,
-                new Module(instance, roundHandler, flaggable, modifierSource, slotDistributor, playerMap, respawnPos,
-                        mapObjectsWrapper));
+                new Module(instance, roundHandlerWrapper, flaggable, modifierSource, slotDistributor, playerMap,
+                        respawnPos, mapObjectsWrapper));
 
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
         List<Spawnpoint> spawnpoints = buildSpawnpoints(mapInfo.spawnpoints(), spawnruleInfoMap);
@@ -169,6 +173,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
         MapObjects mapObjects = new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds);
         mapObjectsWrapper.set(mapObjects);
+        roundHandlerWrapper.set(roundHandlerFunction.apply(rounds));
 
         return mapObjects;
     }
