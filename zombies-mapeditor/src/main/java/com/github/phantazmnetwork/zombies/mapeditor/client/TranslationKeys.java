@@ -105,6 +105,8 @@ public final class TranslationKeys {
      */
     public static final String GUI_MAPEDITOR_DELETE_MAP_QUERY = "gui.mapeditor.delete_map_query";
 
+    public static final String GUI_MAPEDITOR_OVERWRITE_MAP_QUERY = "gui.mapeditor.overwrite_map_query";
+
     private TranslationKeys() {
         throw new UnsupportedOperationException();
     }

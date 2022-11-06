@@ -23,5 +23,6 @@
     "gui.mapeditor.current_map": "En cours: %s",
     "gui.mapeditor.no_map": "Pas de plan",
     "gui.mapeditor.delete_map_query": "Supprimer le plan?",
+    "gui.mapeditor.overwrite_map_query": "Le chargement annulera tous les modifications et plans non sauvés. Continuer?",
     "gui.mapeditor.display_settings": "Montrer les paramètres"
 }

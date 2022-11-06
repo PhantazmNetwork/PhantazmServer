@@ -109,20 +109,25 @@ public class MainGui extends SimplePanelGui {
                     new ArrayList<>(), new LinkedConfigNode(0)));
             session.setCurrent(mapKey);
 
-            ScreenUtils.closeCurrentScreen();
-            MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(session)));
+            refreshMainGui(session);
         });
 
         deleteMap.setOnClick(() -> {
             if (requireMap(session, feedback)) {
                 MinecraftClient.getInstance().setScreen(new CottonClientScreen(
-                        new ConfirmationGui(Text.translatable(TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY),
-                                () -> session.removeMap(session.getMap().settings().id()))));
+                        new ConfirmationGui(Text.translatable(TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> {
+                            session.removeMap(session.getMap().settings().id());
+                            refreshMainGui(session);
+                        }, () -> refreshMainGui(session))));
             }
         });
 
         save.setOnClick(session::saveMapsToDisk);
-        load.setOnClick(session::loadMapsFromDisk);
+        load.setOnClick(() -> {
+            MinecraftClient.getInstance().setScreen(new CottonClientScreen(
+                    new ConfirmationGui(Text.translatable(TranslationKeys.GUI_MAPEDITOR_OVERWRITE_MAP_QUERY),
+                            () -> refreshMaps(session), () -> refreshMainGui(session))));
+        });
     }
 
     private boolean requireMap(EditorSession session, WText feedback) {
@@ -145,4 +150,15 @@ public class MainGui extends SimplePanelGui {
         currentMap.setText(session.hasMap() ? Text.translatable(TranslationKeys.GUI_MAPEDITOR_CURRENT_MAP,
                 session.getMap().settings().id().value()) : Text.translatable(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
     }
+
+    private void refreshMainGui(EditorSession session) {
+        ScreenUtils.closeCurrentScreen();
+        MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(session)));
+    }
+
+    private void refreshMaps(EditorSession session) {
+        session.loadMapsFromDisk();
+        refreshMainGui(session);
+    }
+
 }

@@ -13,6 +13,8 @@ public class SimplePanelGui extends LightweightGuiDescription {
      */
     protected final WGridPanel gridPanelRoot;
 
+    protected final int grid;
+
     /**
      * Creates a new SimplePanelGui with root panel measuring the given width and height.
      *
@@ -20,7 +22,7 @@ public class SimplePanelGui extends LightweightGuiDescription {
      * @param height the height of the panel
      */
     public SimplePanelGui(int width, int height) {
-        setRootPanel(gridPanelRoot = new WGridPanel());
+        setRootPanel(gridPanelRoot = new WGridPanel(grid = 18));
 
         gridPanelRoot.setSize(width, height);
         gridPanelRoot.setInsets(Insets.ROOT_PANEL);

@@ -23,5 +23,6 @@
     "gui.mapeditor.current_map": "TREASURE: %s",
     "gui.mapeditor.no_map": "No X-marks-the-spot",
     "gui.mapeditor.delete_map_query": "Hide yer treasure and forget where ya left it?",
+    "gui.mapeditor.overwrite_map_query": "ARRRR matey here be dragons! Yer changes ain't safe!",
     "gui.mapeditor.display_settings": "Use yer eyepatch"
 }

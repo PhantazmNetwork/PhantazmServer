@@ -6,22 +6,23 @@ plugins {
     alias(libs.plugins.fabric.loom)
 }
 
-version = "1.1.0-SNAPSHOT"
+version = "1.2.0-SNAPSHOT"
 
 base {
     archivesName.set("phantazm-zombies-mapeditor")
 }
 
 repositories {
-    maven("https://jitpack.io")
-    maven("https://server.bbkr.space/artifactory/libs-release")
-    maven("https://ladysnake.jfrog.io/artifactory/mods") {
-        name = "Ladysnake Mods"
-        content {
-            includeGroup("io.github.ladysnake")
-            includeGroupByRegex("io\\.github\\.onyxstudios.*")
+    exclusiveContent {
+        forRepository {
+            maven("https://jitpack.io")
+        }
+        filter {
+            includeGroup("com.github.0x3C50")
         }
     }
+    maven("https://server.bbkr.space/artifactory/libs-release")
+    maven("https://ladysnake.jfrog.io/artifactory/mods")
 }
 
 loom {

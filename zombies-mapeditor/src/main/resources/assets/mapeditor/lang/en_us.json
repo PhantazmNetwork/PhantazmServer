@@ -23,5 +23,6 @@
     "gui.mapeditor.current_map": "Current: %s",
     "gui.mapeditor.no_map": "No map",
     "gui.mapeditor.delete_map_query": "Delete map?",
+    "gui.mapeditor.overwrite_map_query": "Loading will revert any unsaved changes and maps. Continue?",
     "gui.mapeditor.display_settings": "Display settings"
 }
