@@ -5,7 +5,7 @@ import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.NewObjectGui;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
-import com.github.steanky.ethylene.core.codec.ConfigCodec;
+import com.github.steanky.ethylene.core.ConfigCodec;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import me.x150.renderer.event.EventListener;
 import me.x150.renderer.event.EventType;

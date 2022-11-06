@@ -143,6 +143,8 @@ public final class PhantazmServer {
             LOGGER.error("Fatal error during server startup", exception);
             MinecraftServer.stopCleanly();
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly));
     }
 
     private static boolean isUnsafe(String[] args) {
