@@ -173,7 +173,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
         MapObjects mapObjects = new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds);
         mapObjectsWrapper.set(mapObjects);
-        roundHandlerWrapper.set(roundHandlerFunction.apply(rounds));
+        roundHandlerWrapper.set(
+                Objects.requireNonNull(roundHandlerFunction.apply(rounds), "roundHandlerFunction result"));
 
         return mapObjects;
     }

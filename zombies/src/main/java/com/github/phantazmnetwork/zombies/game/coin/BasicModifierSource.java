@@ -23,4 +23,21 @@ public class BasicModifierSource implements ModifierSource {
 
         return modifiers;
     }
+
+    @Override
+    public void addModifier(@NotNull Key group, Transaction.@NotNull Modifier modifier) {
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(modifier, "modifier");
+        modifierSources.computeIfAbsent(group, m -> new ArrayList<>()).add(modifier);
+    }
+
+    @Override
+    public void removeModifier(@NotNull Key group, Transaction.@NotNull Modifier modifier) {
+        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(modifier, "modifier");
+        Collection<Transaction.Modifier> modifiers = modifierSources.get(group);
+        if (modifiers != null) {
+            modifiers.remove(modifier);
+        }
+    }
 }

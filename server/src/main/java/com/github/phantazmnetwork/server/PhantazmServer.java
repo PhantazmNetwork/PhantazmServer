@@ -28,6 +28,7 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snakeyaml.engine.v2.api.Dump;
@@ -112,7 +113,7 @@ public final class PhantazmServer {
                         "other than the default for security reasons.");
                 LOGGER.error("If you are running in a development environment, you can use the 'unsafe' program " +
                         "argument to force the server to start regardless.");
-                MinecraftServer.stopCleanly();
+                shutdown("error during startup");
                 return;
             }
 
@@ -121,7 +122,7 @@ public final class PhantazmServer {
         }
         catch (ConfigProcessException e) {
             LOGGER.error("Fatal error when loading configuration data", e);
-            MinecraftServer.stopCleanly();
+            shutdown("error during startup");
             return;
         }
 
@@ -133,7 +134,7 @@ public final class PhantazmServer {
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during initialization", exception);
-            MinecraftServer.stopCleanly();
+            shutdown("error during startup");
             return;
         }
 
@@ -142,10 +143,13 @@ public final class PhantazmServer {
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
-            MinecraftServer.stopCleanly();
+            shutdown("error during startup");
+            return;
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            shutdown("interrupt");
+        }));
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -155,10 +159,14 @@ public final class PhantazmServer {
         }
     }
 
+    public static void shutdown(@Nullable String reason) {
+        LOGGER.info("Shutting down server. Reason: " + reason);
+        MinecraftServer.stopCleanly();
+    }
+
     private static boolean handleCommand(String command) {
         if (command.equals("stop")) {
-            LOGGER.info("Shutting down server...");
-            MinecraftServer.stopCleanly();
+            shutdown("stop command");
             return true;
         }
 

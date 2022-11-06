@@ -331,7 +331,7 @@ public final class MapProcessors {
         }
     };
 
-    private static final ConfigProcessor<ConfigNode> scoreboard = new ConfigProcessor<ConfigNode>() {
+    private static final ConfigProcessor<ConfigNode> scoreboard = new ConfigProcessor<>() {
         @Override
         public @NotNull ConfigNode dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             if (!element.isNode()) {
