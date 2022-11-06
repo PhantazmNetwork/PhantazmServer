@@ -14,6 +14,16 @@ import java.util.Objects;
  * A general confirmation dialog, allowing the user to choose "yes" or "no", and displaying a specific query.
  */
 public class ConfirmationGui extends SimplePanelGui {
+    /**
+     * Creates a new ConfirmationGui with the supplied message, action to run on confirmation, action to run on denial,
+     * width, and height.
+     *
+     * @param message   the message to display
+     * @param onConfirm the action to run if the user confirms
+     * @param onDeny    the action to run if the user denies
+     * @param width     the width of the dialog
+     * @param height    the height of the dialog
+     */
     public ConfirmationGui(@NotNull Text message, @NotNull Runnable onConfirm, @NotNull Runnable onDeny, int width,
             int height) {
         super(width, height);
@@ -35,6 +45,14 @@ public class ConfirmationGui extends SimplePanelGui {
         deny.setOnClick(onDeny);
     }
 
+    /**
+     * Creates a new ConfirmationGui with the supplied message, action to run on confirmation, action to run on denial,
+     * and a default width/height of 100.
+     *
+     * @param message   the message to display
+     * @param onConfirm the action to run if the user confirms
+     * @param onDeny    the action to run if the user denies
+     */
     public ConfirmationGui(@NotNull Text message, @NotNull Runnable onConfirm, @NotNull Runnable onDeny) {
         this(message, onConfirm, onDeny, 100, computeHeight(message, 100));
     }

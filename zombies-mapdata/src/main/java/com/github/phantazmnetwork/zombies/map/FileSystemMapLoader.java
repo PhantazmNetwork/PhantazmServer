@@ -67,9 +67,7 @@ public class FileSystemMapLoader implements MapLoader {
 
     @Override
     public @NotNull MapInfo load(@NotNull String mapName) throws IOException {
-        Path mapDirectory =
-                FileUtils.findFirstOrThrow(root, (path, attr) -> attr.isDirectory() && path.endsWith(mapName),
-                        () -> "Unable to find map folder for " + mapName);
+        Path mapDirectory = mapDirectoryFromName(mapName);
 
         Path mapInfoFile = mapDirectory.resolve(mapInfoName);
 
@@ -188,6 +186,16 @@ public class FileSystemMapLoader implements MapLoader {
         }
 
         Configuration.write(paths.scoreboard.resolve("settings" + extension), data.scoreboard(), codec);
+    }
+
+    @Override
+    public void delete(@NotNull String mapName) throws IOException {
+        FileUtils.deleteRecursivelyIfExists(mapDirectoryFromName(mapName));
+    }
+
+    private Path mapDirectoryFromName(String mapName) throws IOException {
+        return FileUtils.findFirstOrThrow(root, (path, attr) -> attr.isDirectory() && path.endsWith(mapName),
+                () -> "Unable to find map folder for " + mapName);
     }
 
     private String getPositionString(Vec3I position) {

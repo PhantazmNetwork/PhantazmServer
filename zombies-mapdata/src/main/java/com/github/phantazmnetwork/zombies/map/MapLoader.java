@@ -24,4 +24,12 @@ public interface MapLoader {
      * @throws IOException if an IO error occurs
      */
     void save(@NotNull MapInfo data) throws IOException;
+
+    /**
+     * Deletes a named map.
+     *
+     * @param mapName the name of the map to delete
+     * @throws IOException if an IO error occurs
+     */
+    void delete(@NotNull String mapName) throws IOException;
 }
