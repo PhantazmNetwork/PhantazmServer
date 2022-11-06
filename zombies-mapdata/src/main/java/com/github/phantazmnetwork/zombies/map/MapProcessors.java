@@ -234,8 +234,9 @@ public final class MapProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(MapSettingsInfo mapConfig) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(26);
+            ConfigNode node = new LinkedConfigNode(27);
             node.put("id", ConfigProcessors.key().elementFromData(mapConfig.id()));
+            node.put("instancePath", ConfigProcessor.STRING.listProcessor().elementFromData(mapConfig.instancePath()));
             node.put("origin", VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
             node.putNumber("minimumProtocolVersion", mapConfig.minimumProtocolVersion());
             node.putNumber("maximumProtocolVersion", mapConfig.maximumProtocolVersion());

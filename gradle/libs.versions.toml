@@ -53,6 +53,10 @@ satin = { module = "io.github.ladysnake:satin", version = "1.9.0" }
 
 snakeyaml = { module = "org.snakeyaml:snakeyaml-engine", version = "2.3" }
 
+toolkit-collection = { module = "com.github.steanky:toolkit-collection", version = "0.1.3" }
+
+toolkit-function = { module = "com.github.steanky:toolkit-function", version = "0.1.3" }
+
 velocity-api = { module = "com.velocitypowered:velocity-api", version = "3.1.2-SNAPSHOT" }
 
 yarn-mappings = { module = "net.fabricmc:yarn", version = "1.19.2+build.9" }

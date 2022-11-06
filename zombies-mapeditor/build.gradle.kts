@@ -73,6 +73,8 @@ dependencies {
     include(libs.examination.api)
     include(libs.examination.string)
     include(libs.snakeyaml)
+    include(libs.toolkit.collection)
+    include(libs.toolkit.function)
 }
 
 tasks.processResources {

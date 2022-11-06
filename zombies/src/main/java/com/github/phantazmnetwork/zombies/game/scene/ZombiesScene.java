@@ -14,8 +14,12 @@ import com.github.phantazmnetwork.zombies.game.stage.StageTransition;
 import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.player.GameProfile;
+import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -64,6 +68,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         return stageTransition.isComplete();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull RouteResult join(@NotNull ZombiesJoinRequest joinRequest) {
         Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
@@ -85,6 +90,39 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
             return new RouteResult(false, Component.text("Too many players!", NamedTextColor.RED));
+        }
+
+        for (PlayerView playerView : newPlayers) {
+            Optional<Player> player = playerView.getPlayer();
+            if (player.isEmpty()) {
+                continue;
+            }
+
+            boolean hasMinimum = mapSettingsInfo.minimumProtocolVersion() < 0;
+            boolean hasMaximum = mapSettingsInfo.maximumProtocolVersion() < 0;
+
+            int protocolVersion = MinecraftServer.PROTOCOL_VERSION;
+            if (player.get().getPlayerConnection() instanceof PlayerSocketConnection socketConnection) {
+                for (GameProfile.Property property : socketConnection.gameProfile().properties()) {
+                    if (property.name().equals("protocolVersion")) {
+                        try {
+                            protocolVersion = Integer.parseInt(property.value());
+                        }
+                        catch (NumberFormatException ignored) {
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (hasMinimum && protocolVersion < mapSettingsInfo.minimumProtocolVersion()) {
+                return new RouteResult(false,
+                        Component.text("A player's Minecraft version is too old!", NamedTextColor.RED));
+            }
+            if (hasMaximum && protocolVersion > mapSettingsInfo.maximumProtocolVersion()) {
+                return new RouteResult(false,
+                        Component.text("A player's Minecraft version is too new!", NamedTextColor.RED));
+            }
         }
 
         for (ZombiesPlayer zombiesPlayer : oldPlayers) {
