@@ -26,10 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Basic implementation of {@link EditorSession}.
@@ -250,13 +247,33 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void saveMapsToDisk() {
+        Set<String> savedMaps = new HashSet<>(maps.values().size());
         for (MapInfo map : maps.values()) {
             try {
                 loader.save(map);
+                savedMaps.add(map.settings().id().value());
             }
             catch (IOException e) {
                 LOGGER.warn("Error when trying to save map " + map.settings().id(), e);
             }
+        }
+
+        try {
+            FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory() && !path.equals(mapFolder) &&
+                    !savedMaps.contains(path.getFileName().toString()), mapFolder -> {
+                String name = mapFolder.getFileName().toString();
+
+                try {
+                    loader.delete(name);
+                    LOGGER.info("Successfully deleted map " + name);
+                }
+                catch (IOException e) {
+                    LOGGER.warn("IOException when deleting map " + name, e);
+                }
+            });
+        }
+        catch (IOException e) {
+            LOGGER.warn("IOException when deleting maps", e);
         }
     }
 

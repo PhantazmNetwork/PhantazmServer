@@ -14,6 +14,7 @@ import me.x150.renderer.event.Shift;
 import me.x150.renderer.event.events.RenderEvent;
 import me.x150.renderer.renderer.Renderer3d;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -90,6 +91,7 @@ public class MapeditorClient implements ClientModInitializer {
                 MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewObjectGui(editorSession)));
             }
         });
+        ClientLifecycleEvents.CLIENT_STOPPING.register(unused -> editorSession.saveMapsToDisk());
     }
 
     private static class Renderer implements ObjectRenderer {

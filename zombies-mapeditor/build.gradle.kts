@@ -46,7 +46,8 @@ dependencies {
     }
     sequenceOf(
         "fabric-events-interaction-v0",
-        "fabric-key-binding-api-v1"
+        "fabric-key-binding-api-v1",
+        "fabric-lifecycle-events-v1"
     ).forEach {
         modImplementation(fabricApi.module(it, fabricApiVersion))
     }
