@@ -14,7 +14,7 @@ public record PingListConfig(@NotNull Component description) {
     /**
      * The default description.
      */
-    public static final Component DEFAULT_DESCRIPTION = Component.text("A Minecraft Server");
+    public static final Component DEFAULT_DESCRIPTION = Component.text("A Phantazm Server");
 
     /**
      * The default PingListConfig instance.
