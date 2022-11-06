@@ -38,7 +38,8 @@ public class PhantazmPlugin {
      */
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
-        ChannelIdentifier identifier = MinecraftChannelIdentifier.create(Namespaces.PHANTAZM, MessageChannels.PROXY);
+        ChannelIdentifier identifier =
+                MinecraftChannelIdentifier.create(Namespaces.PHANTAZM, MessageChannels.PROXY_TO_SERVER);
         server.getChannelRegistrar().register(identifier);
         server.getEventManager().register(this, new MaliciousPluginMessageBlocker(identifier));
 

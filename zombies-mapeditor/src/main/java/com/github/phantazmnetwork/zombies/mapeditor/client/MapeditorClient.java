@@ -1,12 +1,24 @@
 package com.github.phantazmnetwork.zombies.mapeditor.client;
 
+import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.messaging.MessageChannels;
+import com.github.phantazmnetwork.messaging.packet.Packet;
+import com.github.phantazmnetwork.messaging.packet.PacketHandler;
+import com.github.phantazmnetwork.messaging.packet.c2s.MapDataVersionQueryPacket;
+import com.github.phantazmnetwork.messaging.packet.c2s.MapDataVersionResponsePacket;
+import com.github.phantazmnetwork.messaging.serialization.PacketSerializer;
+import com.github.phantazmnetwork.messaging.serialization.PacketSerializers;
 import com.github.phantazmnetwork.zombies.map.FileSystemMapLoader;
+import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
+import com.github.phantazmnetwork.zombies.mapeditor.client.packet.PacketByteBufDataReader;
+import com.github.phantazmnetwork.zombies.mapeditor.client.packet.PacketByteBufDataWriter;
 import com.github.phantazmnetwork.zombies.mapeditor.client.render.ObjectRenderer;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.MainGui;
 import com.github.phantazmnetwork.zombies.mapeditor.client.ui.NewObjectGui;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
+import io.netty.buffer.Unpooled;
 import me.x150.renderer.event.EventListener;
 import me.x150.renderer.event.EventType;
 import me.x150.renderer.event.Events;
@@ -14,9 +26,13 @@ import me.x150.renderer.event.Shift;
 import me.x150.renderer.event.events.RenderEvent;
 import me.x150.renderer.renderer.Renderer3d;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.key.Key;
 import net.minecraft.client.MinecraftClient;
@@ -24,7 +40,13 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -67,6 +89,52 @@ public class MapeditorClient implements ClientModInitializer {
                 new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
                         TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
+
+        PacketSerializer clientToServer = PacketSerializers.clientToServerSerializer(
+                () -> new PacketByteBufDataWriter(new PacketByteBuf(Unpooled.buffer())),
+                data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));
+        Identifier clientToServerIdentifier = Identifier.of(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_SERVER);
+        if (clientToServerIdentifier != null) {
+            ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
+                byte[] data = clientToServer.serializePacket(new MapDataVersionQueryPacket());
+                sender.sendPacket(new CustomPayloadC2SPacket(clientToServerIdentifier,
+                        new PacketByteBuf(Unpooled.wrappedBuffer(data))));
+            }));
+
+            PacketHandler<PacketSender> clientToServerHandler = new PacketHandler<>(clientToServer) {
+                @Override
+                protected void handlePacket(@NotNull PacketSender packetSender, @NotNull Packet packet) {
+                    if (packet instanceof MapDataVersionResponsePacket responsePacket) {
+                        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+
+                        if (player != null) {
+                            Text message;
+                            if (responsePacket.version() == MapSettingsInfo.MAP_DATA_VERSION) {
+                                message = MutableText.of(new LiteralTextContent(
+                                        "The mapeditor client is synchronized with the server's expected " +
+                                                "mapdata version.")).formatted(Formatting.GREEN);
+                            }
+                            else {
+                                message = MutableText.of(new LiteralTextContent("The mapeditor client is " +
+                                        "not synchronized with the server's expected mapdata version. Please update " +
+                                        "the mod to the correct version.")).formatted(Formatting.RED);
+                            }
+                            player.sendMessage(message);
+                        }
+                    }
+                }
+
+                @Override
+                protected void sendToReceiver(@NotNull PacketSender packetSender, byte @NotNull [] data) {
+                    packetSender.sendPacket(clientToServerIdentifier, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
+                }
+            };
+            ClientPlayNetworking.registerGlobalReceiver(clientToServerIdentifier,
+                    (client, handler, buf, responseSender) -> {
+                        clientToServerHandler.handleData(responseSender, buf.getWrittenBytes());
+                    });
+        }
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (mapeditorBinding.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(editorSession)));
@@ -90,6 +158,8 @@ public class MapeditorClient implements ClientModInitializer {
                 MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewObjectGui(editorSession)));
             }
         });
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(unused -> editorSession.saveMapsToDisk());
     }
 
     private static class Renderer implements ObjectRenderer {

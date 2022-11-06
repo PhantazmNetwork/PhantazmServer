@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.server.packet;
 
-import com.github.phantazmnetwork.messaging.packet.DataReader;
+import com.github.phantazmnetwork.messaging.serialization.DataReader;
 import net.minestom.server.utils.binary.BinaryReader;
 import net.minestom.server.utils.binary.BinaryWriter;
 import org.jetbrains.annotations.NotNull;

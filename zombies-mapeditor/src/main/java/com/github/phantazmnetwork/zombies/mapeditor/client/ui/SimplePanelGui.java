@@ -13,6 +13,9 @@ public class SimplePanelGui extends LightweightGuiDescription {
      */
     protected final WGridPanel gridPanelRoot;
 
+    /**
+     * The grid size for the root {@link WGridPanel}.
+     */
     protected final int grid;
 
     /**

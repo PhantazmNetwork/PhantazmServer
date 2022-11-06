@@ -13,7 +13,8 @@ import java.util.Objects;
 /**
  * Defines the general settings for a map.
  */
-public record MapSettingsInfo(@NotNull Key id,
+public record MapSettingsInfo(int mapDataVersion,
+                              @NotNull Key id,
                               @NotNull List<String> instancePath,
                               @NotNull Vec3I origin,
                               int minimumProtocolVersion,
@@ -42,6 +43,9 @@ public record MapSettingsInfo(@NotNull Key id,
                               int rollsPerChest,
                               @NotNull List<Integer> milestoneRounds,
                               @NotNull List<Key> defaultEquipment) {
+
+    public static final int MAP_DATA_VERSION = 1;
+
     /**
      * Constructs a new instance of this record.
      *
@@ -96,9 +100,9 @@ public record MapSettingsInfo(@NotNull Key id,
      *               otherwise specified
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
-        this(id, Collections.emptyList(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
-                "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0),
-                Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 20, 500, 2, false, false, 30, 5,
-                new ArrayList<>(0), new ArrayList<>(0));
+        this(MAP_DATA_VERSION, id, Collections.emptyList(), origin, 47, -1, Vec3I.ORIGIN, 0, 0,
+                Component.text(id.value()), "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}",
+                new ArrayList<>(0), Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 20, 500, 2, false,
+                false, 30, 5, new ArrayList<>(0), new ArrayList<>(0));
     }
 }

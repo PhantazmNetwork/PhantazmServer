@@ -8,9 +8,14 @@ public final class MessageChannels {
 
 
     /**
-     * The message channel between a server and the proxy.
+     * The message channel between the proxy and a server.
      */
-    public static final String PROXY = "proxy";
+    public static final String PROXY_TO_SERVER = "proxy2server";
+
+    /**
+     * The message channel between the client and a server.
+     */
+    public static final String CLIENT_TO_SERVER = "client2server";
 
     private MessageChannels() {
         throw new UnsupportedOperationException();

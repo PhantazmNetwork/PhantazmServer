@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.velocity.packet;
 
-import com.github.phantazmnetwork.messaging.packet.DataWriter;
+import com.github.phantazmnetwork.messaging.serialization.DataWriter;
 import com.google.common.io.ByteArrayDataOutput;
 import org.jetbrains.annotations.NotNull;
 

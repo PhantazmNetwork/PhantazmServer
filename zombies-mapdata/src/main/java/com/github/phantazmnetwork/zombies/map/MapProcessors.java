@@ -192,6 +192,12 @@ public final class MapProcessors {
     private static final ConfigProcessor<MapSettingsInfo> mapInfo = new ConfigProcessor<>() {
         @Override
         public MapSettingsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            int mapDataVersion = element.getNumberOrThrow("mapDataVersion").intValue();
+            if (mapDataVersion != MapSettingsInfo.MAP_DATA_VERSION) {
+                throw new ConfigProcessException("Invalid map data version " + mapDataVersion + ", expected " +
+                        MapSettingsInfo.MAP_DATA_VERSION);
+            }
+
             Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
             List<String> instancePath =
                     ConfigProcessor.STRING.listProcessor().dataFromElement(element.getListOrThrow("instancePath"));
@@ -225,16 +231,17 @@ public final class MapProcessors {
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             List<Key> defaultEquipment = keyList.dataFromElement(element.getElementOrThrow("defaultEquipment"));
-            return new MapSettingsInfo(id, instancePath, origin, minimumProtocolVersion, maximumProtocolVersion, spawn,
-                    pitch, yaw, displayName, displayItemTag, introMessages, scoreboardHeader, leaderboardPosition,
-                    leaderboardLength, worldTime, maxPlayers, minPlayers, startingCoins, repairCoins,
-                    windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius, canWallshoot,
-                    perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
+            return new MapSettingsInfo(mapDataVersion, id, instancePath, origin, minimumProtocolVersion,
+                    maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
+                    scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
+                    startingCoins, repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius,
+                    canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(MapSettingsInfo mapConfig) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(27);
+            ConfigNode node = new LinkedConfigNode(28);
+            node.putNumber("mapDataVersion", mapConfig.mapDataVersion());
             node.put("id", ConfigProcessors.key().elementFromData(mapConfig.id()));
             node.put("instancePath", ConfigProcessor.STRING.listProcessor().elementFromData(mapConfig.instancePath()));
             node.put("origin", VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));

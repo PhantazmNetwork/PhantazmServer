@@ -49,7 +49,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
         List<Region3I> regions = doorInfo.regions();
-        if (regions.size() == 0) {
+        if (regions.isEmpty()) {
             LOGGER.warn("Door has no regions, enclosing bounds and center set to origin");
 
             enclosing = Region3I.encompassing(origin, origin);

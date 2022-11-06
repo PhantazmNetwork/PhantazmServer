@@ -104,7 +104,10 @@ public final class TranslationKeys {
      * Shown in the confirmation dialog when attempting to delete a map, asking the player if they really want to do so.
      */
     public static final String GUI_MAPEDITOR_DELETE_MAP_QUERY = "gui.mapeditor.delete_map_query";
-
+    /**
+     * Shown in the confirmation dialog when attempting to load maps and thereby overwriting current changes to maps,
+     * asking the player if they really want to do so.
+     */
     public static final String GUI_MAPEDITOR_OVERWRITE_MAP_QUERY = "gui.mapeditor.overwrite_map_query";
 
     private TranslationKeys() {

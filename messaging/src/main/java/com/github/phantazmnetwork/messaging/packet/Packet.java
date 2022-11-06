@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.messaging.packet;
 
+import com.github.phantazmnetwork.messaging.serialization.DataWriter;
 import org.jetbrains.annotations.NotNull;
 
 /**

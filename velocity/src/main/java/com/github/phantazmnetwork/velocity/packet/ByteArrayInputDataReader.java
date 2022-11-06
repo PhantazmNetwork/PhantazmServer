@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.velocity.packet;
 
-import com.github.phantazmnetwork.messaging.packet.DataReader;
+import com.github.phantazmnetwork.messaging.serialization.DataReader;
 import com.google.common.io.ByteArrayDataInput;
 import org.jetbrains.annotations.NotNull;
 
