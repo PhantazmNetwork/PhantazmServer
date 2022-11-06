@@ -149,13 +149,7 @@ public final class PhantazmServer {
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
-            if (Thread.interrupted()) {
-                MinecraftServer.stopCleanly();
-                break;
-            }
-
-            String command = scanner.nextLine();
-            if (handleCommand(command)) {
+            if (handleCommand(scanner.nextLine())) {
                 break;
             }
         }
