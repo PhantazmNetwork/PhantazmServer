@@ -38,6 +38,7 @@ import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 
@@ -145,6 +146,30 @@ public final class PhantazmServer {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly));
+
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            if (Thread.interrupted()) {
+                MinecraftServer.stopCleanly();
+                break;
+            }
+
+            String command = scanner.nextLine();
+            if (handleCommand(command)) {
+                break;
+            }
+        }
+    }
+
+    private static boolean handleCommand(String command) {
+        if (command.equals("stop")) {
+            LOGGER.info("Shutting down server...");
+            MinecraftServer.stopCleanly();
+            return true;
+        }
+
+        LOGGER.warn("Command '" + command + "' not recognized");
+        return false;
     }
 
     private static boolean isUnsafe(String[] args) {
