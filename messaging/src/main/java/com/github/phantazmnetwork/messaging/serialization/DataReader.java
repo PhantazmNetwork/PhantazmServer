@@ -1,4 +1,4 @@
-package com.github.phantazmnetwork.messaging.packet;
+package com.github.phantazmnetwork.messaging.serialization;
 
 /**
  * Represents a data input.

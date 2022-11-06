@@ -23,6 +23,6 @@
     "gui.mapeditor.current_map": "Aktuelle Map: %s",
     "gui.mapeditor.no_map": "Keine Map ausgewählt",
     "gui.mapeditor.delete_map_query": "Map löschen?",
-    "gui.mapeditor.overwrite_map_query": "Das Laden löscht ungespeicherten Fortschritt und andere Karten. Fortfahren?",
+    "gui.mapeditor.overwrite_map_query": "Das Laden von Karten löscht ungespeicherten Fortschritt auch auf andere Karten. Fortfahren?",
     "gui.mapeditor.display_settings": "Anzeigeeinstellungen"
 }

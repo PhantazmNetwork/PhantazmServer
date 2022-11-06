@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.fabric.loom)
 }
 
-version = "1.2.0-SNAPSHOT"
+version = "1.2.1-SNAPSHOT"
 
 base {
     archivesName.set("phantazm-zombies-mapeditor")
@@ -40,14 +40,10 @@ dependencies {
     }
 
     sequenceOf(
-        "fabric-networking-api-v1" // LibGui incompatibility
-    ).forEach {
-        modRuntimeOnly(fabricApi.module(it, fabricApiVersion))
-    }
-    sequenceOf(
         "fabric-events-interaction-v0",
         "fabric-key-binding-api-v1",
-        "fabric-lifecycle-events-v1"
+        "fabric-lifecycle-events-v1",
+        "fabric-networking-api-v1"
     ).forEach {
         modImplementation(fabricApi.module(it, fabricApiVersion))
     }
@@ -58,6 +54,7 @@ dependencies {
     }
 
     implementation(projects.phantazmCommons)
+    implementation(projects.phantazmMessaging)
     implementation(projects.phantazmZombiesMapdata)
     implementation(libs.ethylene.yaml)
 
@@ -66,6 +63,7 @@ dependencies {
     include(libs.satin)
 
     include(projects.phantazmCommons)
+    include(projects.phantazmMessaging)
     include(projects.phantazmZombiesMapdata)
     include(libs.adventure.api)
     include(libs.adventure.key)

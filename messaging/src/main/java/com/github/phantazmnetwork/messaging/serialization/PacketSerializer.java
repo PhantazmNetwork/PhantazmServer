@@ -1,5 +1,6 @@
-package com.github.phantazmnetwork.messaging.packet;
+package com.github.phantazmnetwork.messaging.serialization;
 
+import com.github.phantazmnetwork.messaging.packet.Packet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
