@@ -10,7 +10,8 @@ import java.util.UUID;
 
 public abstract class PlayerDeathEventListener extends ZombiesPlayerEventListener<EntityDamageEvent> {
 
-    public PlayerDeathEventListener(@NotNull Instance instance, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers) {
+    public PlayerDeathEventListener(@NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         super(instance, zombiesPlayers);
     }
 

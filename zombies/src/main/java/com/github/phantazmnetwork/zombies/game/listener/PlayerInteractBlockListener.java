@@ -14,7 +14,8 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
 
     private final PlayerRightClickListener rightClickListener;
 
-    public PlayerInteractBlockListener(@NotNull Instance instance, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
+    public PlayerInteractBlockListener(@NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
         this.rightClickListener = Objects.requireNonNull(rightClickListener, "rightClickListener");

@@ -39,10 +39,10 @@ import java.util.function.Supplier;
 public class ProjectileFirer implements Firer {
 
     private static final ElementFactory<Data, ProjectileFirer> FACTORY = (objectData, context, dependencyProvider) -> {
-        EventNode<Event> node = dependencyProvider.provide(Key.key("zombies.dependency.event.instance_node"));
+        EventNode<Event> node = dependencyProvider.provide(Key.key("zombies.dependency.gun.event_node"));
 
         Supplier<Optional<? extends Entity>> entitySupplier =
-                dependencyProvider.provide(Key.key("zombies.dependency" + ".gun.shooter.supplier"));
+                dependencyProvider.provide(Key.key("zombies.dependency.gun.shooter.supplier"));
         UUID shooterUUID = dependencyProvider.provide(Key.key("zombies.dependency.gun.firer.projectile.shooter.uuid"));
         ShotEndpointSelector endpointSelector =
                 context.provide(objectData.endSelectorPath(), dependencyProvider, false);

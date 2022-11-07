@@ -15,9 +15,10 @@ public abstract class ZombiesPlayerEventListener<TEvent extends EntityInstanceEv
 
     private final Instance instance;
 
-    private final Map<UUID, ZombiesPlayer> zombiesPlayers;
+    private final Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers;
 
-    public ZombiesPlayerEventListener(@NotNull Instance instance, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers) {
+    public ZombiesPlayerEventListener(@NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }

@@ -3,10 +3,6 @@ package com.github.phantazmnetwork.zombies.game.scoreboard.sidebar;
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.section.SidebarSection;
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
@@ -37,29 +33,11 @@ public class SidebarUpdater implements Activable {
     private int totalSize = 0;
 
     @FactoryMethod
-    public SidebarUpdater(@NotNull Sidebar sidebar,
+    public SidebarUpdater(@NotNull @Dependency("zombies.dependency.player.sidebar") Sidebar sidebar,
             @NotNull @DataName("sections") Collection<SidebarSection> sections) {
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.sections = List.copyOf(sections);
         this.sizes = new int[sections.size()];
-    }
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Collection<String> sectionPaths = ConfigProcessor.STRING.collectionProcessor()
-                        .dataFromElement(element.getListOrThrow("sections"));
-                return new Data(sectionPaths);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("sections",
-                        ConfigProcessor.STRING.collectionProcessor().elementFromData(data.sectionPaths()));
-            }
-        };
     }
 
     @Override
