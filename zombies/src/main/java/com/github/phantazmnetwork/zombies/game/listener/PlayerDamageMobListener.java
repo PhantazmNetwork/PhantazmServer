@@ -14,10 +14,10 @@ import java.util.UUID;
 
 public class PlayerDamageMobListener extends PhantazmMobEventListener<EntityDamageEvent> {
 
-    private final Map<UUID, ZombiesPlayer> zombiesPlayers;
+    private final Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers;
 
     public PlayerDamageMobListener(@NotNull Instance instance, @NotNull MobStore mobStore,
-            @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers) {
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         super(instance, mobStore);
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }

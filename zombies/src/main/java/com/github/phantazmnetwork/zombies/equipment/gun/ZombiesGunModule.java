@@ -8,6 +8,8 @@ import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -25,15 +27,18 @@ public class ZombiesGunModule implements DependencyModule {
 
     private final MobStore mobStore;
 
+    private final EventNode<Event> eventNode;
+
     private final Random random;
 
     private final MapObjects mapObjects;
 
     public ZombiesGunModule(@NotNull PlayerView playerView, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
-            @NotNull Random random, @NotNull MapObjects mapObjects) {
+            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.random = Objects.requireNonNull(random, "random");
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }
@@ -63,8 +68,6 @@ public class ZombiesGunModule implements DependencyModule {
         return playerView.getUUID();
     }
 
-    // TODO: move everything under to different modules?
-    // TODO
     @Memoize
     @DependencySupplier("zombies.dependency.mob.spawner")
     public @NotNull MobSpawner getMobSpawner() {
@@ -75,6 +78,12 @@ public class ZombiesGunModule implements DependencyModule {
     @DependencySupplier("zombies.dependency.mob.store")
     public @NotNull MobStore getMobStore() {
         return mobStore;
+    }
+
+    @Memoize
+    @DependencySupplier("zombies.dependency.gun.event_node")
+    public @NotNull EventNode<Event> getEventNode() {
+        return eventNode;
     }
 
     @Memoize

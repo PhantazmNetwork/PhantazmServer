@@ -52,11 +52,6 @@ public final class PhantazmServer {
      */
     public static final Logger LOGGER = LoggerFactory.getLogger(PhantazmServer.class);
 
-    /**
-     * The global EventNode for Phantazm events.
-     */
-    public static final EventNode<Event> PHANTAZM_NODE = EventNode.all("phantazm");
-
     private static final String UNSAFE_ARGUMENT = "unsafe";
 
     /**

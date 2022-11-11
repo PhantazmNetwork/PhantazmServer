@@ -14,7 +14,8 @@ public class PlayerInteractEntityListener extends ZombiesPlayerEventListener<Pla
 
     private final PlayerRightClickListener rightClickListener;
 
-    public PlayerInteractEntityListener(@NotNull Instance instance, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
+    public PlayerInteractEntityListener(@NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
         this.rightClickListener = Objects.requireNonNull(rightClickListener, "rightClickListener");

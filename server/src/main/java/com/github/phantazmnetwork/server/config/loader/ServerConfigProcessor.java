@@ -77,9 +77,16 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         PingListConfig pingListConfig = serverConfig.pingListConfig();
         pingList.put("description", COMPONENT_PROCESSOR.elementFromData(pingListConfig.description()));
 
-        ConfigNode configNode = new LinkedConfigNode(2);
+        ConfigNode pathfinder = new LinkedConfigNode(3);
+        PathfinderConfig pathfinderConfig = serverConfig.pathfinderConfig();
+        pathfinder.putNumber("threads", pathfinderConfig.threads());
+        pathfinder.putNumber("cacheSize", pathfinderConfig.cacheSize());
+        pathfinder.putNumber("updateQueueCapacity", pathfinderConfig.updateQueueCapacity());
+
+        ConfigNode configNode = new LinkedConfigNode(3);
         configNode.put("serverInfo", serverInfo);
         configNode.put("pingList", pingList);
+        configNode.put("pathfinder", pathfinder);
 
         return configNode;
     }
