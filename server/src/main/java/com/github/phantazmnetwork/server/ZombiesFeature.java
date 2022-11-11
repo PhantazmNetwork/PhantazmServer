@@ -16,6 +16,8 @@ import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.NotPredi
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.OrPredicate;
 import com.github.phantazmnetwork.zombies.game.map.shop.predicate.logic.XorPredicate;
 import com.github.phantazmnetwork.zombies.game.perk.ExtraHealthLevel;
+import com.github.phantazmnetwork.zombies.game.powerup.ItemPowerupVisual;
+import com.github.phantazmnetwork.zombies.game.powerup.TimedPredicate;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.*;
 import com.github.phantazmnetwork.zombies.game.scoreboard.sidebar.lineupdater.condition.AliveCondition;
 import com.github.phantazmnetwork.zombies.map.FileSystemMapLoader;
@@ -113,6 +115,12 @@ public final class ZombiesFeature {
 
         //PerkLevels
         contextManager.registerElementClass(ExtraHealthLevel.class);
+
+        //DeactivationPredicates
+        contextManager.registerElementClass(TimedPredicate.class);
+
+        //PowerupVisuals
+        contextManager.registerElementClass(ItemPowerupVisual.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

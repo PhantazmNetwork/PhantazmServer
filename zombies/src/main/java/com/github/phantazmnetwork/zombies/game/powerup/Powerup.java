@@ -27,7 +27,7 @@ public class Powerup implements Tickable {
 
     public void spawn() {
         for (PowerupVisual visual : visuals) {
-            visual.activate(spawnLocation.x(), spawnLocation.y(), spawnLocation.z());
+            visual.spawn(spawnLocation.x(), spawnLocation.y(), spawnLocation.z());
         }
 
         spawned = true;
