@@ -19,11 +19,13 @@ import com.github.phantazmnetwork.zombies.perk.ExtraHealthLevel;
 import com.github.phantazmnetwork.zombies.powerup.HologramPowerupVisual;
 import com.github.phantazmnetwork.zombies.powerup.ItemPowerupVisual;
 import com.github.phantazmnetwork.zombies.powerup.TimedPredicate;
+import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater.*;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater.condition.AliveCondition;
 import com.github.phantazmnetwork.zombies.map.FileSystemMapLoader;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.map.MapLoader;
+import com.github.phantazmnetwork.zombies.scoreboard.sidebar.section.CollectionSidebarSection;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import net.kyori.adventure.key.Key;
@@ -91,7 +93,9 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(IncrementalMetaDisplay.class);
         contextManager.registerElementClass(AnimatedItemDisplay.class);
 
-        //Sidebar LineUpdaters
+        //Sidebar
+        contextManager.registerElementClass(SidebarUpdater.class);
+        contextManager.registerElementClass(CollectionSidebarSection.class);
         contextManager.registerElementClass(CoinsSidebarLineUpdater.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.ChildUpdater.class);

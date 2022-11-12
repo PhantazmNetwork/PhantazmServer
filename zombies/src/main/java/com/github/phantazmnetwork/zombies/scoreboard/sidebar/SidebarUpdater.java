@@ -33,7 +33,7 @@ public class SidebarUpdater implements Activable {
     private int totalSize = 0;
 
     @FactoryMethod
-    public SidebarUpdater(@NotNull @Dependency("zombies.dependency.player.sidebar") Sidebar sidebar,
+    public SidebarUpdater(@NotNull Data data, @NotNull @Dependency("zombies.dependency.player.sidebar") Sidebar sidebar,
             @NotNull @DataName("sections") Collection<SidebarSection> sections) {
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.sections = List.copyOf(sections);

@@ -3,20 +3,18 @@ package com.github.phantazmnetwork.zombies.stage;
 import com.github.phantazmnetwork.commons.Tickable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class StageTransition implements Tickable {
 
-    private final List<Stage> stages;
+    private final Stage[] stages;
 
     private Stage currentStage;
 
     private int currentStageIndex;
 
-    public StageTransition(@NotNull List<Stage> stages) {
-        this.stages = List.copyOf(stages);
+    public StageTransition(@NotNull Stage @NotNull ... stages) {
+        this.stages = stages.clone();
         this.currentStageIndex = 0;
-        this.currentStage = stages.get(currentStageIndex);
+        this.currentStage = stages[currentStageIndex];
     }
 
     @Override
@@ -25,8 +23,12 @@ public class StageTransition implements Tickable {
             return;
         }
 
-        if (currentStage.shouldEnd()) {
+        if (currentStage.shouldContinue()) {
             setCurrentStageIndex(currentStageIndex + 1);
+            return;
+        }
+        if (currentStage.shouldRevert()) {
+            setCurrentStageIndex(currentStageIndex - 1);
             return;
         }
 
@@ -34,19 +36,19 @@ public class StageTransition implements Tickable {
     }
 
     public boolean isComplete() {
-        return currentStageIndex == stages.size();
+        return currentStageIndex == stages.length;
     }
 
     public void setCurrentStageIndex(int currentStageIndex) {
-        if (currentStageIndex < 0 || currentStageIndex > stages.size()) {
+        if (currentStageIndex < 0 || currentStageIndex > stages.length) {
             throw new IllegalArgumentException("Invalid stage index: " + currentStageIndex);
         }
 
         this.currentStageIndex = currentStageIndex;
         currentStage.end();
 
-        if (currentStageIndex != stages.size()) {
-            currentStage = stages.get(currentStageIndex);
+        if (currentStageIndex != stages.length) {
+            currentStage = stages[currentStageIndex];
             currentStage.start();
         }
         else {

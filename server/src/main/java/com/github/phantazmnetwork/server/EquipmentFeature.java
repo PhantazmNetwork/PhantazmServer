@@ -11,10 +11,10 @@ import com.github.phantazmnetwork.zombies.equipment.gun.reload.StateReloadTester
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.GradientActionBarChooser;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.actionbar.StaticActionBarChooser;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.StateShootTester;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration.WindowBlockIteration;
-import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.BasicShotEndpointSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration.BasicBlockIteration;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration.WallshotBlockIteration;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration.WindowBlockIteration;
+import com.github.phantazmnetwork.zombies.equipment.gun.shoot.endpoint.BasicShotEndpointSelector;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.HitScanFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.SpreadFirer;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile.PhantazmMobProjectileCollisionFilter;

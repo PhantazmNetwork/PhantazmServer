@@ -1,19 +1,17 @@
 package com.github.phantazmnetwork.zombies.stage;
 
 import com.github.phantazmnetwork.commons.Wrapper;
-import com.github.phantazmnetwork.zombies.map.RoundHandler;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
-import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Pos;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
 
-public class InGameStage implements Stage {
+public class EndStage implements Stage {
 
     private final Instance instance;
 
@@ -21,28 +19,27 @@ public class InGameStage implements Stage {
 
     private final Map<UUID, SidebarUpdater> sidebarUpdaters = new HashMap<>();
 
-    private final Pos spawnPos;
-
-    private final RoundHandler roundHandler;
-
-    private final Wrapper<Long> ticksSinceStart;
+    private final Wrapper<Long> remainingTicks;
 
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
 
-    public InGameStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
+    public EndStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull Wrapper<Long> remainingTicks,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.spawnPos = Objects.requireNonNull(spawnPos, "spawnPos");
-        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
-        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
+        this.remainingTicks = Objects.requireNonNull(remainingTicks, "remainingTicks");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
+    }
+
+    public EndStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+            long endTicks, Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
+        this(instance, zombiesPlayers, Wrapper.of(endTicks), sidebarUpdaterCreator);
     }
 
     @Override
     public boolean shouldContinue() {
-        return roundHandler.hasEnded();
+        return remainingTicks.get() == 0L;
     }
 
     @Override
@@ -62,20 +59,13 @@ public class InGameStage implements Stage {
 
     @Override
     public void start() {
-        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            zombiesPlayer.getPlayer().ifPresent(player -> {
-                player.teleport(spawnPos);
-            });
-        }
-        ticksSinceStart.set(0L);
-        if (roundHandler.roundCount() > 0) {
-            roundHandler.setCurrentRound(0);
-        }
+        instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F),
+                Sound.Emitter.self());
     }
 
     @Override
     public void tick(long time) {
-        ticksSinceStart.apply(ticks -> ticks - 1);
+        remainingTicks.apply(ticks -> ticks - 1);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             SidebarUpdater sidebarUpdater =
                     sidebarUpdaters.computeIfAbsent(zombiesPlayer.getModule().getPlayerView().getUUID(), unused -> {
@@ -87,21 +77,6 @@ public class InGameStage implements Stage {
 
     @Override
     public void end() {
-        boolean anyAlive = false;
-        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.ALIVE)) {
-                anyAlive = true;
-                break;
-            }
-        }
-
-        if (anyAlive) {
-            instance.sendMessage(Component.text("You won"));
-        }
-        else {
-            instance.sendMessage(Component.text("You lost"));
-        }
-
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {
             sidebarUpdater.end();
         }

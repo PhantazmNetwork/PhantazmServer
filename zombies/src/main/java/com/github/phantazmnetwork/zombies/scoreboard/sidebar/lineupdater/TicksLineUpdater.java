@@ -6,11 +6,6 @@ import com.github.steanky.element.core.ElementFactory;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.ProcessorMethod;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +26,8 @@ public class TicksLineUpdater implements SidebarLineUpdater {
     }
 
     private static final ElementFactory<Data, TicksLineUpdater> FACTORY = (objectData, context, dependencyProvider) -> {
-        Wrapper<Long> ticksWrapper = dependencyProvider.provide(Key.key("wrapper.long"));
+        Wrapper<Long> ticksWrapper =
+                dependencyProvider.provide(Key.key("zombies.dependency.sidebar" + ".ticks_since_start"));
         TickFormatter tickFormatter = context.provide(objectData.tickFormatterPath(), dependencyProvider, false);
         return new TicksLineUpdater(ticksWrapper, tickFormatter);
     };
@@ -50,23 +46,6 @@ public class TicksLineUpdater implements SidebarLineUpdater {
     @FactoryMethod
     public static @NotNull ElementFactory<Data, TicksLineUpdater> factory() {
         return FACTORY;
-    }
-
-    @ProcessorMethod
-    public static ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String tickFormatterPath = element.getStringOrThrow("tickFormatterPath");
-                return new Data(tickFormatterPath);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return ConfigNode.of("tickFormatterPath", data.tickFormatterPath());
-            }
-        };
     }
 
     @Override

@@ -41,7 +41,7 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     private final PlayerStateSwitcher stateSwitcher;
 
-    private final Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> stateFunctions;
+    private final Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions;
 
     private final Sidebar sidebar;
 
@@ -51,8 +51,8 @@ public class ZombiesPlayerModule implements DependencyModule {
             @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
             @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
             @NotNull PlayerStateSwitcher stateSwitcher,
-            @NotNull Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> stateFunctions, @NotNull Sidebar sidebar,
-            @NotNull ModifierSource modifierSource) {
+            @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
+            @NotNull Sidebar sidebar, @NotNull ModifierSource modifierSource) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -107,7 +107,7 @@ public class ZombiesPlayerModule implements DependencyModule {
     }
 
     @DependencySupplier("zombies.dependency.player.state_functions")
-    public @NotNull Map<PlayerStateKey<?>, Function<?, ZombiesPlayerState>> getStateFunctions() {
+    public @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> getStateFunctions() {
         return stateFunctions;
     }
 

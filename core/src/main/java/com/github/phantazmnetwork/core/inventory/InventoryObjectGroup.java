@@ -64,4 +64,6 @@ public interface InventoryObjectGroup {
      */
     @NotNull InventoryObject popInventoryObject();
 
+    @NotNull InventoryProfile getProfile();
+
 }

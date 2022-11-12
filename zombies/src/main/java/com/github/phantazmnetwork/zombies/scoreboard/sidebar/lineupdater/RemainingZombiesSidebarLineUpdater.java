@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater;
 
 import com.github.phantazmnetwork.zombies.map.Round;
+import com.github.phantazmnetwork.zombies.map.RoundHandler;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -21,8 +22,8 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
 
     @FactoryMethod
     public RemainingZombiesSidebarLineUpdater(
-            @NotNull @Dependency("zombies.dependency.map.round_supplier") Supplier<? extends Round> roundSupplier) {
-        this.roundSupplier = Objects.requireNonNull(roundSupplier, "roundSupplier");
+            @NotNull @Dependency("zombies.dependency.sidebar.round_handler") RoundHandler roundHandler) {
+        this.roundSupplier = Objects.requireNonNull(roundHandler::currentRound, "roundSupplier");
     }
 
     @Override

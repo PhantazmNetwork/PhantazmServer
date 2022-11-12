@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * A {@link TargetTester} that only selects {@link PhantazmMob}s.
  */
-@Model("gun.target_tester.phantazm_mob")
+@Model("zombies.gun.target_tester.phantazm_mob")
 @Cache(false)
 public class PhantazmMobTargetTester implements TargetTester {
 

@@ -84,4 +84,8 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
         return true;
     }
 
+    @Override
+    public @NotNull InventoryProfile getProfile() {
+        return profile;
+    }
 }

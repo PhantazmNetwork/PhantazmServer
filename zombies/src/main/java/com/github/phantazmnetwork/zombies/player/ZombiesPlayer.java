@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.core.inventory.InventoryObject;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerState;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -14,8 +15,7 @@ import java.util.function.Function;
 
 public interface ZombiesPlayer extends Activable {
 
-    @NotNull
-    ZombiesPlayerModule getModule();
+    @NotNull ZombiesPlayerModule getModule();
 
     long getReviveTime();
 
@@ -49,6 +49,12 @@ public interface ZombiesPlayer extends Activable {
         return false;
     }
 
-    void start();
+    default boolean isState(@NotNull PlayerStateKey<?> stateKey) {
+        return getModule().getStateSwitcher().getState().key().equals(stateKey.key());
+    }
+
+    default @NotNull Optional<Player> getPlayer() {
+        return getModule().getPlayerView().getPlayer();
+    }
 
 }

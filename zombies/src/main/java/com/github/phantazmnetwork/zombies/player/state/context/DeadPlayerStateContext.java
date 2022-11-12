@@ -1,18 +1,12 @@
 package com.github.phantazmnetwork.zombies.player.state.context;
 
-import com.github.phantazmnetwork.commons.Activable;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 public class DeadPlayerStateContext {
-
-    private final Collection<Activable> activables;
 
     private final Component killer;
 
@@ -20,25 +14,18 @@ public class DeadPlayerStateContext {
 
     private final boolean isRejoin;
 
-    protected DeadPlayerStateContext(@NotNull Collection<Activable> activables, @Nullable Component killer,
-            @Nullable Component deathRoomName, boolean isRejoin) {
-        this.activables = List.copyOf(activables);
+    protected DeadPlayerStateContext(@Nullable Component killer, @Nullable Component deathRoomName, boolean isRejoin) {
         this.killer = killer;
         this.deathRoomName = deathRoomName;
         this.isRejoin = isRejoin;
     }
 
-    public static DeadPlayerStateContext killed(@NotNull Collection<Activable> activables, @Nullable Component killer,
-            @Nullable Component deathRoomName) {
-        return new DeadPlayerStateContext(activables, killer, deathRoomName, false);
+    public static DeadPlayerStateContext killed(@Nullable Component killer, @Nullable Component deathRoomName) {
+        return new DeadPlayerStateContext(killer, deathRoomName, false);
     }
 
-    public static DeadPlayerStateContext rejoin(@NotNull Collection<Activable> activables) {
-        return new DeadPlayerStateContext(activables, null, null, true);
-    }
-
-    public @NotNull @Unmodifiable Collection<Activable> getActivables() {
-        return activables;
+    public static DeadPlayerStateContext rejoin() {
+        return new DeadPlayerStateContext(null, null, true);
     }
 
     public @NotNull Optional<Component> getKiller() {

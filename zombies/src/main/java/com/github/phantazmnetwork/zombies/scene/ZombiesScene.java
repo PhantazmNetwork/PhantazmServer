@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.core.game.scene.InstanceScene;
 import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.player.state.context.DeadPlayerStateContext;
@@ -27,6 +28,8 @@ import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
+    private final ZombiesMap map;
+
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
 
     private final MapSettingsInfo mapSettingsInfo;
@@ -39,12 +42,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private boolean joinable;
 
-    public ZombiesScene(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
-            @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
+    public ZombiesScene(@NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
+            @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator, @NotNull Random random) {
         super(instance, fallback);
 
+        this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = zombiesPlayers;
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
@@ -98,8 +102,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 continue;
             }
 
-            boolean hasMinimum = mapSettingsInfo.minimumProtocolVersion() < 0;
-            boolean hasMaximum = mapSettingsInfo.maximumProtocolVersion() < 0;
+            boolean hasMinimum = mapSettingsInfo.minimumProtocolVersion() >= 0;
+            boolean hasMaximum = mapSettingsInfo.maximumProtocolVersion() >= 0;
 
             int protocolVersion = MinecraftServer.PROTOCOL_VERSION;
             if (player.get().getPlayerConnection() instanceof PlayerSocketConnection socketConnection) {
@@ -126,28 +130,28 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         for (ZombiesPlayer zombiesPlayer : oldPlayers) {
-            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin(Collections.emptyList()));
+            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
         }
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.getX(), spawn.getY(), spawn.getZ(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
-        List<Component> messages = mapSettingsInfo.introMessages();
         for (PlayerView view : newPlayers) {
-            ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-            zombiesPlayer.start();
-            zombiesPlayers.put(view.getUUID(), zombiesPlayer);
-            players.put(view.getUUID(), view);
+            view.getPlayer().ifPresent(player -> {
+                player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
+                    if (throwable != null) {
+                        // todo: error handling
+                        return;
+                    }
 
-            view.getPlayer().ifPresent(player -> player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
-                if (throwable != null) {
-                    // todo: error handling
-                    return;
-                }
+                    ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+                    zombiesPlayer.start();
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                    zombiesPlayers.put(view.getUUID(), zombiesPlayer);
+                    players.put(view.getUUID(), view);
 
-                if (!messages.isEmpty()) {
-                    player.sendMessage(messages.get(random.nextInt(messages.size())));
-                }
-            }));
+                    stage.onJoin(zombiesPlayer);
+                });
+            });
         }
 
         return RouteResult.SUCCESSFUL;
@@ -166,14 +170,16 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             players.remove(leaver);
 
             Stage stage = getCurrentStage();
+            ZombiesPlayer zombiesPlayer;
             if (stage == null || !stage.hasPermanentPlayers()) {
-                zombiesPlayers.remove(leaver);
+                zombiesPlayer = zombiesPlayers.remove(leaver);
             }
             else {
-                ZombiesPlayer zombiesPlayer = zombiesPlayers.get(leaver);
-                if (zombiesPlayer != null) {
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
-                }
+                zombiesPlayer = zombiesPlayers.get(leaver);
+            }
+
+            if (zombiesPlayer != null) {
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
             }
         }
 
@@ -201,6 +207,14 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     }
 
     @Override
+    public void forceShutdown() {
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
+            zombiesPlayer.end();
+        }
+        super.forceShutdown();
+    }
+
+    @Override
     public void tick(long time) {
         super.tick(time);
         if (!isShutdown() && stageTransition.isComplete()) {
@@ -208,9 +222,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             return;
         }
 
+        map.tick(time);
+        stageTransition.tick(time);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             zombiesPlayer.tick(time);
         }
-        stageTransition.tick(time);
     }
 }

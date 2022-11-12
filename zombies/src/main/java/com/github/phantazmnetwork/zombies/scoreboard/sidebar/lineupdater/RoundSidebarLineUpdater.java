@@ -10,19 +10,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 @Model("zombies.sidebar.lineupdater.round")
 public class RoundSidebarLineUpdater implements SidebarLineUpdater {
 
-    private final Supplier<? extends RoundHandler> roundHandlerSupplier;
+    private final RoundHandler roundHandler;
 
     private int lastRoundIndex = -1;
 
     @FactoryMethod
-    public RoundSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.map_object.round_handler_supplier")
-    Supplier<? extends RoundHandler> roundHandlerSupplier) {
-        this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
+    public RoundSidebarLineUpdater(
+            @NotNull @Dependency("zombies.dependency.sidebar.round_handler") RoundHandler roundHandler) {
+        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
     }
 
     @Override
@@ -32,7 +31,7 @@ public class RoundSidebarLineUpdater implements SidebarLineUpdater {
 
     @Override
     public @NotNull Optional<Component> tick(long time) {
-        int newIndex = roundHandlerSupplier.get().currentRoundIndex();
+        int newIndex = roundHandler.currentRoundIndex();
         if ((lastRoundIndex == -1 || lastRoundIndex != newIndex) && newIndex != -1) {
             lastRoundIndex = newIndex;
             return Optional.of(Component.text("Round " + (lastRoundIndex + 1), NamedTextColor.RED));

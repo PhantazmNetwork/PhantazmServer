@@ -3,10 +3,9 @@ package com.github.phantazmnetwork.zombies.map.action.round;
 import com.github.phantazmnetwork.zombies.map.Round;
 import com.github.phantazmnetwork.zombies.map.action.Action;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
-import com.github.phantazmnetwork.zombies.player.state.KnockedPlayerState;
-import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerState;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.player.state.context.NoContext;
+import com.github.phantazmnetwork.zombies.player.state.revive.KnockedPlayerState;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -34,13 +33,13 @@ public class RevivePlayersAction implements Action<Round> {
     @Override
     public void perform(@NotNull Round round) {
         for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-            ZombiesPlayerState state = zombiesPlayer.getModule().getStateSwitcher().getState();
-            if (state.key().equals(ZombiesPlayerStateKeys.DEAD.key())) {
+            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.DEAD)) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                zombiesPlayer.getModule().getPlayerView().getPlayer().ifPresent(player -> player.teleport(respawnPos));
+                zombiesPlayer.getPlayer().ifPresent(player -> player.teleport(respawnPos));
             }
-            else if (state instanceof KnockedPlayerState knockedPlayerState) {
-                knockedPlayerState.setReviver(null);
+            else if (zombiesPlayer.getModule().getStateSwitcher()
+                    .getState() instanceof KnockedPlayerState knockedPlayerState) {
+                knockedPlayerState.getReviveHandler().setReviver(null);
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
             }
         }

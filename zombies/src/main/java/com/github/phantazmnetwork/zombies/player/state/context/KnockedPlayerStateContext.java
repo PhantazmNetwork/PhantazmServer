@@ -12,15 +12,23 @@ public class KnockedPlayerStateContext {
 
     private final Point knockLocation;
 
+    private final Component knockRoom;
+
     private final Component killer;
 
-    public KnockedPlayerStateContext(@NotNull Point knockLocation, @Nullable Component killer) {
+    public KnockedPlayerStateContext(@NotNull Point knockLocation, @Nullable Component knockRoom,
+            @Nullable Component killer) {
         this.knockLocation = Objects.requireNonNull(knockLocation, "knockLocation");
+        this.knockRoom = knockRoom;
         this.killer = killer;
     }
 
     public @NotNull Point getKnockLocation() {
         return knockLocation;
+    }
+
+    public Optional<Component> getKnockRoom() {
+        return Optional.ofNullable(knockRoom);
     }
 
     public @NotNull Optional<Component> getKiller() {
