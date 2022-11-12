@@ -21,6 +21,8 @@ dependencies {
     implementation(libs.ethylene.toml)
     implementation(libs.ethylene.yaml)
     implementation(libs.element.core)
+
+    implementation(libs.ethylene.mapper);
 }
 
 tasks.getByName<CopyLibs>("copyLibs") {

@@ -47,11 +47,12 @@ public class HologramPowerupVisual implements PowerupVisual {
         if (!blinking) {
             long elapsed = time - start;
             if (elapsed > data.timeUntilBlink && !data.blinkFrames.isEmpty()) {
-                this.blinking = true;
-
-                this.currentFrame = data.blinkFrames.get(0);
-                this.lastFrameTime = time;
+                Frame currentFrame = data.blinkFrames.get(0);
                 hologram.addAll(currentFrame.components);
+
+                this.blinking = true;
+                this.currentFrame = currentFrame;
+                this.lastFrameTime = time;
             }
 
             return;
@@ -61,12 +62,11 @@ public class HologramPowerupVisual implements PowerupVisual {
         Frame currentFrame = this.currentFrame;
 
         if (currentFrame != null && timeSinceLastFrame > currentFrame.delay) {
-            hologram.clear();
-
             int nextFrameIndex = (++currentFrameIndex) % data.blinkFrames.size();
             this.currentFrame = currentFrame = data.blinkFrames.get(nextFrameIndex);
             this.lastFrameTime = time;
 
+            hologram.clear();
             hologram.addAll(currentFrame.components);
         }
     }
