@@ -45,7 +45,7 @@ public final class Ethylene {
                         .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
                         .withScalarSignature(titlePartComponent())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
-                        .withStandardSignatures().withStandardTypeImplementations().build();
+                        .withStandardSignatures().withStandardTypeImplementations().ignoringLengths().build();
 
         LOGGER.info("Ethylene initialized.");
     }
@@ -83,6 +83,7 @@ public final class Ethylene {
                 .matchingTypeHints().build();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private static ScalarSignature<ItemStack> itemStack() {
         return ScalarSignature.of(Token.ofClass(ItemStack.class), element -> {
             try {
