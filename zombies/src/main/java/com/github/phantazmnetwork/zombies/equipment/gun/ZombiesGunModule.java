@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.zombies.equipment.gun;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
-import com.github.phantazmnetwork.zombies.game.map.objects.MapObjects;
+import com.github.phantazmnetwork.zombies.map.objects.MapObjects;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;

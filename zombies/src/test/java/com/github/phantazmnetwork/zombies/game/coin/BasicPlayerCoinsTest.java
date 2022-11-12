@@ -1,8 +1,12 @@
 package com.github.phantazmnetwork.zombies.game.coin;
 
 import com.github.phantazmnetwork.zombies.audience.ComponentSender;
+import com.github.phantazmnetwork.zombies.coin.BasicPlayerCoins;
+import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.coin.Transaction;
+import com.github.phantazmnetwork.zombies.coin.TransactionResult;
 import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
-import com.github.phantazmnetwork.zombies.game.coin.component.TransactionComponentCreator;
+import com.github.phantazmnetwork.zombies.coin.component.TransactionComponentCreator;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
