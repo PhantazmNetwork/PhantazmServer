@@ -54,6 +54,7 @@ public class ItemPowerupVisual implements PowerupVisual {
     @Override
     public void despawn() {
         ItemEntity entity = this.entity;
+
         if (entity != null) {
             entity.remove();
             this.entity = null;
