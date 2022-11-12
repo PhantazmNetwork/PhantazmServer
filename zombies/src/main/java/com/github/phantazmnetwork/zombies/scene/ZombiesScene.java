@@ -126,7 +126,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         for (ZombiesPlayer zombiesPlayer : oldPlayers) {
-            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin(Collections.emptyList()));
+            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
+            zombiesPlayer.onJoin();
         }
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
@@ -138,16 +139,21 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             zombiesPlayers.put(view.getUUID(), zombiesPlayer);
             players.put(view.getUUID(), view);
 
-            view.getPlayer().ifPresent(player -> player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
-                if (throwable != null) {
-                    // todo: error handling
-                    return;
-                }
+            zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+            zombiesPlayer.onJoin();
 
-                if (!messages.isEmpty()) {
-                    player.sendMessage(messages.get(random.nextInt(messages.size())));
-                }
-            }));
+            view.getPlayer().ifPresent(player -> {
+                player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
+                    if (throwable != null) {
+                        // todo: error handling
+                        return;
+                    }
+
+                    if (!messages.isEmpty()) {
+                        player.sendMessage(messages.get(random.nextInt(messages.size())));
+                    }
+                });
+            });
         }
 
         return RouteResult.SUCCESSFUL;
@@ -166,14 +172,17 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             players.remove(leaver);
 
             Stage stage = getCurrentStage();
+            ZombiesPlayer zombiesPlayer;
             if (stage == null || !stage.hasPermanentPlayers()) {
-                zombiesPlayers.remove(leaver);
+                zombiesPlayer = zombiesPlayers.remove(leaver);
             }
             else {
-                ZombiesPlayer zombiesPlayer = zombiesPlayers.get(leaver);
-                if (zombiesPlayer != null) {
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
-                }
+                zombiesPlayer = zombiesPlayers.get(leaver);
+            }
+
+            if (zombiesPlayer != null) {
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
+                zombiesPlayer.onQuit();
             }
         }
 

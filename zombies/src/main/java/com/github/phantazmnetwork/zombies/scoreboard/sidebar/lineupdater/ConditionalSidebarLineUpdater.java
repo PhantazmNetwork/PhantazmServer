@@ -1,10 +1,6 @@
 package com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,24 +38,6 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
             this.updater = Objects.requireNonNull(updater, "updater");
         }
 
-        @ProcessorMethod
-        public static @NotNull ConfigProcessor<ChildUpdater.Data> processor() {
-            return new ConfigProcessor<>() {
-                @Override
-                public @NotNull ChildUpdater.Data dataFromElement(@NotNull ConfigElement element)
-                        throws ConfigProcessException {
-                    String conditionPath = element.getStringOrThrow("condition");
-                    String updaterPath = element.getStringOrThrow("updater");
-                    return new ChildUpdater.Data(conditionPath, updaterPath);
-                }
-
-                @Override
-                public @NotNull ConfigElement elementFromData(@NotNull ChildUpdater.Data data) {
-                    return ConfigNode.of("condition", data.conditionPath(), "updater", data.updaterPath());
-                }
-            };
-        }
-
         public @NotNull BooleanSupplier getCondition() {
             return condition;
         }
@@ -85,23 +63,6 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
     public ConditionalSidebarLineUpdater(@NotNull Data data,
             @NotNull @DataName("child_updaters") List<ChildUpdater> childUpdaters) {
         this.childUpdaters = List.copyOf(childUpdaters);
-    }
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                List<String> childUpdaters = ConfigProcessor.STRING.listProcessor()
-                        .dataFromElement(element.getElementOrThrow("child_processors"));
-                return new Data(childUpdaters);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigProcessor.STRING.listProcessor().elementFromData(data.childUpdaterPaths());
-            }
-        };
     }
 
     @Override

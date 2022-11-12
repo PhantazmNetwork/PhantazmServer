@@ -14,8 +14,7 @@ import java.util.function.Function;
 
 public interface ZombiesPlayer extends Activable {
 
-    @NotNull
-    ZombiesPlayerModule getModule();
+    @NotNull ZombiesPlayerModule getModule();
 
     long getReviveTime();
 
@@ -50,5 +49,4 @@ public interface ZombiesPlayer extends Activable {
     }
 
     void start();
-
 }
