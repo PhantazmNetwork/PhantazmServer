@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.scene;
 
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.commons.Namespaces;
+import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.ClientBlockHandlerSource;
 import com.github.phantazmnetwork.core.VecUtils;
@@ -49,12 +50,14 @@ import com.github.phantazmnetwork.zombies.player.state.revive.BasicKnockedStateA
 import com.github.phantazmnetwork.zombies.player.state.revive.KnockedPlayerState;
 import com.github.phantazmnetwork.zombies.player.state.revive.NearbyReviverFinder;
 import com.github.phantazmnetwork.zombies.player.state.revive.ReviveHandler;
+import com.github.phantazmnetwork.zombies.scoreboard.sidebar.ElementSidebarUpdaterCreator;
+import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarModule;
+import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
 import com.github.phantazmnetwork.zombies.spawn.BasicSpawnDistributor;
 import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
-import com.github.phantazmnetwork.zombies.stage.BasicStages;
-import com.github.phantazmnetwork.zombies.stage.Stage;
-import com.github.phantazmnetwork.zombies.stage.StageTransition;
+import com.github.phantazmnetwork.zombies.stage.*;
 import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.key.KeyParser;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.LongList;
@@ -62,7 +65,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -114,7 +116,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final Map<Key, MobModel> mobModels;
 
     private final ClientBlockHandlerSource clientBlockHandlerSource;
+
     private final ContextManager contextManager;
+
     private final KeyParser keyParser;
 
     private final Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction;
@@ -167,38 +171,43 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     @SuppressWarnings("UnstableApiUsage")
     @Override
     protected @NotNull ZombiesScene createScene(@NotNull ZombiesJoinRequest request) {
-        Instance instance = instanceLoader.loadInstance(instanceManager, mapInfo.settings().instancePath());
+        MapSettingsInfo settings = mapInfo.settings();
+        Instance instance = instanceLoader.loadInstance(instanceManager, settings.instancePath());
 
         Phaser phaser = new Phaser(1);
-        Point spawn = VecUtils.toPoint(mapInfo.settings().spawn().add(mapInfo.settings().origin()));
-        ChunkUtils.forChunksInRange(spawn, MinecraftServer.getChunkViewDistance(), (chunkX, chunkZ) -> {
+        Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
+        ChunkUtils.forChunksInRange(spawnPos, MinecraftServer.getChunkViewDistance(), (chunkX, chunkZ) -> {
             phaser.register();
             instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
         });
         phaser.arriveAndAwaitAdvance();
 
-        Map<UUID, ZombiesPlayer> zombiesPlayers = new HashMap<>(mapInfo.settings().maxPlayers());
+        Map<UUID, ZombiesPlayer> zombiesPlayers = new HashMap<>(settings.maxPlayers());
 
         ModifierSource modifierSource = new BasicModifierSource();
         Flaggable flaggable = new BasicFlaggable();
         Random random = new Random();
-        Pos spawnPos = VecUtils.toPos(mapInfo.settings().origin().add(mapInfo.settings().spawn()));
-        MapObjects mapObjects =
-                createMapObjects(instance, random, zombiesPlayers, flaggable, modifierSource, spawnPos, mapInfo);
+        MapObjects mapObjects = createMapObjects(instance, random, zombiesPlayers, flaggable, modifierSource, spawnPos);
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
         ZombiesMap map = new ZombiesMap(mapInfo, instance, modifierSource, flaggable, mapObjects, roundHandler);
 
         EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, roundHandler);
-        StageTransition stageTransition = createStageTransition(instance, zombiesPlayers, spawnPos, roundHandler);
+
+        Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
+        SidebarModule sidebarModule =
+                new SidebarModule(zombiesPlayers.values(), roundHandler, ticksSinceStart, settings.maxPlayers());
+        StageTransition stageTransition =
+                createStageTransition(instance, settings.introMessages(), random, zombiesPlayers.values(), spawnPos,
+                        roundHandler, ticksSinceStart, sidebarModule);
 
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-            return createPlayer(zombiesPlayers, mapInfo.settings(), instance, playerView, modifierSource, childNode,
-                    random, mapObjects);
+            return createPlayer(zombiesPlayers, settings, instance, playerView, modifierSource, childNode, random,
+                    mapObjects);
         };
 
         ZombiesScene scene =
-                new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, mapInfo.settings(), stageTransition,
-                        playerCreator, random);
+                new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, settings, stageTransition, playerCreator,
+                        random);
 
         eventNode.addChild(childNode);
         contexts.put(scene, new SceneContext(childNode));
@@ -207,7 +216,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private @NotNull MapObjects createMapObjects(@NotNull Instance instance, @NotNull Random random,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull Flaggable flaggable,
-            @NotNull ModifierSource modifierSource, @NotNull Pos spawnPos, @NotNull MapInfo mapInfo) {
+            @NotNull ModifierSource modifierSource, @NotNull Pos spawnPos) {
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, zombiesPlayers.values());
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
@@ -313,17 +322,29 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     private @NotNull StageTransition createStageTransition(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
-            @NotNull RoundHandler roundHandler) {
-        Stage idle = BasicStages.idle(zombiesPlayers);
+            @NotNull List<Component> messages, @NotNull Random random,
+            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
+            @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
+            @NotNull SidebarModule sidebarModule) {
+        Stage idle = new IdleStage(zombiesPlayers);
 
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
         TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.YELLOW, true, false);
-        Stage countdown = BasicStages.countdown(instance, zombiesPlayers, alertTicks, tickFormatter, 400L);
 
-        Stage inGame = BasicStages.inGame(instance, zombiesPlayers, spawnPos, roundHandler);
-        Stage end = BasicStages.end(instance, 200L);
+        Stage countdown =
+                new CountdownStage(instance, zombiesPlayers, messages, random, 400L, alertTicks, tickFormatter,
+                        newSidebarUpdaterCreator(sidebarModule, "countdown"));
+
+        Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
+                newSidebarUpdaterCreator(sidebarModule, "inGame"));
+        Stage end = new EndStage(instance, zombiesPlayers, 200L, newSidebarUpdaterCreator(sidebarModule, "end"));
         return new StageTransition(idle, countdown, inGame, end);
+    }
+
+    private @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> newSidebarUpdaterCreator(
+            @NotNull SidebarModule sidebarModule, @NotNull String scoreboardSubNode) {
+        ElementContext context = contextManager.makeContext(mapInfo.scoreboard());
+        return new ElementSidebarUpdaterCreator(sidebarModule, context, keyParser, scoreboardSubNode);
     }
 
     @Override

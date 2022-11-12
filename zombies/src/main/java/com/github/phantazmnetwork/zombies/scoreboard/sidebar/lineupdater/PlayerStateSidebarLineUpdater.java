@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater;
 
+import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateSwitcher;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
@@ -19,10 +20,10 @@ public class PlayerStateSidebarLineUpdater implements SidebarLineUpdater {
     private final PlayerStateSwitcher stateSwitcher;
 
     @FactoryMethod
-    public PlayerStateSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.player.name_future")
-    CompletableFuture<? extends Component> playerNameFuture,
+    public PlayerStateSidebarLineUpdater(
+            @NotNull @Dependency("zombies.dependency.player.player_view") PlayerView playerView,
             @NotNull @Dependency("zombies.dependency.player.state_switcher") PlayerStateSwitcher stateSwitcher) {
-        this.playerNameFuture = Objects.requireNonNull(playerNameFuture, "playerNameFuture");
+        this.playerNameFuture = playerView.getDisplayName();
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
     }
 

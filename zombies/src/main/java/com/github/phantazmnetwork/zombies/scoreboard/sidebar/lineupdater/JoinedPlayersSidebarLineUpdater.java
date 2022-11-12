@@ -22,9 +22,8 @@ public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
     private int currentPlayers = -1;
 
     @FactoryMethod
-    public JoinedPlayersSidebarLineUpdater(
-            @NotNull @Dependency("zombies.dependency.map_object.player_map") Collection<ZombiesPlayer> zombiesPlayers,
-            @Dependency("zombies.dependency.map.max_players") int maxPlayers) {
+    public JoinedPlayersSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.sidebar.player_collection")
+    Collection<ZombiesPlayer> zombiesPlayers, @Dependency("zombies.dependency.sidebar.max_players") int maxPlayers) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.maxPlayers = maxPlayers;
     }

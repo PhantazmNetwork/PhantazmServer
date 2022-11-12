@@ -135,15 +135,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.getX(), spawn.getY(), spawn.getZ(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
-        List<Component> messages = mapSettingsInfo.introMessages();
         for (PlayerView view : newPlayers) {
-            ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-            zombiesPlayer.start();
-            zombiesPlayers.put(view.getUUID(), zombiesPlayer);
-            players.put(view.getUUID(), view);
-
-            zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-
             view.getPlayer().ifPresent(player -> {
                 player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
                     if (throwable != null) {
@@ -151,9 +143,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         return;
                     }
 
-                    if (!messages.isEmpty()) {
-                        player.sendMessage(messages.get(random.nextInt(messages.size())));
-                    }
+                    ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+                    zombiesPlayer.start();
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                    zombiesPlayers.put(view.getUUID(), zombiesPlayer);
+                    players.put(view.getUUID(), view);
+
+                    stage.onJoin(zombiesPlayer);
                 });
             });
         }

@@ -26,7 +26,8 @@ public class TicksLineUpdater implements SidebarLineUpdater {
     }
 
     private static final ElementFactory<Data, TicksLineUpdater> FACTORY = (objectData, context, dependencyProvider) -> {
-        Wrapper<Long> ticksWrapper = dependencyProvider.provide(Key.key("wrapper.long"));
+        Wrapper<Long> ticksWrapper =
+                dependencyProvider.provide(Key.key("zombies.dependency.sidebar" + ".ticks_since_start"));
         TickFormatter tickFormatter = context.provide(objectData.tickFormatterPath(), dependencyProvider, false);
         return new TicksLineUpdater(ticksWrapper, tickFormatter);
     };

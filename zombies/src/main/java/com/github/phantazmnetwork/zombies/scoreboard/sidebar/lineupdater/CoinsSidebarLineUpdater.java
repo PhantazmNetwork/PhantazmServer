@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater;
 
+import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
@@ -22,10 +23,9 @@ public class CoinsSidebarLineUpdater implements SidebarLineUpdater {
     private int lastCoins = -1;
 
     @FactoryMethod
-    public CoinsSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.player.name_future")
-    CompletableFuture<? extends Component> playerNameFuture,
+    public CoinsSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.player.player_view") PlayerView playerView,
             @NotNull @Dependency("zombies.dependency.player.coins") PlayerCoins coins) {
-        this.playerNameFuture = Objects.requireNonNull(playerNameFuture, "playerNameFuture");
+        this.playerNameFuture = playerView.getDisplayName();
         this.coins = Objects.requireNonNull(coins, "coins");
     }
 

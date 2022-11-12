@@ -46,7 +46,7 @@ public class DurationTickFormatter implements TickFormatter {
             }
         }
         if (minutes != 0) {
-            builder.append(Component.text(minutes)).append(Component.text("m"));
+            builder.append(Component.text(minutes));
             if (verbose) {
                 builder.append(Component.text(" minutes"));
             }
@@ -55,7 +55,7 @@ public class DurationTickFormatter implements TickFormatter {
             }
         }
         if ((hours == 0 && minutes == 0) || seconds != 0) {
-            builder.append(Component.text(seconds)).append(Component.text("s"));
+            builder.append(Component.text(seconds));
             if (verbose) {
                 builder.append(Component.text(" seconds"));
             }

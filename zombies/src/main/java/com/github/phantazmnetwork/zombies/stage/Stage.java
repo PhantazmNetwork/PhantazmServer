@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.stage;
 
 import com.github.phantazmnetwork.commons.Activable;
+import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -8,12 +9,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 public interface Stage extends Activable {
 
     boolean shouldContinue();
 
     boolean shouldRevert();
+
+    void onJoin(@NotNull ZombiesPlayer zombiesPlayer);
 
     boolean hasPermanentPlayers();
 
@@ -23,7 +27,10 @@ public interface Stage extends Activable {
 
         private BooleanSupplier continueCondition;
 
-        private BooleanSupplier revertCondition;
+        private BooleanSupplier revertCondition = () -> false;
+
+        private Consumer<ZombiesPlayer> playerJoinHandler = unused -> {
+        };
 
         private boolean hasPermanentPlayers;
 
@@ -34,6 +41,11 @@ public interface Stage extends Activable {
 
         public @NotNull Builder setRevertCondition(@NotNull BooleanSupplier revertCondition) {
             this.revertCondition = Objects.requireNonNull(revertCondition, "revertCondition");
+            return this;
+        }
+
+        public @NotNull Builder setPlayerJoinHandler(@NotNull Consumer<ZombiesPlayer> playerJoinHandler) {
+            this.playerJoinHandler = Objects.requireNonNull(playerJoinHandler, "playerJoinHandler");
             return this;
         }
 
@@ -54,7 +66,6 @@ public interface Stage extends Activable {
 
         public @NotNull Stage build() {
             Objects.requireNonNull(continueCondition, "continueCondition");
-            Objects.requireNonNull(revertCondition, "revertCondition");
 
             return new Stage() {
 
@@ -87,6 +98,11 @@ public interface Stage extends Activable {
                 @Override
                 public boolean shouldRevert() {
                     return revertCondition.getAsBoolean();
+                }
+
+                @Override
+                public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
+                    playerJoinHandler.accept(Objects.requireNonNull(zombiesPlayer, "zombiesPlayer"));
                 }
 
                 @Override
