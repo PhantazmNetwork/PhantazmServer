@@ -98,8 +98,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 continue;
             }
 
-            boolean hasMinimum = mapSettingsInfo.minimumProtocolVersion() < 0;
-            boolean hasMaximum = mapSettingsInfo.maximumProtocolVersion() < 0;
+            boolean hasMinimum = mapSettingsInfo.minimumProtocolVersion() >= 0;
+            boolean hasMaximum = mapSettingsInfo.maximumProtocolVersion() >= 0;
 
             int protocolVersion = MinecraftServer.PROTOCOL_VERSION;
             if (player.get().getPlayerConnection() instanceof PlayerSocketConnection socketConnection) {

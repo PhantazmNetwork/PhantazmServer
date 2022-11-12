@@ -199,7 +199,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     });
                 }
             }
-        }), map, Wrapper.of(0L));
+        }), zombiesPlayers.values(), map, Wrapper.of(0L));
         Stage end = new EndGameStage(Collections.emptyList(), zombiesPlayers.values(), 200L);
         StageTransition stageTransition = new StageTransition(List.of(idle, countdown, inGame, end));
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {

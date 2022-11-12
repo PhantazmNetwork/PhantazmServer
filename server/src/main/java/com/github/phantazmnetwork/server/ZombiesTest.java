@@ -153,7 +153,7 @@ final class ZombiesTest {
         });
 
 
-        Key testMapKey = Key.key(Namespaces.PHANTAZM, "test");
+        Key testMapKey = Key.key(Namespaces.PHANTAZM, "test_map");
         MapInfo testMap = maps.get(testMapKey);
 
         if (testMap != null) {

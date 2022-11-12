@@ -1,9 +1,14 @@
 package com.github.phantazmnetwork.zombies.stage;
 
 import com.github.phantazmnetwork.commons.Activable;
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Wrapper;
+import com.github.phantazmnetwork.core.inventory.InventoryAccess;
+import com.github.phantazmnetwork.core.inventory.InventoryObjectGroup;
 import com.github.phantazmnetwork.zombies.map.RoundHandler;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
+import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -13,12 +18,16 @@ public class InGameStage extends StageBase {
 
     private final ZombiesMap map;
 
+    private final Collection<? extends ZombiesPlayer> zombiesPlayers;
+
     private final Wrapper<Long> ticksSinceStart;
 
-    public InGameStage(@NotNull Collection<Activable> activables, @NotNull ZombiesMap map,
+    public InGameStage(@NotNull Collection<Activable> activables,
+            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull ZombiesMap map,
             @NotNull Wrapper<Long> ticksSinceStart) {
         super(activables);
         this.map = Objects.requireNonNull(map, "map");
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
     }
 
@@ -37,6 +46,24 @@ public class InGameStage extends StageBase {
             roundHandler.setCurrentRound(0);
         }
         ticksSinceStart.set(0L);
+
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            if (!zombiesPlayer.getModule().getInventoryAccessRegistry().hasCurrentAccess()) {
+                continue;
+            }
+
+            InventoryAccess access = zombiesPlayer.getModule().getInventoryAccessRegistry().getCurrentAccess();
+            InventoryObjectGroup objectGroup =
+                    access.groups().get(Key.key(Namespaces.PHANTAZM, "inventory.access.gun")); // todo
+            if (objectGroup == null) {
+                continue;
+            }
+
+            for (Key equipmentKey : map.getData().settings().defaultEquipment()) {
+                zombiesPlayer.getModule().getEquipmentCreator().createEquipment(equipmentKey)
+                        .ifPresent(objectGroup::pushInventoryObject);
+            }
+        }
     }
 
     @Override
