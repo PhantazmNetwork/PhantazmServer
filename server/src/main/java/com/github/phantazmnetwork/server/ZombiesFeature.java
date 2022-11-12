@@ -16,6 +16,7 @@ import com.github.phantazmnetwork.zombies.map.shop.predicate.logic.NotPredicate;
 import com.github.phantazmnetwork.zombies.map.shop.predicate.logic.OrPredicate;
 import com.github.phantazmnetwork.zombies.map.shop.predicate.logic.XorPredicate;
 import com.github.phantazmnetwork.zombies.perk.ExtraHealthLevel;
+import com.github.phantazmnetwork.zombies.powerup.HologramPowerupVisual;
 import com.github.phantazmnetwork.zombies.powerup.ItemPowerupVisual;
 import com.github.phantazmnetwork.zombies.powerup.TimedPredicate;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater.*;
@@ -121,6 +122,7 @@ public final class ZombiesFeature {
 
         //PowerupVisuals
         contextManager.registerElementClass(ItemPowerupVisual.class);
+        contextManager.registerElementClass(HologramPowerupVisual.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }
