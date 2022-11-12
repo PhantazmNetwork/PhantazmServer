@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class BasicDeathStateActivable implements Activable {
+public class BasicDeadStateActivable implements Activable {
 
     private final DeadPlayerStateContext context;
 
@@ -22,7 +22,7 @@ public class BasicDeathStateActivable implements Activable {
 
     private final Sidebar sidebar;
 
-    public BasicDeathStateActivable(@NotNull DeadPlayerStateContext context, @NotNull Instance instance,
+    public BasicDeadStateActivable(@NotNull DeadPlayerStateContext context, @NotNull Instance instance,
             @NotNull PlayerView playerView, @NotNull Sidebar sidebar) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");

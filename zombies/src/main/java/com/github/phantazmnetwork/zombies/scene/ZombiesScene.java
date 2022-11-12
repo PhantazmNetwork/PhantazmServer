@@ -127,7 +127,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         for (ZombiesPlayer zombiesPlayer : oldPlayers) {
             zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
-            zombiesPlayer.onJoin();
         }
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
@@ -140,7 +139,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             players.put(view.getUUID(), view);
 
             zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-            zombiesPlayer.onJoin();
 
             view.getPlayer().ifPresent(player -> {
                 player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
@@ -182,7 +180,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
             if (zombiesPlayer != null) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
-                zombiesPlayer.onQuit();
             }
         }
 
@@ -207,6 +204,14 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         return 0;
+    }
+
+    @Override
+    public void forceShutdown() {
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
+            zombiesPlayer.end();
+        }
+        super.forceShutdown();
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.github.phantazmnetwork.zombies.map.action.round;
 import com.github.phantazmnetwork.zombies.map.Round;
 import com.github.phantazmnetwork.zombies.map.action.Action;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
-import com.github.phantazmnetwork.zombies.player.state.KnockedPlayerState;
+import com.github.phantazmnetwork.zombies.player.state.revive.KnockedPlayerState;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerState;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.player.state.context.NoContext;
@@ -40,7 +40,7 @@ public class RevivePlayersAction implements Action<Round> {
                 zombiesPlayer.getModule().getPlayerView().getPlayer().ifPresent(player -> player.teleport(respawnPos));
             }
             else if (state instanceof KnockedPlayerState knockedPlayerState) {
-                knockedPlayerState.setReviver(null);
+                knockedPlayerState.getReviveHandler().setReviver(null);
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
             }
         }

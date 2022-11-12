@@ -1,8 +1,9 @@
 package com.github.phantazmnetwork.zombies.corpse;
 
+import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.core.hologram.Hologram;
 import com.github.phantazmnetwork.core.time.TickFormatter;
-import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import com.github.phantazmnetwork.zombies.player.state.revive.ReviveHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Entity;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class Corpse {
+public class Corpse implements Activable {
 
     private final Hologram hologram;
 
@@ -32,14 +33,15 @@ public class Corpse {
         corpseEntity.setPose(Entity.Pose.SLEEPING);
     }
 
-    public void deathTick(long time, long ticksUntilDeath) {
-        hologram.set(1, Component.text("dying", NamedTextColor.RED));
-        hologram.set(2, tickFormatter.format(ticksUntilDeath));
-    }
-
-    public void reviveTick(long time, @NotNull ZombiesPlayer reviver, long ticksUntilRevive) {
-        hologram.set(1, Component.text("reviving", NamedTextColor.GREEN));
-        hologram.set(2, tickFormatter.format(ticksUntilRevive));
+    public void tick(@NotNull ReviveHandler reviveHandler) {
+        if (reviveHandler.isReviving()) {
+            hologram.set(1, Component.text("reviving", NamedTextColor.GREEN));
+            hologram.set(2, tickFormatter.format(reviveHandler.getTicksUntilRevive()));
+        }
+        else {
+            hologram.set(1, Component.text("dying", NamedTextColor.RED));
+            hologram.set(2, tickFormatter.format(reviveHandler.getTicksUntilDeath()));
+        }
     }
 
     public void disable() {
@@ -49,6 +51,36 @@ public class Corpse {
     public void remove() {
         disable();
         corpseEntity.remove();
+    }
+
+    public @NotNull Activable asKnockActivable(@NotNull ReviveHandler reviveHandler) {
+        Objects.requireNonNull(reviveHandler, "reviveHandler");
+
+        return new Activable() {
+            @Override
+            public void start() {
+                Corpse.this.start();
+            }
+
+            @Override
+            public void tick(long time) {
+                Corpse.this.tick(time);
+            }
+
+            @Override
+            public void end() {
+                Corpse.this.disable();
+            }
+        };
+    }
+
+    public @NotNull Activable asDeathActivable() {
+        return new Activable() {
+            @Override
+            public void end() {
+                Corpse.this.remove();
+            }
+        };
     }
 
 }
