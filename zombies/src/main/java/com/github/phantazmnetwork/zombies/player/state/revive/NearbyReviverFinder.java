@@ -45,7 +45,7 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
                 continue;
             }
 
-            Optional<Player> reviverPlayerOptional = zombiesPlayer.getModule().getPlayerView().getPlayer();
+            Optional<Player> reviverPlayerOptional = zombiesPlayer.getPlayer();
             if (reviverPlayerOptional.isEmpty()) {
                 continue;
             }

@@ -20,12 +20,12 @@ import java.util.Objects;
 public class PlaySoundSkill implements Skill {
 
     @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath,
+    public record Data(@NotNull @DataPath("target_selector") String selectorPath,
                        @NotNull Sound sound,
                        boolean followAudience) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(selectorPath, "targetSelectorPath");
             Objects.requireNonNull(sound, "sound");
         }
 
@@ -42,7 +42,7 @@ public class PlaySoundSkill implements Skill {
      */
     @FactoryMethod
     public PlaySoundSkill(@NotNull Data data,
-            @NotNull @DataName("selector") TargetSelector<? extends Audience> selector) {
+            @NotNull @DataName("target_selector") TargetSelector<? extends Audience> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.selector = Objects.requireNonNull(selector, "selector");
     }
@@ -53,7 +53,7 @@ public class PlaySoundSkill implements Skill {
         return new ConfigProcessor<>() {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String selectorPath = element.getStringOrThrow("selectorPath");
+                String selectorPath = element.getStringOrThrow("targetSelectorPath");
                 Sound sound = soundProcessor.dataFromElement(element.getElementOrThrow("sound"));
                 boolean followAudience = element.getBooleanOrThrow("followAudience");
 
@@ -62,7 +62,7 @@ public class PlaySoundSkill implements Skill {
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("selectorPath", data.selectorPath(), "sound",
+                return ConfigNode.of("targetSelectorPath", data.selectorPath(), "sound",
                         soundProcessor.elementFromData(data.sound()), "followAudience", data.followAudience());
             }
         };

@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.scene;
 
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.ClientBlockHandlerSource;
 import com.github.phantazmnetwork.core.VecUtils;
@@ -52,10 +51,13 @@ import com.github.phantazmnetwork.zombies.player.state.revive.NearbyReviverFinde
 import com.github.phantazmnetwork.zombies.player.state.revive.ReviveHandler;
 import com.github.phantazmnetwork.zombies.spawn.BasicSpawnDistributor;
 import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
-import com.github.phantazmnetwork.zombies.stage.*;
+import com.github.phantazmnetwork.zombies.stage.BasicStages;
+import com.github.phantazmnetwork.zombies.stage.Stage;
+import com.github.phantazmnetwork.zombies.stage.StageTransition;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -187,30 +189,15 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         ZombiesMap map = new ZombiesMap(mapInfo, instance, modifierSource, flaggable, mapObjects, roundHandler);
 
         EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, roundHandler);
+        StageTransition stageTransition = createStageTransition(instance, zombiesPlayers, spawnPos, roundHandler);
 
-        Stage idle = new IdleStage(Collections.emptyList(), zombiesPlayers.values());
-        Stage countdown = new CountdownStage(Collections.emptyList(), zombiesPlayers.values(), Wrapper.of(400L), 400L);
-        Stage inGame = new InGameStage(List.of(new Activable() {
-            @Override
-            public void start() {
-                for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-                    zombiesPlayer.getModule().getPlayerView().getPlayer().ifPresent(player -> {
-                        player.teleport(spawnPos);
-                    });
-                }
-            }
-        }), zombiesPlayers.values(), map, Wrapper.of(0L));
-        Stage end = new EndGameStage(Collections.emptyList(), zombiesPlayers.values(), 200L);
-        StageTransition stageTransition = new StageTransition(List.of(idle, countdown, inGame, end));
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-            ZombiesPlayerModule module =
-                    createPlayerModule(zombiesPlayers, mapInfo.settings(), instance, playerView, modifierSource,
-                            childNode, random, mapObjects);
-            return new BasicZombiesPlayer(module);
+            return createPlayer(zombiesPlayers, mapInfo.settings(), instance, playerView, modifierSource, childNode,
+                    random, mapObjects);
         };
 
         ZombiesScene scene =
-                new ZombiesScene(zombiesPlayers, instance, sceneFallback, mapInfo.settings(), stageTransition,
+                new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, mapInfo.settings(), stageTransition,
                         playerCreator, random);
 
         eventNode.addChild(childNode);
@@ -230,8 +217,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 keyParser).build(mapInfo);
     }
 
-    private @NotNull ZombiesPlayerModule createPlayerModule(
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+    private @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull ModifierSource modifierSource, @NotNull EventNode<Event> eventNode, @NotNull Random random,
             @NotNull MapObjects mapObjects) {
@@ -272,7 +258,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
             Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(),
                     UUID.randomUUID().toString().substring(0, 16), skin);
-            TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.RED, false);
+            TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.RED, false, false);
             Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
 
             Supplier<ZombiesPlayerState> deadStateSupplier = () -> {
@@ -299,8 +285,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                                 Collections.emptyList()), ZombiesPlayerStateKeys.KNOCKED, knockedStateCreator,
                         ZombiesPlayerStateKeys.QUIT, quitStateCreator);
 
-        return new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
-                accessRegistry, stateSwitcher, stateFunctions, sidebar, modifierSource);
+        ZombiesPlayerModule module =
+                new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
+                        accessRegistry, stateSwitcher, stateFunctions, sidebar, modifierSource);
+        return new BasicZombiesPlayer(module);
     }
 
     private @NotNull EventNode<Event> createEventNode(@NotNull Instance instance,
@@ -322,6 +310,20 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers));
 
         return node;
+    }
+
+    private @NotNull StageTransition createStageTransition(@NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
+            @NotNull RoundHandler roundHandler) {
+        Stage idle = BasicStages.idle(zombiesPlayers);
+
+        LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
+        TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.YELLOW, true, false);
+        Stage countdown = BasicStages.countdown(instance, zombiesPlayers, alertTicks, tickFormatter, 400L);
+
+        Stage inGame = BasicStages.inGame(instance, zombiesPlayers, spawnPos, roundHandler);
+        Stage end = BasicStages.end(instance, 200L);
+        return new StageTransition(idle, countdown, inGame, end);
     }
 
     @Override

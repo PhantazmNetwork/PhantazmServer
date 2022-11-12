@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.core.game.scene.InstanceScene;
 import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.player.state.context.DeadPlayerStateContext;
@@ -27,6 +28,8 @@ import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
+    private final ZombiesMap map;
+
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
 
     private final MapSettingsInfo mapSettingsInfo;
@@ -39,12 +42,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private boolean joinable;
 
-    public ZombiesScene(@NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
-            @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
+    public ZombiesScene(@NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
+            @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator, @NotNull Random random) {
         super(instance, fallback);
 
+        this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = zombiesPlayers;
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
@@ -222,9 +226,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             return;
         }
 
+        map.tick(time);
+        stageTransition.tick(time);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             zombiesPlayer.tick(time);
         }
-        stageTransition.tick(time);
     }
 }

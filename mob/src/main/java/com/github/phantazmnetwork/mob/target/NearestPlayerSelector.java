@@ -15,10 +15,10 @@ import java.util.Objects;
 public class NearestPlayerSelector extends FirstTargetSelector<Player> {
 
     @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath) {
+    public record Data(@NotNull @DataPath("target_selector") String targetSelectorPath) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(targetSelectorPath, "targetSelectorPath");
         }
 
     }
@@ -30,7 +30,7 @@ public class NearestPlayerSelector extends FirstTargetSelector<Player> {
      */
     @FactoryMethod
     public NearestPlayerSelector(@NotNull Data data,
-            @NotNull @DataName("selector") TargetSelector<Iterable<Player>> delegate) {
+            @NotNull @DataName("target_selector") TargetSelector<Iterable<Player>> delegate) {
         super(delegate);
     }
 
@@ -39,13 +39,13 @@ public class NearestPlayerSelector extends FirstTargetSelector<Player> {
         return new ConfigProcessor<>() {
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String selectorPath = element.getStringOrThrow("selectorPath");
+                String selectorPath = element.getStringOrThrow("targetSelectorPath");
                 return new Data(selectorPath);
             }
 
             @Override
             public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return ConfigNode.of("selectorPath", data.selectorPath());
+                return ConfigNode.of("targetSelectorPath", data.targetSelectorPath());
             }
         };
     }

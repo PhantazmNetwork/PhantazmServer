@@ -12,10 +12,13 @@ public class DurationTickFormatter implements TickFormatter {
 
     private final TextColor color;
 
+    private final boolean verbose;
+
     private final boolean ceil;
 
-    public DurationTickFormatter(@NotNull TextColor color, boolean ceil) {
+    public DurationTickFormatter(@NotNull TextColor color, boolean verbose, boolean ceil) {
         this.color = Objects.requireNonNull(color, "color");
+        this.verbose = verbose;
         this.ceil = ceil;
     }
 
@@ -34,12 +37,32 @@ public class DurationTickFormatter implements TickFormatter {
 
         TextComponent.Builder builder = Component.text().color(color);
         if (hours != 0) {
-            builder.append(Component.text(hours)).append(Component.text("h"));
+            builder.append(Component.text(hours));
+            if (verbose) {
+                builder.append(Component.text(" hours"));
+            }
+            else {
+                builder.append(Component.text("h"));
+            }
         }
         if (minutes != 0) {
             builder.append(Component.text(minutes)).append(Component.text("m"));
+            if (verbose) {
+                builder.append(Component.text(" minutes"));
+            }
+            else {
+                builder.append(Component.text("m"));
+            }
         }
-        builder.append(Component.text(seconds)).append(Component.text("s"));
+        if ((hours == 0 && minutes == 0) || seconds != 0) {
+            builder.append(Component.text(seconds)).append(Component.text("s"));
+            if (verbose) {
+                builder.append(Component.text(" seconds"));
+            }
+            else {
+                builder.append(Component.text("s"));
+            }
+        }
 
         return builder.build();
     }
