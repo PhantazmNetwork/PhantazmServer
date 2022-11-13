@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.mob.MobModel;
+import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
@@ -24,6 +25,7 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Spawnpoint.class);
 
     private final Function<? super Key, ? extends SpawnruleInfo> spawnrules;
+    private final MobStore mobStore;
     private final MobSpawner mobSpawner;
 
     /**
@@ -35,9 +37,11 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
      * @param mobSpawner        the function used to actually spawn mobs in the world
      */
     public Spawnpoint(@NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
-            @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner) {
+            @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobStore mobStore,
+            @NotNull MobSpawner mobSpawner) {
         super(spawnInfo, spawnInfo.position(), instance);
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
     }
 
@@ -96,6 +100,6 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
      */
     public @NotNull PhantazmMob spawn(@NotNull MobModel model) {
         Objects.requireNonNull(model, "model");
-        return mobSpawner.spawn(instance, VecUtils.toPoint(origin.add(data.position())), model);
+        return mobSpawner.spawn(instance, VecUtils.toPoint(origin.add(data.position())), mobStore, model);
     }
 }

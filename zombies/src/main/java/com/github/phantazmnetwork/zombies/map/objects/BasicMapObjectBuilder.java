@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.zombies.map.objects;
 import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.gui.SlotDistributor;
+import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.coin.ModifierSource;
@@ -43,6 +44,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
     private final ContextManager contextManager;
     private final Instance instance;
+    private final MobStore mobStore;
     private final MobSpawner mobSpawner;
     private final ClientBlockHandler clientBlockHandler;
     private final SpawnDistributor spawnDistributor;
@@ -134,7 +136,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     }
 
     public BasicMapObjectBuilder(@NotNull ContextManager contextManager, @NotNull Instance instance,
-            @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler clientBlockHandler,
+            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler clientBlockHandler,
             @NotNull SpawnDistributor spawnDistributor,
             @NotNull Function<? super List<Round>, ? extends RoundHandler> roundHandlerFunction,
             @NotNull Flaggable flaggable, @NotNull ModifierSource modifierSource,
@@ -142,6 +144,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             @NotNull Pos respawnPos, @NotNull KeyParser keyParser) {
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.instance = Objects.requireNonNull(instance, "instance");
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockHandler");
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
@@ -239,7 +242,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             Map<Key, SpawnruleInfo> spawnruleInfoMap) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
-            spawnpoints.add(new Spawnpoint(spawnpointInfo, instance, spawnruleInfoMap::get, mobSpawner));
+            spawnpoints.add(new Spawnpoint(spawnpointInfo, instance, spawnruleInfoMap::get, mobStore, mobSpawner));
         }
 
         return spawnpoints;

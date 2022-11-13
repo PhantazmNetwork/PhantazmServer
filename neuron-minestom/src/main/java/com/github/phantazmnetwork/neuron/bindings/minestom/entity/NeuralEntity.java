@@ -67,15 +67,14 @@ public final class NeuralEntity extends LivingEntity implements Agent {
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        return super.setInstance(instance, spawnPosition).thenRun(() -> {
-            PathContext context = provider.provideContext(instance);
+        PathContext context = provider.provideContext(instance);
 
-            cancelNavigation();
-            navigator = descriptor.makeNavigator(context, this);
-            controller = descriptor.makeController(this);
+        cancelNavigation();
+        navigator = descriptor.makeNavigator(context, this);
+        controller = descriptor.makeController(this);
 
-            explorer = new TranslationExplorer(null, descriptor, descriptor.makeTranslator(instance, context));
-        });
+        explorer = new TranslationExplorer(null, descriptor, descriptor.makeTranslator(instance, context));
+        return super.setInstance(instance, spawnPosition);
     }
 
     @Override

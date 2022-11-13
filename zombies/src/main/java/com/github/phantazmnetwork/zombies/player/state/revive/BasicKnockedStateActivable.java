@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.core.time.TickFormatter;
 import com.github.phantazmnetwork.zombies.listener.PlayerMoveCancelListener;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import com.github.phantazmnetwork.zombies.player.ZombiesPlayerMeta;
 import com.github.phantazmnetwork.zombies.player.state.context.KnockedPlayerStateContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -38,18 +39,22 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final Sidebar sidebar;
 
+    private final ZombiesPlayerMeta meta;
+
     private final EventListener<PlayerMoveEvent> moveEventListener;
 
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull EventNode<? super PlayerMoveEvent> eventNode, @NotNull PlayerView playerView,
-            @NotNull ReviveHandler reviveHandler, @NotNull TickFormatter tickFormatter, @NotNull Sidebar sidebar) {
+            @NotNull ReviveHandler reviveHandler, @NotNull TickFormatter tickFormatter, @NotNull ZombiesPlayerMeta meta,
+            @NotNull Sidebar sidebar) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.reviveHandler = Objects.requireNonNull(reviveHandler, "reviveHandler");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
+        this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.moveEventListener =
                 EventListener.of(PlayerMoveEvent.class, new PlayerMoveCancelListener(instance, zombiesPlayers));
@@ -68,6 +73,9 @@ public class BasicKnockedStateActivable implements Activable {
             instance.sendMessage(buildDeathMessage(displayName));
         });
         eventNode.addListener(moveEventListener);
+        meta.setInGame(true);
+        meta.setCanRevive(false);
+        meta.setCanTriggerSLA(false);
     }
 
     @Override

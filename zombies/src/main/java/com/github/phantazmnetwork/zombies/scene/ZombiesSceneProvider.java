@@ -21,6 +21,8 @@ import com.github.phantazmnetwork.core.time.TickFormatter;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
+import com.github.phantazmnetwork.mob.trigger.MobTrigger;
+import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.zombies.audience.ChatComponentSender;
 import com.github.phantazmnetwork.zombies.coin.BasicModifierSource;
 import com.github.phantazmnetwork.zombies.coin.BasicPlayerCoins;
@@ -201,8 +203,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         roundHandler, ticksSinceStart, sidebarModule);
 
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-            return createPlayer(zombiesPlayers, settings, instance, playerView, modifierSource, new BasicFlaggable(),
-                    childNode, random, mapObjects);
+            return createPlayer(zombiesPlayers, settings, instance, playerView, new BasicModifierSource(),
+                    new BasicFlaggable(), childNode, random, mapObjects);
         };
 
         ZombiesScene scene =
@@ -221,7 +223,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, zombiesPlayers.values());
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
 
-        return new BasicMapObjectBuilder(contextManager, instance, mobSpawner, blockHandler, spawnDistributor,
+        return new BasicMapObjectBuilder(contextManager, instance, mobStore, mobSpawner, blockHandler, spawnDistributor,
                 BasicRoundHandler::new, flaggable, modifierSource, slotDistributor, zombiesPlayers, spawnPos,
                 keyParser).build(mapInfo);
     }
@@ -236,7 +238,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         PlayerKills kills = new BasicPlayerKills();
         InventoryProfile profile = new BasicInventoryProfile(9);
         InventoryAccess inventoryAccess = new InventoryAccess(profile,
-                Map.of(Key.key(Namespaces.PHANTAZM, "inventory.access.gun"),
+                Map.of(Key.key(Namespaces.PHANTAZM, "inventory.group.gun"),
                         new BasicInventoryObjectGroup(profile, IntSet.of(1, 2))));
         InventoryAccessRegistry accessRegistry = new BasicInventoryAccessRegistry();
         Key accessKey = Key.key(Namespaces.PHANTAZM, "inventory.access.default");
@@ -253,12 +255,12 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
                     ZombiesPlayerStateKeys.ALIVE.key(),
-                    Collections.singleton(new BasicAliveStateActivable(playerView, sidebar)));
+                    Collections.singleton(new BasicAliveStateActivable(playerView, meta, sidebar)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
                 (context, activables) -> {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
-                    combinedActivables.add(new BasicDeadStateActivable(context, instance, playerView, sidebar));
+                    combinedActivables.add(new BasicDeadStateActivable(context, instance, playerView, meta, sidebar));
                     return new BasicZombiesPlayerState(Component.text("DEAD", NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
@@ -273,19 +275,30 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             Supplier<ZombiesPlayerState> deadStateSupplier = () -> {
                 DeadPlayerStateContext deathContext = DeadPlayerStateContext.killed(context.getKiller().orElse(null),
                         context.getKnockRoom().orElse(null));
-                return deadStateCreator.apply(deathContext, Collections.singleton(corpse.asDeathActivable()));
+                return deadStateCreator.apply(deathContext, List.of(corpse.asDeathActivable(), new Activable() {
+                    @Override
+                    public void end() {
+                        meta.setCorpse(null);
+                    }
+                }));
             };
             ReviveHandler reviveHandler =
                     new ReviveHandler(() -> aliveStateCreator.apply(NoContext.INSTANCE), deadStateSupplier,
                             new NearbyReviverFinder(zombiesPlayers, playerView, mapSettingsInfo.reviveRadius()), 500L);
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, zombiesPlayers, eventNode, playerView,
-                            reviveHandler, tickFormatter, sidebar), corpse.asKnockActivable(reviveHandler)));
+                                    reviveHandler, tickFormatter, meta, sidebar), corpse.asKnockActivable(reviveHandler),
+                            new Activable() {
+                                @Override
+                                public void start() {
+                                    meta.setCorpse(corpse);
+                                }
+                            }));
         };
         Function<NoContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT", NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
-                    Collections.singleton(new BasicQuitStateActivable(instance, playerView, sidebar)));
+                    Collections.singleton(new BasicQuitStateActivable(instance, playerView, meta, sidebar)));
         };
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(aliveStateCreator.apply(NoContext.INSTANCE));
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
@@ -317,8 +330,17 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers));
+        for (MobTrigger<?> trigger : MobTriggers.TRIGGERS) {
+            registerTrigger(node, mobStore, trigger);
+        }
 
         return node;
+    }
+
+    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
+            @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
+        node.addListener(trigger.eventClass(),
+                event -> mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
     }
 
     private @NotNull StageTransition createStageTransition(@NotNull Instance instance,
@@ -336,7 +358,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         newSidebarUpdaterCreator(sidebarModule, "countdown"));
 
         Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
-                newSidebarUpdaterCreator(sidebarModule, "inGame"));
+                mapInfo.settings().defaultEquipment(), newSidebarUpdaterCreator(sidebarModule, "inGame"));
         Stage end = new EndStage(instance, zombiesPlayers, 200L, newSidebarUpdaterCreator(sidebarModule, "end"));
         return new StageTransition(idle, countdown, inGame, end);
     }

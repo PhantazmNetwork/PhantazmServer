@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.core.config.processor.ItemStackConfigProcessor
 import com.github.phantazmnetwork.core.config.processor.MinestomConfigProcessors;
 import com.github.phantazmnetwork.core.config.processor.VariantConfigProcessor;
 import com.github.phantazmnetwork.mob.MobModel;
-import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
 import com.github.phantazmnetwork.mob.goal.FollowPlayerGoal;
 import com.github.phantazmnetwork.mob.goal.MeleeAttackGoal;
@@ -16,7 +15,6 @@ import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.mob.target.EntitySelector;
 import com.github.phantazmnetwork.mob.target.NearestPlayerSelector;
 import com.github.phantazmnetwork.mob.target.NearestPlayersSelector;
-import com.github.phantazmnetwork.mob.trigger.MobTrigger;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.MinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
@@ -36,9 +34,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.metadata.villager.VillagerMeta;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +47,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -65,7 +59,6 @@ public final class Mob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Mob.class);
     private static final ConfigProcessor<MobModel> MODEL_PROCESSOR;
-    private static final MobStore MOB_STORE = new MobStore();
     private static MobSpawner mobSpawner;
     private static Map<Key, MobModel> models;
 
@@ -83,9 +76,8 @@ public final class Mob {
     }
 
     @SuppressWarnings("SameParameterValue")
-    static void initialize(@NotNull EventNode<Event> global, @NotNull ContextManager contextManager,
-            @NotNull KeyParser keyParser, @NotNull Spawner spawner, @NotNull Collection<MobTrigger<?>> triggers,
-            @NotNull Path mobPath, @NotNull ConfigCodec codec) {
+    static void initialize(@NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
+            @NotNull Spawner spawner, @NotNull Path mobPath, @NotNull ConfigCodec codec) {
         registerElementClasses(contextManager);
 
         Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap = new HashMap<>();
@@ -131,12 +123,7 @@ public final class Mob {
                 MinestomConfigProcessors.villagerData());
         processorMap.put(BooleanObjectPair.of(false, Entity.Pose.class.getName()),
                 ConfigProcessor.enumProcessor(Entity.Pose.class));
-        mobSpawner = new BasicMobSpawner(processorMap, MOB_STORE, spawner, contextManager, keyParser);
-
-        global.addListener(EntityDeathEvent.class, MOB_STORE::onMobDeath);
-        for (MobTrigger<?> trigger : triggers) {
-            registerTrigger(global, MOB_STORE, trigger);
-        }
+        mobSpawner = new BasicMobSpawner(processorMap, spawner, contextManager, keyParser);
 
         loadModels(mobPath, codec);
     }
@@ -158,13 +145,6 @@ public final class Mob {
         contextManager.registerElementClass(NearestPlayersSelector.class);
 
         LOGGER.info("Registered Mob element classes.");
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
-            @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
-        node.addListener(trigger.eventClass(),
-                event -> mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
     }
 
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
@@ -213,15 +193,6 @@ public final class Mob {
      */
     public static @NotNull ConfigProcessor<MobModel> getModelProcessor() {
         return MODEL_PROCESSOR;
-    }
-
-    /**
-     * Gets the {@link MobStore} used by the {@link Mob} system.
-     *
-     * @return The {@link MobStore} used by the {@link Mob} system
-     */
-    public static MobStore getMobStore() {
-        return MOB_STORE;
     }
 
     /**

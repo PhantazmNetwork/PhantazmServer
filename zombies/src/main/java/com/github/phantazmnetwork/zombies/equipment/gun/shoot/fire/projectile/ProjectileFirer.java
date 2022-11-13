@@ -1,6 +1,8 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.fire.projectile;
 
 import com.github.phantazmnetwork.mob.MobModel;
+import com.github.phantazmnetwork.mob.MobStore;
+import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.goal.ProjectileMovementGoal;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
@@ -53,11 +55,12 @@ public class ProjectileFirer implements Firer {
         for (String shotHandlerPath : objectData.shotHandlerPaths()) {
             shotHandlers.add(context.provide(shotHandlerPath, dependencyProvider, false));
         }
-        MobSpawner spawner = dependencyProvider.provide(Key.key("zombies.dependency.mob.spawner"));
+        MobStore mobStore = dependencyProvider.provide(Key.key("zombies.dependency.gun.store"));
+        MobSpawner spawner = dependencyProvider.provide(Key.key("zombies.dependency.gun.spawner"));
 
         ProjectileFirer firer =
                 new ProjectileFirer(objectData, entitySupplier, shooterUUID, endpointSelector, targetFinder,
-                        collisionFilter, shotHandlers, spawner);
+                        collisionFilter, shotHandlers, mobStore, spawner);
         node.addListener(ProjectileCollideWithBlockEvent.class, firer::onProjectileCollision);
         node.addListener(ProjectileCollideWithEntityEvent.class, firer::onProjectileCollision);
 
@@ -75,6 +78,8 @@ public class ProjectileFirer implements Firer {
     private final ProjectileCollisionFilter collisionFilter;
     private final Collection<ShotHandler> shotHandlers;
 
+    private final MobStore mobStore;
+
     private final MobSpawner spawner;
 
     /**
@@ -91,7 +96,7 @@ public class ProjectileFirer implements Firer {
     public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
             @NotNull UUID shooterUUID, @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
             @NotNull ProjectileCollisionFilter collisionFilter, @NotNull Collection<ShotHandler> shotHandlers,
-            @NotNull MobSpawner spawner) {
+            @NotNull MobStore mobStore, @NotNull MobSpawner spawner) {
         this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.shooterUUID = Objects.requireNonNull(shooterUUID, "shooterUUID");
@@ -99,6 +104,7 @@ public class ProjectileFirer implements Firer {
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
         this.collisionFilter = Objects.requireNonNull(collisionFilter, "collisionFilter");
         this.shotHandlers = List.copyOf(shotHandlers);
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.spawner = Objects.requireNonNull(spawner, "spawner");
     }
 
@@ -116,10 +122,12 @@ public class ProjectileFirer implements Firer {
             }
 
             endSelector.getEnd(start).ifPresent(end -> {
-                NeuralEntity neuralEntity = spawner.spawn(instance, start, data.model()).entity();
+                PhantazmMob mob = spawner.spawn(instance, start, mobStore, data.model());
+                NeuralEntity neuralEntity = mob.entity();
                 neuralEntity.addGoalGroup(new GoalGroup(Collections.singleton(
                         new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
                 neuralEntity.setNoGravity(!data.hasGravity());
+                mobStore.registerMob(mob);
 
                 firedShots.put(neuralEntity.getUuid(), new FiredShot(state, entity, start, previousHits));
                 removalQueue.add(new AliveProjectile(new WeakReference<>(neuralEntity), System.currentTimeMillis()));

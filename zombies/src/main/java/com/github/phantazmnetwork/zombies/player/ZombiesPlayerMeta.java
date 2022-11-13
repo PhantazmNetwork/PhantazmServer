@@ -18,7 +18,7 @@ public class ZombiesPlayerMeta {
 
     private boolean isReviving = false;
 
-    private boolean canTriggerSLA = false;
+    private boolean canTriggerSLA = true;
 
     public Optional<Corpse> getCorpse() {
         return Optional.ofNullable(corpse);

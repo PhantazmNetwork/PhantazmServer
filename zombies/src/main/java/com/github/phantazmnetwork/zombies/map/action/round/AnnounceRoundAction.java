@@ -71,7 +71,7 @@ public class AnnounceRoundAction implements Action<Round> {
     /**
      * Data for an AnnounceRoundAction.
      *
-     * @param formatMessage the MiniMessage-compatible string. The format specifier %i will be replaced by the current
+     * @param formatMessage the MiniMessage-compatible string. The format specifier %d will be replaced by the current
      *                      round number (1-indexed)
      * @param titlePart     which Component-accepting {@link TitlePart} to send the message to
      */

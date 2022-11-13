@@ -26,5 +26,6 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         if (round != null) {
             round.removeMob(mob);
         }
+        getMobStore().onMobDeath(event);
     }
 }

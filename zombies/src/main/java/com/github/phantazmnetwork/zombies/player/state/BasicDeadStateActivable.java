@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.player.state;
 
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.phantazmnetwork.zombies.player.ZombiesPlayerMeta;
 import com.github.phantazmnetwork.zombies.player.state.context.DeadPlayerStateContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -20,13 +21,16 @@ public class BasicDeadStateActivable implements Activable {
 
     private final PlayerView playerView;
 
+    private final ZombiesPlayerMeta meta;
+
     private final Sidebar sidebar;
 
     public BasicDeadStateActivable(@NotNull DeadPlayerStateContext context, @NotNull Instance instance,
-            @NotNull PlayerView playerView, @NotNull Sidebar sidebar) {
+            @NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
     }
 
@@ -42,6 +46,9 @@ public class BasicDeadStateActivable implements Activable {
         playerView.getDisplayName().thenAccept(displayName -> {
             instance.sendMessage(buildDeathMessage(displayName));
         });
+        meta.setInGame(true);
+        meta.setCanRevive(false);
+        meta.setCanTriggerSLA(false);
     }
 
     private @NotNull Component buildDeathMessage(@NotNull Component displayName) {

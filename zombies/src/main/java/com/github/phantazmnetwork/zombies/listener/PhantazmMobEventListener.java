@@ -34,4 +34,7 @@ public abstract class PhantazmMobEventListener<TEvent extends EntityInstanceEven
 
     protected abstract void accept(@NotNull PhantazmMob mob, @NotNull TEvent event);
 
+    protected @NotNull MobStore getMobStore() {
+        return mobStore;
+    }
 }
