@@ -26,10 +26,12 @@ import java.util.*;
  *
  * @see ClientBlockHandler
  */
-public class Window extends PositionalMapObject<WindowInfo> {
+public class Window {
     private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
     private static final Block DEFAULT_PADDING = Block.OAK_SLAB;
 
+    private final Instance instance;
+    private final WindowInfo windowInfo;
     private final ClientBlockHandler clientBlockHandler;
     private final Vec3I worldMin;
     private final Vec3D center;
@@ -45,19 +47,21 @@ public class Window extends PositionalMapObject<WindowInfo> {
      * Creates a new (fully-repaired) window.
      *
      * @param instance           the instance in which the window is present
-     * @param data               the data defining the configurable parameters of this window
+     * @param windowInfo         the data defining the configurable parameters of this window
      * @param clientBlockHandler the {@link ClientBlockHandler} used to set client-only barrier blocks
      */
-    public Window(@NotNull Instance instance, @NotNull WindowInfo data, @NotNull ClientBlockHandler clientBlockHandler,
-            @NotNull List<Action<Window>> repairActions, @NotNull List<Action<Window>> breakActions) {
-        super(data, data.frameRegion().origin(), instance);
-
+    public Window(@NotNull Vec3I mapOrigin, @NotNull Instance instance, @NotNull WindowInfo windowInfo,
+            @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
+            @NotNull List<Action<Window>> breakActions) {
+        Vec3I origin = mapOrigin.add(windowInfo.frameRegion().origin());
+        this.instance = Objects.requireNonNull(instance, "instance");
+        this.windowInfo = Objects.requireNonNull(windowInfo, "data");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
 
         this.repairActions = List.copyOf(repairActions);
         this.breakActions = List.copyOf(breakActions);
 
-        Region3I frame = data.frameRegion();
+        Region3I frame = windowInfo.frameRegion();
         Vec3I min = frame.origin();
 
         worldMin = Vec3I.of(origin.getX() + min.getX(), origin.getY() + min.getY(), origin.getZ() + min.getZ());
@@ -68,7 +72,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
             throw new IllegalArgumentException("Zero-volume window");
         }
 
-        List<String> repairBlockSnbts = data.repairBlocks();
+        List<String> repairBlockSnbts = windowInfo.repairBlocks();
         repairBlocks = new ArrayList<>(repairBlockSnbts.size());
         for (String blockString : repairBlockSnbts) {
             try {
@@ -143,6 +147,10 @@ public class Window extends PositionalMapObject<WindowInfo> {
         }
     }
 
+    public @NotNull WindowInfo getWindowInfo() {
+        return windowInfo;
+    }
+
     /**
      * Checks if the given {@link Point} is within the distance {@code range} specifies to the center of this window.
      *
@@ -171,8 +179,8 @@ public class Window extends PositionalMapObject<WindowInfo> {
 
         if (newIndex < index) {
             //play the break sound
-            instance.playSound(newIndex == 0 ? data.breakAllSound() : data.breakSound(), center.getX(), center.getY(),
-                    center.getZ());
+            instance.playSound(newIndex == 0 ? windowInfo.breakAllSound() : windowInfo.breakSound(), center.getX(),
+                    center.getY(), center.getZ());
 
             for (int i = index - 1; i >= newIndex; i--) {
                 Vec3I breakLocation = indexToCoordinate(i);
@@ -186,8 +194,8 @@ public class Window extends PositionalMapObject<WindowInfo> {
         }
         else {
             //play the repair sound
-            instance.playSound(newIndex == volume ? data.repairAllSound() : data.repairSound(), center.getX(),
-                    center.getY(), center.getZ());
+            instance.playSound(newIndex == volume ? windowInfo.repairAllSound() : windowInfo.repairSound(),
+                    center.getX(), center.getY(), center.getZ());
 
             for (int i = index; i < newIndex; i++) {
                 Vec3I repairLocation = indexToCoordinate(i);
@@ -251,7 +259,7 @@ public class Window extends PositionalMapObject<WindowInfo> {
     }
 
     private Vec3I indexToCoordinate(int index) {
-        Vec3I lengths = data.frameRegion().lengths();
+        Vec3I lengths = windowInfo.frameRegion().lengths();
 
         int xWidth = lengths.getX();
         int xyArea = xWidth * lengths.getY();

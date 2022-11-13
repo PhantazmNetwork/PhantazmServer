@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.map;
 
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
@@ -7,6 +8,7 @@ import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -21,10 +23,12 @@ import java.util.function.Function;
 /**
  * Represents a particular position where {@link PhantazmMob} instances may be spawned.
  */
-public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
+public class Spawnpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(Spawnpoint.class);
-
+    private final SpawnpointInfo spawnInfo;
     private final Function<? super Key, ? extends SpawnruleInfo> spawnrules;
+    private final Instance instance;
+    private final Point spawnPoint;
     private final MobStore mobStore;
     private final MobSpawner mobSpawner;
 
@@ -36,11 +40,13 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
      * @param spawnruleFunction the function used to resolve {@link SpawnruleInfo} data from keys
      * @param mobSpawner        the function used to actually spawn mobs in the world
      */
-    public Spawnpoint(@NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
+    public Spawnpoint(@NotNull Vec3I mapOrigin, @NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
             @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobStore mobStore,
             @NotNull MobSpawner mobSpawner) {
-        super(spawnInfo, spawnInfo.position(), instance);
+        this.spawnInfo = Objects.requireNonNull(spawnInfo, "spawnInfo");
+        this.spawnPoint = VecUtils.toPoint(mapOrigin.add(spawnInfo.position()));
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
+        this.instance = Objects.requireNonNull(instance, "instance");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
     }
@@ -58,12 +64,12 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
         Objects.requireNonNull(model, "model");
         Objects.requireNonNull(spawnType, "spawnType");
 
-        Key spawnruleKey = data.spawnRule();
+        Key spawnruleKey = spawnInfo.spawnRule();
         SpawnruleInfo spawnrule = spawnrules.apply(spawnruleKey);
 
         if (spawnrule == null) {
-            LOGGER.warn("Unrecognized spawnrule " + spawnruleKey + " at " + data.position() + "; mob not allowed to " +
-                    "spawn");
+            LOGGER.warn("Unrecognized spawnrule " + spawnruleKey + " at " + spawnInfo.position() + "; mob not allowed" +
+                    " to " + "spawn");
             return false;
         }
 
@@ -80,7 +86,7 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
 
             Optional<Player> playerOptional = player.getModule().getPlayerView().getPlayer();
             if (playerOptional.isPresent()) {
-                if (VecUtils.toDouble(playerOptional.get().getPosition()).squaredDistance(this.data.position()) <
+                if (VecUtils.toDouble(playerOptional.get().getPosition()).squaredDistance(this.spawnInfo.position()) <
                         slaSquared) {
                     inRange = true;
                     break;
@@ -100,6 +106,6 @@ public class Spawnpoint extends PositionalMapObject<SpawnpointInfo> {
      */
     public @NotNull PhantazmMob spawn(@NotNull MobModel model) {
         Objects.requireNonNull(model, "model");
-        return mobSpawner.spawn(instance, VecUtils.toPoint(origin.add(data.position())), mobStore, model);
+        return mobSpawner.spawn(instance, spawnPoint, mobStore, model);
     }
 }

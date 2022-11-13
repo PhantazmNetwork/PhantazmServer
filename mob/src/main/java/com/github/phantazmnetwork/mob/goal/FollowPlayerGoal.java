@@ -17,7 +17,7 @@ import java.util.Objects;
 public class FollowPlayerGoal extends FollowEntityGoal<Player> {
 
     @DataObject
-    public record Data(@NotNull @DataPath("target_selector") String targetSelectorPath) {
+    public record Data(@NotNull @DataPath("target_selector") String targetSelectorPath, long retargetInterval) {
 
         public Data {
             Objects.requireNonNull(targetSelectorPath, "targetSelectorPath");
@@ -33,7 +33,7 @@ public class FollowPlayerGoal extends FollowEntityGoal<Player> {
     @FactoryMethod
     public FollowPlayerGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity,
             @NotNull @DataName("target_selector") TargetSelector<Player> selector) {
-        super(entity, selector);
+        super(entity, selector, data.retargetInterval());
     }
 
 }

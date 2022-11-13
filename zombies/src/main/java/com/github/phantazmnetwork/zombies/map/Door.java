@@ -18,10 +18,12 @@ import java.util.*;
 /**
  * Represents a door. May be opened once.
  */
-public class Door extends PositionalMapObject<DoorInfo> {
+public class Door {
     private static final Logger LOGGER = LoggerFactory.getLogger(Door.class);
     private static final Region3I[] EMPTY_REGION_ARRAY = new Region3I[0];
 
+    private final Instance instance;
+    private final DoorInfo doorInfo;
     private final Block fillBlock;
     private final Region3I enclosing;
     private final Vec3D center;
@@ -40,10 +42,12 @@ public class Door extends PositionalMapObject<DoorInfo> {
      * @param doorInfo the backing data object
      * @param instance the instance which this MapObject is in
      */
-    public Door(@NotNull DoorInfo doorInfo, @NotNull Instance instance, @NotNull Block fillBlock,
-            @NotNull List<Action<Door>> openActions) {
-        super(doorInfo, Vec3I.floored(Region3I.enclosing(doorInfo.regions().toArray(EMPTY_REGION_ARRAY)).getCenter()),
-                instance);
+    public Door(@NotNull Vec3I mapOrigin, @NotNull DoorInfo doorInfo, @NotNull Instance instance,
+            @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions) {
+        Vec3I origin = mapOrigin.add(
+                Vec3I.floored(Region3I.enclosing(doorInfo.regions().toArray(EMPTY_REGION_ARRAY)).getCenter()));
+        this.instance = Objects.requireNonNull(instance, "instance");
+        this.doorInfo = Objects.requireNonNull(doorInfo, "doorInfo");
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
         List<Region3I> regions = doorInfo.regions();
@@ -65,7 +69,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
             this.regions = List.of(regionArray);
         }
 
-        List<HologramInfo> hologramInfo = data.holograms();
+        List<HologramInfo> hologramInfo = doorInfo.holograms();
         holograms = new ArrayList<>(hologramInfo.size());
 
         initHolograms(hologramInfo);
@@ -140,7 +144,7 @@ public class Door extends PositionalMapObject<DoorInfo> {
             instance.setBlock(pos.getX(), pos.getY(), pos.getZ(), blockEntry.getValue());
         }
 
-        initHolograms(data.holograms());
+        initHolograms(doorInfo.holograms());
         blockMappings.clear();
     }
 

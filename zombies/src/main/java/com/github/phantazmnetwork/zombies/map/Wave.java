@@ -1,9 +1,13 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.zombies.map.objects.MapObject;
 import org.jetbrains.annotations.NotNull;
 
-public class Wave extends MapObject<WaveInfo> {
+import java.util.Objects;
+
+public class Wave {
+
+    private final WaveInfo waveInfo;
+
     private final int mobCount;
 
     /**
@@ -12,12 +16,12 @@ public class Wave extends MapObject<WaveInfo> {
      * @param waveInfo the backing data object
      */
     public Wave(@NotNull WaveInfo waveInfo) {
-        super(waveInfo);
+        this.waveInfo = Objects.requireNonNull(waveInfo, "waveInfo");
+
         int count = 0;
         for (SpawnInfo spawnInfo : waveInfo.spawns()) {
             count += spawnInfo.amount();
         }
-
         this.mobCount = count;
     }
 
@@ -28,5 +32,9 @@ public class Wave extends MapObject<WaveInfo> {
      */
     public int mobCount() {
         return mobCount;
+    }
+
+    public @NotNull WaveInfo getWaveInfo() {
+        return waveInfo;
     }
 }

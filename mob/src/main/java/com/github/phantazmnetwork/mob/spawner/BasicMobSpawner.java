@@ -82,6 +82,12 @@ public class BasicMobSpawner implements MobSpawner {
             return spawner;
         }
 
+        @DependencySupplier("mob.store")
+        @Memoize
+        public MobStore getMobStore() {
+            return mobStore;
+        }
+
         @DependencySupplier("mob.model")
         @Memoize
         public @NotNull MobModel getModel() {

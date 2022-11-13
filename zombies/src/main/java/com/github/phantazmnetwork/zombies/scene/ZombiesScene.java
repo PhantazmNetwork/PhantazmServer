@@ -38,14 +38,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
 
-    private final Random random;
-
     private boolean joinable;
 
     public ZombiesScene(@NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition,
-            @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator, @NotNull Random random) {
+            @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator) {
         super(instance, fallback);
 
         this.map = Objects.requireNonNull(map, "map");
@@ -53,7 +51,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
-        this.random = Objects.requireNonNull(random, "random");
     }
 
     public @NotNull Map<UUID, ZombiesPlayer> getZombiesPlayers() {

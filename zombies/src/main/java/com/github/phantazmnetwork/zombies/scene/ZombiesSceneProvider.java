@@ -191,7 +191,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Random random = new Random();
         MapObjects mapObjects = createMapObjects(instance, random, zombiesPlayers, flaggable, modifierSource, spawnPos);
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
-        ZombiesMap map = new ZombiesMap(mapInfo, instance, modifierSource, flaggable, mapObjects, roundHandler);
+        ZombiesMap map = new ZombiesMap(modifierSource, flaggable, mapObjects, roundHandler);
 
         EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, roundHandler);
 
@@ -207,9 +207,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     new BasicFlaggable(), childNode, random, mapObjects);
         };
 
-        ZombiesScene scene =
-                new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, settings, stageTransition, playerCreator,
-                        random);
+        ZombiesScene scene = new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, settings, stageTransition,
+                playerCreator);
 
         eventNode.addChild(childNode);
         contexts.put(scene, new SceneContext(childNode));

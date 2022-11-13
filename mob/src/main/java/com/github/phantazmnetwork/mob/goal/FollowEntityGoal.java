@@ -21,14 +21,21 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Neural
 
     private final TargetSelector<TEntity> selector;
 
+    private final long retargetInterval;
+
+    private long ticksSinceTargetChosen;
+
     /**
      * Creates a {@link FollowEntityGoal}.
      *
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
-    public FollowEntityGoal(@NotNull NeuralEntity entity, @NotNull TargetSelector<TEntity> selector) {
+    public FollowEntityGoal(@NotNull NeuralEntity entity, @NotNull TargetSelector<TEntity> selector,
+            long retargetInterval) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.selector = Objects.requireNonNull(selector, "selector");
+        this.retargetInterval = retargetInterval;
+        this.ticksSinceTargetChosen = retargetInterval;
     }
 
     @Override
@@ -38,9 +45,7 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Neural
 
     @Override
     public void start() {
-        MinestomDescriptor descriptor = (MinestomDescriptor)entity.getDescriptor();
-        entity.getNavigator()
-                .setDestination(() -> selector.selectTarget().map(descriptor::computeTargetPosition).orElse(null));
+
     }
 
     @Override
@@ -55,7 +60,18 @@ public abstract class FollowEntityGoal<TEntity extends Entity> implements Neural
 
     @Override
     public void tick(long time) {
+        if (ticksSinceTargetChosen >= retargetInterval) {
+            refreshTarget();
+        }
+        else {
+            ++ticksSinceTargetChosen;
+        }
+    }
 
+    private void refreshTarget() {
+        MinestomDescriptor descriptor = (MinestomDescriptor)entity.getDescriptor();
+        entity.getNavigator()
+                .setDestination(() -> selector.selectTarget().map(descriptor::computeTargetPosition).orElse(null));
     }
 
     /**

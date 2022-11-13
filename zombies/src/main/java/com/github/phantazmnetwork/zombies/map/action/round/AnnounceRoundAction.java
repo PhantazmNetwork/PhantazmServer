@@ -65,7 +65,7 @@ public class AnnounceRoundAction implements Action<Round> {
     @Override
     public void perform(@NotNull Round round) {
         instance.sendTitlePart(data.titlePart,
-                MiniMessage.miniMessage().deserialize(data.formatMessage.formatted(round.getData().round())));
+                MiniMessage.miniMessage().deserialize(data.formatMessage.formatted(round.getRoundInfo().round() + 1)));
     }
 
     /**
