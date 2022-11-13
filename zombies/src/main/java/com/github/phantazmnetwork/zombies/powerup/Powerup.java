@@ -2,13 +2,17 @@ package com.github.phantazmnetwork.zombies.powerup;
 
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
 
-public class Powerup implements Tickable {
+public class Powerup implements Tickable, Keyed {
+    private final Key type;
+
     private final PowerupVisual[] visuals;
     private final PowerupAction[] actions;
     private final DeactivationPredicate despawnPredicate;
@@ -16,9 +20,12 @@ public class Powerup implements Tickable {
 
     private boolean spawned;
     private boolean active;
+    private ZombiesPlayer activatingPlayer;
 
-    public Powerup(@NotNull Collection<PowerupVisual> visuals, @NotNull Collection<PowerupAction> actions,
-            @NotNull DeactivationPredicate despawnPredicate, @NotNull Vec spawnLocation) {
+    public Powerup(@NotNull Key type, @NotNull Collection<PowerupVisual> visuals,
+            @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
+            @NotNull Vec spawnLocation) {
+        this.type = Objects.requireNonNull(type, "type");
         this.visuals = visuals.toArray(PowerupVisual[]::new);
         this.actions = actions.toArray(PowerupAction[]::new);
         this.despawnPredicate = Objects.requireNonNull(despawnPredicate, "despawnPredicate");
@@ -26,6 +33,10 @@ public class Powerup implements Tickable {
     }
 
     public void spawn() {
+        if (spawned) {
+            return;
+        }
+
         for (PowerupVisual visual : visuals) {
             visual.spawn(spawnLocation.x(), spawnLocation.y(), spawnLocation.z());
         }
@@ -33,9 +44,21 @@ public class Powerup implements Tickable {
         spawned = true;
     }
 
+    public boolean spawned() {
+        return spawned;
+    }
+
+    public boolean active() {
+        return active;
+    }
+
     public void activate(@NotNull ZombiesPlayer player, long time) {
         if (active) {
             return;
+        }
+
+        for (PowerupVisual visual : visuals) {
+            visual.despawn();
         }
 
         boolean anyActive = false;
@@ -49,7 +72,7 @@ public class Powerup implements Tickable {
 
             if (action.deactivationPredicate().shouldDeactivate(time)) {
                 //deactivate immediately if necessary
-                action.deactivate();
+                action.deactivate(player);
                 actions[i] = null;
             }
             else {
@@ -59,6 +82,7 @@ public class Powerup implements Tickable {
 
         if (anyActive) {
             active = true;
+            activatingPlayer = player;
         }
 
         spawned = false;
@@ -98,7 +122,7 @@ public class Powerup implements Tickable {
 
             DeactivationPredicate deactivationPredicate = action.deactivationPredicate();
             if (deactivationPredicate.shouldDeactivate(time)) {
-                action.deactivate();
+                action.deactivate(activatingPlayer);
                 actions[i] = null;
             }
             else {
@@ -109,5 +133,10 @@ public class Powerup implements Tickable {
         if (!anyActive) {
             active = false;
         }
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return type;
     }
 }

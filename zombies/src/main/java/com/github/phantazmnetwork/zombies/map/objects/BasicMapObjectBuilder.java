@@ -170,7 +170,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         List<Room> rooms = buildRooms(mapInfo.rooms(), provider);
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider);
 
-        MapObjects mapObjects = new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds);
+        MapObjects mapObjects = new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds, provider);
         mapObjectsWrapper.set(mapObjects);
         roundHandlerWrapper.set(
                 Objects.requireNonNull(roundHandlerFunction.apply(rounds), "roundHandlerFunction result"));

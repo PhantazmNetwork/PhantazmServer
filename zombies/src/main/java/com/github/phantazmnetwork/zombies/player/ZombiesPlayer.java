@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.core.inventory.InventoryAccess;
 import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.InventoryObject;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
+import com.github.phantazmnetwork.zombies.map.Flaggable;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerState;
 import net.minestom.server.entity.Player;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface ZombiesPlayer extends Activable {
+public interface ZombiesPlayer extends Activable, Flaggable.Source {
 
     @NotNull ZombiesPlayerModule getModule();
 

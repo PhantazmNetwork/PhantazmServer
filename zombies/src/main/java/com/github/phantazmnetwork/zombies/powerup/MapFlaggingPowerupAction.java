@@ -6,14 +6,14 @@ import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-@Model("zombies.powerup.action.flagging")
+@Model("zombies.powerup.action.map_flagging")
 @Cache(false)
-public class FlaggingPowerupAction extends PowerupActionBase {
+public class MapFlaggingPowerupAction extends PowerupActionBase {
     private final Data data;
     private final Flaggable flaggable;
 
     @FactoryMethod
-    public FlaggingPowerupAction(@NotNull Data data,
+    public MapFlaggingPowerupAction(@NotNull Data data,
             @NotNull @DataName("deactivation_predicate") DeactivationPredicate deactivationPredicate,
             @NotNull @Dependency("zombies.dependency.map_object.flaggable") Flaggable flaggable) {
         super(deactivationPredicate);
@@ -28,7 +28,7 @@ public class FlaggingPowerupAction extends PowerupActionBase {
     }
 
     @Override
-    public void deactivate() {
+    public void deactivate(@NotNull ZombiesPlayer player) {
         flaggable.clearFlag(data.flag);
     }
 

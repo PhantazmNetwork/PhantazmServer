@@ -201,8 +201,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         roundHandler, ticksSinceStart, sidebarModule);
 
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-            return createPlayer(zombiesPlayers, settings, instance, playerView, modifierSource, childNode, random,
-                    mapObjects);
+            return createPlayer(zombiesPlayers, settings, instance, playerView, modifierSource, new BasicFlaggable(),
+                    childNode, random, mapObjects);
         };
 
         ZombiesScene scene =
@@ -228,8 +228,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull ModifierSource modifierSource, @NotNull EventNode<Event> eventNode, @NotNull Random random,
-            @NotNull MapObjects mapObjects) {
+            @NotNull ModifierSource modifierSource, @NotNull Flaggable flaggable, @NotNull EventNode<Event> eventNode,
+            @NotNull Random random, @NotNull MapObjects mapObjects) {
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
         PlayerCoins coins = new BasicPlayerCoins(new PlayerAudienceProvider(playerView), new ChatComponentSender(),
                 new BasicTransactionComponentCreator(), 0);
@@ -296,7 +296,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesPlayerModule module =
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
-                        accessRegistry, stateSwitcher, stateFunctions, sidebar, modifierSource);
+                        accessRegistry, stateSwitcher, stateFunctions, sidebar, modifierSource, flaggable);
         return new BasicZombiesPlayer(module);
     }
 

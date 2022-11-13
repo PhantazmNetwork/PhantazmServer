@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
+import com.github.steanky.element.core.dependency.DependencyProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -25,6 +26,8 @@ public interface MapObjects extends Tickable {
     @Unmodifiable @NotNull List<Room> rooms();
 
     @Unmodifiable @NotNull List<Round> rounds();
+
+    @NotNull DependencyProvider mapDependencyProvider();
 
     default @NotNull Optional<Window> nearestWindowInRange(@NotNull Vec3D origin, double distance) {
         double distanceSquared = distance * distance;

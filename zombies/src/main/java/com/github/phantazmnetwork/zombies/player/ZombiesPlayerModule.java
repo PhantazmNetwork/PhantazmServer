@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.coin.ModifierSource;
 import com.github.phantazmnetwork.zombies.kill.PlayerKills;
+import com.github.phantazmnetwork.zombies.map.Flaggable;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateSwitcher;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerState;
@@ -47,12 +48,14 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     private final ModifierSource modifierSource;
 
+    private final Flaggable flaggable;
+
     public ZombiesPlayerModule(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
             @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
             @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
             @NotNull PlayerStateSwitcher stateSwitcher,
             @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
-            @NotNull Sidebar sidebar, @NotNull ModifierSource modifierSource) {
+            @NotNull Sidebar sidebar, @NotNull ModifierSource modifierSource, @NotNull Flaggable flaggable) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -64,6 +67,7 @@ public class ZombiesPlayerModule implements DependencyModule {
         this.stateFunctions = Map.copyOf(stateFunctions);
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
+        this.flaggable = Objects.requireNonNull(flaggable, "flags");
     }
 
     @DependencySupplier("zombies.dependency.player.meta")
@@ -126,4 +130,8 @@ public class ZombiesPlayerModule implements DependencyModule {
         return modifierSource;
     }
 
+    @DependencySupplier("zombies.dependency.player.flaggable")
+    public @NotNull Flaggable flaggable() {
+        return flaggable;
+    }
 }

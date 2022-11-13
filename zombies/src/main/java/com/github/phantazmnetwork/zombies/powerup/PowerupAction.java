@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 public interface PowerupAction {
     void activate(@NotNull ZombiesPlayer player, long time);
 
-    void deactivate();
+    void deactivate(@NotNull ZombiesPlayer player);
 
     @NotNull DeactivationPredicate deactivationPredicate();
 }

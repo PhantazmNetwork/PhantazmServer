@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.player;
 
+import com.github.phantazmnetwork.zombies.map.Flaggable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -46,5 +47,10 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public void end() {
         module.getStateSwitcher().end();
+    }
+
+    @Override
+    public @NotNull Flaggable flags() {
+        return module.flaggable();
     }
 }
