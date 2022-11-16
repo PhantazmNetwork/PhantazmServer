@@ -121,6 +121,7 @@ public final class ZombiesFeature {
 
         //DeactivationPredicates
         contextManager.registerElementClass(TimedDeactivationPredicateFactory.class);
+        contextManager.registerElementClass(ImmediateDeactivationPredicateFactory.class);
 
         //PowerupVisuals
         contextManager.registerElementClass(ItemPowerupVisualFactory.class);
@@ -128,6 +129,7 @@ public final class ZombiesFeature {
 
         //PowerupActions
         contextManager.registerElementClass(MapFlaggingPowerupActionFactory.class);
+        contextManager.registerElementClass(PlayerFlaggingPowerupActionFactory.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }
