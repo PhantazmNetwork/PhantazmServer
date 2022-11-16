@@ -25,7 +25,9 @@ public class FileSystemMapLoader implements MapLoader {
     private static final String ROUNDS_PATH = "rounds";
     private static final String SPAWNRULES_PATH = "spawnrules";
     private static final String SPAWNPOINTS_PATH = "spawnpoints";
+    private static final String POWERUPS_PATH = "powerups";
     private static final String SCOREBOARD_PATH = "scoreboard";
+
     private final String mapInfoName;
     private final BiPredicate<Path, BasicFileAttributes> configPredicate;
     private final Path root;
@@ -80,6 +82,7 @@ public class FileSystemMapLoader implements MapLoader {
         List<RoundInfo> rounds = new ArrayList<>();
         List<SpawnruleInfo> spawnrules = new ArrayList<>();
         List<SpawnpointInfo> spawnpoints = new ArrayList<>();
+        List<PowerupInfo> powerups = new ArrayList<>();
         ConfigNode scoreboard;
 
         FileUtils.forEachFileMatching(paths.rooms, configPredicate,
@@ -104,12 +107,16 @@ public class FileSystemMapLoader implements MapLoader {
         FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate,
                 file -> spawnpoints.add(Configuration.read(file, codec, MapProcessors.spawnpointInfo())));
 
+        FileUtils.forEachFileMatching(paths.powerups, configPredicate,
+                file -> powerups.add(Configuration.read(file, codec, MapProcessors.powerupInfo())));
+
         String scoreboardSettingsPath =
                 "settings" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         scoreboard =
                 Configuration.read(paths.scoreboard.resolve(scoreboardSettingsPath), codec, MapProcessors.scoreboard());
 
-        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, scoreboard);
+        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, powerups,
+                scoreboard);
     }
 
     @Override
@@ -130,6 +137,7 @@ public class FileSystemMapLoader implements MapLoader {
         FileUtils.deleteRecursivelyIfExists(paths.rounds);
         FileUtils.deleteRecursivelyIfExists(paths.spawnrules);
         FileUtils.deleteRecursivelyIfExists(paths.spawnpoints);
+        FileUtils.deleteRecursivelyIfExists(paths.powerups);
         FileUtils.deleteRecursivelyIfExists(paths.scoreboard);
 
         Files.createDirectories(paths.rooms);
@@ -139,6 +147,7 @@ public class FileSystemMapLoader implements MapLoader {
         Files.createDirectories(paths.rounds);
         Files.createDirectories(paths.spawnrules);
         Files.createDirectories(paths.spawnpoints);
+        Files.createDirectories(paths.powerups);
         Files.createDirectories(paths.scoreboard);
 
         String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension();
@@ -209,11 +218,12 @@ public class FileSystemMapLoader implements MapLoader {
                                Path rounds,
                                Path spawnrules,
                                Path spawnpoints,
+                               Path powerups,
                                Path scoreboard) {
         private FolderPaths(Path root) {
             this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH),
                     root.resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH),
-                    root.resolve(SPAWNPOINTS_PATH), root.resolve(SCOREBOARD_PATH));
+                    root.resolve(SPAWNPOINTS_PATH), root.resolve(POWERUPS_PATH), root.resolve(SCOREBOARD_PATH));
         }
     }
 }

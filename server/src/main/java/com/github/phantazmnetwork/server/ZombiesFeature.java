@@ -16,9 +16,7 @@ import com.github.phantazmnetwork.zombies.map.shop.predicate.logic.NotPredicate;
 import com.github.phantazmnetwork.zombies.map.shop.predicate.logic.OrPredicate;
 import com.github.phantazmnetwork.zombies.map.shop.predicate.logic.XorPredicate;
 import com.github.phantazmnetwork.zombies.perk.ExtraHealthLevel;
-import com.github.phantazmnetwork.zombies.powerup.HologramPowerupVisualBuilder;
-import com.github.phantazmnetwork.zombies.powerup.ItemPowerupVisualBuilder;
-import com.github.phantazmnetwork.zombies.powerup.TimedPredicateBuilder;
+import com.github.phantazmnetwork.zombies.powerup.*;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater.*;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater.condition.AliveCondition;
@@ -122,11 +120,14 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(ExtraHealthLevel.class);
 
         //DeactivationPredicates
-        contextManager.registerElementClass(TimedPredicateBuilder.class);
+        contextManager.registerElementClass(TimedDeactivationPredicateFactory.class);
 
         //PowerupVisuals
-        contextManager.registerElementClass(ItemPowerupVisualBuilder.class);
-        contextManager.registerElementClass(HologramPowerupVisualBuilder.class);
+        contextManager.registerElementClass(ItemPowerupVisualFactory.class);
+        contextManager.registerElementClass(HologramPowerupVisualFactory.class);
+
+        //PowerupActions
+        contextManager.registerElementClass(MapFlaggingPowerupActionFactory.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

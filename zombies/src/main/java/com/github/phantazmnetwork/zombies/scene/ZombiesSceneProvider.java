@@ -52,6 +52,7 @@ import com.github.phantazmnetwork.zombies.player.state.revive.BasicKnockedStateA
 import com.github.phantazmnetwork.zombies.player.state.revive.KnockedPlayerState;
 import com.github.phantazmnetwork.zombies.player.state.revive.NearbyReviverFinder;
 import com.github.phantazmnetwork.zombies.player.state.revive.ReviveHandler;
+import com.github.phantazmnetwork.zombies.powerup.*;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.ElementSidebarUpdaterCreator;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarModule;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
@@ -60,7 +61,11 @@ import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.stage.*;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
+import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ConfigList;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
@@ -170,19 +175,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return Optional.empty();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     protected @NotNull ZombiesScene createScene(@NotNull ZombiesJoinRequest request) {
         MapSettingsInfo settings = mapInfo.settings();
         Instance instance = instanceLoader.loadInstance(instanceManager, settings.instancePath());
 
-        Phaser phaser = new Phaser(1);
         Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
-        ChunkUtils.forChunksInRange(spawnPos, MinecraftServer.getChunkViewDistance(), (chunkX, chunkZ) -> {
-            phaser.register();
-            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
-        });
-        phaser.arriveAndAwaitAdvance();
+        awaitChunkLoad(instance, spawnPos);
 
         Map<UUID, ZombiesPlayer> zombiesPlayers = new HashMap<>(settings.maxPlayers());
 
@@ -190,8 +189,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Flaggable flaggable = new BasicFlaggable();
         Random random = new Random();
         MapObjects mapObjects = createMapObjects(instance, random, zombiesPlayers, flaggable, modifierSource, spawnPos);
+        PowerupHandler powerupHandler = createPowerupHandler(mapObjects.mapDependencyProvider());
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
-        ZombiesMap map = new ZombiesMap(modifierSource, flaggable, mapObjects, roundHandler);
+
+        ZombiesMap map = new ZombiesMap(modifierSource, flaggable, mapObjects, powerupHandler, roundHandler);
 
         EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, roundHandler);
 
@@ -215,6 +216,16 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return scene;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
+    private static void awaitChunkLoad(Instance instance, Pos spawnPos) {
+        Phaser phaser = new Phaser(1);
+        ChunkUtils.forChunksInRange(spawnPos, MinecraftServer.getChunkViewDistance(), (chunkX, chunkZ) -> {
+            phaser.register();
+            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
+        });
+        phaser.arriveAndAwaitAdvance();
+    }
+
     private @NotNull MapObjects createMapObjects(@NotNull Instance instance, @NotNull Random random,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull Flaggable flaggable,
             @NotNull ModifierSource modifierSource, @NotNull Pos spawnPos) {
@@ -225,6 +236,43 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return new BasicMapObjectBuilder(contextManager, instance, mobStore, mobSpawner, blockHandler, spawnDistributor,
                 BasicRoundHandler::new, flaggable, modifierSource, slotDistributor, zombiesPlayers, spawnPos,
                 keyParser).build(mapInfo);
+    }
+
+    private @NotNull PowerupHandler createPowerupHandler(@NotNull DependencyProvider mapDependencyProvider) {
+        List<PowerupInfo> powerupData = mapInfo.powerups();
+        Map<Key, PowerupComponents> powerupMap = new HashMap<>(powerupData.size());
+
+        for (PowerupInfo data : powerupData) {
+            ConfigList visualData = data.visuals();
+            ConfigList actionData = data.actions();
+            ConfigNode deactivationPredicateData = data.deactivationPredicate();
+
+            Collection<Supplier<PowerupVisual>> visuals = new ArrayList<>(visualData.size());
+            Collection<Supplier<PowerupAction>> actions = new ArrayList<>(actionData.size());
+
+            for (ConfigElement element : visualData) {
+                if (element.isNode()) {
+                    Supplier<PowerupVisual> visual =
+                            contextManager.makeContext(element.asNode()).provide(mapDependencyProvider);
+                    visuals.add(visual);
+                }
+            }
+
+            for (ConfigElement element : actionData) {
+                if (element.isNode()) {
+                    Supplier<PowerupAction> action =
+                            contextManager.makeContext(element.asNode()).provide(mapDependencyProvider);
+                    actions.add(action);
+                }
+            }
+
+            Supplier<DeactivationPredicate> deactivationPredicateSupplier =
+                    contextManager.makeContext(deactivationPredicateData).provide(mapDependencyProvider);
+
+            powerupMap.put(data.id(), new PowerupComponents(visuals, actions, deactivationPredicateSupplier));
+        }
+
+        return new BasicPowerupHandler(powerupMap);
     }
 
     private @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,

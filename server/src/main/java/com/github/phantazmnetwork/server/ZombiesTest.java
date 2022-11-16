@@ -15,6 +15,7 @@ import com.github.phantazmnetwork.core.instance.InstanceLoader;
 import com.github.phantazmnetwork.core.player.PlayerViewProvider;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.neuron.bindings.minestom.chunk.NeuralChunk;
+import com.github.phantazmnetwork.zombies.powerup.Powerup;
 import com.github.phantazmnetwork.zombies.scene.ZombiesRouteRequest;
 import com.github.phantazmnetwork.zombies.scene.ZombiesSceneProvider;
 import com.github.phantazmnetwork.zombies.scene.ZombiesSceneRouter;

@@ -9,11 +9,11 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.deactivation_predicate.timed")
-public class TimedPredicateBuilder implements Supplier<DeactivationPredicate> {
+public class TimedDeactivationPredicateFactory implements Supplier<DeactivationPredicate> {
     private final Data data;
 
     @FactoryMethod
-    public TimedPredicateBuilder(@NotNull Data data) {
+    public TimedDeactivationPredicateFactory(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 

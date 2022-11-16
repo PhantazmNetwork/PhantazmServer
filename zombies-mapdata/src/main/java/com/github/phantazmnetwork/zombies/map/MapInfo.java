@@ -17,6 +17,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
                       @NotNull List<RoundInfo> rounds,
                       @NotNull List<SpawnruleInfo> spawnrules,
                       @NotNull List<SpawnpointInfo> spawnpoints,
+                      @NotNull List<PowerupInfo> powerups,
                       @NotNull ConfigNode scoreboard) {
     /**
      * Constructs a new instances of this record.
@@ -39,6 +40,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
         Objects.requireNonNull(rounds, "rounds");
         Objects.requireNonNull(spawnrules, "spawnrules");
         Objects.requireNonNull(spawnpoints, "spawnpoints");
+        Objects.requireNonNull(powerups, "powerups");
         Objects.requireNonNull(scoreboard, "scoreboard");
     }
 }

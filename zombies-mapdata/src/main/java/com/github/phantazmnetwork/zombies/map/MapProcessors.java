@@ -59,6 +59,25 @@ public final class MapProcessors {
             return node;
         }
     };
+
+    private static final ConfigProcessor<PowerupInfo> powerupInfo = new ConfigProcessor<>() {
+        @Override
+        public PowerupInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            ConfigList visuals = element.getListOrThrow("visuals");
+            ConfigList actions = element.getListOrThrow("actions");
+            ConfigNode deactivationPredicate = element.getNodeOrThrow("deactivationPredicate");
+            return new PowerupInfo(id, visuals, actions, deactivationPredicate);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(PowerupInfo powerupInfo) throws ConfigProcessException {
+            return ConfigNode.of("id", ConfigProcessors.key().elementFromData(powerupInfo.id()), "visuals",
+                    powerupInfo.visuals(), "actions", powerupInfo.actions(), "deactivationPredicate",
+                    powerupInfo.deactivationPredicate());
+        }
+    };
+
     private static final ConfigProcessor<List<Key>> keyList = ConfigProcessors.key().listProcessor();
     private static final ConfigProcessor<Set<Key>> keySet = ConfigProcessors.key().collectionProcessor(HashSet::new);
     private static final ConfigProcessor<SpawnruleInfo> spawnruleInfo = new ConfigProcessor<>() {
@@ -342,7 +361,7 @@ public final class MapProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(@NotNull ConfigNode configNode) throws ConfigProcessException {
+        public @NotNull ConfigElement elementFromData(@NotNull ConfigNode configNode) {
             return configNode;
         }
     };
@@ -403,6 +422,10 @@ public final class MapProcessors {
      */
     public static @NotNull ConfigProcessor<SpawnpointInfo> spawnpointInfo() {
         return spawnpointInfo;
+    }
+
+    public static @NotNull ConfigProcessor<PowerupInfo> powerupInfo() {
+        return powerupInfo;
     }
 
     /**

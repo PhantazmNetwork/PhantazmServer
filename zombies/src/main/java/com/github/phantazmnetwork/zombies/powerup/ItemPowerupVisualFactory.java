@@ -13,12 +13,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.visual.item")
-public class ItemPowerupVisualBuilder implements Supplier<PowerupVisual> {
+public class ItemPowerupVisualFactory implements Supplier<PowerupVisual> {
     private final Data data;
     private final Instance instance;
 
     @FactoryMethod
-    public ItemPowerupVisualBuilder(@NotNull Data data,
+    public ItemPowerupVisualFactory(@NotNull Data data,
             @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");

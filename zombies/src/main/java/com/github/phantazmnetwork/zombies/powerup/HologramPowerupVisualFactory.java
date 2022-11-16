@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.core.hologram.Hologram;
 import com.github.phantazmnetwork.core.hologram.InstanceHologram;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.Instance;
@@ -15,11 +16,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.visual.hologram")
-public class HologramPowerupVisualBuilder implements Supplier<PowerupVisual> {
+public class HologramPowerupVisualFactory implements Supplier<PowerupVisual> {
     private final Data data;
     private final Instance instance;
 
-    public HologramPowerupVisualBuilder(@NotNull Data data,
+    @FactoryMethod
+    public HologramPowerupVisualFactory(@NotNull Data data,
             @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");

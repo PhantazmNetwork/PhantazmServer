@@ -10,13 +10,13 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.map_flagging")
-public class MapFlaggingPowerupActionBuilder implements Supplier<PowerupAction> {
+public class MapFlaggingPowerupActionFactory implements Supplier<PowerupAction> {
     private final Data data;
     private final Supplier<DeactivationPredicate> deactivationPredicate;
     private final Flaggable flaggable;
 
     @FactoryMethod
-    public MapFlaggingPowerupActionBuilder(@NotNull Data data,
+    public MapFlaggingPowerupActionFactory(@NotNull Data data,
             @NotNull @DataName("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
             @NotNull @Dependency("zombies.dependency.map_object.flaggable") Flaggable flaggable) {
         this.data = Objects.requireNonNull(data, "data");
