@@ -1,73 +1,75 @@
 package com.github.phantazmnetwork.zombies.powerup;
 
-import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.context.ElementContext;
-import com.github.steanky.element.core.dependency.DependencyProvider;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class BasicPowerupHandler implements PowerupHandler {
-    private final Map<Key, ConfigNode> powerupData;
-    private final ContextManager contextManager;
-    private final DependencyProvider mapProvider;
+    private final Map<Key, PowerupComponents> components;
 
-    private final List<Powerup> activePowerups;
+    private final List<Powerup> spawnedOrActivePowerups;
     private final Collection<Powerup> powerupView;
 
+    public BasicPowerupHandler(@NotNull Map<Key, PowerupComponents> components) {
+        this.components = Map.copyOf(components);
+        this.spawnedOrActivePowerups = new ArrayList<>(16);
+        this.powerupView = Collections.unmodifiableCollection(this.spawnedOrActivePowerups);
+    }
 
-    public BasicPowerupHandler(@NotNull Map<Key, ConfigNode> powerupData, @NotNull ContextManager contextManager,
-            @NotNull DependencyProvider mapProvider) {
-        this.powerupData = Map.copyOf(powerupData);
-        this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
-        this.mapProvider = Objects.requireNonNull(mapProvider, "mapDependencyProvider");
-        this.activePowerups = new ArrayList<>();
-        this.powerupView = Collections.unmodifiableCollection(this.activePowerups);
+    @Override
+    public void tick(long time) {
+        if (spawnedOrActivePowerups.isEmpty()) {
+            return;
+        }
+
+        Iterator<Powerup> powerupIterator = spawnedOrActivePowerups.listIterator();
+        while (powerupIterator.hasNext()) {
+            Powerup next = powerupIterator.next();
+
+            if (!next.active() && !next.spawned()) {
+                powerupIterator.remove();
+            }
+
+            next.tick(time);
+        }
     }
 
     @Override
     public @NotNull Powerup spawn(@NotNull Key powerupType, double x, double y, double z) {
-        ConfigNode data = powerupData.get(powerupType);
-        if (data == null) {
-            throw new IllegalArgumentException("Unrecognized powerup type '" + powerupType + "'");
+        PowerupComponents component = components.get(powerupType);
+        if (component == null) {
+            throw new IllegalArgumentException("Powerup type '" + powerupType + "' unknown");
         }
 
-        ElementContext context = contextManager.makeContext(data);
-        Collection<PowerupVisual> visuals = context.provideCollection("visuals", mapProvider, false);
-        Collection<PowerupAction> actions = context.provideCollection("actions", mapProvider, false);
-        DeactivationPredicate predicate = context.provide("deactivationPredicate", mapProvider, false);
+        Collection<Supplier<PowerupVisual>> visualSuppliers = component.visuals();
+        Collection<Supplier<PowerupAction>> actionSuppliers = component.actions();
+        Supplier<DeactivationPredicate> deactivationPredicateSupplier = component.deactivationPredicate();
 
+        Collection<PowerupVisual> visuals = new ArrayList<>(visualSuppliers.size());
+        Collection<PowerupAction> actions = new ArrayList<>(actionSuppliers.size());
 
-        Powerup powerup = new Powerup(powerupType, visuals, actions, predicate, new Vec(x, y, z));
-        powerup.spawn();
+        for (Supplier<PowerupVisual> supplier : visualSuppliers) {
+            visuals.add(supplier.get());
+        }
 
-        activePowerups.add(powerup);
-        return powerup;
+        for (Supplier<PowerupAction> supplier : actionSuppliers) {
+            actions.add(supplier.get());
+        }
+
+        Powerup newPowerup =
+                new Powerup(powerupType, visuals, actions, deactivationPredicateSupplier.get(), new Vec(x, y, z));
+        newPowerup.spawn();
+
+        spawnedOrActivePowerups.add(newPowerup);
+        return newPowerup;
     }
 
     @Override
     public @NotNull @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups() {
         return powerupView;
-    }
-
-    @Override
-    public void tick(long time) {
-        if (activePowerups.isEmpty()) {
-            return;
-        }
-
-        Iterator<Powerup> iterator = activePowerups.iterator();
-        while (iterator.hasNext()) {
-            Powerup powerup = iterator.next();
-            if (!powerup.spawned() && !powerup.active()) {
-                iterator.remove();
-            }
-
-            powerup.tick(time);
-        }
     }
 }
