@@ -16,10 +16,7 @@ public class BasicRoundHandler implements RoundHandler {
     public BasicRoundHandler(@NotNull List<Round> rounds) {
         this.rounds = Objects.requireNonNull(rounds, "rounds");
 
-        if (!rounds.isEmpty()) {
-            this.currentRound = rounds.get(0);
-        }
-        else {
+        if (rounds.isEmpty()) {
             hasEnded = true;
         }
     }

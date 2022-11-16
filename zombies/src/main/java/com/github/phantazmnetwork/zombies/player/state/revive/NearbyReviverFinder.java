@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.player.state.revive;
 
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import com.github.phantazmnetwork.zombies.player.ZombiesPlayerMeta;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -42,6 +43,11 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
             }
             if (!zombiesPlayer.getModule().getStateSwitcher().getState().key()
                     .equals(ZombiesPlayerStateKeys.ALIVE.key())) {
+                continue;
+            }
+
+            ZombiesPlayerMeta meta = zombiesPlayer.getModule().getMeta();
+            if (!(meta.isCanRevive() && !meta.isReviving())) {
                 continue;
             }
 

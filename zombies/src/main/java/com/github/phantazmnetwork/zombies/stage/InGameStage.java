@@ -1,10 +1,13 @@
 package com.github.phantazmnetwork.zombies.stage;
 
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.Wrapper;
+import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.map.RoundHandler;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
@@ -27,22 +30,37 @@ public class InGameStage implements Stage {
 
     private final Wrapper<Long> ticksSinceStart;
 
+    private final Collection<Key> defaultEquipment;
+
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
 
     public InGameStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
+            @NotNull Collection<Key> defaultEquipment,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.spawnPos = Objects.requireNonNull(spawnPos, "spawnPos");
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
+        this.defaultEquipment = Objects.requireNonNull(defaultEquipment, "defaultEquipment");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
     }
 
     @Override
     public boolean shouldContinue() {
-        return roundHandler.hasEnded();
+        if (roundHandler.hasEnded()) {
+            return true;
+        }
+
+        boolean anyAlive = false;
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.ALIVE)) {
+                anyAlive = true;
+                break;
+            }
+        }
+        return !anyAlive;
     }
 
     @Override
@@ -62,15 +80,25 @@ public class InGameStage implements Stage {
 
     @Override
     public void start() {
+        Key gunsKey = Key.key(Namespaces.PHANTAZM, "inventory.group.gun");
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             zombiesPlayer.getPlayer().ifPresent(player -> {
                 player.teleport(spawnPos);
             });
+
+            for (Key equipmentKey : defaultEquipment) {
+                EquipmentHandler equipmentHandler = zombiesPlayer.getModule().getEquipmentHandler();
+                if (!equipmentHandler.canAddEquipment(gunsKey)) {
+                    continue;
+                }
+
+                zombiesPlayer.getModule().getEquipmentCreator().createEquipment(equipmentKey).ifPresent(equipment -> {
+                    equipmentHandler.addEquipment(equipment, gunsKey);
+                });
+            }
         }
         ticksSinceStart.set(0L);
-        if (roundHandler.roundCount() > 0) {
-            roundHandler.setCurrentRound(0);
-        }
+        roundHandler.setCurrentRound(0);
     }
 
     @Override

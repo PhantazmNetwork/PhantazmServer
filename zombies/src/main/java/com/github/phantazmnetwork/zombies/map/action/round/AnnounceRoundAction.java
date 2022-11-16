@@ -65,13 +65,13 @@ public class AnnounceRoundAction implements Action<Round> {
     @Override
     public void perform(@NotNull Round round) {
         instance.sendTitlePart(data.titlePart,
-                MiniMessage.miniMessage().deserialize(data.formatMessage.formatted(round.getData().round())));
+                MiniMessage.miniMessage().deserialize(data.formatMessage.formatted(round.getRoundInfo().round() + 1)));
     }
 
     /**
      * Data for an AnnounceRoundAction.
      *
-     * @param formatMessage the MiniMessage-compatible string. The format specifier %i will be replaced by the current
+     * @param formatMessage the MiniMessage-compatible string. The format specifier %d will be replaced by the current
      *                      round number (1-indexed)
      * @param titlePart     which Component-accepting {@link TitlePart} to send the message to
      */

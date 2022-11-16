@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.server;
 
+import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
@@ -75,12 +76,14 @@ public final class Ethylene {
     }
 
     private static Signature<Sound> sound() {
-        return Signature.builder(Token.ofClass(Sound.class),
-                        (ignored, args) -> Sound.sound((Key)args[0], (Sound.Source)args[1], (float)args[2], (float)args[3]),
-                        sound -> List.of(sound.name(), sound.source(), sound.volume(), sound.pitch()),
+        return Signature.builder(Token.ofClass(Sound.class), (ignored, args) -> {
+                            double volume = (double)args[2];
+                            double pitch = (double)args[3];
+                            return Sound.sound((Key)args[0], (Sound.Source)args[1], (float)volume, (float)pitch);
+                        }, sound -> List.of(sound.name(), sound.source(), sound.volume(), sound.pitch()),
                         Map.entry("name", Token.ofClass(Key.class)), Map.entry("source", Token.ofClass(Sound.Source.class)),
-                        Map.entry("volume", Token.PRIMITIVE_FLOAT), Map.entry("pitch", Token.PRIMITIVE_FLOAT)).matchingNames()
-                .matchingTypeHints().build();
+                        Map.entry("volume", Token.DOUBLE), Map.entry("pitch", Token.DOUBLE)).matchingNames().matchingTypeHints()
+                .build();
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -115,8 +118,15 @@ public final class Ethylene {
 
     @SuppressWarnings("PatternValidation")
     private static ScalarSignature<Key> key() {
-        return ScalarSignature.of(Token.ofClass(Key.class), element -> Key.key(element.asString()),
-                key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString()));
+        return ScalarSignature.of(Token.ofClass(Key.class), element -> {
+            String value = element.asString();
+            if (value.contains(":")) {
+                return Key.key(value);
+            }
+            else {
+                return Key.key(Namespaces.PHANTAZM, value);
+            }
+        }, key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString()));
     }
 
     private static ScalarSignature<Component> component() {

@@ -13,6 +13,7 @@ import com.github.phantazmnetwork.core.hologram.ViewableHologram;
 import com.github.phantazmnetwork.core.instance.AnvilFileSystemInstanceLoader;
 import com.github.phantazmnetwork.core.instance.InstanceLoader;
 import com.github.phantazmnetwork.core.player.PlayerViewProvider;
+import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.neuron.bindings.minestom.chunk.NeuralChunk;
 import com.github.phantazmnetwork.zombies.scene.ZombiesRouteRequest;
 import com.github.phantazmnetwork.zombies.scene.ZombiesSceneProvider;
@@ -161,7 +162,7 @@ final class ZombiesTest {
                     new AnvilFileSystemInstanceLoader(Path.of("./zombies/instances/"), NeuralChunk::new);
             ZombiesSceneProvider testProvider =
                     new ZombiesSceneProvider(1, testMap, MinecraftServer.getInstanceManager(), instanceLoader,
-                            sceneFallback, global, Mob.getMobSpawner(), Mob.getMobStore(), Mob.getModels(),
+                            sceneFallback, global, Mob.getMobSpawner(), new MobStore(), Mob.getModels(),
                             new BasicClientBlockHandlerSource(
                                     instance -> new InstanceClientBlockHandler(instance, global)), contextManager,
                             keyParser, EquipmentFeature::createEquipmentCreator);

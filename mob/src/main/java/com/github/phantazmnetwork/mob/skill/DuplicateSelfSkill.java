@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.mob.skill;
 
 import com.github.phantazmnetwork.mob.MobModel;
+import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
@@ -13,6 +14,8 @@ import java.util.Objects;
 @Model("mob.skill.duplicate_self")
 public class DuplicateSelfSkill implements Skill {
 
+    private final MobStore mobStore;
+
     private final MobSpawner spawner;
 
     private final MobModel model;
@@ -20,8 +23,9 @@ public class DuplicateSelfSkill implements Skill {
     private final Entity entity;
 
     @FactoryMethod
-    public DuplicateSelfSkill(@Dependency("mob.spawner") MobSpawner spawner, @Dependency("mob.model") MobModel model,
-            @Dependency("mob.entity.entity") Entity entity) {
+    public DuplicateSelfSkill(@Dependency("mob.store") MobStore mobStore, @Dependency("mob.spawner") MobSpawner spawner,
+            @Dependency("mob.model") MobModel model, @Dependency("mob.entity.entity") Entity entity) {
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.spawner = Objects.requireNonNull(spawner, "spawner");
         this.model = Objects.requireNonNull(model, "model");
         this.entity = Objects.requireNonNull(entity, "entity");
@@ -34,6 +38,6 @@ public class DuplicateSelfSkill implements Skill {
             return;
         }
 
-        spawner.spawn(instance, entity.getPosition(), model);
+        spawner.spawn(instance, entity.getPosition(), mobStore, model);
     }
 }

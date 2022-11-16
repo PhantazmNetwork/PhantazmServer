@@ -52,8 +52,6 @@ public class BasicMobSpawner implements MobSpawner {
 
     private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
 
-    private final MobStore mobStore;
-
     private final Spawner neuralSpawner;
 
     private final ContextManager contextManager;
@@ -64,12 +62,16 @@ public class BasicMobSpawner implements MobSpawner {
 
         private final MobSpawner spawner;
 
+        private final MobStore mobStore;
+
         private final MobModel model;
 
         private final NeuralEntity entity;
 
-        public Module(@NotNull MobSpawner spawner, @NotNull MobModel model, @NotNull NeuralEntity entity) {
+        public Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull MobModel model,
+                @NotNull NeuralEntity entity) {
             this.spawner = Objects.requireNonNull(spawner, "spawner");
+            this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
             this.model = Objects.requireNonNull(model, "model");
             this.entity = Objects.requireNonNull(entity, "entity");
         }
@@ -78,6 +80,12 @@ public class BasicMobSpawner implements MobSpawner {
         @Memoize
         public @NotNull MobSpawner getSpawner() {
             return spawner;
+        }
+
+        @DependencySupplier("mob.store")
+        @Memoize
+        public MobStore getMobStore() {
+            return mobStore;
         }
 
         @DependencySupplier("mob.model")
@@ -103,28 +111,26 @@ public class BasicMobSpawner implements MobSpawner {
     /**
      * Creates a new {@link BasicMobSpawner}.
      *
-     * @param mobStore      The {@link MobStore} to register new {@link PhantazmMob}s to
      * @param neuralSpawner The {@link Spawner} to spawn backing {@link NeuralEntity}s
      */
     public BasicMobSpawner(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
-            @NotNull MobStore mobStore, @NotNull Spawner neuralSpawner, @NotNull ContextManager contextManager,
-            @NotNull KeyParser keyParser) {
+            @NotNull Spawner neuralSpawner, @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
         this.processorMap = Map.copyOf(processorMap);
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.neuralSpawner = Objects.requireNonNull(neuralSpawner, "neuralSpawner");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
     }
 
     @Override
-    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Point point, @NotNull MobModel model) {
+    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Point point, @NotNull MobStore mobStore,
+            @NotNull MobModel model) {
         NeuralEntity neuralEntity = neuralSpawner.spawnEntity(instance, point, model.getDescriptor());
         setEntityMeta(neuralEntity, model);
         setEquipment(neuralEntity, model);
         setAttributes(neuralEntity, model);
         setHealth(neuralEntity);
 
-        Module module = new Module(this, model, neuralEntity);
+        Module module = new Module(this, mobStore, model, neuralEntity);
         DependencyProvider dependencyProvider = new ModuleDependencyProvider(keyParser, module);
         ElementContext context = contextManager.makeContext(model.getNode());
         addGoals(context, dependencyProvider, neuralEntity);

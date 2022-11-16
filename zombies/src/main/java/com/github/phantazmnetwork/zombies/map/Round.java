@@ -2,9 +2,8 @@ package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.map.action.Action;
-import net.minestom.server.instance.Instance;
+import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -16,9 +15,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
+public class Round implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
 
+    private final RoundInfo roundInfo;
     private final List<Wave> waves;
     private final List<Action<Round>> startActions;
     private final List<Action<Round>> endActions;
@@ -39,15 +39,15 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
      *
      * @param roundInfo the backing data object
      */
-    public Round(@NotNull RoundInfo roundInfo, @NotNull Instance instance, @NotNull List<Wave> waves,
-            @NotNull List<Action<Round>> startActions, @NotNull List<Action<Round>> endActions,
-            @NotNull SpawnDistributor spawnDistributor, @NotNull List<Spawnpoint> spawnpoints) {
-        super(roundInfo, instance);
+    public Round(@NotNull RoundInfo roundInfo, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
+            @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
+            @NotNull List<Spawnpoint> spawnpoints) {
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.isEmpty()) {
             LOGGER.warn("Round {} has no waves", roundInfo);
         }
 
+        this.roundInfo = Objects.requireNonNull(roundInfo, "roundInfo");
         this.waves = List.copyOf(waves);
         this.startActions = List.copyOf(startActions);
         this.endActions = List.copyOf(endActions);
@@ -56,6 +56,10 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
         this.spawnedMobs = new ArrayList<>();
         this.unmodifiableSpawnedMobs = Collections.unmodifiableList(spawnedMobs);
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
+    }
+
+    public @NotNull RoundInfo getRoundInfo() {
+        return roundInfo;
     }
 
     public void removeMob(@NotNull PhantazmMob mob) {
@@ -161,8 +165,8 @@ public class Round extends InstanceMapObject<RoundInfo> implements Tickable {
             }
 
             long timeSinceLastWave = time - waveStartTime;
-            if (waveIndex < waves.size() && timeSinceLastWave > currentWave.getData().delayTicks()) {
-                spawnMobs(currentWave.getData().spawns(), spawnDistributor, true);
+            if (waveIndex < waves.size() && timeSinceLastWave > currentWave.getWaveInfo().delayTicks()) {
+                spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
 
                 waveStartTime = time;
                 if (++waveIndex >= waves.size()) {

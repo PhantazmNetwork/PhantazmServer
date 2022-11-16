@@ -1,8 +1,10 @@
 package com.github.phantazmnetwork.zombies.map.objects;
 
 import com.github.phantazmnetwork.commons.Wrapper;
+import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.gui.SlotDistributor;
+import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.coin.ModifierSource;
@@ -43,6 +45,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
     private final ContextManager contextManager;
     private final Instance instance;
+    private final MobStore mobStore;
     private final MobSpawner mobSpawner;
     private final ClientBlockHandler clientBlockHandler;
     private final SpawnDistributor spawnDistributor;
@@ -134,7 +137,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     }
 
     public BasicMapObjectBuilder(@NotNull ContextManager contextManager, @NotNull Instance instance,
-            @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler clientBlockHandler,
+            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler clientBlockHandler,
             @NotNull SpawnDistributor spawnDistributor,
             @NotNull Function<? super List<Round>, ? extends RoundHandler> roundHandlerFunction,
             @NotNull Flaggable flaggable, @NotNull ModifierSource modifierSource,
@@ -142,6 +145,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             @NotNull Pos respawnPos, @NotNull KeyParser keyParser) {
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.instance = Objects.requireNonNull(instance, "instance");
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockHandler");
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
@@ -163,11 +167,12 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
                         respawnPos, mapObjectsWrapper));
 
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
-        List<Spawnpoint> spawnpoints = buildSpawnpoints(mapInfo.spawnpoints(), spawnruleInfoMap);
-        List<Window> windows = buildWindows(mapInfo.windows(), provider);
+        List<Spawnpoint> spawnpoints =
+                buildSpawnpoints(mapInfo.settings().origin(), mapInfo.spawnpoints(), spawnruleInfoMap);
+        List<Window> windows = buildWindows(mapInfo.settings().origin(), mapInfo.windows(), provider);
         List<Shop> shops = buildShops(mapInfo.shops(), provider);
-        List<Door> doors = buildDoors(mapInfo.doors(), provider);
-        List<Room> rooms = buildRooms(mapInfo.rooms(), provider);
+        List<Door> doors = buildDoors(mapInfo.settings().origin(), mapInfo.doors(), provider);
+        List<Room> rooms = buildRooms(mapInfo.settings().origin(), mapInfo.rooms(), provider);
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider);
 
         MapObjects mapObjects = new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds, provider);
@@ -235,17 +240,19 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return spawnruleInfoMap;
     }
 
-    private List<Spawnpoint> buildSpawnpoints(List<SpawnpointInfo> spawnpointInfoList,
+    private List<Spawnpoint> buildSpawnpoints(Vec3I mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
             Map<Key, SpawnruleInfo> spawnruleInfoMap) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
-            spawnpoints.add(new Spawnpoint(spawnpointInfo, instance, spawnruleInfoMap::get, mobSpawner));
+            spawnpoints.add(
+                    new Spawnpoint(mapOrigin, spawnpointInfo, instance, spawnruleInfoMap::get, mobStore, mobSpawner));
         }
 
         return spawnpoints;
     }
 
-    private List<Window> buildWindows(List<WindowInfo> windowInfoList, DependencyProvider dependencyProvider) {
+    private List<Window> buildWindows(Vec3I mapOrigin, List<WindowInfo> windowInfoList,
+            DependencyProvider dependencyProvider) {
         List<Window> windows = new ArrayList<>(windowInfoList.size());
         for (WindowInfo windowInfo : windowInfoList) {
             ConfigList repairActionInfo = windowInfo.repairActions();
@@ -257,7 +264,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             createElements(repairActionInfo, repairActions, () -> "window repair action", dependencyProvider);
             createElements(breakActionInfo, breakActions, () -> "window break action", dependencyProvider);
 
-            windows.add(new Window(instance, windowInfo, clientBlockHandler, repairActions, breakActions));
+            windows.add(new Window(mapOrigin, instance, windowInfo, clientBlockHandler, repairActions, breakActions));
         }
 
         return windows;
@@ -293,7 +300,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return shops;
     }
 
-    private List<Door> buildDoors(List<DoorInfo> doorInfoList, DependencyProvider dependencyProvider) {
+    private List<Door> buildDoors(Vec3I mapOrigin, List<DoorInfo> doorInfoList, DependencyProvider dependencyProvider) {
         List<Door> doors = new ArrayList<>(doorInfoList.size());
         for (DoorInfo doorInfo : doorInfoList) {
             ConfigList openActionInfo = doorInfo.openActions();
@@ -302,13 +309,13 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
             createElements(openActionInfo, openActions, () -> "door open action", dependencyProvider);
 
-            doors.add(new Door(doorInfo, instance, Block.AIR, openActions));
+            doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions));
         }
 
         return doors;
     }
 
-    private List<Room> buildRooms(List<RoomInfo> roomInfoList, DependencyProvider dependencyProvider) {
+    private List<Room> buildRooms(Vec3I mapOrigin, List<RoomInfo> roomInfoList, DependencyProvider dependencyProvider) {
         List<Room> rooms = new ArrayList<>(roomInfoList.size());
         for (RoomInfo roomInfo : roomInfoList) {
             ConfigList openActionInfo = roomInfo.openActions();
@@ -317,7 +324,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
             createElements(openActionInfo, openActions, () -> "room open action", dependencyProvider);
 
-            rooms.add(new Room(roomInfo, instance, openActions));
+            rooms.add(new Room(mapOrigin, roomInfo, openActions));
         }
 
         return rooms;
@@ -342,7 +349,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
                 waves.add(new Wave(wave));
             }
 
-            rounds.add(new Round(roundInfo, instance, waves, startActions, endActions, spawnDistributor, spawnpoints));
+            rounds.add(new Round(roundInfo, waves, startActions, endActions, spawnDistributor, spawnpoints));
         }
 
         return rounds;

@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.core.game.scene.fallback.KickFallback;
 import com.github.phantazmnetwork.core.game.scene.lobby.LobbyRouterFallback;
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.MojangIdentitySource;
-import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
@@ -200,8 +199,7 @@ public final class PhantazmServer {
         Neuron.initialize(global, contextManager, serverConfig.pathfinderConfig());
         NeuronTest.initialize(global, Neuron.getSpawner());
 
-        Mob.initialize(global, contextManager, keyParser, Neuron.getSpawner(), MobTriggers.TRIGGERS, Path.of("./mobs/"),
-                new YamlCodec());
+        Mob.initialize(contextManager, keyParser, Neuron.getSpawner(), Path.of("./mobs/"), new YamlCodec());
         EquipmentFeature.initialize(keyParser, contextManager, Path.of("./equipment/"),
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())),

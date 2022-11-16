@@ -51,7 +51,7 @@ public interface MapObjects extends Tickable {
 
     default @NotNull Optional<Window> windowAt(@NotNull Vec3I block) {
         for (Window window : windows()) {
-            if (window.getData().frameRegion().contains(block)) {
+            if (window.getWindowInfo().frameRegion().contains(block)) {
                 return Optional.of(window);
             }
         }
@@ -88,7 +88,7 @@ public interface MapObjects extends Tickable {
 
     default @NotNull Optional<Shop> shopAt(@NotNull Vec3I block) {
         for (Shop shop : shops()) {
-            if (block.equals(shop.data.triggerLocation())) {
+            if (block.equals(shop.getShopInfo().triggerLocation())) {
                 return Optional.of(shop);
             }
         }
