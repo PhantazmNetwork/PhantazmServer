@@ -30,7 +30,12 @@ public class ItemVisual implements Supplier<PowerupVisual> {
     }
 
     @DataObject
-    public record Data(@NotNull ItemStack stack, long interval, long period, long periodOffset, double amplitude) {
+    public record Data(@NotNull ItemStack stack,
+                       long interval,
+                       long period,
+                       long periodOffset,
+                       double amplitude,
+                       double heightOffset) {
 
     }
 
@@ -53,8 +58,8 @@ public class ItemVisual implements Supplier<PowerupVisual> {
             }
 
             if (time % data.interval == 0) {
-                double o = Math.sin((2 * Math.PI * ((time + data.periodOffset) % data.period)) / data.period) *
-                        data.amplitude;
+                double o = (Math.sin((2 * Math.PI * ((time + data.periodOffset) % data.period)) / data.period) *
+                        data.amplitude) + data.heightOffset;
                 Pos pos = entity.getPosition();
                 entity.teleport(new Pos(pos.x(), baseY + o, pos.z()));
             }
