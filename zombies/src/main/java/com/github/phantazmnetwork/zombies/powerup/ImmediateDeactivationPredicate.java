@@ -6,11 +6,11 @@ import com.github.steanky.element.core.annotation.Model;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.deactivation_predicate.immediate")
-public class ImmediateDeactivationPredicateFactory implements Supplier<DeactivationPredicate> {
-    public static final DeactivationPredicate INSTANCE = new ImmediateDeactivationPredicate();
+public class ImmediateDeactivationPredicate implements Supplier<DeactivationPredicate> {
+    public static final DeactivationPredicate INSTANCE = new Predicate();
 
     @FactoryMethod
-    public ImmediateDeactivationPredicateFactory() {
+    public ImmediateDeactivationPredicate() {
     }
 
     @Override
@@ -18,7 +18,7 @@ public class ImmediateDeactivationPredicateFactory implements Supplier<Deactivat
         return INSTANCE;
     }
 
-    private static class ImmediateDeactivationPredicate implements DeactivationPredicate {
+    private static class Predicate implements DeactivationPredicate {
 
         @Override
         public void activate(long time) {

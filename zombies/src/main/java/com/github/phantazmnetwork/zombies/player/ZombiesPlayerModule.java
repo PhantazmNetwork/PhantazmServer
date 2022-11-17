@@ -6,13 +6,12 @@ import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
-import com.github.phantazmnetwork.zombies.coin.ModifierSource;
+import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.phantazmnetwork.zombies.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.map.Flaggable;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateSwitcher;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerState;
-import com.github.phantazmnetwork.zombies.powerup.PowerupHandler;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import net.minestom.server.scoreboard.Sidebar;
@@ -47,7 +46,7 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     private final Sidebar sidebar;
 
-    private final ModifierSource modifierSource;
+    private final TransactionModifierSource transactionModifierSource;
 
     private final Flaggable flaggable;
 
@@ -56,7 +55,8 @@ public class ZombiesPlayerModule implements DependencyModule {
             @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
             @NotNull PlayerStateSwitcher stateSwitcher,
             @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
-            @NotNull Sidebar sidebar, @NotNull ModifierSource modifierSource, @NotNull Flaggable flaggable) {
+            @NotNull Sidebar sidebar, @NotNull TransactionModifierSource transactionModifierSource,
+            @NotNull Flaggable flaggable) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -67,7 +67,7 @@ public class ZombiesPlayerModule implements DependencyModule {
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
         this.stateFunctions = Map.copyOf(stateFunctions);
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
+        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
         this.flaggable = Objects.requireNonNull(flaggable, "flags");
     }
 
@@ -127,8 +127,8 @@ public class ZombiesPlayerModule implements DependencyModule {
     }
 
     @DependencySupplier("zombies.dependency.player.modifiers")
-    public @NotNull ModifierSource modifiers() {
-        return modifierSource;
+    public @NotNull TransactionModifierSource modifiers() {
+        return transactionModifierSource;
     }
 
     @DependencySupplier("zombies.dependency.player.flaggable")

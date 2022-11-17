@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public interface ModifierSource {
+public interface TransactionModifierSource {
     @NotNull Collection<Transaction.Modifier> modifiers(@NotNull Key key);
 
     void addModifier(@NotNull Key group, @NotNull Transaction.Modifier modifier);

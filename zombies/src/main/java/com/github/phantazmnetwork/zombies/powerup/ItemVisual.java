@@ -13,12 +13,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.visual.item")
-public class ItemPowerupVisualFactory implements Supplier<PowerupVisual> {
+public class ItemVisual implements Supplier<PowerupVisual> {
     private final Data data;
     private final Instance instance;
 
     @FactoryMethod
-    public ItemPowerupVisualFactory(@NotNull Data data,
+    public ItemVisual(@NotNull Data data,
             @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");
@@ -26,7 +26,7 @@ public class ItemPowerupVisualFactory implements Supplier<PowerupVisual> {
 
     @Override
     public PowerupVisual get() {
-        return new ItemPowerupVisual(data, instance);
+        return new Visual(data, instance);
     }
 
     @DataObject
@@ -34,14 +34,14 @@ public class ItemPowerupVisualFactory implements Supplier<PowerupVisual> {
 
     }
 
-    private static class ItemPowerupVisual implements PowerupVisual {
+    private static class Visual implements PowerupVisual {
         private final Data data;
         private final Instance instance;
 
         private ItemEntity entity;
         private double baseY;
 
-        private ItemPowerupVisual(Data data, Instance instance) {
+        private Visual(Data data, Instance instance) {
             this.data = data;
             this.instance = instance;
         }

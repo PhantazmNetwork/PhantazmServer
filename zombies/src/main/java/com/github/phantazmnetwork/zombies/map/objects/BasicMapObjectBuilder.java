@@ -7,7 +7,7 @@ import com.github.phantazmnetwork.core.gui.SlotDistributor;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
-import com.github.phantazmnetwork.zombies.coin.ModifierSource;
+import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.phantazmnetwork.zombies.map.action.Action;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.shop.display.ShopDisplay;
@@ -24,10 +24,8 @@ import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
-import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
@@ -37,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -52,7 +49,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
     private final SpawnDistributor spawnDistributor;
     private final Function<? super List<Round>, ? extends RoundHandler> roundHandlerFunction;
     private final Flaggable flaggable;
-    private final ModifierSource modifierSource;
+    private final TransactionModifierSource transactionModifierSource;
     private final SlotDistributor slotDistributor;
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
     private final Pos respawnPos;
@@ -62,20 +59,20 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         private final Instance instance;
         private final Supplier<? extends RoundHandler> roundHandlerSupplier;
         private final Flaggable flaggable;
-        private final ModifierSource modifierSource;
+        private final TransactionModifierSource transactionModifierSource;
         private final SlotDistributor slotDistributor;
         private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
         private final Pos respawnPos;
         private final Supplier<? extends MapObjects> mapObjectsSupplier;
 
         private Module(Instance instance, Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
-                ModifierSource modifierSource, SlotDistributor slotDistributor,
+                TransactionModifierSource transactionModifierSource, SlotDistributor slotDistributor,
                 Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
                 Supplier<? extends MapObjects> mapObjectsSupplier) {
             this.instance = Objects.requireNonNull(instance, "instance");
             this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
             this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
-            this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
+            this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
             this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
             this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
             this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPos");
@@ -102,8 +99,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
         @Memoize
         @DependencySupplier("zombies.dependency.map_object.modifier_source")
-        public @NotNull ModifierSource modifierSource() {
-            return modifierSource;
+        public @NotNull TransactionModifierSource modifierSource() {
+            return transactionModifierSource;
         }
 
         @Memoize
@@ -141,7 +138,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull ClientBlockHandler clientBlockHandler,
             @NotNull SpawnDistributor spawnDistributor,
             @NotNull Function<? super List<Round>, ? extends RoundHandler> roundHandlerFunction,
-            @NotNull Flaggable flaggable, @NotNull ModifierSource modifierSource,
+            @NotNull Flaggable flaggable, @NotNull TransactionModifierSource transactionModifierSource,
             @NotNull SlotDistributor slotDistributor, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Pos respawnPos, @NotNull KeyParser keyParser) {
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
@@ -152,7 +149,7 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
         this.roundHandlerFunction = Objects.requireNonNull(roundHandlerFunction, "roundHandlerFunction");
         this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
-        this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
+        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
         this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.respawnPos = Objects.requireNonNull(respawnPos);
@@ -164,8 +161,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
         DependencyProvider provider = new ModuleDependencyProvider(keyParser,
-                new Module(instance, roundHandlerWrapper, flaggable, modifierSource, slotDistributor, playerMap,
-                        respawnPos, mapObjectsWrapper));
+                new Module(instance, roundHandlerWrapper, flaggable, transactionModifierSource, slotDistributor,
+                        playerMap, respawnPos, mapObjectsWrapper));
 
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
         List<Spawnpoint> spawnpoints =

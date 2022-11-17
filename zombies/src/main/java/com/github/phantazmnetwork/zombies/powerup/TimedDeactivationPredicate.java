@@ -9,17 +9,17 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.deactivation_predicate.timed")
-public class TimedDeactivationPredicateFactory implements Supplier<DeactivationPredicate> {
+public class TimedDeactivationPredicate implements Supplier<DeactivationPredicate> {
     private final Data data;
 
     @FactoryMethod
-    public TimedDeactivationPredicateFactory(@NotNull Data data) {
+    public TimedDeactivationPredicate(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
     public DeactivationPredicate get() {
-        return new TimedPredicate(data);
+        return new Predicate(data);
     }
 
     @DataObject
@@ -27,11 +27,11 @@ public class TimedDeactivationPredicateFactory implements Supplier<DeactivationP
 
     }
 
-    private static class TimedPredicate implements DeactivationPredicate {
+    private static class Predicate implements DeactivationPredicate {
         private final Data data;
         private long start = -1;
 
-        private TimedPredicate(Data data) {
+        private Predicate(Data data) {
             this.data = data;
         }
 

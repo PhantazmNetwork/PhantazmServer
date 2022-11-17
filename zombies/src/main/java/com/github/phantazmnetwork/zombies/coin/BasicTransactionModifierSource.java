@@ -5,10 +5,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class BasicModifierSource implements ModifierSource {
+public class BasicTransactionModifierSource implements TransactionModifierSource {
     private final Map<Key, Collection<Transaction.Modifier>> modifierSources;
 
-    public BasicModifierSource() {
+    public BasicTransactionModifierSource() {
         this.modifierSources = new HashMap<>();
     }
 

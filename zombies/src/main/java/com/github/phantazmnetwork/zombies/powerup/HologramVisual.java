@@ -16,12 +16,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.visual.hologram")
-public class HologramPowerupVisualFactory implements Supplier<PowerupVisual> {
+public class HologramVisual implements Supplier<PowerupVisual> {
     private final Data data;
     private final Instance instance;
 
     @FactoryMethod
-    public HologramPowerupVisualFactory(@NotNull Data data,
+    public HologramVisual(@NotNull Data data,
             @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");
@@ -29,7 +29,7 @@ public class HologramPowerupVisualFactory implements Supplier<PowerupVisual> {
 
     @Override
     public PowerupVisual get() {
-        return new HologramPowerupVisual(data, instance);
+        return new Visual(data, instance);
     }
 
     @DataObject
@@ -39,7 +39,7 @@ public class HologramPowerupVisualFactory implements Supplier<PowerupVisual> {
     public record Frame(@NotNull List<Component> components, long delay) {
     }
 
-    private static class HologramPowerupVisual implements PowerupVisual {
+    private static class Visual implements PowerupVisual {
         private final Data data;
         private final Instance instance;
 
@@ -52,7 +52,7 @@ public class HologramPowerupVisualFactory implements Supplier<PowerupVisual> {
         private int currentFrameIndex;
         private Frame currentFrame;
 
-        private HologramPowerupVisual(Data data, Instance instance) {
+        private Visual(Data data, Instance instance) {
             this.data = data;
             this.instance = instance;
         }

@@ -120,16 +120,18 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(ExtraHealthLevel.class);
 
         //DeactivationPredicates
-        contextManager.registerElementClass(TimedDeactivationPredicateFactory.class);
-        contextManager.registerElementClass(ImmediateDeactivationPredicateFactory.class);
+        contextManager.registerElementClass(TimedDeactivationPredicate.class);
+        contextManager.registerElementClass(ImmediateDeactivationPredicate.class);
 
         //PowerupVisuals
-        contextManager.registerElementClass(ItemPowerupVisualFactory.class);
-        contextManager.registerElementClass(HologramPowerupVisualFactory.class);
+        contextManager.registerElementClass(ItemVisual.class);
+        contextManager.registerElementClass(HologramVisual.class);
 
         //PowerupActions
-        contextManager.registerElementClass(MapFlaggingPowerupActionFactory.class);
-        contextManager.registerElementClass(PlayerFlaggingPowerupActionFactory.class);
+        contextManager.registerElementClass(MapFlaggingAction.class);
+        contextManager.registerElementClass(PlayerFlaggingAction.class);
+        contextManager.registerElementClass(MapTransactionModifierMultiplyAction.class);
+        contextManager.registerElementClass(MapTransactionModifierAddAction.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

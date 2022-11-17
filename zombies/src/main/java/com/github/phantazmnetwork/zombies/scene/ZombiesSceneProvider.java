@@ -24,9 +24,9 @@ import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.mob.trigger.MobTrigger;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.zombies.audience.ChatComponentSender;
-import com.github.phantazmnetwork.zombies.coin.BasicModifierSource;
+import com.github.phantazmnetwork.zombies.coin.BasicTransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.BasicPlayerCoins;
-import com.github.phantazmnetwork.zombies.coin.ModifierSource;
+import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.coin.component.BasicTransactionComponentCreator;
 import com.github.phantazmnetwork.zombies.corpse.Corpse;
@@ -64,7 +64,6 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
-import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -190,15 +189,16 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         //LinkedHashMap for better value iteration performance
         Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
 
-        ModifierSource modifierSource = new BasicModifierSource();
+        TransactionModifierSource transactionModifierSource = new BasicTransactionModifierSource();
         Flaggable flaggable = new BasicFlaggable();
         Random random = new Random();
-        MapObjects mapObjects = createMapObjects(instance, random, zombiesPlayers, flaggable, modifierSource, spawnPos);
+        MapObjects mapObjects =
+                createMapObjects(instance, random, zombiesPlayers, flaggable, transactionModifierSource, spawnPos);
         PowerupHandler powerupHandler = createPowerupHandler(mapObjects.mapDependencyProvider(), zombiesPlayers,
                 settings.powerupPickupRadius());
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
 
-        ZombiesMap map = new ZombiesMap(modifierSource, flaggable, mapObjects, powerupHandler, roundHandler);
+        ZombiesMap map = new ZombiesMap(transactionModifierSource, flaggable, mapObjects, powerupHandler, roundHandler);
 
         EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, roundHandler);
 
@@ -210,7 +210,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         roundHandler, ticksSinceStart, sidebarModule);
 
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-            return createPlayer(zombiesPlayers, settings, instance, playerView, new BasicModifierSource(),
+            return createPlayer(zombiesPlayers, settings, instance, playerView, new BasicTransactionModifierSource(),
                     new BasicFlaggable(), childNode, random, mapObjects);
         };
 
@@ -234,13 +234,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private @NotNull MapObjects createMapObjects(@NotNull Instance instance, @NotNull Random random,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull Flaggable flaggable,
-            @NotNull ModifierSource modifierSource, @NotNull Pos spawnPos) {
+            @NotNull TransactionModifierSource transactionModifierSource, @NotNull Pos spawnPos) {
         ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, zombiesPlayers.values());
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
 
         return new BasicMapObjectBuilder(contextManager, instance, mobStore, mobSpawner, blockHandler, spawnDistributor,
-                BasicRoundHandler::new, flaggable, modifierSource, slotDistributor, zombiesPlayers, spawnPos,
+                BasicRoundHandler::new, flaggable, transactionModifierSource, slotDistributor, zombiesPlayers, spawnPos,
                 keyParser).build(mapInfo);
     }
 
@@ -268,7 +268,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                             "powerup deactivation predicate", mapDependencyProvider, LOGGER);
 
             if (deactivationPredicateSupplier == null) {
-                deactivationPredicateSupplier = () -> ImmediateDeactivationPredicateFactory.INSTANCE;
+                deactivationPredicateSupplier = () -> ImmediateDeactivationPredicate.INSTANCE;
             }
 
             powerupMap.put(data.id(), new PowerupComponents(visuals, actions, deactivationPredicateSupplier));
@@ -279,8 +279,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull ModifierSource modifierSource, @NotNull Flaggable flaggable, @NotNull EventNode<Event> eventNode,
-            @NotNull Random random, @NotNull MapObjects mapObjects) {
+            @NotNull TransactionModifierSource transactionModifierSource, @NotNull Flaggable flaggable,
+            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
         PlayerCoins coins = new BasicPlayerCoins(new PlayerAudienceProvider(playerView), new ChatComponentSender(),
                 new BasicTransactionComponentCreator(), 0);
@@ -358,7 +358,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesPlayerModule module =
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
-                        accessRegistry, stateSwitcher, stateFunctions, sidebar, modifierSource, flaggable);
+                        accessRegistry, stateSwitcher, stateFunctions, sidebar, transactionModifierSource, flaggable);
         return new BasicZombiesPlayer(module);
     }
 
