@@ -12,7 +12,6 @@ import java.util.Objects;
 
 public class Powerup implements Tickable, Keyed {
     private final Key type;
-
     private final PowerupVisual[] visuals;
     private final PowerupAction[] actions;
     private final DeactivationPredicate despawnPredicate;
@@ -70,8 +69,8 @@ public class Powerup implements Tickable, Keyed {
 
             action.activate(player, time);
 
+            //deactivate immediately if necessary
             if (action.deactivationPredicate().shouldDeactivate(time)) {
-                //deactivate immediately if necessary
                 action.deactivate(player);
                 actions[i] = null;
             }

@@ -26,15 +26,15 @@ public class BasicPowerupHandler implements PowerupHandler {
             return;
         }
 
-        Iterator<Powerup> powerupIterator = spawnedOrActivePowerups.listIterator();
-        while (powerupIterator.hasNext()) {
-            Powerup next = powerupIterator.next();
+        for (int i = spawnedOrActivePowerups.size() - 1; i >= 0; i--) {
+            Powerup powerup = spawnedOrActivePowerups.get(i);
 
-            if (!next.active() && !next.spawned()) {
-                powerupIterator.remove();
+            if (!powerup.active() && !powerup.spawned()) {
+                spawnedOrActivePowerups.remove(i);
             }
-
-            next.tick(time);
+            else {
+                powerup.tick(time);
+            }
         }
     }
 
