@@ -241,6 +241,7 @@ public final class MapProcessors {
             int startingCoins = element.getNumberOrThrow("startingCoins").intValue();
             int repairCoins = element.getNumberOrThrow("repairCoins").intValue();
             double windowRepairRadius = element.getNumberOrThrow("windowRepairRadius").doubleValue();
+            double powerupPickupRadius = element.getNumberOrThrow("powerupPickupRadius").doubleValue();
             long windowRepairTicks = element.getNumberOrThrow("windowRepairTicks").longValue();
             long corpseDeathTicks = element.getNumberOrThrow("corpseDeathTicks").longValue();
             double reviveRadius = element.getNumberOrThrow("reviveRadius").doubleValue();
@@ -253,13 +254,14 @@ public final class MapProcessors {
             return new MapSettingsInfo(mapDataVersion, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
-                    startingCoins, repairCoins, windowRepairRadius, windowRepairTicks, corpseDeathTicks, reviveRadius,
-                    canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest, milestoneRounds, defaultEquipment);
+                    startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
+                    corpseDeathTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest,
+                    milestoneRounds, defaultEquipment);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(MapSettingsInfo mapConfig) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(28);
+            ConfigNode node = new LinkedConfigNode(29);
             node.putNumber("mapDataVersion", mapConfig.mapDataVersion());
             node.put("id", ConfigProcessors.key().elementFromData(mapConfig.id()));
             node.put("instancePath", ConfigProcessor.STRING.listProcessor().elementFromData(mapConfig.instancePath()));
@@ -282,6 +284,7 @@ public final class MapProcessors {
             node.putNumber("startingCoins", mapConfig.startingCoins());
             node.putNumber("repairCoins", mapConfig.repairCoins());
             node.putNumber("windowRepairRadius", mapConfig.windowRepairRadius());
+            node.putNumber("powerupPickupRadius", mapConfig.powerupPickupRadius());
             node.putNumber("windowRepairTicks", mapConfig.windowRepairTicks());
             node.putNumber("corpseDeathTicks", mapConfig.corpseDeathTicks());
             node.putNumber("reviveRadius", mapConfig.reviveRadius());

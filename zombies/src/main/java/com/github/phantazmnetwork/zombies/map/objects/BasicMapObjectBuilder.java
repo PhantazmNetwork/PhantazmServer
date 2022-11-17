@@ -15,6 +15,7 @@ import com.github.phantazmnetwork.zombies.map.shop.interactor.ShopInteractor;
 import com.github.phantazmnetwork.zombies.map.shop.predicate.ShopPredicate;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.map.*;
+import com.github.phantazmnetwork.zombies.util.ElementUtils;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
@@ -183,52 +184,6 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
         return mapObjects;
     }
 
-    private static void createElement(ConfigElement element, Consumer<ConfigNode> action,
-            Supplier<String> elementName) {
-        if (element.isNode()) {
-            try {
-                action.accept(element.asNode());
-            }
-            catch (Throwable e) {
-                LOGGER.warn("Exception thrown when creating element object '" + elementName.get() + "'", e);
-            }
-            return;
-        }
-
-        LOGGER.warn("Expected ConfigNode, was {}", element);
-    }
-
-    private static ConfigList extractList(ConfigNode rootNode, String path) {
-        try {
-            return rootNode.getListOrThrow(path);
-        }
-        catch (ConfigProcessException e) {
-            LOGGER.warn("Error getting ConfigList from path '" + path + "'", e);
-        }
-
-        return ConfigList.of();
-    }
-
-    private <T> void createElements(ConfigList list, Collection<T> collection, Supplier<String> elementName,
-            DependencyProvider dependencyProvider) {
-        for (ConfigElement element : list) {
-            createElement(element, node -> collection.add(contextManager.makeContext(node).provide(dependencyProvider)),
-                    elementName);
-        }
-    }
-
-    private <T> void createElements(ConfigList list, String basePath, ElementContext context, Collection<T> collection,
-            Supplier<String> elementName, DependencyProvider dependencyProvider) {
-        for (int i = 0; i < list.size(); i++) {
-            ConfigElement element = list.get(i);
-
-            int finalI = i;
-            createElement(element,
-                    node -> collection.add(context.provide(basePath + "/" + finalI, dependencyProvider, true)),
-                    elementName);
-        }
-    }
-
     private Map<Key, SpawnruleInfo> buildSpawnrules(List<SpawnruleInfo> spawnruleInfoList) {
         Map<Key, SpawnruleInfo> spawnruleInfoMap = new HashMap<>(spawnruleInfoList.size());
         for (SpawnruleInfo spawnruleInfo : spawnruleInfoList) {
@@ -261,8 +216,10 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             List<Action<Window>> repairActions = new ArrayList<>(repairActionInfo.size());
             List<Action<Window>> breakActions = new ArrayList<>(breakActionInfo.size());
 
-            createElements(repairActionInfo, repairActions, () -> "window repair action", dependencyProvider);
-            createElements(breakActionInfo, breakActions, () -> "window break action", dependencyProvider);
+            ElementUtils.createElements(contextManager, repairActionInfo, repairActions, "window repair action",
+                    dependencyProvider, LOGGER);
+            ElementUtils.createElements(contextManager, breakActionInfo, breakActions, "window break action",
+                    dependencyProvider, LOGGER);
 
             windows.add(new Window(mapOrigin, instance, windowInfo, clientBlockHandler, repairActions, breakActions));
         }
@@ -276,23 +233,24 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             ConfigNode rootNode = shopInfo.data();
             ElementContext shopContext = contextManager.makeContext(rootNode);
 
-            ConfigList predicateInfo = extractList(rootNode, "predicates");
-            ConfigList successInteractorInfo = extractList(rootNode, "successInteractors");
-            ConfigList failureInteractorInfo = extractList(rootNode, "failureInteractors");
-            ConfigList displayInfo = extractList(rootNode, "displays");
+            ConfigList predicateInfo = ElementUtils.extractList(rootNode, LOGGER, "predicates");
+            ConfigList successInteractorInfo = ElementUtils.extractList(rootNode, LOGGER, "successInteractors");
+            ConfigList failureInteractorInfo = ElementUtils.extractList(rootNode, LOGGER, "failureInteractors");
+            ConfigList displayInfo = ElementUtils.extractList(rootNode, LOGGER, "displays");
 
             List<ShopPredicate> predicates = new ArrayList<>(predicateInfo.size());
             List<ShopInteractor> successInteractors = new ArrayList<>(successInteractorInfo.size());
             List<ShopInteractor> failureInteractors = new ArrayList<>(failureInteractorInfo.size());
             List<ShopDisplay> displays = new ArrayList<>(displayInfo.size());
 
-            createElements(predicateInfo, "predicates", shopContext, predicates, () -> "shop predicate",
-                    dependencyProvider);
-            createElements(successInteractorInfo, "successInteractors", shopContext, successInteractors,
-                    () -> "shop success interactor", dependencyProvider);
-            createElements(failureInteractorInfo, "failureInteractors", shopContext, failureInteractors,
-                    () -> "shop failure interactor", dependencyProvider);
-            createElements(displayInfo, "displays", shopContext, displays, () -> "shop display", dependencyProvider);
+            ElementUtils.createElements(predicateInfo, "predicates", shopContext, predicates, "shop predicate",
+                    dependencyProvider, LOGGER);
+            ElementUtils.createElements(successInteractorInfo, "successInteractors", shopContext, successInteractors,
+                    "shop success interactor", dependencyProvider, LOGGER);
+            ElementUtils.createElements(failureInteractorInfo, "failureInteractors", shopContext, failureInteractors,
+                    "shop failure interactor", dependencyProvider, LOGGER);
+            ElementUtils.createElements(displayInfo, "displays", shopContext, displays, "shop display",
+                    dependencyProvider, LOGGER);
 
             shops.add(new Shop(shopInfo, instance, predicates, successInteractors, failureInteractors, displays));
         }
@@ -307,7 +265,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
             List<Action<Door>> openActions = new ArrayList<>(openActionInfo.size());
 
-            createElements(openActionInfo, openActions, () -> "door open action", dependencyProvider);
+            ElementUtils.createElements(contextManager, openActionInfo, openActions, "door open action",
+                    dependencyProvider, LOGGER);
 
             doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions));
         }
@@ -322,7 +281,8 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
 
             List<Action<Room>> openActions = new ArrayList<>(openActionInfo.size());
 
-            createElements(openActionInfo, openActions, () -> "room open action", dependencyProvider);
+            ElementUtils.createElements(contextManager, openActionInfo, openActions, "room open action",
+                    dependencyProvider, LOGGER);
 
             rooms.add(new Room(mapOrigin, roomInfo, openActions));
         }
@@ -342,8 +302,10 @@ public class BasicMapObjectBuilder implements MapObjectBuilder {
             List<Action<Round>> startActions = new ArrayList<>(startActionInfo.size());
             List<Action<Round>> endActions = new ArrayList<>(endActionInfo.size());
 
-            createElements(startActionInfo, startActions, () -> "round start action", dependencyProvider);
-            createElements(endActionInfo, endActions, () -> "round end action", dependencyProvider);
+            ElementUtils.createElements(contextManager, startActionInfo, startActions, "round start action",
+                    dependencyProvider, LOGGER);
+            ElementUtils.createElements(contextManager, endActionInfo, endActions, "round end action",
+                    dependencyProvider, LOGGER);
 
             for (WaveInfo wave : roundInfo.waves()) {
                 waves.add(new Wave(wave));

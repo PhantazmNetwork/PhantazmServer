@@ -1,7 +1,11 @@
 package com.github.phantazmnetwork.zombies.powerup;
 
+import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
+import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -10,14 +14,19 @@ import java.util.function.Supplier;
 
 public class BasicPowerupHandler implements PowerupHandler {
     private final Map<Key, PowerupComponents> components;
+    private final Map<UUID, ZombiesPlayer> playerMap;
+    private final double powerupPickupRadiusSquared;
 
     private final List<Powerup> spawnedOrActivePowerups;
     private final Collection<Powerup> powerupView;
 
-    public BasicPowerupHandler(@NotNull Map<Key, PowerupComponents> components) {
+    public BasicPowerupHandler(@NotNull Map<Key, PowerupComponents> components,
+            @NotNull Map<UUID, ZombiesPlayer> playerMap, double powerupPickupRadius) {
         this.components = Map.copyOf(components);
         this.spawnedOrActivePowerups = new ArrayList<>(16);
         this.powerupView = Collections.unmodifiableCollection(this.spawnedOrActivePowerups);
+        this.playerMap = Objects.requireNonNull(playerMap);
+        this.powerupPickupRadiusSquared = powerupPickupRadius * powerupPickupRadius;
     }
 
     @Override
@@ -29,11 +38,35 @@ public class BasicPowerupHandler implements PowerupHandler {
         for (int i = spawnedOrActivePowerups.size() - 1; i >= 0; i--) {
             Powerup powerup = spawnedOrActivePowerups.get(i);
 
-            if (!powerup.active() && !powerup.spawned()) {
+            boolean active = powerup.active();
+            boolean spawned = powerup.spawned();
+
+            if (!active && !spawned) {
                 spawnedOrActivePowerups.remove(i);
             }
             else {
+                if (spawned) {
+                    maybePickup(powerup, time);
+                }
+
                 powerup.tick(time);
+            }
+        }
+    }
+
+    private void maybePickup(Powerup powerup, long time) {
+        for (ZombiesPlayer player : playerMap.values()) {
+            if (player.isState(ZombiesPlayerStateKeys.ALIVE)) {
+                Optional<Player> playerOptional = player.getPlayer();
+                if (playerOptional.isPresent()) {
+                    Player actualPlayer = playerOptional.get();
+
+                    if (actualPlayer.getPosition().distanceSquared(powerup.spawnLocation()) <=
+                            powerupPickupRadiusSquared) {
+                        powerup.activate(player, time);
+                        return;
+                    }
+                }
             }
         }
     }

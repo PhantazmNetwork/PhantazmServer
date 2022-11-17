@@ -59,6 +59,7 @@ import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
 import com.github.phantazmnetwork.zombies.spawn.BasicSpawnDistributor;
 import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
 import com.github.phantazmnetwork.zombies.stage.*;
+import com.github.phantazmnetwork.zombies.util.ElementUtils;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
@@ -87,6 +88,8 @@ import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Phaser;
@@ -95,6 +98,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, ZombiesJoinRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesSceneProvider.class);
 
     private record SceneContext(@NotNull EventNode<?> node) {
 
@@ -183,13 +187,15 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
         awaitChunkLoad(instance, spawnPos);
 
-        Map<UUID, ZombiesPlayer> zombiesPlayers = new HashMap<>(settings.maxPlayers());
+        //LinkedHashMap for better value iteration performance
+        Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
 
         ModifierSource modifierSource = new BasicModifierSource();
         Flaggable flaggable = new BasicFlaggable();
         Random random = new Random();
         MapObjects mapObjects = createMapObjects(instance, random, zombiesPlayers, flaggable, modifierSource, spawnPos);
-        PowerupHandler powerupHandler = createPowerupHandler(mapObjects.mapDependencyProvider());
+        PowerupHandler powerupHandler = createPowerupHandler(mapObjects.mapDependencyProvider(), zombiesPlayers,
+                settings.powerupPickupRadius());
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
 
         ZombiesMap map = new ZombiesMap(modifierSource, flaggable, mapObjects, powerupHandler, roundHandler);
@@ -238,7 +244,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 keyParser).build(mapInfo);
     }
 
-    private @NotNull PowerupHandler createPowerupHandler(@NotNull DependencyProvider mapDependencyProvider) {
+    private @NotNull PowerupHandler createPowerupHandler(@NotNull DependencyProvider mapDependencyProvider,
+            @NotNull Map<UUID, ZombiesPlayer> playerMap, double powerupPickupRadiusSquared) {
         List<PowerupInfo> powerupData = mapInfo.powerups();
         Map<Key, PowerupComponents> powerupMap = new HashMap<>(powerupData.size());
 
@@ -250,29 +257,24 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             Collection<Supplier<PowerupVisual>> visuals = new ArrayList<>(visualData.size());
             Collection<Supplier<PowerupAction>> actions = new ArrayList<>(actionData.size());
 
-            for (ConfigElement element : visualData) {
-                if (element.isNode()) {
-                    Supplier<PowerupVisual> visual =
-                            contextManager.makeContext(element.asNode()).provide(mapDependencyProvider);
-                    visuals.add(visual);
-                }
-            }
+            ElementUtils.createElements(contextManager, visualData, visuals, "powerup visual", mapDependencyProvider,
+                    LOGGER);
 
-            for (ConfigElement element : actionData) {
-                if (element.isNode()) {
-                    Supplier<PowerupAction> action =
-                            contextManager.makeContext(element.asNode()).provide(mapDependencyProvider);
-                    actions.add(action);
-                }
-            }
+            ElementUtils.createElements(contextManager, actionData, actionData, "powerup action", mapDependencyProvider,
+                    LOGGER);
 
             Supplier<DeactivationPredicate> deactivationPredicateSupplier =
-                    contextManager.makeContext(deactivationPredicateData).provide(mapDependencyProvider);
+                    ElementUtils.createElement(contextManager, deactivationPredicateData,
+                            "powerup deactivation predicate", mapDependencyProvider, LOGGER);
+
+            if (deactivationPredicateSupplier == null) {
+                deactivationPredicateSupplier = () -> ImmediateDeactivationPredicateFactory.INSTANCE;
+            }
 
             powerupMap.put(data.id(), new PowerupComponents(visuals, actions, deactivationPredicateSupplier));
         }
 
-        return new BasicPowerupHandler(powerupMap);
+        return new BasicPowerupHandler(powerupMap, playerMap, powerupPickupRadiusSquared);
     }
 
     private @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,

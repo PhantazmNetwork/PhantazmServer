@@ -12,6 +12,7 @@ import com.github.phantazmnetwork.zombies.map.Flaggable;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateSwitcher;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerState;
+import com.github.phantazmnetwork.zombies.powerup.PowerupHandler;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import net.minestom.server.scoreboard.Sidebar;

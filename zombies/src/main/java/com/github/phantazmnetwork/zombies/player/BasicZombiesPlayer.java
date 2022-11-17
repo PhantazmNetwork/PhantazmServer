@@ -4,11 +4,15 @@ import com.github.phantazmnetwork.zombies.map.Flaggable;
 import com.github.phantazmnetwork.core.inventory.InventoryAccessRegistry;
 import com.github.phantazmnetwork.core.inventory.InventoryObject;
 import com.github.phantazmnetwork.core.inventory.InventoryProfile;
+import com.github.phantazmnetwork.zombies.map.PowerupInfo;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
+import com.github.phantazmnetwork.zombies.powerup.Powerup;
+import com.github.phantazmnetwork.zombies.powerup.PowerupHandler;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -57,26 +61,30 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
             Player player = playerOptional.get();
             module.getMeta().setCrouching(playerOptional.get().getPose() == Entity.Pose.SLEEPING);
 
-            InventoryAccessRegistry accessRegistry = module.getInventoryAccessRegistry();
-            if (accessRegistry.hasCurrentAccess()) {
-                InventoryProfile profile = accessRegistry.getCurrentAccess().profile();
-                for (int slot = 0; slot < profile.getSlotCount(); ++slot) {
-                    if (profile.hasInventoryObject(slot)) {
-                        InventoryObject inventoryObject = profile.getInventoryObject(slot);
-                        inventoryObject.tick(time);
-
-                        if (inventoryObject.shouldRedraw()) {
-                            player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
-                        }
-                    }
-                }
-            }
+            inventoryTick(player, time);
         }
         else {
             module.getMeta().setCrouching(false);
         }
 
         module.getStateSwitcher().tick(time);
+    }
+
+    private void inventoryTick(Player player, long time) {
+        InventoryAccessRegistry accessRegistry = module.getInventoryAccessRegistry();
+        if (accessRegistry.hasCurrentAccess()) {
+            InventoryProfile profile = accessRegistry.getCurrentAccess().profile();
+            for (int slot = 0; slot < profile.getSlotCount(); ++slot) {
+                if (profile.hasInventoryObject(slot)) {
+                    InventoryObject inventoryObject = profile.getInventoryObject(slot);
+                    inventoryObject.tick(time);
+
+                    if (inventoryObject.shouldRedraw()) {
+                        player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
+                    }
+                }
+            }
+        }
     }
 
     @Override

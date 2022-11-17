@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 @Model("zombies.powerup.deactivation_predicate.immediate")
 public class ImmediateDeactivationPredicateFactory implements Supplier<DeactivationPredicate> {
-    private static final DeactivationPredicate INSTANCE = new ImmediateDeactivationPredicate();
+    public static final DeactivationPredicate INSTANCE = new ImmediateDeactivationPredicate();
 
     @FactoryMethod
     public ImmediateDeactivationPredicateFactory() {
