@@ -4,14 +4,13 @@ import com.github.phantazmnetwork.core.item.UpdatingItem;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.metadata.LivingEntityMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
 @Model("zombies.perk.level.extra_health")
 public class ExtraHealthLevel extends PerkLevelBase {
-    private static final float BASE_HEALTH = 20F;
-
     @FactoryMethod
     public ExtraHealthLevel(@NotNull Data data, @NotNull @DataName("updating_item") UpdatingItem item) {
         super(data, item);
@@ -25,13 +24,18 @@ public class ExtraHealthLevel extends PerkLevelBase {
     @Override
     public void start(@NotNull ZombiesPlayer zombiesPlayer) {
         //TODO: API for modifying health on ZombiesPlayer?
-        zombiesPlayer.getPlayer()
-                .ifPresent(player -> player.getLivingEntityMeta().setHealth(BASE_HEALTH + getData().bonusHealth));
+        zombiesPlayer.getPlayer().ifPresent(player -> {
+            LivingEntityMeta meta = player.getLivingEntityMeta();
+            meta.setHealth(meta.getHealth() + getData().bonusHealth);
+        });
     }
 
     @Override
     public void end(@NotNull ZombiesPlayer zombiesPlayer) {
-        zombiesPlayer.getPlayer().ifPresent(player -> player.getLivingEntityMeta().setHealth(BASE_HEALTH));
+        zombiesPlayer.getPlayer().ifPresent(player -> {
+            LivingEntityMeta meta = player.getLivingEntityMeta();
+            meta.setHealth(meta.getHealth() - getData().bonusHealth);
+        });
     }
 
     @DataObject

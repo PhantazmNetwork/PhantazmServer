@@ -127,7 +127,7 @@ public class ZombiesPlayerModule implements DependencyModule {
     }
 
     @DependencySupplier("zombies.dependency.player.modifiers")
-    public @NotNull TransactionModifierSource modifiers() {
+    public @NotNull TransactionModifierSource transactionModifiers() {
         return transactionModifierSource;
     }
 
