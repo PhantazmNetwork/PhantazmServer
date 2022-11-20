@@ -1,26 +1,25 @@
 package com.github.phantazmnetwork.mob.goal;
 
-import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.NeuralEntity;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.NeuralGoal;
 import com.github.steanky.element.core.annotation.*;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * A {@link NeuralGoal} that makes a {@link PhantazmMob} follow {@link Entity}s
- */
-@Model("mob.goal.follow_entity")
-public class FollowEntityGoal implements NeuralGoal {
+@Model("mob.goal.charge_at_entity")
+public class ChargeAtEntityGoal implements NeuralGoal {
 
     @DataObject
     public record Data(@NotNull @DataPath("selector_path") String selectorPath,
                        long retargetInterval,
-                       double followRange) {
+                       double followRange,
+                       long chargeInterval,
+                       double chargeSpeed) {
 
         public Data {
             Objects.requireNonNull(selectorPath, "selectorPath");
@@ -38,17 +37,20 @@ public class FollowEntityGoal implements NeuralGoal {
 
     private long ticksSinceTargetChosen;
 
+    private long ticksSinceCharge;
+
     /**
      * Creates a {@link FollowEntityGoal}.
      *
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
-    public FollowEntityGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity,
+    public ChargeAtEntityGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity,
             @NotNull @DataName("selector") TargetSelector<? extends Entity> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.entity = Objects.requireNonNull(entity, "entity");
         this.selector = Objects.requireNonNull(selector, "selector");
         this.ticksSinceTargetChosen = data.retargetInterval();
+        this.ticksSinceCharge = data.chargeInterval();
     }
 
     @Override
@@ -86,6 +88,13 @@ public class FollowEntityGoal implements NeuralGoal {
         else {
             ++ticksSinceTargetChosen;
         }
+
+        if (ticksSinceCharge >= data.chargeInterval()) {
+            charge();
+        }
+        else {
+            ++ticksSinceCharge;
+        }
     }
 
     private void refreshTarget() {
@@ -99,10 +108,20 @@ public class FollowEntityGoal implements NeuralGoal {
         Optional<? extends Entity> newTargetOptional = selector.selectTarget();
         if (newTargetOptional.isPresent()) {
             entity.setTarget(target = newTargetOptional.get());
+            ticksSinceCharge = 0L;
         }
         else {
             entity.setTarget(target = null);
+            ticksSinceCharge = data.chargeInterval();
         }
+    }
+
+    private void charge() {
+        Vec direction =
+                Vec.fromPoint(target.getPosition().sub(entity.getPosition())).normalize().mul(data.chargeSpeed());
+        entity.setVelocity(entity.getVelocity().add(direction));
+
+        ticksSinceCharge = 0L;
     }
 
 }

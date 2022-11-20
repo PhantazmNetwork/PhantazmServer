@@ -6,7 +6,8 @@ import com.github.phantazmnetwork.core.config.processor.MinestomConfigProcessors
 import com.github.phantazmnetwork.core.config.processor.VariantConfigProcessor;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.config.MobModelConfigProcessor;
-import com.github.phantazmnetwork.mob.goal.FollowPlayerGoal;
+import com.github.phantazmnetwork.mob.goal.ChargeAtEntityGoal;
+import com.github.phantazmnetwork.mob.goal.FollowEntityGoal;
 import com.github.phantazmnetwork.mob.goal.MeleeAttackGoal;
 import com.github.phantazmnetwork.mob.goal.UseSkillGoal;
 import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
@@ -132,7 +133,8 @@ public final class Mob {
         LOGGER.info("Registering Mob element classes...");
 
         //mob goals
-        contextManager.registerElementClass(FollowPlayerGoal.class);
+        contextManager.registerElementClass(FollowEntityGoal.class);
+        contextManager.registerElementClass(ChargeAtEntityGoal.class);
         contextManager.registerElementClass(UseSkillGoal.class);
         contextManager.registerElementClass(MeleeAttackGoal.class);
 
