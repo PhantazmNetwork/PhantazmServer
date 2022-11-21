@@ -8,6 +8,7 @@ import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.map.Flaggable;
 import com.github.phantazmnetwork.zombies.player.state.PlayerStateKey;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerState;
+import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,6 +53,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
 
     default boolean isState(@NotNull PlayerStateKey<?> stateKey) {
         return getModule().getStateSwitcher().getState().key().equals(stateKey.key());
+    }
+
+    default boolean isAlive() {
+        return isState(ZombiesPlayerStateKeys.ALIVE);
     }
 
     default @NotNull Optional<Player> getPlayer() {

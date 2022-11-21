@@ -55,7 +55,7 @@ public class InGameStage implements Stage {
 
         boolean anyAlive = false;
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.ALIVE)) {
+            if (zombiesPlayer.isAlive()) {
                 anyAlive = true;
                 break;
             }
@@ -117,7 +117,7 @@ public class InGameStage implements Stage {
     public void end() {
         boolean anyAlive = false;
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.ALIVE)) {
+            if (zombiesPlayer.isAlive()) {
                 anyAlive = true;
                 break;
             }

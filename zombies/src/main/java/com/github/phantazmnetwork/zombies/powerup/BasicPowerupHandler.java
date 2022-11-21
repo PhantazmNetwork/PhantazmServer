@@ -56,7 +56,7 @@ public class BasicPowerupHandler implements PowerupHandler {
 
     private void maybePickup(Powerup powerup, long time) {
         for (ZombiesPlayer player : playerMap.values()) {
-            if (player.isState(ZombiesPlayerStateKeys.ALIVE)) {
+            if (player.isAlive()) {
                 Optional<Player> playerOptional = player.getPlayer();
                 if (playerOptional.isPresent()) {
                     Player actualPlayer = playerOptional.get();

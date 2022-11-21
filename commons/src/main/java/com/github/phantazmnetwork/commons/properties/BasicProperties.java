@@ -56,10 +56,8 @@ public class BasicProperties implements Properties {
         Objects.requireNonNull(propertyName, "propertyName");
         Objects.requireNonNull(modifier, "modifier");
 
-        Property property = propertyMap.computeIfAbsent(propertyName, ignored -> newProperty());
-        Set<Modifier> modifiers = property.modifiers.computeIfAbsent(modifierGroup, ignored -> new ObjectRBTreeSet<>());
-
-        modifiers.add(modifier);
+        propertyMap.computeIfAbsent(propertyName, ignored -> newProperty()).modifiers.computeIfAbsent(modifierGroup,
+                ignored -> newSet()).add(modifier);
     }
 
     @Override
@@ -82,5 +80,9 @@ public class BasicProperties implements Properties {
 
     private static Property newProperty() {
         return new Property(0, new HashMap<>(1));
+    }
+
+    private static Set<Modifier> newSet() {
+        return new ObjectRBTreeSet<>();
     }
 }
