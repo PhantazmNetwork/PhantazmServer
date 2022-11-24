@@ -10,7 +10,7 @@ import com.github.phantazmnetwork.mob.goal.ChargeAtEntityGoal;
 import com.github.phantazmnetwork.mob.goal.FollowEntityGoal;
 import com.github.phantazmnetwork.mob.goal.MeleeAttackGoal;
 import com.github.phantazmnetwork.mob.goal.UseSkillGoal;
-import com.github.phantazmnetwork.mob.skill.PlaySoundSkill;
+import com.github.phantazmnetwork.mob.skill.*;
 import com.github.phantazmnetwork.mob.spawner.BasicMobSpawner;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.mob.target.EntitySelector;
@@ -139,6 +139,10 @@ public final class Mob {
         contextManager.registerElementClass(MeleeAttackGoal.class);
 
         //mob skills
+        contextManager.registerElementClass(BleedEntitiesSkill.class);
+        contextManager.registerElementClass(DamageEntitySkill.class);
+        contextManager.registerElementClass(DuplicateSelfSkill.class);
+        contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
 
         //mob selectors

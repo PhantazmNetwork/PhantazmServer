@@ -18,9 +18,7 @@ import java.util.Optional;
 public class FollowEntityGoal implements NeuralGoal {
 
     @DataObject
-    public record Data(@NotNull @DataPath("selector_path") String selectorPath,
-                       long retargetInterval,
-                       double followRange) {
+    public record Data(@NotNull @DataPath("selector") String selectorPath, long retargetInterval, double followRange) {
 
         public Data {
             Objects.requireNonNull(selectorPath, "selectorPath");
@@ -43,6 +41,7 @@ public class FollowEntityGoal implements NeuralGoal {
      *
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
+    @FactoryMethod
     public FollowEntityGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity,
             @NotNull @DataName("selector") TargetSelector<? extends Entity> selector) {
         this.data = Objects.requireNonNull(data, "data");

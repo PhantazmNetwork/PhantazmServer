@@ -80,4 +80,9 @@ public class PlaySoundSkill implements Skill {
         });
     }
 
+    @Override
+    public void tick(long time) {
+
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.mob;
 
+import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.mob.skill.Skill;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
@@ -12,7 +13,7 @@ import java.util.*;
  * A store of {@link PhantazmMob}s. Mobs should be registered to the store and events
  * pertaining to mobs should be handled by the store.
  */
-public class MobStore {
+public class MobStore implements Tickable {
 
     private final Map<UUID, PhantazmMob> uuidToMob = new HashMap<>();
 
@@ -80,4 +81,14 @@ public class MobStore {
         return uuidToMob.containsKey(Objects.requireNonNull(uuid, "uuid"));
     }
 
+    @Override
+    public void tick(long time) {
+        for (PhantazmMob mob : uuidToMob.values()) {
+            for (Collection<Skill> triggerSkills : mob.triggers().values()) {
+                for (Skill skill : triggerSkills) {
+                    skill.tick(time);
+                }
+            }
+        }
+    }
 }
