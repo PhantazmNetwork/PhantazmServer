@@ -14,7 +14,7 @@ import java.util.*;
 // TODO: almost everything is copied from LobbySceneRouter, but trying to create a base creates a lot of generics
 public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
 
-    private final Map<Key, SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders;
+    private final Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders;
 
     private final Map<UUID, ZombiesScene> playerSceneMap = new HashMap<>();
 
@@ -60,7 +60,8 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
 
     private boolean joinable = true;
 
-    public ZombiesSceneRouter(@NotNull Map<Key, SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders) {
+    public ZombiesSceneRouter(
+            @NotNull Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders) {
         this.sceneProviders = Objects.requireNonNull(sceneProviders, "sceneProviders");
     }
 

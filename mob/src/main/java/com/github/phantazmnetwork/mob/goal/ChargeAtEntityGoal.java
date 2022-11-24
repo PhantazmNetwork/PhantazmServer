@@ -15,7 +15,7 @@ import java.util.Optional;
 public class ChargeAtEntityGoal implements NeuralGoal {
 
     @DataObject
-    public record Data(@NotNull @DataPath("selector_path") String selectorPath,
+    public record Data(@NotNull @DataPath("selector") String selectorPath,
                        long retargetInterval,
                        double followRange,
                        long chargeInterval,
@@ -44,6 +44,7 @@ public class ChargeAtEntityGoal implements NeuralGoal {
      *
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
+    @FactoryMethod
     public ChargeAtEntityGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity,
             @NotNull @DataName("selector") TargetSelector<? extends Entity> selector) {
         this.data = Objects.requireNonNull(data, "data");

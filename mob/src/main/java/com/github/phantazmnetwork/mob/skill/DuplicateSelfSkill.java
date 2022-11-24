@@ -40,4 +40,9 @@ public class DuplicateSelfSkill implements Skill {
 
         spawner.spawn(instance, entity.getPosition(), mobStore, model);
     }
+
+    @Override
+    public void tick(long time) {
+
+    }
 }
