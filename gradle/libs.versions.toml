@@ -43,7 +43,7 @@ libgui = { module = "io.github.cottonmc:LibGui", version = "6.0.1+1.19" }
 
 minecraft = { module = "com.mojang:minecraft", version = "1.19.2" }
 
-minestom = { module = "com.github.phantazmnetwork.minestom:Minestom", version = "43f0861fff" }
+minestom = { module = "com.github.PhantazmNetwork.Minestom:Minestom", version = "957fa05d84" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.7.0" }
 
