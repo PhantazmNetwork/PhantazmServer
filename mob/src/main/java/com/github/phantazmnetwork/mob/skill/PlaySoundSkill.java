@@ -1,12 +1,7 @@
 package com.github.phantazmnetwork.mob.skill;
 
-import com.github.phantazmnetwork.commons.ConfigProcessors;
 import com.github.phantazmnetwork.mob.target.TargetSelector;
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
@@ -20,12 +15,12 @@ import java.util.Objects;
 public class PlaySoundSkill implements Skill {
 
     @DataObject
-    public record Data(@NotNull @DataPath("target_selector") String selectorPath,
+    public record Data(@NotNull @DataPath("selector") String selectorPath,
                        @NotNull Sound sound,
                        boolean followAudience) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "targetSelectorPath");
+            Objects.requireNonNull(selectorPath, "selectorPath");
             Objects.requireNonNull(sound, "sound");
         }
 
@@ -42,30 +37,9 @@ public class PlaySoundSkill implements Skill {
      */
     @FactoryMethod
     public PlaySoundSkill(@NotNull Data data,
-            @NotNull @DataName("target_selector") TargetSelector<? extends Audience> selector) {
+            @NotNull @DataName("selector") TargetSelector<? extends Audience> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.selector = Objects.requireNonNull(selector, "selector");
-    }
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Sound> soundProcessor = ConfigProcessors.sound();
-        return new ConfigProcessor<>() {
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String selectorPath = element.getStringOrThrow("targetSelectorPath");
-                Sound sound = soundProcessor.dataFromElement(element.getElementOrThrow("sound"));
-                boolean followAudience = element.getBooleanOrThrow("followAudience");
-
-                return new Data(selectorPath, sound, followAudience);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                return ConfigNode.of("targetSelectorPath", data.selectorPath(), "sound",
-                        soundProcessor.elementFromData(data.sound()), "followAudience", data.followAudience());
-            }
-        };
     }
 
     @Override

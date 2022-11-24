@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.core.BasicClientBlockHandlerSource;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
@@ -15,11 +14,10 @@ import com.github.phantazmnetwork.core.instance.InstanceLoader;
 import com.github.phantazmnetwork.core.player.PlayerViewProvider;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.neuron.bindings.minestom.chunk.NeuralChunk;
-import com.github.phantazmnetwork.zombies.powerup.Powerup;
-import com.github.phantazmnetwork.zombies.scene.ZombiesRouteRequest;
+import com.github.phantazmnetwork.zombies.command.ZombiesCommand;
+import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.phantazmnetwork.zombies.scene.ZombiesSceneProvider;
 import com.github.phantazmnetwork.zombies.scene.ZombiesSceneRouter;
-import com.github.phantazmnetwork.zombies.map.MapInfo;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
@@ -27,6 +25,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
@@ -44,7 +43,7 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -56,8 +55,9 @@ final class ZombiesTest {
     }
 
     static void initialize(@NotNull EventNode<Event> global, @NotNull Map<Key, MapInfo> maps,
-            @NotNull PlayerViewProvider viewProvider, @NotNull ContextManager contextManager,
-            @NotNull KeyParser keyParser, @NotNull SceneFallback sceneFallback) {
+            @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
+            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
+            @NotNull SceneFallback sceneFallback) {
         global.addListener(PlayerLoginEvent.class, event -> {
             if (holograms) {
                 return;
@@ -154,42 +154,25 @@ final class ZombiesTest {
             }
         });
 
-
-        Key testMapKey = Key.key(Namespaces.PHANTAZM, "test_map");
-        MapInfo testMap = maps.get(testMapKey);
-
-        if (testMap != null) {
-            InstanceLoader instanceLoader =
-                    new AnvilFileSystemInstanceLoader(Path.of("./zombies/instances/"), NeuralChunk::new);
-            ZombiesSceneProvider testProvider =
-                    new ZombiesSceneProvider(1, testMap, MinecraftServer.getInstanceManager(), instanceLoader,
+        InstanceLoader instanceLoader =
+                new AnvilFileSystemInstanceLoader(Path.of("./zombies/instances/"), NeuralChunk::new);
+        Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
+        for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
+            ZombiesSceneProvider provider =
+                    new ZombiesSceneProvider(1, entry.getValue(), MinecraftServer.getInstanceManager(), instanceLoader,
                             sceneFallback, global, Mob.getMobSpawner(), new MobStore(), Mob.getModels(),
                             new BasicClientBlockHandlerSource(
                                     instance -> new InstanceClientBlockHandler(instance, global)), contextManager,
                             keyParser, EquipmentFeature::createEquipmentCreator);
-            ZombiesSceneRouter sceneRouter = new ZombiesSceneRouter(Map.of(testMapKey, testProvider));
-
-            global.addListener(EventListener.builder(PlayerChatEvent.class).ignoreCancelled(false).handler(event -> {
-                String msg = event.getMessage();
-                Player player = event.getPlayer();
-                Instance instance = player.getInstance();
-
-                if (instance == null) {
-                    return;
-                }
-
-                switch (msg) {
-                    case "warp" -> {
-                        sceneRouter.join(new ZombiesRouteRequest(testMapKey,
-                                () -> Collections.singleton(viewProvider.fromPlayer(player))));
-                    }
-                }
-            }).build());
-
-            MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-                sceneRouter.tick(System.currentTimeMillis());
-            }, TaskSchedule.immediate(), TaskSchedule.tick(1));
+            providers.put(entry.getKey(), provider);
         }
+        ZombiesSceneRouter sceneRouter = new ZombiesSceneRouter(providers);
+
+        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+            sceneRouter.tick(System.currentTimeMillis());
+        }, TaskSchedule.immediate(), TaskSchedule.tick(1));
+
+        commandManager.register(new ZombiesCommand(sceneRouter, keyParser, maps, viewProvider));
     }
 
     private static void pigstepRandomPitch(Player player) {

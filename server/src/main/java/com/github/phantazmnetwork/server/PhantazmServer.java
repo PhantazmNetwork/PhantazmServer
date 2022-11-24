@@ -206,8 +206,8 @@ public final class PhantazmServer {
                 mappingProcessorSource.processorFor(Token.ofClass(GunData.class)));
 
         ZombiesFeature.initialize(contextManager);
-        ZombiesTest.initialize(global, ZombiesFeature.maps(), viewProvider, contextManager, keyParser,
-                new CompositeFallback(
+        ZombiesTest.initialize(global, ZombiesFeature.maps(), viewProvider, MinecraftServer.getCommandManager(),
+                contextManager, keyParser, new CompositeFallback(
                         List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),
                                 new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
     }
