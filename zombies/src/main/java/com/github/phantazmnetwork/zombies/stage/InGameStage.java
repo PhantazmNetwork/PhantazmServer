@@ -5,7 +5,6 @@ import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.map.RoundHandler;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
-import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -103,7 +102,7 @@ public class InGameStage implements Stage {
 
     @Override
     public void tick(long time) {
-        ticksSinceStart.apply(ticks -> ticks - 1);
+        ticksSinceStart.apply(ticks -> ticks + 1);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             SidebarUpdater sidebarUpdater =
                     sidebarUpdaters.computeIfAbsent(zombiesPlayer.getModule().getPlayerView().getUUID(), unused -> {

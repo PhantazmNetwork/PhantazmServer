@@ -18,7 +18,7 @@ public interface BlockIteration {
 
         boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block);
 
-        boolean isValidIntersection(@NotNull Vec intersection, @NotNull Block block);
+        boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block);
 
     }
 
