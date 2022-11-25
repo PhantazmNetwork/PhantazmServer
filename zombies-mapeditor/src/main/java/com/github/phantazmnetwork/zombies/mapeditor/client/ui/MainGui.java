@@ -106,7 +106,7 @@ public class MainGui extends SimplePanelGui {
 
             session.addMap(new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), new ArrayList<>(),
                     new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                    new ArrayList<>(), new LinkedConfigNode(0)));
+                    new ArrayList<>(), new ArrayList<>(), new LinkedConfigNode(0)));
             session.setCurrent(mapKey);
 
             refreshMainGui(session);

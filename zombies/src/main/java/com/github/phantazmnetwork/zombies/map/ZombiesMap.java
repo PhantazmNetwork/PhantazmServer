@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class ZombiesMap implements Tickable, Flaggable.Source {
     private final TransactionModifierSource transactionModifierSource;
     private final Flaggable flags;

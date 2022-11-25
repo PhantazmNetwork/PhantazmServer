@@ -200,7 +200,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesMap map = new ZombiesMap(transactionModifierSource, flaggable, mapObjects, powerupHandler, roundHandler);
 
-        EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, roundHandler);
+        EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, mapObjects, roundHandler);
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         SidebarModule sidebarModule =
@@ -363,7 +363,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     private @NotNull EventNode<Event> createEventNode(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull RoundHandler roundHandler) {
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
+            @NotNull RoundHandler roundHandler) {
         EventNode<Event> node = EventNode.all(UUID.randomUUID().toString());
         node.addListener(EntityDeathEvent.class,
                 new PhantazmMobDeathListener(instance, mobStore, roundHandler::currentRound));
@@ -377,6 +378,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener));
         node.addListener(PlayerUseItemOnBlockEvent.class,
                 new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener));
+        node.addListener(EntityDamageEvent.class, new PlayerDeathEventListener(instance, zombiesPlayers, mapObjects));
+        node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers));
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers));
