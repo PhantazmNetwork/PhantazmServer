@@ -20,6 +20,12 @@ import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandManager;
+import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.CommandExecutor;
+import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -27,6 +33,8 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.permission.Permission;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,40 +140,24 @@ public final class PhantazmServer {
             return;
         }
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (!MinecraftServer.isStopping()) {
+                shutdown("interrupt");
+            }
+        }));
+
         try {
             startServer(node, minecraftServer, serverConfig);
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
             shutdown("error during startup");
-            return;
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            shutdown("interrupt");
-        }));
-
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            if (handleCommand(scanner.nextLine())) {
-                break;
-            }
         }
     }
 
     public static void shutdown(@Nullable String reason) {
         LOGGER.info("Shutting down server. Reason: " + reason);
         MinecraftServer.stopCleanly();
-    }
-
-    private static boolean handleCommand(String command) {
-        if (command.equals("stop")) {
-            shutdown("stop command");
-            return true;
-        }
-
-        LOGGER.warn("Command '" + command + "' not recognized");
-        return false;
     }
 
     private static boolean isUnsafe(String[] args) {
@@ -180,6 +172,9 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
             LobbiesConfig lobbiesConfig) throws Exception {
+        CommandManager commandManager = MinecraftServer.getCommandManager();
+        ServerCommandFeature.initialize(commandManager);
+
         Ethylene.initialize();
 
         MappingProcessorSource mappingProcessorSource = Ethylene.getMappingProcessorSource();
@@ -206,8 +201,8 @@ public final class PhantazmServer {
                 mappingProcessorSource.processorFor(Token.ofClass(GunData.class)));
 
         ZombiesFeature.initialize(contextManager);
-        ZombiesTest.initialize(global, ZombiesFeature.maps(), viewProvider, MinecraftServer.getCommandManager(),
-                contextManager, keyParser, new CompositeFallback(
+        ZombiesTest.initialize(global, ZombiesFeature.maps(), viewProvider, commandManager, contextManager, keyParser,
+                new CompositeFallback(
                         List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),
                                 new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
     }
