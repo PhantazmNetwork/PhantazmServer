@@ -57,12 +57,14 @@ public class ReviveHandler implements Activable {
             if (cachedDeathState == null) {
                 cachedDeathState = deathStateSupplier.get();
             }
+            reviver = null;
             return;
         }
         if (ticksUntilRevive == 0) {
             if (cachedDefaultState == null) {
                 cachedDefaultState = defaultStateSupplier.get();
             }
+            reviver = null;
             return;
         }
 
@@ -73,11 +75,17 @@ public class ReviveHandler implements Activable {
                 reviver.getModule().getMeta().setReviving(true);
                 ticksUntilRevive = reviver.getReviveTime();
             }
+            else {
+                --ticksUntilDeath;
+            }
         }
         else if (!reviver.getModule().getMeta().isCanRevive() || !reviver.getModule().getMeta().isCrouching()) {
             reviver.getModule().getMeta().setReviving(false);
             reviver = null;
             ticksUntilRevive = -1;
+        }
+        else {
+            --ticksUntilRevive;
         }
     }
 

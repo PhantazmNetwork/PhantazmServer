@@ -20,13 +20,18 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.player.GameProfile;
+import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
 
     private final ZombiesMap map;
 
@@ -38,7 +43,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
 
-    private boolean joinable;
+    private boolean joinable = true;
 
     public ZombiesScene(@NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
@@ -69,7 +74,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         return stageTransition.isComplete();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull RouteResult join(@NotNull ZombiesJoinRequest joinRequest) {
         Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
@@ -85,45 +89,20 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         Stage stage = getCurrentStage();
-        if (stage != null && stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
-            return new RouteResult(false, Component.text("The game is not accepting new players."));
+        if (stage == null) {
+            return new RouteResult(false, Component.text("The game is not currently running.", NamedTextColor.RED));
+        }
+        if (stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
+            return new RouteResult(false, Component.text("The game is not accepting new players.", NamedTextColor.RED));
         }
 
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
             return new RouteResult(false, Component.text("Too many players!", NamedTextColor.RED));
         }
 
-        for (PlayerView playerView : newPlayers) {
-            Optional<Player> player = playerView.getPlayer();
-            if (player.isEmpty()) {
-                continue;
-            }
-
-            boolean hasMinimum = mapSettingsInfo.minimumProtocolVersion() >= 0;
-            boolean hasMaximum = mapSettingsInfo.maximumProtocolVersion() >= 0;
-
-            int protocolVersion = MinecraftServer.PROTOCOL_VERSION;
-            if (player.get().getPlayerConnection() instanceof PlayerSocketConnection socketConnection) {
-                for (GameProfile.Property property : socketConnection.gameProfile().properties()) {
-                    if (property.name().equals("protocolVersion")) {
-                        try {
-                            protocolVersion = Integer.parseInt(property.value());
-                        }
-                        catch (NumberFormatException ignored) {
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (hasMinimum && protocolVersion < mapSettingsInfo.minimumProtocolVersion()) {
-                return new RouteResult(false,
-                        Component.text("A player's Minecraft version is too old!", NamedTextColor.RED));
-            }
-            if (hasMaximum && protocolVersion > mapSettingsInfo.maximumProtocolVersion()) {
-                return new RouteResult(false,
-                        Component.text("A player's Minecraft version is too new!", NamedTextColor.RED));
-            }
+        RouteResult protocolResult = checkWithinProtocolVersionBounds(newPlayers);
+        if (protocolResult != null) {
+            return protocolResult;
         }
 
         for (ZombiesPlayer zombiesPlayer : oldPlayers) {
@@ -136,7 +115,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             view.getPlayer().ifPresent(player -> {
                 player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
                     if (throwable != null) {
-                        // todo: error handling
+                        LOGGER.warn("Failed to send {} to an instance", player.getUuid(), throwable);
                         return;
                     }
 
@@ -152,6 +131,57 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         return RouteResult.SUCCESSFUL;
+    }
+
+    private RouteResult checkWithinProtocolVersionBounds(@NotNull Collection<PlayerView> newPlayers) {
+        for (PlayerView playerView : newPlayers) {
+            Optional<Player> player = playerView.getPlayer();
+            if (player.isEmpty()) {
+                continue;
+            }
+
+            boolean hasMinimum = mapSettingsInfo.minimumProtocolVersion() >= 0;
+            boolean hasMaximum = mapSettingsInfo.maximumProtocolVersion() >= 0;
+
+            int protocolVersion = getActualProtocolVersion(player.get().getPlayerConnection());
+
+            if (hasMinimum && protocolVersion < mapSettingsInfo.minimumProtocolVersion()) {
+                return new RouteResult(false,
+                        Component.text("A player's Minecraft version is too old!", NamedTextColor.RED));
+            }
+            if (hasMaximum && protocolVersion > mapSettingsInfo.maximumProtocolVersion()) {
+                return new RouteResult(false,
+                        Component.text("A player's Minecraft version is too new!", NamedTextColor.RED));
+            }
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private int getActualProtocolVersion(PlayerConnection playerConnection) {
+        int protocolVersion = MinecraftServer.PROTOCOL_VERSION;
+        if (!(playerConnection instanceof PlayerSocketConnection socketConnection)) {
+            return protocolVersion;
+        }
+
+        GameProfile gameProfile = socketConnection.gameProfile();
+        if (gameProfile == null) {
+            return protocolVersion;
+        }
+
+        for (GameProfile.Property property : gameProfile.properties()) {
+            if (property.name().equals("protocolVersion")) {
+                try {
+                    protocolVersion = Integer.parseInt(property.value());
+                }
+                catch (NumberFormatException ignored) {
+                }
+                break;
+            }
+        }
+
+        return protocolVersion;
     }
 
     @Override

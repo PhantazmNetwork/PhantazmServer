@@ -23,7 +23,7 @@ public class BasicBlockIteration implements BlockIteration {
         }
 
         @Override
-        public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Block block) {
+        public boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block) {
             return true;
         }
     };

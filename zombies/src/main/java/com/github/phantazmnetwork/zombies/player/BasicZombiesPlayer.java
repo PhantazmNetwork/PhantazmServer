@@ -59,7 +59,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
         Optional<Player> playerOptional = getPlayer();
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-            module.getMeta().setCrouching(playerOptional.get().getPose() == Entity.Pose.SLEEPING);
+            module.getMeta().setCrouching(playerOptional.get().getPose() == Entity.Pose.SNEAKING);
 
             inventoryTick(player, time);
         }
@@ -90,9 +90,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public void end() {
         if (!isState(ZombiesPlayerStateKeys.QUIT)) {
-            getPlayer().ifPresent(player -> {
-                player.getInventory().clear();
-            });
+            getPlayer().ifPresent(player -> player.getInventory().clear());
         }
         module.getStateSwitcher().end();
     }

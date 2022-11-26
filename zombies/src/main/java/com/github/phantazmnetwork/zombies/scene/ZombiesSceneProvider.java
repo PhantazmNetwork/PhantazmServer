@@ -71,6 +71,8 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -90,6 +92,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Phaser;
 import java.util.function.BiFunction;
@@ -185,6 +189,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
         awaitChunkLoad(instance, spawnPos);
+        instance.setTime(settings.worldTime());
+        instance.setTimeRate(0);
 
         //LinkedHashMap for better value iteration performance
         Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
@@ -200,11 +206,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesMap map = new ZombiesMap(transactionModifierSource, flaggable, mapObjects, powerupHandler, roundHandler);
 
-        EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, roundHandler);
+        EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, mapObjects, roundHandler);
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        String dateString = dateFormatter.format(LocalDate.now());
+        Component date = Component.text(dateString, TextColor.color(7040896));
         SidebarModule sidebarModule =
-                new SidebarModule(zombiesPlayers.values(), roundHandler, ticksSinceStart, settings.maxPlayers());
+                new SidebarModule(zombiesPlayers.values(), roundHandler, ticksSinceStart, date, settings.maxPlayers());
         StageTransition stageTransition =
                 createStageTransition(instance, settings.introMessages(), random, zombiesPlayers.values(), spawnPos,
                         roundHandler, ticksSinceStart, sidebarModule);
@@ -299,7 +308,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new ZombiesGunModule(playerView, mobSpawner, mobStore, eventNode, random, mapObjects);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(gunModule);
 
-        Sidebar sidebar = new Sidebar(Component.text("ZOMBIES", NamedTextColor.RED));
+        Sidebar sidebar = new Sidebar(Component.text("ZOMBIES", NamedTextColor.YELLOW, TextDecoration.BOLD));
 
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
@@ -335,14 +344,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     new ReviveHandler(() -> aliveStateCreator.apply(NoContext.INSTANCE), deadStateSupplier,
                             new NearbyReviverFinder(zombiesPlayers, playerView, mapSettingsInfo.reviveRadius()), 500L);
             return new KnockedPlayerState(reviveHandler,
-                    List.of(new BasicKnockedStateActivable(context, instance, zombiesPlayers, eventNode, playerView,
-                                    reviveHandler, tickFormatter, meta, sidebar), corpse.asKnockActivable(reviveHandler),
-                            new Activable() {
-                                @Override
-                                public void start() {
-                                    meta.setCorpse(corpse);
-                                }
-                            }));
+                    List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
+                            meta, sidebar), corpse.asKnockActivable(reviveHandler), new Activable() {
+                        @Override
+                        public void start() {
+                            meta.setCorpse(corpse);
+                        }
+                    }));
         };
         Function<NoContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT", NamedTextColor.RED),
@@ -363,7 +371,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     private @NotNull EventNode<Event> createEventNode(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull RoundHandler roundHandler) {
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
+            @NotNull RoundHandler roundHandler) {
         EventNode<Event> node = EventNode.all(UUID.randomUUID().toString());
         node.addListener(EntityDeathEvent.class,
                 new PhantazmMobDeathListener(instance, mobStore, roundHandler::currentRound));
@@ -377,6 +386,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener));
         node.addListener(PlayerUseItemOnBlockEvent.class,
                 new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener));
+        node.addListener(EntityDamageEvent.class, new PlayerDeathEventListener(instance, zombiesPlayers, mapObjects));
+        node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers));
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers));

@@ -116,7 +116,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
                 if (intersectionOptional.isPresent()) {
                     Vec intersection = intersectionOptional.get();
                     for (BlockIteration.Context context : contexts) {
-                        if (!context.isValidIntersection(intersection, block)) {
+                        if (!context.acceptRaytracedBlock(intersection, block)) {
                             continue blockLoop;
                         }
 

@@ -45,14 +45,14 @@ public class WallshotBlockIteration implements BlockIteration {
 
             @SuppressWarnings("UnstableApiUsage")
             @Override
-            public boolean isValidIntersection(@NotNull Vec intersection, @NotNull Block block) {
+            public boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block) {
                 if (!block.registry().collisionShape().relativeEnd().equals(Vec.ONE) ||
                         data.passableBlocks().contains(block.key())) {
                     wallshot = true;
                     return false;
                 }
 
-                return true;
+                return !block.isAir();
             }
 
         };

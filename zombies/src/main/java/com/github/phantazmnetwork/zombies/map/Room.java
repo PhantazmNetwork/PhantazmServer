@@ -9,10 +9,12 @@ import org.jetbrains.annotations.UnmodifiableView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Room {
     private final List<Action<Room>> openActions;
     private final List<Region3I> unmodifiableRegions;
+    private final RoomInfo roomInfo;
     private boolean isOpen;
 
     /**
@@ -31,10 +33,15 @@ public class Room {
         }
 
         this.unmodifiableRegions = Collections.unmodifiableList(list);
+        this.roomInfo = Objects.requireNonNull(roomInfo, "roomInfo");
     }
 
     public @UnmodifiableView @NotNull List<Region3I> roomBounds() {
         return unmodifiableRegions;
+    }
+
+    public @NotNull RoomInfo getRoomInfo() {
+        return roomInfo;
     }
 
     public boolean isOpen() {

@@ -19,4 +19,5 @@ val catalogs = extensions.getByType<VersionCatalogsExtension>()
 pluginManager.withPlugin("java") {
     val libs = catalogs.named("libs")
     dependencies.addProvider("api", libs.findLibrary("minestom").get())
+    dependencies.addProvider("testImplementation", libs.findLibrary("minestom.testing").get())
 }
