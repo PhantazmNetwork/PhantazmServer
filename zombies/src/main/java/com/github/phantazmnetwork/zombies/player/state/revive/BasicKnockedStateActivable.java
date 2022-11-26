@@ -4,23 +4,18 @@ import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.core.time.TickFormatter;
-import com.github.phantazmnetwork.zombies.listener.PlayerMoveCancelListener;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayerMeta;
 import com.github.phantazmnetwork.zombies.player.state.context.KnockedPlayerStateContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.event.EventListener;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class BasicKnockedStateActivable implements Activable {
@@ -28,8 +23,6 @@ public class BasicKnockedStateActivable implements Activable {
     private final KnockedPlayerStateContext context;
 
     private final Instance instance;
-
-    private final EventNode<? super PlayerMoveEvent> eventNode;
 
     private final PlayerView playerView;
 
@@ -41,38 +34,32 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final ZombiesPlayerMeta meta;
 
-    private final EventListener<PlayerMoveEvent> moveEventListener;
-
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull EventNode<? super PlayerMoveEvent> eventNode, @NotNull PlayerView playerView,
-            @NotNull ReviveHandler reviveHandler, @NotNull TickFormatter tickFormatter, @NotNull ZombiesPlayerMeta meta,
-            @NotNull Sidebar sidebar) {
+            @NotNull PlayerView playerView, @NotNull ReviveHandler reviveHandler, @NotNull TickFormatter tickFormatter,
+            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
-        this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.reviveHandler = Objects.requireNonNull(reviveHandler, "reviveHandler");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.moveEventListener =
-                EventListener.of(PlayerMoveEvent.class, new PlayerMoveCancelListener(instance, zombiesPlayers));
     }
 
     @Override
     public void start() {
         playerView.getPlayer().ifPresent(player -> {
             player.setInvisible(true);
-            player.setAllowFlying(false);
-            player.setFlying(false);
+            player.setAllowFlying(true);
+            player.setFlyingSpeed(0F);
+            player.setFlying(true);
+            player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0F);
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             instance.sendMessage(buildDeathMessage(displayName));
         });
-        eventNode.addListener(moveEventListener);
         meta.setInGame(true);
         meta.setCanRevive(false);
         meta.setCanTriggerSLA(false);
@@ -95,12 +82,13 @@ public class BasicKnockedStateActivable implements Activable {
     public void end() {
         playerView.getPlayer().ifPresent(player -> {
             player.setInvisible(false);
-            player.setAllowFlying(false);
             player.setFlying(false);
+            player.setAllowFlying(false);
+            player.setFlyingSpeed(Attribute.FLYING_SPEED.defaultValue());
+            player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(Attribute.MOVEMENT_SPEED.defaultValue());
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
         });
-        eventNode.removeListener(moveEventListener);
     }
 
     private void sendReviveStatus(@NotNull ZombiesPlayer reviver, @NotNull Component knockedDisplayName,

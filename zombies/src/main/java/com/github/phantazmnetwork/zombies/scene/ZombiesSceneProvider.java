@@ -344,14 +344,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     new ReviveHandler(() -> aliveStateCreator.apply(NoContext.INSTANCE), deadStateSupplier,
                             new NearbyReviverFinder(zombiesPlayers, playerView, mapSettingsInfo.reviveRadius()), 500L);
             return new KnockedPlayerState(reviveHandler,
-                    List.of(new BasicKnockedStateActivable(context, instance, zombiesPlayers, eventNode, playerView,
-                                    reviveHandler, tickFormatter, meta, sidebar), corpse.asKnockActivable(reviveHandler),
-                            new Activable() {
-                                @Override
-                                public void start() {
-                                    meta.setCorpse(corpse);
-                                }
-                            }));
+                    List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
+                            meta, sidebar), corpse.asKnockActivable(reviveHandler), new Activable() {
+                        @Override
+                        public void start() {
+                            meta.setCorpse(corpse);
+                        }
+                    }));
         };
         Function<NoContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT", NamedTextColor.RED),
