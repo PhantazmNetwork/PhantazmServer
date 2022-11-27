@@ -24,10 +24,10 @@ import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.mob.trigger.MobTrigger;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
 import com.github.phantazmnetwork.zombies.audience.ChatComponentSender;
-import com.github.phantazmnetwork.zombies.coin.BasicTransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.BasicPlayerCoins;
-import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
+import com.github.phantazmnetwork.zombies.coin.BasicTransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.component.BasicTransactionComponentCreator;
 import com.github.phantazmnetwork.zombies.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
@@ -88,6 +88,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.utils.chunk.ChunkUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,7 +211,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        String dateString = dateFormatter.format(LocalDate.now());
+        String dateString = StringUtils.center(dateFormatter.format(LocalDate.now()), 16);
         Component date = Component.text(dateString, TextColor.color(7040896));
         SidebarModule sidebarModule =
                 new SidebarModule(zombiesPlayers.values(), roundHandler, ticksSinceStart, date, settings.maxPlayers());
@@ -308,7 +309,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new ZombiesGunModule(playerView, mobSpawner, mobStore, eventNode, random, mapObjects);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(gunModule);
 
-        Sidebar sidebar = new Sidebar(Component.text("ZOMBIES", NamedTextColor.YELLOW, TextDecoration.BOLD));
+        Sidebar sidebar = new Sidebar(
+                Component.text(StringUtils.center("ZOMBIES", 16), NamedTextColor.YELLOW, TextDecoration.BOLD));
 
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
