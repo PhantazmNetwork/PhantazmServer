@@ -39,6 +39,9 @@ import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
+import net.minestom.server.scoreboard.Team;
+import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 
@@ -157,13 +160,16 @@ final class ZombiesTest {
         InstanceLoader instanceLoader =
                 new AnvilFileSystemInstanceLoader(Path.of("./zombies/instances/"), NeuralChunk::new);
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
+        TeamManager teamManager = MinecraftServer.getTeamManager();
+        Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
+                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(1, entry.getValue(), MinecraftServer.getInstanceManager(), instanceLoader,
                             sceneFallback, global, Mob.getMobSpawner(), new MobStore(), Mob.getModels(),
                             new BasicClientBlockHandlerSource(
                                     instance -> new InstanceClientBlockHandler(instance, global)), contextManager,
-                            keyParser, EquipmentFeature::createEquipmentCreator);
+                            keyParser, EquipmentFeature::createEquipmentCreator, corpseTeam);
             providers.put(entry.getKey(), provider);
         }
         ZombiesSceneRouter sceneRouter = new ZombiesSceneRouter(providers);

@@ -87,6 +87,7 @@ import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.scoreboard.Sidebar;
+import net.minestom.server.scoreboard.Team;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -138,12 +139,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private final Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction;
 
+    private final Team corpseTeam;
+
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> eventNode, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
-            @NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction) {
+            @NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction, @NotNull Team corpseTeam) {
         super(maximumScenes);
         this.contexts = new IdentityHashMap<>(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
@@ -158,6 +161,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
+        this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
     }
 
     @Override
@@ -327,8 +331,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateCreator = context -> {
             Hologram hologram = new InstanceHologram(VecUtils.toDouble(context.getKnockLocation()), 1.0);
             PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
-            Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(),
-                    UUID.randomUUID().toString().substring(0, 16), skin);
+            String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
+            Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
+            corpseTeam.addMember(corpseUsername);
             TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.RED, false, false);
             Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
 
