@@ -23,7 +23,6 @@ import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.mob.trigger.MobTrigger;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
-import com.github.phantazmnetwork.zombies.audience.ChatComponentSender;
 import com.github.phantazmnetwork.zombies.coin.BasicPlayerCoins;
 import com.github.phantazmnetwork.zombies.coin.BasicTransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
@@ -33,7 +32,6 @@ import com.github.phantazmnetwork.zombies.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.ZombiesGunModule;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.PlayerAudienceProvider;
 import com.github.phantazmnetwork.zombies.kill.BasicPlayerKills;
 import com.github.phantazmnetwork.zombies.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.listener.*;
@@ -296,8 +294,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull TransactionModifierSource transactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
-        PlayerCoins coins = new BasicPlayerCoins(new PlayerAudienceProvider(playerView), new ChatComponentSender(),
-                new BasicTransactionComponentCreator(), 0);
+        PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
         PlayerKills kills = new BasicPlayerKills();
         InventoryProfile profile = new BasicInventoryProfile(9);
         InventoryAccess inventoryAccess = new InventoryAccess(profile,

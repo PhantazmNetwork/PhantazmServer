@@ -69,12 +69,12 @@ public class BasicKnockedStateActivable implements Activable {
     public void tick(long time) {
         reviveHandler.getReviver().ifPresentOrElse(reviver -> {
             Wrapper<Component> knockedDisplayName = Wrapper.ofNull(), reviverDisplayName = Wrapper.ofNull();
-            reviver.getModule().getPlayerView().getDisplayName().thenAccept(reviverDisplayName::set);
-            CompletableFuture.allOf(playerView.getDisplayName().thenAccept(knockedDisplayName::set),
-                            reviver.getModule().getPlayerView().getDisplayName().thenAccept(reviverDisplayName::set))
-                    .thenAccept(v -> {
-                        sendReviveStatus(reviver, knockedDisplayName.get(), reviverDisplayName.get());
-                    });
+            CompletableFuture<Void> knockedFuture = playerView.getDisplayName().thenAccept(knockedDisplayName::set);
+            CompletableFuture<Void> reviverFuture =
+                    reviver.getModule().getPlayerView().getDisplayName().thenAccept(reviverDisplayName::set);
+            CompletableFuture.allOf(knockedFuture, reviverFuture).thenAccept(v -> {
+                sendReviveStatus(reviver, knockedDisplayName.get(), reviverDisplayName.get());
+            });
         }, this::sendDyingStatus);
     }
 
