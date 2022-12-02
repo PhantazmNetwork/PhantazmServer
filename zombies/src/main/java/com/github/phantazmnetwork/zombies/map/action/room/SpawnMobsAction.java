@@ -27,10 +27,7 @@ public class SpawnMobsAction implements Action<Room> {
 
     @Override
     public void perform(@NotNull Room room) {
-        Round current = roundHandlerSupplier.get().currentRound();
-        if (current != null) {
-            current.spawnMobs(data.mobSpawns);
-        }
+        roundHandlerSupplier.get().currentRound().ifPresent(round -> round.spawnMobs(data.mobSpawns));
     }
 
     @DataObject

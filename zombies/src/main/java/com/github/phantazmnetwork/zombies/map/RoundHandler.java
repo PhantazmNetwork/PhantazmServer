@@ -1,6 +1,9 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.Tickable;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public interface RoundHandler extends Tickable {
     int roundCount();
@@ -9,7 +12,7 @@ public interface RoundHandler extends Tickable {
 
     void setCurrentRound(int roundIndex);
 
-    Round currentRound();
+    @NotNull Optional<Round> currentRound();
 
     boolean hasEnded();
 }

@@ -133,7 +133,7 @@ public class Round implements Tickable {
         return spawnMobs(spawnInfo, spawnDistributor, false);
     }
 
-    public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
+    private @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
             @NotNull SpawnDistributor spawnDistributor, boolean isWave) {
         if (!isActive) {
             throw new IllegalStateException("Round must be active to spawn mobs");
@@ -144,6 +144,7 @@ public class Round implements Tickable {
 
         if (isWave) {
             //adjust for mobs that may have failed to spawn
+            //only reached when calling internally
             totalMobCount -= currentWave.mobCount() - spawns.size();
         }
         else {

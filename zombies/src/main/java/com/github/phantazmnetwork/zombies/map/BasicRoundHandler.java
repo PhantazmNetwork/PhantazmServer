@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class BasicRoundHandler implements RoundHandler {
     private final List<Round> rounds;
@@ -66,8 +67,8 @@ public class BasicRoundHandler implements RoundHandler {
     }
 
     @Override
-    public Round currentRound() {
-        return currentRound;
+    public @NotNull Optional<Round> currentRound() {
+        return Optional.ofNullable(currentRound);
     }
 
     @Override
