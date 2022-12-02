@@ -8,26 +8,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class ZombiesMap implements Tickable, Flaggable.Source {
-    private final TransactionModifierSource transactionModifierSource;
-    private final Flaggable flags;
-
+public class ZombiesMap implements Tickable {
     private final MapObjects mapObjects;
     private final PowerupHandler powerupHandler;
     private final RoundHandler roundHandler;
 
-    public ZombiesMap(@NotNull TransactionModifierSource transactionModifierSource, @NotNull Flaggable flags,
-            @NotNull MapObjects mapObjects, @NotNull PowerupHandler powerupHandler,
+    public ZombiesMap(@NotNull MapObjects mapObjects, @NotNull PowerupHandler powerupHandler,
             @NotNull RoundHandler roundHandler) {
-        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
-        this.flags = Objects.requireNonNull(flags, "flags");
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
-    }
-
-    public @NotNull TransactionModifierSource modifierSource() {
-        return transactionModifierSource;
     }
 
     public @NotNull MapObjects mapObjects() {
@@ -47,10 +37,5 @@ public class ZombiesMap implements Tickable, Flaggable.Source {
         mapObjects.tick(time);
         powerupHandler.tick(time);
         roundHandler.tick(time);
-    }
-
-    @Override
-    public @NotNull Flaggable flags() {
-        return flags;
     }
 }

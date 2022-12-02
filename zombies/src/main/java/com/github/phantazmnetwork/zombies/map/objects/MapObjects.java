@@ -6,14 +6,25 @@ import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
+import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 public interface MapObjects extends Tickable {
+    interface Source {
+        @NotNull MapObjects make(@NotNull Instance instance, @NotNull MapInfo mapInfo,
+                @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier);
+    }
 
     @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
 
@@ -26,6 +37,8 @@ public interface MapObjects extends Tickable {
     @Unmodifiable @NotNull List<Room> rooms();
 
     @Unmodifiable @NotNull List<Round> rounds();
+
+    @NotNull DependencyModule module();
 
     @NotNull DependencyProvider mapDependencyProvider();
 

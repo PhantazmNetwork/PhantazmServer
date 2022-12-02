@@ -38,7 +38,9 @@ import com.github.phantazmnetwork.zombies.kill.BasicPlayerKills;
 import com.github.phantazmnetwork.zombies.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.listener.*;
 import com.github.phantazmnetwork.zombies.map.*;
-import com.github.phantazmnetwork.zombies.map.objects.BasicMapObjectBuilder;
+import com.github.phantazmnetwork.zombies.map.objects.BasicMapObjects;
+import com.github.phantazmnetwork.zombies.map.objects.BasicMapObjectsSource;
+import com.github.phantazmnetwork.zombies.map.objects.MapObjectBuilder;
 import com.github.phantazmnetwork.zombies.map.objects.MapObjects;
 import com.github.phantazmnetwork.zombies.player.BasicZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
@@ -127,15 +129,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private final MobStore mobStore;
 
-    private final Map<Key, MobModel> mobModels;
-
-    private final ClientBlockHandlerSource clientBlockHandlerSource;
-
     private final ContextManager contextManager;
 
     private final KeyParser keyParser;
 
     private final Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction;
+
+    private final BasicMapObjectsSource mapObjectSource;
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
@@ -152,11 +152,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-        this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
-        this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource, "clientBlockHandlerSource");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
+
+        this.mapObjectSource =
+                new BasicMapObjectsSource(contextManager, mobStore, mobSpawner, mobModels, clientBlockHandlerSource,
+                        keyParser);
     }
 
     @Override
@@ -195,16 +197,16 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         //LinkedHashMap for better value iteration performance
         Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
 
-        TransactionModifierSource transactionModifierSource = new BasicTransactionModifierSource();
-        Flaggable flaggable = new BasicFlaggable();
-        Random random = new Random();
-        MapObjects mapObjects =
-                createMapObjects(instance, random, zombiesPlayers, flaggable, transactionModifierSource, spawnPos);
+        Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
+
+        BasicMapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper);
         PowerupHandler powerupHandler = createPowerupHandler(mapObjects.mapDependencyProvider(), zombiesPlayers,
                 settings.powerupPickupRadius());
-        RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
 
-        ZombiesMap map = new ZombiesMap(transactionModifierSource, flaggable, mapObjects, powerupHandler, roundHandler);
+        RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
+        roundHandlerWrapper.set(roundHandler);
+
+        ZombiesMap map = new ZombiesMap(mapObjects, powerupHandler, roundHandler);
 
         EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, mapObjects, roundHandler);
 
@@ -215,12 +217,12 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         SidebarModule sidebarModule =
                 new SidebarModule(zombiesPlayers.values(), roundHandler, ticksSinceStart, date, settings.maxPlayers());
         StageTransition stageTransition =
-                createStageTransition(instance, settings.introMessages(), random, zombiesPlayers.values(), spawnPos,
-                        roundHandler, ticksSinceStart, sidebarModule);
+                createStageTransition(instance, settings.introMessages(), mapObjects.module().random(),
+                        zombiesPlayers.values(), spawnPos, roundHandler, ticksSinceStart, sidebarModule);
 
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
             return createPlayer(zombiesPlayers, settings, instance, playerView, new BasicTransactionModifierSource(),
-                    new BasicFlaggable(), childNode, random, mapObjects);
+                    new BasicFlaggable(), childNode, mapObjects.module().random(), mapObjects);
         };
 
         ZombiesScene scene = new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, settings, stageTransition,
@@ -241,16 +243,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         phaser.arriveAndAwaitAdvance();
     }
 
-    private @NotNull MapObjects createMapObjects(@NotNull Instance instance, @NotNull Random random,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull Flaggable flaggable,
-            @NotNull TransactionModifierSource transactionModifierSource, @NotNull Pos spawnPos) {
-        ClientBlockHandler blockHandler = clientBlockHandlerSource.forInstance(instance);
-        SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, zombiesPlayers.values());
-        SlotDistributor slotDistributor = new BasicSlotDistributor(1);
-
-        return new BasicMapObjectBuilder(contextManager, instance, mobStore, mobSpawner, blockHandler, spawnDistributor,
-                BasicRoundHandler::new, flaggable, transactionModifierSource, slotDistributor, zombiesPlayers, spawnPos,
-                keyParser).build(mapInfo);
+    private @NotNull BasicMapObjects createMapObjects(@NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier) {
+        return mapObjectSource.make(instance, mapInfo, zombiesPlayers, roundHandlerSupplier);
     }
 
     private @NotNull PowerupHandler createPowerupHandler(@NotNull DependencyProvider mapDependencyProvider,

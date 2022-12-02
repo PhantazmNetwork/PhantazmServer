@@ -2,10 +2,12 @@ package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import com.github.phantazmnetwork.neuron.bindings.minestom.entity.Spawner;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
+import net.minestom.server.entity.metadata.other.WitherSkullMeta;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
@@ -13,6 +15,8 @@ import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.client.play.ClientSteerVehiclePacket;
+import net.minestom.server.potion.Potion;
+import net.minestom.server.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -52,6 +56,7 @@ final class NeuronTest {
                     }
                     case "C" -> event.getPlayer().setGameMode(GameMode.CREATIVE);
                     case "S" -> event.getPlayer().setGameMode(GameMode.SURVIVAL);
+                    case "A" -> event.getPlayer().setGameMode(GameMode.ADVENTURE);
                     case "ZZ" -> {
                         EntityCreature creature = new EntityCreature(EntityType.ZOMBIE);
                         creature.setInstance(instance, player.getPosition().add(5, 0, 0));
@@ -64,6 +69,11 @@ final class NeuronTest {
                         for (Entity entity : entities) {
                             entity.setVelocity(new Vec(10, 0, 0));
                         }
+                    }
+                    case "W" -> {
+                        Entity entity = new Entity(EntityType.ZOMBIE);
+                        entity.setInstance(player.getInstance(), player.getPosition()).join();
+                        entity.setInvisible(true);
                     }
                 }
             }

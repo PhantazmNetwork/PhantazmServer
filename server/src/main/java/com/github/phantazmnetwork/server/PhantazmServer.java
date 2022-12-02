@@ -61,6 +61,8 @@ public final class PhantazmServer {
 
     private static final String UNSAFE_ARGUMENT = "unsafe";
 
+    public static final String BRAND_NAME = "Minestom-Phantazm";
+
     /**
      * Starting point for the server.
      *
@@ -146,6 +148,8 @@ public final class PhantazmServer {
             }
         }));
 
+        MinecraftServer.setBrandName(BRAND_NAME);
+
         try {
             startServer(node, minecraftServer, serverConfig);
         }
@@ -214,6 +218,8 @@ public final class PhantazmServer {
             OptifineSupport.enable();
         }
 
+        MojangAuth.init();
+        /*
         switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
             case BUNGEE -> {
@@ -221,11 +227,12 @@ public final class PhantazmServer {
                 BungeeCordProxy.setBungeeGuardTokens(Set.of(infoConfig.proxySecret()));
             }
             case VELOCITY -> VelocityProxy.enable(infoConfig.proxySecret());
-        }
+        }*/
 
         node.addListener(ServerListPingEvent.class,
                 event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
+        LOGGER.info("serverIP: " + infoConfig.serverIP() + ", port: " + infoConfig.port());
     }
 }
