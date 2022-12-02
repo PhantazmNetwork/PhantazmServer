@@ -215,7 +215,6 @@ public class BasicMobSpawner implements MobSpawner {
         entity.setHealth(entity.getAttributeValue(Attribute.MAX_HEALTH));
     }
 
-
     private void addGoals(@NotNull ElementContext context, @NotNull DependencyProvider dependencyProvider,
             @NotNull NeuralEntity entity) {
         Collection<GoalGroup> goalGroups = context.provideCollection("goalGroups", dependencyProvider);

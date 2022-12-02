@@ -27,4 +27,9 @@ public record TransactionResult(@NotNull List<Component> modifierNames, int chan
         Objects.requireNonNull(coins, "coins");
         return coins.getCoins() + change >= 0;
     }
+
+    public boolean hasChange() {
+        return change != 0;
+    }
+
 }

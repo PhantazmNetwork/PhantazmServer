@@ -23,17 +23,15 @@ import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.mob.trigger.MobTrigger;
 import com.github.phantazmnetwork.mob.trigger.MobTriggers;
-import com.github.phantazmnetwork.zombies.audience.ChatComponentSender;
-import com.github.phantazmnetwork.zombies.coin.BasicTransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.BasicPlayerCoins;
-import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
+import com.github.phantazmnetwork.zombies.coin.BasicTransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
+import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.component.BasicTransactionComponentCreator;
 import com.github.phantazmnetwork.zombies.corpse.Corpse;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentCreator;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.equipment.gun.ZombiesGunModule;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.PlayerAudienceProvider;
 import com.github.phantazmnetwork.zombies.kill.BasicPlayerKills;
 import com.github.phantazmnetwork.zombies.kill.PlayerKills;
 import com.github.phantazmnetwork.zombies.listener.*;
@@ -89,7 +87,9 @@ import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.scoreboard.Sidebar;
+import net.minestom.server.scoreboard.Team;
 import net.minestom.server.utils.chunk.ChunkUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,12 +137,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private final BasicMapObjectsSource mapObjectSource;
 
+    private final Team corpseTeam;
+
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> eventNode, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
-            @NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction) {
+            @NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction, @NotNull Team corpseTeam) {
         super(maximumScenes);
         this.contexts = new IdentityHashMap<>(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
@@ -155,6 +157,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
+        this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
 
         this.mapObjectSource =
                 new BasicMapObjectsSource(contextManager, mobStore, mobSpawner, mobModels, clientBlockHandlerSource,
@@ -212,7 +215,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        String dateString = dateFormatter.format(LocalDate.now());
+        String dateString = StringUtils.center(dateFormatter.format(LocalDate.now()), 16);
         Component date = Component.text(dateString, TextColor.color(7040896));
         SidebarModule sidebarModule =
                 new SidebarModule(zombiesPlayers.values(), roundHandler, ticksSinceStart, date, settings.maxPlayers());
@@ -287,8 +290,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull TransactionModifierSource transactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
-        PlayerCoins coins = new BasicPlayerCoins(new PlayerAudienceProvider(playerView), new ChatComponentSender(),
-                new BasicTransactionComponentCreator(), 0);
+        PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
         PlayerKills kills = new BasicPlayerKills();
         InventoryProfile profile = new BasicInventoryProfile(9);
         InventoryAccess inventoryAccess = new InventoryAccess(profile,
@@ -304,7 +306,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new ZombiesGunModule(playerView, mobSpawner, mobStore, eventNode, random, mapObjects);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(gunModule);
 
-        Sidebar sidebar = new Sidebar(Component.text("ZOMBIES", NamedTextColor.YELLOW, TextDecoration.BOLD));
+        Sidebar sidebar = new Sidebar(
+                Component.text(StringUtils.center("ZOMBIES", 16), NamedTextColor.YELLOW, TextDecoration.BOLD));
 
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
@@ -321,8 +324,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateCreator = context -> {
             Hologram hologram = new InstanceHologram(VecUtils.toDouble(context.getKnockLocation()), 1.0);
             PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
-            Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(),
-                    UUID.randomUUID().toString().substring(0, 16), skin);
+            String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
+            Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
+            corpseTeam.addMember(corpseUsername);
             TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.RED, false, false);
             Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
 

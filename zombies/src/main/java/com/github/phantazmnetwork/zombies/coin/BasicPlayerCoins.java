@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.coin;
 
-import com.github.phantazmnetwork.zombies.audience.ComponentSender;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
+import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.coin.component.TransactionComponentCreator;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -13,18 +12,15 @@ import java.util.Objects;
 
 public class BasicPlayerCoins implements PlayerCoins {
 
-    private final AudienceProvider audienceProvider;
-
-    private final ComponentSender componentSender;
+    private final PlayerView playerView;
 
     private final TransactionComponentCreator componentCreator;
 
     private int coins;
 
-    public BasicPlayerCoins(@NotNull AudienceProvider audienceProvider, @NotNull ComponentSender componentSender,
-            @NotNull TransactionComponentCreator componentCreator, int initialCoins) {
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
-        this.componentSender = Objects.requireNonNull(componentSender, "componentSender");
+    public BasicPlayerCoins(@NotNull PlayerView playerView, @NotNull TransactionComponentCreator componentCreator,
+            int initialCoins) {
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.componentCreator = Objects.requireNonNull(componentCreator, "componentCreator");
         this.coins = initialCoins;
     }
@@ -66,14 +62,14 @@ public class BasicPlayerCoins implements PlayerCoins {
 
     @Override
     public void applyTransaction(@NotNull TransactionResult result) {
-        if (result.change() == 0) {
+        if (!result.hasChange()) {
             return;
         }
 
         coins += result.change();
-        audienceProvider.provideAudience().ifPresent(audience -> {
+        playerView.getPlayer().ifPresent(player -> {
             Component message = componentCreator.createTransactionComponent(result.modifierNames(), result.change());
-            componentSender.send(audience, message);
+            player.sendMessage(message);
         });
     }
 }

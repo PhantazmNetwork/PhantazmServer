@@ -1,14 +1,14 @@
 package com.github.phantazmnetwork.zombies.game.coin;
 
-import com.github.phantazmnetwork.zombies.audience.ComponentSender;
+import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.coin.BasicPlayerCoins;
 import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.coin.Transaction;
 import com.github.phantazmnetwork.zombies.coin.TransactionResult;
-import com.github.phantazmnetwork.zombies.equipment.gun.audience.AudienceProvider;
+import com.github.phantazmnetwork.zombies.coin.component.BasicTransactionComponentCreator;
 import com.github.phantazmnetwork.zombies.coin.component.TransactionComponentCreator;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -18,18 +18,19 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class BasicPlayerCoinsTest {
 
     private PlayerCoins coins;
 
     private void setup(int initialCoins) {
-        Audience audience = mock(Audience.class);
-        AudienceProvider audienceProvider = () -> Optional.of(audience);
-        ComponentSender componentSender = mock(ComponentSender.class);
-        TransactionComponentCreator componentCreator = mock(TransactionComponentCreator.class);
+        PlayerView playerView = mock(PlayerView.class);
+        Player player = mock(Player.class);
+        when(playerView.getPlayer()).thenReturn(Optional.of(player));
+        TransactionComponentCreator componentCreator = new BasicTransactionComponentCreator();
 
-        coins = new BasicPlayerCoins(audienceProvider, componentSender, componentCreator, initialCoins);
+        coins = new BasicPlayerCoins(playerView, componentCreator, initialCoins);
     }
 
     @Test
