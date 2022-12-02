@@ -218,8 +218,6 @@ public final class PhantazmServer {
             OptifineSupport.enable();
         }
 
-        MojangAuth.init();
-        /*
         switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
             case BUNGEE -> {
@@ -227,7 +225,7 @@ public final class PhantazmServer {
                 BungeeCordProxy.setBungeeGuardTokens(Set.of(infoConfig.proxySecret()));
             }
             case VELOCITY -> VelocityProxy.enable(infoConfig.proxySecret());
-        }*/
+        }
 
         node.addListener(ServerListPingEvent.class,
                 event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
