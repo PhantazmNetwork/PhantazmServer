@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Region3I;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.zombies.map.action.Action;
+import com.github.steanky.vector.Bounds3I;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class Room {
     private final List<Action<Room>> openActions;
-    private final List<Region3I> unmodifiableRegions;
+    private final List<Bounds3I> unmodifiableRegions;
     private final RoomInfo roomInfo;
     private boolean isOpen;
 
@@ -25,18 +25,19 @@ public class Room {
     public Room(@NotNull Vec3I mapOrigin, @NotNull RoomInfo roomInfo, @NotNull List<Action<Room>> openActions) {
         this.openActions = List.copyOf(openActions);
 
+        List<Bounds3I> regions = roomInfo.regions();
         Vec3I origin = mapOrigin.add(
-                Vec3I.floored(Region3I.enclosing(roomInfo.regions().toArray(new Region3I[0])).getCenter()));
-        List<Region3I> list = new ArrayList<>(roomInfo.regions().size());
-        for (Region3I region : roomInfo.regions()) {
-            list.add(region.add(origin));
+                Bounds3I.enclosingImmutable(regions.toArray(new Bounds3I[0])).immutableCenter().floorToImmutableInt());
+        List<Bounds3I> list = new ArrayList<>(roomInfo.regions().size());
+        for (Bounds3I region : roomInfo.regions()) {
+            list.add(region.shift(origin));
         }
 
         this.unmodifiableRegions = Collections.unmodifiableList(list);
         this.roomInfo = Objects.requireNonNull(roomInfo, "roomInfo");
     }
 
-    public @UnmodifiableView @NotNull List<Region3I> roomBounds() {
+    public @UnmodifiableView @NotNull List<Bounds3I> roomBounds() {
         return unmodifiableRegions;
     }
 

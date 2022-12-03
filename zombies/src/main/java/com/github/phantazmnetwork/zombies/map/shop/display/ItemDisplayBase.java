@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.map.shop.display;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
+import com.github.steanky.vector.Vec3D;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;

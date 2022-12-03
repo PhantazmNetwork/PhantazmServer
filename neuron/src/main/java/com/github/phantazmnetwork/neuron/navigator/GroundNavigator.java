@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.neuron.navigator;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.engine.PathEngine;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.operation.PathResult;
+import com.github.steanky.vector.Vec3D;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,7 +62,8 @@ public class GroundNavigator extends TrackingNavigator {
     }
 
     private static boolean withinDistance(Controller controller, Node node) {
-        return node.getPosition().equals(Vec3I.floored(controller.getX(), controller.getY(), controller.getZ()));
+        return node.getPosition()
+                .equals(Vec3I.immutableFloored(controller.getX(), controller.getY(), controller.getZ()));
     }
 
     @Override
@@ -118,10 +119,8 @@ public class GroundNavigator extends TrackingNavigator {
             }
 
             Vec3I nodePos = node.getPosition();
-            double distance =
-                    Vec3D.squaredDistance(nodePos.getX() + node.getXOffset(), nodePos.getY() + node.getYOffset(),
-                            nodePos.getZ() + node.getZOffset(), controller.getX(), controller.getY(),
-                            controller.getZ());
+            double distance = Vec3D.distanceSquared(nodePos.x() + node.getXOffset(), nodePos.y() + node.getYOffset(),
+                    nodePos.z() + node.getZOffset(), controller.getX(), controller.getY(), controller.getZ());
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearest = node;
@@ -194,7 +193,7 @@ public class GroundNavigator extends TrackingNavigator {
             double currentZ = controller.getZ();
 
             if (!controller.hasControl()) {
-                if (!Vec3D.equals(currentX, currentY, currentZ, lastX, lastY, lastZ)) {
+                if (!Vec3D.immutable(currentX, currentY, currentZ).equals(Vec3D.immutable(lastX, lastY, lastZ))) {
                     lastMoved = time;
                 }
                 else if (time - lastMoved > immobileThreshold) {

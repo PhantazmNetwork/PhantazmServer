@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.neuron.node;
 
 import com.github.phantazmnetwork.commons.MathUtils;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
 import com.github.phantazmnetwork.neuron.world.Collider;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -41,12 +41,12 @@ public class GroundTranslator implements NodeTranslator {
     public @NotNull Vec3I translate(@NotNull Node node, int dX, int dY, int dZ) {
         Vec3I nodePosition = node.getPosition();
 
-        double x = nodePosition.getX() + node.getXOffset();
-        double y = nodePosition.getY() + node.getYOffset();
-        double z = nodePosition.getZ() + node.getZOffset();
+        double x = nodePosition.x() + node.getXOffset();
+        double y = nodePosition.y() + node.getYOffset();
+        double z = nodePosition.z() + node.getZOffset();
 
-        double nX = nodePosition.getX() + dX + HALF_BLOCK;
-        double nZ = nodePosition.getZ() + dZ + HALF_BLOCK;
+        double nX = nodePosition.x() + dX + HALF_BLOCK;
+        double nZ = nodePosition.z() + dZ + HALF_BLOCK;
 
         double adX = nX - x;
         double adZ = nZ - z;
@@ -73,7 +73,7 @@ public class GroundTranslator implements NodeTranslator {
 
                 highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, 0, -descriptor.getFallTolerance(), 0);
                 if (highestY != Double.NEGATIVE_INFINITY) {
-                    return Vec3I.of(dX, (int)Math.floor(highestY) - (int)Math.floor(y), dZ);
+                    return Vec3I.immutable(dX, (int)Math.floor(highestY) - (int)Math.floor(y), dZ);
                 }
             }
             else if (jump > 0F) { //we should try to perform a jump, assuming we even can
@@ -91,7 +91,7 @@ public class GroundTranslator implements NodeTranslator {
 
                     highestY = collider.highestCollisionAlong(oX, oY, oZ, vX, vY, vZ, adX, 0, adZ);
                     if (highestY == Double.NEGATIVE_INFINITY) { //gap found
-                        return Vec3I.of(dX, (int)Math.floor(oY - y), dZ);
+                        return Vec3I.immutable(dX, (int)Math.floor(oY - y), dZ);
                     }
                 }
             }

@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.neuron.agent;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.world.Solid;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -16,9 +16,11 @@ public interface GroundDescriptor extends PhysicalDescriptor {
      * The default value returned by {@link GroundDescriptor#stepDirections()}.
      */
     Collection<? extends Vec3I> DEFAULT_WALK_DIRECTIONS =
-            List.of(Vec3I.of(1, 0, 0), Vec3I.of(0, 0, 1), Vec3I.of(-1, 0, 0), Vec3I.of(0, 0, -1),
+            List.of(Vec3I.immutable(1, 0, 0), Vec3I.immutable(0, 0, 1), Vec3I.immutable(-1, 0, 0),
+                    Vec3I.immutable(0, 0, -1),
 
-                    Vec3I.of(1, 0, 1), Vec3I.of(-1, 0, 1), Vec3I.of(1, 0, -1), Vec3I.of(-1, 0, -1));
+                    Vec3I.immutable(1, 0, 1), Vec3I.immutable(-1, 0, 1), Vec3I.immutable(1, 0, -1),
+                    Vec3I.immutable(-1, 0, -1));
 
     /**
      * Returns the jump height for this agent.
@@ -49,8 +51,9 @@ public interface GroundDescriptor extends PhysicalDescriptor {
                 return true;
             }
 
-            steps.removeIf(vector -> vector.getX() == (int)Math.signum(step.getX()) &&
-                    vector.getY() == (int)Math.signum(step.getY()) && vector.getZ() == (int)Math.signum(step.getZ()));
+            steps.removeIf(
+                    vector -> vector.x() == (int)Math.signum(step.x()) && vector.y() == (int)Math.signum(step.y()) &&
+                            vector.z() == (int)Math.signum(step.z()));
         }
 
         for (Vec3I step : steps) {
@@ -71,20 +74,20 @@ public interface GroundDescriptor extends PhysicalDescriptor {
         double halfWidth = getWidth() / 2;
         double halfDepth = getDepth() / 2;
 
-        double centerX = origin.getX() + 0.5;
-        double centerZ = origin.getZ() + 0.5;
+        double centerX = origin.x() + 0.5;
+        double centerZ = origin.z() + 0.5;
 
         double minX = centerX - halfWidth;
-        double minY = origin.getY() - 1; //update if block below the agent changes
+        double minY = origin.y() - 1; //update if block below the agent changes
         double minZ = centerZ - halfDepth;
 
         double maxX = centerX + halfWidth;
-        double maxY = origin.getY() + getHeight();
+        double maxY = origin.y() + getHeight();
         double maxZ = centerZ + halfDepth;
 
-        double stepX = step.getX();
-        double stepY = step.getY();
-        double stepZ = step.getZ();
+        double stepX = step.x();
+        double stepY = step.y();
+        double stepZ = step.z();
 
         if (stepX < 0) {
             minX += stepX;
@@ -115,9 +118,9 @@ public interface GroundDescriptor extends PhysicalDescriptor {
         int iMaxY = (int)Math.floor(maxY);
         int iMaxZ = (int)Math.floor(maxZ);
 
-        int uX = update.getX();
-        int uY = update.getY();
-        int uZ = update.getZ();
+        int uX = update.x();
+        int uY = update.y();
+        int uZ = update.z();
 
         return uX >= iMinX && uX <= iMaxX && uY >= iMinY && uY <= iMaxY && uZ >= iMinZ && uZ <= iMaxZ;
     }

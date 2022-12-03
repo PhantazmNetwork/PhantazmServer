@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.MathUtils;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.PhysicsUtils;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.node.Node;
+import com.github.steanky.vector.Vec3I;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.collision.CollisionUtils;
@@ -64,11 +64,11 @@ public class GroundController implements Controller {
         Vec3I targetPos = target.getPosition();
         Pos entityPos = entity.getPosition();
 
-        double exactTargetY = targetPos.getY() + target.getYOffset();
+        double exactTargetY = targetPos.y() + target.getYOffset();
 
-        double dX = (targetPos.getX() + target.getXOffset()) - entityPos.x();
+        double dX = (targetPos.x() + target.getXOffset()) - entityPos.x();
         double dY = exactTargetY - entityPos.y();
-        double dZ = (targetPos.getZ() + target.getZOffset()) - entityPos.z();
+        double dZ = (targetPos.z() + target.getZOffset()) - entityPos.z();
 
         //slows down entities when they reach their position
         double distSquared = dX * dX + dY * dY + dZ * dZ;
@@ -110,7 +110,7 @@ public class GroundController implements Controller {
 
             if (entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
                 Vec3I currentPos = current.getPosition();
-                double nodeDiff = exactTargetY - (currentPos.getY() + current.getYOffset());
+                double nodeDiff = exactTargetY - (currentPos.y() + current.getYOffset());
                 if (nodeDiff > step) {
                     entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(
                             MinecraftServer.TICK_PER_SECOND));

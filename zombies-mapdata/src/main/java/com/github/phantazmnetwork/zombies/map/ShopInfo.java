@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 

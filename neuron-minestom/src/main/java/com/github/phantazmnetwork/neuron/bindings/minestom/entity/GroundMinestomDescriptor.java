@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
@@ -12,6 +11,7 @@ import com.github.phantazmnetwork.neuron.navigator.NavigationTracker;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
+import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;

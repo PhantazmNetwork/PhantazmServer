@@ -1,12 +1,12 @@
 package com.github.phantazmnetwork.zombies.map.shop.display;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.core.item.ItemAnimationFrame;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.vector.Vec3D;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;

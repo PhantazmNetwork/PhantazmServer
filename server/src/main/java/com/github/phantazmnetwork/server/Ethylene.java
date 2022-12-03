@@ -1,14 +1,14 @@
 package com.github.phantazmnetwork.server;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
 import com.github.steanky.ethylene.mapper.signature.Signature;
 import com.github.steanky.ethylene.mapper.type.Token;
+import com.github.steanky.vector.Vec3D;
+import com.github.steanky.vector.Vec3I;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.key.Key;
@@ -53,8 +53,8 @@ public final class Ethylene {
 
     private static Signature<Vec3I> vec3I() {
         return Signature.builder(Token.ofClass(Vec3I.class),
-                        (ignored, args) -> Vec3I.of((int)args[0], (int)args[1], (int)args[2]),
-                        vec -> List.of(vec.getX(), vec.getY(), vec.getZ()), Map.entry("x", Token.PRIMITIVE_INT),
+                        (ignored, args) -> Vec3I.immutable((int)args[0], (int)args[1], (int)args[2]),
+                        vec -> List.of(vec.x(), vec.y(), vec.z()), Map.entry("x", Token.PRIMITIVE_INT),
                         Map.entry("y", Token.PRIMITIVE_INT), Map.entry("z", Token.PRIMITIVE_INT)).matchingNames()
                 .matchingTypeHints().build();
     }
@@ -69,8 +69,8 @@ public final class Ethylene {
 
     private static Signature<Vec3D> vec3D() {
         return Signature.builder(Token.ofClass(Vec3D.class),
-                        (ignored, args) -> Vec3D.of((double)args[0], (double)args[1], (double)args[2]),
-                        vec -> List.of(vec.getX(), vec.getY(), vec.getZ()), Map.entry("x", Token.PRIMITIVE_DOUBLE),
+                        (ignored, args) -> Vec3D.immutable((double)args[0], (double)args[1], (double)args[2]),
+                        vec -> List.of(vec.x(), vec.y(), vec.z()), Map.entry("x", Token.PRIMITIVE_DOUBLE),
                         Map.entry("y", Token.PRIMITIVE_DOUBLE), Map.entry("z", Token.PRIMITIVE_DOUBLE)).matchingNames()
                 .matchingTypeHints().build();
     }

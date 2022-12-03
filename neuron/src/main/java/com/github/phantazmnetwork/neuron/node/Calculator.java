@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.node;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,12 +22,12 @@ public interface Calculator {
     Calculator SQUARED_DISTANCE = new Calculator() {
         @Override
         public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return (float)Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
+            return (float)Vec3I.distanceSquared(fromX, fromY, fromZ, toX, toY, toZ);
         }
 
         @Override
         public float distance(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
-            return (float)Vec3I.squaredDistance(fromX, fromY, fromZ, toX, toY, toZ);
+            return (float)Vec3I.distanceSquared(fromX, fromY, fromZ, toX, toY, toZ);
         }
     };
 
@@ -80,7 +80,7 @@ public interface Calculator {
      * @return the heuristic value
      */
     default float heuristic(@NotNull Vec3I from, @NotNull Vec3I to) {
-        return heuristic(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
+        return heuristic(from.x(), from.y(), from.z(), to.x(), to.y(), to.z());
     }
 
     /**
@@ -91,6 +91,6 @@ public interface Calculator {
      * @return the distance value
      */
     default float distance(@NotNull Vec3I from, @NotNull Vec3I to) {
-        return distance(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
+        return distance(from.x(), from.y(), from.z(), to.x(), to.y(), to.z());
     }
 }

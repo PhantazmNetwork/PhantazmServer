@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.core.config.processor;
 
 import com.github.phantazmnetwork.commons.ConfigProcessors;
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.VectorConfigProcessors;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -10,6 +9,7 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;

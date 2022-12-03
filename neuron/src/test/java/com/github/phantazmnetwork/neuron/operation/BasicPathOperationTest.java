@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.MazeReader;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.node.Node;
+import com.github.steanky.vector.Vec3I;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -29,14 +29,15 @@ class BasicPathOperationTest {
             Node node = invocation.getArgument(0);
             Vec3I nodePos = node.getPosition();
 
-            int x = nodePos.getX();
-            int y = nodePos.getY();
-            int z = nodePos.getZ();
+            int x = nodePos.x();
+            int y = nodePos.y();
+            int z = nodePos.z();
 
             //rudimentary simulation of collision checking: filter all directions that would collide with a "solid"
-            return StreamSupport.stream(walkDirections.spliterator(), false).filter(direction -> solids.stream()
-                    .noneMatch(solid -> Vec3I.equals(solid.getX(), solid.getY(), solid.getZ(), x + direction.getX(),
-                            y + direction.getY(), z + direction.getZ()))).collect(Collectors.toList());
+            return StreamSupport.stream(walkDirections.spliterator(), false)
+                    .filter(direction -> solids.stream().noneMatch(solid -> {
+                        return solid.equals(Vec3I.mutable(x + direction.x(), y + direction.y(), z + direction.z()));
+                    })).collect(Collectors.toList());
         });
 
         Agent mockAgent = mock(Agent.class);
@@ -68,15 +69,16 @@ class BasicPathOperationTest {
     @Nested
     class UpwardDestination {
         private static final Vec3I[] OPTIMAL_PATH =
-                new Vec3I[] {Vec3I.ORIGIN, Vec3I.of(0, 1, 0), Vec3I.of(0, 2, 0), Vec3I.of(0, 3, 0), Vec3I.of(0, 4, 0),
-                        Vec3I.of(0, 5, 0), Vec3I.of(0, 6, 0), Vec3I.of(0, 7, 0), Vec3I.of(0, 8, 0), Vec3I.of(0, 9, 0),
-                        Vec3I.of(0, 10, 0)};
+                new Vec3I[] {Vec3I.ORIGIN, Vec3I.immutable(0, 1, 0), Vec3I.immutable(0, 2, 0), Vec3I.immutable(0, 3, 0),
+                        Vec3I.immutable(0, 4, 0), Vec3I.immutable(0, 5, 0), Vec3I.immutable(0, 6, 0),
+                        Vec3I.immutable(0, 7, 0), Vec3I.immutable(0, 8, 0), Vec3I.immutable(0, 9, 0),
+                        Vec3I.immutable(0, 10, 0)};
 
-        private static final Vec3I UPWARD_DESTINATION = Vec3I.of(0, 10, 0);
-        private static final Collection<Vec3I> UPWARD_MOVEMENT = List.of(Vec3I.of(0, 1, 0));
+        private static final Vec3I UPWARD_DESTINATION = Vec3I.immutable(0, 10, 0);
+        private static final Collection<Vec3I> UPWARD_MOVEMENT = List.of(Vec3I.immutable(0, 1, 0));
         private static final Collection<Vec3I> CARDINAL_MOVEMENT =
-                List.of(Vec3I.of(0, 1, 0), Vec3I.of(0, -1, 0), Vec3I.of(1, 0, 0), Vec3I.of(-1, 0, 0), Vec3I.of(0, 0, 1),
-                        Vec3I.of(0, 0, -1));
+                List.of(Vec3I.immutable(0, 1, 0), Vec3I.immutable(0, -1, 0), Vec3I.immutable(1, 0, 0),
+                        Vec3I.immutable(-1, 0, 0), Vec3I.immutable(0, 0, 1), Vec3I.immutable(0, 0, -1));
 
         @Nested
         class Unblocked {
@@ -115,14 +117,15 @@ class BasicPathOperationTest {
             @Nested
             class Partially {
                 private static final Collection<Vec3I> POSITIVE_X_MISSING_SOLIDS = new ArrayList<>(CARDINAL_MOVEMENT);
-                private static final Vec3I DESTINATION_X_MISSING = Vec3I.of(1, 10, 0);
+                private static final Vec3I DESTINATION_X_MISSING = Vec3I.immutable(1, 10, 0);
                 private static final Vec3I[] OPTIMAL_PATH_X_MISSING =
-                        new Vec3I[] {Vec3I.ORIGIN, Vec3I.of(1, 0, 0), Vec3I.of(1, 1, 0), Vec3I.of(1, 2, 0),
-                                Vec3I.of(1, 3, 0), Vec3I.of(1, 4, 0), Vec3I.of(1, 5, 0), Vec3I.of(1, 6, 0),
-                                Vec3I.of(1, 7, 0), Vec3I.of(1, 8, 0), Vec3I.of(1, 9, 0), Vec3I.of(1, 10, 0),};
+                        new Vec3I[] {Vec3I.ORIGIN, Vec3I.immutable(1, 0, 0), Vec3I.immutable(1, 1, 0),
+                                Vec3I.immutable(1, 2, 0), Vec3I.immutable(1, 3, 0), Vec3I.immutable(1, 4, 0),
+                                Vec3I.immutable(1, 5, 0), Vec3I.immutable(1, 6, 0), Vec3I.immutable(1, 7, 0),
+                                Vec3I.immutable(1, 8, 0), Vec3I.immutable(1, 9, 0), Vec3I.immutable(1, 10, 0),};
 
                 static {
-                    POSITIVE_X_MISSING_SOLIDS.remove(Vec3I.of(1, 0, 0));
+                    POSITIVE_X_MISSING_SOLIDS.remove(Vec3I.immutable(1, 0, 0));
                 }
 
                 @Test
@@ -138,7 +141,8 @@ class BasicPathOperationTest {
     @Nested
     class Maze {
         private static final Collection<Vec3I> FLAT_CARDINAL_MOVEMENT =
-                List.of(Vec3I.of(1, 0, 0), Vec3I.of(-1, 0, 0), Vec3I.of(0, 0, 1), Vec3I.of(0, 0, -1));
+                List.of(Vec3I.immutable(1, 0, 0), Vec3I.immutable(-1, 0, 0), Vec3I.immutable(0, 0, 1),
+                        Vec3I.immutable(0, 0, -1));
         private static final Calculator CALCULATOR = Calculator.SQUARED_DISTANCE;
 
         @Test

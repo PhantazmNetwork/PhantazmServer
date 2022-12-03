@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.neuron.agent;
 
 import com.github.phantazmnetwork.commons.pipe.Pipe;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeTranslator;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +41,7 @@ public class TranslationExplorer extends CachingExplorer {
     @Override
     public @NotNull Iterator<Vec3I> getWalkIterator(@NotNull Node current) {
         return Pipe.from(descriptor.stepDirections())
-                .map(delta -> translator.translate(current, delta.getX(), delta.getY(), delta.getZ()))
+                .map(delta -> translator.translate(current, delta.x(), delta.y(), delta.z()))
                 .filter(delta -> !delta.equals(Vec3I.ORIGIN));
     }
 }

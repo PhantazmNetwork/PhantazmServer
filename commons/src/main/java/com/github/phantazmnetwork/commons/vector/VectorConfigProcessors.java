@@ -5,6 +5,9 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.vector.Bounds3I;
+import com.github.steanky.vector.Vec3D;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -18,15 +21,15 @@ public final class VectorConfigProcessors {
             double x = element.getNumberOrThrow("x").doubleValue();
             double y = element.getNumberOrThrow("y").doubleValue();
             double z = element.getNumberOrThrow("z").doubleValue();
-            return Vec3D.of(x, y, z);
+            return Vec3D.immutable(x, y, z);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3D vec3D) {
             ConfigNode node = new LinkedConfigNode(3);
-            node.putNumber("x", vec3D.getX());
-            node.putNumber("y", vec3D.getY());
-            node.putNumber("z", vec3D.getZ());
+            node.putNumber("x", vec3D.x());
+            node.putNumber("y", vec3D.y());
+            node.putNumber("z", vec3D.z());
             return node;
         }
     };
@@ -37,15 +40,15 @@ public final class VectorConfigProcessors {
             int x = element.getNumberOrThrow("x").intValue();
             int y = element.getNumberOrThrow("y").intValue();
             int z = element.getNumberOrThrow("z").intValue();
-            return Vec3I.of(x, y, z);
+            return Vec3I.immutable(x, y, z);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull Vec3I vec) {
             ConfigNode node = new LinkedConfigNode(3);
-            node.putNumber("x", vec.getX());
-            node.putNumber("y", vec.getY());
-            node.putNumber("z", vec.getZ());
+            node.putNumber("x", vec.x());
+            node.putNumber("y", vec.y());
+            node.putNumber("z", vec.z());
             return node;
         }
     };
@@ -69,19 +72,21 @@ public final class VectorConfigProcessors {
         }
     };
 
-    private static final ConfigProcessor<Region3I> region3I = new ConfigProcessor<>() {
+    private static final ConfigProcessor<Bounds3I> bounds3I = new ConfigProcessor<>() {
         @Override
-        public Region3I dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+        public Bounds3I dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Vec3I origin = vec3I.dataFromElement(element.getElementOrThrow("origin"));
             Vec3I lengths = vec3I.dataFromElement(element.getElementOrThrow("lengths"));
-            return Region3I.normalized(origin, lengths);
+            return Bounds3I.immutable(origin, lengths);
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(Region3I region3I) throws ConfigProcessException {
+        public @NotNull ConfigElement elementFromData(Bounds3I region3I) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
-            node.put("origin", vec3I.elementFromData(region3I.origin()));
-            node.put("lengths", vec3I.elementFromData(region3I.lengths()));
+            node.put("origin",
+                    vec3I.elementFromData(Vec3I.immutable(region3I.originX(), region3I.originY(), region3I.originZ())));
+            node.put("lengths",
+                    vec3I.elementFromData(Vec3I.immutable(region3I.lengthX(), region3I.lengthY(), region3I.lengthZ())));
             return node;
         }
     };
@@ -114,11 +119,11 @@ public final class VectorConfigProcessors {
     }
 
     /**
-     * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Region3I} instances.
+     * Returns the common {@link ConfigProcessor} used to serialize/deserialize {@link Bounds3I} instances.
      *
      * @return the ConfigProcessor used to serialize/deserialize Region3I instances
      */
-    public static @NotNull ConfigProcessor<Region3I> region3I() {
-        return region3I;
+    public static @NotNull ConfigProcessor<Bounds3I> bounds3I() {
+        return bounds3I;
     }
 }

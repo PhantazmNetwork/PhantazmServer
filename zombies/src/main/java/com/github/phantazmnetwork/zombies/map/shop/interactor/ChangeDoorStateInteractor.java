@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.zombies.map.shop.interactor;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.Door;
 import com.github.phantazmnetwork.zombies.map.objects.MapObjects;
 import com.github.phantazmnetwork.zombies.map.shop.PlayerInteraction;
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

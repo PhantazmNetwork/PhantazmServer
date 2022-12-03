@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.steanky.ethylene.core.collection.ArrayConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigList;
+import com.github.steanky.vector.Bounds3I;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * Defines a window.
  */
-public record WindowInfo(@NotNull Region3I frameRegion,
+public record WindowInfo(@NotNull Bounds3I frameRegion,
                          @NotNull List<String> repairBlocks,
                          @NotNull Sound repairSound,
                          @NotNull Sound repairAllSound,
@@ -72,7 +72,7 @@ public record WindowInfo(@NotNull Region3I frameRegion,
      * @param frameRegion  the region representing the repairable part of the window
      * @param repairBlocks the blocks used to repair the window when it is broken
      */
-    public WindowInfo(@NotNull Region3I frameRegion, @NotNull List<String> repairBlocks) {
+    public WindowInfo(@NotNull Bounds3I frameRegion, @NotNull List<String> repairBlocks) {
         this(frameRegion, repairBlocks, DEFAULT_REPAIR_SOUND, DEFAULT_REPAIR_ALL_SOUND, DEFAULT_BREAK_SOUND,
                 DEFAULT_BREAK_ALL_SOUND, new ArrayConfigList(0), new ArrayConfigList(0));
     }

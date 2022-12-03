@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.node;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

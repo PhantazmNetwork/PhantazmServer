@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.scene;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.game.scene.InstanceScene;
 import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
@@ -13,6 +12,7 @@ import com.github.phantazmnetwork.zombies.player.state.context.DeadPlayerStateCo
 import com.github.phantazmnetwork.zombies.player.state.context.NoContext;
 import com.github.phantazmnetwork.zombies.stage.Stage;
 import com.github.phantazmnetwork.zombies.stage.StageTransition;
+import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -110,7 +110,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
-        Pos pos = new Pos(spawn.getX(), spawn.getY(), spawn.getZ(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
+        Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
         for (PlayerView view : newPlayers) {
             view.getPlayer().ifPresent(player -> {
                 player.setInstance(instance, pos).whenComplete((unused, throwable) -> {

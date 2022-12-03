@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.GroundDescriptor;
 import com.github.phantazmnetwork.neuron.node.GroundTranslator;
 import com.github.phantazmnetwork.neuron.node.Node;
+import com.github.steanky.vector.Vec3I;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.OngoingStubbing;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
 
 class GroundTranslatorTest {
     private static Node makeNode(int x, int y, int z) {
-        return new Node(Vec3I.of(x, y, z), 0, Float.POSITIVE_INFINITY, null);
+        return new Node(Vec3I.immutable(x, y, z), 0, Float.POSITIVE_INFINITY, null);
     }
 
     private static GroundTranslator mockTranslator(float agentHeight, float agentWidth, float jumpHeight,
@@ -32,7 +32,8 @@ class GroundTranslatorTest {
 
         Collider mockCollider = mock(Collider.class);
         when(mockCollider.heightAt(anyInt(), anyInt(), anyInt())).thenAnswer(invocation -> {
-            Vec3I targetVec = Vec3I.of(invocation.getArgument(0), invocation.getArgument(1), invocation.getArgument(2));
+            Vec3I targetVec =
+                    Vec3I.immutable(invocation.getArgument(0), invocation.getArgument(1), invocation.getArgument(2));
             if (heightMap.containsKey(targetVec)) {
                 return heightMap.get(targetVec);
             }
@@ -69,7 +70,7 @@ class GroundTranslatorTest {
                 GroundTranslator translator =
                         mockTranslator(1, 1, 0, 0, Collections.emptyMap(), List.of(Double.NEGATIVE_INFINITY, 0D),
                                 Collections.emptyList());
-                assertEquals(Vec3I.of(1, 0, 0), translator.translate(makeNode(0, 0, 0), 1, 0, 0));
+                assertEquals(Vec3I.immutable(1, 0, 0), translator.translate(makeNode(0, 0, 0), 1, 0, 0));
             }
 
             @Test
@@ -87,7 +88,7 @@ class GroundTranslatorTest {
                 GroundTranslator translator =
                         mockTranslator(1, 1, 1, 0, Collections.emptyMap(), List.of(1D), Collections.emptyList());
                 Vec3I translate = translator.translate(makeNode(0, 0, 0), 1, 0, 0);
-                assertEquals(Vec3I.of(1, 1, 0), translate);
+                assertEquals(Vec3I.immutable(1, 1, 0), translate);
             }
 
             @Test
@@ -102,7 +103,7 @@ class GroundTranslatorTest {
                 GroundTranslator translator =
                         mockTranslator(1, 1, 2, 0, Collections.emptyMap(), List.of(2D), Collections.emptyList());
                 Vec3I translate = translator.translate(makeNode(0, 0, 0), 1, 0, 0);
-                assertEquals(Vec3I.of(1, 2, 0), translate);
+                assertEquals(Vec3I.immutable(1, 2, 0), translate);
             }
 
             @Test
@@ -119,7 +120,7 @@ class GroundTranslatorTest {
                         mockTranslator(1, 1, 69, 0, Collections.emptyMap(), List.of(1D, 2D, 3D, 4D, 5D),
                                 Collections.emptyList());
                 Vec3I translate = translator.translate(makeNode(0, 0, 0), 1, 0, 0);
-                assertEquals(Vec3I.of(1, 5, 0), translate);
+                assertEquals(Vec3I.immutable(1, 5, 0), translate);
             }
         }
 
@@ -130,7 +131,7 @@ class GroundTranslatorTest {
                 GroundTranslator translator =
                         mockTranslator(1, 1, 0, 1, Collections.emptyMap(), List.of(Double.NEGATIVE_INFINITY, -1D),
                                 Collections.emptyList());
-                assertEquals(Vec3I.of(1, -1, 0), translator.translate(makeNode(0, 0, 0), 1, 0, 0));
+                assertEquals(Vec3I.immutable(1, -1, 0), translator.translate(makeNode(0, 0, 0), 1, 0, 0));
             }
         }
     }

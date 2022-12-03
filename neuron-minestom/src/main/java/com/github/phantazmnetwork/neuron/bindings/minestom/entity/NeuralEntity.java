@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.neuron.bindings.minestom.entity;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.neuron.agent.Agent;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
@@ -11,6 +10,7 @@ import com.github.phantazmnetwork.neuron.bindings.minestom.entity.goal.GoalGroup
 import com.github.phantazmnetwork.neuron.engine.PathContext;
 import com.github.phantazmnetwork.neuron.navigator.Controller;
 import com.github.phantazmnetwork.neuron.navigator.Navigator;
+import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;

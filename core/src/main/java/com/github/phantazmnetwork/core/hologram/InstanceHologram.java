@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.core.hologram;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
+import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -171,11 +171,11 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
         int armorStandCount = armorStands.size();
         double totalHeight = gap * (armorStandCount - 1) + armorStandCount * MESSAGE_HEIGHT;
-        double topCornerHeight = location.getY() + totalHeight / 2;
+        double topCornerHeight = location.y() + totalHeight / 2;
 
         for (int i = 0; i < armorStandCount; i++) {
             Entity armorStand = armorStands.get(i);
-            Pos pos = new Pos(location.getX(), topCornerHeight - (i * (gap + MESSAGE_HEIGHT)), location.getZ());
+            Pos pos = new Pos(location.x(), topCornerHeight - (i * (gap + MESSAGE_HEIGHT)), location.z());
             switch (alignment) {
                 case CENTERED -> pos = pos.add(0, totalHeight / 2, 0);
                 case LOWER -> pos = pos.add(0, totalHeight, 0);

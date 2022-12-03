@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.node.Node;
+import com.github.steanky.vector.Vec3I;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +12,7 @@ class NodeTest {
 
         Node prev = null;
         for (int i = size - 1; i >= 0; i--) {
-            array[i] = prev = new Node(Vec3I.of(i, i, i), i, i, prev);
+            array[i] = prev = new Node(Vec3I.immutable(i, i, i), i, i, prev);
         }
 
         return array;
@@ -20,9 +20,9 @@ class NodeTest {
 
     @Test
     void compare() {
-        Node x = new Node(Vec3I.of(1, 0, 0), 0, 0, null);
-        Node y = new Node(Vec3I.of(0, 1, 0), 0, 0, null);
-        Node z = new Node(Vec3I.of(0, 0, 1), 0, 0, null);
+        Node x = new Node(Vec3I.immutable(1, 0, 0), 0, 0, null);
+        Node y = new Node(Vec3I.immutable(0, 1, 0), 0, 0, null);
+        Node z = new Node(Vec3I.immutable(0, 0, 1), 0, 0, null);
 
         assertTrue(x.compareTo(y) > 0);
         assertTrue(y.compareTo(x) < 0);

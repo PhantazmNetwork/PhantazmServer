@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.agent;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.engine.PathCache;
 import com.github.phantazmnetwork.neuron.node.Node;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

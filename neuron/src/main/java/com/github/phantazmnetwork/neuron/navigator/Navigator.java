@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.navigator;
 
 import com.github.phantazmnetwork.commons.Tickable;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Agent;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

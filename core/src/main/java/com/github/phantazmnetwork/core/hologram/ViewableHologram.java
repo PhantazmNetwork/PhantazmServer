@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.core.hologram;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
+import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;

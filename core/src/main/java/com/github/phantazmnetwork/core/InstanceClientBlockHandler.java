@@ -1,10 +1,9 @@
 package com.github.phantazmnetwork.core;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
-import com.github.phantazmnetwork.commons.vector.Vec3IBase;
+import com.github.steanky.vector.HashVec3I2ObjectMap;
+import com.github.steanky.vector.Vec3I2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
@@ -36,7 +35,9 @@ import java.util.function.Predicate;
  */
 public class InstanceClientBlockHandler implements ClientBlockHandler {
     private final Reference<Instance> instance;
-    private final Long2ObjectMap<ObjectOpenHashSet<PositionedBlock>> clientBlocks;
+    private final Long2ObjectMap<Vec3I2ObjectMap<PositionedBlock>> clientBlocks;
+    private final int chunkFloor;
+    private final int chunkHeight;
 
     /**
      * <p>Constructs a new instance of this class bound to the provided {@link Instance}. This will add a few necessary
@@ -47,10 +48,13 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
      * @param instance   the instance this handler is bound to
      * @param globalNode the node to add block event listeners to
      */
-    public InstanceClientBlockHandler(@NotNull Instance instance, @NotNull EventNode<Event> globalNode) {
+    public InstanceClientBlockHandler(@NotNull Instance instance, @NotNull EventNode<Event> globalNode, int chunkFloor,
+            int chunkHeight) {
         //weakref necessary as instance field will be captured by the expiration predicate
         this.instance = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
         this.clientBlocks = new Long2ObjectOpenHashMap<>();
+        this.chunkFloor = chunkFloor;
+        this.chunkHeight = chunkHeight;
 
         Predicate<InstanceEvent> filter = event -> event.getInstance() == this.instance.get();
         Predicate<Object> expire = ignored -> {
@@ -80,15 +84,15 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         long index = ChunkUtils.getChunkIndex(cx, cz);
 
         synchronized (clientBlocks) {
-            ObjectOpenHashSet<PositionedBlock> positionedBlocks = clientBlocks.get(index);
+            Vec3I2ObjectMap<PositionedBlock> positionedBlocks = clientBlocks.get(index);
             if (positionedBlocks == null) {
-                clientBlocks.put(index, positionedBlocks = new ObjectOpenHashSet<>(6));
+                clientBlocks.put(index,
+                        positionedBlocks = new HashVec3I2ObjectMap<>(0, chunkFloor, 0, 16, chunkHeight, 16));
             }
 
-            Vec3I pos = Vec3I.of(x, y, z);
-            PositionedBlock block = positionedBlocks.get(pos);
+            PositionedBlock block = positionedBlocks.get(x, y, z);
             if (block == null) {
-                positionedBlocks.add(new PositionedBlock(type, pos));
+                positionedBlocks.put(x, y, z, new PositionedBlock(type, x, y, z));
             }
             else {
                 block.block = type;
@@ -109,17 +113,18 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         }
 
         synchronized (clientBlocks) {
-            for (Long2ObjectMap.Entry<ObjectOpenHashSet<PositionedBlock>> entry : clientBlocks.long2ObjectEntrySet()) {
+            for (Long2ObjectMap.Entry<Vec3I2ObjectMap<PositionedBlock>> entry : clientBlocks.long2ObjectEntrySet()) {
                 long index = entry.getLongKey();
                 int x = ChunkUtils.getChunkCoordX(index);
                 int z = ChunkUtils.getChunkCoordZ(index);
 
                 Chunk chunk = instance.getChunkAt(x, z);
-                ObjectOpenHashSet<PositionedBlock> blocks = entry.getValue();
+                Vec3I2ObjectMap<PositionedBlock> blocks = entry.getValue();
                 if (chunk != null) {
-                    for (PositionedBlock block : blocks) {
-                        Block serverBlock = chunk.getBlock(block.getX(), block.getY(), block.getZ());
-                        chunk.sendPacketToViewers(new BlockChangePacket(VecUtils.toPoint(block.position), serverBlock));
+                    for (PositionedBlock block : blocks.values()) {
+                        Block serverBlock = chunk.getBlock(block.x, block.y, block.z);
+                        chunk.sendPacketToViewers(
+                                new BlockChangePacket(new Vec(block.x, block.y, block.z), serverBlock));
                     }
                 }
 
@@ -141,12 +146,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         int cz = ChunkUtils.getChunkCoordinate(z);
         long index = ChunkUtils.getChunkIndex(cx, cz);
         synchronized (clientBlocks) {
-            ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+            Vec3I2ObjectMap<PositionedBlock> blocks = clientBlocks.get(index);
 
             if (blocks != null) {
-                //not sus, equals/hashCode is comparable between all Vec3I
-                //noinspection SuspiciousMethodCalls
-                if (blocks.remove(Vec3I.of(x, y, z))) {
+                if (blocks.remove(x, y, z) != null) {
                     Chunk chunk = instance.getChunk(cx, cz);
 
                     if (chunk != null) {
@@ -154,6 +157,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
                         //make sure player gets the actual block
                         chunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
+                    }
+
+                    if (blocks.isEmpty()) {
+                        clientBlocks.remove(index);
                     }
                 }
             }
@@ -164,10 +171,11 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
-            ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+            Vec3I2ObjectMap<PositionedBlock> blocks = clientBlocks.get(index);
 
             if (blocks != null) {
-                PositionedBlock block = blocks.get(VecUtils.toBlockInt(blockPosition));
+                PositionedBlock block =
+                        blocks.get(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ());
 
                 if (block != null) {
                     if (event.getResult().success()) {
@@ -184,12 +192,14 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
-            ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+            Vec3I2ObjectMap<PositionedBlock> blocks = clientBlocks.get(index);
 
             if (blocks != null) {
                 //remove the client block; no need to send something else as it will be updated soon
-                //noinspection SuspiciousMethodCalls
-                blocks.remove(VecUtils.toBlockInt(blockPosition));
+                if (blocks.remove(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ()) != null &&
+                        blocks.isEmpty()) {
+                    clientBlocks.remove(index);
+                }
             }
         }
     }
@@ -198,11 +208,10 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         Point blockPosition = event.blockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
         synchronized (clientBlocks) {
-            ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+            Vec3I2ObjectMap<PositionedBlock> blocks = clientBlocks.get(index);
 
             if (blocks != null) {
-                //noinspection SuspiciousMethodCalls
-                if (blocks.contains(VecUtils.toBlockInt(blockPosition))) {
+                if (blocks.containsKey(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ())) {
                     //allow the server to update the block, but don't tell the client
                     event.setSyncClient(false);
                 }
@@ -217,14 +226,14 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         BlockChangePacket[] packets = null;
         long index = ChunkUtils.getChunkIndex(cx, cz);
         synchronized (clientBlocks) {
-            ObjectOpenHashSet<PositionedBlock> blocks = clientBlocks.get(index);
+            Vec3I2ObjectMap<PositionedBlock> blocks = clientBlocks.get(index);
 
             if (blocks != null) {
-                Iterator<PositionedBlock> blockIterator = blocks.iterator();
+                Iterator<PositionedBlock> blockIterator = blocks.values().iterator();
                 packets = new BlockChangePacket[blocks.size()];
                 for (int i = 0; i < packets.length; i++) {
                     PositionedBlock block = blockIterator.next();
-                    packets[i] = new BlockChangePacket(VecUtils.toPoint(block.position), block.block);
+                    packets[i] = new BlockChangePacket(new Vec(block.x, block.y, block.z), block.block);
                 }
             }
         }
@@ -234,28 +243,17 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         }
     }
 
-    private static class PositionedBlock extends Vec3IBase {
-        private final Vec3I position;
+    private static class PositionedBlock {
+        private final int x;
+        private final int y;
+        private final int z;
         private Block block;
 
-        private PositionedBlock(Block block, Vec3I position) {
+        private PositionedBlock(Block block, int x, int y, int z) {
             this.block = block;
-            this.position = position;
-        }
-
-        @Override
-        public int getX() {
-            return position.getX();
-        }
-
-        @Override
-        public int getY() {
-            return position.getY();
-        }
-
-        @Override
-        public int getZ() {
-            return position.getZ();
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
     }
 }

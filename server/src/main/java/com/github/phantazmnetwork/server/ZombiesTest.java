@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.core.BasicClientBlockHandlerSource;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.InstanceClientBlockHandler;
@@ -20,6 +19,7 @@ import com.github.phantazmnetwork.zombies.scene.ZombiesSceneProvider;
 import com.github.phantazmnetwork.zombies.scene.ZombiesSceneRouter;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -70,10 +70,10 @@ final class ZombiesTest {
 
             Instance spawnInstance = event.getSpawningInstance();
             if (spawnInstance != null) {
-                ClientBlockHandler tracker = new InstanceClientBlockHandler(spawnInstance, global);
+                ClientBlockHandler tracker = new InstanceClientBlockHandler(spawnInstance, global, -64, 384);
                 tracker.setClientBlock(Block.BARRIER, 1, 100, 1);
 
-                Hologram hologram = new InstanceHologram(Vec3D.of(1, 101, 1), 0);
+                Hologram hologram = new InstanceHologram(Vec3D.immutable(1, 101, 1), 0);
                 hologram.add(Component.text("This hologram should be...").color(TextColor.color(255, 0, 0)));
                 hologram.add(Component.text("...visible to everyone").color(TextColor.color(0, 255, 0)));
                 hologram.add(Component.text("And be colored.").color(TextColor.color(0, 0, 255)));
@@ -81,12 +81,12 @@ final class ZombiesTest {
 
                 UUID steankUUID = UUID.fromString("6458e77a-f565-4374-9de7-c2a20be572f3");
 
-                Hologram steankHologram =
-                        new ViewableHologram(Vec3D.of(1, 105, 1), 0, player -> player.getUuid().equals(steankUUID));
+                Hologram steankHologram = new ViewableHologram(Vec3D.immutable(1, 105, 1), 0,
+                        player -> player.getUuid().equals(steankUUID));
                 steankHologram.add(Component.text("This should only be visible to Steank"));
 
-                Hologram everyoneElseHologram =
-                        new ViewableHologram(Vec3D.of(5, 101, 5), 0, player -> !player.getUuid().equals(steankUUID));
+                Hologram everyoneElseHologram = new ViewableHologram(Vec3D.immutable(5, 101, 5), 0,
+                        player -> !player.getUuid().equals(steankUUID));
                 everyoneElseHologram.add(Component.text("This should be visible to everyone EXCEPT Steank"));
 
                 steankHologram.setInstance(spawnInstance);
@@ -168,8 +168,8 @@ final class ZombiesTest {
                     new ZombiesSceneProvider(1, entry.getValue(), MinecraftServer.getInstanceManager(), instanceLoader,
                             sceneFallback, global, Mob.getMobSpawner(), new MobStore(), Mob.getModels(),
                             new BasicClientBlockHandlerSource(
-                                    instance -> new InstanceClientBlockHandler(instance, global)), contextManager,
-                            keyParser, EquipmentFeature::createEquipmentCreator, corpseTeam);
+                                    instance -> new InstanceClientBlockHandler(instance, global, -64, 384)),
+                            contextManager, keyParser, EquipmentFeature::createEquipmentCreator, corpseTeam);
             providers.put(entry.getKey(), provider);
         }
         ZombiesSceneRouter sceneRouter = new ZombiesSceneRouter(providers);

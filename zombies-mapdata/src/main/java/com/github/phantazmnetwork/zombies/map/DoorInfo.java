@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.steanky.ethylene.core.collection.ArrayConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigList;
+import com.github.steanky.vector.Bounds3I;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ public record DoorInfo(@NotNull Key id,
                        @NotNull List<Key> opensTo,
                        @NotNull List<Integer> costs,
                        @NotNull List<HologramInfo> holograms,
-                       @NotNull List<Region3I> regions,
+                       @NotNull List<Bounds3I> regions,
                        @NotNull Sound openSound,
                        @NotNull ConfigList openActions) {
 
@@ -54,7 +54,7 @@ public record DoorInfo(@NotNull Key id,
      * @param id      the id of the door
      * @param regions the regions making up the door
      */
-    public DoorInfo(@NotNull Key id, @NotNull List<Region3I> regions) {
+    public DoorInfo(@NotNull Key id, @NotNull List<Bounds3I> regions) {
         this(id, new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), regions, DEFAULT_OPEN_SOUND,
                 new ArrayConfigList(0));
     }

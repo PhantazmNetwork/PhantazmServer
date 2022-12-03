@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;

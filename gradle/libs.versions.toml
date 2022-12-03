@@ -62,7 +62,7 @@ snakeyaml = { module = "org.snakeyaml:snakeyaml-engine", version = "2.3" }
 toolkit-collection = { module = "com.github.steanky:toolkit-collection", version.ref = "toolkit" }
 toolkit-function = { module = "com.github.steanky:toolkit-function", version.ref = "toolkit" }
 
-vector-core = { module = "com.github.steanky:vector-core", version = "0.6.0" }
+vector-core = { module = "com.github.steanky:vector-core", version = "0.7.0" }
 
 velocity-api = { module = "com.velocitypowered:velocity-api", version = "3.1.2-SNAPSHOT" }
 

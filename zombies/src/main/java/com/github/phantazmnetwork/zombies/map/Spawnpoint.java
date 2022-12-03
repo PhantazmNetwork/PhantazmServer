@@ -1,12 +1,12 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.mob.spawner.MobSpawner;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -86,8 +86,8 @@ public class Spawnpoint {
 
             Optional<Player> playerOptional = player.getModule().getPlayerView().getPlayer();
             if (playerOptional.isPresent()) {
-                if (VecUtils.toDouble(playerOptional.get().getPosition()).squaredDistance(this.spawnInfo.position()) <
-                        slaSquared) {
+                if (VecUtils.toDouble(playerOptional.get().getPosition())
+                        .distanceSquaredTo(this.spawnInfo.position().toImmutableDouble()) < slaSquared) {
                     inRange = true;
                     break;
                 }

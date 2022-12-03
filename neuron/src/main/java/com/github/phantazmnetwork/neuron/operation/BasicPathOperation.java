@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.neuron.operation;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Explorer;
 import com.github.phantazmnetwork.neuron.node.Calculator;
 import com.github.phantazmnetwork.neuron.node.Node;
 import com.github.phantazmnetwork.neuron.node.NodeQueue;
+import com.github.steanky.vector.Vec3I;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -98,16 +98,16 @@ public class BasicPathOperation implements PathOperation {
             //we haven't reached the destination, expand current
             for (Vec3I walkVector : explorer.expandNode(current)) {
                 //x, y, and z are the coordinates of the "neighbor" node we're trying to explore
-                int x = currentPos.getX() + walkVector.getX();
-                int y = currentPos.getY() + walkVector.getY();
-                int z = currentPos.getZ() + walkVector.getZ();
+                int x = currentPos.x() + walkVector.x();
+                int y = currentPos.y() + walkVector.y();
+                int z = currentPos.z() + walkVector.z();
 
                 /*
                 the node used as a key here may be stored as a value too, or it may just be used to access a
                 previously-existing value. for the purposes of all maps (even comparator-based ones using Node's natural
                 ordering), node objects are safe for use as keys because comparison-changing values are final
                  */
-                Node neighbor = graph.computeIfAbsent(Vec3I.of(x, y, z),
+                Node neighbor = graph.computeIfAbsent(Vec3I.immutable(x, y, z),
                         (Vec3I key) -> new Node(key, Float.POSITIVE_INFINITY, calculator.heuristic(key, destination),
                                 current));
 

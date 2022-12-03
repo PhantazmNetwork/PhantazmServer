@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.neuron.engine;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.neuron.agent.Descriptor;
 import com.github.phantazmnetwork.neuron.world.Solid;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;

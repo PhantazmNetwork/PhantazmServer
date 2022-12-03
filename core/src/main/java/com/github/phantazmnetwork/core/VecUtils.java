@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.core;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.steanky.vector.Vec3D;
+import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -23,7 +23,7 @@ public final class VecUtils {
      * @return a Vec3I representing the block position of the given point
      */
     public static @NotNull Vec3I toBlockInt(@NotNull Point point) {
-        return Vec3I.of(point.blockX(), point.blockY(), point.blockZ());
+        return Vec3I.immutable(point.blockX(), point.blockY(), point.blockZ());
     }
 
     /**
@@ -43,15 +43,15 @@ public final class VecUtils {
      * @return a Vec3D representing the position of the point
      */
     public static @NotNull Vec3D toDouble(@NotNull Point point) {
-        return Vec3D.of(point.x(), point.y(), point.z());
+        return Vec3D.immutable(point.x(), point.y(), point.z());
     }
 
     public static @NotNull Pos toPos(@NotNull Vec3I vec) {
-        return new Pos(vec.getX(), vec.getY(), vec.getZ());
+        return new Pos(vec.x(), vec.y(), vec.z());
     }
 
     public static @NotNull Vec toVec(@NotNull Vec3I vec) {
-        return new Vec(vec.getX(), vec.getY(), vec.getZ());
+        return new Vec(vec.x(), vec.y(), vec.z());
     }
 
     /**
@@ -83,11 +83,11 @@ public final class VecUtils {
     }
 
     public static @NotNull Pos toPos(@NotNull Vec3D vec) {
-        return new Pos(vec.getX(), vec.getY(), vec.getZ());
+        return new Pos(vec.x(), vec.y(), vec.z());
     }
 
     public static @NotNull Vec toVec(@NotNull Vec3D vec) {
-        return new Vec(vec.getX(), vec.getY(), vec.getZ());
+        return new Vec(vec.x(), vec.y(), vec.z());
     }
 
     /**
@@ -97,6 +97,6 @@ public final class VecUtils {
      * @return a new Point ({@link Vec}) from the components of the given Vec3D
      */
     public static @NotNull Point toPoint(@NotNull Vec3D vec) {
-        return new Vec(vec.getX(), vec.getY(), vec.getZ());
+        return new Vec(vec.x(), vec.y(), vec.z());
     }
 }

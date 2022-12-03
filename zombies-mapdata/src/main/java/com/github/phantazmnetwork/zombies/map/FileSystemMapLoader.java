@@ -1,10 +1,11 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.FileUtils;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.vector.Bounds3I;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -171,8 +172,9 @@ public class FileSystemMapLoader implements MapLoader {
         List<WindowInfo> windows = data.windows();
         for (int i = 0; i < windows.size(); i++) {
             WindowInfo window = windows.get(i);
-            Configuration.write(
-                    paths.windows.resolve(getPositionString(window.frameRegion().origin()) + "-" + i + extension),
+            Bounds3I frameRegion = window.frameRegion();
+            Vec3I origin = Vec3I.immutable(frameRegion.originX(), frameRegion.originY(), frameRegion.originZ());
+            Configuration.write(paths.windows.resolve(getPositionString(origin) + "-" + i + extension),
                     MapProcessors.windowInfo().elementFromData(window), codec);
         }
 
@@ -208,7 +210,7 @@ public class FileSystemMapLoader implements MapLoader {
     }
 
     private String getPositionString(Vec3I position) {
-        return position.getX() + "_" + position.getY() + "_" + position.getZ();
+        return position.x() + "_" + position.y() + "_" + position.z();
     }
 
     private record FolderPaths(Path rooms,

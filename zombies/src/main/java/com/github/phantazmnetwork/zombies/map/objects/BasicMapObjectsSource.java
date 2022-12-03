@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.map.objects;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.ClientBlockHandlerSource;
 import com.github.phantazmnetwork.core.VecUtils;
@@ -32,6 +31,7 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.toolkit.collection.Wrapper;
+import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
@@ -51,6 +51,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     private final Map<Key, MobModel> mobModels;
     private final ClientBlockHandlerSource clientBlockHandlerSource;
     private final KeyParser keyParser;
+
     public BasicMapObjectsSource(@NotNull ContextManager contextManager, @NotNull MobStore mobStore,
             @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
             @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {

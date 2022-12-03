@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.neuron.world;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -64,6 +64,6 @@ public interface Collider {
      * @return the height of the highest solid, if present, else the y-component of the given vector
      */
     default double heightAt(@NotNull Vec3I vec3I) {
-        return heightAt(vec3I.getX(), vec3I.getY(), vec3I.getZ());
+        return heightAt(vec3I.x(), vec3I.y(), vec3I.z());
     }
 }

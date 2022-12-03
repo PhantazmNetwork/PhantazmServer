@@ -1,14 +1,14 @@
 package com.github.phantazmnetwork.zombies.map.objects;
 
 import com.github.phantazmnetwork.commons.Tickable;
-import com.github.phantazmnetwork.commons.vector.Region3I;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
+import com.github.steanky.vector.Bounds3I;
+import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -71,9 +71,9 @@ public interface MapObjects extends Tickable {
     default @NotNull Optional<Door> doorAt(@NotNull Point block) {
         Vec3I vec = VecUtils.toBlockInt(block);
         for (Door door : doors()) {
-            Region3I enclosing = door.getEnclosing();
+            Bounds3I enclosing = door.getEnclosing();
             if (enclosing.contains(vec)) {
-                for (Region3I subRegion : door.regions()) {
+                for (Bounds3I subRegion : door.regions()) {
                     if (subRegion.contains(vec)) {
                         return Optional.of(door);
                     }
@@ -87,7 +87,7 @@ public interface MapObjects extends Tickable {
     default @NotNull Optional<Room> roomAt(@NotNull Point block) {
         Vec3I vec = VecUtils.toBlockInt(block);
         for (Room room : rooms()) {
-            for (Region3I region : room.roomBounds()) {
+            for (Bounds3I region : room.roomBounds()) {
                 if (region.contains(vec)) {
                     return Optional.of(room);
                 }
@@ -100,7 +100,7 @@ public interface MapObjects extends Tickable {
     default @NotNull Optional<Shop> shopAt(@NotNull Point block) {
         for (Shop shop : shops()) {
             Vec3I trigger = shop.getShopInfo().triggerLocation();
-            if (block.sameBlock(trigger.getX(), trigger.getY(), trigger.getZ())) {
+            if (block.sameBlock(trigger.x(), trigger.y(), trigger.z())) {
                 return Optional.of(shop);
             }
         }

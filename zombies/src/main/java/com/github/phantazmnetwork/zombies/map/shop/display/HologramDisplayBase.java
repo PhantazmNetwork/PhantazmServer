@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.map.shop.display;
 
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.core.hologram.Hologram;
 import com.github.phantazmnetwork.core.hologram.InstanceHologram;
+import com.github.steanky.vector.Vec3D;
 
 public abstract class HologramDisplayBase implements ShopDisplay {
     protected final Hologram hologram;

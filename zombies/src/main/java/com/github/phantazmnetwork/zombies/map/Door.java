@@ -1,11 +1,9 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Region3I;
-import com.github.phantazmnetwork.commons.vector.Vec3D;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.hologram.Hologram;
 import com.github.phantazmnetwork.core.hologram.InstanceHologram;
 import com.github.phantazmnetwork.zombies.map.action.Action;
+import com.github.steanky.vector.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -13,26 +11,29 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a door. May be opened once.
  */
 public class Door {
     private static final Logger LOGGER = LoggerFactory.getLogger(Door.class);
-    private static final Region3I[] EMPTY_REGION_ARRAY = new Region3I[0];
+    private static final Bounds3I[] EMPTY_BOUNDS_ARRAY = new Bounds3I[0];
 
     private final Instance instance;
     private final DoorInfo doorInfo;
     private final Block fillBlock;
-    private final Region3I enclosing;
+    private final Bounds3I enclosing;
     private final Vec3D center;
-    private final List<Region3I> regions;
+    private final List<Bounds3I> regions;
 
     private final ArrayList<Hologram> holograms;
     private final List<Action<Door>> openActions;
 
-    private final Map<Vec3I, Block> blockMappings;
+    private final Vec3I2ObjectMap<Block> blockMappings;
 
     private boolean isOpen;
 
@@ -45,27 +46,28 @@ public class Door {
     public Door(@NotNull Vec3I mapOrigin, @NotNull DoorInfo doorInfo, @NotNull Instance instance,
             @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions) {
         Vec3I origin = mapOrigin.add(
-                Vec3I.floored(Region3I.enclosing(doorInfo.regions().toArray(EMPTY_REGION_ARRAY)).getCenter()));
+                Bounds3I.enclosingImmutable(doorInfo.regions().toArray(EMPTY_BOUNDS_ARRAY)).immutableCenter()
+                        .floorToImmutableInt());
         this.instance = Objects.requireNonNull(instance, "instance");
         this.doorInfo = Objects.requireNonNull(doorInfo, "doorInfo");
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
-        List<Region3I> regions = doorInfo.regions();
+        List<Bounds3I> regions = doorInfo.regions();
         if (regions.isEmpty()) {
             LOGGER.warn("Door has no regions, enclosing bounds and center set to origin");
 
-            enclosing = Region3I.encompassing(origin, origin);
-            center = Vec3D.of(origin);
+            enclosing = Bounds3I.immutable(origin, 1, 1, 1);
+            center = origin.toMutableDouble().add(0.5, 0.5, 0.5).immutable();
             this.regions = Collections.emptyList();
         }
         else {
-            Region3I[] regionArray = regions.toArray(EMPTY_REGION_ARRAY);
+            Bounds3I[] regionArray = regions.toArray(EMPTY_BOUNDS_ARRAY);
             for (int i = 0; i < regionArray.length; i++) {
-                regionArray[i] = regionArray[i].add(origin);
+                regionArray[i] = regionArray[i].shift(origin);
             }
 
-            enclosing = Region3I.enclosing(regionArray);
-            center = enclosing.getCenter();
+            enclosing = Bounds3I.enclosingImmutable(regionArray);
+            center = enclosing.immutableCenter();
             this.regions = List.of(regionArray);
         }
 
@@ -75,15 +77,15 @@ public class Door {
         initHolograms(hologramInfo);
 
         this.openActions = List.copyOf(openActions);
-        this.blockMappings = new HashMap<>();
+        this.blockMappings = new HashVec3I2ObjectMap<>(enclosing.originX(), enclosing.originX(), enclosing.originZ(),
+                enclosing.lengthX(), enclosing.lengthY(), enclosing.lengthZ());
     }
 
     private void initHolograms(List<HologramInfo> hologramInfo) {
         for (HologramInfo info : hologramInfo) {
             Vec3D offset = info.position();
             Hologram hologram = new InstanceHologram(
-                    Vec3D.of(center.getX() + offset.getX(), center.getY() + offset.getY(),
-                            center.getZ() + offset.getZ()), 0.1);
+                    Vec3D.immutable(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z()), 0.1);
             hologram.addAll(info.text());
             hologram.setInstance(instance);
             holograms.add(hologram);
@@ -109,12 +111,12 @@ public class Door {
 
         isOpen = true;
 
-        for (Region3I region : regions) {
-            for (Vec3I pos : region) {
-                Block oldBlock = instance.getBlock(pos.getX(), pos.getY(), pos.getZ());
-                blockMappings.put(pos, oldBlock);
-                instance.setBlock(pos.getX(), pos.getY(), pos.getZ(), fillBlock);
-            }
+        for (Bounds3I region : regions) {
+            region.forEach((x, y, z) -> {
+                Block oldBlock = instance.getBlock(x, y, z);
+                blockMappings.put(x, y, z, oldBlock);
+                instance.setBlock(x, y, z, fillBlock);
+            });
         }
 
         for (Hologram hologram : holograms) {
@@ -139,16 +141,13 @@ public class Door {
         }
 
         isOpen = false;
-        for (Map.Entry<Vec3I, Block> blockEntry : blockMappings.entrySet()) {
-            Vec3I pos = blockEntry.getKey();
-            instance.setBlock(pos.getX(), pos.getY(), pos.getZ(), blockEntry.getValue());
-        }
+        blockMappings.forEach((x, y, z, block) -> instance.setBlock(x, y, z, block));
 
         initHolograms(doorInfo.holograms());
         blockMappings.clear();
     }
 
-    public @Unmodifiable @NotNull List<Region3I> regions() {
+    public @Unmodifiable @NotNull List<Bounds3I> regions() {
         return regions;
     }
 
@@ -168,7 +167,7 @@ public class Door {
      *
      * @return the enclosing region for this door
      */
-    public @NotNull Region3I getEnclosing() {
+    public @NotNull Bounds3I getEnclosing() {
         return enclosing;
     }
 }

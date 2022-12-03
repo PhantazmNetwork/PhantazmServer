@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.zombies.map;
 
-import com.github.phantazmnetwork.commons.vector.Region3I;
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.action.Action;
+import com.github.steanky.vector.Bounds3I;
+import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
@@ -53,7 +53,7 @@ public class Window {
     public Window(@NotNull Vec3I mapOrigin, @NotNull Instance instance, @NotNull WindowInfo windowInfo,
             @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
             @NotNull List<Action<Window>> breakActions) {
-        Vec3I origin = mapOrigin.add(windowInfo.frameRegion().origin());
+        Vec3I origin = mapOrigin.add(windowInfo.frameRegion().immutableOrigin());
         this.instance = Objects.requireNonNull(instance, "instance");
         this.windowInfo = Objects.requireNonNull(windowInfo, "data");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
@@ -61,11 +61,11 @@ public class Window {
         this.repairActions = List.copyOf(repairActions);
         this.breakActions = List.copyOf(breakActions);
 
-        Region3I frame = windowInfo.frameRegion();
-        Vec3I min = frame.origin();
+        Bounds3I frame = windowInfo.frameRegion();
+        Vec3I min = frame.immutableOrigin();
 
-        worldMin = new Vec(origin.getX() + min.getX(), origin.getY() + min.getY(), origin.getZ() + min.getZ());
-        center = VecUtils.toPoint(frame.getCenter());
+        worldMin = new Vec(origin.x() + min.x(), origin.y() + min.y(), origin.z() + min.z());
+        center = VecUtils.toPoint(frame.immutableCenter());
         volume = frame.volume();
 
         if (volume == 0) {
@@ -257,10 +257,10 @@ public class Window {
     }
 
     private Point indexToCoordinate(int index) {
-        Vec3I lengths = windowInfo.frameRegion().lengths();
+        Bounds3I frameRegion = windowInfo.frameRegion();
 
-        int xWidth = lengths.getX();
-        int xyArea = xWidth * lengths.getY();
+        int xWidth = frameRegion.lengthX();
+        int xyArea = xWidth * frameRegion.lengthY();
 
         int x = index % xWidth;
         int y = index / xWidth;
