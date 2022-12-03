@@ -32,6 +32,14 @@ repositories {
     }
     exclusiveContent {
         forRepository {
+            maven("https://dl.cloudsmith.io/public/steanky/vector/maven/")
+        }
+        filter {
+            includeModule("com.github.steanky", "vector-core")
+        }
+    }
+    exclusiveContent {
+        forRepository {
             maven("https://dl.cloudsmith.io/public/steanky/toolkit/maven/")
         }
         filter {

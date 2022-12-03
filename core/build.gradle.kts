@@ -9,4 +9,5 @@ dependencies {
     api(libs.element.core)
     api(libs.toolkit.collection)
     api(libs.toolkit.function)
+    api(libs.vector.core)
 }
