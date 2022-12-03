@@ -105,7 +105,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final SceneFallback sceneFallback;
     private final EventNode<Event> eventNode;
     private final MobSpawner mobSpawner;
-    private final MobStore mobStore;
     private final ContextManager contextManager;
     private final KeyParser keyParser;
     private final Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction;
@@ -114,9 +113,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
-            @NotNull EventNode<Event> eventNode, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
-            @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
+            @NotNull EventNode<Event> eventNode, @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
+            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull ContextManager contextManager,
+            @NotNull KeyParser keyParser,
             @NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction, @NotNull Team corpseTeam) {
         super(maximumScenes);
         this.contexts = new IdentityHashMap<>(maximumScenes);
@@ -126,15 +125,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.sceneFallback = Objects.requireNonNull(sceneFallback, "sceneFallback");
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
         this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
 
         this.mapObjectSource =
-                new BasicMapObjectsSource(contextManager, mobStore, mobSpawner, mobModels, clientBlockHandlerSource,
-                        keyParser);
+                new BasicMapObjectsSource(contextManager, mobSpawner, mobModels, clientBlockHandlerSource, keyParser);
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -189,9 +186,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         //LinkedHashMap for better value iteration performance
         Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
 
+        MobStore mobStore = new MobStore();
+
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
 
-        BasicMapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper);
+        BasicMapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore);
         PowerupHandler powerupHandler = createPowerupHandler(mapObjects.mapDependencyProvider(), zombiesPlayers,
                 settings.powerupPickupRadius());
 
@@ -199,7 +198,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesMap map = new ZombiesMap(mapObjects, powerupHandler, roundHandler);
 
-        EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, mapObjects, roundHandler);
+        EventNode<Event> childNode = createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, mobStore);
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
@@ -213,7 +212,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
             return createPlayer(zombiesPlayers, settings, instance, playerView, new BasicTransactionModifierSource(),
-                    new BasicFlaggable(), childNode, mapObjects.module().random(), mapObjects);
+                    new BasicFlaggable(), childNode, mapObjects.module().random(), mapObjects, mobStore);
         };
 
         ZombiesScene scene = new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, settings, stageTransition,
@@ -236,8 +235,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private @NotNull BasicMapObjects createMapObjects(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier) {
-        return mapObjectSource.make(instance, mapInfo, zombiesPlayers, roundHandlerSupplier);
+            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore) {
+        return mapObjectSource.make(instance, mapInfo, zombiesPlayers, roundHandlerSupplier, mobStore);
     }
 
     private @NotNull PowerupHandler createPowerupHandler(@NotNull DependencyProvider mapDependencyProvider,
@@ -276,7 +275,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource transactionModifierSource, @NotNull Flaggable flaggable,
-            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
+            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
+            @NotNull MobStore mobStore) {
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
         PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
         PlayerKills kills = new BasicPlayerKills();
@@ -360,7 +360,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private @NotNull EventNode<Event> createEventNode(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
-            @NotNull RoundHandler roundHandler) {
+            @NotNull RoundHandler roundHandler, @NotNull MobStore mobStore) {
         EventNode<Event> node = EventNode.all(UUID.randomUUID().toString());
         node.addListener(EntityDeathEvent.class,
                 new PhantazmMobDeathListener(instance, mobStore, roundHandler::currentRound));

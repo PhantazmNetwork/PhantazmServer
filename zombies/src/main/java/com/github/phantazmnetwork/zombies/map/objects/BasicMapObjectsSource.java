@@ -46,17 +46,15 @@ import java.util.function.Supplier;
 public class BasicMapObjectsSource implements MapObjects.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMapObjectsSource.class);
     private final ContextManager contextManager;
-    private final MobStore mobStore;
     private final MobSpawner mobSpawner;
     private final Map<Key, MobModel> mobModels;
     private final ClientBlockHandlerSource clientBlockHandlerSource;
     private final KeyParser keyParser;
 
-    public BasicMapObjectsSource(@NotNull ContextManager contextManager, @NotNull MobStore mobStore,
-            @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
-            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {
+    public BasicMapObjectsSource(@NotNull ContextManager contextManager, @NotNull MobSpawner mobSpawner,
+            @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
+            @NotNull KeyParser keyParser) {
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
         this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource, "clientBlockHandlerSource");
@@ -66,7 +64,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     @Override
     public @NotNull BasicMapObjects make(@NotNull Instance instance, @NotNull MapInfo mapInfo,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier) {
+            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, playerMap.values());
@@ -87,7 +85,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
         List<Spawnpoint> spawnpoints =
-                buildSpawnpoints(mapInfo.settings().origin(), mapInfo.spawnpoints(), spawnruleInfoMap, instance);
+                buildSpawnpoints(mapInfo.settings().origin(), mapInfo.spawnpoints(), spawnruleInfoMap, instance,
+                        mobStore);
         List<Window> windows =
                 buildWindows(mapInfo.settings().origin(), mapInfo.windows(), provider, instance, clientBlockHandler);
         List<Shop> shops = buildShops(mapInfo.shops(), provider, instance);
@@ -114,7 +113,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Spawnpoint> buildSpawnpoints(Vec3I mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
-            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance) {
+            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobStore mobStore) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
             spawnpoints.add(

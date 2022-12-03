@@ -166,7 +166,7 @@ final class ZombiesTest {
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(1, entry.getValue(), MinecraftServer.getInstanceManager(), instanceLoader,
-                            sceneFallback, global, Mob.getMobSpawner(), new MobStore(), Mob.getModels(),
+                            sceneFallback, global, Mob.getMobSpawner(), Mob.getModels(),
                             new BasicClientBlockHandlerSource(
                                     instance -> new InstanceClientBlockHandler(instance, global, -64, 384)),
                             contextManager, keyParser, EquipmentFeature::createEquipmentCreator, corpseTeam);

@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.map.objects;
 
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.core.VecUtils;
+import com.github.phantazmnetwork.mob.MobStore;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
@@ -111,6 +112,6 @@ public interface MapObjects extends Tickable {
     interface Source {
         @NotNull MapObjects make(@NotNull Instance instance, @NotNull MapInfo mapInfo,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier);
+                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore);
     }
 }
