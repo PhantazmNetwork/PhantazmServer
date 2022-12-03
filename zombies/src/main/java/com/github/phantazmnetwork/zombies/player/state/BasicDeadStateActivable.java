@@ -51,6 +51,17 @@ public class BasicDeadStateActivable implements Activable {
         meta.setCanTriggerSLA(false);
     }
 
+    @Override
+    public void end() {
+        playerView.getPlayer().ifPresent(player -> {
+            player.setInvisible(false);
+            player.setFlying(false);
+            player.setAllowFlying(false);
+            player.setGameMode(GameMode.ADVENTURE);
+            sidebar.addViewer(player);
+        });
+    }
+
     private @NotNull Component buildDeathMessage(@NotNull Component displayName) {
         if (context.isRejoin()) {
             return Component.textOfChildren(displayName, Component.text(" rejoined."));
@@ -70,17 +81,6 @@ public class BasicDeadStateActivable implements Activable {
         builder.append(Component.text("."));
 
         return builder.build();
-    }
-
-    @Override
-    public void end() {
-        playerView.getPlayer().ifPresent(player -> {
-            player.setInvisible(false);
-            player.setFlying(false);
-            player.setAllowFlying(false);
-            player.setGameMode(GameMode.ADVENTURE);
-            sidebar.addViewer(player);
-        });
     }
 
 }

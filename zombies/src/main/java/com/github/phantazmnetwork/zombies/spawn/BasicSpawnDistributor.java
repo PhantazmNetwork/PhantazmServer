@@ -2,9 +2,9 @@ package com.github.phantazmnetwork.zombies.spawn;
 
 import com.github.phantazmnetwork.mob.MobModel;
 import com.github.phantazmnetwork.mob.PhantazmMob;
+import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import com.github.phantazmnetwork.zombies.map.Spawnpoint;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
-import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;

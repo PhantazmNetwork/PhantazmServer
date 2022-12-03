@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.map.shop.interactor;
 
+import com.github.phantazmnetwork.zombies.map.Evaluation;
 import com.github.phantazmnetwork.zombies.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.map.shop.predicate.ShopPredicate;
-import com.github.phantazmnetwork.zombies.map.Evaluation;
 import com.github.steanky.element.core.annotation.*;
 import org.jetbrains.annotations.NotNull;
 

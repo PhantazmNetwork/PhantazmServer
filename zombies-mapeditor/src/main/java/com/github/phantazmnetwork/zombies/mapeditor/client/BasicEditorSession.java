@@ -208,7 +208,8 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public @UnmodifiableView @NotNull Map<Key, MapInfo> mapView() {
+    public @UnmodifiableView
+    @NotNull Map<Key, MapInfo> mapView() {
         return unmodifiableMaps;
     }
 

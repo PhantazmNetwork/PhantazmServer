@@ -17,15 +17,10 @@ public class ReviveHandler implements Activable {
     private final Supplier<? extends ZombiesPlayerState> deathStateSupplier;
 
     private final Supplier<? extends ZombiesPlayer> reviverFinder;
-
-    private ZombiesPlayerState cachedDefaultState = null;
-
-    private ZombiesPlayerState cachedDeathState = null;
-
-    private ZombiesPlayer reviver;
-
     private final long deathTime;
-
+    private ZombiesPlayerState cachedDefaultState = null;
+    private ZombiesPlayerState cachedDeathState = null;
+    private ZombiesPlayer reviver;
     private long ticksUntilDeath;
 
     private long ticksUntilRevive = -1;
@@ -94,6 +89,10 @@ public class ReviveHandler implements Activable {
         reviver = null;
     }
 
+    public @NotNull Optional<ZombiesPlayer> getReviver() {
+        return Optional.ofNullable(reviver);
+    }
+
     public void setReviver(@Nullable ZombiesPlayer reviver) {
         if (this.reviver == reviver) {
             return;
@@ -111,10 +110,6 @@ public class ReviveHandler implements Activable {
         else {
             ticksUntilRevive = -1;
         }
-    }
-
-    public @NotNull Optional<ZombiesPlayer> getReviver() {
-        return Optional.ofNullable(reviver);
     }
 
     public boolean isReviving() {

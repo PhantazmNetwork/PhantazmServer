@@ -45,39 +45,6 @@ public record GunLevel(@NotNull Data data,
                        @NotNull @DataName("gun_stack_mappers") Collection<GunStackMapper> gunStackMappers)
         implements UpgradeNode {
 
-    @DataObject
-    public record Data(@NotNull Key key,
-                       @NotNull @DataPath("stats") String statsPath,
-                       @NotNull @DataPath("shoot_tester") String shootTesterPath,
-                       @NotNull @DataPath("reload_tester") String reloadTesterPath,
-                       @NotNull @DataPath("firer") String firerPath,
-                       @NotNull @DataPath("activate_effects") Collection<String> activateEffectPaths,
-                       @NotNull @DataPath("shoot_effects") Collection<String> shootEffectPaths,
-                       @NotNull @DataPath("reload_effects") Collection<String> reloadEffectPaths,
-                       @NotNull @DataPath("tick_effects") Collection<String> tickEffectPaths,
-                       @NotNull @DataPath("no_ammo_effects") Collection<String> noAmmoEffectPaths,
-                       @NotNull @DataPath("gun_stack_mappers") Collection<String> gunStackMapperPaths,
-                       @NotNull ItemStack stack,
-                       @NotNull Set<Key> upgrades) {
-
-        public Data {
-            Objects.requireNonNull(key, "key");
-            Objects.requireNonNull(statsPath, "statsPath");
-            Objects.requireNonNull(shootTesterPath, "shootTesterPath");
-            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
-            Objects.requireNonNull(firerPath, "firerPath");
-            verifyCollection(activateEffectPaths, "activateEffectPaths");
-            verifyCollection(shootEffectPaths, "shootEffectPaths");
-            verifyCollection(reloadEffectPaths, "reloadEffectPaths");
-            verifyCollection(tickEffectPaths, "tickEffectPaths");
-            verifyCollection(noAmmoEffectPaths, "noAmmoEffectPaths");
-            verifyCollection(gunStackMapperPaths, "gunStackMapperPaths");
-            Objects.requireNonNull(stack, "stack");
-            verifyCollection(upgrades, "upgrades");
-        }
-
-    }
-
     /**
      * Creates a {@link GunLevel}.
      *
@@ -118,6 +85,39 @@ public record GunLevel(@NotNull Data data,
     @Override
     public @Unmodifiable @NotNull Set<Key> upgrades() {
         return data.upgrades();
+    }
+
+    @DataObject
+    public record Data(@NotNull Key key,
+                       @NotNull @DataPath("stats") String statsPath,
+                       @NotNull @DataPath("shoot_tester") String shootTesterPath,
+                       @NotNull @DataPath("reload_tester") String reloadTesterPath,
+                       @NotNull @DataPath("firer") String firerPath,
+                       @NotNull @DataPath("activate_effects") Collection<String> activateEffectPaths,
+                       @NotNull @DataPath("shoot_effects") Collection<String> shootEffectPaths,
+                       @NotNull @DataPath("reload_effects") Collection<String> reloadEffectPaths,
+                       @NotNull @DataPath("tick_effects") Collection<String> tickEffectPaths,
+                       @NotNull @DataPath("no_ammo_effects") Collection<String> noAmmoEffectPaths,
+                       @NotNull @DataPath("gun_stack_mappers") Collection<String> gunStackMapperPaths,
+                       @NotNull ItemStack stack,
+                       @NotNull Set<Key> upgrades) {
+
+        public Data {
+            Objects.requireNonNull(key, "key");
+            Objects.requireNonNull(statsPath, "statsPath");
+            Objects.requireNonNull(shootTesterPath, "shootTesterPath");
+            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
+            Objects.requireNonNull(firerPath, "firerPath");
+            verifyCollection(activateEffectPaths, "activateEffectPaths");
+            verifyCollection(shootEffectPaths, "shootEffectPaths");
+            verifyCollection(reloadEffectPaths, "reloadEffectPaths");
+            verifyCollection(tickEffectPaths, "tickEffectPaths");
+            verifyCollection(noAmmoEffectPaths, "noAmmoEffectPaths");
+            verifyCollection(gunStackMapperPaths, "gunStackMapperPaths");
+            Objects.requireNonNull(stack, "stack");
+            verifyCollection(upgrades, "upgrades");
+        }
+
     }
 
 }

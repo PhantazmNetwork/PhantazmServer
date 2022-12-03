@@ -18,17 +18,7 @@ import java.util.Objects;
 @Model("neuron.goal.group")
 public class GoalGroup implements Tickable {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("goals") Collection<String> goalPaths) {
-
-        public Data {
-            Objects.requireNonNull(goalPaths, "goalPaths");
-        }
-
-    }
-
     private final Iterable<NeuralGoal> goals;
-
     private NeuralGoal activeGroup;
 
     /**
@@ -87,6 +77,15 @@ public class GoalGroup implements Tickable {
                 break;
             }
         }
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("goals") Collection<String> goalPaths) {
+
+        public Data {
+            Objects.requireNonNull(goalPaths, "goalPaths");
+        }
+
     }
 
 }

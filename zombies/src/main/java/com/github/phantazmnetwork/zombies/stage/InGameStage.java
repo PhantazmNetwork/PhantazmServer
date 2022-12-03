@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.zombies.stage;
 
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.zombies.equipment.EquipmentHandler;
 import com.github.phantazmnetwork.zombies.map.RoundHandler;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;

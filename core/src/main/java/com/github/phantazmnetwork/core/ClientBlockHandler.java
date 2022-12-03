@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.core;
 
-import com.github.phantazmnetwork.commons.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;

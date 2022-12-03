@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.blockiteration;
 
-import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.objects.MapObjects;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.Dependency;

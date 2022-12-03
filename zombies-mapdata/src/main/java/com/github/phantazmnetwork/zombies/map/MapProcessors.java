@@ -120,32 +120,6 @@ public final class MapProcessors {
         }
     };
     private static final ConfigProcessor<List<HologramInfo>> hologramInfoList = hologramInfo.listProcessor();
-    private static final ConfigProcessor<DoorInfo> doorInfo = new ConfigProcessor<>() {
-        @Override
-        public DoorInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
-            List<Key> opensTo = keyList.dataFromElement(element.getElementOrThrow("opensTo"));
-            List<Integer> costs = integerList.dataFromElement(element.getElementOrThrow("costs"));
-            List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow("holograms"));
-            List<Region3I> regions = regionInfoList.dataFromElement(element.getListOrThrow("regions"));
-            Sound openSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("openSound"));
-            ConfigList openActions = element.getListOrThrow("openActions");
-            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound, openActions);
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(6);
-            node.put("id", ConfigProcessors.key().elementFromData(doorInfo.id()));
-            node.put("opensTo", keyList.elementFromData(doorInfo.opensTo()));
-            node.put("costs", integerList.elementFromData(doorInfo.costs()));
-            node.put("holograms", hologramInfoList.elementFromData(doorInfo.holograms()));
-            node.put("regions", regionInfoList.elementFromData(doorInfo.regions()));
-            node.put("openSound", ConfigProcessors.sound().elementFromData(doorInfo.openSound()));
-            node.put("openActions", doorInfo.openActions());
-            return node;
-        }
-    };
     private static final ConfigProcessor<List<Region3I>> regionInfoList =
             VectorConfigProcessors.region3I().listProcessor();
     private static final ConfigProcessor<RoomInfo> roomInfo = new ConfigProcessor<>() {
@@ -208,6 +182,32 @@ public final class MapProcessors {
         }
     };
     private static final ConfigProcessor<List<Integer>> integerList = ConfigProcessor.INTEGER.listProcessor();
+    private static final ConfigProcessor<DoorInfo> doorInfo = new ConfigProcessor<>() {
+        @Override
+        public DoorInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            List<Key> opensTo = keyList.dataFromElement(element.getElementOrThrow("opensTo"));
+            List<Integer> costs = integerList.dataFromElement(element.getElementOrThrow("costs"));
+            List<HologramInfo> hologramInfos = hologramInfoList.dataFromElement(element.getElementOrThrow("holograms"));
+            List<Region3I> regions = regionInfoList.dataFromElement(element.getListOrThrow("regions"));
+            Sound openSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("openSound"));
+            ConfigList openActions = element.getListOrThrow("openActions");
+            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound, openActions);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
+            ConfigNode node = new LinkedConfigNode(6);
+            node.put("id", ConfigProcessors.key().elementFromData(doorInfo.id()));
+            node.put("opensTo", keyList.elementFromData(doorInfo.opensTo()));
+            node.put("costs", integerList.elementFromData(doorInfo.costs()));
+            node.put("holograms", hologramInfoList.elementFromData(doorInfo.holograms()));
+            node.put("regions", regionInfoList.elementFromData(doorInfo.regions()));
+            node.put("openSound", ConfigProcessors.sound().elementFromData(doorInfo.openSound()));
+            node.put("openActions", doorInfo.openActions());
+            return node;
+        }
+    };
     private static final ConfigProcessor<MapSettingsInfo> mapInfo = new ConfigProcessor<>() {
         @Override
         public MapSettingsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {

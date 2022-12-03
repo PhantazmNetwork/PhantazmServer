@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.commons.pipe;
 
-import com.github.phantazmnetwork.commons.Wrapper;
+import com.github.steanky.toolkit.collection.Wrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

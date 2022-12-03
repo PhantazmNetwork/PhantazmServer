@@ -10,15 +10,6 @@ import java.util.Objects;
 @Model("mob.selector.nearest_player")
 public class NearestPlayerSelector extends FirstTargetSelector<Player> {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath) {
-
-        public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
-        }
-
-    }
-
     /**
      * Creates a new {@link MappedSelector}.
      *
@@ -38,5 +29,14 @@ public class NearestPlayerSelector extends FirstTargetSelector<Player> {
         }
 
         return null;
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("selector") String selectorPath) {
+
+        public Data {
+            Objects.requireNonNull(selectorPath, "selectorPath");
+        }
+
     }
 }

@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.scene;
 
 import com.github.phantazmnetwork.commons.Activable;
 import com.github.phantazmnetwork.commons.Namespaces;
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.ClientBlockHandlerSource;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.core.entity.fakeplayer.MinimalFakePlayer;
@@ -60,6 +59,7 @@ import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
@@ -98,39 +98,18 @@ import java.util.function.Supplier;
 
 public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesSceneProvider.class);
-
-    private record SceneContext(@NotNull EventNode<?> node) {
-
-        public SceneContext {
-            Objects.requireNonNull(node, "node");
-        }
-
-    }
-
     private final IdentityHashMap<ZombiesScene, SceneContext> contexts;
-
     private final MapInfo mapInfo;
-
     private final InstanceManager instanceManager;
-
     private final InstanceLoader instanceLoader;
-
     private final SceneFallback sceneFallback;
-
     private final EventNode<Event> eventNode;
-
     private final MobSpawner mobSpawner;
-
     private final MobStore mobStore;
-
     private final ContextManager contextManager;
-
     private final KeyParser keyParser;
-
     private final Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction;
-
     private final BasicMapObjectsSource mapObjectSource;
-
     private final Team corpseTeam;
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
@@ -156,6 +135,22 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.mapObjectSource =
                 new BasicMapObjectsSource(contextManager, mobStore, mobSpawner, mobModels, clientBlockHandlerSource,
                         keyParser);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static void awaitChunkLoad(Instance instance, Pos spawnPos) {
+        Phaser phaser = new Phaser(1);
+        ChunkUtils.forChunksInRange(spawnPos, MinecraftServer.getChunkViewDistance(), (chunkX, chunkZ) -> {
+            phaser.register();
+            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
+        });
+        phaser.arriveAndAwaitAdvance();
+    }
+
+    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
+            @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
+        node.addListener(trigger.eventClass(),
+                event -> mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
     }
 
     @Override
@@ -200,8 +195,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         PowerupHandler powerupHandler = createPowerupHandler(mapObjects.mapDependencyProvider(), zombiesPlayers,
                 settings.powerupPickupRadius());
 
-        RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
-        roundHandlerWrapper.set(roundHandler);
+        RoundHandler roundHandler = roundHandlerWrapper.set(new BasicRoundHandler(mapObjects.rounds()));
 
         ZombiesMap map = new ZombiesMap(mapObjects, powerupHandler, roundHandler);
 
@@ -230,14 +224,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return scene;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    private static void awaitChunkLoad(Instance instance, Pos spawnPos) {
-        Phaser phaser = new Phaser(1);
-        ChunkUtils.forChunksInRange(spawnPos, MinecraftServer.getChunkViewDistance(), (chunkX, chunkZ) -> {
-            phaser.register();
-            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
-        });
-        phaser.arriveAndAwaitAdvance();
+    @Override
+    protected void cleanupScene(@NotNull ZombiesScene scene) {
+        SceneContext context = contexts.remove(scene);
+        if (context == null) {
+            return;
+        }
+
+        eventNode.removeChild(context.node());
     }
 
     private @NotNull BasicMapObjects createMapObjects(@NotNull Instance instance,
@@ -392,12 +386,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return node;
     }
 
-    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
-            @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
-        node.addListener(trigger.eventClass(),
-                event -> mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
-    }
-
     private @NotNull StageTransition createStageTransition(@NotNull Instance instance,
             @NotNull List<Component> messages, @NotNull Random random,
             @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
@@ -424,13 +412,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return new ElementSidebarUpdaterCreator(sidebarModule, context, keyParser, scoreboardSubNode);
     }
 
-    @Override
-    protected void cleanupScene(@NotNull ZombiesScene scene) {
-        SceneContext context = contexts.remove(scene);
-        if (context == null) {
-            return;
+    private record SceneContext(@NotNull EventNode<?> node) {
+
+        public SceneContext {
+            Objects.requireNonNull(node, "node");
         }
 
-        eventNode.removeChild(context.node());
     }
 }

@@ -70,6 +70,14 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
         module.getStateSwitcher().tick(time);
     }
 
+    @Override
+    public void end() {
+        if (!isState(ZombiesPlayerStateKeys.QUIT)) {
+            getPlayer().ifPresent(player -> player.getInventory().clear());
+        }
+        module.getStateSwitcher().end();
+    }
+
     private void inventoryTick(Player player, long time) {
         InventoryAccessRegistry accessRegistry = module.getInventoryAccessRegistry();
         if (accessRegistry.hasCurrentAccess()) {
@@ -85,14 +93,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
                 }
             }
         }
-    }
-
-    @Override
-    public void end() {
-        if (!isState(ZombiesPlayerStateKeys.QUIT)) {
-            getPlayer().ifPresent(player -> player.getInventory().clear());
-        }
-        module.getStateSwitcher().end();
     }
 
     @Override

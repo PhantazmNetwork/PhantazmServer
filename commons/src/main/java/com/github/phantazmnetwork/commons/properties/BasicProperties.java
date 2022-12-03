@@ -8,20 +8,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class BasicProperties implements Properties {
-    private static class Property {
-        private float value;
-        private final Map<Key, Set<Modifier>> modifiers;
-
-        private Property(float value, Map<Key, Set<Modifier>> modifiers) {
-            this.value = value;
-            this.modifiers = modifiers;
-        }
-    }
-
     private final Map<Key, Property> propertyMap;
 
     public BasicProperties() {
         this.propertyMap = new HashMap<>(4);
+    }
+
+    private static Property newProperty() {
+        return new Property(0, new HashMap<>(1));
+    }
+
+    private static Set<Modifier> newSet() {
+        return new ObjectRBTreeSet<>();
     }
 
     @Override
@@ -78,11 +76,13 @@ public class BasicProperties implements Properties {
         modifiers.remove(modifier);
     }
 
-    private static Property newProperty() {
-        return new Property(0, new HashMap<>(1));
-    }
+    private static class Property {
+        private final Map<Key, Set<Modifier>> modifiers;
+        private float value;
 
-    private static Set<Modifier> newSet() {
-        return new ObjectRBTreeSet<>();
+        private Property(float value, Map<Key, Set<Modifier>> modifiers) {
+            this.value = value;
+            this.modifiers = modifiers;
+        }
     }
 }

@@ -167,6 +167,10 @@ public final class NeuralEntity extends LivingEntity implements Agent {
         return navigator;
     }
 
+    public Entity getTarget() {
+        return target;
+    }
+
     /**
      * Sets the given entity as a navigation target for this entity. If null, pathfinding will be cancelled. If
      * non-null, this entity will follow the given entity according to its navigation capabilities.
@@ -182,10 +186,6 @@ public final class NeuralEntity extends LivingEntity implements Agent {
         else {
             navigator.setDestination(() -> descriptor.computeTargetPosition(target));
         }
-    }
-
-    public Entity getTarget() {
-        return target;
     }
 
     /**

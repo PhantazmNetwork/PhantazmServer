@@ -12,19 +12,8 @@ import java.util.Objects;
 @Model("mob.skill.damage")
 public class DamageEntitySkill implements Skill {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath, float damage) {
-
-        public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
-        }
-
-    }
-
     private final Data data;
-
     private final DamageType damageType;
-
     private final TargetSelector<? extends LivingEntity> selector;
 
     @FactoryMethod
@@ -43,6 +32,15 @@ public class DamageEntitySkill implements Skill {
     @Override
     public void use() {
         selector.selectTarget().ifPresent(livingEntity -> livingEntity.damage(damageType, data.damage()));
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("selector") String selectorPath, float damage) {
+
+        public Data {
+            Objects.requireNonNull(selectorPath, "selectorPath");
+        }
+
     }
 
 }

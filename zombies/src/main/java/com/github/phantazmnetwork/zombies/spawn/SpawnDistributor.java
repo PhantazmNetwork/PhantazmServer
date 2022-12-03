@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.spawn;
 
 import com.github.phantazmnetwork.mob.PhantazmMob;
-import com.github.phantazmnetwork.zombies.map.Spawnpoint;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;
+import com.github.phantazmnetwork.zombies.map.Spawnpoint;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

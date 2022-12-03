@@ -14,29 +14,11 @@ import java.util.Optional;
 @Model("mob.goal.charge_at_entity")
 public class ChargeAtEntityGoal implements NeuralGoal {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath,
-                       long retargetInterval,
-                       double followRange,
-                       long chargeInterval,
-                       double chargeSpeed) {
-
-        public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
-        }
-
-    }
-
     private final Data data;
-
     private final NeuralEntity entity;
-
     private final TargetSelector<? extends Entity> selector;
-
     private Entity target;
-
     private long ticksSinceTargetChosen;
-
     private long ticksSinceCharge;
 
     /**
@@ -60,17 +42,12 @@ public class ChargeAtEntityGoal implements NeuralGoal {
     }
 
     @Override
-    public void start() {
-
-    }
-
-    @Override
     public boolean shouldEnd() {
         return false;
     }
 
     @Override
-    public void end() {
+    public void start() {
 
     }
 
@@ -98,6 +75,11 @@ public class ChargeAtEntityGoal implements NeuralGoal {
         }
     }
 
+    @Override
+    public void end() {
+
+    }
+
     private void refreshTarget() {
         ticksSinceTargetChosen = 0L;
 
@@ -123,6 +105,19 @@ public class ChargeAtEntityGoal implements NeuralGoal {
         entity.setVelocity(entity.getVelocity().add(direction));
 
         ticksSinceCharge = 0L;
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("selector") String selectorPath,
+                       long retargetInterval,
+                       double followRange,
+                       long chargeInterval,
+                       double chargeSpeed) {
+
+        public Data {
+            Objects.requireNonNull(selectorPath, "selectorPath");
+        }
+
     }
 
 }

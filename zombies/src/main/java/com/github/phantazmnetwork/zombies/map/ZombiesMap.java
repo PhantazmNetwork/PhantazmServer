@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.phantazmnetwork.commons.Tickable;
-import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.phantazmnetwork.zombies.map.objects.MapObjects;
 import com.github.phantazmnetwork.zombies.powerup.PowerupHandler;
 import org.jetbrains.annotations.NotNull;

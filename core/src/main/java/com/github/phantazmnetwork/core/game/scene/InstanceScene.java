@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.core.game.scene;
 
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;

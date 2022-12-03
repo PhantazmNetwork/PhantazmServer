@@ -3,52 +3,52 @@ name: Deploy to Remote
 on: workflow_dispatch
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        cache: 'gradle'
-        distribution: 'adopt'
-    - name: Set up server
-      run: ./gradlew :phantazm-server:setupServer
-    - name: Build & copy jar
-      run: ./gradlew :phantazm-server:copyJar
-    - name: Zip files
-      run: |
-          cd ./run/server-1
-          tar -czf /tmp/server.tar.gz server.jar libs
-    - name: Set up SSH
-      run: |
-        mkdir -p ~/.ssh/
-        echo "$SSH_KEY" > ~/.ssh/deploy
-        chmod 600 ~/.ssh/deploy
-        cat >> ~/.ssh/config <<END
-        Host phantazm
-          HostName $SSH_HOST
-          User $SSH_USER
-          IdentityFile ~/.ssh/deploy
-          StrictHostKeyChecking no
-        END
-      env:
-        SSH_KEY: ${{ secrets.SSH_KEY }}
-        SSH_HOST: ${{ secrets.SSH_HOST }}
-        SSH_USER: ${{ secrets.SSH_USER }}
-    - name: Copy server files to remote
-      run: |
-        scp /tmp/server.tar.gz phantazm:/home/gh/server.tar.gz
-    - name: Restart server
-      uses: appleboy/ssh-action@master
-      with:
-        key: ${{ secrets.SSH_KEY }}
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        script: |
-          tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'stop' Enter
-          tar -xf /home/gh/server.tar.gz -C /home/prod/servers/prod/
-          tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
+        steps:
+            -   uses: actions/checkout@v3
+            -   name: Set up JDK 17
+                uses: actions/setup-java@v3
+                with:
+                    java-version: '17'
+                    cache: 'gradle'
+                    distribution: 'adopt'
+            -   name: Set up server
+                run: ./gradlew :phantazm-server:setupServer
+            -   name: Build & copy jar
+                run: ./gradlew :phantazm-server:copyJar
+            -   name: Zip files
+                run: |
+                    cd ./run/server-1
+                    tar -czf /tmp/server.tar.gz server.jar libs
+            -   name: Set up SSH
+                run: |
+                    mkdir -p ~/.ssh/
+                    echo "$SSH_KEY" > ~/.ssh/deploy
+                    chmod 600 ~/.ssh/deploy
+                    cat >> ~/.ssh/config <<END
+                    Host phantazm
+                      HostName $SSH_HOST
+                      User $SSH_USER
+                      IdentityFile ~/.ssh/deploy
+                      StrictHostKeyChecking no
+                    END
+                env:
+                    SSH_KEY: ${{ secrets.SSH_KEY }}
+                    SSH_HOST: ${{ secrets.SSH_HOST }}
+                    SSH_USER: ${{ secrets.SSH_USER }}
+            -   name: Copy server files to remote
+                run: |
+                    scp /tmp/server.tar.gz phantazm:/home/gh/server.tar.gz
+            -   name: Restart server
+                uses: appleboy/ssh-action@master
+                with:
+                    key: ${{ secrets.SSH_KEY }}
+                    host: ${{ secrets.SSH_HOST }}
+                    username: ${{ secrets.SSH_USER }}
+                    script: |
+                        tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'stop' Enter
+                        tar -xf /home/gh/server.tar.gz -C /home/prod/servers/prod/
+                        tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
 

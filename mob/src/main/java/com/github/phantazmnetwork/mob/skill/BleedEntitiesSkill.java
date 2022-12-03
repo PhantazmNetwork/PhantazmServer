@@ -15,49 +15,9 @@ import java.util.Objects;
 @Model("mob.skill.bleed")
 public class BleedEntitiesSkill implements Skill {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath,
-                       float bleedDamage,
-                       long bleedInterval,
-                       long bleedTime) {
-
-        public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
-        }
-
-    }
-
-    private static final class BleedContext {
-
-        private final LivingEntity target;
-        private long ticksSinceStart;
-
-
-        public BleedContext(@NotNull LivingEntity target, long ticksSinceStart) {
-            this.target = Objects.requireNonNull(target, "target");
-            this.ticksSinceStart = ticksSinceStart;
-        }
-
-        public @NotNull LivingEntity target() {
-            return target;
-        }
-
-        public long ticksSinceStart() {
-            return ticksSinceStart;
-        }
-
-        public void setTicksSinceStart(long ticksSinceStart) {
-            this.ticksSinceStart = ticksSinceStart;
-        }
-
-    }
-
     private final Collection<BleedContext> bleeding = new LinkedList<>();
-
     private final Data data;
-
     private final DamageType damageType;
-
     private final TargetSelector<? extends LivingEntity> selector;
 
     @FactoryMethod
@@ -100,5 +60,42 @@ public class BleedEntitiesSkill implements Skill {
                 contextIterator.remove();
             }
         }
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("selector") String selectorPath,
+                       float bleedDamage,
+                       long bleedInterval,
+                       long bleedTime) {
+
+        public Data {
+            Objects.requireNonNull(selectorPath, "selectorPath");
+        }
+
+    }
+
+    private static final class BleedContext {
+
+        private final LivingEntity target;
+        private long ticksSinceStart;
+
+
+        public BleedContext(@NotNull LivingEntity target, long ticksSinceStart) {
+            this.target = Objects.requireNonNull(target, "target");
+            this.ticksSinceStart = ticksSinceStart;
+        }
+
+        public @NotNull LivingEntity target() {
+            return target;
+        }
+
+        public long ticksSinceStart() {
+            return ticksSinceStart;
+        }
+
+        public void setTicksSinceStart(long ticksSinceStart) {
+            this.ticksSinceStart = ticksSinceStart;
+        }
+
     }
 }

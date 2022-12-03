@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import it.unimi.dsi.fastutil.Hash;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 

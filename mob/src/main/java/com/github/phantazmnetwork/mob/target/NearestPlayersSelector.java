@@ -17,11 +17,6 @@ import java.util.Optional;
 @Model("mob.selector.nearest_players")
 public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
 
-    @DataObject
-    public record Data(double range, int targetLimit) {
-
-    }
-
     /**
      * Creates a {@link NearestPlayersSelector}.
      */
@@ -60,6 +55,11 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
     @Override
     protected boolean isTargetValid(@NotNull Entity targetEntity, @NotNull Player target) {
         return true;
+    }
+
+    @DataObject
+    public record Data(double range, int targetLimit) {
+
     }
 
 }

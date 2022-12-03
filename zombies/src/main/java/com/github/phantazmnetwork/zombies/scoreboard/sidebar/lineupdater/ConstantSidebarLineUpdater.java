@@ -12,17 +12,7 @@ import java.util.Optional;
 @Model("zombies.sidebar.lineupdater.constant")
 public class ConstantSidebarLineUpdater implements SidebarLineUpdater {
 
-    @DataObject
-    public record Data(@NotNull Component component) {
-
-        public Data {
-            Objects.requireNonNull(component, "component");
-        }
-
-    }
-
     private final Data data;
-
     private boolean componentSet = false;
 
     @FactoryMethod
@@ -43,5 +33,14 @@ public class ConstantSidebarLineUpdater implements SidebarLineUpdater {
         }
 
         return Optional.empty();
+    }
+
+    @DataObject
+    public record Data(@NotNull Component component) {
+
+        public Data {
+            Objects.requireNonNull(component, "component");
+        }
+
     }
 }

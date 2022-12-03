@@ -58,56 +58,6 @@ public class BasicMobSpawner implements MobSpawner {
 
     private final KeyParser keyParser;
 
-    public static class Module implements DependencyModule {
-
-        private final MobSpawner spawner;
-
-        private final MobStore mobStore;
-
-        private final MobModel model;
-
-        private final NeuralEntity entity;
-
-        public Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull MobModel model,
-                @NotNull NeuralEntity entity) {
-            this.spawner = Objects.requireNonNull(spawner, "spawner");
-            this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-            this.model = Objects.requireNonNull(model, "model");
-            this.entity = Objects.requireNonNull(entity, "entity");
-        }
-
-        @DependencySupplier("mob.spawner")
-        @Memoize
-        public @NotNull MobSpawner getSpawner() {
-            return spawner;
-        }
-
-        @DependencySupplier("mob.store")
-        @Memoize
-        public MobStore getMobStore() {
-            return mobStore;
-        }
-
-        @DependencySupplier("mob.model")
-        @Memoize
-        public @NotNull MobModel getModel() {
-            return model;
-        }
-
-        @DependencySupplier("mob.entity.entity")
-        @Memoize
-        public @NotNull Entity getEntity() {
-            return entity;
-        }
-
-        @DependencySupplier("mob.entity.neural_entity")
-        @Memoize
-        public @NotNull NeuralEntity getNeuralEntity() {
-            return entity;
-        }
-
-    }
-
     /**
      * Creates a new {@link BasicMobSpawner}.
      *
@@ -240,6 +190,56 @@ public class BasicMobSpawner implements MobSpawner {
         }
 
         return skills;
+    }
+
+    public static class Module implements DependencyModule {
+
+        private final MobSpawner spawner;
+
+        private final MobStore mobStore;
+
+        private final MobModel model;
+
+        private final NeuralEntity entity;
+
+        public Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull MobModel model,
+                @NotNull NeuralEntity entity) {
+            this.spawner = Objects.requireNonNull(spawner, "spawner");
+            this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+            this.model = Objects.requireNonNull(model, "model");
+            this.entity = Objects.requireNonNull(entity, "entity");
+        }
+
+        @DependencySupplier("mob.spawner")
+        @Memoize
+        public @NotNull MobSpawner getSpawner() {
+            return spawner;
+        }
+
+        @DependencySupplier("mob.store")
+        @Memoize
+        public MobStore getMobStore() {
+            return mobStore;
+        }
+
+        @DependencySupplier("mob.model")
+        @Memoize
+        public @NotNull MobModel getModel() {
+            return model;
+        }
+
+        @DependencySupplier("mob.entity.entity")
+        @Memoize
+        public @NotNull Entity getEntity() {
+            return entity;
+        }
+
+        @DependencySupplier("mob.entity.neural_entity")
+        @Memoize
+        public @NotNull NeuralEntity getNeuralEntity() {
+            return entity;
+        }
+
     }
 
 }

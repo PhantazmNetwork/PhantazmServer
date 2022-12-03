@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunStats;
 import com.github.phantazmnetwork.zombies.equipment.gun.reload.ReloadTester;
 import com.github.steanky.element.core.annotation.*;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 

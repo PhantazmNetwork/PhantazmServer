@@ -8,7 +8,6 @@ import com.github.phantazmnetwork.zombies.equipment.gun.target.limiter.TargetLim
 import com.github.phantazmnetwork.zombies.equipment.gun.target.tester.TargetTester;
 import com.github.steanky.element.core.annotation.*;
 import it.unimi.dsi.fastutil.Pair;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;

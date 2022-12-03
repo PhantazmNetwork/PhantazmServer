@@ -2,8 +2,8 @@ package com.github.phantazmnetwork.zombies.map.shop.predicate;
 
 import com.github.phantazmnetwork.zombies.coin.PlayerCoins;
 import com.github.phantazmnetwork.zombies.coin.Transaction;
-import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
+import com.github.phantazmnetwork.zombies.equipment.Equipment;
 import com.github.phantazmnetwork.zombies.map.shop.PlayerInteraction;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.upgrade.Upgradable;

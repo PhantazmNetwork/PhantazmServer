@@ -1,6 +1,9 @@
 package com.github.phantazmnetwork.zombies.powerup;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;

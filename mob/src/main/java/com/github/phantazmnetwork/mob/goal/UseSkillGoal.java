@@ -17,18 +17,8 @@ import java.util.Objects;
 @Model("mob.goal.use_skill")
 public class UseSkillGoal implements NeuralGoal {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("skill") String skillPath, long period) {
-
-        public Data {
-            Objects.requireNonNull(skillPath, "skillPath");
-        }
-    }
-
     private final Data data;
-
     private final Skill skill;
-
     private long lastUsage = System.currentTimeMillis();
 
     /**
@@ -67,17 +57,12 @@ public class UseSkillGoal implements NeuralGoal {
     }
 
     @Override
-    public void start() {
-
-    }
-
-    @Override
     public boolean shouldEnd() {
         return false;
     }
 
     @Override
-    public void end() {
+    public void start() {
 
     }
 
@@ -86,6 +71,19 @@ public class UseSkillGoal implements NeuralGoal {
         if (time - lastUsage >= data.period()) {
             skill.use();
             lastUsage = time;
+        }
+    }
+
+    @Override
+    public void end() {
+
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("skill") String skillPath, long period) {
+
+        public Data {
+            Objects.requireNonNull(skillPath, "skillPath");
         }
     }
 

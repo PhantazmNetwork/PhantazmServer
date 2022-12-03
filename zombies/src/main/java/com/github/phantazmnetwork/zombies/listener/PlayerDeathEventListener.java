@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.listener;
 
-import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.objects.MapObjects;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;

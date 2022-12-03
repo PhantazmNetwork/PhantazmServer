@@ -11,7 +11,7 @@ public enum Evaluation {
 
     public <T> boolean evaluate(@NotNull Iterable<? extends Predicate<T>> predicates, T type) {
         Objects.requireNonNull(predicates, "predicates");
-        
+
         return switch (this) {
             case ALL_TRUE -> {
                 for (Predicate<T> predicate : predicates) {

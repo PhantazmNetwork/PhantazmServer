@@ -1,6 +1,5 @@
 package com.github.phantazmnetwork.zombies.map.objects;
 
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.ClientBlockHandlerSource;
@@ -32,6 +31,7 @@ import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
@@ -41,104 +41,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicMapObjectsSource implements MapObjects.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMapObjectsSource.class);
-
-    public static class Module implements DependencyModule {
-        private final Instance instance;
-        private final Random random;
-        private final Supplier<? extends RoundHandler> roundHandlerSupplier;
-        private final Flaggable flaggable;
-        private final TransactionModifierSource transactionModifierSource;
-        private final SlotDistributor slotDistributor;
-        private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
-        private final Pos respawnPos;
-        private final Supplier<? extends MapObjects> mapObjectsSupplier;
-
-        private Module(Instance instance, Random random, Supplier<? extends RoundHandler> roundHandlerSupplier,
-                Flaggable flaggable, TransactionModifierSource transactionModifierSource,
-                SlotDistributor slotDistributor, Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
-                Supplier<? extends MapObjects> mapObjectsSupplier) {
-            this.instance = Objects.requireNonNull(instance, "instance");
-            this.random = Objects.requireNonNull(random, "random");
-            this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
-            this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
-            this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
-            this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
-            this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
-            this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPos");
-            this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier, "mapObjectsSupplier");
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.instance")
-        public @NotNull Instance instance() {
-            return instance;
-        }
-
-        public @NotNull Random random() {
-            return random;
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.round_handler_supplier")
-        public @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier() {
-            return roundHandlerSupplier;
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.flaggable")
-        public @NotNull Flaggable flaggable() {
-            return flaggable;
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.modifier_source")
-        public @NotNull TransactionModifierSource modifierSource() {
-            return transactionModifierSource;
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.slot_distributor")
-        public @NotNull SlotDistributor slotDistributor() {
-            return slotDistributor;
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.player_map")
-        public @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap() {
-            return playerMap;
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.player_collection")
-        public @NotNull Collection<? extends ZombiesPlayer> playerCollection() {
-            return playerMap.values();
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.respawn_pos")
-        public @NotNull Pos respawnPos() {
-            return respawnPos;
-        }
-
-        @Memoize
-        @DependencySupplier("zombies.dependency.map_object.map_objects")
-        public @NotNull Supplier<? extends MapObjects> mapObjectsSupplier() {
-            return mapObjectsSupplier;
-        }
-    }
-
     private final ContextManager contextManager;
     private final MobStore mobStore;
     private final MobSpawner mobSpawner;
     private final Map<Key, MobModel> mobModels;
     private final ClientBlockHandlerSource clientBlockHandlerSource;
     private final KeyParser keyParser;
-
     public BasicMapObjectsSource(@NotNull ContextManager contextManager, @NotNull MobStore mobStore,
             @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
             @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {
@@ -188,7 +100,6 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         return mapObjects;
     }
-
 
     private Map<Key, SpawnruleInfo> buildSpawnrules(List<SpawnruleInfo> spawnruleInfoList) {
         Map<Key, SpawnruleInfo> spawnruleInfoMap = new HashMap<>(spawnruleInfoList.size());
@@ -323,5 +234,92 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         }
 
         return rounds;
+    }
+
+    public static class Module implements DependencyModule {
+        private final Instance instance;
+        private final Random random;
+        private final Supplier<? extends RoundHandler> roundHandlerSupplier;
+        private final Flaggable flaggable;
+        private final TransactionModifierSource transactionModifierSource;
+        private final SlotDistributor slotDistributor;
+        private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+        private final Pos respawnPos;
+        private final Supplier<? extends MapObjects> mapObjectsSupplier;
+
+        private Module(Instance instance, Random random, Supplier<? extends RoundHandler> roundHandlerSupplier,
+                Flaggable flaggable, TransactionModifierSource transactionModifierSource,
+                SlotDistributor slotDistributor, Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
+                Supplier<? extends MapObjects> mapObjectsSupplier) {
+            this.instance = Objects.requireNonNull(instance, "instance");
+            this.random = Objects.requireNonNull(random, "random");
+            this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
+            this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
+            this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
+            this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
+            this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+            this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPos");
+            this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier, "mapObjectsSupplier");
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.instance")
+        public @NotNull Instance instance() {
+            return instance;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.random")
+        public @NotNull Random random() {
+            return random;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.round_handler_supplier")
+        public @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier() {
+            return roundHandlerSupplier;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.flaggable")
+        public @NotNull Flaggable flaggable() {
+            return flaggable;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.modifier_source")
+        public @NotNull TransactionModifierSource modifierSource() {
+            return transactionModifierSource;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.slot_distributor")
+        public @NotNull SlotDistributor slotDistributor() {
+            return slotDistributor;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.player_map")
+        public @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap() {
+            return playerMap;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.player_collection")
+        public @NotNull Collection<? extends ZombiesPlayer> playerCollection() {
+            return playerMap.values();
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.respawn_pos")
+        public @NotNull Pos respawnPos() {
+            return respawnPos;
+        }
+
+        @Memoize
+        @DependencySupplier("zombies.dependency.map_object.map_objects")
+        public @NotNull Supplier<? extends MapObjects> mapObjectsSupplier() {
+            return mapObjectsSupplier;
+        }
     }
 }

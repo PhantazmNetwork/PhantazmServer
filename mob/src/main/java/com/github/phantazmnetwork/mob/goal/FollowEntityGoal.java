@@ -17,23 +17,10 @@ import java.util.Optional;
 @Model("mob.goal.follow_entity")
 public class FollowEntityGoal implements NeuralGoal {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath, long retargetInterval, double followRange) {
-
-        public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
-        }
-
-    }
-
     private final Data data;
-
     private final NeuralEntity entity;
-
     private final TargetSelector<? extends Entity> selector;
-
     private Entity target;
-
     private long ticksSinceTargetChosen;
 
     /**
@@ -56,17 +43,12 @@ public class FollowEntityGoal implements NeuralGoal {
     }
 
     @Override
-    public void start() {
-
-    }
-
-    @Override
     public boolean shouldEnd() {
         return false;
     }
 
     @Override
-    public void end() {
+    public void start() {
 
     }
 
@@ -87,6 +69,11 @@ public class FollowEntityGoal implements NeuralGoal {
         }
     }
 
+    @Override
+    public void end() {
+
+    }
+
     private void refreshTarget() {
         ticksSinceTargetChosen = 0L;
 
@@ -102,6 +89,15 @@ public class FollowEntityGoal implements NeuralGoal {
         else {
             entity.setTarget(target = null);
         }
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("selector") String selectorPath, long retargetInterval, double followRange) {
+
+        public Data {
+            Objects.requireNonNull(selectorPath, "selectorPath");
+        }
+
     }
 
 }

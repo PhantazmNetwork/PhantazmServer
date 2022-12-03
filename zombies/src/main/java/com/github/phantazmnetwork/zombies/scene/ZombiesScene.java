@@ -5,6 +5,7 @@ import com.github.phantazmnetwork.core.game.scene.InstanceScene;
 import com.github.phantazmnetwork.core.game.scene.RouteResult;
 import com.github.phantazmnetwork.core.game.scene.fallback.SceneFallback;
 import com.github.phantazmnetwork.core.player.PlayerView;
+import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import com.github.phantazmnetwork.zombies.map.ZombiesMap;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
@@ -12,7 +13,6 @@ import com.github.phantazmnetwork.zombies.player.state.context.DeadPlayerStateCo
 import com.github.phantazmnetwork.zombies.player.state.context.NoContext;
 import com.github.phantazmnetwork.zombies.stage.Stage;
 import com.github.phantazmnetwork.zombies.stage.StageTransition;
-import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -133,6 +133,45 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         return RouteResult.SUCCESSFUL;
     }
 
+    @Override
+    public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+        for (UUID leaver : leavers) {
+            if (!players.containsKey(leaver)) {
+                return new RouteResult(false,
+                        Component.text("Not all players are within the scene.", NamedTextColor.RED));
+            }
+        }
+
+        for (UUID leaver : leavers) {
+            players.remove(leaver);
+
+            Stage stage = getCurrentStage();
+            ZombiesPlayer zombiesPlayer;
+            if (stage == null || !stage.hasPermanentPlayers()) {
+                zombiesPlayer = zombiesPlayers.remove(leaver);
+            }
+            else {
+                zombiesPlayer = zombiesPlayers.get(leaver);
+            }
+
+            if (zombiesPlayer != null) {
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
+            }
+        }
+
+        return RouteResult.SUCCESSFUL;
+    }
+
+    @Override
+    public boolean isJoinable() {
+        return joinable;
+    }
+
+    @Override
+    public void setJoinable(boolean joinable) {
+        this.joinable = joinable;
+    }
+
     private RouteResult checkWithinProtocolVersionBounds(@NotNull Collection<PlayerView> newPlayers) {
         for (PlayerView playerView : newPlayers) {
             Optional<Player> player = playerView.getPlayer();
@@ -182,45 +221,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         return protocolVersion;
-    }
-
-    @Override
-    public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
-        for (UUID leaver : leavers) {
-            if (!players.containsKey(leaver)) {
-                return new RouteResult(false,
-                        Component.text("Not all players are within the scene.", NamedTextColor.RED));
-            }
-        }
-
-        for (UUID leaver : leavers) {
-            players.remove(leaver);
-
-            Stage stage = getCurrentStage();
-            ZombiesPlayer zombiesPlayer;
-            if (stage == null || !stage.hasPermanentPlayers()) {
-                zombiesPlayer = zombiesPlayers.remove(leaver);
-            }
-            else {
-                zombiesPlayer = zombiesPlayers.get(leaver);
-            }
-
-            if (zombiesPlayer != null) {
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
-            }
-        }
-
-        return RouteResult.SUCCESSFUL;
-    }
-
-    @Override
-    public boolean isJoinable() {
-        return joinable;
-    }
-
-    @Override
-    public void setJoinable(boolean joinable) {
-        this.joinable = joinable;
     }
 
     @Override

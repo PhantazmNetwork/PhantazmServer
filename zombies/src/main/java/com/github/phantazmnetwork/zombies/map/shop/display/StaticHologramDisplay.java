@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.map.shop.display;
 
-import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.map.HologramInfo;
+import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;

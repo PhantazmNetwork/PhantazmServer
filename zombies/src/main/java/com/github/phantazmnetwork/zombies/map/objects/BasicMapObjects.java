@@ -2,16 +2,12 @@ package com.github.phantazmnetwork.zombies.map.objects;
 
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
-import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.steanky.element.core.dependency.DependencyProvider;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public record BasicMapObjects(@Unmodifiable @NotNull List<Spawnpoint> spawnpoints,
                               @Unmodifiable @NotNull List<Window> windows,

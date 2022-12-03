@@ -57,12 +57,6 @@ public class ConfirmationGui extends SimplePanelGui {
         this(message, onConfirm, onDeny, 100, computeHeight(message, 100));
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private static int computeHeight(Text message, int width) {
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        return textRenderer.wrapLines(message, width).size() * textRenderer.fontHeight + 30;
-    }
-
     /**
      * Creates a new ConfirmationGui with the provided query message and Runnable to execute if the user selects "yes".
      *
@@ -71,5 +65,11 @@ public class ConfirmationGui extends SimplePanelGui {
      */
     public ConfirmationGui(@NotNull Text message, @NotNull Runnable onConfirm) {
         this(message, onConfirm, ScreenUtils::closeCurrentScreen);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private static int computeHeight(Text message, int width) {
+        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        return textRenderer.wrapLines(message, width).size() * textRenderer.fontHeight + 30;
     }
 }

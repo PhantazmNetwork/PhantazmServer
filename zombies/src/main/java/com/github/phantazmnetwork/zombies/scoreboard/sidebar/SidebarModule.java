@@ -1,10 +1,10 @@
 package com.github.phantazmnetwork.zombies.scoreboard.sidebar;
 
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.zombies.map.RoundHandler;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.dependency.DependencyModule;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 

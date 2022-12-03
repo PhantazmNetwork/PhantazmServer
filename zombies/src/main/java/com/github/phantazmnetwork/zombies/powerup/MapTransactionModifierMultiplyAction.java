@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.zombies.powerup;
 
-import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.phantazmnetwork.zombies.coin.Transaction;
+import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;

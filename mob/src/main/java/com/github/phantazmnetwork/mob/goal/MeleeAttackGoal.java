@@ -15,26 +15,10 @@ import java.util.Objects;
 @Model("mob.goal.melee_attack")
 public class MeleeAttackGoal implements NeuralGoal {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("skills") String skillPaths,
-                       @NotNull @DataPath("last_hit_selector") String lastHitSelectorPath,
-                       long cooldown,
-                       double rangeSquared) {
-
-        public Data {
-            Objects.requireNonNull(lastHitSelectorPath, "lastHitSelectorPath");
-        }
-
-    }
-
     private final Data data;
-
     private final Collection<Skill> skills;
-
     private final LastHitSelector<LivingEntity> lastHitSelector;
-
     private final NeuralEntity entity;
-
     private long ticksSinceLastAttack = 0L;
 
     @FactoryMethod
@@ -50,6 +34,11 @@ public class MeleeAttackGoal implements NeuralGoal {
     @Override
     public boolean shouldStart() {
         return true;
+    }
+
+    @Override
+    public boolean shouldEnd() {
+        return false;
     }
 
     @Override
@@ -78,8 +67,15 @@ public class MeleeAttackGoal implements NeuralGoal {
         }
     }
 
-    @Override
-    public boolean shouldEnd() {
-        return false;
+    @DataObject
+    public record Data(@NotNull @DataPath("skills") String skillPaths,
+                       @NotNull @DataPath("last_hit_selector") String lastHitSelectorPath,
+                       long cooldown,
+                       double rangeSquared) {
+
+        public Data {
+            Objects.requireNonNull(lastHitSelectorPath, "lastHitSelectorPath");
+        }
+
     }
 }

@@ -1,8 +1,8 @@
 package com.github.phantazmnetwork.zombies.stage;
 
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;

@@ -2,7 +2,6 @@ package com.github.phantazmnetwork.zombies.map.objects;
 
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.vector.Region3I;
-import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.*;
@@ -22,12 +21,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public interface MapObjects extends Tickable {
-    interface Source {
-        @NotNull MapObjects make(@NotNull Instance instance, @NotNull MapInfo mapInfo,
-                @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier);
-    }
-
     @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
 
     @Unmodifiable @NotNull List<Window> windows();
@@ -113,5 +106,11 @@ public interface MapObjects extends Tickable {
         }
 
         return Optional.empty();
+    }
+
+    interface Source {
+        @NotNull MapObjects make(@NotNull Instance instance, @NotNull MapInfo mapInfo,
+                @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier);
     }
 }

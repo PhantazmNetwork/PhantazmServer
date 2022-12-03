@@ -1,8 +1,6 @@
 package com.github.phantazmnetwork.zombies.powerup;
 
-import com.github.phantazmnetwork.zombies.map.MapSettingsInfo;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
-import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;

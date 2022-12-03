@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.time.TickFormatter;
 import com.github.steanky.element.core.ElementFactory;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -16,26 +16,14 @@ import java.util.Optional;
 @Model("zombies.sidebar.lineupdater.ticks")
 public class TicksLineUpdater implements SidebarLineUpdater {
 
-    @DataObject
-    public record Data(@NotNull String tickFormatterPath) {
-
-        public Data {
-            Objects.requireNonNull(tickFormatterPath, "tickFormatterPath");
-        }
-
-    }
-
     private static final ElementFactory<Data, TicksLineUpdater> FACTORY = (objectData, context, dependencyProvider) -> {
         Wrapper<Long> ticksWrapper =
                 dependencyProvider.provide(Key.key("zombies.dependency.sidebar" + ".ticks_since_start"));
         TickFormatter tickFormatter = context.provide(objectData.tickFormatterPath(), dependencyProvider, false);
         return new TicksLineUpdater(ticksWrapper, tickFormatter);
     };
-
     private final Wrapper<Long> ticksWrapper;
-
     private final TickFormatter tickFormatter;
-
     private long lastTicks = -1;
 
     public TicksLineUpdater(@NotNull Wrapper<Long> ticksWrapper, @NotNull TickFormatter tickFormatter) {
@@ -61,5 +49,14 @@ public class TicksLineUpdater implements SidebarLineUpdater {
         }
 
         return Optional.empty();
+    }
+
+    @DataObject
+    public record Data(@NotNull String tickFormatterPath) {
+
+        public Data {
+            Objects.requireNonNull(tickFormatterPath, "tickFormatterPath");
+        }
+
     }
 }

@@ -1,9 +1,9 @@
 package com.github.phantazmnetwork.zombies.stage;
 
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.time.TickFormatter;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.SidebarUpdater;
+import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.Instance;

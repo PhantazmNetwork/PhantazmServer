@@ -13,50 +13,6 @@ import java.util.function.BooleanSupplier;
 public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
 
 
-    @Model("zombies.sidebar.line_updater.conditional.child")
-    public static class ChildUpdater {
-
-        @DataObject
-        public record Data(@NotNull @DataPath("condition") String conditionPath,
-                           @NotNull @DataPath("updater") String updaterPath) {
-
-            public Data {
-                Objects.requireNonNull(conditionPath, "conditionPath");
-                Objects.requireNonNull(updaterPath, "updaterPath");
-            }
-
-        }
-
-        private final BooleanSupplier condition;
-
-        private final SidebarLineUpdater updater;
-
-        @FactoryMethod
-        public ChildUpdater(@NotNull ChildUpdater.Data data, @NotNull @DataName("condition") BooleanSupplier condition,
-                @NotNull @DataName("updater") SidebarLineUpdater updater) {
-            this.condition = Objects.requireNonNull(condition, "condition");
-            this.updater = Objects.requireNonNull(updater, "updater");
-        }
-
-        public @NotNull BooleanSupplier getCondition() {
-            return condition;
-        }
-
-        public @NotNull SidebarLineUpdater getUpdater() {
-            return updater;
-        }
-
-    }
-
-    @DataObject
-    public record Data(@NotNull @DataPath("child_updaters") List<String> childUpdaterPaths) {
-
-        public Data {
-            Objects.requireNonNull(childUpdaterPaths, "childUpdaterPaths");
-        }
-
-    }
-
     private final List<ChildUpdater> childUpdaters;
 
     @FactoryMethod
@@ -81,5 +37,48 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
         }
 
         return Optional.empty();
+    }
+
+    @Model("zombies.sidebar.line_updater.conditional.child")
+    public static class ChildUpdater {
+
+        private final BooleanSupplier condition;
+        private final SidebarLineUpdater updater;
+
+        @FactoryMethod
+        public ChildUpdater(@NotNull ChildUpdater.Data data, @NotNull @DataName("condition") BooleanSupplier condition,
+                @NotNull @DataName("updater") SidebarLineUpdater updater) {
+            this.condition = Objects.requireNonNull(condition, "condition");
+            this.updater = Objects.requireNonNull(updater, "updater");
+        }
+
+        public @NotNull BooleanSupplier getCondition() {
+            return condition;
+        }
+
+        public @NotNull SidebarLineUpdater getUpdater() {
+            return updater;
+        }
+
+        @DataObject
+        public record Data(@NotNull @DataPath("condition") String conditionPath,
+                           @NotNull @DataPath("updater") String updaterPath) {
+
+            public Data {
+                Objects.requireNonNull(conditionPath, "conditionPath");
+                Objects.requireNonNull(updaterPath, "updaterPath");
+            }
+
+        }
+
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("child_updaters") List<String> childUpdaterPaths) {
+
+        public Data {
+            Objects.requireNonNull(childUpdaterPaths, "childUpdaterPaths");
+        }
+
     }
 }

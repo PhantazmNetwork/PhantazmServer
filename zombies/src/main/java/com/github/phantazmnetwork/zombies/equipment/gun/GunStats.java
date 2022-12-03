@@ -22,21 +22,6 @@ public final class GunStats {
     private final Data data;
 
 
-    /**
-     * Underlying data for the {@link GunStats}.
-     *
-     * @param shootSpeed   The gun's shoot speed
-     * @param reloadSpeed  The gun's reload speed
-     * @param maxAmmo      The gun's max ammo
-     * @param maxClip      The gun's max clip
-     * @param shots        The gun's shots per clip
-     * @param shotInterval The interval between gun fire
-     */
-    @DataObject
-    public record Data(long shootSpeed, long reloadSpeed, int maxAmmo, int maxClip, int shots, long shotInterval) {
-
-    }
-
     @FactoryMethod
     public GunStats(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
@@ -118,6 +103,21 @@ public final class GunStats {
 
     public long shotInterval() {
         return data.shotInterval();
+    }
+
+    /**
+     * Underlying data for the {@link GunStats}.
+     *
+     * @param shootSpeed   The gun's shoot speed
+     * @param reloadSpeed  The gun's reload speed
+     * @param maxAmmo      The gun's max ammo
+     * @param maxClip      The gun's max clip
+     * @param shots        The gun's shots per clip
+     * @param shotInterval The interval between gun fire
+     */
+    @DataObject
+    public record Data(long shootSpeed, long reloadSpeed, int maxAmmo, int maxClip, int shots, long shotInterval) {
+
     }
 
 

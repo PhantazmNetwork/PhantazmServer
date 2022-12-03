@@ -57,6 +57,11 @@ public class ProjectileMovementGoal implements NeuralGoal {
     }
 
     @Override
+    public boolean shouldEnd() {
+        return entity.isRemoved();
+    }
+
+    @Override
     public void start() {
         //TODO: entity.hasPhysics = false;
         if (entity.getEntityMeta() instanceof ProjectileMeta projectileMeta) {
@@ -177,10 +182,5 @@ public class ProjectileMovementGoal implements NeuralGoal {
             }
         }
         return false;
-    }
-
-    @Override
-    public boolean shouldEnd() {
-        return entity.isRemoved();
     }
 }

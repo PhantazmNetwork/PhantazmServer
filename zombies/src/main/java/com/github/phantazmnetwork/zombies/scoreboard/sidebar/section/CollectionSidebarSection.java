@@ -12,15 +12,6 @@ public class CollectionSidebarSection implements SidebarSection {
 
     private final Collection<SidebarLineUpdater> lineUpdaters;
 
-    @DataObject
-    public record Data(@NotNull @DataPath("line_updaters") Collection<String> lineUpdaterPaths) {
-
-        public Data {
-            Objects.requireNonNull(lineUpdaterPaths, "lineUpdaters");
-        }
-
-    }
-
     @FactoryMethod
     public CollectionSidebarSection(@NotNull Data data,
             @NotNull @DataName("line_updaters") Collection<? extends SidebarLineUpdater> lineUpdaters) {
@@ -46,5 +37,14 @@ public class CollectionSidebarSection implements SidebarSection {
             updates.add(lineUpdater.tick(time));
         }
         return updates;
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("line_updaters") Collection<String> lineUpdaterPaths) {
+
+        public Data {
+            Objects.requireNonNull(lineUpdaterPaths, "lineUpdaters");
+        }
+
     }
 }

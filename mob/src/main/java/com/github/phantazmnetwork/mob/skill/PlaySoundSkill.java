@@ -14,20 +14,7 @@ import java.util.Objects;
 @Model("mob.skill.play_sound")
 public class PlaySoundSkill implements Skill {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath,
-                       @NotNull Sound sound,
-                       boolean followAudience) {
-
-        public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
-            Objects.requireNonNull(sound, "sound");
-        }
-
-    }
-
     private final Data data;
-
     private final TargetSelector<? extends Audience> selector;
 
     /**
@@ -56,6 +43,18 @@ public class PlaySoundSkill implements Skill {
 
     @Override
     public void tick(long time) {
+
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("selector") String selectorPath,
+                       @NotNull Sound sound,
+                       boolean followAudience) {
+
+        public Data {
+            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(sound, "sound");
+        }
 
     }
 

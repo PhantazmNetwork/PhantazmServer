@@ -6,7 +6,6 @@ import com.github.phantazmnetwork.core.game.scene.lobby.LobbyRouterFallback;
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.IdentitySource;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
-import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunData;
@@ -49,10 +48,8 @@ public final class PhantazmServer {
      * The default, global {@link Logger} for PhantazmServer.
      */
     public static final Logger LOGGER = LoggerFactory.getLogger(PhantazmServer.class);
-
-    private static final String UNSAFE_ARGUMENT = "unsafe";
-
     public static final String BRAND_NAME = "Minestom-Phantazm";
+    private static final String UNSAFE_ARGUMENT = "unsafe";
 
     /**
      * Starting point for the server.

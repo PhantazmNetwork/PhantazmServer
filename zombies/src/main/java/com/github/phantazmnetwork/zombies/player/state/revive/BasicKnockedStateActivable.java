@@ -1,12 +1,12 @@
 package com.github.phantazmnetwork.zombies.player.state.revive;
 
 import com.github.phantazmnetwork.commons.Activable;
-import com.github.phantazmnetwork.commons.Wrapper;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.core.time.TickFormatter;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayerMeta;
 import com.github.phantazmnetwork.zombies.player.state.context.KnockedPlayerStateContext;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.attribute.Attribute;

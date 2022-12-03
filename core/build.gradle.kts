@@ -7,4 +7,6 @@ dependencies {
     api(libs.ethylene.core)
     api(libs.caffeine)
     api(libs.element.core)
+    api(libs.toolkit.collection)
+    api(libs.toolkit.function)
 }

@@ -12,19 +12,8 @@ import java.util.Objects;
 @Model("mob.skill.knockback")
 public class KnockbackEntitySkill implements Skill {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath, float knockback) {
-
-        public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
-        }
-
-    }
-
     private final Data data;
-
     private final Entity user;
-
     private final TargetSelector<? extends LivingEntity> selector;
 
     @FactoryMethod
@@ -48,6 +37,15 @@ public class KnockbackEntitySkill implements Skill {
 
             livingEntity.takeKnockback(data.knockback(), Math.sin(yaw), -Math.cos(yaw));
         });
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("selector") String selectorPath, float knockback) {
+
+        public Data {
+            Objects.requireNonNull(selectorPath, "selectorPath");
+        }
+
     }
 
 }

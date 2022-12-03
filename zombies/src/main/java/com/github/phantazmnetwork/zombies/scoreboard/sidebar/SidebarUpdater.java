@@ -15,21 +15,9 @@ import java.util.Optional;
 @Model("zombies.sidebar.updater")
 public class SidebarUpdater implements Activable {
 
-    @DataObject
-    public record Data(@NotNull @DataPath("sections") Collection<String> sectionPaths) {
-
-        public Data {
-            Objects.requireNonNull(sectionPaths, "sectionPaths");
-        }
-
-    }
-
     private final Sidebar sidebar;
-
     private final List<SidebarSection> sections;
-
     private final int[] sizes;
-
     private int totalSize = 0;
 
     @FactoryMethod
@@ -118,6 +106,15 @@ public class SidebarUpdater implements Activable {
 
     private @NotNull String lineId(int index) {
         return "line" + index;
+    }
+
+    @DataObject
+    public record Data(@NotNull @DataPath("sections") Collection<String> sectionPaths) {
+
+        public Data {
+            Objects.requireNonNull(sectionPaths, "sectionPaths");
+        }
+
     }
 
 }
