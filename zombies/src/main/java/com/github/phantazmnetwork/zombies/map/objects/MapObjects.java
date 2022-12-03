@@ -4,11 +4,13 @@ import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.commons.vector.Region3I;
 import com.github.phantazmnetwork.commons.vector.Vec3D;
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -42,13 +44,13 @@ public interface MapObjects extends Tickable {
 
     @NotNull DependencyProvider mapDependencyProvider();
 
-    default @NotNull Optional<Window> nearestWindowInRange(@NotNull Vec3D origin, double distance) {
+    default @NotNull Optional<Window> nearestWindowInRange(@NotNull Point origin, double distance) {
         double distanceSquared = distance * distance;
 
         double nearestDistance = Double.POSITIVE_INFINITY;
         Window nearestWindow = null;
         for (Window window : windows()) {
-            double currentDistance = window.getCenter().squaredDistance(origin);
+            double currentDistance = window.getCenter().distanceSquared(origin);
             if (currentDistance < nearestDistance) {
                 nearestDistance = currentDistance;
                 nearestWindow = window;
@@ -62,9 +64,10 @@ public interface MapObjects extends Tickable {
         return Optional.empty();
     }
 
-    default @NotNull Optional<Window> windowAt(@NotNull Vec3I block) {
+    default @NotNull Optional<Window> windowAt(@NotNull Point block) {
+        Vec3I vec = VecUtils.toBlockInt(block);
         for (Window window : windows()) {
-            if (window.getWindowInfo().frameRegion().contains(block)) {
+            if (window.getWindowInfo().frameRegion().contains(vec)) {
                 return Optional.of(window);
             }
         }
@@ -72,12 +75,13 @@ public interface MapObjects extends Tickable {
         return Optional.empty();
     }
 
-    default @NotNull Optional<Door> doorAt(@NotNull Vec3I block) {
+    default @NotNull Optional<Door> doorAt(@NotNull Point block) {
+        Vec3I vec = VecUtils.toBlockInt(block);
         for (Door door : doors()) {
             Region3I enclosing = door.getEnclosing();
-            if (enclosing.contains(block)) {
+            if (enclosing.contains(vec)) {
                 for (Region3I subRegion : door.regions()) {
-                    if (subRegion.contains(block)) {
+                    if (subRegion.contains(vec)) {
                         return Optional.of(door);
                     }
                 }
@@ -87,10 +91,11 @@ public interface MapObjects extends Tickable {
         return Optional.empty();
     }
 
-    default @NotNull Optional<Room> roomAt(@NotNull Vec3I block) {
+    default @NotNull Optional<Room> roomAt(@NotNull Point block) {
+        Vec3I vec = VecUtils.toBlockInt(block);
         for (Room room : rooms()) {
             for (Region3I region : room.roomBounds()) {
-                if (region.contains(block)) {
+                if (region.contains(vec)) {
                     return Optional.of(room);
                 }
             }
@@ -99,9 +104,10 @@ public interface MapObjects extends Tickable {
         return Optional.empty();
     }
 
-    default @NotNull Optional<Shop> shopAt(@NotNull Vec3I block) {
+    default @NotNull Optional<Shop> shopAt(@NotNull Point block) {
         for (Shop shop : shops()) {
-            if (block.equals(shop.getShopInfo().triggerLocation())) {
+            Vec3I trigger = shop.getShopInfo().triggerLocation();
+            if (block.sameBlock(trigger.getX(), trigger.getY(), trigger.getZ())) {
                 return Optional.of(shop);
             }
         }

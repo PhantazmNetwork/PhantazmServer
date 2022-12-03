@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.core;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -40,8 +41,8 @@ public interface ClientBlockHandler {
      * @param type          the kind of block to set
      * @param blockLocation the block location
      */
-    default void setClientBlock(@NotNull Block type, @NotNull Vec3I blockLocation) {
-        setClientBlock(type, blockLocation.getX(), blockLocation.getY(), blockLocation.getZ());
+    default void setClientBlock(@NotNull Block type, @NotNull Point blockLocation) {
+        setClientBlock(type, blockLocation.blockX(), blockLocation.blockY(), blockLocation.blockZ());
     }
 
     /**
@@ -58,7 +59,7 @@ public interface ClientBlockHandler {
      *
      * @param blockLocation the block location
      */
-    default void removeClientBlock(@NotNull Vec3I blockLocation) {
-        removeClientBlock(blockLocation.getX(), blockLocation.getY(), blockLocation.getZ());
+    default void removeClientBlock(@NotNull Point blockLocation) {
+        removeClientBlock(blockLocation.blockX(), blockLocation.blockY(), blockLocation.blockZ());
     }
 }

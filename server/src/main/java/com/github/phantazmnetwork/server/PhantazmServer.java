@@ -4,7 +4,7 @@ import com.github.phantazmnetwork.core.game.scene.fallback.CompositeFallback;
 import com.github.phantazmnetwork.core.game.scene.fallback.KickFallback;
 import com.github.phantazmnetwork.core.game.scene.lobby.LobbyRouterFallback;
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
-import com.github.phantazmnetwork.core.player.MojangIdentitySource;
+import com.github.phantazmnetwork.core.player.IdentitySource;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.AuthType;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
@@ -21,11 +21,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
-import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Command;
-import net.minestom.server.command.builder.CommandContext;
-import net.minestom.server.command.builder.CommandExecutor;
-import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -33,8 +28,6 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.permission.Permission;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +39,7 @@ import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.ForkJoinPool;
 
 /**
  * Launches the server, and provides some useful static constants.
@@ -110,11 +101,9 @@ public final class PhantazmServer {
                 LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value " +
                         "\"default\". Only use this option when running in a secure development environment.");
             }
-            else if ((serverInfoConfig.authType() == AuthType.VELOCITY ||
-                    serverInfoConfig.authType() == AuthType.BUNGEE) &&
-                    serverInfoConfig.proxySecret().equals(ServerInfoConfig.DEFAULT_PROXY_SECRET)) {
-                LOGGER.error("When using AuthType.VELOCITY or AuthType.BUNGEE, proxySecret must be set to a value " +
-                        "other than the default for security reasons.");
+            else if (serverInfoConfig.isUnsafeConfiguration()) {
+                LOGGER.error("When using authType " + serverInfoConfig.authType() + ", proxySecret must be set to a " +
+                        "value other than the default for security reasons.");
                 LOGGER.error("If you are running in a development environment, you can use the 'unsafe' program " +
                         "argument to force the server to start regardless.");
                 shutdown("error during startup");
@@ -188,8 +177,7 @@ public final class PhantazmServer {
         KeyParser keyParser = Element.getKeyParser();
 
         BasicPlayerViewProvider viewProvider =
-                new BasicPlayerViewProvider(new MojangIdentitySource(ForkJoinPool.commonPool()),
-                        MinecraftServer.getConnectionManager());
+                new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());

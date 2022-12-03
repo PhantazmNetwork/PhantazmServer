@@ -7,6 +7,7 @@ import com.github.phantazmnetwork.core.ClientBlockHandler;
 import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.action.Action;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -33,8 +34,8 @@ public class Window {
     private final Instance instance;
     private final WindowInfo windowInfo;
     private final ClientBlockHandler clientBlockHandler;
-    private final Vec3I worldMin;
-    private final Vec3D center;
+    private final Point worldMin;
+    private final Point center;
     private final int volume;
     private final ArrayList<Block> repairBlocks;
 
@@ -64,8 +65,8 @@ public class Window {
         Region3I frame = windowInfo.frameRegion();
         Vec3I min = frame.origin();
 
-        worldMin = Vec3I.of(origin.getX() + min.getX(), origin.getY() + min.getY(), origin.getZ() + min.getZ());
-        center = frame.getCenter();
+        worldMin = new Vec(origin.getX() + min.getX(), origin.getY() + min.getY(), origin.getZ() + min.getZ());
+        center = VecUtils.toPoint(frame.getCenter());
         volume = frame.volume();
 
         if (volume == 0) {
@@ -160,7 +161,7 @@ public class Window {
      */
     public boolean isInRange(@NotNull Point point, double range) {
         Objects.requireNonNull(point, "point");
-        return Vec3D.distance(point.x(), point.y(), point.z(), center.getX(), center.getY(), center.getZ()) < range;
+        return point.distanceSquared(center) < range * range;
     }
 
     /**
@@ -179,12 +180,11 @@ public class Window {
 
         if (newIndex < index) {
             //play the break sound
-            instance.playSound(newIndex == 0 ? windowInfo.breakAllSound() : windowInfo.breakSound(), center.getX(),
-                    center.getY(), center.getZ());
+            instance.playSound(newIndex == 0 ? windowInfo.breakAllSound() : windowInfo.breakSound(), center);
 
             for (int i = index - 1; i >= newIndex; i--) {
-                Vec3I breakLocation = indexToCoordinate(i);
-                instance.setBlock(VecUtils.toPoint(breakLocation), Block.AIR);
+                Point breakLocation = indexToCoordinate(i);
+                instance.setBlock(breakLocation, Block.AIR);
                 clientBlockHandler.setClientBlock(Block.BARRIER, breakLocation);
             }
 
@@ -194,12 +194,11 @@ public class Window {
         }
         else {
             //play the repair sound
-            instance.playSound(newIndex == volume ? windowInfo.repairAllSound() : windowInfo.repairSound(),
-                    center.getX(), center.getY(), center.getZ());
+            instance.playSound(newIndex == volume ? windowInfo.repairAllSound() : windowInfo.repairSound(), center);
 
             for (int i = index; i < newIndex; i++) {
-                Vec3I repairLocation = indexToCoordinate(i);
-                instance.setBlock(VecUtils.toPoint(repairLocation), repairBlocks.get(i));
+                Point repairLocation = indexToCoordinate(i);
+                instance.setBlock(repairLocation, repairBlocks.get(i));
                 clientBlockHandler.removeClientBlock(repairLocation);
             }
 
@@ -254,11 +253,11 @@ public class Window {
      *
      * @return the center of the window
      */
-    public @NotNull Vec3D getCenter() {
+    public @NotNull Point getCenter() {
         return center;
     }
 
-    private Vec3I indexToCoordinate(int index) {
+    private Point indexToCoordinate(int index) {
         Vec3I lengths = windowInfo.frameRegion().lengths();
 
         int xWidth = lengths.getX();

@@ -59,6 +59,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
         return isState(ZombiesPlayerStateKeys.ALIVE);
     }
 
+    default boolean hasQuit() {
+        return isState(ZombiesPlayerStateKeys.QUIT);
+    }
+
     default @NotNull Optional<Player> getPlayer() {
         return getModule().getPlayerView().getPlayer();
     }

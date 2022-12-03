@@ -66,4 +66,8 @@ public record ServerInfoConfig(@NotNull String serverIP,
         Objects.requireNonNull(proxySecret, "proxySecret");
     }
 
+    public boolean isUnsafeConfiguration() {
+        return (authType == AuthType.VELOCITY || authType == AuthType.BUNGEE) &&
+                proxySecret.equals(ServerInfoConfig.DEFAULT_PROXY_SECRET);
+    }
 }

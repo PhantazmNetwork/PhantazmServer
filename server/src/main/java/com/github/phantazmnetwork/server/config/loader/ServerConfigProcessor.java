@@ -33,7 +33,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         boolean optifineEnabled = serverInfo.getBooleanOrThrow("optifineEnabled");
         AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType").toUpperCase(Locale.ENGLISH))
                 .orElseThrow(() -> new ConfigProcessException(
-                        "Invalid AuthType, must " + "be one of the following: " + Arrays.toString(AuthType.values())));
+                        "Invalid AuthType, must be one of the following: " + Arrays.toString(AuthType.values())));
         String proxySecret = serverInfo.getStringOrThrow("proxySecret");
 
         ServerInfoConfig serverInfoConfig =

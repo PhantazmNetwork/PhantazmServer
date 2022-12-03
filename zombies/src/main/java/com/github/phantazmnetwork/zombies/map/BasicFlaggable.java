@@ -1,5 +1,7 @@
 package com.github.phantazmnetwork.zombies.map;
 
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,11 +13,15 @@ public class BasicFlaggable implements Flaggable {
     private final Set<Key> flags;
 
     public BasicFlaggable() {
-        this(16);
+        this(Hash.DEFAULT_INITIAL_SIZE, Hash.DEFAULT_LOAD_FACTOR);
     }
 
     public BasicFlaggable(int initialSize) {
-        this.flags = new HashSet<>(initialSize);
+        this(initialSize, Hash.DEFAULT_LOAD_FACTOR);
+    }
+
+    public BasicFlaggable(int initialSize, float loadFactor) {
+        this.flags = new HashSet<>(initialSize, loadFactor);
     }
 
     @Override

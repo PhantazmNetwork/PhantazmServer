@@ -1,6 +1,7 @@
 package com.github.phantazmnetwork.zombies.map.shop.interactor;
 
 import com.github.phantazmnetwork.commons.vector.Vec3I;
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.Door;
 import com.github.phantazmnetwork.zombies.map.objects.MapObjects;
 import com.github.phantazmnetwork.zombies.map.shop.PlayerInteraction;
@@ -36,7 +37,7 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
         if (!searchedDoor) {
             searchedDoor = true;
 
-            Optional<Door> doorOptional = mapObjects.get().doorAt(data.doorPosition);
+            Optional<Door> doorOptional = mapObjects.get().doorAt(VecUtils.toPoint(data.doorPosition));
             boolean isPresent = doorOptional.isPresent();
             if (isPresent) {
                 door = doorOptional.get();
