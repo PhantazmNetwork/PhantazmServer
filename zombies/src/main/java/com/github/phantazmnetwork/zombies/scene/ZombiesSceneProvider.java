@@ -97,7 +97,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, ZombiesJoinRequest> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesSceneProvider.class);
     private final IdentityHashMap<ZombiesScene, SceneContext> contexts;
     private final MapInfo mapInfo;
     private final InstanceManager instanceManager;
@@ -109,6 +108,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final KeyParser keyParser;
     private final Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction;
     private final BasicMapObjectsSource mapObjectSource;
+    private final PowerupHandler.Source powerupHandlerSource;
     private final Team corpseTeam;
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
@@ -131,7 +131,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
 
         this.mapObjectSource =
-                new BasicMapObjectsSource(contextManager, mobSpawner, mobModels, clientBlockHandlerSource, keyParser);
+                new BasicMapObjectsSource(mapInfo, contextManager, mobSpawner, mobModels, clientBlockHandlerSource,
+                        keyParser);
+        this.powerupHandlerSource = new BasicPowerupHandlerSource(mapInfo.powerups(), contextManager,
+                mapInfo.settings().powerupPickupRadius());
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -191,8 +194,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
 
         BasicMapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore);
-        PowerupHandler powerupHandler = createPowerupHandler(mapObjects.mapDependencyProvider(), zombiesPlayers,
-                settings.powerupPickupRadius());
+        PowerupHandler powerupHandler = createPowerupHandler(zombiesPlayers, mapObjects.mapDependencyProvider());
 
         RoundHandler roundHandler = roundHandlerWrapper.set(new BasicRoundHandler(mapObjects.rounds()));
 
@@ -236,40 +238,12 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private @NotNull BasicMapObjects createMapObjects(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore) {
-        return mapObjectSource.make(instance, mapInfo, zombiesPlayers, roundHandlerSupplier, mobStore);
+        return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore);
     }
 
-    private @NotNull PowerupHandler createPowerupHandler(@NotNull DependencyProvider mapDependencyProvider,
-            @NotNull Map<UUID, ZombiesPlayer> playerMap, double powerupPickupRadiusSquared) {
-        List<PowerupInfo> powerupData = mapInfo.powerups();
-        Map<Key, PowerupComponents> powerupMap = new HashMap<>(powerupData.size());
-
-        for (PowerupInfo data : powerupData) {
-            ConfigList visualData = data.visuals();
-            ConfigList actionData = data.actions();
-            ConfigNode deactivationPredicateData = data.deactivationPredicate();
-
-            Collection<Supplier<PowerupVisual>> visuals = new ArrayList<>(visualData.size());
-            Collection<Supplier<PowerupAction>> actions = new ArrayList<>(actionData.size());
-
-            ElementUtils.createElements(contextManager, visualData, visuals, "powerup visual", mapDependencyProvider,
-                    LOGGER);
-
-            ElementUtils.createElements(contextManager, actionData, actionData, "powerup action", mapDependencyProvider,
-                    LOGGER);
-
-            Supplier<DeactivationPredicate> deactivationPredicateSupplier =
-                    ElementUtils.createElement(contextManager, deactivationPredicateData,
-                            "powerup deactivation predicate", mapDependencyProvider, LOGGER);
-
-            if (deactivationPredicateSupplier == null) {
-                deactivationPredicateSupplier = () -> ImmediateDeactivationPredicate.INSTANCE;
-            }
-
-            powerupMap.put(data.id(), new PowerupComponents(visuals, actions, deactivationPredicateSupplier));
-        }
-
-        return new BasicPowerupHandler(powerupMap, playerMap, powerupPickupRadiusSquared);
+    private @NotNull PowerupHandler createPowerupHandler(@NotNull Map<UUID, ZombiesPlayer> playerMap,
+            @NotNull DependencyProvider mapDependencyProvider) {
+        return powerupHandlerSource.make(playerMap, mapDependencyProvider);
     }
 
     private @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,

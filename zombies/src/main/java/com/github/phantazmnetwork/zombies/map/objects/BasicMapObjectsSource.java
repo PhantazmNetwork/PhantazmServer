@@ -45,15 +45,18 @@ import java.util.function.Supplier;
 
 public class BasicMapObjectsSource implements MapObjects.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMapObjectsSource.class);
+
+    private final MapInfo mapInfo;
     private final ContextManager contextManager;
     private final MobSpawner mobSpawner;
     private final Map<Key, MobModel> mobModels;
     private final ClientBlockHandlerSource clientBlockHandlerSource;
     private final KeyParser keyParser;
 
-    public BasicMapObjectsSource(@NotNull ContextManager contextManager, @NotNull MobSpawner mobSpawner,
-            @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-            @NotNull KeyParser keyParser) {
+    public BasicMapObjectsSource(@NotNull MapInfo mapInfo, @NotNull ContextManager contextManager,
+            @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
+            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {
+        this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
@@ -62,7 +65,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     @Override
-    public @NotNull BasicMapObjects make(@NotNull Instance instance, @NotNull MapInfo mapInfo,
+    public @NotNull BasicMapObjects make(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore) {
         Random random = new Random();

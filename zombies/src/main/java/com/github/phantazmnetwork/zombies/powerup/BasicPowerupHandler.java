@@ -1,11 +1,14 @@
 package com.github.phantazmnetwork.zombies.powerup;
 
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import com.github.phantazmnetwork.zombies.scene.ZombiesSceneProvider;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Supplier;

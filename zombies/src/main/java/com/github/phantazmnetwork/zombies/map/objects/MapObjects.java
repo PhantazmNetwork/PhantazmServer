@@ -110,7 +110,7 @@ public interface MapObjects extends Tickable {
     }
 
     interface Source {
-        @NotNull MapObjects make(@NotNull Instance instance, @NotNull MapInfo mapInfo,
+        @NotNull MapObjects make(@NotNull Instance instance,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore);
     }
