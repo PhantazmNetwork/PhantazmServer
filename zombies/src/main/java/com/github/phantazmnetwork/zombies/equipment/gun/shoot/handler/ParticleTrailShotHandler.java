@@ -1,12 +1,11 @@
 package com.github.phantazmnetwork.zombies.equipment.gun.shoot.handler;
 
+import com.github.phantazmnetwork.core.config.processor.ItemStackConfigProcessors;
 import com.github.phantazmnetwork.core.particle.ParticleWrapper;
+import com.github.phantazmnetwork.core.particle.data.ParticleData;
 import com.github.phantazmnetwork.zombies.equipment.gun.GunState;
 import com.github.phantazmnetwork.zombies.equipment.gun.shoot.GunShot;
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -46,11 +45,12 @@ public class ParticleTrailShotHandler implements ShotHandler {
     /**
      * Creates a {@link ConfigProcessor} for {@link Data}s.
      *
-     * @param particleProcessor A {@link ConfigProcessor} for {@link ParticleWrapper}s
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
-    public static @NotNull ConfigProcessor<Data> processor(
-            @NotNull ConfigProcessor<ParticleWrapper> particleProcessor) {
+    @ProcessorMethod
+    public static @NotNull ConfigProcessor<Data> processor() {
+        ConfigProcessor<ParticleWrapper> particleProcessor =
+                ParticleWrapper.processor(ParticleData.processor(ItemStackConfigProcessors.snbt()));
 
         return new ConfigProcessor<>() {
 
