@@ -50,10 +50,11 @@ public class Window {
      * @param windowInfo         the data defining the configurable parameters of this window
      * @param clientBlockHandler the {@link ClientBlockHandler} used to set client-only barrier blocks
      */
-    public Window(@NotNull Vec3I mapOrigin, @NotNull Instance instance, @NotNull WindowInfo windowInfo,
+    public Window(@NotNull Point mapOrigin, @NotNull Instance instance, @NotNull WindowInfo windowInfo,
             @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
             @NotNull List<Action<Window>> breakActions) {
-        Vec3I origin = mapOrigin.add(windowInfo.frameRegion().immutableOrigin());
+        Bounds3I frameRegion = windowInfo.frameRegion();
+
         this.instance = Objects.requireNonNull(instance, "instance");
         this.windowInfo = Objects.requireNonNull(windowInfo, "data");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
@@ -62,10 +63,9 @@ public class Window {
         this.breakActions = List.copyOf(breakActions);
 
         Bounds3I frame = windowInfo.frameRegion();
-        Vec3I min = frame.immutableOrigin();
 
-        worldMin = new Vec(origin.x() + min.x(), origin.y() + min.y(), origin.z() + min.z());
-        center = VecUtils.toPoint(frame.immutableCenter());
+        worldMin = mapOrigin.add(frameRegion.originX(), frameRegion.originY(), frameRegion.originZ());
+        center = VecUtils.toPoint(frame.immutableCenter()).add(mapOrigin);
         volume = frame.volume();
 
         if (volume == 0) {

@@ -15,11 +15,11 @@ public record BasicMapObjects(@Unmodifiable @NotNull List<Spawnpoint> spawnpoint
                               @Unmodifiable @NotNull List<Door> doors,
                               @Unmodifiable @NotNull List<Room> rooms,
                               @Unmodifiable @NotNull List<Round> rounds,
-                              @NotNull Module module,
-                              @NotNull DependencyProvider mapDependencyProvider) implements MapObjects {
+                              @NotNull DependencyProvider mapDependencyProvider,
+                              @NotNull Module module) implements MapObjects {
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull List<Window> windows,
             @NotNull List<Shop> shops, @NotNull List<Door> doors, @NotNull List<Room> rooms,
-            @NotNull List<Round> rounds, @NotNull Module module, @NotNull DependencyProvider mapDependencyProvider) {
+            @NotNull List<Round> rounds, @NotNull DependencyProvider mapDependencyProvider, @NotNull Module module) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.windows = List.copyOf(windows);
         this.shops = List.copyOf(shops);

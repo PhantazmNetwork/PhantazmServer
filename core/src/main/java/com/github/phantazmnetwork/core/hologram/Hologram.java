@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.core.hologram;
 
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,14 +20,14 @@ public interface Hologram extends List<Component> {
      *
      * @return the center location of the hologram
      */
-    @NotNull Vec3D getLocation();
+    @NotNull Point getLocation();
 
     /**
      * Sets the current location of the hologram.
      *
      * @param location the current location of the hologram
      */
-    void setLocation(@NotNull Vec3D location);
+    void setLocation(@NotNull Point location);
 
     /**
      * Sets the current instance of this Hologram.
@@ -35,7 +36,7 @@ public interface Hologram extends List<Component> {
      */
     void setInstance(@NotNull Instance instance);
 
-    void setInstance(@NotNull Instance instance, @NotNull Vec3D location);
+    void setInstance(@NotNull Instance instance, @NotNull Point location);
 
     /**
      * Trims internal lists to size.

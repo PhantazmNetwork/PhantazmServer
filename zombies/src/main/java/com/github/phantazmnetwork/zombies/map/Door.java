@@ -1,9 +1,11 @@
 package com.github.phantazmnetwork.zombies.map;
 
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.core.hologram.Hologram;
 import com.github.phantazmnetwork.core.hologram.InstanceHologram;
 import com.github.phantazmnetwork.zombies.map.action.Action;
 import com.github.steanky.vector.*;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +29,7 @@ public class Door {
     private final DoorInfo doorInfo;
     private final Block fillBlock;
     private final Bounds3I enclosing;
-    private final Vec3D center;
+    private final Point center;
     private final List<Bounds3I> regions;
 
     private final ArrayList<Hologram> holograms;
@@ -43,31 +45,28 @@ public class Door {
      * @param doorInfo the backing data object
      * @param instance the instance which this MapObject is in
      */
-    public Door(@NotNull Vec3I mapOrigin, @NotNull DoorInfo doorInfo, @NotNull Instance instance,
+    public Door(@NotNull Point mapOrigin, @NotNull DoorInfo doorInfo, @NotNull Instance instance,
             @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions) {
-        Vec3I origin = mapOrigin.add(
-                Bounds3I.enclosingImmutable(doorInfo.regions().toArray(EMPTY_BOUNDS_ARRAY)).immutableCenter()
-                        .floorToImmutableInt());
         this.instance = Objects.requireNonNull(instance, "instance");
         this.doorInfo = Objects.requireNonNull(doorInfo, "doorInfo");
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
 
         List<Bounds3I> regions = doorInfo.regions();
         if (regions.isEmpty()) {
-            LOGGER.warn("Door has no regions, enclosing bounds and center set to origin");
+            LOGGER.warn("Door has no regions, enclosing bounds and center set to map origin");
 
-            enclosing = Bounds3I.immutable(origin, 1, 1, 1);
-            center = origin.toMutableDouble().add(0.5, 0.5, 0.5).immutable();
+            enclosing = Bounds3I.immutable(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ(), 1, 1, 1);
+            center = mapOrigin;
             this.regions = Collections.emptyList();
         }
         else {
-            Bounds3I[] regionArray = regions.toArray(EMPTY_BOUNDS_ARRAY);
+            Bounds3I[] regionArray = doorInfo.regions().toArray(EMPTY_BOUNDS_ARRAY);
             for (int i = 0; i < regionArray.length; i++) {
-                regionArray[i] = regionArray[i].shift(origin);
+                regionArray[i] = regionArray[i].shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ());
             }
 
             enclosing = Bounds3I.enclosingImmutable(regionArray);
-            center = enclosing.immutableCenter();
+            center = VecUtils.toPoint(enclosing.immutableCenter());
             this.regions = List.of(regionArray);
         }
 
@@ -84,8 +83,7 @@ public class Door {
     private void initHolograms(List<HologramInfo> hologramInfo) {
         for (HologramInfo info : hologramInfo) {
             Vec3D offset = info.position();
-            Hologram hologram = new InstanceHologram(
-                    Vec3D.immutable(center.x() + offset.x(), center.y() + offset.y(), center.z() + offset.z()), 0.1);
+            Hologram hologram = new InstanceHologram(center.add(VecUtils.toPoint(offset)), 0.1);
             hologram.addAll(info.text());
             hologram.setInstance(instance);
             holograms.add(hologram);
@@ -157,7 +155,7 @@ public class Door {
      *
      * @return the center of the door
      */
-    public @NotNull Vec3D getCenter() {
+    public @NotNull Point getCenter() {
         return center;
     }
 

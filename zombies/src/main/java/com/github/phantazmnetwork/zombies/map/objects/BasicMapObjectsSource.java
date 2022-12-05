@@ -33,6 +33,7 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.toolkit.collection.Wrapper;
 import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -77,6 +78,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
 
         MapSettingsInfo mapSettingsInfo = mapInfo.settings();
+
+
         Pos respawnPos = VecUtils.toPos(mapSettingsInfo.origin().add(mapSettingsInfo.spawn()));
 
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
@@ -86,19 +89,19 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
+        Point origin = VecUtils.toPoint(mapSettingsInfo.origin());
+
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
         List<Spawnpoint> spawnpoints =
-                buildSpawnpoints(mapInfo.settings().origin(), mapInfo.spawnpoints(), spawnruleInfoMap, instance,
-                        mobStore);
-        List<Window> windows =
-                buildWindows(mapInfo.settings().origin(), mapInfo.windows(), provider, instance, clientBlockHandler);
+                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobStore);
+        List<Window> windows = buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler);
         List<Shop> shops = buildShops(mapInfo.shops(), provider, instance);
-        List<Door> doors = buildDoors(mapInfo.settings().origin(), mapInfo.doors(), provider, instance);
-        List<Room> rooms = buildRooms(mapInfo.settings().origin(), mapInfo.rooms(), provider);
+        List<Door> doors = buildDoors(origin, mapInfo.doors(), provider, instance);
+        List<Room> rooms = buildRooms(origin, mapInfo.rooms(), provider);
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor);
 
         MapObjects mapObjects =
-                new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds, module, provider);
+                new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds, provider, module);
         mapObjectsWrapper.set(mapObjects);
 
         return mapObjects;
@@ -115,7 +118,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         return spawnruleInfoMap;
     }
 
-    private List<Spawnpoint> buildSpawnpoints(Vec3I mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
+    private List<Spawnpoint> buildSpawnpoints(Point mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
             Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobStore mobStore) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
@@ -126,7 +129,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         return spawnpoints;
     }
 
-    private List<Window> buildWindows(Vec3I mapOrigin, List<WindowInfo> windowInfoList,
+    private List<Window> buildWindows(Point mapOrigin, List<WindowInfo> windowInfoList,
             DependencyProvider dependencyProvider, Instance instance, ClientBlockHandler clientBlockHandler) {
         List<Window> windows = new ArrayList<>(windowInfoList.size());
         for (WindowInfo windowInfo : windowInfoList) {
@@ -179,7 +182,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         return shops;
     }
 
-    private List<Door> buildDoors(Vec3I mapOrigin, List<DoorInfo> doorInfoList, DependencyProvider dependencyProvider,
+    private List<Door> buildDoors(Point mapOrigin, List<DoorInfo> doorInfoList, DependencyProvider dependencyProvider,
             Instance instance) {
         List<Door> doors = new ArrayList<>(doorInfoList.size());
         for (DoorInfo doorInfo : doorInfoList) {
@@ -196,7 +199,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         return doors;
     }
 
-    private List<Room> buildRooms(Vec3I mapOrigin, List<RoomInfo> roomInfoList, DependencyProvider dependencyProvider) {
+    private List<Room> buildRooms(Point mapOrigin, List<RoomInfo> roomInfoList, DependencyProvider dependencyProvider) {
         List<Room> rooms = new ArrayList<>(roomInfoList.size());
         for (RoomInfo roomInfo : roomInfoList) {
             ConfigList openActionInfo = roomInfo.openActions();

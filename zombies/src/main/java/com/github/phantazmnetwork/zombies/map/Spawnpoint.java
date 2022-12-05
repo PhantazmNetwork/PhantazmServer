@@ -40,11 +40,12 @@ public class Spawnpoint {
      * @param spawnruleFunction the function used to resolve {@link SpawnruleInfo} data from keys
      * @param mobSpawner        the function used to actually spawn mobs in the world
      */
-    public Spawnpoint(@NotNull Vec3I mapOrigin, @NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
+    public Spawnpoint(@NotNull Point mapOrigin, @NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
             @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobStore mobStore,
             @NotNull MobSpawner mobSpawner) {
         this.spawnInfo = Objects.requireNonNull(spawnInfo, "spawnInfo");
-        this.spawnPoint = VecUtils.toPoint(mapOrigin.add(spawnInfo.position()));
+        Vec3I spawnPosition = spawnInfo.position();
+        this.spawnPoint = mapOrigin.add(spawnPosition.x(), spawnPosition.y(), spawnPosition.z());
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
@@ -69,7 +70,7 @@ public class Spawnpoint {
 
         if (spawnrule == null) {
             LOGGER.warn("Unrecognized spawnrule " + spawnruleKey + " at " + spawnInfo.position() + "; mob not allowed" +
-                    " to " + "spawn");
+                    " to spawn");
             return false;
         }
 

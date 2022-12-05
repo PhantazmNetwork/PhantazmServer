@@ -26,6 +26,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
@@ -73,7 +74,7 @@ final class ZombiesTest {
                 ClientBlockHandler tracker = new InstanceClientBlockHandler(spawnInstance, global, -64, 384);
                 tracker.setClientBlock(Block.BARRIER, 1, 100, 1);
 
-                Hologram hologram = new InstanceHologram(Vec3D.immutable(1, 101, 1), 0);
+                Hologram hologram = new InstanceHologram(new Vec(1, 101, 1), 0);
                 hologram.add(Component.text("This hologram should be...").color(TextColor.color(255, 0, 0)));
                 hologram.add(Component.text("...visible to everyone").color(TextColor.color(0, 255, 0)));
                 hologram.add(Component.text("And be colored.").color(TextColor.color(0, 0, 255)));

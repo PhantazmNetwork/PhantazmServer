@@ -1,8 +1,10 @@
 package com.github.phantazmnetwork.zombies.map;
 
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.action.Action;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3I;
+import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -22,15 +24,12 @@ public class Room {
      *
      * @param roomInfo the backing data object
      */
-    public Room(@NotNull Vec3I mapOrigin, @NotNull RoomInfo roomInfo, @NotNull List<Action<Room>> openActions) {
+    public Room(@NotNull Point mapOrigin, @NotNull RoomInfo roomInfo, @NotNull List<Action<Room>> openActions) {
         this.openActions = List.copyOf(openActions);
 
-        List<Bounds3I> regions = roomInfo.regions();
-        Vec3I origin = mapOrigin.add(
-                Bounds3I.enclosingImmutable(regions.toArray(new Bounds3I[0])).immutableCenter().floorToImmutableInt());
         List<Bounds3I> list = new ArrayList<>(roomInfo.regions().size());
         for (Bounds3I region : roomInfo.regions()) {
-            list.add(region.shift(origin));
+            list.add(region.shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ()));
         }
 
         this.unmodifiableRegions = Collections.unmodifiableList(list);

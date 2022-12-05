@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.core.hologram;
 
-import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -26,7 +26,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     private final Object sync;
     private Alignment alignment;
     private Instance instance;
-    private Vec3D location;
+    private Point location;
 
     /**
      * Creates a new instance of this class, whose holograms will be rendered at the given location, using the given
@@ -36,7 +36,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * @param gap       the distance between separate hologram messages
      * @param alignment the alignment method
      */
-    public InstanceHologram(@NotNull Vec3D location, double gap, @NotNull Alignment alignment) {
+    public InstanceHologram(@NotNull Point location, double gap, @NotNull Alignment alignment) {
         this.alignment = Objects.requireNonNull(alignment, "alignment");
         this.location = Objects.requireNonNull(location, "location");
         armorStands = new ArrayList<>();
@@ -53,7 +53,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * @param location the location to render holograms
      * @param gap      the distance between separate hologram messages
      */
-    public InstanceHologram(@NotNull Vec3D location, double gap) {
+    public InstanceHologram(@NotNull Point location, double gap) {
         this(location, gap, Alignment.UPPER);
     }
 
@@ -66,12 +66,12 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     @Override
-    public @NotNull Vec3D getLocation() {
+    public @NotNull Point getLocation() {
         return location;
     }
 
     @Override
-    public void setLocation(@NotNull Vec3D location) {
+    public void setLocation(@NotNull Point location) {
         Objects.requireNonNull(location, "location");
         synchronized (sync) {
             if (!location.equals(this.location)) {
@@ -93,7 +93,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     @Override
-    public void setInstance(@NotNull Instance instance, @NotNull Vec3D location) {
+    public void setInstance(@NotNull Instance instance, @NotNull Point location) {
         Objects.requireNonNull(instance, "instance");
         Objects.requireNonNull(location, "location");
         synchronized (sync) {
