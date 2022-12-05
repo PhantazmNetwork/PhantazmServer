@@ -43,22 +43,37 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
                 door = doorOptional.get();
             }
             else {
-                LOGGER.warn("Failed to locate door at " + data.doorPosition);
+                LOGGER.warn("Failed to locate door at {}", data.doorPosition);
                 return;
             }
         }
 
         if (door != null) {
-            if (data.open) {
-                door.open();
+            switch (data.type) {
+                case OPEN -> door.open();
+                case CLOSE -> door.close();
+                case TOGGLE -> {
+                    if (door.isOpen()) {
+                        door.close();
+                    }
+                    else {
+                        door.open();
+                    }
+                }
             }
-            else {
-                door.close();
-            }
+        }
+        else {
+            LOGGER.warn("Tried to open nonexistent door at {}", data.doorPosition);
         }
     }
 
     @DataObject
-    public record Data(@NotNull Vec3I doorPosition, boolean open) {
+    public record Data(@NotNull Vec3I doorPosition, @NotNull OpenType type) {
+    }
+
+    public enum OpenType {
+        OPEN,
+        CLOSE,
+        TOGGLE
     }
 }
