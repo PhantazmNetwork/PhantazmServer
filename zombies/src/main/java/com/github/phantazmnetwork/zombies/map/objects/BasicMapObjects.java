@@ -26,8 +26,8 @@ public record BasicMapObjects(@Unmodifiable @NotNull List<Spawnpoint> spawnpoint
         this.doors = List.copyOf(doors);
         this.rooms = List.copyOf(rooms);
         this.rounds = List.copyOf(rounds);
-        this.module = Objects.requireNonNull(module, "module");
         this.mapDependencyProvider = Objects.requireNonNull(mapDependencyProvider, "mapDependencyProvider");
+        this.module = Objects.requireNonNull(module, "module");
     }
 
     @Override

@@ -36,9 +36,9 @@ public interface MapObjects extends Tickable {
 
     @Unmodifiable @NotNull List<Round> rounds();
 
-    @NotNull Module module();
-
     @NotNull DependencyProvider mapDependencyProvider();
+
+    @NotNull Module module();
 
     default @NotNull Optional<Window> nearestWindowInRange(@NotNull Point origin, double distance) {
         double distanceSquared = distance * distance;

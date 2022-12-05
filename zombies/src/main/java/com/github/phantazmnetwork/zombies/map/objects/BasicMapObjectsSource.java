@@ -78,9 +78,9 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
 
         MapSettingsInfo mapSettingsInfo = mapInfo.settings();
-
-
-        Pos respawnPos = VecUtils.toPos(mapSettingsInfo.origin().add(mapSettingsInfo.spawn()));
+        Pos respawnPos =
+                new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
+                        mapSettingsInfo.pitch());
 
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
 
