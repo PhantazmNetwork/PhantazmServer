@@ -27,10 +27,11 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
         ZombiesPlayer player = interaction.player();
         for (Equipment equipment : player.getModule().getEquipment()) {
             if (equipment.key().equals(data.equipmentKey) && equipment instanceof Upgradable upgradable) {
-                Key targetUpgrade = upgradePath.nextUpgrade(upgradable.currentLevel());
-                if (upgradable.getSuggestedUpgrades().contains(targetUpgrade)) {
-                    upgradable.setLevel(targetUpgrade);
-                }
+                upgradePath.nextUpgrade(upgradable.currentLevel()).ifPresent(upgradeKey -> {
+                    if (upgradable.getSuggestedUpgrades().contains(upgradeKey)) {
+                        upgradable.setLevel(upgradeKey);
+                    }
+                });
 
                 return;
             }

@@ -10,6 +10,7 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Model("zombies.map.shop.predicate.equipment_space")
 public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredicate.Data> {
@@ -26,7 +27,8 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
         ZombiesPlayer player = interaction.player();
         for (Equipment equipment : player.getModule().getEquipment()) {
             if (equipment.key().equals(data.equipmentKey) && equipment instanceof Upgradable upgradable) {
-                return upgradable.getSuggestedUpgrades().contains(upgradePath.nextUpgrade(upgradable.currentLevel()));
+                return upgradePath.nextUpgrade(upgradable.currentLevel())
+                        .filter(key -> upgradable.getSuggestedUpgrades().contains(key)).isPresent();
             }
         }
 

@@ -2,8 +2,11 @@ package com.github.phantazmnetwork.zombies.map.shop;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 @FunctionalInterface
 public interface UpgradePath {
-    Key nextUpgrade(@NotNull Key key);
+    @NotNull Optional<Key> nextUpgrade(@NotNull Key key);
 }
