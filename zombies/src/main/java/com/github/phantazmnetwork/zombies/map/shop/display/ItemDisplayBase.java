@@ -28,7 +28,7 @@ public abstract class ItemDisplayBase implements ShopDisplay {
         itemEntity.setMergeable(false);
         itemEntity.setPickable(false);
         itemEntity.setNoGravity(true);
-        itemEntity.setInstance(shop.getInstance(), VecUtils.toPoint(shop.computeAbsolutePosition(offset)));
+        itemEntity.setInstance(shop.getInstance(), shop.computeAbsolutePosition(VecUtils.toPoint(offset)));
     }
 
     @Override

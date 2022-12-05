@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +16,7 @@ public class Powerup implements Tickable, Keyed {
     private final PowerupVisual[] visuals;
     private final PowerupAction[] actions;
     private final DeactivationPredicate despawnPredicate;
-    private final Vec spawnLocation;
+    private final Point spawnLocation;
 
     private boolean spawned;
     private boolean active;
@@ -23,7 +24,7 @@ public class Powerup implements Tickable, Keyed {
 
     public Powerup(@NotNull Key type, @NotNull Collection<PowerupVisual> visuals,
             @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
-            @NotNull Vec spawnLocation) {
+            @NotNull Point spawnLocation) {
         this.type = Objects.requireNonNull(type, "type");
         this.visuals = visuals.toArray(PowerupVisual[]::new);
         this.actions = actions.toArray(PowerupAction[]::new);
@@ -87,7 +88,7 @@ public class Powerup implements Tickable, Keyed {
         spawned = false;
     }
 
-    public @NotNull Vec spawnLocation() {
+    public @NotNull Point spawnLocation() {
         return spawnLocation;
     }
 

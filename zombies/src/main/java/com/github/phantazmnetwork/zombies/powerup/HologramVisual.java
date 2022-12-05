@@ -8,6 +8,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -102,7 +103,7 @@ public class HologramVisual implements Supplier<PowerupVisual> {
                 hologram.clear();
             }
 
-            this.hologram = new InstanceHologram(Vec3D.immutable(x, y, z), 0, Hologram.Alignment.CENTERED);
+            this.hologram = new InstanceHologram(new Vec(x, y, z), 0, Hologram.Alignment.CENTERED);
             this.hologram.addAll(data.lines);
             this.hologram.setInstance(instance);
             this.start = System.currentTimeMillis();

@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.core.hologram;
 
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public class ViewableHologram extends InstanceHologram {
      * @param alignment the alignment method
      * @param canRender the predicate used to determine if this hologram should be visible
      */
-    public ViewableHologram(@NotNull Vec3D location, double gap, @NotNull Alignment alignment,
+    public ViewableHologram(@NotNull Point location, double gap, @NotNull Alignment alignment,
             @NotNull Predicate<? super Player> canRender) {
         super(location, gap, alignment);
         this.canRender = Objects.requireNonNull(canRender, "canRender");
@@ -39,7 +40,7 @@ public class ViewableHologram extends InstanceHologram {
      * @param gap       the distance between separate hologram messages
      * @param canRender the predicate used to determine if this hologram should be visible
      */
-    public ViewableHologram(@NotNull Vec3D location, double gap, @NotNull Predicate<? super Player> canRender) {
+    public ViewableHologram(@NotNull Point location, double gap, @NotNull Predicate<? super Player> canRender) {
         this(location, gap, Alignment.UPPER, canRender);
     }
 

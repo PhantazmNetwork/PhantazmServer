@@ -1,5 +1,6 @@
 package com.github.phantazmnetwork.zombies.map.shop.display;
 
+import com.github.phantazmnetwork.core.VecUtils;
 import com.github.phantazmnetwork.zombies.map.HologramInfo;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.steanky.element.core.annotation.DataObject;
@@ -20,7 +21,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
 
     @Override
     public void initialize(@NotNull Shop shop) {
-        hologram.setInstance(shop.getInstance(), shop.computeAbsolutePosition(data.info.position()));
+        hologram.setInstance(shop.getInstance(), shop.computeAbsolutePosition(VecUtils.toPoint(data.info.position())));
         hologram.clear();
 
         hologram.addAll(data.info.text());

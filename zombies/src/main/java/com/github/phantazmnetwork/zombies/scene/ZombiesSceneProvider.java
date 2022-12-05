@@ -282,7 +282,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
         Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateCreator = context -> {
-            Hologram hologram = new InstanceHologram(VecUtils.toDouble(context.getKnockLocation()), 1.0);
+            Hologram hologram = new InstanceHologram(context.getKnockLocation(), 1.0);
             PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
             String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
             Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);

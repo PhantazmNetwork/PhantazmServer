@@ -82,12 +82,12 @@ final class ZombiesTest {
 
                 UUID steankUUID = UUID.fromString("6458e77a-f565-4374-9de7-c2a20be572f3");
 
-                Hologram steankHologram = new ViewableHologram(Vec3D.immutable(1, 105, 1), 0,
-                        player -> player.getUuid().equals(steankUUID));
+                Hologram steankHologram =
+                        new ViewableHologram(new Vec(1, 105, 1), 0, player -> player.getUuid().equals(steankUUID));
                 steankHologram.add(Component.text("This should only be visible to Steank"));
 
-                Hologram everyoneElseHologram = new ViewableHologram(Vec3D.immutable(5, 101, 5), 0,
-                        player -> !player.getUuid().equals(steankUUID));
+                Hologram everyoneElseHologram =
+                        new ViewableHologram(new Vec(5, 101, 5), 0, player -> !player.getUuid().equals(steankUUID));
                 everyoneElseHologram.add(Component.text("This should be visible to everyone EXCEPT Steank"));
 
                 steankHologram.setInstance(spawnInstance);
