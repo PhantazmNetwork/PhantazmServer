@@ -59,7 +59,8 @@ public final class ZombiesFeature {
 
         //ShopPredicate
         contextManager.registerElementClass(StaticCostPredicate.class);
-        contextManager.registerElementClass(FlagPredicate.class);
+        contextManager.registerElementClass(MapFlagPredicate.class);
+        contextManager.registerElementClass(PlayerFlagPredicate.class);
         contextManager.registerElementClass(PlayerStatePredicate.class);
         contextManager.registerElementClass(UuidPredicate.class);
         contextManager.registerElementClass(TypePredicate.class);
@@ -73,7 +74,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(EquipmentSpacePredicate.class);
 
         //ShopInteractor
-        contextManager.registerElementClass(FlagSettingInteractor.class);
+        contextManager.registerElementClass(MapFlaggingInteractor.class);
+        contextManager.registerElementClass(PlayerFlaggingInteractor.class);
         contextManager.registerElementClass(MessagingInteractor.class);
         contextManager.registerElementClass(PlaySoundInteractor.class);
         contextManager.registerElementClass(DelayedInteractor.class);

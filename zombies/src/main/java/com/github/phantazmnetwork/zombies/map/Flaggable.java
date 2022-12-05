@@ -10,6 +10,15 @@ public interface Flaggable {
 
     void clearFlag(@NotNull Key flag);
 
+    default void toggleFlag(@NotNull Key flag) {
+        if (hasFlag(flag)) {
+            clearFlag(flag);
+        }
+        else {
+            setFlag(flag);
+        }
+    }
+
     @FunctionalInterface
     interface Source {
         @NotNull Flaggable flags();
