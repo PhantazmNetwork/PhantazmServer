@@ -85,8 +85,6 @@ import net.minestom.server.scoreboard.Team;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -193,10 +191,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
 
-        BasicMapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore);
-        PowerupHandler powerupHandler = createPowerupHandler(zombiesPlayers, mapObjects.mapDependencyProvider());
-
+        MapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore);
         RoundHandler roundHandler = roundHandlerWrapper.set(new BasicRoundHandler(mapObjects.rounds()));
+
+        PowerupHandler powerupHandler = createPowerupHandler(zombiesPlayers, mapObjects.mapDependencyProvider());
 
         ZombiesMap map = new ZombiesMap(mapObjects, powerupHandler, roundHandler);
 
@@ -235,7 +233,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         eventNode.removeChild(context.node());
     }
 
-    private @NotNull BasicMapObjects createMapObjects(@NotNull Instance instance,
+    private @NotNull MapObjects createMapObjects(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore) {
         return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore);

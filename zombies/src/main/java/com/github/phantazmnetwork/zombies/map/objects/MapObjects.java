@@ -2,23 +2,25 @@ package com.github.phantazmnetwork.zombies.map.objects;
 
 import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.core.VecUtils;
+import com.github.phantazmnetwork.core.gui.SlotDistributor;
 import com.github.phantazmnetwork.mob.MobStore;
+import com.github.phantazmnetwork.zombies.coin.TransactionModifierSource;
 import com.github.phantazmnetwork.zombies.map.*;
 import com.github.phantazmnetwork.zombies.map.shop.Shop;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
+import com.github.steanky.element.core.annotation.DependencySupplier;
+import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 public interface MapObjects extends Tickable {
@@ -34,7 +36,7 @@ public interface MapObjects extends Tickable {
 
     @Unmodifiable @NotNull List<Round> rounds();
 
-    @NotNull DependencyModule module();
+    @NotNull Module module();
 
     @NotNull DependencyProvider mapDependencyProvider();
 
@@ -113,5 +115,27 @@ public interface MapObjects extends Tickable {
         @NotNull MapObjects make(@NotNull Instance instance,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore);
+    }
+
+    interface Module {
+        @NotNull Instance instance();
+
+        @NotNull Random random();
+
+        @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier();
+
+        @NotNull Flaggable flaggable();
+
+        @NotNull TransactionModifierSource modifierSource();
+
+        @NotNull SlotDistributor slotDistributor();
+
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap();
+
+        @NotNull Collection<? extends ZombiesPlayer> playerCollection();
+
+        @NotNull Pos respawnPos();
+
+        @NotNull Supplier<? extends MapObjects> mapObjectsSupplier();
     }
 }

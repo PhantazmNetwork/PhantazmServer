@@ -60,7 +60,7 @@ public class ZombiesPlayerMeta {
         isReviving = reviving;
     }
 
-    public boolean isCanTriggerSLA() {
+    public boolean canTriggerSLA() {
         return canTriggerSLA;
     }
 
