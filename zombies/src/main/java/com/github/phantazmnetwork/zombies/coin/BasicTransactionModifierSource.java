@@ -2,6 +2,7 @@ package com.github.phantazmnetwork.zombies.coin;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
 
@@ -13,7 +14,7 @@ public class BasicTransactionModifierSource implements TransactionModifierSource
     }
 
     @Override
-    public @NotNull Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
+    public @NotNull @UnmodifiableView Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
         Objects.requireNonNull(key, "key");
 
         Collection<Transaction.Modifier> modifiers = modifierSources.get(key);
@@ -21,7 +22,7 @@ public class BasicTransactionModifierSource implements TransactionModifierSource
             return Collections.emptyList();
         }
 
-        return modifiers;
+        return Collections.unmodifiableCollection(modifiers);
     }
 
     @Override

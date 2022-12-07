@@ -21,6 +21,6 @@ public class PlayerStartSneakingListener extends ZombiesPlayerEventListener<Play
 
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerStartSneakingEvent event) {
-        windowHandler.handleCrouchStateChange(zombiesPlayer, event.getPlayer().getPosition(), true);
+        windowHandler.handleCrouchStateChange(zombiesPlayer, true);
     }
 }

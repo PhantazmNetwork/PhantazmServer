@@ -206,7 +206,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         PowerupHandler powerupHandler = createPowerupHandler(zombiesPlayers, mapObjects.mapDependencyProvider());
         ShopHandler shopHandler = createShopHandler(mapObjects.shops());
-        WindowHandler windowHandler = createWindowHandler(mapObjects.windows(), mapObjects.module().modifierSource());
+        WindowHandler windowHandler = createWindowHandler(mapObjects.windows());
 
         ZombiesMap map = new ZombiesMap(mapObjects, powerupHandler, roundHandler, shopHandler, windowHandler);
 
@@ -225,7 +225,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         zombiesPlayers.values(), spawnPos, roundHandler, ticksSinceStart, sidebarModule);
 
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-            return createPlayer(zombiesPlayers, settings, instance, playerView, new BasicTransactionModifierSource(),
+            return createPlayer(zombiesPlayers, settings, instance, playerView, mapObjects.module().modifierSource(),
                     new BasicFlaggable(), childNode, mapObjects.module().random(), mapObjects, mobStore);
         };
 
@@ -261,15 +261,17 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return shopHandlerSource.make(shops);
     }
 
-    private WindowHandler createWindowHandler(List<Window> windows, TransactionModifierSource mapTransactionModifiers) {
-        return windowHandlerSource.make(windows, mapTransactionModifiers);
+    private WindowHandler createWindowHandler(List<Window> windows) {
+        return windowHandlerSource.make(windows);
     }
 
     private @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull TransactionModifierSource transactionModifierSource, @NotNull Flaggable flaggable,
+            @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
             @NotNull MobStore mobStore) {
+        TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
+
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
         PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
         PlayerKills kills = new BasicPlayerKills();
@@ -347,7 +349,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesPlayerModule module =
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
-                        accessRegistry, stateSwitcher, stateFunctions, sidebar, transactionModifierSource, flaggable);
+                        accessRegistry, stateSwitcher, stateFunctions, sidebar, mapTransactionModifierSource,
+                        playerTransactionModifierSource, flaggable);
         return new BasicZombiesPlayer(module);
     }
 

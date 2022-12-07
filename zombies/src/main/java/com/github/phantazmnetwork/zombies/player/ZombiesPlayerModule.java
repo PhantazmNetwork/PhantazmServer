@@ -46,7 +46,9 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     private final Sidebar sidebar;
 
-    private final TransactionModifierSource transactionModifierSource;
+    private final TransactionModifierSource playerTransactionModifierSource;
+
+    private final TransactionModifierSource compositeTransactionModifierSource;
 
     private final Flaggable flaggable;
 
@@ -55,8 +57,8 @@ public class ZombiesPlayerModule implements DependencyModule {
             @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
             @NotNull PlayerStateSwitcher stateSwitcher,
             @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
-            @NotNull Sidebar sidebar, @NotNull TransactionModifierSource transactionModifierSource,
-            @NotNull Flaggable flaggable) {
+            @NotNull Sidebar sidebar, @NotNull TransactionModifierSource mapTransactionModifierSource,
+            @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -67,7 +69,10 @@ public class ZombiesPlayerModule implements DependencyModule {
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
         this.stateFunctions = Map.copyOf(stateFunctions);
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
+        this.playerTransactionModifierSource =
+                Objects.requireNonNull(playerTransactionModifierSource, "playerTransactionModifierSource");
+        this.compositeTransactionModifierSource =
+                TransactionModifierSource.compositeView(mapTransactionModifierSource, playerTransactionModifierSource);
         this.flaggable = Objects.requireNonNull(flaggable, "flags");
     }
 
@@ -127,8 +132,13 @@ public class ZombiesPlayerModule implements DependencyModule {
     }
 
     @DependencySupplier("zombies.dependency.player.modifiers")
-    public @NotNull TransactionModifierSource transactionModifiers() {
-        return transactionModifierSource;
+    public @NotNull TransactionModifierSource playerTransactionModifiers() {
+        return playerTransactionModifierSource;
+    }
+
+    @DependencySupplier("zombies.dependency.player.composite_modifiers")
+    public @NotNull TransactionModifierSource compositeTransactionModifiers() {
+        return compositeTransactionModifierSource;
     }
 
     @DependencySupplier("zombies.dependency.player.flaggable")

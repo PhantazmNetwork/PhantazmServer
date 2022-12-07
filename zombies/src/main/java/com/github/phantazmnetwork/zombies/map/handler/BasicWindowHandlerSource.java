@@ -9,18 +9,16 @@ import java.util.List;
 public class BasicWindowHandlerSource implements WindowHandler.Source {
     private final double repairRadius;
     private final long repairInterval;
-    private final int goldPerWindowBlock;
+    private final int coinsPerWindowBlock;
 
-    public BasicWindowHandlerSource(double repairRadius, long repairInterval, int goldPerWindowBlock) {
+    public BasicWindowHandlerSource(double repairRadius, long repairInterval, int coinsPerWindowBlock) {
         this.repairRadius = repairRadius;
         this.repairInterval = repairInterval;
-        this.goldPerWindowBlock = goldPerWindowBlock;
+        this.coinsPerWindowBlock = coinsPerWindowBlock;
     }
 
     @Override
-    public @NotNull WindowHandler make(@NotNull List<Window> windows,
-            @NotNull TransactionModifierSource mapTransactionModifiers) {
-        return new BasicWindowHandler(windows, mapTransactionModifiers, repairRadius, repairInterval,
-                goldPerWindowBlock);
+    public @NotNull WindowHandler make(@NotNull List<Window> windows) {
+        return new BasicWindowHandler(windows, repairRadius, repairInterval, coinsPerWindowBlock);
     }
 }

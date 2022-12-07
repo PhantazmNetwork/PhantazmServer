@@ -21,14 +21,9 @@ import java.util.Set;
 
 @Model("zombies.map.shop.predicate.equipment_cost")
 public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate.Data> {
-    private final TransactionModifierSource transactionModifierSource;
-
     @FactoryMethod
-    public EquipmentCostPredicate(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.modifier_source")
-            TransactionModifierSource transactionModifierSource) {
+    public EquipmentCostPredicate(@NotNull Data data) {
         super(data);
-        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
     }
 
     @Override
@@ -37,9 +32,10 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
 
         PlayerCoins coins = player.getModule().getCoins();
         Optional<Equipment> equipmentOptional = player.getHeldEquipment();
+        TransactionModifierSource modifierSource = player.getModule().compositeTransactionModifiers();
         if (equipmentOptional.isEmpty()) {
             return coins.runTransaction(
-                            new Transaction(transactionModifierSource.modifiers(data.modifierType), -data.purchaseCost))
+                            new Transaction(modifierSource.modifiers(data.modifierType), -data.purchaseCost))
                     .isAffordable(coins);
         }
 
@@ -53,8 +49,7 @@ public class EquipmentCostPredicate extends PredicateBase<EquipmentCostPredicate
             for (Key upgradeKey : upgradeKeys) {
                 if (data.upgradeCosts.containsKey(upgradeKey)) {
                     int cost = data.upgradeCosts.getInt(upgradeKey);
-                    return coins.runTransaction(
-                                    new Transaction(transactionModifierSource.modifiers(data.modifierType), -cost))
+                    return coins.runTransaction(new Transaction(modifierSource.modifiers(data.modifierType), -cost))
                             .isAffordable(coins);
                 }
             }

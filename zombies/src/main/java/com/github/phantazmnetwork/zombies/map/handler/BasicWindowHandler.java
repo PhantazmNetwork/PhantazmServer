@@ -4,7 +4,6 @@ import com.github.phantazmnetwork.zombies.coin.*;
 import com.github.phantazmnetwork.zombies.map.Window;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,28 +23,25 @@ public class BasicWindowHandler implements WindowHandler {
     }
 
     private final List<Window> windows;
-    private final TransactionModifierSource modifierSource;
     private final double repairRadius;
     private final long repairInterval;
-    private final int goldPerWindowBlock;
+    private final int coinsPerWindowBlock;
 
     private final Map<UUID, RepairOperation> repairOperationMap;
     private final Collection<RepairOperation> activeRepairs;
 
-    public BasicWindowHandler(@NotNull List<Window> windows, @NotNull TransactionModifierSource modifierSource,
-            double repairRadius, long repairInterval, int goldPerWindowBlock) {
+    public BasicWindowHandler(@NotNull List<Window> windows, double repairRadius, long repairInterval,
+            int coinsPerWindowBlock) {
         this.windows = Objects.requireNonNull(windows, "windows");
-        this.modifierSource = Objects.requireNonNull(modifierSource, "modifierSource");
         this.repairRadius = repairRadius;
         this.repairInterval = repairInterval;
         this.repairOperationMap = new LinkedHashMap<>();
         this.activeRepairs = repairOperationMap.values();
-        this.goldPerWindowBlock = goldPerWindowBlock;
+        this.coinsPerWindowBlock = coinsPerWindowBlock;
     }
 
     @Override
-    public void handleCrouchStateChange(@NotNull ZombiesPlayer zombiesPlayer, @NotNull Point position,
-            boolean crouching) {
+    public void handleCrouchStateChange(@NotNull ZombiesPlayer zombiesPlayer, boolean crouching) {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
 
         if (!crouching || !zombiesPlayer.isAlive() || playerOptional.isEmpty()) {
@@ -84,10 +80,12 @@ public class BasicWindowHandler implements WindowHandler {
                     int repaired = targetWindow.updateIndex(
                             targetWindow.getIndex() + zombiesPlayer.getModule().getMeta().getWindowRepairAmount());
 
-                    int baseGold = repaired * goldPerWindowBlock;
+                    int baseGold = repaired * coinsPerWindowBlock;
                     PlayerCoins coins = zombiesPlayer.getModule().getCoins();
-                    TransactionResult result = coins.runTransaction(
-                            new Transaction(modifierSource.modifiers(ModifierSourceGroups.WINDOW_GOLD_GAIN), baseGold));
+
+                    TransactionResult result = coins.runTransaction(new Transaction(
+                            zombiesPlayer.getModule().compositeTransactionModifiers()
+                                    .modifiers(ModifierSourceGroups.WINDOW_COIN_GAIN), baseGold));
 
                     coins.applyTransaction(result);
                 }
