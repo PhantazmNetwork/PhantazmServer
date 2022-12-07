@@ -57,22 +57,16 @@ public interface TransactionModifierSource {
         }
 
         return new TransactionModifierSource() {
-            @SuppressWarnings("unchecked")
             @Override
             public @NotNull Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
-                Collection<?>[] array = new Collection[sourcesCopy.length];
-
                 int totalLength = 0;
-                for (int i = 0; i < sourcesCopy.length; i++) {
-                    Collection<Transaction.Modifier> collection = sourcesCopy[i].modifiers(key);
-                    totalLength += collection.size();
-
-                    array[i] = collection;
+                for (TransactionModifierSource modifierSource : sourcesCopy) {
+                    totalLength += modifierSource.modifiers(key).size();
                 }
 
                 Collection<Transaction.Modifier> combined = new ArrayList<>(totalLength);
-                for (Collection<?> collection : array) {
-                    combined.addAll((Collection<? extends Transaction.Modifier>)collection);
+                for (TransactionModifierSource transactionModifierSource : sourcesCopy) {
+                    combined.addAll(transactionModifierSource.modifiers(key));
                 }
 
                 return Collections.unmodifiableCollection(combined);
