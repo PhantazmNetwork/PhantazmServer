@@ -169,12 +169,18 @@ public class Window {
      * {@code newIndex} equal to 0 will fully break it.
      *
      * @param newIndex the new break index
-     * @throws IndexOutOfBoundsException if newIndex is &lt; 0 or &gt; volume
+     * @return a positive number indicating the actual number of repaired blocks, or a negative number indicating the
+     * actual number of broken blocks
      */
-    public void updateIndex(int newIndex) {
-        Objects.checkIndex(newIndex, volume + 1);
+    public int updateIndex(int newIndex) {
+        if (newIndex < 0) {
+            newIndex = 0;
+        }
+
+        newIndex = Math.min(newIndex, volume);
+
         if (newIndex == index) {
-            return; //no change
+            return 0; //no change
         }
 
         if (newIndex < index) {
@@ -206,7 +212,10 @@ public class Window {
             }
         }
 
+        int oldIndex = index;
         index = newIndex;
+
+        return newIndex - oldIndex;
     }
 
     /**

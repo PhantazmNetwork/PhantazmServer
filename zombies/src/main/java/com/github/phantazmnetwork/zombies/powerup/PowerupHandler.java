@@ -23,7 +23,7 @@ public interface PowerupHandler extends Tickable {
     @NotNull @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups();
 
     interface Source {
-        @NotNull PowerupHandler make(@NotNull Map<UUID, ZombiesPlayer> playerMap,
+        @NotNull PowerupHandler make(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull DependencyProvider mapDependencyProvider);
     }
 }

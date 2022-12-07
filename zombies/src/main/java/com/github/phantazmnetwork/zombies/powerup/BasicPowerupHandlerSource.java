@@ -30,7 +30,7 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
     }
 
     @Override
-    public @NotNull PowerupHandler make(@NotNull Map<UUID, ZombiesPlayer> playerMap,
+    public @NotNull PowerupHandler make(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull DependencyProvider mapDependencyProvider) {
         Map<Key, PowerupComponents> powerupMap = new HashMap<>(powerupData.size());
 

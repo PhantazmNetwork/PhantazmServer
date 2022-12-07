@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.*;
 import java.util.function.Supplier;
 
-public interface MapObjects extends Tickable {
+public interface MapObjects {
     @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
 
     @Unmodifiable @NotNull List<Window> windows();

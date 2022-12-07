@@ -20,6 +20,8 @@ public class ZombiesPlayerMeta {
 
     private boolean canTriggerSLA = true;
 
+    private int windowRepairAmount = 1;
+
     public Optional<Corpse> getCorpse() {
         return Optional.ofNullable(corpse);
     }
@@ -66,5 +68,13 @@ public class ZombiesPlayerMeta {
 
     public void setCanTriggerSLA(boolean canTriggerSLA) {
         this.canTriggerSLA = canTriggerSLA;
+    }
+
+    public int getWindowRepairAmount() {
+        return windowRepairAmount;
+    }
+
+    public void setWindowRepairAmount(int amount) {
+        this.windowRepairAmount = amount;
     }
 }

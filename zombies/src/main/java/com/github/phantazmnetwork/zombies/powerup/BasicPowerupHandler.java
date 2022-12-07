@@ -15,14 +15,14 @@ import java.util.function.Supplier;
 
 public class BasicPowerupHandler implements PowerupHandler {
     private final Map<Key, PowerupComponents> components;
-    private final Map<UUID, ZombiesPlayer> playerMap;
+    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
     private final double powerupPickupRadiusSquared;
 
     private final List<Powerup> spawnedOrActivePowerups;
     private final Collection<Powerup> powerupView;
 
     public BasicPowerupHandler(@NotNull Map<Key, PowerupComponents> components,
-            @NotNull Map<UUID, ZombiesPlayer> playerMap, double powerupPickupRadius) {
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap, double powerupPickupRadius) {
         this.components = Map.copyOf(components);
         this.spawnedOrActivePowerups = new ArrayList<>(16);
         this.powerupView = Collections.unmodifiableCollection(this.spawnedOrActivePowerups);

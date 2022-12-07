@@ -13,6 +13,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 public interface ZombiesPlayer extends Activable, Flaggable.Source {
@@ -67,4 +68,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
         return getModule().getPlayerView().getPlayer();
     }
 
+    default @NotNull UUID getUUID() {
+        return getModule().getPlayerView().getUUID();
+    }
 }

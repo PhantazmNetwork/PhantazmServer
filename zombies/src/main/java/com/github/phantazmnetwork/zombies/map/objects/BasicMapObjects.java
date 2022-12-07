@@ -29,11 +29,4 @@ public record BasicMapObjects(@Unmodifiable @NotNull List<Spawnpoint> spawnpoint
         this.mapDependencyProvider = Objects.requireNonNull(mapDependencyProvider, "mapDependencyProvider");
         this.module = Objects.requireNonNull(module, "module");
     }
-
-    @Override
-    public void tick(long time) {
-        for (Shop shop : shops) {
-            shop.tick(time);
-        }
-    }
 }

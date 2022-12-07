@@ -7,6 +7,9 @@ public final class InteractionTypes {
     public static final Key RIGHT_CLICK_BLOCK =
             Key.key(Namespaces.PHANTAZM, "zombies.map.shop.interaction.right_click_block");
 
+    public static final Key RIGHT_CLICK_ENTITY =
+            Key.key(Namespaces.PHANTAZM, "zombies.map.shop.interaction.right_click_entity");
+
     public static final Key CLICK_INVENTORY =
             Key.key(Namespaces.PHANTAZM, "zombies.map.shop.interaction.click_inventory");
 
