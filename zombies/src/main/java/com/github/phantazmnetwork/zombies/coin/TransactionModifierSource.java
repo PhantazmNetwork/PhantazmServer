@@ -33,6 +33,15 @@ public interface TransactionModifierSource {
 
     void removeModifier(@NotNull Key group, @NotNull Transaction.Modifier modifier);
 
+    static @NotNull TransactionModifierSource compositeView() {
+        return EMPTY;
+    }
+
+    static @NotNull TransactionModifierSource compositeView(
+            @NotNull TransactionModifierSource transactionModifierSource) {
+        return Objects.requireNonNull(transactionModifierSource, "transactionModifierSource");
+    }
+
     static @NotNull TransactionModifierSource compositeView(@NotNull TransactionModifierSource @NotNull ... sources) {
         if (sources.length == 0) {
             return EMPTY;
