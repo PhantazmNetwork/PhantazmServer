@@ -1,7 +1,7 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.commons.Namespaces;
 import com.github.phantazmnetwork.commons.vector.Vec3F;
+import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -36,10 +37,12 @@ public final class Ethylene {
     private static final Logger LOGGER = LoggerFactory.getLogger(Mob.class);
 
     private static MappingProcessorSource mappingProcessorSource;
+    private static KeyParser keyParser;
 
-    static void initialize() {
+    static void initialize(@NotNull KeyParser keyParser) {
         LOGGER.info("Initializing Ethylene...");
 
+        Ethylene.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(vec3F())
                         .withCustomSignature(sound()).withCustomSignature(vec3D()).withScalarSignature(key())
@@ -99,6 +102,9 @@ public final class Ethylene {
     }
 
     private static ScalarSignature<TitlePart<Component>> titlePartComponent() {
+        ConfigPrimitive title = ConfigPrimitive.of("TITLE");
+        ConfigPrimitive subtitle = ConfigPrimitive.of("SUBTITLE");
+
         return ScalarSignature.of(new Token<>() {
         }, element -> {
             String value = element.asString();
@@ -107,9 +113,7 @@ public final class Ethylene {
                 case "SUBTITLE" -> TitlePart.SUBTITLE;
                 default -> throw new IllegalArgumentException("Unexpected TitlePart '" + value + "'");
             };
-        }, titlePart -> titlePart == null
-                        ? ConfigPrimitive.NULL
-                        : titlePart == TitlePart.TITLE ? ConfigPrimitive.of("TITLE") : ConfigPrimitive.of("SUBTITLE"));
+        }, titlePart -> titlePart == null ? ConfigPrimitive.NULL : titlePart == TitlePart.TITLE ? title : subtitle);
     }
 
     public static @NotNull MappingProcessorSource getMappingProcessorSource() {
@@ -118,15 +122,8 @@ public final class Ethylene {
 
     @SuppressWarnings("PatternValidation")
     private static ScalarSignature<Key> key() {
-        return ScalarSignature.of(Token.ofClass(Key.class), element -> {
-            String value = element.asString();
-            if (value.contains(":")) {
-                return Key.key(value);
-            }
-            else {
-                return Key.key(Namespaces.PHANTAZM, value);
-            }
-        }, key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString()));
+        return ScalarSignature.of(Token.ofClass(Key.class), element -> keyParser.parseKey(element.asString()),
+                key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString()));
     }
 
     private static ScalarSignature<Component> component() {

@@ -20,15 +20,17 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * Initializes features related to Element.
  */
 public final class Element {
-    private static KeyParser keyParser;
     private static ContextManager contextManager;
 
-    static void initialize(@NotNull MappingProcessorSource mappingProcessorSource) {
-        keyParser = new BasicKeyParser("phantazm");
+    static void initialize(@NotNull MappingProcessorSource mappingProcessorSource, @NotNull KeyParser keyParser) {
+        Objects.requireNonNull(mappingProcessorSource, "mappingProcessorSource");
+        Objects.requireNonNull(keyParser, "keyParser");
 
         KeyExtractor typeExtractor = new BasicKeyExtractor("type", keyParser);
         ElementTypeIdentifier elementTypeIdentifier = new BasicElementTypeIdentifier(keyParser);
@@ -53,10 +55,6 @@ public final class Element {
                         dataLocator, typeExtractor);
 
         contextManager = new BasicContextManager(elementInspector, elementTypeIdentifier, source);
-    }
-
-    public static @NotNull KeyParser getKeyParser() {
-        return FeatureUtils.check(keyParser);
     }
 
     public static @NotNull ContextManager getContextManager() {

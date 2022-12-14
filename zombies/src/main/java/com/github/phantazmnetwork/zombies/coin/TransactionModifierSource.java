@@ -65,8 +65,8 @@ public interface TransactionModifierSource {
                 }
 
                 Collection<Transaction.Modifier> combined = new ArrayList<>(totalLength);
-                for (TransactionModifierSource transactionModifierSource : sourcesCopy) {
-                    combined.addAll(transactionModifierSource.modifiers(key));
+                for (TransactionModifierSource modifierSource : sourcesCopy) {
+                    combined.addAll(modifierSource.modifiers(key));
                 }
 
                 return Collections.unmodifiableCollection(combined);

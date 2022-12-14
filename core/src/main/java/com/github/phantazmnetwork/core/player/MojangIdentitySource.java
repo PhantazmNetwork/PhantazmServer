@@ -46,7 +46,7 @@ public class MojangIdentitySource implements IdentitySource {
                 response = MojangUtils.fromUuid(uuid.toString());
             }
             catch (RuntimeException exception) {
-                LOGGER.error("RuntimeException thrown during name resolution", exception);
+                LOGGER.error("RuntimeException thrown during name resolution of UUID {}: {}", uuid, exception);
             }
 
             if (response != null) {
@@ -58,7 +58,7 @@ public class MojangIdentitySource implements IdentitySource {
                     }
                 }
 
-                LOGGER.error("Unexpected response when resolving UUID {} {}", uuid, response);
+                LOGGER.error("Unexpected response when resolving UUID {}: {}", uuid, response);
             }
 
             return Optional.empty();
@@ -73,7 +73,7 @@ public class MojangIdentitySource implements IdentitySource {
                 response = MojangUtils.fromUsername(name);
             }
             catch (RuntimeException exception) {
-                LOGGER.error("RuntimeException thrown during UUID resolution", exception);
+                LOGGER.error("RuntimeException thrown during UUID resolution of name {}: {}", name, exception);
             }
 
             if (response != null) {
@@ -85,7 +85,7 @@ public class MojangIdentitySource implements IdentitySource {
                     }
                 }
 
-                LOGGER.error("Unexpected response when resolving username {} {}", name, response);
+                LOGGER.error("Unexpected response when resolving username {}: {}", name, response);
             }
 
             return Optional.empty();

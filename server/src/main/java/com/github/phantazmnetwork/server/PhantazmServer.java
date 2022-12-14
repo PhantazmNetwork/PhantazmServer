@@ -5,11 +5,13 @@ import com.github.phantazmnetwork.core.game.scene.fallback.KickFallback;
 import com.github.phantazmnetwork.core.game.scene.lobby.LobbyRouterFallback;
 import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.IdentitySource;
+import com.github.phantazmnetwork.core.player.PlayerViewProvider;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
 import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunData;
 import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.key.BasicKeyParser;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
@@ -162,18 +164,19 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
             LobbiesConfig lobbiesConfig) throws Exception {
+        KeyParser keyParser = new BasicKeyParser("phantazm");
+
         CommandManager commandManager = MinecraftServer.getCommandManager();
         ServerCommandFeature.initialize(commandManager);
 
-        Ethylene.initialize();
+        Ethylene.initialize(keyParser);
 
         MappingProcessorSource mappingProcessorSource = Ethylene.getMappingProcessorSource();
-        Element.initialize(mappingProcessorSource);
+        Element.initialize(mappingProcessorSource, keyParser);
 
         ContextManager contextManager = Element.getContextManager();
-        KeyParser keyParser = Element.getKeyParser();
 
-        BasicPlayerViewProvider viewProvider =
+        PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
