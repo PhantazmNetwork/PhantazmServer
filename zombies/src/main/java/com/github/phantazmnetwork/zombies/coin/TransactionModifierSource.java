@@ -4,10 +4,7 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 
 public interface TransactionModifierSource {
     TransactionModifierSource EMPTY = new TransactionModifierSource() {
@@ -39,7 +36,24 @@ public interface TransactionModifierSource {
 
     static @NotNull TransactionModifierSource compositeView(
             @NotNull TransactionModifierSource transactionModifierSource) {
-        return Objects.requireNonNull(transactionModifierSource, "transactionModifierSource");
+        Objects.requireNonNull(transactionModifierSource, "transactionModifierSource");
+
+        return new TransactionModifierSource() {
+            @Override
+            public @NotNull @UnmodifiableView Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
+                return transactionModifierSource.modifiers(key);
+            }
+
+            @Override
+            public void addModifier(@NotNull Key group, Transaction.@NotNull Modifier modifier) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void removeModifier(@NotNull Key group, Transaction.@NotNull Modifier modifier) {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     static @NotNull TransactionModifierSource compositeView(@NotNull TransactionModifierSource @NotNull ... sources) {
@@ -48,7 +62,7 @@ public interface TransactionModifierSource {
         }
 
         if (sources.length == 1) {
-            return Objects.requireNonNull(sources[0], "sources array element");
+            return compositeView(sources[0]);
         }
 
         TransactionModifierSource[] sourcesCopy = new TransactionModifierSource[sources.length];
@@ -59,17 +73,51 @@ public interface TransactionModifierSource {
         return new TransactionModifierSource() {
             @Override
             public @NotNull Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
-                int totalLength = 0;
-                for (TransactionModifierSource modifierSource : sourcesCopy) {
-                    totalLength += modifierSource.modifiers(key).size();
-                }
+                return new AbstractCollection<>() {
+                    @Override
+                    public Iterator<Transaction.Modifier> iterator() {
+                        return new Iterator<>() {
+                            private int i = 0; //index of sourcesCopy
+                            private Iterator<Transaction.Modifier> iterator = null;
 
-                Collection<Transaction.Modifier> combined = new ArrayList<>(totalLength);
-                for (TransactionModifierSource modifierSource : sourcesCopy) {
-                    combined.addAll(modifierSource.modifiers(key));
-                }
+                            @Override
+                            public boolean hasNext() {
+                                if (i < sourcesCopy.length) {
+                                    while ((iterator == null || !iterator.hasNext()) && i < sourcesCopy.length) {
+                                        iterator = sourcesCopy[i++].modifiers(key).iterator();
+                                    }
 
-                return Collections.unmodifiableCollection(combined);
+                                    return iterator.hasNext();
+                                }
+
+                                return false;
+                            }
+
+                            @Override
+                            public Transaction.Modifier next() {
+                                while (iterator == null || !iterator.hasNext()) {
+                                    if (i >= sourcesCopy.length) {
+                                        throw new NoSuchElementException();
+                                    }
+
+                                    iterator = sourcesCopy[i++].modifiers(key).iterator();
+                                }
+
+                                return iterator.next();
+                            }
+                        };
+                    }
+
+                    @Override
+                    public int size() {
+                        int size = 0;
+                        for (TransactionModifierSource source : sourcesCopy) {
+                            size += source.modifiers(key).size();
+                        }
+
+                        return size;
+                    }
+                };
             }
 
             @Override
