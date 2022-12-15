@@ -7,7 +7,6 @@ import com.github.phantazmnetwork.core.player.BasicPlayerViewProvider;
 import com.github.phantazmnetwork.core.player.IdentitySource;
 import com.github.phantazmnetwork.core.player.PlayerViewProvider;
 import com.github.phantazmnetwork.server.config.lobby.LobbiesConfig;
-import com.github.phantazmnetwork.server.config.server.ServerConfig;
 import com.github.phantazmnetwork.server.config.server.ServerInfoConfig;
 import com.github.phantazmnetwork.zombies.equipment.gun.data.GunData;
 import com.github.steanky.element.core.context.ContextManager;
@@ -63,15 +62,15 @@ public final class PhantazmServer {
     public static void main(String[] args) {
         MinecraftServer minecraftServer = MinecraftServer.init();
 
-        ServerConfig serverConfig;
+        com.github.phantazmnetwork.server.config.server.ServerConfig serverConfig;
         LobbiesConfig lobbiesConfig;
         try {
             LOGGER.info("Loading server configuration data.");
-            Configuration.initialize();
-            ConfigHandler handler = Configuration.getHandler();
+            Config.initialize();
+            ConfigHandler handler = Config.getHandler();
             handler.writeDefaultsAndGet();
 
-            serverConfig = handler.loadDataNow(Configuration.SERVER_CONFIG_KEY);
+            serverConfig = handler.loadDataNow(Config.SERVER_CONFIG_KEY);
             ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
             if (isUnsafe(args)) {
                 LOGGER.warn("""
@@ -109,7 +108,7 @@ public final class PhantazmServer {
                 return;
             }
 
-            lobbiesConfig = handler.loadDataNow(Configuration.LOBBIES_CONFIG_KEY);
+            lobbiesConfig = handler.loadDataNow(Config.LOBBIES_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         }
         catch (ConfigProcessException e) {
@@ -162,8 +161,9 @@ public final class PhantazmServer {
         return false;
     }
 
-    private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
-            LobbiesConfig lobbiesConfig) throws Exception {
+    private static void initializeFeatures(EventNode<Event> global,
+            com.github.phantazmnetwork.server.config.server.ServerConfig serverConfig, LobbiesConfig lobbiesConfig)
+            throws Exception {
         KeyParser keyParser = new BasicKeyParser("phantazm");
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
@@ -199,7 +199,8 @@ public final class PhantazmServer {
                                 new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
     }
 
-    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
+    private static void startServer(EventNode<Event> node, MinecraftServer server,
+            com.github.phantazmnetwork.server.config.server.ServerConfig serverConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
 
         if (infoConfig.optifineEnabled()) {

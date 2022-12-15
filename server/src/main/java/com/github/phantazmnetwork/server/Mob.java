@@ -27,6 +27,7 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
@@ -166,8 +167,7 @@ public final class Mob {
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {
                         try {
-                            MobModel model = com.github.steanky.ethylene.core.bridge.Configuration.read(path, codec,
-                                    getModelProcessor());
+                            MobModel model = Configuration.read(path, codec, getModelProcessor());
                             if (loadedModels.containsKey(model.key())) {
                                 LOGGER.warn("Duplicate key ({}), skipping...", model.key());
                             }

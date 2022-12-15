@@ -16,7 +16,7 @@ import java.nio.file.Path;
 /**
  * Entrypoint for configuration-related features.
  */
-public final class Configuration {
+public final class Config {
     /**
      * The location of the server configuration file.
      */
@@ -26,7 +26,7 @@ public final class Configuration {
      */
     public static final Path LOBBIES_CONFIG_PATH = Path.of("./lobbies-config.toml");
     /**
-     * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link ServerConfig} loader.
+     * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link com.github.phantazmnetwork.server.config.server.ServerConfig} loader.
      */
     public static final ConfigHandler.ConfigKey<ServerConfig> SERVER_CONFIG_KEY =
             new ConfigHandler.ConfigKey<>(ServerConfig.class, "server_config");
@@ -37,7 +37,7 @@ public final class Configuration {
             new ConfigHandler.ConfigKey<>(LobbiesConfig.class, "lobbies_config");
     private static ConfigHandler handler;
 
-    private Configuration() {
+    private Config() {
         throw new UnsupportedOperationException();
     }
 
