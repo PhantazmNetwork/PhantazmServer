@@ -42,7 +42,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
             return;
         }
 
-        if (timeAtLastFrame - time > (long)currentFrame.delayTicks() * MinecraftServer.TICK_MS) {
+        if ((timeAtLastFrame - time) / MinecraftServer.TICK_MS > currentFrame.delayTicks()) {
             if (++frameIndex >= data.frames.size()) {
                 frameIndex = 0;
                 loopCount++;

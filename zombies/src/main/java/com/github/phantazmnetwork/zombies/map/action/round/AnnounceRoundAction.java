@@ -38,30 +38,6 @@ public class AnnounceRoundAction implements Action<Round> {
         this.instance = Objects.requireNonNull(instance, "instane");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            private static final ConfigProcessor<TitlePart<Component>> TITLE_PART_CONFIG_PROCESSOR =
-                    ConfigProcessors.componentTitlePart();
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement node) throws ConfigProcessException {
-                String formatMessage = node.getStringOrThrow("formatMessage");
-                TitlePart<Component> titlePart =
-                        TITLE_PART_CONFIG_PROCESSOR.dataFromElement(node.getElementOrThrow("titlePart"));
-                return new Data(formatMessage, titlePart);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.putString("formatMessage", data.formatMessage);
-                node.put("titlePart", TITLE_PART_CONFIG_PROCESSOR.elementFromData(data.titlePart));
-                return node;
-            }
-        };
-    }
-
     @Override
     public void perform(@NotNull Round round) {
         instance.sendTitlePart(data.titlePart,

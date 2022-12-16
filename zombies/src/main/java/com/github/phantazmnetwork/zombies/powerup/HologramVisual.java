@@ -8,6 +8,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +71,7 @@ public class HologramVisual implements Supplier<PowerupVisual> {
             long start = this.start;
 
             if (!blinking) {
-                long elapsed = time - start;
+                long elapsed = (time - start) / MinecraftServer.TICK_MS;
                 if (elapsed > data.timeUntilBlink && !data.blinkFrames.isEmpty()) {
                     Frame currentFrame = data.blinkFrames.get(0);
                     hologram.addAll(currentFrame.components());
@@ -83,7 +84,7 @@ public class HologramVisual implements Supplier<PowerupVisual> {
                 return;
             }
 
-            long timeSinceLastFrame = time - lastFrameTime;
+            long timeSinceLastFrame = (time - lastFrameTime) / MinecraftServer.TICK_MS;
             Frame currentFrame = this.currentFrame;
 
             if (currentFrame != null && timeSinceLastFrame > currentFrame.delay()) {

@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.scoreboard.sidebar;
 
-import com.github.phantazmnetwork.zombies.map.RoundHandler;
+import com.github.phantazmnetwork.zombies.map.handler.RoundHandler;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.steanky.element.core.annotation.DependencySupplier;
 import com.github.steanky.element.core.dependency.DependencyModule;

@@ -2,7 +2,7 @@ package com.github.phantazmnetwork.zombies.map.action.room;
 
 import com.github.phantazmnetwork.zombies.map.Room;
 import com.github.phantazmnetwork.zombies.map.Round;
-import com.github.phantazmnetwork.zombies.map.RoundHandler;
+import com.github.phantazmnetwork.zombies.map.handler.RoundHandler;
 import com.github.phantazmnetwork.zombies.map.SpawnInfo;
 import com.github.phantazmnetwork.zombies.map.action.Action;
 import com.github.steanky.element.core.annotation.DataObject;

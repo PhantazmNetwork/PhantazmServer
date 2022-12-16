@@ -3,6 +3,7 @@ package com.github.phantazmnetwork.zombies.powerup;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -46,7 +47,7 @@ public class TimedDeactivationPredicate implements Supplier<DeactivationPredicat
                 return false;
             }
 
-            return time - start >= data.time;
+            return (time - start) / MinecraftServer.TICK_MS >= data.time;
         }
     }
 }

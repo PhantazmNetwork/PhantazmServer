@@ -1,6 +1,6 @@
 package com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater;
 
-import com.github.phantazmnetwork.zombies.map.RoundHandler;
+import com.github.phantazmnetwork.zombies.map.handler.RoundHandler;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;

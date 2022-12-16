@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -60,8 +61,9 @@ public class ItemVisual implements Supplier<PowerupVisual> {
                 return;
             }
 
-            if (time % data.interval == 0) {
-                double o = (Math.sin((2 * Math.PI * ((time + data.periodOffset) % data.period)) / data.period) *
+            long ticks = time / MinecraftServer.TICK_MS;
+            if (ticks % data.interval == 0) {
+                double o = (Math.sin((2 * Math.PI * ((ticks + data.periodOffset) % data.period)) / data.period) *
                         data.amplitude) + data.heightOffset;
                 Pos pos = entity.getPosition();
                 entity.teleport(new Pos(pos.x(), baseY + o, pos.z()));

@@ -34,5 +34,5 @@ public abstract class MapTransactionAction extends PowerupActionBase {
         }
     }
 
-    protected abstract @NotNull Transaction.Modifier getModifier();
+    protected abstract Transaction.@NotNull Modifier getModifier();
 }

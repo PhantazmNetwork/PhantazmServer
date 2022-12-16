@@ -4,6 +4,7 @@ import com.github.phantazmnetwork.commons.Tickable;
 import com.github.phantazmnetwork.mob.PhantazmMob;
 import com.github.phantazmnetwork.zombies.map.action.Action;
 import com.github.phantazmnetwork.zombies.spawn.SpawnDistributor;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -165,7 +166,7 @@ public class Round implements Tickable {
                 return;
             }
 
-            long timeSinceLastWave = time - waveStartTime;
+            long timeSinceLastWave = (time - waveStartTime) / MinecraftServer.TICK_MS;
             if (waveIndex < waves.size() && timeSinceLastWave > currentWave.getWaveInfo().delayTicks()) {
                 spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
 
