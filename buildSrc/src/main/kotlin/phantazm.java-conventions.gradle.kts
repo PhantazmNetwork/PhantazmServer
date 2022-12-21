@@ -1,5 +1,5 @@
-import com.github.phantazmnetwork.gradle.task.CopyLibs
-import com.github.phantazmnetwork.gradle.task.SetupServer
+import org.phantazm.gradle.task.CopyLibs
+import org.phantazm.gradle.task.SetupServer
 
 plugins {
     java

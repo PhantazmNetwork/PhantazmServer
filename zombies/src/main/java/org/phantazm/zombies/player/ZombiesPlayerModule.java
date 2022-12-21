@@ -1,0 +1,148 @@
+package org.phantazm.zombies.player;
+
+import com.github.steanky.element.core.annotation.DependencySupplier;
+import com.github.steanky.element.core.dependency.DependencyModule;
+import net.minestom.server.scoreboard.Sidebar;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.core.inventory.InventoryAccessRegistry;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.zombies.coin.PlayerCoins;
+import org.phantazm.zombies.coin.TransactionModifierSource;
+import org.phantazm.zombies.equipment.Equipment;
+import org.phantazm.zombies.equipment.EquipmentCreator;
+import org.phantazm.zombies.equipment.EquipmentHandler;
+import org.phantazm.zombies.kill.PlayerKills;
+import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.player.state.PlayerStateKey;
+import org.phantazm.zombies.player.state.PlayerStateSwitcher;
+import org.phantazm.zombies.player.state.ZombiesPlayerState;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+
+public class ZombiesPlayerModule implements DependencyModule {
+
+    private final PlayerView playerView;
+
+    private final ZombiesPlayerMeta meta;
+
+    private final PlayerCoins coins;
+
+    private final PlayerKills kills;
+
+    private final EquipmentHandler equipmentHandler;
+
+    private final EquipmentCreator equipmentCreator;
+
+    private final InventoryAccessRegistry profileSwitcher;
+
+    private final PlayerStateSwitcher stateSwitcher;
+
+    private final Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions;
+
+    private final Sidebar sidebar;
+
+    private final TransactionModifierSource playerTransactionModifierSource;
+
+    private final TransactionModifierSource compositeTransactionModifierSource;
+
+    private final Flaggable flaggable;
+
+    public ZombiesPlayerModule(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
+            @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
+            @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
+            @NotNull PlayerStateSwitcher stateSwitcher,
+            @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
+            @NotNull Sidebar sidebar, @NotNull TransactionModifierSource mapTransactionModifierSource,
+            @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable) {
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.meta = Objects.requireNonNull(meta, "meta");
+        this.coins = Objects.requireNonNull(coins, "coins");
+        this.kills = Objects.requireNonNull(kills, "kills");
+        this.equipmentHandler = Objects.requireNonNull(equipmentHandler, "equipmentHandler");
+        this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
+        this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
+        this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
+        this.stateFunctions = Map.copyOf(stateFunctions);
+        this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
+        this.playerTransactionModifierSource =
+                Objects.requireNonNull(playerTransactionModifierSource, "playerTransactionModifierSource");
+        this.compositeTransactionModifierSource =
+                TransactionModifierSource.compositeView(mapTransactionModifierSource, playerTransactionModifierSource);
+        this.flaggable = Objects.requireNonNull(flaggable, "flags");
+    }
+
+    @DependencySupplier("zombies.dependency.player.meta")
+    public @NotNull ZombiesPlayerMeta getMeta() {
+        return meta;
+    }
+
+    @DependencySupplier("zombies.dependency.player.coins")
+    public @NotNull PlayerCoins getCoins() {
+        return coins;
+    }
+
+    @DependencySupplier("zombies.dependency.player.kills")
+    public @NotNull PlayerKills getKills() {
+        return kills;
+    }
+
+    @DependencySupplier("zombies.dependency.player.equipment_handler")
+    public @NotNull EquipmentHandler getEquipmentHandler() {
+        return equipmentHandler;
+    }
+
+    @DependencySupplier("zombies.dependency.player.equipment_creator")
+    public @NotNull EquipmentCreator getEquipmentCreator() {
+        return equipmentCreator;
+    }
+
+    @DependencySupplier("zombies.dependency.player.equipment")
+    public @NotNull @UnmodifiableView Collection<Equipment> getEquipment() {
+        return Collections.emptyList();
+    }
+
+    @DependencySupplier("zombies.dependency.player.inventory_access_registry")
+    public @NotNull InventoryAccessRegistry getInventoryAccessRegistry() {
+        return profileSwitcher;
+    }
+
+    @DependencySupplier("zombies.dependency.player.state_switcher")
+    public @NotNull PlayerStateSwitcher getStateSwitcher() {
+        return stateSwitcher;
+    }
+
+    @DependencySupplier("zombies.dependency.player.state_functions")
+    public @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> getStateFunctions() {
+        return stateFunctions;
+    }
+
+    @DependencySupplier("zombies.dependency.player.player_view")
+    public @NotNull PlayerView getPlayerView() {
+        return playerView;
+    }
+
+    @DependencySupplier("zombies.dependency.player.sidebar")
+    public @NotNull Sidebar getSidebar() {
+        return sidebar;
+    }
+
+    @DependencySupplier("zombies.dependency.player.modifiers")
+    public @NotNull TransactionModifierSource playerTransactionModifiers() {
+        return playerTransactionModifierSource;
+    }
+
+    @DependencySupplier("zombies.dependency.player.composite_modifiers")
+    public @NotNull TransactionModifierSource compositeTransactionModifiers() {
+        return compositeTransactionModifierSource;
+    }
+
+    @DependencySupplier("zombies.dependency.player.flaggable")
+    public @NotNull Flaggable flaggable() {
+        return flaggable;
+    }
+}

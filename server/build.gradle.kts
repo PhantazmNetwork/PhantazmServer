@@ -1,5 +1,5 @@
-import com.github.phantazmnetwork.gradle.task.CopyLibs
-import com.github.phantazmnetwork.gradle.task.SetupServer
+import org.phantazm.gradle.task.CopyLibs
+import org.phantazm.gradle.task.SetupServer
 
 plugins {
     id("phantazm.minestom-library-conventions")
@@ -40,7 +40,7 @@ tasks.jar {
             "Class-Path" to copyLibsTask.outputs.files.joinToString(" ") {
                 "libs/${it.relativeTo(copyLibsTask.libraryDirectory!!).toPath().joinToString("/")}"
             },
-            "Main-Class" to "com.github.phantazmnetwork.server.PhantazmServer",
+            "Main-Class" to "org.phantazm.server.PhantazmServer",
             "Multi-Release" to true
         )
     }
