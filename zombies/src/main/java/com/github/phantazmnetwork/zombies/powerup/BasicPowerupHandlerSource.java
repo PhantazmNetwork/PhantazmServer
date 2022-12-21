@@ -8,6 +8,7 @@ import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,8 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
     }
 
     @Override
-    public @NotNull PowerupHandler make(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+    public @NotNull PowerupHandler make(@NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull DependencyProvider mapDependencyProvider) {
         Map<Key, PowerupComponents> powerupMap = new HashMap<>(powerupData.size());
 
@@ -59,6 +61,6 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
             powerupMap.put(data.id(), new PowerupComponents(visuals, actions, deactivationPredicateSupplier));
         }
 
-        return new BasicPowerupHandler(powerupMap, playerMap, powerupPickupRadius);
+        return new BasicPowerupHandler(instance, powerupMap, playerMap, powerupPickupRadius);
     }
 }

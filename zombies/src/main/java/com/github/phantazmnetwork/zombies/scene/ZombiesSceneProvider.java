@@ -201,7 +201,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         MapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore);
         RoundHandler roundHandler = roundHandlerWrapper.set(new BasicRoundHandler(mapObjects.rounds()));
 
-        PowerupHandler powerupHandler = createPowerupHandler(zombiesPlayers, mapObjects.mapDependencyProvider());
+        PowerupHandler powerupHandler =
+                createPowerupHandler(instance, zombiesPlayers, mapObjects.mapDependencyProvider());
         ShopHandler shopHandler = createShopHandler(mapObjects.shops());
         WindowHandler windowHandler = createWindowHandler(mapObjects.windows());
 
@@ -249,9 +250,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore);
     }
 
-    private PowerupHandler createPowerupHandler(Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+    private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             DependencyProvider mapDependencyProvider) {
-        return powerupHandlerSource.make(playerMap, mapDependencyProvider);
+        return powerupHandlerSource.make(instance, playerMap, mapDependencyProvider);
     }
 
     private ShopHandler createShopHandler(List<Shop> shops) {

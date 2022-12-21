@@ -6,6 +6,7 @@ import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -23,7 +24,8 @@ public interface PowerupHandler extends Tickable {
     @NotNull @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups();
 
     interface Source {
-        @NotNull PowerupHandler make(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+        @NotNull PowerupHandler make(@NotNull Instance instance,
+                @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull DependencyProvider mapDependencyProvider);
     }
 }

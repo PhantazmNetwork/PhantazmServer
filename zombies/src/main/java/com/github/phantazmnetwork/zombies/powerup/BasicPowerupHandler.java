@@ -1,39 +1,52 @@
 package com.github.phantazmnetwork.zombies.powerup;
 
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
-import com.github.phantazmnetwork.zombies.scene.ZombiesSceneProvider;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.EntityTracker;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 public class BasicPowerupHandler implements PowerupHandler {
+    private static final int PICKUP_CHECK_INTERVAL = 100; //check every 2 ticks for powerup pickups
+
+    private final Instance instance;
     private final Map<Key, PowerupComponents> components;
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
-    private final double powerupPickupRadiusSquared;
+    private final double powerupPickupRadius;
 
     private final List<Powerup> spawnedOrActivePowerups;
     private final Collection<Powerup> powerupView;
 
-    public BasicPowerupHandler(@NotNull Map<Key, PowerupComponents> components,
+    private long lastPickupCheck = 0L;
+
+    public BasicPowerupHandler(@NotNull Instance instance, @NotNull Map<Key, PowerupComponents> components,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap, double powerupPickupRadius) {
+        this.instance = Objects.requireNonNull(instance, "instance");
         this.components = Map.copyOf(components);
         this.spawnedOrActivePowerups = new ArrayList<>(16);
         this.powerupView = Collections.unmodifiableCollection(this.spawnedOrActivePowerups);
         this.playerMap = Objects.requireNonNull(playerMap);
-        this.powerupPickupRadiusSquared = powerupPickupRadius * powerupPickupRadius;
+        this.powerupPickupRadius = powerupPickupRadius;
     }
 
     @Override
     public void tick(long time) {
         if (spawnedOrActivePowerups.isEmpty()) {
             return;
+        }
+
+        //don't check for pickups too many times
+        boolean pickupCheckTick = time - lastPickupCheck >= PICKUP_CHECK_INTERVAL;
+        if (pickupCheckTick) {
+            lastPickupCheck = time;
         }
 
         for (int i = spawnedOrActivePowerups.size() - 1; i >= 0; i--) {
@@ -46,7 +59,7 @@ public class BasicPowerupHandler implements PowerupHandler {
                 spawnedOrActivePowerups.remove(i);
             }
             else {
-                if (spawned) {
+                if (spawned && pickupCheckTick) {
                     maybePickup(powerup, time);
                 }
 
@@ -56,20 +69,17 @@ public class BasicPowerupHandler implements PowerupHandler {
     }
 
     private void maybePickup(Powerup powerup, long time) {
-        for (ZombiesPlayer player : playerMap.values()) {
-            if (player.isAlive()) {
-                Optional<Player> playerOptional = player.getPlayer();
-                if (playerOptional.isPresent()) {
-                    Player actualPlayer = playerOptional.get();
+        instance.getEntityTracker()
+                .nearbyEntitiesUntil(powerup.spawnLocation(), powerupPickupRadius, EntityTracker.Target.PLAYERS,
+                        player -> {
+                            ZombiesPlayer zombiesPlayer = playerMap.get(player.getUuid());
+                            if (zombiesPlayer != null && zombiesPlayer.isAlive()) {
+                                powerup.activate(zombiesPlayer, time);
+                                return true;
+                            }
 
-                    if (actualPlayer.getPosition().distanceSquared(powerup.spawnLocation()) <=
-                            powerupPickupRadiusSquared) {
-                        powerup.activate(player, time);
-                        return;
-                    }
-                }
-            }
-        }
+                            return false;
+                        });
     }
 
     @Override

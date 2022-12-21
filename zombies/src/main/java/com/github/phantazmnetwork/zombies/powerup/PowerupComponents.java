@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 public record PowerupComponents(@NotNull @Unmodifiable Collection<Supplier<PowerupVisual>> visuals,
                                 @NotNull @Unmodifiable Collection<Supplier<PowerupAction>> actions,
                                 @NotNull Supplier<DeactivationPredicate> deactivationPredicate) {
-    public PowerupComponents(@NotNull @Unmodifiable Collection<Supplier<PowerupVisual>> visuals,
-            @NotNull @Unmodifiable Collection<Supplier<PowerupAction>> actions,
+    public PowerupComponents(@NotNull Collection<Supplier<PowerupVisual>> visuals,
+            @NotNull Collection<Supplier<PowerupAction>> actions,
             @NotNull Supplier<DeactivationPredicate> deactivationPredicate) {
         this.visuals = List.copyOf(visuals);
         this.actions = List.copyOf(actions);
