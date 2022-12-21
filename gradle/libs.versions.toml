@@ -8,8 +8,8 @@ ethylene = "0.17.0"
 examination = "1.3.0"
 
 junit-jupiter = "5.9.0"
-
-minestom = "c11a70cecc"
+            
+minestom = "c3c723953a"
 
 toolkit = "0.3.0"
 
