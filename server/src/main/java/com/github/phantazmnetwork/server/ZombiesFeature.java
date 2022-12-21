@@ -1,11 +1,11 @@
 package com.github.phantazmnetwork.server;
 
-import com.github.phantazmnetwork.commons.FileUtils;
 import com.github.phantazmnetwork.core.item.AnimatedUpdatingItem;
 import com.github.phantazmnetwork.core.item.StaticUpdatingItem;
 import com.github.phantazmnetwork.zombies.map.FileSystemMapLoader;
+import com.github.phantazmnetwork.zombies.map.Loader;
 import com.github.phantazmnetwork.zombies.map.MapInfo;
-import com.github.phantazmnetwork.zombies.map.MapLoader;
+import com.github.phantazmnetwork.zombies.powerup.PowerupInfo;
 import com.github.phantazmnetwork.zombies.map.action.room.SpawnMobsAction;
 import com.github.phantazmnetwork.zombies.map.action.round.AnnounceRoundAction;
 import com.github.phantazmnetwork.zombies.map.action.round.RevivePlayersAction;
@@ -26,28 +26,38 @@ import com.github.phantazmnetwork.zombies.scoreboard.sidebar.lineupdater.conditi
 import com.github.phantazmnetwork.zombies.scoreboard.sidebar.section.CollectionSidebarSection;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
+import com.github.steanky.ethylene.core.ConfigCodec;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public final class ZombiesFeature {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
-    private static final Map<Key, MapInfo> maps = new HashMap<>();
+    public static final Path MAPS_FOLDER = Path.of("./zombies/maps");
+    public static final Path POWERUPS_FOLDER = Path.of("./zombies/powerups");
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
+
+    private static Map<Key, MapInfo> maps;
+    private static Map<Key, PowerupInfo> powerups;
     private static ContextManager contextManager;
 
     static void initialize(@NotNull ContextManager contextManager) throws IOException {
         ZombiesFeature.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         registerElementClasses(contextManager);
-        loadMaps();
+
+        ConfigCodec codec = new YamlCodec();
+        ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec));
+        ZombiesFeature.powerups = loadFeature("powerup", new FileSystemPowerupLoader(POWERUPS_FOLDER, codec));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
@@ -138,29 +148,42 @@ public final class ZombiesFeature {
         LOGGER.info("Registered Zombies element classes.");
     }
 
-    private static void loadMaps() throws IOException {
-        Path rootFolder = Path.of("./zombies/maps/");
-        MapLoader mapLoader = new FileSystemMapLoader(rootFolder, new YamlCodec());
+    private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) throws IOException {
+        LOGGER.info("Loading " + featureName + "s...");
 
-        Files.createDirectories(rootFolder);
-        FileUtils.forEachFileMatching(rootFolder, (path, attr) -> attr.isDirectory() && !path.equals(rootFolder),
-                mapFolder -> {
-                    LOGGER.info("Trying to load map from " + mapFolder);
-                    String name = mapFolder.getFileName().toString();
+        List<String> dataNames = loader.loadableData();
+        Map<Key, T> data = new HashMap<>(dataNames.size());
 
-                    try {
-                        MapInfo map = mapLoader.load(name);
-                        maps.put(map.settings().id(), map);
-                        LOGGER.info("Successfully loaded map " + name);
-                    }
-                    catch (IOException e) {
-                        LOGGER.warn("IOException when loading map " + name, e);
-                    }
-                });
+        for (String dataName : dataNames) {
+            LOGGER.info("Trying to load " + featureName + " from " + dataName);
+
+            try {
+                T feature = loader.load(dataName);
+                Key id = feature.key();
+
+                if (data.containsKey(id)) {
+                    LOGGER.warn("Found duplicate " + featureName + " with id " + id + "; the previously loaded " +
+                            "version will be overwritten");
+                }
+
+                data.put(id, feature);
+                LOGGER.info("Successfully loaded " + featureName + " " + id);
+            }
+            catch (IOException e) {
+                LOGGER.warn("Exception when loading " + featureName, e);
+            }
+        }
+
+        LOGGER.info("Loaded " + data.size() + " " + featureName + "s");
+        return Map.copyOf(data);
     }
 
-    public static @NotNull Map<Key, MapInfo> maps() {
-        return maps;
+    public static @NotNull @Unmodifiable Map<Key, MapInfo> maps() {
+        return FeatureUtils.check(maps);
+    }
+
+    public static @NotNull @Unmodifiable Map<Key, PowerupInfo> powerups() {
+        return FeatureUtils.check(powerups);
     }
 
     public static @NotNull ContextManager mapObjectBuilder() {

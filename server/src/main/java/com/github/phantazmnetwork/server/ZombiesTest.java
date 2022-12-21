@@ -170,7 +170,8 @@ final class ZombiesTest {
                             sceneFallback, global, Mob.getMobSpawner(), Mob.getModels(),
                             new BasicClientBlockHandlerSource(
                                     instance -> new InstanceClientBlockHandler(instance, global, -64, 384)),
-                            contextManager, keyParser, EquipmentFeature::createEquipmentCreator, corpseTeam);
+                            contextManager, keyParser, ZombiesFeature.powerups(),
+                            EquipmentFeature::createEquipmentCreator, corpseTeam);
             providers.put(entry.getKey(), provider);
         }
         ZombiesSceneRouter sceneRouter = new ZombiesSceneRouter(providers);

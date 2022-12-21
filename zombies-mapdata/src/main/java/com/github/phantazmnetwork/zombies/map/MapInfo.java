@@ -1,6 +1,8 @@
 package com.github.phantazmnetwork.zombies.map;
 
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -17,8 +19,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
                       @NotNull List<RoundInfo> rounds,
                       @NotNull List<SpawnruleInfo> spawnrules,
                       @NotNull List<SpawnpointInfo> spawnpoints,
-                      @NotNull List<PowerupInfo> powerups,
-                      @NotNull ConfigNode scoreboard) {
+                      @NotNull ConfigNode scoreboard) implements Keyed {
     /**
      * Constructs a new instances of this record.
      *
@@ -40,7 +41,11 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
         Objects.requireNonNull(rounds, "rounds");
         Objects.requireNonNull(spawnrules, "spawnrules");
         Objects.requireNonNull(spawnpoints, "spawnpoints");
-        Objects.requireNonNull(powerups, "powerups");
         Objects.requireNonNull(scoreboard, "scoreboard");
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return settings.id();
     }
 }

@@ -7,6 +7,7 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3I;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,11 +15,12 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.stream.Stream;
 
 /**
- * A {@link MapLoader} implementation that loads maps from a filesystem.
+ * A {@link Loader} implementation that loads maps from a filesystem.
  */
-public class FileSystemMapLoader implements MapLoader {
+public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
     private static final String ROOMS_PATH = "rooms";
     private static final String DOORS_PATH = "doors";
     private static final String SHOPS_PATH = "shops";
@@ -26,12 +28,10 @@ public class FileSystemMapLoader implements MapLoader {
     private static final String ROUNDS_PATH = "rounds";
     private static final String SPAWNRULES_PATH = "spawnrules";
     private static final String SPAWNPOINTS_PATH = "spawnpoints";
-    private static final String POWERUPS_PATH = "powerups";
     private static final String SCOREBOARD_PATH = "scoreboard";
 
     private final String mapInfoName;
     private final BiPredicate<Path, BasicFileAttributes> configPredicate;
-    private final Path root;
     private final ConfigCodec codec;
 
     /**
@@ -42,7 +42,7 @@ public class FileSystemMapLoader implements MapLoader {
      * @param codec the codec used to serialize/deserialize map data files
      */
     public FileSystemMapLoader(@NotNull Path root, @NotNull ConfigCodec codec) {
-        this.root = Objects.requireNonNull(root, "root");
+        super(root);
         this.codec = Objects.requireNonNull(codec, "codec");
 
         Set<String> preferredExtensions = codec.getPreferredExtensions();
@@ -83,7 +83,6 @@ public class FileSystemMapLoader implements MapLoader {
         List<RoundInfo> rounds = new ArrayList<>();
         List<SpawnruleInfo> spawnrules = new ArrayList<>();
         List<SpawnpointInfo> spawnpoints = new ArrayList<>();
-        List<PowerupInfo> powerups = new ArrayList<>();
         ConfigNode scoreboard;
 
         FileUtils.forEachFileMatching(paths.rooms, configPredicate,
@@ -108,16 +107,12 @@ public class FileSystemMapLoader implements MapLoader {
         FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate,
                 file -> spawnpoints.add(Configuration.read(file, codec, MapProcessors.spawnpointInfo())));
 
-        FileUtils.forEachFileMatching(paths.powerups, configPredicate,
-                file -> powerups.add(Configuration.read(file, codec, MapProcessors.powerupInfo())));
-
         String scoreboardSettingsPath =
                 "settings" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         scoreboard =
                 Configuration.read(paths.scoreboard.resolve(scoreboardSettingsPath), codec, MapProcessors.scoreboard());
 
-        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, powerups,
-                scoreboard);
+        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, scoreboard);
     }
 
     @Override
@@ -138,7 +133,6 @@ public class FileSystemMapLoader implements MapLoader {
         FileUtils.deleteRecursivelyIfExists(paths.rounds);
         FileUtils.deleteRecursivelyIfExists(paths.spawnrules);
         FileUtils.deleteRecursivelyIfExists(paths.spawnpoints);
-        FileUtils.deleteRecursivelyIfExists(paths.powerups);
         FileUtils.deleteRecursivelyIfExists(paths.scoreboard);
 
         Files.createDirectories(paths.rooms);
@@ -148,7 +142,6 @@ public class FileSystemMapLoader implements MapLoader {
         Files.createDirectories(paths.rounds);
         Files.createDirectories(paths.spawnrules);
         Files.createDirectories(paths.spawnpoints);
-        Files.createDirectories(paths.powerups);
         Files.createDirectories(paths.scoreboard);
 
         String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension();
@@ -204,6 +197,14 @@ public class FileSystemMapLoader implements MapLoader {
         FileUtils.deleteRecursivelyIfExists(mapDirectoryFromName(mapName));
     }
 
+    @Override
+    public @NotNull @Unmodifiable List<String> loadableData() throws IOException {
+        Files.createDirectories(root);
+        try (Stream<Path> fileStream = Files.list(root)) {
+            return fileStream.filter(Files::isDirectory).map(path -> path.getFileName().toString()).toList();
+        }
+    }
+
     private Path mapDirectoryFromName(String mapName) throws IOException {
         return FileUtils.findFirstOrThrow(root, (path, attr) -> attr.isDirectory() && path.endsWith(mapName),
                 () -> "Unable to find map folder for " + mapName);
@@ -220,12 +221,11 @@ public class FileSystemMapLoader implements MapLoader {
                                Path rounds,
                                Path spawnrules,
                                Path spawnpoints,
-                               Path powerups,
                                Path scoreboard) {
         private FolderPaths(Path root) {
             this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH),
                     root.resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH),
-                    root.resolve(SPAWNPOINTS_PATH), root.resolve(POWERUPS_PATH), root.resolve(SCOREBOARD_PATH));
+                    root.resolve(SPAWNPOINTS_PATH), root.resolve(SCOREBOARD_PATH));
         }
     }
 }

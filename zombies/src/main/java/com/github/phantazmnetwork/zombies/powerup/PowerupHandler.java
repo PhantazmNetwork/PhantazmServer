@@ -1,7 +1,6 @@
 package com.github.phantazmnetwork.zombies.powerup;
 
 import com.github.phantazmnetwork.commons.Tickable;
-import com.github.phantazmnetwork.zombies.map.PowerupInfo;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import net.kyori.adventure.key.Key;

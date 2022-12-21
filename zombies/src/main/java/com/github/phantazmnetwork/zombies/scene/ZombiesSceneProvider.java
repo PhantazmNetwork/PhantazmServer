@@ -114,7 +114,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> eventNode, @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
             @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull ContextManager contextManager,
-            @NotNull KeyParser keyParser,
+            @NotNull KeyParser keyParser, @NotNull Map<Key, PowerupInfo> powerups,
             @NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction, @NotNull Team corpseTeam) {
         super(maximumScenes);
         this.contexts = new IdentityHashMap<>(maximumScenes);
@@ -126,6 +126,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        Objects.requireNonNull(powerups, "powerups");
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
         this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
 
@@ -135,7 +136,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new BasicMapObjectsSource(mapInfo, contextManager, mobSpawner, mobModels, clientBlockHandlerSource,
                         keyParser);
         this.powerupHandlerSource =
-                new BasicPowerupHandlerSource(mapInfo.powerups(), contextManager, settingsInfo.powerupPickupRadius());
+                new BasicPowerupHandlerSource(powerups, contextManager, settingsInfo.powerupPickupRadius());
         this.shopHandlerSource = new BasicShopHandlerSource();
         this.windowHandlerSource =
                 new BasicWindowHandlerSource(settingsInfo.windowRepairRadius(), settingsInfo.windowRepairTicks(),
