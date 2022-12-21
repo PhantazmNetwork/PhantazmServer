@@ -8,7 +8,7 @@ ethylene = "0.17.0"
 examination = "1.3.0"
 
 junit-jupiter = "5.9.0"
-            
+
 minestom = "c3c723953a"
 
 toolkit = "0.3.0"
@@ -47,9 +47,9 @@ libgui = { module = "io.github.cottonmc:LibGui", version = "6.0.1+1.19" }
 
 minecraft = { module = "com.mojang:minecraft", version = "1.19.2" }
 
-minestom = { module = "org.phantazm:Minestom", version.ref = "minestom" }
+minestom = { module = "org.phantazm.Minestom:Minestom", version.ref = "minestom" }
 
-minestom-testing = { module = "org.phantazm:minestom-testing", version.ref = "minestom" }
+minestom-testing = { module = "org.phantazm.Minestom:minestom-testing", version.ref = "minestom" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.7.0" }
 
