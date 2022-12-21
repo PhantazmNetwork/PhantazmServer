@@ -65,25 +65,30 @@ abstract class CopyLibs : DefaultTask() {
             }
         }
 
-        libraryDirectory?.walkTopDown()?.filter {
-            it.isFile
-        }?.forEach {
-            val relative = libraryDirectory?.let { it1 -> it.relativeTo(it1) }
-            val relativeParent = relative?.parentFile
-
-            if (relativeParent == null) {
-                logger.info("Deleting $it because its artifact group cannot be determined.")
-                it.delete()
-            } else {
-                val artifactFileGroup = relativeParent.toPath().joinToString(".")
-                val artifactFileName = relative.nameWithoutExtension
-
-                if (resolvedArtifacts.none { artifact ->
-                        artifact.moduleVersion.id.group.equals(artifactFileGroup, true) &&
-                                artifact.file.nameWithoutExtension.equals(artifactFileName, true)
-                    }) {
-                    logger.info("Deleting $it because it does not match any known artifacts.")
+        libraryDirectory?.walkTopDown()?.forEach {
+            if (it.isDirectory) {
+                val files = it.listFiles()
+                if (files != null && files.size == 0) {
                     it.delete()
+                }
+            } else {
+                val relative = libraryDirectory?.let { it1 -> it.relativeTo(it1) }
+                val relativeParent = relative?.parentFile
+
+                if (relativeParent == null) {
+                    logger.info("Deleting $it because its artifact group cannot be determined.")
+                    it.delete()
+                } else {
+                    val artifactFileGroup = relativeParent.toPath().joinToString(".")
+                    val artifactFileName = relative.nameWithoutExtension
+
+                    if (resolvedArtifacts.none { artifact ->
+                            artifact.moduleVersion.id.group.equals(artifactFileGroup, true) &&
+                                    artifact.file.nameWithoutExtension.equals(artifactFileName, true)
+                        }) {
+                        logger.info("Deleting $it because it does not match any known artifacts.")
+                        it.delete()
+                    }
                 }
             }
         }
