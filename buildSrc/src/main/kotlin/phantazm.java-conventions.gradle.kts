@@ -5,7 +5,7 @@ plugins {
     java
 }
 
-group = "com.github.phantazmnetwork"
+group = "org.phantazm"
 version = "1.0-SNAPSHOT"
 
 java {

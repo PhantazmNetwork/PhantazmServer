@@ -8,7 +8,7 @@ repositories {
             maven("https://jitpack.io")
         }
         filter {
-            includeGroup("com.github.PhantazmNetwork.Minestom")
+            includeGroup("org.phantazm")
             includeGroup("com.github.Minestom")
             includeGroup("com.github.MadMartian")
         }
