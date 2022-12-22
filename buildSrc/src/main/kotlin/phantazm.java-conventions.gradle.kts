@@ -1,11 +1,11 @@
-import com.github.phantazmnetwork.gradle.task.CopyLibs
-import com.github.phantazmnetwork.gradle.task.SetupServer
+import org.phantazm.gradle.task.CopyLibs
+import org.phantazm.gradle.task.SetupServer
 
 plugins {
     java
 }
 
-group = "com.github.phantazmnetwork"
+group = "org.phantazm"
 version = "1.0-SNAPSHOT"
 
 java {

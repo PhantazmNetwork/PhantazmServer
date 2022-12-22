@@ -16,7 +16,7 @@
     "environment": "client",
     "entrypoints": {
         "client": [
-            "com.github.phantazmnetwork.zombies.mapeditor.client.MapeditorClient"
+            "org.phantazm.zombies.mapeditor.client.MapeditorClient"
         ]
     },
     "depends": {
