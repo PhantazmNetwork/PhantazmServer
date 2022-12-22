@@ -3,7 +3,6 @@ package com.github.phantazmnetwork.zombies.player.state.revive;
 import com.github.phantazmnetwork.core.player.PlayerView;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayer;
 import com.github.phantazmnetwork.zombies.player.ZombiesPlayerMeta;
-import com.github.phantazmnetwork.zombies.player.state.ZombiesPlayerStateKeys;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -38,11 +37,10 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
         Point knockedPosition = knockedPlayerOptional.get().getPosition();
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-            if (zombiesPlayer.getModule().getPlayerView().getUUID().equals(playerView.getUUID())) {
+            if (zombiesPlayer.getUUID().equals(playerView.getUUID())) {
                 continue;
             }
-            if (!zombiesPlayer.getModule().getStateSwitcher().getState().key()
-                    .equals(ZombiesPlayerStateKeys.ALIVE.key())) {
+            if (!zombiesPlayer.isAlive()) {
                 continue;
             }
 
