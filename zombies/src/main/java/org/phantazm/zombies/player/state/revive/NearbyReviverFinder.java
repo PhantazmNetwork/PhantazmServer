@@ -38,11 +38,10 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
         Point knockedPosition = knockedPlayerOptional.get().getPosition();
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-            if (zombiesPlayer.getModule().getPlayerView().getUUID().equals(playerView.getUUID())) {
+            if (zombiesPlayer.getUUID().equals(playerView.getUUID())) {
                 continue;
             }
-            if (!zombiesPlayer.getModule().getStateSwitcher().getState().key()
-                    .equals(ZombiesPlayerStateKeys.ALIVE.key())) {
+            if (!zombiesPlayer.isAlive()) {
                 continue;
             }
 

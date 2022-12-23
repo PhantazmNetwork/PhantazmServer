@@ -33,7 +33,7 @@ public class RevivePlayersAction implements Action<Round> {
     @Override
     public void perform(@NotNull Round round) {
         for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.DEAD)) {
+            if (zombiesPlayer.isDead()) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
                 zombiesPlayer.getPlayer().ifPresent(player -> player.teleport(respawnPos));
             }

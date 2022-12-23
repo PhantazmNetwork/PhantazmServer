@@ -67,10 +67,9 @@ public class EndStage implements Stage {
     public void tick(long time) {
         remainingTicks.apply(ticks -> ticks - 1);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            SidebarUpdater sidebarUpdater =
-                    sidebarUpdaters.computeIfAbsent(zombiesPlayer.getModule().getPlayerView().getUUID(), unused -> {
-                        return sidebarUpdaterCreator.apply(zombiesPlayer);
-                    });
+            SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> {
+                return sidebarUpdaterCreator.apply(zombiesPlayer);
+            });
             sidebarUpdater.tick(time);
         }
     }
