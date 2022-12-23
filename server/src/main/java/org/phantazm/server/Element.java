@@ -6,9 +6,7 @@ import com.github.steanky.element.core.context.BasicElementContext;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.data.BasicDataInspector;
-import com.github.steanky.element.core.data.BasicDataLocator;
 import com.github.steanky.element.core.data.DataInspector;
-import com.github.steanky.element.core.data.DataLocator;
 import com.github.steanky.element.core.factory.BasicCollectionCreator;
 import com.github.steanky.element.core.factory.BasicFactoryResolver;
 import com.github.steanky.element.core.factory.CollectionCreator;
@@ -49,10 +47,9 @@ public final class Element {
         Registry<Boolean> cacheRegistry = new HashRegistry<>();
 
         PathSplitter pathSplitter = BasicPathSplitter.INSTANCE;
-        DataLocator dataLocator = new BasicDataLocator(pathSplitter);
         ElementContext.Source source =
                 new BasicElementContext.Source(configRegistry, factoryRegistry, cacheRegistry, pathSplitter,
-                        dataLocator, typeExtractor);
+                        typeExtractor);
 
         contextManager = new BasicContextManager(elementInspector, elementTypeIdentifier, source);
     }

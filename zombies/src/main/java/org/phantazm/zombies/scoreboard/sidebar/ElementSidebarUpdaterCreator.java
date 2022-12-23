@@ -2,6 +2,7 @@ package org.phantazm.zombies.scoreboard.sidebar;
 
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyModule;
+import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,10 @@ public class ElementSidebarUpdaterCreator implements Function<ZombiesPlayer, Sid
 
     @Override
     public SidebarUpdater apply(ZombiesPlayer zombiesPlayer) {
-        return sidebarContext.provide(updaterPath,
-                new ModuleDependencyProvider(keyParser, sidebarModule, zombiesPlayer.getModule()), false);
+        DependencyProvider composite =
+                DependencyProvider.composite(new ModuleDependencyProvider(keyParser, sidebarModule),
+                        new ModuleDependencyProvider(keyParser, zombiesPlayer.getModule()));
+
+        return sidebarContext.provide(updaterPath, composite, false);
     }
 }

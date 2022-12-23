@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player;
 
-import com.github.steanky.element.core.annotation.DependencySupplier;
+import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
@@ -76,72 +77,86 @@ public class ZombiesPlayerModule implements DependencyModule {
         this.flaggable = Objects.requireNonNull(flaggable, "flags");
     }
 
-    @DependencySupplier("zombies.dependency.player.meta")
+    @Dependency
+    @Memoize
     public @NotNull ZombiesPlayerMeta getMeta() {
         return meta;
     }
 
-    @DependencySupplier("zombies.dependency.player.coins")
+    @Dependency
+    @Memoize
     public @NotNull PlayerCoins getCoins() {
         return coins;
     }
 
-    @DependencySupplier("zombies.dependency.player.kills")
+    @Dependency
+    @Memoize
     public @NotNull PlayerKills getKills() {
         return kills;
     }
 
-    @DependencySupplier("zombies.dependency.player.equipment_handler")
+    @Dependency
+    @Memoize
     public @NotNull EquipmentHandler getEquipmentHandler() {
         return equipmentHandler;
     }
 
-    @DependencySupplier("zombies.dependency.player.equipment_creator")
+    @Dependency
+    @Memoize
     public @NotNull EquipmentCreator getEquipmentCreator() {
         return equipmentCreator;
     }
 
-    @DependencySupplier("zombies.dependency.player.equipment")
+    @Dependency
+    @Memoize
     public @NotNull @UnmodifiableView Collection<Equipment> getEquipment() {
         return Collections.emptyList();
     }
 
-    @DependencySupplier("zombies.dependency.player.inventory_access_registry")
+    @Dependency
+    @Memoize
     public @NotNull InventoryAccessRegistry getInventoryAccessRegistry() {
         return profileSwitcher;
     }
 
-    @DependencySupplier("zombies.dependency.player.state_switcher")
+    @Dependency
+    @Memoize
     public @NotNull PlayerStateSwitcher getStateSwitcher() {
         return stateSwitcher;
     }
 
-    @DependencySupplier("zombies.dependency.player.state_functions")
+    @Dependency
+    @Memoize
     public @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> getStateFunctions() {
         return stateFunctions;
     }
 
-    @DependencySupplier("zombies.dependency.player.player_view")
+    @Dependency
+    @Memoize
     public @NotNull PlayerView getPlayerView() {
         return playerView;
     }
 
-    @DependencySupplier("zombies.dependency.player.sidebar")
+    @Dependency
+    @Memoize
     public @NotNull Sidebar getSidebar() {
         return sidebar;
     }
 
-    @DependencySupplier("zombies.dependency.player.modifiers")
+    @Dependency("zombies.dependency.player.modifiers")
+    @Memoize
     public @NotNull TransactionModifierSource playerTransactionModifiers() {
         return playerTransactionModifierSource;
     }
 
-    @DependencySupplier("zombies.dependency.player.composite_modifiers")
+    @Dependency("zombies.dependency.player.composite_modifiers")
+    @Memoize
     public @NotNull TransactionModifierSource compositeTransactionModifiers() {
         return compositeTransactionModifierSource;
     }
 
-    @DependencySupplier("zombies.dependency.player.flaggable")
+    @Dependency
+    @Memoize
     public @NotNull Flaggable flaggable() {
         return flaggable;
     }

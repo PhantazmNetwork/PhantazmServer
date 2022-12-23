@@ -4,6 +4,8 @@ import com.github.steanky.element.core.ElementFactory;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.dependency.DependencyProvider;
+import com.github.steanky.ethylene.mapper.type.Token;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -17,8 +19,8 @@ import java.util.Optional;
 public class TicksLineUpdater implements SidebarLineUpdater {
 
     private static final ElementFactory<Data, TicksLineUpdater> FACTORY = (objectData, context, dependencyProvider) -> {
-        Wrapper<Long> ticksWrapper =
-                dependencyProvider.provide(Key.key("zombies.dependency.sidebar" + ".ticks_since_start"));
+        Wrapper<Long> ticksWrapper = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
+        }));
         TickFormatter tickFormatter = context.provide(objectData.tickFormatterPath(), dependencyProvider, false);
         return new TicksLineUpdater(ticksWrapper, tickFormatter);
     };

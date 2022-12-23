@@ -1,6 +1,6 @@
 package org.phantazm.mob.spawner;
 
-import com.github.steanky.element.core.annotation.DependencySupplier;
+import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
@@ -210,31 +210,31 @@ public class BasicMobSpawner implements MobSpawner {
             this.entity = Objects.requireNonNull(entity, "entity");
         }
 
-        @DependencySupplier("mob.spawner")
+        @Dependency
         @Memoize
         public @NotNull MobSpawner getSpawner() {
             return spawner;
         }
 
-        @DependencySupplier("mob.store")
+        @Dependency
         @Memoize
         public MobStore getMobStore() {
             return mobStore;
         }
 
-        @DependencySupplier("mob.model")
+        @Dependency
         @Memoize
         public @NotNull MobModel getModel() {
             return model;
         }
 
-        @DependencySupplier("mob.entity.entity")
+        @Dependency
         @Memoize
         public @NotNull Entity getEntity() {
             return entity;
         }
 
-        @DependencySupplier("mob.entity.neural_entity")
+        @Dependency
         @Memoize
         public @NotNull NeuralEntity getNeuralEntity() {
             return entity;

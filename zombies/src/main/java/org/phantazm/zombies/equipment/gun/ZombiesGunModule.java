@@ -1,6 +1,6 @@
 package org.phantazm.zombies.equipment.gun;
 
-import com.github.steanky.element.core.annotation.DependencySupplier;
+import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import net.minestom.server.entity.Entity;
@@ -44,56 +44,56 @@ public class ZombiesGunModule implements DependencyModule {
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.gun.player_view")
+    @Dependency
     public @NotNull PlayerView getPlayerView() {
         return playerView;
     }
 
     // TODO: maybe make this name-key based for EntityInstanceAudienceProvider
     @Memoize
-    @DependencySupplier("zombies.dependency.gun.entity_supplier")
+    @Dependency("zombies.dependency.gun.entity_supplier")
     public @NotNull Supplier<Optional<? extends Entity>> getEntitySupplier() {
         return getShooterSupplier();
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.gun.shooter.supplier")
+    @Dependency("zombies.dependency.gun.shooter.supplier")
     public @NotNull Supplier<Optional<? extends Entity>> getShooterSupplier() {
         return playerView::getPlayer;
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.gun.shooter.uuid")
+    @Dependency
     public @NotNull UUID getShooterUUID() {
         return playerView.getUUID();
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.mob.spawner")
+    @Dependency
     public @NotNull MobSpawner getMobSpawner() {
         return mobSpawner;
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.mob.store")
+    @Dependency
     public @NotNull MobStore getMobStore() {
         return mobStore;
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.gun.event_node")
+    @Dependency
     public @NotNull EventNode<Event> getEventNode() {
         return eventNode;
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.gun.random")
+    @Dependency
     public @NotNull Random getRandom() {
         return random;
     }
 
     @Memoize
-    @DependencySupplier("zombies.dependency.gun.map_objects")
+    @Dependency
     public @NotNull MapObjects getMapObjects() {
         return mapObjects;
     }

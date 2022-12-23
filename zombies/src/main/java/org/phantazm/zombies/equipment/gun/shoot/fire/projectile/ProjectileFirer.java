@@ -5,6 +5,8 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.dependency.DependencyProvider;
+import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -44,11 +46,15 @@ import java.util.function.Supplier;
 public class ProjectileFirer implements Firer {
 
     private static final ElementFactory<Data, ProjectileFirer> FACTORY = (objectData, context, dependencyProvider) -> {
-        EventNode<Event> node = dependencyProvider.provide(Key.key("zombies.dependency.gun.event_node"));
+        EventNode<Event> node = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
+        }));
 
         Supplier<Optional<? extends Entity>> entitySupplier =
-                dependencyProvider.provide(Key.key("zombies.dependency.gun.shooter.supplier"));
-        UUID shooterUUID = dependencyProvider.provide(Key.key("zombies.dependency.gun.firer.projectile.shooter.uuid"));
+                dependencyProvider.provide(DependencyProvider.key(new Token<>() {
+                }, Key.key("zombies.dependency.gun.shooter.supplier")));
+
+        UUID shooterUUID = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
+        }));
         ShotEndpointSelector endpointSelector =
                 context.provide(objectData.endSelectorPath(), dependencyProvider, false);
         TargetFinder targetFinder = context.provide(objectData.targetFinderPath(), dependencyProvider, false);
@@ -58,8 +64,10 @@ public class ProjectileFirer implements Firer {
         for (String shotHandlerPath : objectData.shotHandlerPaths()) {
             shotHandlers.add(context.provide(shotHandlerPath, dependencyProvider, false));
         }
-        MobStore mobStore = dependencyProvider.provide(Key.key("zombies.dependency.gun.store"));
-        MobSpawner spawner = dependencyProvider.provide(Key.key("zombies.dependency.gun.spawner"));
+        MobStore mobStore = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
+        }));
+        MobSpawner spawner = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
+        }));
 
         ProjectileFirer firer =
                 new ProjectileFirer(objectData, entitySupplier, shooterUUID, endpointSelector, targetFinder,

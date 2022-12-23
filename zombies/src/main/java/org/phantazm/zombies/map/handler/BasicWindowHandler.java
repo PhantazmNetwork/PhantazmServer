@@ -49,16 +49,16 @@ public class BasicWindowHandler implements WindowHandler {
 
         if (!crouching || !zombiesPlayer.isAlive() || playerOptional.isEmpty()) {
             repairOperationMap.remove(zombiesPlayer.getUUID());
+            return;
         }
-        else {
-            Player player = playerOptional.get();
 
-            for (Window window : windows) {
-                if (window.isInRange(player.getPosition(), repairRadius)) {
-                    repairOperationMap.put(player.getUuid(),
-                            new RepairOperation(zombiesPlayer, window, System.currentTimeMillis()));
-                    return;
-                }
+        Player player = playerOptional.get();
+
+        for (Window window : windows) {
+            if (window.isInRange(player.getPosition(), repairRadius)) {
+                repairOperationMap.put(player.getUuid(),
+                        new RepairOperation(zombiesPlayer, window, System.currentTimeMillis()));
+                return;
             }
         }
     }

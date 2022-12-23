@@ -1,6 +1,6 @@
 package org.phantazm.zombies.map.objects;
 
-import com.github.steanky.element.core.annotation.DependencySupplier;
+import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
@@ -269,70 +269,70 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.instance")
+        @Dependency
         @Override
         public @NotNull Instance instance() {
             return instance;
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.random")
+        @Dependency
         @Override
         public @NotNull Random random() {
             return random;
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.round_handler_supplier")
+        @Dependency
         @Override
         public @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier() {
             return roundHandlerSupplier;
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.flaggable")
+        @Dependency
         @Override
         public @NotNull Flaggable flaggable() {
             return flaggable;
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.modifier_source")
+        @Dependency
         @Override
         public @NotNull TransactionModifierSource modifierSource() {
             return transactionModifierSource;
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.slot_distributor")
+        @Dependency
         @Override
         public @NotNull SlotDistributor slotDistributor() {
             return slotDistributor;
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.player_map")
+        @Dependency
         @Override
         public @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap() {
             return playerMap;
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.player_collection")
+        @Dependency
         @Override
         public @NotNull Collection<? extends ZombiesPlayer> playerCollection() {
             return playerMap.values();
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.respawn_pos")
+        @Dependency
         @Override
         public @NotNull Pos respawnPos() {
             return respawnPos;
         }
 
         @Memoize
-        @DependencySupplier("zombies.dependency.map_object.map_objects")
+        @Dependency
         @Override
         public @NotNull Supplier<? extends MapObjects> mapObjectsSupplier() {
             return mapObjectsSupplier;

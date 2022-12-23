@@ -26,7 +26,7 @@ examination-string = { module = "net.kyori:examination-string", version.ref = "e
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
 
-element-core = { module = "com.github.steanky:element-core", version = "0.9.1" }
+element-core = { module = "com.github.steanky:element-core", version = "0.10.0" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }
@@ -52,7 +52,7 @@ minestom = { module = "org.phantazm.Minestom:Minestom", version.ref = "minestom"
 minestom-testing = { module = "org.phantazm.Minestom:testing", version.ref = "minestom" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.7.0" }
-                                                               
+
 renderer = { module = "com.github.0x3C50:Renderer", version = "90737050df" }
 
 satin = { module = "io.github.ladysnake:satin", version = "1.9.0" }
