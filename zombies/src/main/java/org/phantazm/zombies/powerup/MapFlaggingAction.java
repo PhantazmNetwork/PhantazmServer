@@ -18,7 +18,7 @@ public class MapFlaggingAction implements Supplier<PowerupAction> {
     @FactoryMethod
     public MapFlaggingAction(@NotNull Data data,
             @NotNull @DataName("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
-            @NotNull @Dependency("zombies.dependency.map_object.flaggable") Flaggable flaggable) {
+            @NotNull @Dependency Flaggable flaggable) {
         this.data = Objects.requireNonNull(data, "data");
         this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");
         this.flaggable = Objects.requireNonNull(flaggable, "flaggable");

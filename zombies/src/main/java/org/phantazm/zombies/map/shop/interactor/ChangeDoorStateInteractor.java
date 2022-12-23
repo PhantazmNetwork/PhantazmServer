@@ -26,8 +26,7 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
 
     @FactoryMethod
     public ChangeDoorStateInteractor(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.map_objects")
-            Supplier<? extends MapObjects> mapObjects) {
+            @NotNull @Dependency Supplier<? extends MapObjects> mapObjects) {
         super(data);
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }

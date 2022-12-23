@@ -18,8 +18,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     private final Instance instance;
 
     @FactoryMethod
-    public MessagingInteractor(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
+    public MessagingInteractor(@NotNull Data data, @NotNull @Dependency Instance instance) {
         super(data);
         this.instance = Objects.requireNonNull(instance, "instance");
     }

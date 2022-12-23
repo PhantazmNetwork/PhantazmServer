@@ -18,8 +18,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     private final List<GuiItem> guiItems;
 
     @FactoryMethod
-    public OpenGuiInteractor(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.slot_distributor") SlotDistributor slotDistributor,
+    public OpenGuiInteractor(@NotNull Data data, @NotNull @Dependency SlotDistributor slotDistributor,
             @NotNull @DataName("items") List<GuiItem> guiItems) {
         super(data);
         this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");

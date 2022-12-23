@@ -22,8 +22,7 @@ public class ItemVisual implements Supplier<PowerupVisual> {
     private final Instance instance;
 
     @FactoryMethod
-    public ItemVisual(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
+    public ItemVisual(@NotNull Data data, @NotNull @Dependency Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");
     }

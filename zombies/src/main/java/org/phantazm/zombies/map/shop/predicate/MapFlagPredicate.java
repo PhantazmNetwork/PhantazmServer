@@ -16,8 +16,7 @@ public class MapFlagPredicate extends PredicateBase<MapFlagPredicate.Data> {
     private final Flaggable flaggable;
 
     @FactoryMethod
-    public MapFlagPredicate(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.flaggable") Flaggable flaggable) {
+    public MapFlagPredicate(@NotNull Data data, @NotNull @Dependency Flaggable flaggable) {
         super(data);
         this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
     }

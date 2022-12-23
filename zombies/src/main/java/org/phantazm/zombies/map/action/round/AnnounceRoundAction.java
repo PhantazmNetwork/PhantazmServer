@@ -29,8 +29,7 @@ public class AnnounceRoundAction implements Action<Round> {
      * @param instance the current instance
      */
     @FactoryMethod
-    public AnnounceRoundAction(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
+    public AnnounceRoundAction(@NotNull Data data, @NotNull @Dependency Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instane");
     }

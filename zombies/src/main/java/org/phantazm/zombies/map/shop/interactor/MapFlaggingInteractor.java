@@ -17,8 +17,7 @@ public class MapFlaggingInteractor extends InteractorBase<MapFlaggingInteractor.
     private final Flaggable flaggable;
 
     @FactoryMethod
-    public MapFlaggingInteractor(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.flaggable") Flaggable flaggable) {
+    public MapFlaggingInteractor(@NotNull Data data, @NotNull @Dependency Flaggable flaggable) {
         super(data);
         this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
     }

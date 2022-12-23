@@ -27,8 +27,7 @@ public class SpawnMobsAction implements Action<Room> {
 
     @FactoryMethod
     public SpawnMobsAction(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.round_handler_supplier")
-            Supplier<? extends RoundHandler> roundHandlerSupplier) {
+            @NotNull @Dependency Supplier<? extends RoundHandler> roundHandlerSupplier) {
         this.data = Objects.requireNonNull(data, "data");
         this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
     }

@@ -19,8 +19,7 @@ public class MapTransactionModifierAddAction implements Supplier<PowerupAction> 
     @FactoryMethod
     public MapTransactionModifierAddAction(@NotNull Data data,
             @NotNull @DataName("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
-            @Dependency("zombies.dependency.map_object.modifier_source")
-            TransactionModifierSource transactionModifierSource) {
+            @Dependency TransactionModifierSource transactionModifierSource) {
         this.data = Objects.requireNonNull(data, "data");
         this.transactionModifierSource = transactionModifierSource;
         this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");

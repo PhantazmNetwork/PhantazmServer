@@ -22,8 +22,7 @@ public class HologramVisual implements Supplier<PowerupVisual> {
     private final Instance instance;
 
     @FactoryMethod
-    public HologramVisual(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
+    public HologramVisual(@NotNull Data data, @NotNull @Dependency Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");
     }

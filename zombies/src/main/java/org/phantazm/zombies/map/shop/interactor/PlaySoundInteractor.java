@@ -16,8 +16,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     private final Instance instance;
 
     @FactoryMethod
-    public PlaySoundInteractor(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.map_object.instance") Instance instance) {
+    public PlaySoundInteractor(@NotNull Data data, @NotNull @Dependency Instance instance) {
         super(data);
         this.instance = Objects.requireNonNull(instance, "instance");
     }

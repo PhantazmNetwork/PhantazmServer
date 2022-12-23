@@ -23,9 +23,8 @@ public class RevivePlayersAction implements Action<Round> {
     private final Pos respawnPos;
 
     @FactoryMethod
-    public RevivePlayersAction(@NotNull @Dependency("zombies.dependency.map_object.player_map")
-    Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull @Dependency("zombies.dependency.map_object.respawn_pos") Pos respawnPos) {
+    public RevivePlayersAction(@NotNull @Dependency Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull @Dependency Pos respawnPos) {
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPoint");
     }

@@ -27,8 +27,9 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     private boolean redraw;
 
     @FactoryMethod
-    public InteractingClickHandler(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map_object.player_map")
-    Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull @DataName("updating_item") UpdatingItem updatingItem,
+    public InteractingClickHandler(@NotNull Data data,
+            @NotNull @Dependency Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull @DataName("updating_item") UpdatingItem updatingItem,
             @NotNull @DataName("click_interactor") ShopInteractor clickInteractor) {
         super(data, playerMap);
         this.updatingItem = Objects.requireNonNull(updatingItem, "updatingItem");

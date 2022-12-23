@@ -18,8 +18,8 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     private final TransactionModifierSource transactionModifierSource;
 
     @FactoryMethod
-    public StaticCostPredicate(@NotNull Data data, @NotNull @Dependency("zombies.dependency.map_object.modifier_source")
-    TransactionModifierSource transactionModifierSource) {
+    public StaticCostPredicate(@NotNull Data data,
+            @NotNull @Dependency TransactionModifierSource transactionModifierSource) {
         super(data);
         this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
     }
