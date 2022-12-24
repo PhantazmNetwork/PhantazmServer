@@ -1,18 +1,28 @@
 package org.phantazm.zombies.player;
 
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.InventoryAccess;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.mob.MobStore;
+import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.equipment.Equipment;
 import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.map.MapSettingsInfo;
+import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -75,4 +85,15 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
     default @NotNull UUID getUUID() {
         return getModule().getPlayerView().getUUID();
     }
+
+    interface Source {
+
+        ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+                @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+                @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
+                @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
+                @NotNull MobStore mobStore);
+
+    }
+
 }

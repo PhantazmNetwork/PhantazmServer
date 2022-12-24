@@ -41,6 +41,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.neuron.bindings.minestom.chunk.NeuralChunk;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.scene.ZombiesSceneProvider;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
 
@@ -169,7 +170,8 @@ final class ZombiesTest {
                             new BasicClientBlockHandlerSource(
                                     instance -> new InstanceClientBlockHandler(instance, global, -64, 384)),
                             contextManager, keyParser, ZombiesFeature.powerups(),
-                            EquipmentFeature::createEquipmentCreator, corpseTeam);
+                            new BasicZombiesPlayerSource(Mob.getMobSpawner(), EquipmentFeature::createEquipmentCreator,
+                                    corpseTeam));
             providers.put(entry.getKey(), provider);
         }
         ZombiesSceneRouter sceneRouter = new ZombiesSceneRouter(providers);

@@ -18,7 +18,7 @@ public class UuidPredicate extends PredicateBase<UuidPredicate.Data> {
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        return data.blacklist != data.uuids.contains(interaction.player().getModule().getPlayerView().getUUID());
+        return data.blacklist != data.uuids.contains(interaction.player().getUUID());
     }
 
     @DataObject
