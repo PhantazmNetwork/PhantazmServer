@@ -25,8 +25,7 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
     private boolean searchedDoor;
 
     @FactoryMethod
-    public ChangeDoorStateInteractor(@NotNull Data data,
-            @NotNull @Dependency Supplier<? extends MapObjects> mapObjects) {
+    public ChangeDoorStateInteractor(@NotNull Data data, @NotNull Supplier<? extends MapObjects> mapObjects) {
         super(data);
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }

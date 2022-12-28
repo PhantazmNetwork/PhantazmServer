@@ -13,7 +13,7 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
     private final List<ShopPredicate> predicates;
 
     @FactoryMethod
-    public OrPredicate(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates) {
+    public OrPredicate(@NotNull Data data, @Child("predicates") List<ShopPredicate> predicates) {
         super(data);
         this.predicates = List.copyOf(predicates);
     }

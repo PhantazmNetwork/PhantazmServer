@@ -18,8 +18,8 @@ public class MapTransactionModifierMultiplyAction implements Supplier<PowerupAct
 
     @FactoryMethod
     public MapTransactionModifierMultiplyAction(@NotNull Data data,
-            @NotNull @DataName("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
-            @Dependency TransactionModifierSource transactionModifierSource) {
+            @NotNull @Child("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
+            @NotNull TransactionModifierSource transactionModifierSource) {
         this.data = Objects.requireNonNull(data, "data");
         this.transactionModifierSource = transactionModifierSource;
         this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");

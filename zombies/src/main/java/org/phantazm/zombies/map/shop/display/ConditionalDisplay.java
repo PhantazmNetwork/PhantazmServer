@@ -17,9 +17,8 @@ public class ConditionalDisplay implements ShopDisplay {
     private List<ShopDisplay> activeDisplays;
 
     @FactoryMethod
-    public ConditionalDisplay(@NotNull Data data,
-            @NotNull @DataName("success_displays") List<ShopDisplay> successDisplays,
-            @NotNull @DataName("failure_displays") List<ShopDisplay> failureDisplays) {
+    public ConditionalDisplay(@NotNull @Child("success_displays") List<ShopDisplay> successDisplays,
+            @NotNull @Child("failure_displays") List<ShopDisplay> failureDisplays) {
         this.successDisplays = Objects.requireNonNull(successDisplays, "successDisplays");
         this.failureDisplays = Objects.requireNonNull(failureDisplays, "failureDisplays");
     }

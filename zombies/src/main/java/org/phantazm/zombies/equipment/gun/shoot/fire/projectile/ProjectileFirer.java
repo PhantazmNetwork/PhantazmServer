@@ -1,13 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.fire.projectile;
 
-import com.github.steanky.element.core.ElementFactory;
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.dependency.DependencyProvider;
-import com.github.steanky.ethylene.mapper.type.Token;
-import net.kyori.adventure.key.Key;
+import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -44,40 +37,6 @@ import java.util.function.Supplier;
 @Model("zombies.gun.firer.projectile")
 @Cache(false)
 public class ProjectileFirer implements Firer {
-
-    private static final ElementFactory<Data, ProjectileFirer> FACTORY = (objectData, context, dependencyProvider) -> {
-        EventNode<Event> node = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
-        }));
-
-        Supplier<Optional<? extends Entity>> entitySupplier =
-                dependencyProvider.provide(DependencyProvider.key(new Token<>() {
-                }, Key.key("zombies.dependency.gun.shooter.supplier")));
-
-        UUID shooterUUID = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
-        }));
-        ShotEndpointSelector endpointSelector =
-                context.provide(objectData.endSelectorPath(), dependencyProvider, false);
-        TargetFinder targetFinder = context.provide(objectData.targetFinderPath(), dependencyProvider, false);
-        ProjectileCollisionFilter collisionFilter =
-                context.provide(objectData.collisionFilterPath(), dependencyProvider, false);
-        Collection<ShotHandler> shotHandlers = new ArrayList<>(objectData.shotHandlerPaths().size());
-        for (String shotHandlerPath : objectData.shotHandlerPaths()) {
-            shotHandlers.add(context.provide(shotHandlerPath, dependencyProvider, false));
-        }
-        MobStore mobStore = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
-        }));
-        MobSpawner spawner = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
-        }));
-
-        ProjectileFirer firer =
-                new ProjectileFirer(objectData, entitySupplier, shooterUUID, endpointSelector, targetFinder,
-                        collisionFilter, shotHandlers, mobStore, spawner);
-        node.addListener(ProjectileCollideWithBlockEvent.class, firer::onProjectileCollision);
-        node.addListener(ProjectileCollideWithEntityEvent.class, firer::onProjectileCollision);
-
-        return firer;
-    };
-
     private final PriorityQueue<AliveProjectile> removalQueue =
             new PriorityQueue<>(Comparator.comparingLong(AliveProjectile::time));
     private final Map<UUID, FiredShot> firedShots = new HashMap<>();
@@ -104,10 +63,13 @@ public class ProjectileFirer implements Firer {
      * @param collisionFilter The {@link ProjectileCollisionFilter} of the {@link ProjectileFirer}
      * @param shotHandlers    The {@link ShotHandler}s of the {@link ProjectileFirer}
      */
+    @FactoryMethod
     public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-            @NotNull UUID shooterUUID, @NotNull ShotEndpointSelector endSelector, @NotNull TargetFinder targetFinder,
-            @NotNull ProjectileCollisionFilter collisionFilter, @NotNull Collection<ShotHandler> shotHandlers,
-            @NotNull MobStore mobStore, @NotNull MobSpawner spawner) {
+            @NotNull UUID shooterUUID, @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
+            @NotNull @Child("target_finder") TargetFinder targetFinder,
+            @NotNull @Child("collision_filter") ProjectileCollisionFilter collisionFilter,
+            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers, @NotNull MobStore mobStore,
+            @NotNull MobSpawner spawner, @NotNull EventNode<Event> node) {
         this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.shooterUUID = Objects.requireNonNull(shooterUUID, "shooterUUID");
@@ -117,11 +79,9 @@ public class ProjectileFirer implements Firer {
         this.shotHandlers = List.copyOf(shotHandlers);
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.spawner = Objects.requireNonNull(spawner, "spawner");
-    }
 
-    @FactoryMethod
-    public static @NotNull ElementFactory<Data, ProjectileFirer> factory() {
-        return FACTORY;
+        node.addListener(ProjectileCollideWithBlockEvent.class, this::onProjectileCollision);
+        node.addListener(ProjectileCollideWithEntityEvent.class, this::onProjectileCollision);
     }
 
     @Override
@@ -242,10 +202,10 @@ public class ProjectileFirer implements Firer {
      *                            before automatically exploding
      */
     @DataObject
-    public record Data(@NotNull String endSelectorPath,
-                       @NotNull String targetFinderPath,
-                       @NotNull String collisionFilterPath,
-                       @NotNull Collection<String> shotHandlerPaths,
+    public record Data(@NotNull @DataPath("end_selector") String endSelectorPath,
+                       @NotNull @DataPath("target_finder") String targetFinderPath,
+                       @NotNull @DataPath("collision_filter") String collisionFilterPath,
+                       @NotNull @DataPath("shot_handlers") Collection<String> shotHandlerPaths,
                        @NotNull MobModel model,
                        double power,
                        double spread,

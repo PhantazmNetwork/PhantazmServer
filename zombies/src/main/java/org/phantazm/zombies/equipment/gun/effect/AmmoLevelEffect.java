@@ -1,7 +1,6 @@
 package org.phantazm.zombies.equipment.gun.effect;
 
 import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
@@ -27,7 +26,7 @@ public class AmmoLevelEffect implements GunEffect {
      * @param playerView The {@link PlayerView} of the {@link Player} to set the level of
      */
     @FactoryMethod
-    public AmmoLevelEffect(@NotNull @Dependency("zombies.dependency.gun.player_view") PlayerView playerView) {
+    public AmmoLevelEffect(@NotNull PlayerView playerView) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
     }
 

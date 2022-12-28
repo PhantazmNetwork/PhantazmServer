@@ -18,12 +18,14 @@ import java.util.Optional;
 @Model("zombies.sidebar.lineupdater.ticks")
 public class TicksLineUpdater implements SidebarLineUpdater {
 
-    private static final ElementFactory<Data, TicksLineUpdater> FACTORY = (objectData, context, dependencyProvider) -> {
-        Wrapper<Long> ticksWrapper = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
-        }));
-        TickFormatter tickFormatter = context.provide(objectData.tickFormatterPath(), dependencyProvider, false);
-        return new TicksLineUpdater(ticksWrapper, tickFormatter);
-    };
+    private static final ElementFactory<Data, TicksLineUpdater> FACTORY =
+            (objectData, objectPath, context, dependencyProvider) -> {
+                Wrapper<Long> ticksWrapper = dependencyProvider.provide(DependencyProvider.key(new Token<>() {
+                }));
+                TickFormatter tickFormatter =
+                        context.provide(objectPath.resolve(objectData.tickFormatterPath()), dependencyProvider, false);
+                return new TicksLineUpdater(ticksWrapper, tickFormatter);
+            };
     private final Wrapper<Long> ticksWrapper;
     private final TickFormatter tickFormatter;
     private long lastTicks = -1;

@@ -5,6 +5,7 @@ import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.element.core.path.ElementPath;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -19,10 +20,10 @@ public class ElementSidebarUpdaterCreator implements Function<ZombiesPlayer, Sid
 
     private final KeyParser keyParser;
 
-    private final String updaterPath;
+    private final ElementPath updaterPath;
 
     public ElementSidebarUpdaterCreator(@NotNull SidebarModule sidebarModule, @NotNull ElementContext sidebarContext,
-            @NotNull KeyParser keyParser, @NotNull String updaterPath) {
+            @NotNull KeyParser keyParser, @NotNull ElementPath updaterPath) {
         this.sidebarModule = Objects.requireNonNull(sidebarModule, "sidebarModule");
         this.sidebarContext = Objects.requireNonNull(sidebarContext, "sidebarContext");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");

@@ -36,11 +36,10 @@ public class HitScanFirer implements Firer {
      * @param shotHandlers   The {@link HitScanFirer}'s {@link ShotHandler}s
      */
     @FactoryMethod
-    public HitScanFirer(@NotNull Data data, @NotNull @Dependency("zombies.dependency.gun.shooter.supplier")
-    Supplier<Optional<? extends Entity>> entitySupplier,
-            @NotNull @DataName("end_selector") ShotEndpointSelector endSelector,
-            @NotNull @DataName("target_finder") TargetFinder targetFinder,
-            @NotNull @DataName("shot_handlers") Collection<ShotHandler> shotHandlers) {
+    public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+            @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
+            @NotNull @Child("target_finder") TargetFinder targetFinder,
+            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");

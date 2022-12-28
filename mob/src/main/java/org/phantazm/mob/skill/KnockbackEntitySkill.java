@@ -17,8 +17,8 @@ public class KnockbackEntitySkill implements Skill {
     private final TargetSelector<? extends LivingEntity> selector;
 
     @FactoryMethod
-    public KnockbackEntitySkill(@NotNull Data data, @NotNull @Dependency("mob.entity.entity") Entity user,
-            @NotNull @DataName("selector") TargetSelector<? extends LivingEntity> selector) {
+    public KnockbackEntitySkill(@NotNull Data data, @NotNull Entity user,
+            @NotNull @Child("selector") TargetSelector<? extends LivingEntity> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.user = Objects.requireNonNull(user, "user");
         this.selector = Objects.requireNonNull(selector, "selector");

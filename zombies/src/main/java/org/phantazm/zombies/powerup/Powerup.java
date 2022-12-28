@@ -7,13 +7,15 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public class Powerup implements Tickable, Keyed {
     private final Key type;
-    private final PowerupVisual[] visuals;
-    private final PowerupAction[] actions;
+    private final List<PowerupVisual> visuals;
+    private final List<PowerupAction> actions;
     private final DeactivationPredicate despawnPredicate;
     private final Point spawnLocation;
 
@@ -25,8 +27,8 @@ public class Powerup implements Tickable, Keyed {
             @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
             @NotNull Point spawnLocation) {
         this.type = Objects.requireNonNull(type, "type");
-        this.visuals = visuals.toArray(PowerupVisual[]::new);
-        this.actions = actions.toArray(PowerupAction[]::new);
+        this.visuals = new ArrayList<>(visuals);
+        this.actions = new ArrayList<>(actions);
         this.despawnPredicate = Objects.requireNonNull(despawnPredicate, "despawnPredicate");
         this.spawnLocation = Objects.requireNonNull(spawnLocation, "spawnLocation");
     }
@@ -61,18 +63,14 @@ public class Powerup implements Tickable, Keyed {
         }
 
         boolean anyActive = false;
-        for (int i = 0; i < actions.length; i++) {
-            PowerupAction action = actions[i];
-            if (action == null) {
-                continue;
-            }
+        for (int i = actions.size() - 1; i >= 0; i--) {
+            PowerupAction action = actions.get(i);
 
             action.activate(player, time);
 
-            //deactivate immediately if necessary
             if (action.deactivationPredicate().shouldDeactivate(time)) {
                 action.deactivate(player);
-                actions[i] = null;
+                actions.remove(i);
             }
             else {
                 anyActive = true;
@@ -113,16 +111,13 @@ public class Powerup implements Tickable, Keyed {
         }
 
         boolean anyActive = false;
-        for (int i = 0; i < actions.length; i++) {
-            PowerupAction action = actions[i];
-            if (action == null) {
-                continue;
-            }
+        for (int i = actions.size() - 1; i >= 0; i--) {
+            PowerupAction action = actions.get(i);
 
             DeactivationPredicate deactivationPredicate = action.deactivationPredicate();
             if (deactivationPredicate.shouldDeactivate(time)) {
                 action.deactivate(activatingPlayer);
-                actions[i] = null;
+                actions.remove(i);
             }
             else {
                 anyActive = true;

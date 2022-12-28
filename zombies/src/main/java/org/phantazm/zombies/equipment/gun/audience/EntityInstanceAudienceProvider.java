@@ -1,7 +1,7 @@
 package org.phantazm.zombies.equipment.gun.audience;
 
 import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
@@ -27,7 +27,7 @@ public class EntityInstanceAudienceProvider implements AudienceProvider {
      * @param entitySupplier The {@link Supplier} of an {@link Entity} to retrieve the {@link Instance} of
      */
     @FactoryMethod
-    public EntityInstanceAudienceProvider(@NotNull @Dependency("zombies.dependency.gun.entity_supplier")
+    public EntityInstanceAudienceProvider(@NotNull @Depend("zombies.dependency.gun.entity_supplier")
     Supplier<Optional<? extends Entity>> entitySupplier) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
     }

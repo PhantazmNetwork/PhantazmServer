@@ -13,7 +13,7 @@ public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     private final List<ShopPredicate> predicates;
 
     @FactoryMethod
-    public AndPredicate(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates) {
+    public AndPredicate(@NotNull Data data, @Child("predicates") List<ShopPredicate> predicates) {
         super(data);
         this.predicates = List.copyOf(predicates);
     }

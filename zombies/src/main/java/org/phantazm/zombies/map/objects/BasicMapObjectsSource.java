@@ -1,6 +1,6 @@
 package org.phantazm.zombies.map.objects;
 
-import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
@@ -8,6 +8,7 @@ import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.toolkit.collection.Wrapper;
@@ -37,7 +38,6 @@ import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.spawn.BasicSpawnDistributor;
 import org.phantazm.zombies.spawn.SpawnDistributor;
-import org.phantazm.zombies.util.ElementUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,16 +133,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             DependencyProvider dependencyProvider, Instance instance, ClientBlockHandler clientBlockHandler) {
         List<Window> windows = new ArrayList<>(windowInfoList.size());
         for (WindowInfo windowInfo : windowInfoList) {
-            ConfigList repairActionInfo = windowInfo.repairActions();
-            ConfigList breakActionInfo = windowInfo.breakActions();
+            List<Action<Window>> repairActions = contextManager.makeContext(windowInfo.repairActions())
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
 
-            List<Action<Window>> repairActions = new ArrayList<>(repairActionInfo.size());
-            List<Action<Window>> breakActions = new ArrayList<>(breakActionInfo.size());
-
-            ElementUtils.createElements(contextManager, repairActionInfo, repairActions, "window repair action",
-                    dependencyProvider, LOGGER);
-            ElementUtils.createElements(contextManager, breakActionInfo, breakActions, "window break action",
-                    dependencyProvider, LOGGER);
+            List<Action<Window>> breakActions = contextManager.makeContext(windowInfo.breakActions())
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
 
             windows.add(new Window(mapOrigin, instance, windowInfo, clientBlockHandler, repairActions, breakActions));
         }
@@ -154,27 +149,15 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             Instance instance) {
         List<Shop> shops = new ArrayList<>(shopInfoList.size());
         for (ShopInfo shopInfo : shopInfoList) {
-            ConfigNode rootNode = shopInfo.data();
-            ElementContext shopContext = contextManager.makeContext(rootNode);
+            ElementContext shopContext = contextManager.makeContext(shopInfo.data());
 
-            ConfigList predicateInfo = ElementUtils.extractList(rootNode, LOGGER, "predicates");
-            ConfigList successInteractorInfo = ElementUtils.extractList(rootNode, LOGGER, "successInteractors");
-            ConfigList failureInteractorInfo = ElementUtils.extractList(rootNode, LOGGER, "failureInteractors");
-            ConfigList displayInfo = ElementUtils.extractList(rootNode, LOGGER, "displays");
-
-            List<ShopPredicate> predicates = new ArrayList<>(predicateInfo.size());
-            List<ShopInteractor> successInteractors = new ArrayList<>(successInteractorInfo.size());
-            List<ShopInteractor> failureInteractors = new ArrayList<>(failureInteractorInfo.size());
-            List<ShopDisplay> displays = new ArrayList<>(displayInfo.size());
-
-            ElementUtils.createElements(predicateInfo, "predicates", shopContext, predicates, "shop predicate",
-                    dependencyProvider, LOGGER);
-            ElementUtils.createElements(successInteractorInfo, "successInteractors", shopContext, successInteractors,
-                    "shop success interactor", dependencyProvider, LOGGER);
-            ElementUtils.createElements(failureInteractorInfo, "failureInteractors", shopContext, failureInteractors,
-                    "shop failure interactor", dependencyProvider, LOGGER);
-            ElementUtils.createElements(displayInfo, "displays", shopContext, displays, "shop display",
-                    dependencyProvider, LOGGER);
+            List<ShopPredicate> predicates =
+                    shopContext.provideCollection(ElementPath.of("predicates"), dependencyProvider);
+            List<ShopInteractor> successInteractors =
+                    shopContext.provideCollection(ElementPath.of("successInteractors"), dependencyProvider);
+            List<ShopInteractor> failureInteractors =
+                    shopContext.provideCollection(ElementPath.of("failureInteractors"), dependencyProvider);
+            List<ShopDisplay> displays = shopContext.provideCollection(ElementPath.of("displays"), dependencyProvider);
 
             shops.add(new Shop(shopInfo, instance, predicates, successInteractors, failureInteractors, displays));
         }
@@ -186,12 +169,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             Instance instance) {
         List<Door> doors = new ArrayList<>(doorInfoList.size());
         for (DoorInfo doorInfo : doorInfoList) {
-            ConfigList openActionInfo = doorInfo.openActions();
-
-            List<Action<Door>> openActions = new ArrayList<>(openActionInfo.size());
-
-            ElementUtils.createElements(contextManager, openActionInfo, openActions, "door open action",
-                    dependencyProvider, LOGGER);
+            List<Action<Door>> openActions = contextManager.makeContext(doorInfo.openActions())
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
 
             doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions));
         }
@@ -202,12 +181,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     private List<Room> buildRooms(Point mapOrigin, List<RoomInfo> roomInfoList, DependencyProvider dependencyProvider) {
         List<Room> rooms = new ArrayList<>(roomInfoList.size());
         for (RoomInfo roomInfo : roomInfoList) {
-            ConfigList openActionInfo = roomInfo.openActions();
-
-            List<Action<Room>> openActions = new ArrayList<>(openActionInfo.size());
-
-            ElementUtils.createElements(contextManager, openActionInfo, openActions, "room open action",
-                    dependencyProvider, LOGGER);
+            List<Action<Room>> openActions = contextManager.makeContext(roomInfo.openActions())
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
 
             rooms.add(new Room(mapOrigin, roomInfo, openActions));
         }
@@ -219,19 +194,14 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             DependencyProvider dependencyProvider, SpawnDistributor spawnDistributor) {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
+            List<Action<Round>> startActions = contextManager.makeContext(roundInfo.startActions())
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
+
+            List<Action<Round>> endActions = contextManager.makeContext(roundInfo.endActions())
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
+
             List<WaveInfo> waveInfo = roundInfo.waves();
-            ConfigList startActionInfo = roundInfo.startActions();
-            ConfigList endActionInfo = roundInfo.endActions();
-
             List<Wave> waves = new ArrayList<>(waveInfo.size());
-            List<Action<Round>> startActions = new ArrayList<>(startActionInfo.size());
-            List<Action<Round>> endActions = new ArrayList<>(endActionInfo.size());
-
-            ElementUtils.createElements(contextManager, startActionInfo, startActions, "round start action",
-                    dependencyProvider, LOGGER);
-            ElementUtils.createElements(contextManager, endActionInfo, endActions, "round end action",
-                    dependencyProvider, LOGGER);
-
             for (WaveInfo wave : roundInfo.waves()) {
                 waves.add(new Wave(wave));
             }
@@ -242,6 +212,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         return rounds;
     }
 
+    @Memoize
+    @Depend
     public static class Module implements DependencyModule, MapObjects.Module {
         private final Instance instance;
         private final Random random;
@@ -268,71 +240,51 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier, "mapObjectsSupplier");
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull Instance instance() {
             return instance;
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull Random random() {
             return random;
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier() {
             return roundHandlerSupplier;
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull Flaggable flaggable() {
             return flaggable;
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull TransactionModifierSource modifierSource() {
             return transactionModifierSource;
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull SlotDistributor slotDistributor() {
             return slotDistributor;
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap() {
             return playerMap;
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull Collection<? extends ZombiesPlayer> playerCollection() {
             return playerMap.values();
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull Pos respawnPos() {
             return respawnPos;
         }
 
-        @Memoize
-        @Dependency
         @Override
         public @NotNull Supplier<? extends MapObjects> mapObjectsSupplier() {
             return mapObjectsSupplier;

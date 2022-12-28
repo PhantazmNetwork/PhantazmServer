@@ -17,7 +17,7 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
     private final UpgradePath upgradePath;
 
     @FactoryMethod
-    public AddEquipmentInteractor(@NotNull Data data, @NotNull @DataName("upgrade_path") UpgradePath upgradePath) {
+    public AddEquipmentInteractor(@NotNull Data data, @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
         super(data);
         this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
     }

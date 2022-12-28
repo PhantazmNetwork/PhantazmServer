@@ -18,8 +18,8 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     private final List<GuiItem> guiItems;
 
     @FactoryMethod
-    public OpenGuiInteractor(@NotNull Data data, @NotNull @Dependency SlotDistributor slotDistributor,
-            @NotNull @DataName("items") List<GuiItem> guiItems) {
+    public OpenGuiInteractor(@NotNull Data data, @NotNull SlotDistributor slotDistributor,
+            @NotNull @Child("items") List<GuiItem> guiItems) {
         super(data);
         this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
         this.guiItems = Objects.requireNonNull(guiItems, "guiItems");

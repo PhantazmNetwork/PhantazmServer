@@ -26,7 +26,7 @@ public class SendMessageEffect implements GunEffect {
      */
     @FactoryMethod
     public SendMessageEffect(@NotNull Data data,
-            @NotNull @DataName("audience_provider") AudienceProvider audienceProvider) {
+            @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data, "data");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }

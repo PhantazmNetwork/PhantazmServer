@@ -1,6 +1,5 @@
 package org.phantazm.zombies.scoreboard.sidebar.lineupdater.condition;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +15,7 @@ public class AliveCondition implements BooleanSupplier {
     private final PlayerStateSwitcher stateSwitcher;
 
     @FactoryMethod
-    public AliveCondition(
-            @NotNull @Dependency("zombies.dependency.player.state_switcher") PlayerStateSwitcher stateSwitcher) {
+    public AliveCondition(@NotNull PlayerStateSwitcher stateSwitcher) {
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
     }
 

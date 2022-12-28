@@ -31,7 +31,7 @@ public class FeedbackShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public FeedbackShotHandler(@NotNull Data data,
-            @NotNull @DataName("audience_provider") AudienceProvider audienceProvider) {
+            @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data, "data");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }

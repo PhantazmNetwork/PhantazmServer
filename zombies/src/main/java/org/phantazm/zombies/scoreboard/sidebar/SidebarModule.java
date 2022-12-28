@@ -1,6 +1,6 @@
 package org.phantazm.zombies.scoreboard.sidebar;
 
-import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.toolkit.collection.Wrapper;
@@ -12,6 +12,8 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.Collection;
 import java.util.Objects;
 
+@Memoize
+@Depend
 @SuppressWarnings("ClassCanBeRecord")
 public class SidebarModule implements DependencyModule {
 
@@ -35,32 +37,22 @@ public class SidebarModule implements DependencyModule {
         this.maxPlayers = maxPlayers;
     }
 
-    @Dependency
-    @Memoize
     public @NotNull Collection<? extends ZombiesPlayer> getZombiesPlayers() {
         return zombiesPlayers;
     }
 
-    @Dependency
-    @Memoize
     public @NotNull RoundHandler getRoundHandler() {
         return roundHandler;
     }
 
-    @Dependency
-    @Memoize
     public @NotNull Wrapper<Long> getTicksSinceStart() {
         return ticksSinceStart;
     }
 
-    @Dependency
-    @Memoize
     public @NotNull Component getDate() {
         return date;
     }
 
-    @Dependency
-    @Memoize
     public int getMaxPlayers() {
         return maxPlayers;
     }

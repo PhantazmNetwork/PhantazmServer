@@ -2,13 +2,13 @@ package org.phantazm.zombies.powerup;
 
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.dependency.DependencyProvider;
+import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.util.ElementUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,27 +38,15 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
         for (Map.Entry<Key, PowerupInfo> dataEntry : powerups.entrySet()) {
             PowerupInfo data = dataEntry.getValue();
 
-            ConfigList visualData = data.visuals();
-            ConfigList actionData = data.actions();
-            ConfigNode deactivationPredicateData = data.deactivationPredicate();
+            Collection<Supplier<PowerupVisual>> visuals = contextManager.makeContext(data.visuals())
+                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider);
 
-            Collection<Supplier<PowerupVisual>> visuals = new ArrayList<>(visualData.size());
-            Collection<Supplier<PowerupAction>> actions = new ArrayList<>(actionData.size());
-
-            ElementUtils.createElements(contextManager, visualData, visuals, "powerup visual", mapDependencyProvider,
-                    LOGGER);
-
-            ElementUtils.createElements(contextManager, actionData, actionData, "powerup action", mapDependencyProvider,
-                    LOGGER);
+            Collection<Supplier<PowerupAction>> actions = contextManager.makeContext(data.actions())
+                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider);
 
             Supplier<DeactivationPredicate> deactivationPredicateSupplier =
-                    ElementUtils.createElement(contextManager, deactivationPredicateData,
-                            "powerup deactivation predicate", mapDependencyProvider, LOGGER);
-
-            if (deactivationPredicateSupplier == null) {
-                deactivationPredicateSupplier = () -> ImmediateDeactivationPredicate.INSTANCE;
-            }
-
+                    contextManager.makeContext(data.deactivationPredicate()).provide(mapDependencyProvider);
+            
             powerupMap.put(dataEntry.getKey(), new PowerupComponents(visuals, actions, deactivationPredicateSupplier));
         }
 

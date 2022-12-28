@@ -7,9 +7,9 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.data.BasicDataInspector;
 import com.github.steanky.element.core.data.DataInspector;
-import com.github.steanky.element.core.factory.BasicCollectionCreator;
+import com.github.steanky.element.core.factory.BasicContainerCreator;
 import com.github.steanky.element.core.factory.BasicFactoryResolver;
-import com.github.steanky.element.core.factory.CollectionCreator;
+import com.github.steanky.element.core.factory.ContainerCreator;
 import com.github.steanky.element.core.factory.FactoryResolver;
 import com.github.steanky.element.core.key.*;
 import com.github.steanky.element.core.processor.BasicProcessorResolver;
@@ -33,11 +33,10 @@ public final class Element {
         KeyExtractor typeExtractor = new BasicKeyExtractor("type", keyParser);
         ElementTypeIdentifier elementTypeIdentifier = new BasicElementTypeIdentifier(keyParser);
         DataInspector dataInspector = new BasicDataInspector(keyParser);
-        CollectionCreator collectionCreator = new BasicCollectionCreator();
+        ContainerCreator containerCreator = new BasicContainerCreator();
 
         FactoryResolver factoryResolver =
-                new BasicFactoryResolver(keyParser, elementTypeIdentifier, dataInspector, collectionCreator,
-                        mappingProcessorSource);
+                new BasicFactoryResolver(keyParser, dataInspector, containerCreator, mappingProcessorSource);
 
         ProcessorResolver processorResolver = BasicProcessorResolver.INSTANCE;
         ElementInspector elementInspector = new BasicElementInspector(factoryResolver, processorResolver);
@@ -46,10 +45,8 @@ public final class Element {
         Registry<ElementFactory<?, ?>> factoryRegistry = new HashRegistry<>();
         Registry<Boolean> cacheRegistry = new HashRegistry<>();
 
-        PathSplitter pathSplitter = BasicPathSplitter.INSTANCE;
         ElementContext.Source source =
-                new BasicElementContext.Source(configRegistry, factoryRegistry, cacheRegistry, pathSplitter,
-                        typeExtractor);
+                new BasicElementContext.Source(configRegistry, factoryRegistry, cacheRegistry, typeExtractor);
 
         contextManager = new BasicContextManager(elementInspector, elementTypeIdentifier, source);
     }

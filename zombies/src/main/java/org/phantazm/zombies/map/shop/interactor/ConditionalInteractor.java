@@ -16,9 +16,9 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
     private final List<ShopInteractor> failureInteractors;
 
     @FactoryMethod
-    public ConditionalInteractor(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates,
-            @DataName("success_interactors") List<ShopInteractor> successInteractors,
-            @DataName("failure_interactors") List<ShopInteractor> failureInteractors) {
+    public ConditionalInteractor(@NotNull Data data, @Child("predicates") List<ShopPredicate> predicates,
+            @Child("success_interactors") List<ShopInteractor> successInteractors,
+            @Child("failure_interactors") List<ShopInteractor> failureInteractors) {
         super(data);
         this.predicates = Objects.requireNonNull(predicates, "predicates");
         this.successInteractors = Objects.requireNonNull(successInteractors, "successInteractors");

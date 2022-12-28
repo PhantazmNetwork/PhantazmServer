@@ -1,6 +1,5 @@
 package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
@@ -23,8 +22,7 @@ public class CoinsSidebarLineUpdater implements SidebarLineUpdater {
     private int lastCoins = -1;
 
     @FactoryMethod
-    public CoinsSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.player.player_view") PlayerView playerView,
-            @NotNull @Dependency("zombies.dependency.player.coins") PlayerCoins coins) {
+    public CoinsSidebarLineUpdater(@NotNull PlayerView playerView, @NotNull PlayerCoins coins) {
         this.playerNameFuture = playerView.getDisplayName();
         this.coins = Objects.requireNonNull(coins, "coins");
     }

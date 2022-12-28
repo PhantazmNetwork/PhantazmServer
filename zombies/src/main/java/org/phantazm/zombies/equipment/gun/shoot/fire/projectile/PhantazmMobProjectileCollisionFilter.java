@@ -1,7 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.fire.projectile;
 
 import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
@@ -26,8 +25,7 @@ public class PhantazmMobProjectileCollisionFilter implements ProjectileCollision
      * @param mobStore A {@link MobStore} to retrive {@link PhantazmMob}s from
      */
     @FactoryMethod
-    public PhantazmMobProjectileCollisionFilter(
-            @NotNull @Dependency("zombies.dependency.mob.store") MobStore mobStore) {
+    public PhantazmMobProjectileCollisionFilter(@NotNull MobStore mobStore) {
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 

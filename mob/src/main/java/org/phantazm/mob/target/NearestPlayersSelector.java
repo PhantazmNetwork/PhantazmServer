@@ -21,26 +21,8 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
      * Creates a {@link NearestPlayersSelector}.
      */
     @FactoryMethod
-    public NearestPlayersSelector(@NotNull Data data, @NotNull @Dependency("mob.entity.entity") Entity entity) {
+    public NearestPlayersSelector(@NotNull Data data, @NotNull Entity entity) {
         super(entity, data.range(), data.targetLimit());
-    }
-
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                double range = element.getNumberOrThrow("range").doubleValue();
-                int targetLimit = element.getNumberOrThrow("targetLimit").intValue();
-
-                return new Data(range, targetLimit);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return ConfigNode.of("range", data.range(), "targetLimit", data.targetLimit());
-            }
-        };
     }
 
     @Override

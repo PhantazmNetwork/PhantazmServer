@@ -1,10 +1,10 @@
 package org.phantazm.mob.skill;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
+import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
@@ -23,8 +23,8 @@ public class DuplicateSelfSkill implements Skill {
     private final Entity entity;
 
     @FactoryMethod
-    public DuplicateSelfSkill(@Dependency("mob.store") MobStore mobStore, @Dependency("mob.spawner") MobSpawner spawner,
-            @Dependency("mob.model") MobModel model, @Dependency("mob.entity.entity") Entity entity) {
+    public DuplicateSelfSkill(@NotNull MobStore mobStore, @NotNull MobSpawner spawner, @NotNull MobModel model,
+            @NotNull Entity entity) {
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.spawner = Objects.requireNonNull(spawner, "spawner");
         this.model = Objects.requireNonNull(model, "model");

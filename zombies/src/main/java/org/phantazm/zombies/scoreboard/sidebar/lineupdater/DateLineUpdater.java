@@ -1,6 +1,5 @@
 package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +12,7 @@ public class DateLineUpdater implements SidebarLineUpdater {
 
     private boolean baked = false;
 
-    public DateLineUpdater(@NotNull @Dependency("zombies.dependency.sidebar.date") Component date) {
+    public DateLineUpdater(@NotNull Component date) {
         this.date = Objects.requireNonNull(date, "date");
     }
 

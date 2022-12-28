@@ -22,7 +22,7 @@ public class StateReloadTester implements ReloadTester {
      * @param stats The gun's {@link GunStats}
      */
     @FactoryMethod
-    public StateReloadTester(@NotNull Data data, @NotNull @DataName("stats") GunStats stats) {
+    public StateReloadTester(@NotNull @Child("stats") GunStats stats) {
         this.stats = Objects.requireNonNull(stats, "stats");
     }
 

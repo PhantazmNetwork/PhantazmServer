@@ -1,6 +1,5 @@
 package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
@@ -19,8 +18,7 @@ public class ZombieKillsSidebarLineUpdater implements SidebarLineUpdater {
     private int killCount = -1;
 
     @FactoryMethod
-    public ZombieKillsSidebarLineUpdater(
-            @Dependency("zombies.dependency.player.kills") @NotNull PlayerKills playerKills) {
+    public ZombieKillsSidebarLineUpdater(@NotNull PlayerKills playerKills) {
         this.playerKills = Objects.requireNonNull(playerKills, "playerKills");
     }
 

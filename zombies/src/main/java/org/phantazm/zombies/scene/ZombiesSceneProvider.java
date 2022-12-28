@@ -4,6 +4,7 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.LongList;
@@ -409,16 +410,18 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Stage countdown =
                 new CountdownStage(instance, zombiesPlayers, messages, random, 400L, alertTicks, tickFormatter,
-                        newSidebarUpdaterCreator(sidebarModule, "countdown"));
+                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("scoreboard")));
 
         Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
-                mapInfo.settings().defaultEquipment(), newSidebarUpdaterCreator(sidebarModule, "inGame"));
-        Stage end = new EndStage(instance, zombiesPlayers, 200L, newSidebarUpdaterCreator(sidebarModule, "end"));
+                mapInfo.settings().defaultEquipment(),
+                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")));
+        Stage end = new EndStage(instance, zombiesPlayers, 200L,
+                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")));
         return new StageTransition(idle, countdown, inGame, end);
     }
 
     private @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> newSidebarUpdaterCreator(
-            @NotNull SidebarModule sidebarModule, @NotNull String scoreboardSubNode) {
+            @NotNull SidebarModule sidebarModule, @NotNull ElementPath scoreboardSubNode) {
         ElementContext context = contextManager.makeContext(mapInfo.scoreboard());
         return new ElementSidebarUpdaterCreator(sidebarModule, context, keyParser, scoreboardSubNode);
     }

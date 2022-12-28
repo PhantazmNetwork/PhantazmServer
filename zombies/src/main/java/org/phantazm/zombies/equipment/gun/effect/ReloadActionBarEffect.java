@@ -34,10 +34,10 @@ public class ReloadActionBarEffect implements GunEffect {
      * @param chooser          The {@link ReloadActionBarChooser} to choose an action bar to send to the {@link Audience}
      */
     @FactoryMethod
-    public ReloadActionBarEffect(@NotNull Data data, @NotNull @DataName("stats") GunStats stats,
-            @NotNull @DataName("audience_provider") AudienceProvider audienceProvider,
-            @NotNull @DataName("reload_tester") ReloadTester reloadTester,
-            @NotNull @DataName("reload_action_bar_chooser") ReloadActionBarChooser chooser) {
+    public ReloadActionBarEffect(@NotNull Data data, @NotNull @Child("stats") GunStats stats,
+            @NotNull @Child("audience_provider") AudienceProvider audienceProvider,
+            @NotNull @Child("reload_tester") ReloadTester reloadTester,
+            @NotNull @Child("reload_action_bar_chooser") ReloadActionBarChooser chooser) {
         this.stats = Objects.requireNonNull(stats, "stats");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");

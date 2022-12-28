@@ -16,7 +16,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
     private final UpgradePath upgradePath;
 
     @FactoryMethod
-    public EquipmentSpacePredicate(@NotNull Data data, @NotNull @DataName("upgrade_path") UpgradePath upgradePath) {
+    public EquipmentSpacePredicate(@NotNull Data data, @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
         super(data);
         this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
     }

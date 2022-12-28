@@ -12,7 +12,7 @@ import java.util.Set;
 @Model("zombies.perk.level.extra_health")
 public class ExtraHealthLevel extends PerkLevelBase {
     @FactoryMethod
-    public ExtraHealthLevel(@NotNull Data data, @NotNull @DataName("updating_item") UpdatingItem item) {
+    public ExtraHealthLevel(@NotNull Data data, @NotNull @Child("updating_item") UpdatingItem item) {
         super(data, item);
     }
 

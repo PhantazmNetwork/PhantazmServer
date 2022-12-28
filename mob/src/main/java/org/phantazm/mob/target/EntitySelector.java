@@ -1,6 +1,5 @@
 package org.phantazm.mob.target;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
@@ -18,7 +17,7 @@ public class EntitySelector implements TargetSelector<Entity> {
     private final Entity entity;
 
     @FactoryMethod
-    public EntitySelector(@NotNull @Dependency("mob.entity.entity") Entity entity) {
+    public EntitySelector(@NotNull Entity entity) {
         this.entity = Objects.requireNonNull(entity, "entity");
     }
 

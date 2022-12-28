@@ -18,7 +18,7 @@ public class IncrementalMetaDisplay implements ShopDisplay {
     private int displayIndex;
 
     @FactoryMethod
-    public IncrementalMetaDisplay(@NotNull Data data, @NotNull @DataName("displays") List<ShopDisplay> displays) {
+    public IncrementalMetaDisplay(@NotNull Data data, @NotNull @Child("displays") List<ShopDisplay> displays) {
         this.data = Objects.requireNonNull(data, "data");
         this.displays = Objects.requireNonNull(displays, "displays");
         this.displayIndex = 0;

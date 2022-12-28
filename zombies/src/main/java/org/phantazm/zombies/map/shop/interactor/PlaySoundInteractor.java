@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.sound.Sound;
@@ -16,7 +15,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     private final Instance instance;
 
     @FactoryMethod
-    public PlaySoundInteractor(@NotNull Data data, @NotNull @Dependency Instance instance) {
+    public PlaySoundInteractor(@NotNull Data data, @NotNull Instance instance) {
         super(data);
         this.instance = Objects.requireNonNull(instance, "instance");
     }

@@ -25,8 +25,8 @@ public class ReloadStackMapper implements GunStackMapper {
      * @param reloadTester The gun's {@link ReloadTester}
      */
     @FactoryMethod
-    public ReloadStackMapper(@NotNull Data data, @NotNull @DataName("stats") GunStats stats,
-            @NotNull @DataName("reload_tester") ReloadTester reloadTester) {
+    public ReloadStackMapper(@NotNull @Child("stats") GunStats stats,
+            @NotNull @Child("reload_tester") ReloadTester reloadTester) {
         this.stats = Objects.requireNonNull(stats, "stats");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
     }

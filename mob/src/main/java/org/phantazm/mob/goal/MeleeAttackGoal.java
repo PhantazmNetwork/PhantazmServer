@@ -22,9 +22,9 @@ public class MeleeAttackGoal implements NeuralGoal {
     private long ticksSinceLastAttack = 0L;
 
     @FactoryMethod
-    public MeleeAttackGoal(@NotNull Data data, @NotNull @DataName("skills") Collection<Skill> skills,
-            @NotNull @DataName("last_hit_selector") LastHitSelector<LivingEntity> lastHitSelector,
-            @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity) {
+    public MeleeAttackGoal(@NotNull Data data, @NotNull @Child("skills") Collection<Skill> skills,
+            @NotNull @Child("last_hit_selector") LastHitSelector<LivingEntity> lastHitSelector,
+            @NotNull NeuralEntity entity) {
         this.data = Objects.requireNonNull(data, "data");
         this.skills = Objects.requireNonNull(skills, "skills");
         this.lastHitSelector = Objects.requireNonNull(lastHitSelector, "lastHitSelector");

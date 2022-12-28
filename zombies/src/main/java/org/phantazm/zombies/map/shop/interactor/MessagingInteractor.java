@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.audience.Audience;
@@ -18,7 +17,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     private final Instance instance;
 
     @FactoryMethod
-    public MessagingInteractor(@NotNull Data data, @NotNull @Dependency Instance instance) {
+    public MessagingInteractor(@NotNull Data data, @NotNull Instance instance) {
         super(data);
         this.instance = Objects.requireNonNull(instance, "instance");
     }

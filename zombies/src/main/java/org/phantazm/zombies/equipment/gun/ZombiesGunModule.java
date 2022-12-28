@@ -1,6 +1,6 @@
 package org.phantazm.zombies.equipment.gun;
 
-import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import net.minestom.server.entity.Entity;
@@ -19,6 +19,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @SuppressWarnings("ClassCanBeRecord")
+@Memoize
+@Depend
 public class ZombiesGunModule implements DependencyModule {
 
     private final PlayerView playerView;
@@ -43,57 +45,42 @@ public class ZombiesGunModule implements DependencyModule {
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }
 
-    @Memoize
-    @Dependency
     public @NotNull PlayerView getPlayerView() {
         return playerView;
     }
 
-    // TODO: maybe make this name-key based for EntityInstanceAudienceProvider
     @Memoize
-    @Dependency("zombies.dependency.gun.entity_supplier")
+    @Depend("zombies.dependency.gun.entity_supplier")
     public @NotNull Supplier<Optional<? extends Entity>> getEntitySupplier() {
         return getShooterSupplier();
     }
 
     @Memoize
-    @Dependency("zombies.dependency.gun.shooter.supplier")
+    @Depend("zombies.dependency.gun.shooter.supplier")
     public @NotNull Supplier<Optional<? extends Entity>> getShooterSupplier() {
         return playerView::getPlayer;
     }
 
-    @Memoize
-    @Dependency
     public @NotNull UUID getShooterUUID() {
         return playerView.getUUID();
     }
 
-    @Memoize
-    @Dependency
     public @NotNull MobSpawner getMobSpawner() {
         return mobSpawner;
     }
 
-    @Memoize
-    @Dependency
     public @NotNull MobStore getMobStore() {
         return mobStore;
     }
 
-    @Memoize
-    @Dependency
     public @NotNull EventNode<Event> getEventNode() {
         return eventNode;
     }
 
-    @Memoize
-    @Dependency
     public @NotNull Random getRandom() {
         return random;
     }
 
-    @Memoize
-    @Dependency
     public @NotNull MapObjects getMapObjects() {
         return mapObjects;
     }

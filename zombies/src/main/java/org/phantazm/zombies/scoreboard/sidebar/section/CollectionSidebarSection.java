@@ -13,8 +13,8 @@ public class CollectionSidebarSection implements SidebarSection {
     private final Collection<SidebarLineUpdater> lineUpdaters;
 
     @FactoryMethod
-    public CollectionSidebarSection(@NotNull Data data,
-            @NotNull @DataName("line_updaters") Collection<? extends SidebarLineUpdater> lineUpdaters) {
+    public CollectionSidebarSection(
+            @NotNull @Child("line_updaters") Collection<? extends SidebarLineUpdater> lineUpdaters) {
         this.lineUpdaters = List.copyOf(lineUpdaters);
     }
 

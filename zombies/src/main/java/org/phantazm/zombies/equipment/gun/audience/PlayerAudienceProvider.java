@@ -1,7 +1,6 @@
 package org.phantazm.zombies.equipment.gun.audience;
 
 import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
@@ -26,7 +25,7 @@ public class PlayerAudienceProvider implements AudienceProvider {
      * @param playerView The {@link PlayerView} of the {@link Player}
      */
     @FactoryMethod
-    public PlayerAudienceProvider(@NotNull @Dependency("zombies.dependency.gun.player_view") PlayerView playerView) {
+    public PlayerAudienceProvider(@NotNull PlayerView playerView) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
     }
 

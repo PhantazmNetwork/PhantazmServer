@@ -1,7 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.blockiteration;
 
 import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
@@ -19,7 +18,7 @@ public class WindowBlockIteration implements BlockIteration {
     private final Context context;
 
     @FactoryMethod
-    public WindowBlockIteration(@NotNull @Dependency("zombies.dependency.gun.map_objects") MapObjects mapObjects) {
+    public WindowBlockIteration(@NotNull MapObjects mapObjects) {
         Objects.requireNonNull(mapObjects, "mapObjects");
         this.context = new Context() {
             @Override

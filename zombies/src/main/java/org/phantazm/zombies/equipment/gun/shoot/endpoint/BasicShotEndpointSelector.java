@@ -43,9 +43,8 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
      * @param blockIteration  {@link BlockIteration}s method to find the endpoint with
      */
     @FactoryMethod
-    public BasicShotEndpointSelector(@NotNull Data data, @NotNull @Dependency("zombies.dependency.gun.shooter.supplier")
-    Supplier<Optional<? extends Entity>> shooterSupplier,
-            @NotNull @DataName("block_iterations") Collection<BlockIteration> blockIteration) {
+    public BasicShotEndpointSelector(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> shooterSupplier,
+            @NotNull @Child("block_iterations") Collection<BlockIteration> blockIteration) {
         this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(shooterSupplier, "playerView");
         this.blockIterations = List.copyOf(blockIteration);

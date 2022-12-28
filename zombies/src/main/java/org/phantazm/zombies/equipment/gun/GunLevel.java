@@ -33,16 +33,16 @@ import java.util.Set;
  */
 @Model("zombies.gun.level")
 public record GunLevel(@NotNull Data data,
-                       @NotNull @DataName("stats") GunStats stats,
-                       @NotNull @DataName("shoot_tester") ShootTester shootTester,
-                       @NotNull @DataName("reload_tester") ReloadTester reloadTester,
-                       @NotNull @DataName("firer") Firer firer,
-                       @NotNull @DataName("activate_effects") Collection<GunEffect> activateEffects,
-                       @NotNull @DataName("shoot_effects") Collection<GunEffect> shootEffects,
-                       @NotNull @DataName("reload_effects") Collection<GunEffect> reloadEffects,
-                       @NotNull @DataName("tick_effects") Collection<GunEffect> tickEffects,
-                       @NotNull @DataName("no_ammo_effects") Collection<GunEffect> noAmmoEffects,
-                       @NotNull @DataName("gun_stack_mappers") Collection<GunStackMapper> gunStackMappers)
+                       @NotNull @Child("stats") GunStats stats,
+                       @NotNull @Child("shoot_tester") ShootTester shootTester,
+                       @NotNull @Child("reload_tester") ReloadTester reloadTester,
+                       @NotNull @Child("firer") Firer firer,
+                       @NotNull @Child("activate_effects") Collection<GunEffect> activateEffects,
+                       @NotNull @Child("shoot_effects") Collection<GunEffect> shootEffects,
+                       @NotNull @Child("reload_effects") Collection<GunEffect> reloadEffects,
+                       @NotNull @Child("tick_effects") Collection<GunEffect> tickEffects,
+                       @NotNull @Child("no_ammo_effects") Collection<GunEffect> noAmmoEffects,
+                       @NotNull @Child("gun_stack_mappers") Collection<GunStackMapper> gunStackMappers)
         implements UpgradeNode {
 
     /**

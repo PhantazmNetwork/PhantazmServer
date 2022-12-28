@@ -28,7 +28,7 @@ public class SoundShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public SoundShotHandler(@NotNull Data data,
-            @NotNull @DataName("audience_provider") AudienceProvider audienceProvider) {
+            @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data, "data");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
     }

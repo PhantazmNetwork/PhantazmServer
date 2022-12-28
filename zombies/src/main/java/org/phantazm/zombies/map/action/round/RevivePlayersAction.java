@@ -1,6 +1,5 @@
 package org.phantazm.zombies.map.action.round;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Pos;
@@ -23,8 +22,7 @@ public class RevivePlayersAction implements Action<Round> {
     private final Pos respawnPos;
 
     @FactoryMethod
-    public RevivePlayersAction(@NotNull @Dependency Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull @Dependency Pos respawnPos) {
+    public RevivePlayersAction(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull Pos respawnPos) {
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPoint");
     }

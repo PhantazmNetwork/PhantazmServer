@@ -23,8 +23,7 @@ public class PlaySoundSkill implements Skill {
      * @param selector The {@link TargetSelector} used to select {@link Audience}s
      */
     @FactoryMethod
-    public PlaySoundSkill(@NotNull Data data,
-            @NotNull @DataName("selector") TargetSelector<? extends Audience> selector) {
+    public PlaySoundSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<? extends Audience> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.selector = Objects.requireNonNull(selector, "selector");
     }

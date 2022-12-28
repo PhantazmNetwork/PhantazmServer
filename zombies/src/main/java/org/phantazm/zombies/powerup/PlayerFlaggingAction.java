@@ -15,7 +15,7 @@ public class PlayerFlaggingAction implements Supplier<PowerupAction> {
 
     @FactoryMethod
     public PlayerFlaggingAction(@NotNull Data data,
-            @NotNull @DataName("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate) {
+            @NotNull @Child("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate) {
         this.data = Objects.requireNonNull(data, "data");
         this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");
     }

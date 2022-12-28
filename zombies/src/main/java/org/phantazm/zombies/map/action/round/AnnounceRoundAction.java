@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map.action.round;
 
 import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
@@ -29,7 +28,7 @@ public class AnnounceRoundAction implements Action<Round> {
      * @param instance the current instance
      */
     @FactoryMethod
-    public AnnounceRoundAction(@NotNull Data data, @NotNull @Dependency Instance instance) {
+    public AnnounceRoundAction(@NotNull Data data, @NotNull Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instane");
     }

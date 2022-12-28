@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map.action.room;
 
 import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +25,7 @@ public class SpawnMobsAction implements Action<Room> {
     private final Supplier<? extends RoundHandler> roundHandlerSupplier;
 
     @FactoryMethod
-    public SpawnMobsAction(@NotNull Data data,
-            @NotNull @Dependency Supplier<? extends RoundHandler> roundHandlerSupplier) {
+    public SpawnMobsAction(@NotNull Data data, @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier) {
         this.data = Objects.requireNonNull(data, "data");
         this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
     }

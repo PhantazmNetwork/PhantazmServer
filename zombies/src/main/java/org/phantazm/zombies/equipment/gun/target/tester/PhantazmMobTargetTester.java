@@ -27,8 +27,7 @@ public class PhantazmMobTargetTester implements TargetTester {
      * @param mobStore The {@link MobStore} to retrieve {@link PhantazmMob}s from
      */
     @FactoryMethod
-    public PhantazmMobTargetTester(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.mob.store") MobStore mobStore) {
+    public PhantazmMobTargetTester(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }

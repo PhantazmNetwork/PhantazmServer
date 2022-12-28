@@ -13,7 +13,7 @@ public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     private final ShopPredicate predicate;
 
     @FactoryMethod
-    public NotPredicate(@NotNull Data data, @DataName("predicate") ShopPredicate predicate) {
+    public NotPredicate(@NotNull Data data, @Child("predicate") ShopPredicate predicate) {
         super(data);
         this.predicate = Objects.requireNonNull(predicate, "predicate");
     }

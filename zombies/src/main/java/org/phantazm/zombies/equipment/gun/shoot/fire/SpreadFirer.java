@@ -33,8 +33,8 @@ public class SpreadFirer implements Firer {
      * @param subFirers A {@link Collection} of sub-{@link Firer}s
      */
     @FactoryMethod
-    public SpreadFirer(@NotNull Data data, @NotNull @Dependency("zombies.dependency.gun.random") Random random,
-            @NotNull @DataName("sub_firers") Collection<Firer> subFirers) {
+    public SpreadFirer(@NotNull Data data, @NotNull Random random,
+            @NotNull @Child("sub_firers") Collection<Firer> subFirers) {
         this.data = Objects.requireNonNull(data, "data");
         this.random = Objects.requireNonNull(random, "random");
         this.subFirers = List.copyOf(subFirers);

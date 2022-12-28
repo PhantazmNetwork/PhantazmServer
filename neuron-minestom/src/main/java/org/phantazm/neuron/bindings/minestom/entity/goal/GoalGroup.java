@@ -27,11 +27,7 @@ public class GoalGroup implements Tickable {
      * @param goals The {@link NeuralGoal}s in the group
      */
     @FactoryMethod
-    public GoalGroup(@NotNull Data data, @NotNull @DataName("goals") Collection<NeuralGoal> goals) {
-        this(goals);
-    }
-
-    public GoalGroup(@NotNull Collection<NeuralGoal> goals) {
+    public GoalGroup(@NotNull @Child("goals") Collection<NeuralGoal> goals) {
         this.goals = Objects.requireNonNull(goals, "goals");
     }
 

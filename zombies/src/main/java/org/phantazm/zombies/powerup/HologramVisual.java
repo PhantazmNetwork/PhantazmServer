@@ -1,7 +1,6 @@
 package org.phantazm.zombies.powerup;
 
 import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
@@ -22,7 +21,7 @@ public class HologramVisual implements Supplier<PowerupVisual> {
     private final Instance instance;
 
     @FactoryMethod
-    public HologramVisual(@NotNull Data data, @NotNull @Dependency Instance instance) {
+    public HologramVisual(@NotNull Data data, @NotNull Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");
     }

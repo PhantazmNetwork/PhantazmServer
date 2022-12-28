@@ -1,6 +1,5 @@
 package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
@@ -22,8 +21,7 @@ public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
     private int currentPlayers = -1;
 
     @FactoryMethod
-    public JoinedPlayersSidebarLineUpdater(@NotNull @Dependency("zombies.dependency.sidebar.player_collection")
-    Collection<ZombiesPlayer> zombiesPlayers, @Dependency("zombies.dependency.sidebar.max_players") int maxPlayers) {
+    public JoinedPlayersSidebarLineUpdater(@NotNull Collection<ZombiesPlayer> zombiesPlayers, int maxPlayers) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.maxPlayers = maxPlayers;
     }

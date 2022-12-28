@@ -29,8 +29,8 @@ public class FollowEntityGoal implements NeuralGoal {
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
     @FactoryMethod
-    public FollowEntityGoal(@NotNull Data data, @NotNull @Dependency("mob.entity.neural_entity") NeuralEntity entity,
-            @NotNull @DataName("selector") TargetSelector<? extends Entity> selector) {
+    public FollowEntityGoal(@NotNull Data data, @NotNull NeuralEntity entity,
+            @NotNull @Child("selector") TargetSelector<? extends Entity> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.entity = Objects.requireNonNull(entity, "entity");
         this.selector = Objects.requireNonNull(selector, "selector");

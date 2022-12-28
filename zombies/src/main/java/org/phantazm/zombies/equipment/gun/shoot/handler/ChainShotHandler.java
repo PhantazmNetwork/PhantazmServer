@@ -38,8 +38,8 @@ public class ChainShotHandler implements ShotHandler {
      * @param firer  The {@link Firer} used to shoot new shots
      */
     @FactoryMethod
-    public ChainShotHandler(@NotNull Data data, @NotNull @DataName("finder") PositionalEntityFinder finder,
-            @NotNull @DataName("firer") Firer firer) {
+    public ChainShotHandler(@NotNull Data data, @NotNull @Child("finder") PositionalEntityFinder finder,
+            @NotNull @Child("firer") Firer firer) {
         this.data = Objects.requireNonNull(data, "data");
         this.finder = Objects.requireNonNull(finder, "finder");
         this.firer = Objects.requireNonNull(firer, "firer");

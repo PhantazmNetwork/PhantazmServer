@@ -29,9 +29,7 @@ public class ShootExpEffect implements GunEffect {
      * @param stats      The {@link GunStats} of the gun
      */
     @FactoryMethod
-    public ShootExpEffect(@NotNull Data data,
-            @NotNull @Dependency("zombies.dependency.gun.player_view") PlayerView playerView,
-            @NotNull @DataName("stats") GunStats stats) {
+    public ShootExpEffect(@NotNull PlayerView playerView, @NotNull @Child("stats") GunStats stats) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.stats = Objects.requireNonNull(stats, "stats");
     }

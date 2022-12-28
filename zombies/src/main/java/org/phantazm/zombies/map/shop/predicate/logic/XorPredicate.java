@@ -13,7 +13,7 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
     private final List<ShopPredicate> predicates;
 
     @FactoryMethod
-    public XorPredicate(@NotNull Data data, @DataName("predicates") List<ShopPredicate> predicates) {
+    public XorPredicate(@NotNull Data data, @Child("predicates") List<ShopPredicate> predicates) {
         super(data);
         this.predicates = List.copyOf(predicates);
     }

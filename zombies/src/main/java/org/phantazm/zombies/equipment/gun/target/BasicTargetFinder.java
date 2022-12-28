@@ -40,12 +40,11 @@ public class BasicTargetFinder implements TargetFinder {
      * @param targetLimiter      A {@link TargetLimiter} which limits the number of targets found
      */
     @FactoryMethod
-    public BasicTargetFinder(@NotNull Data data,
-            @NotNull @DataName("entity_finder") DirectionalEntityFinder entityFinder,
-            @NotNull @DataName("target_tester") TargetTester targetTester,
-            @NotNull @DataName("intersection_finder") IntersectionFinder intersectionFinder,
-            @NotNull @DataName("headshot_tester") HeadshotTester headshotTester,
-            @NotNull @DataName("target_limiter") TargetLimiter targetLimiter) {
+    public BasicTargetFinder(@NotNull @Child("entity_finder") DirectionalEntityFinder entityFinder,
+            @NotNull @Child("target_tester") TargetTester targetTester,
+            @NotNull @Child("intersection_finder") IntersectionFinder intersectionFinder,
+            @NotNull @Child("headshot_tester") HeadshotTester headshotTester,
+            @NotNull @Child("target_limiter") TargetLimiter targetLimiter) {
         this.entityFinder = Objects.requireNonNull(entityFinder, "entityFinder");
         this.targetTester = Objects.requireNonNull(targetTester, "targetTester");
         this.intersectionFinder = Objects.requireNonNull(intersectionFinder, "intersectionFinder");

@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
@@ -17,7 +16,7 @@ public class MapFlaggingInteractor extends InteractorBase<MapFlaggingInteractor.
     private final Flaggable flaggable;
 
     @FactoryMethod
-    public MapFlaggingInteractor(@NotNull Data data, @NotNull @Dependency Flaggable flaggable) {
+    public MapFlaggingInteractor(@NotNull Data data, @NotNull Flaggable flaggable) {
         super(data);
         this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
     }

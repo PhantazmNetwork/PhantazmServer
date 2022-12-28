@@ -16,8 +16,7 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
     private final List<ChildUpdater> childUpdaters;
 
     @FactoryMethod
-    public ConditionalSidebarLineUpdater(@NotNull Data data,
-            @NotNull @DataName("child_updaters") List<ChildUpdater> childUpdaters) {
+    public ConditionalSidebarLineUpdater(@NotNull @Child("child_updaters") List<ChildUpdater> childUpdaters) {
         this.childUpdaters = List.copyOf(childUpdaters);
     }
 
@@ -46,8 +45,8 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
         private final SidebarLineUpdater updater;
 
         @FactoryMethod
-        public ChildUpdater(@NotNull ChildUpdater.Data data, @NotNull @DataName("condition") BooleanSupplier condition,
-                @NotNull @DataName("updater") SidebarLineUpdater updater) {
+        public ChildUpdater(@NotNull @Child("condition") BooleanSupplier condition,
+                @NotNull @Child("updater") SidebarLineUpdater updater) {
             this.condition = Objects.requireNonNull(condition, "condition");
             this.updater = Objects.requireNonNull(updater, "updater");
         }

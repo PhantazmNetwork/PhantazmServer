@@ -1,5 +1,6 @@
 package org.phantazm.server;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -9,8 +10,15 @@ import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.client.play.ClientSteerVehiclePacket;
+import net.minestom.server.network.packet.server.play.ChangeGameStatePacket;
+import net.minestom.server.network.packet.server.play.EffectPacket;
+import net.minestom.server.network.packet.server.play.PlayerAbilitiesPacket;
+import net.minestom.server.network.player.PlayerConnection;
+import net.minestom.server.thread.TickSchedulerThread;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
 import org.phantazm.neuron.bindings.minestom.entity.Spawner;
@@ -70,6 +78,36 @@ final class NeuronTest {
                         Entity entity = new Entity(EntityType.ZOMBIE);
                         entity.setInstance(player.getInstance(), player.getPosition()).join();
                         entity.setInvisible(true);
+                    }
+                    case "succ" -> {
+                        player.sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.BEGIN_RAINING, 0));
+                        player.sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.RAIN_LEVEL_CHANGE,
+                                Float.MIN_VALUE));
+                    }
+                    case "stop" -> {
+                        player.sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.END_RAINING, 0));
+                    }
+                    case "succc" -> {
+                        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+                            player.sendPacket(new ChangeGameStatePacket(
+                                    ChangeGameStatePacket.Reason.PLAYER_ELDER_GUARDIAN_MOB_APPEARANCE, 5));
+                        }, TaskSchedule.immediate(), TaskSchedule.millis(500));
+                    }
+                    case "vegetals" -> {
+                        player.sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.DEMO_EVENT, 0));
+                    }
+                    case "noob" -> {
+                        player.sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.DEMO_EVENT, 104));
+                    }
+                    case "fish" -> {
+                        player.sendPacket(
+                                new ChangeGameStatePacket(ChangeGameStatePacket.Reason.PLAY_PUFFERFISH_STING_SOUND, 0));
+                    }
+                    case "sonic" -> {
+                        player.sendPacket(new PlayerAbilitiesPacket((byte)0x6, 50f, 50f));
+                    }
+                    case "zz_slow_low_iq" -> {
+                        player.sendPacket(new PlayerAbilitiesPacket((byte)0x6, 0.05f, 0.05f));
                     }
                 }
             }

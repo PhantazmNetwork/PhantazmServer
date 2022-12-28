@@ -1,6 +1,5 @@
 package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
 
-import com.github.steanky.element.core.annotation.Dependency;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
@@ -19,8 +18,7 @@ public class RoundSidebarLineUpdater implements SidebarLineUpdater {
     private int lastRoundIndex = -1;
 
     @FactoryMethod
-    public RoundSidebarLineUpdater(
-            @NotNull @Dependency("zombies.dependency.sidebar.round_handler") RoundHandler roundHandler) {
+    public RoundSidebarLineUpdater(@NotNull RoundHandler roundHandler) {
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
     }
 

@@ -27,7 +27,7 @@ public class UseSkillGoal implements NeuralGoal {
      * @param skill The {@link Skill} to use
      */
     @FactoryMethod
-    public UseSkillGoal(@NotNull Data data, @NotNull @DataName("skill") Skill skill) {
+    public UseSkillGoal(@NotNull Data data, @NotNull @Child("skill") Skill skill) {
         this.data = Objects.requireNonNull(data, "data");
         this.skill = Objects.requireNonNull(skill, "skill");
     }

@@ -1,6 +1,6 @@
 package org.phantazm.mob.spawner;
 
-import com.github.steanky.element.core.annotation.Dependency;
+import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
@@ -8,6 +8,7 @@ import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigEntry;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -167,7 +168,7 @@ public class BasicMobSpawner implements MobSpawner {
 
     private void addGoals(@NotNull ElementContext context, @NotNull DependencyProvider dependencyProvider,
             @NotNull NeuralEntity entity) {
-        Collection<GoalGroup> goalGroups = context.provideCollection("goalGroups", dependencyProvider);
+        Collection<GoalGroup> goalGroups = context.provideCollection(ElementPath.of("goalGroups"), dependencyProvider);
 
         for (GoalGroup group : goalGroups) {
             entity.addGoalGroup(group);
@@ -176,7 +177,7 @@ public class BasicMobSpawner implements MobSpawner {
 
     private @NotNull Map<Key, Collection<Skill>> createTriggers(@NotNull ElementContext context,
             @NotNull DependencyProvider dependencyProvider) {
-        ConfigNode node = context.rootNode().getNodeOrDefault(LinkedConfigNode::new, "triggers");
+        ConfigNode node = context.root().getNodeOrDefault(LinkedConfigNode::new, "triggers");
         Map<Key, Collection<Skill>> skills = new HashMap<>(node.size());
         for (ConfigEntry entry : node.entryCollection()) {
             @Subst("key")
@@ -186,12 +187,15 @@ public class BasicMobSpawner implements MobSpawner {
             }
 
             Key key = keyParser.parseKey(stringKey);
-            skills.put(key, context.provideCollection("triggers/" + stringKey, dependencyProvider));
+            skills.put(key,
+                    context.provideCollection(ElementPath.of("triggers").append(stringKey), dependencyProvider));
         }
 
         return skills;
     }
 
+    @Depend
+    @Memoize
     public static class Module implements DependencyModule {
 
         private final MobSpawner spawner;
@@ -210,36 +214,24 @@ public class BasicMobSpawner implements MobSpawner {
             this.entity = Objects.requireNonNull(entity, "entity");
         }
 
-        @Dependency
-        @Memoize
         public @NotNull MobSpawner getSpawner() {
             return spawner;
         }
 
-        @Dependency
-        @Memoize
-        public MobStore getMobStore() {
+        public @NotNull MobStore getMobStore() {
             return mobStore;
         }
 
-        @Dependency
-        @Memoize
         public @NotNull MobModel getModel() {
             return model;
         }
 
-        @Dependency
-        @Memoize
         public @NotNull Entity getEntity() {
             return entity;
         }
 
-        @Dependency
-        @Memoize
         public @NotNull NeuralEntity getNeuralEntity() {
             return entity;
         }
-
     }
-
 }
