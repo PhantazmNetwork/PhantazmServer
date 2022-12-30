@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.objects;
 
+import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
@@ -9,8 +10,6 @@ import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.element.core.path.ElementPath;
-import com.github.steanky.ethylene.core.collection.ConfigList;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
@@ -42,10 +41,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BasicMapObjectsSource implements MapObjects.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMapObjectsSource.class);
+    private static final Consumer<ElementException> EXCEPTION_HANDLER =
+            e -> LOGGER.warn("Exception when loading map object", e);
 
     private final MapInfo mapInfo;
     private final ContextManager contextManager;
@@ -134,10 +136,10 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Window> windows = new ArrayList<>(windowInfoList.size());
         for (WindowInfo windowInfo : windowInfoList) {
             List<Action<Window>> repairActions = contextManager.makeContext(windowInfo.repairActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider, EXCEPTION_HANDLER);
 
             List<Action<Window>> breakActions = contextManager.makeContext(windowInfo.breakActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider, EXCEPTION_HANDLER);
 
             windows.add(new Window(mapOrigin, instance, windowInfo, clientBlockHandler, repairActions, breakActions));
         }
@@ -152,12 +154,15 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             ElementContext shopContext = contextManager.makeContext(shopInfo.data());
 
             List<ShopPredicate> predicates =
-                    shopContext.provideCollection(ElementPath.of("predicates"), dependencyProvider);
+                    shopContext.provideCollection(ElementPath.of("predicates"), dependencyProvider, EXCEPTION_HANDLER);
             List<ShopInteractor> successInteractors =
-                    shopContext.provideCollection(ElementPath.of("successInteractors"), dependencyProvider);
+                    shopContext.provideCollection(ElementPath.of("successInteractors"), dependencyProvider,
+                            EXCEPTION_HANDLER);
             List<ShopInteractor> failureInteractors =
-                    shopContext.provideCollection(ElementPath.of("failureInteractors"), dependencyProvider);
-            List<ShopDisplay> displays = shopContext.provideCollection(ElementPath.of("displays"), dependencyProvider);
+                    shopContext.provideCollection(ElementPath.of("failureInteractors"), dependencyProvider,
+                            EXCEPTION_HANDLER);
+            List<ShopDisplay> displays =
+                    shopContext.provideCollection(ElementPath.of("displays"), dependencyProvider, EXCEPTION_HANDLER);
 
             shops.add(new Shop(shopInfo, instance, predicates, successInteractors, failureInteractors, displays));
         }
@@ -170,7 +175,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Door> doors = new ArrayList<>(doorInfoList.size());
         for (DoorInfo doorInfo : doorInfoList) {
             List<Action<Door>> openActions = contextManager.makeContext(doorInfo.openActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider, EXCEPTION_HANDLER);
 
             doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions));
         }
@@ -182,7 +187,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Room> rooms = new ArrayList<>(roomInfoList.size());
         for (RoomInfo roomInfo : roomInfoList) {
             List<Action<Room>> openActions = contextManager.makeContext(roomInfo.openActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider, EXCEPTION_HANDLER);
 
             rooms.add(new Room(mapOrigin, roomInfo, openActions));
         }
@@ -195,10 +200,10 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
             List<Action<Round>> startActions = contextManager.makeContext(roundInfo.startActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider, EXCEPTION_HANDLER);
 
             List<Action<Round>> endActions = contextManager.makeContext(roundInfo.endActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider);
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider, EXCEPTION_HANDLER);
 
             List<WaveInfo> waveInfo = roundInfo.waves();
             List<Wave> waves = new ArrayList<>(waveInfo.size());

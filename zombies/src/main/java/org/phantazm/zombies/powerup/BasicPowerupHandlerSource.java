@@ -1,10 +1,9 @@
 package org.phantazm.zombies.powerup;
 
+import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.path.ElementPath;
-import com.github.steanky.ethylene.core.collection.ConfigList;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -13,10 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BasicPowerupHandlerSource implements PowerupHandler.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicPowerupHandler.class);
+    private static final Consumer<ElementException> EXCEPTION_HANDLER =
+            e -> LOGGER.warn("Exception when loading powerup element", e);
 
     private final Map<Key, PowerupInfo> powerups;
     private final ContextManager contextManager;
@@ -39,14 +41,21 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
             PowerupInfo data = dataEntry.getValue();
 
             Collection<Supplier<PowerupVisual>> visuals = contextManager.makeContext(data.visuals())
-                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider);
+                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider, EXCEPTION_HANDLER);
 
             Collection<Supplier<PowerupAction>> actions = contextManager.makeContext(data.actions())
-                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider);
+                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider, EXCEPTION_HANDLER);
 
-            Supplier<DeactivationPredicate> deactivationPredicateSupplier =
-                    contextManager.makeContext(data.deactivationPredicate()).provide(mapDependencyProvider);
-            
+            Supplier<DeactivationPredicate> deactivationPredicateSupplier;
+            try {
+                deactivationPredicateSupplier =
+                        contextManager.makeContext(data.deactivationPredicate()).provide(mapDependencyProvider);
+            }
+            catch (ElementException e) {
+                EXCEPTION_HANDLER.accept(e);
+                deactivationPredicateSupplier = () -> ImmediateDeactivationPredicate.INSTANCE;
+            }
+
             powerupMap.put(dataEntry.getKey(), new PowerupComponents(visuals, actions, deactivationPredicateSupplier));
         }
 
