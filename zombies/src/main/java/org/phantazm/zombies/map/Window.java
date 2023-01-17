@@ -268,12 +268,9 @@ public class Window {
     private Point indexToCoordinate(int index) {
         Bounds3I frameRegion = windowInfo.frameRegion();
 
-        int xWidth = frameRegion.lengthX();
-        int xyArea = xWidth * frameRegion.lengthY();
-
-        int x = index % xWidth;
-        int y = index / xWidth;
-        int z = index / xyArea;
+        int x = index % frameRegion.lengthX();
+        int y = (index / frameRegion.lengthX()) % frameRegion.lengthY();
+        int z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
 
         return worldMin.add(x, y, z);
     }
