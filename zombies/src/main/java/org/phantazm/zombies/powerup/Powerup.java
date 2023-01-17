@@ -67,7 +67,7 @@ public class Powerup implements Tickable, Keyed {
         for (int i = actions.size() - 1; i >= 0; i--) {
             PowerupAction action = actions.get(i);
 
-            action.activate(player, time);
+            action.activate(this, player, time);
 
             if (action.deactivationPredicate().shouldDeactivate(time)) {
                 action.deactivate(player);

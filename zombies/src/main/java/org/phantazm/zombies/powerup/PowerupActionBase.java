@@ -13,7 +13,7 @@ public abstract class PowerupActionBase implements PowerupAction {
     }
 
     @Override
-    public void activate(@NotNull ZombiesPlayer player, long time) {
+    public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
         deactivationPredicate.activate(time);
     }
 

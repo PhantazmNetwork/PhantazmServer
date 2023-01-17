@@ -145,6 +145,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlayerFlaggingAction.class);
         contextManager.registerElementClass(MapTransactionModifierMultiplyAction.class);
         contextManager.registerElementClass(MapTransactionModifierAddAction.class);
+        contextManager.registerElementClass(KillAllInRadiusAction.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

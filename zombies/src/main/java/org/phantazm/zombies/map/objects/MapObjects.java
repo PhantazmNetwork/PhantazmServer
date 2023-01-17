@@ -139,5 +139,7 @@ public interface MapObjects {
         @NotNull Supplier<? extends MapObjects> mapObjectsSupplier();
 
         @NotNull Supplier<? extends PowerupHandler> powerupHandler();
+
+        @NotNull MobStore mobStore();
     }
 }

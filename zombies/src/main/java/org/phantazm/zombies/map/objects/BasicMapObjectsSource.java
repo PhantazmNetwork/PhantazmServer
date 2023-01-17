@@ -89,7 +89,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
 
         Module module = new Module(instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
-                slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler);
+                slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, mobStore);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -232,11 +232,13 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Pos respawnPos;
         private final Supplier<? extends MapObjects> mapObjectsSupplier;
         private final Wrapper<PowerupHandler> powerupHandler;
+        private final MobStore mobStore;
 
         private Module(Instance instance, Random random, Supplier<? extends RoundHandler> roundHandlerSupplier,
                 Flaggable flaggable, TransactionModifierSource transactionModifierSource,
                 SlotDistributor slotDistributor, Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
-                Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler) {
+                Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
+                MobStore mobStore) {
             this.instance = Objects.requireNonNull(instance, "instance");
             this.random = Objects.requireNonNull(random, "random");
             this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
@@ -247,6 +249,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPos");
             this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier, "mapObjectsSupplier");
             this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
+            this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         }
 
         @Override
@@ -302,6 +305,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull Supplier<? extends PowerupHandler> powerupHandler() {
             return powerupHandler;
+        }
+
+        @Override
+        public @NotNull MobStore mobStore() {
+            return null;
         }
     }
 }

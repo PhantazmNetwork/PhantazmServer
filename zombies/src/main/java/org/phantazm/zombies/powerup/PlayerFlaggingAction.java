@@ -38,8 +38,8 @@ public class PlayerFlaggingAction implements Supplier<PowerupAction> {
         }
 
         @Override
-        public void activate(@NotNull ZombiesPlayer player, long time) {
-            super.activate(player, time);
+        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+            super.activate(powerup, player, time);
             player.flags().setFlag(data.flag);
         }
 
