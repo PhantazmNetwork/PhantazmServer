@@ -61,6 +61,10 @@ public final class FileUtils {
         Objects.requireNonNull(predicate, "predicate");
         Objects.requireNonNull(consumer, "consumer");
 
+        if (!Files.exists(root)) {
+            return;
+        }
+
         try (Stream<Path> stream = Files.find(root, 1, predicate, FileVisitOption.FOLLOW_LINKS)) {
             for (Path path : (Iterable<? extends Path>)(stream::iterator)) {
                 consumer.accept(path);

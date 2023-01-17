@@ -42,6 +42,7 @@ public class Powerup implements Tickable, Keyed {
             visual.spawn(spawnLocation.x(), spawnLocation.y(), spawnLocation.z());
         }
 
+        despawnPredicate.activate(System.currentTimeMillis());
         spawned = true;
     }
 

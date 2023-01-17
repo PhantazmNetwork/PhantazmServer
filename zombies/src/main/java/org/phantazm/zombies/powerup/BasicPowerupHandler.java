@@ -70,7 +70,7 @@ public class BasicPowerupHandler implements PowerupHandler {
                 .nearbyEntitiesUntil(powerup.spawnLocation(), powerupPickupRadius, EntityTracker.Target.PLAYERS,
                         player -> {
                             ZombiesPlayer zombiesPlayer = playerMap.get(player.getUuid());
-                            if (zombiesPlayer != null && zombiesPlayer.isAlive()) {
+                            if (zombiesPlayer != null && zombiesPlayer.canPickupPowerup(powerup)) {
                                 powerup.activate(zombiesPlayer, time);
                                 return true;
                             }

@@ -35,6 +35,7 @@ import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.map.shop.interactor.ShopInteractor;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.spawn.BasicSpawnDistributor;
 import org.phantazm.zombies.spawn.SpawnDistributor;
 import org.slf4j.Logger;
@@ -70,7 +71,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     @Override
     public @NotNull MapObjects make(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore) {
+            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
+            @NotNull Wrapper<PowerupHandler> powerupHandler) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, playerMap.values());
@@ -87,7 +89,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
 
         Module module = new Module(instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
-                slotDistributor, playerMap, respawnPos, mapObjectsWrapper);
+                slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -229,11 +231,12 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
         private final Pos respawnPos;
         private final Supplier<? extends MapObjects> mapObjectsSupplier;
+        private final Wrapper<PowerupHandler> powerupHandler;
 
         private Module(Instance instance, Random random, Supplier<? extends RoundHandler> roundHandlerSupplier,
                 Flaggable flaggable, TransactionModifierSource transactionModifierSource,
                 SlotDistributor slotDistributor, Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
-                Supplier<? extends MapObjects> mapObjectsSupplier) {
+                Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler) {
             this.instance = Objects.requireNonNull(instance, "instance");
             this.random = Objects.requireNonNull(random, "random");
             this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
@@ -243,6 +246,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
             this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPos");
             this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier, "mapObjectsSupplier");
+            this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
         }
 
         @Override
@@ -293,6 +297,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull Supplier<? extends MapObjects> mapObjectsSupplier() {
             return mapObjectsSupplier;
+        }
+
+        @Override
+        public @NotNull Supplier<? extends PowerupHandler> powerupHandler() {
+            return powerupHandler;
         }
     }
 }

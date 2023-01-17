@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map.objects;
 
 import com.github.steanky.element.core.dependency.DependencyProvider;
+import com.github.steanky.toolkit.collection.Wrapper;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
@@ -16,6 +17,7 @@ import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.powerup.PowerupHandler;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -111,7 +113,8 @@ public interface MapObjects {
     interface Source {
         @NotNull MapObjects make(@NotNull Instance instance,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore);
+                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
+                @NotNull Wrapper<PowerupHandler> powerupHandler);
     }
 
     interface Module {
@@ -134,5 +137,7 @@ public interface MapObjects {
         @NotNull Pos respawnPos();
 
         @NotNull Supplier<? extends MapObjects> mapObjectsSupplier();
+
+        @NotNull Supplier<? extends PowerupHandler> powerupHandler();
     }
 }

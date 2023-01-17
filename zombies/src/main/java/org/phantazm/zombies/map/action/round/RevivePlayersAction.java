@@ -18,7 +18,6 @@ import java.util.UUID;
 @Model("zombies.map.round.action.revive_players")
 public class RevivePlayersAction implements Action<Round> {
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
-
     private final Pos respawnPos;
 
     @FactoryMethod

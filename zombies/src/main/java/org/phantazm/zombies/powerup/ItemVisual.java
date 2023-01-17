@@ -76,6 +76,9 @@ public class ItemVisual implements Supplier<PowerupVisual> {
             }
 
             this.entity = new ItemEntity(data.stack);
+            this.entity.setNoGravity(true);
+            this.entity.setPickable(false);
+            this.entity.setMergeable(false);
             this.entity.setInstance(this.instance, new Vec(x, y, z));
             this.baseY = y;
         }

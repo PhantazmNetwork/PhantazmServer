@@ -19,6 +19,7 @@ import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
+import org.phantazm.zombies.powerup.Powerup;
 
 import java.util.Map;
 import java.util.Optional;
@@ -86,9 +87,13 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
         return getModule().getPlayerView().getUUID();
     }
 
+    default boolean canPickupPowerup(@NotNull Powerup powerup) {
+        return isAlive();
+    }
+
     interface Source {
 
-        ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+        @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
                 @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
                 @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
                 @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,

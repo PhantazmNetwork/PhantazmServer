@@ -161,12 +161,16 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         MobStore mobStore = new MobStore();
 
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
+        Wrapper<PowerupHandler> powerupHandlerWrapper = Wrapper.ofNull();
 
-        MapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore);
+        MapObjects mapObjects =
+                createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, powerupHandlerWrapper);
         RoundHandler roundHandler = roundHandlerWrapper.set(new BasicRoundHandler(mapObjects.rounds()));
 
         PowerupHandler powerupHandler =
                 createPowerupHandler(instance, zombiesPlayers, mapObjects.mapDependencyProvider());
+        powerupHandlerWrapper.set(powerupHandler);
+
         ShopHandler shopHandler = createShopHandler(mapObjects.shops());
         WindowHandler windowHandler = createWindowHandler(mapObjects.windows());
 
@@ -211,8 +215,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     private MapObjects createMapObjects(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-            Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore) {
-        return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore);
+            Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore,
+            Wrapper<PowerupHandler> powerupHandler) {
+        return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, powerupHandler);
     }
 
     private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,
@@ -282,7 +287,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Stage countdown =
                 new CountdownStage(instance, zombiesPlayers, messages, random, 400L, alertTicks, tickFormatter,
-                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("scoreboard")));
+                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
 
         Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
                 mapInfo.settings().defaultEquipment(),

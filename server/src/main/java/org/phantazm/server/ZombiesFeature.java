@@ -15,6 +15,7 @@ import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.map.action.room.SpawnMobsAction;
 import org.phantazm.zombies.map.action.round.AnnounceRoundAction;
 import org.phantazm.zombies.map.action.round.RevivePlayersAction;
+import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
 import org.phantazm.zombies.map.shop.LinearUpgradePath;
 import org.phantazm.zombies.map.shop.display.*;
 import org.phantazm.zombies.map.shop.gui.InteractingClickHandler;
@@ -61,10 +62,11 @@ public final class ZombiesFeature {
 
     private static void registerElementClasses(ContextManager contextManager) {
         LOGGER.info("Registering Zombies element classes...");
-        //actions
+        //Action<Room> and Action<Round>
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);
         contextManager.registerElementClass(SpawnMobsAction.class);
+        contextManager.registerElementClass(SpawnPowerupAction.class);
 
         //ShopPredicate
         contextManager.registerElementClass(StaticCostPredicate.class);
