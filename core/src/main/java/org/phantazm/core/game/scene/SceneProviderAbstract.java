@@ -28,11 +28,11 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
     @Override
     public @NotNull Optional<TScene> provideScene(@NotNull TRequest request) {
-        if (scenes.size() >= maximumScenes) {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(chooseScene(request).orElseGet(() -> {
+            if (scenes.size() >= maximumScenes) {
+                return null;
+            }
 
-        return Optional.of(chooseScene(request).orElseGet(() -> {
             TScene newScene = createScene(request);
             scenes.add(newScene);
 
