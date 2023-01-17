@@ -41,15 +41,12 @@ public class BasicPlayerCoins implements PlayerCoins {
             change = newChange;
         }
 
-        int coinsUntilMax = Integer.MAX_VALUE - coins;
-        if (coinsUntilMax < change) {
-            change = coinsUntilMax;
+        int newCoins = coins + change;
+        if (change < 0 && newCoins > coins) {
+            change = -(coins - Integer.MIN_VALUE);
         }
-        else {
-            int coinsUntilMin = Integer.MIN_VALUE - coins;
-            if (coinsUntilMin > change) {
-                change = coinsUntilMin;
-            }
+        else if (change > 0 && newCoins < coins) {
+            change = Integer.MAX_VALUE - coins;
         }
 
         return new TransactionResult(modifierNames, change);
