@@ -309,7 +309,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         @Override
         public @NotNull MobStore mobStore() {
-            return null;
+            return mobStore;
         }
     }
 }
