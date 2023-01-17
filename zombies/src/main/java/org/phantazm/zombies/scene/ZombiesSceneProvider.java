@@ -162,17 +162,22 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
         Wrapper<PowerupHandler> powerupHandlerWrapper = Wrapper.ofNull();
+        Wrapper<WindowHandler> windowHandlerWrapper = Wrapper.ofNull();
 
         MapObjects mapObjects =
-                createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, powerupHandlerWrapper);
-        RoundHandler roundHandler = roundHandlerWrapper.set(new BasicRoundHandler(mapObjects.rounds()));
+                createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, powerupHandlerWrapper,
+                        windowHandlerWrapper);
+        RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
+        roundHandlerWrapper.set(roundHandler);
 
         PowerupHandler powerupHandler =
                 createPowerupHandler(instance, zombiesPlayers, mapObjects.mapDependencyProvider());
         powerupHandlerWrapper.set(powerupHandler);
 
         ShopHandler shopHandler = createShopHandler(mapObjects.shops());
+
         WindowHandler windowHandler = createWindowHandler(mapObjects.windows());
+        windowHandlerWrapper.set(windowHandler);
 
         ZombiesMap map = new ZombiesMap(mapObjects, powerupHandler, roundHandler, shopHandler, windowHandler);
 
@@ -216,8 +221,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private MapObjects createMapObjects(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore,
-            Wrapper<PowerupHandler> powerupHandler) {
-        return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, powerupHandler);
+            Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler) {
+        return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, powerupHandler,
+                windowHandler);
     }
 
     private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,

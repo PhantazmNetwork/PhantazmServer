@@ -15,6 +15,7 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.RoundHandler;
+import org.phantazm.zombies.map.handler.WindowHandler;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
@@ -114,7 +115,7 @@ public interface MapObjects {
         @NotNull MapObjects make(@NotNull Instance instance,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
-                @NotNull Wrapper<PowerupHandler> powerupHandler);
+                @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler);
     }
 
     interface Module {
@@ -139,6 +140,8 @@ public interface MapObjects {
         @NotNull Supplier<? extends MapObjects> mapObjectsSupplier();
 
         @NotNull Supplier<? extends PowerupHandler> powerupHandler();
+
+        @NotNull Supplier<? extends WindowHandler> windowHandler();
 
         @NotNull MobStore mobStore();
     }

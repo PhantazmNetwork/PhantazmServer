@@ -6,6 +6,9 @@ import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.powerup.action.PowerupAction;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.powerup.visual.PowerupVisual;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup;
+package org.phantazm.zombies.powerup.action;
 
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
@@ -8,6 +8,9 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
+import org.phantazm.zombies.powerup.Powerup;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -35,7 +38,7 @@ public class KillAllInRadiusAction implements Supplier<PowerupAction> {
 
     }
 
-    private static class Action implements PowerupAction {
+    private static class Action extends InstantAction {
         private final Data data;
         private final Instance instance;
         private final MobStore mobStore;
@@ -55,16 +58,6 @@ public class KillAllInRadiusAction implements Supplier<PowerupAction> {
                                     entity.kill();
                                 }
                             });
-        }
-
-        @Override
-        public void deactivate(@NotNull ZombiesPlayer player) {
-
-        }
-
-        @Override
-        public @NotNull DeactivationPredicate deactivationPredicate() {
-            return ImmediateDeactivationPredicate.INSTANCE;
         }
     }
 }

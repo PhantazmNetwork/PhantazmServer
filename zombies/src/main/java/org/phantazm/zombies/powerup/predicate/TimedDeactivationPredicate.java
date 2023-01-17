@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup;
+package org.phantazm.zombies.powerup.predicate;
 
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;

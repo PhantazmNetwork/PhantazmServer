@@ -1,10 +1,12 @@
-package org.phantazm.zombies.powerup;
+package org.phantazm.zombies.powerup.action;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.powerup.Powerup;
 
 import java.util.Objects;
 

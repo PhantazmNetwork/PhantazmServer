@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup;
+package org.phantazm.zombies.powerup.predicate;
 
 
 public interface DeactivationPredicate {

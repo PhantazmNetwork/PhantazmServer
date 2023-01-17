@@ -3,6 +3,7 @@ package org.phantazm.zombies.map.handler;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -35,7 +36,7 @@ public class BasicWindowHandler implements WindowHandler {
 
     public BasicWindowHandler(@NotNull List<Window> windows, double repairRadius, long repairInterval,
             int coinsPerWindowBlock) {
-        this.windows = Objects.requireNonNull(windows, "windows");
+        this.windows = List.copyOf(windows);
         this.repairRadius = repairRadius;
         this.repairInterval = repairInterval;
         this.repairOperationMap = new LinkedHashMap<>();
@@ -61,6 +62,11 @@ public class BasicWindowHandler implements WindowHandler {
                 return;
             }
         }
+    }
+
+    @Override
+    public @NotNull @Unmodifiable List<Window> windows() {
+        return windows;
     }
 
     @Override

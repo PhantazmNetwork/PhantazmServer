@@ -143,6 +143,8 @@ public class Window {
                         "blocks in window at ~" + center);
             }
         }
+
+        this.index = this.volume;
     }
 
     public @NotNull WindowInfo getWindowInfo() {

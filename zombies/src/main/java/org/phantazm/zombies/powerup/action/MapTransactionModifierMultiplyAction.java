@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup;
+package org.phantazm.zombies.powerup.action;
 
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 
 import java.util.Objects;
 import java.util.function.Supplier;

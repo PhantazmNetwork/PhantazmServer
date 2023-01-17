@@ -27,6 +27,11 @@ import org.phantazm.zombies.map.shop.predicate.logic.OrPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.XorPredicate;
 import org.phantazm.zombies.perk.ExtraHealthLevel;
 import org.phantazm.zombies.powerup.*;
+import org.phantazm.zombies.powerup.action.*;
+import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
+import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
+import org.phantazm.zombies.powerup.visual.HologramVisual;
+import org.phantazm.zombies.powerup.visual.ItemVisual;
 import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
 import org.phantazm.zombies.scoreboard.sidebar.lineupdater.*;
 import org.phantazm.zombies.scoreboard.sidebar.lineupdater.condition.AliveCondition;
@@ -147,6 +152,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(MapTransactionModifierAddAction.class);
         contextManager.registerElementClass(KillAllInRadiusAction.class);
         contextManager.registerElementClass(PlaySoundAction.class);
+        contextManager.registerElementClass(ModifyWindowsAction.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

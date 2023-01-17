@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup;
+package org.phantazm.zombies.powerup.action;
 
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
@@ -7,6 +7,7 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.powerup.Powerup;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -29,10 +30,10 @@ public class PlaySoundAction implements Supplier<PowerupAction> {
 
     @DataObject
     public record Data(Sound sound) {
-        
+
     }
 
-    private static class Action implements PowerupAction {
+    private static class Action extends InstantAction {
         private final Data data;
         private final Instance instance;
 
@@ -44,16 +45,6 @@ public class PlaySoundAction implements Supplier<PowerupAction> {
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             instance.playSound(data.sound, powerup.spawnLocation());
-        }
-
-        @Override
-        public void deactivate(@NotNull ZombiesPlayer player) {
-
-        }
-
-        @Override
-        public @NotNull DeactivationPredicate deactivationPredicate() {
-            return ImmediateDeactivationPredicate.INSTANCE;
         }
     }
 }
