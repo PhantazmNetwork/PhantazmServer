@@ -153,6 +153,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(KillAllInRadiusAction.class);
         contextManager.registerElementClass(PlaySoundAction.class);
         contextManager.registerElementClass(ModifyWindowsAction.class);
+        contextManager.registerElementClass(SendTitleAction.class);
+        contextManager.registerElementClass(SendMessageAction.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }
