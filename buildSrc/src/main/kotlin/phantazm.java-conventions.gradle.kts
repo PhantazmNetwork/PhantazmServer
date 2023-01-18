@@ -46,6 +46,14 @@ repositories {
             includeModuleByRegex("com\\.github\\.steanky", "toolkit-.+")
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steanky/proxima/maven/")
+        }
+        filter {
+            includeModule("com.github.steanky", "proxima-core")
+        }
+    }
 }
 
 val catalogs = extensions.getByType<VersionCatalogsExtension>()

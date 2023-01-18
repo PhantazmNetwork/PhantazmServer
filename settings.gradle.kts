@@ -27,6 +27,7 @@ sequenceOf(
     "mob",
     "neuron",
     "neuron-minestom",
+    "proxima-minestom",
     "server",
     "velocity",
     "zombies",

@@ -3,8 +3,6 @@ plugins {
 }
 
 repositories {
-    maven("https://jitpack.io")
-
     exclusiveContent {
         forRepository {
             maven("https://jitpack.io")
