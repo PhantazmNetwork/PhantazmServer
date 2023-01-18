@@ -7,7 +7,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import java.util.*;
 
 public class BasicTransactionModifierSource implements TransactionModifierSource {
-    private final Map<Key, Collection<Transaction.Modifier>> modifierSources;
+    private final Map<String, Collection<Transaction.Modifier>> modifierSources;
 
     public BasicTransactionModifierSource() {
         this.modifierSources = new HashMap<>();
@@ -17,26 +17,37 @@ public class BasicTransactionModifierSource implements TransactionModifierSource
     public @NotNull @UnmodifiableView Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
         Objects.requireNonNull(key, "key");
 
-        Collection<Transaction.Modifier> modifiers = modifierSources.get(key);
-        if (modifiers == null) {
-            return Collections.emptyList();
+        String namespace = key.namespace();
+        String value = key.value();
+
+        String[] parts = value.split("\\.");
+
+        List<Transaction.Modifier> mergedModifiers = new ArrayList<>(3);
+        StringBuilder current = new StringBuilder(namespace + ":");
+        for (String part : parts) {
+            Collection<Transaction.Modifier> modifiers = modifierSources.get(current.append(part).toString());
+            if (modifiers != null) {
+                mergedModifiers.addAll(modifiers);
+            }
         }
 
-        return Collections.unmodifiableCollection(modifiers);
+        return Collections.unmodifiableCollection(mergedModifiers);
     }
 
     @Override
     public void addModifier(@NotNull Key group, Transaction.@NotNull Modifier modifier) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(modifier, "modifier");
-        modifierSources.computeIfAbsent(group, m -> new LinkedHashSet<>(4)).add(modifier);
+
+        modifierSources.computeIfAbsent(group.asString(), (ignored) -> new LinkedHashSet<>(4)).add(modifier);
     }
 
     @Override
     public void removeModifier(@NotNull Key group, Transaction.@NotNull Modifier modifier) {
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(modifier, "modifier");
-        Collection<Transaction.Modifier> modifiers = modifierSources.get(group);
+
+        Collection<Transaction.Modifier> modifiers = modifierSources.get(group.asString());
         if (modifiers != null) {
             modifiers.remove(modifier);
         }
