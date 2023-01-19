@@ -130,13 +130,17 @@ public class InstanceSpace extends ConcurrentCachingSpace {
         return cachedSolid(shape);
     }
 
+    public @NotNull Instance instance() {
+        return instance;
+    }
+
     private static Block getBlock(Chunk chunk, int x, int y, int z) {
         synchronized (chunk) {
             return chunk.getBlock(x, y, z, Block.Getter.Condition.TYPE);
         }
     }
 
-    private static Solid @NotNull [] getSplit(@NotNull Shape shape) {
+    private static Solid[] getSplit(Shape shape) {
         return splitMap.computeIfAbsent(shape, (s) -> {
             List<BoundingBox> bounds = shape.childBounds();
 
