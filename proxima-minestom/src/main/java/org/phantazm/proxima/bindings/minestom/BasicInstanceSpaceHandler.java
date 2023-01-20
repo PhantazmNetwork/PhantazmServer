@@ -18,25 +18,36 @@ import java.util.Objects;
 
 public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
     private final InstanceSpace space;
-    private final EventNode<Event> root;
+
     private final EventNode<InstanceEvent> child;
 
     public BasicInstanceSpaceHandler(@NotNull Instance instance, @NotNull EventNode<Event> root) {
         this.space = new InstanceSpace(instance);
-        this.root = Objects.requireNonNull(root, "node");
+        Objects.requireNonNull(root, "root");
 
-        this.child = EventNode.event("space_updater",
+        this.child = EventNode.event("proxima_cache_synchronize_@" + System.identityHashCode(instance),
                 EventFilter.from(InstanceEvent.class, Instance.class, InstanceEvent::getInstance),
                 event -> event.getInstance() == space.instance());
-        this.root.addChild(this.child);
+
+        this.child.addListener(InstanceUnregisterEvent.class, this::unregisterInstance);
+        this.child.addListener(InstanceChunkUnloadEvent.class, this::chunkUnload);
+        this.child.addListener(BlockChangeEvent.class, this::blockChange);
+
+        root.addChild(this.child);
     }
 
     private void unregisterInstance(InstanceUnregisterEvent event) {
-        root.removeChild(child);
+        EventNode<? super InstanceEvent> parent = child.getParent();
+        if (parent == null) {
+            throw new IllegalStateException("event node " + child.getName() + " was orphaned");
+        }
+
+        parent.removeChild(child);
+        space.clearCache();
     }
 
     private void chunkUnload(InstanceChunkUnloadEvent event) {
-        //space.unloadChunk(event.getChunkX(), event.getChunkZ());
+        space.clearChunk(event.getChunkX(), event.getChunkZ());
     }
 
     private void blockChange(BlockChangeEvent event) {
@@ -51,10 +62,14 @@ public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
         }
 
         Vec position = event.blockPosition();
-        space.updateSolid(position.blockX(), position.blockY(), position.blockY(), null);
+        int bx = position.blockX();
+        int by = position.blockY();
+        int bz = position.blockZ();
+
+        space.updateSolid(bx, by, bz, null);
 
         if (oldShape.relativeEnd().y() > 1 || newShape.relativeEnd().y() > 1) {
-            space.updateSolid(position.blockX(), position.blockY() + 1, position.blockY(), null);
+            space.updateSolid(bx, by + 1, bz, null);
         }
     }
 
