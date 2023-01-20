@@ -130,6 +130,7 @@ public class Powerup implements Tickable, Keyed {
 
         if (!anyActive) {
             active = false;
+            activatingPlayer = null;
         }
     }
 

@@ -18,7 +18,6 @@ import java.util.Objects;
 
 public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
     private final InstanceSpace space;
-
     private final EventNode<InstanceEvent> child;
 
     public BasicInstanceSpaceHandler(@NotNull Instance instance, @NotNull EventNode<Event> root) {

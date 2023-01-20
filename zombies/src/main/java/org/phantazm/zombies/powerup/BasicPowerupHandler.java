@@ -113,6 +113,11 @@ public class BasicPowerupHandler implements PowerupHandler {
     }
 
     @Override
+    public boolean typeExists(@NotNull Key powerupType) {
+        return components.containsKey(powerupType);
+    }
+
+    @Override
     public @NotNull @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups() {
         return powerupView;
     }

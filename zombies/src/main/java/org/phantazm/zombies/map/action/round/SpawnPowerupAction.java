@@ -10,12 +10,16 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.powerup.PowerupHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.map.room.action.spawn_powerup")
 public class SpawnPowerupAction implements Action<Round> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpawnPowerupAction.class);
+
     private final Data data;
     private final Supplier<? extends PowerupHandler> powerupHandler;
 
@@ -27,7 +31,7 @@ public class SpawnPowerupAction implements Action<Round> {
 
     @Override
     public void perform(@NotNull Round round) {
-        powerupHandler.get().spawn(data.powerup, VecUtils.toPoint(data.spawnPosition));
+        powerupHandler.get().spawnIfExists(data.powerup, VecUtils.toPoint(data.spawnPosition), LOGGER);
     }
 
     @DataObject
