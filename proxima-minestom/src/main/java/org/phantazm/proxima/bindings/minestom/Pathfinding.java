@@ -1,12 +1,15 @@
 package org.phantazm.proxima.bindings.minestom;
 
 import com.github.steanky.proxima.Heuristic;
+import com.github.steanky.proxima.Navigator;
 import com.github.steanky.proxima.PathLimiter;
 import com.github.steanky.proxima.explorer.Explorer;
 import com.github.steanky.proxima.explorer.WalkExplorer;
 import com.github.steanky.proxima.node.Node;
 import com.github.steanky.proxima.node.NodeProcessor;
+import com.github.steanky.proxima.path.BasicNavigator;
 import com.github.steanky.proxima.path.PathSettings;
+import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.proxima.snapper.BasicNodeSnapper;
 import com.github.steanky.proxima.snapper.NodeSnapper;
 import com.github.steanky.vector.Vec3I;
@@ -14,11 +17,15 @@ import com.github.steanky.vector.Vec3I2ObjectMap;
 import com.github.steanky.vector.Vec3IBiPredicate;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.proxima.bindings.minestom.controller.Controller;
+import org.phantazm.proxima.bindings.minestom.controller.GroundController;
 
 import java.util.Objects;
 
 public class Pathfinding {
+    protected final Pathfinder pathfinder;
     protected final ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal;
     protected final InstanceSpaceHandler spaceHandler;
     protected final EntityType entityType;
@@ -30,17 +37,30 @@ public class Pathfinding {
     protected Heuristic heuristic;
     protected NodeProcessor nodeProcessor;
 
+    protected Navigator navigator;
     protected PathSettings pathSettings;
+    protected Controller controller;
 
-    public Pathfinding(@NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal,
+    public Pathfinding(@NotNull Pathfinder pathfinder, @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal,
             @NotNull InstanceSpaceHandler spaceHandler, @NotNull EntityType entityType) {
+        this.pathfinder = Objects.requireNonNull(pathfinder, "pathfinder");
         this.nodeMapLocal = Objects.requireNonNull(nodeMapLocal, "nodeMapLocal");
         this.spaceHandler = Objects.requireNonNull(spaceHandler, "spaceHandler");
         this.entityType = Objects.requireNonNull(entityType, "entityType");
     }
 
+    public @NotNull Navigator getNavigator() {
+        return Objects.requireNonNullElseGet(navigator,
+                () -> navigator = new BasicNavigator(pathfinder, getSettings()));
+    }
+
     public @NotNull PathSettings getSettings() {
         return Objects.requireNonNullElseGet(pathSettings, () -> pathSettings = generateSettings());
+    }
+
+    public @NotNull Controller getController(@NotNull LivingEntity livingEntity) {
+        return Objects.requireNonNullElseGet(controller,
+                () -> controller = new GroundController(livingEntity, stepHeight()));
     }
 
     protected @NotNull PathSettings generateSettings() {
@@ -99,6 +119,14 @@ public class Pathfinding {
         return 4.0F;
     }
 
+    protected float stepHeight() {
+        return 0.5F;
+    }
+
+    public long immobileThreshold() {
+        return 100L;
+    }
+
     protected @NotNull Explorer explorer() {
         return new WalkExplorer(nodeSnapper, pathLimiter);
     }
@@ -124,5 +152,6 @@ public class Pathfinding {
         this.nodeProcessor = null;
 
         this.pathSettings = null;
+        this.navigator = null;
     }
 }

@@ -13,7 +13,8 @@ public interface Spawner {
             @NotNull PathfindingFactory factory);
 
     interface PathfindingFactory {
-        @NotNull Pathfinding make(@NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal,
-                @NotNull InstanceSpaceHandler spaceHandler, @NotNull EntityType entityType);
+        @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
+                @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler,
+                @NotNull EntityType entityType);
     }
 }

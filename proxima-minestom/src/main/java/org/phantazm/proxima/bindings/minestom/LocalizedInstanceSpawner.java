@@ -1,6 +1,7 @@
 package org.phantazm.proxima.bindings.minestom;
 
 import com.github.steanky.proxima.node.Node;
+import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.HashVec3I2ObjectMap;
 import com.github.steanky.vector.Vec3I2ObjectMap;
@@ -13,10 +14,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class LocalizedInstanceSpawner implements Spawner {
+    private final Pathfinder pathfinder;
     private final ThreadLocal<Vec3I2ObjectMap<Node>> nodeLocal;
     private final InstanceSpaceHandler spaceHandler;
 
-    public LocalizedInstanceSpawner(@NotNull InstanceSpaceHandler spaceHandler, @NotNull Bounds3I searchArea) {
+    public LocalizedInstanceSpawner(@NotNull Pathfinder pathfinder, @NotNull InstanceSpaceHandler spaceHandler,
+            @NotNull Bounds3I searchArea) {
+        this.pathfinder = Objects.requireNonNull(pathfinder, "pathfinder");
         this.spaceHandler = Objects.requireNonNull(spaceHandler, "spaceHandler");
         this.nodeLocal = ThreadLocal.withInitial(() -> new HashVec3I2ObjectMap<>(searchArea));
     }
@@ -24,7 +28,7 @@ public class LocalizedInstanceSpawner implements Spawner {
     @Override
     public @NotNull ProximaEntity spawn(@NotNull Instance instance, @NotNull Point point,
             @NotNull EntityType entityType, @NotNull PathfindingFactory factory) {
-        Pathfinding pathfinding = factory.make(nodeLocal, spaceHandler, entityType);
+        Pathfinding pathfinding = factory.make(pathfinder, nodeLocal, spaceHandler, entityType);
         return new ProximaEntity(entityType, UUID.randomUUID(), pathfinding);
     }
 }
