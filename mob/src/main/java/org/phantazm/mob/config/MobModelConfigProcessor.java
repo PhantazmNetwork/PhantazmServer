@@ -1,5 +1,8 @@
 package org.phantazm.mob.config;
 
+import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.context.ElementContext;
+import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigEntry;
@@ -11,12 +14,14 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ConfigProcessors;
 import org.phantazm.mob.MobModel;
-import org.phantazm.neuron.bindings.minestom.entity.MinestomDescriptor;
+import org.phantazm.proxima.bindings.minestom.Pathfinding;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,19 +43,19 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
     private static final ConfigProcessor<Object2FloatMap<String>> ATTRIBUTE_MAP_PROCESSOR =
             ConfigProcessor.FLOAT.mapProcessor(Object2FloatOpenHashMap::new);
 
-    private final ConfigProcessor<MinestomDescriptor> descriptorProcessor;
+    private final ContextManager contextManager;
 
     private final ConfigProcessor<ItemStack> itemStackProcessor;
 
     /**
      * Creates a new {@link MobModelConfigProcessor}.
      *
-     * @param descriptorProcessor A {@link ConfigProcessor} for {@link MinestomDescriptor}s
-     * @param itemStackProcessor  A {@link ConfigProcessor} for {@link ItemStack}s
+     * @param contextManager     A {@link ContextManager} used to load {@link Pathfinding.Factory} objects
+     * @param itemStackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
      */
-    public MobModelConfigProcessor(@NotNull ConfigProcessor<MinestomDescriptor> descriptorProcessor,
+    public MobModelConfigProcessor(@NotNull ContextManager contextManager,
             @NotNull ConfigProcessor<ItemStack> itemStackProcessor) {
-        this.descriptorProcessor = Objects.requireNonNull(descriptorProcessor, "descriptorProcessor");
+        this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.itemStackProcessor = Objects.requireNonNull(itemStackProcessor, "itemStackProcessor");
     }
 
@@ -62,8 +67,11 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ConfigNode node = element.asNode();
 
         Key key = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("key"));
+        EntityType entityType = EntityType.fromNamespaceId(
+                NamespaceID.from(KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("entityType"))));
 
-        MinestomDescriptor descriptor = descriptorProcessor.dataFromElement(element.getElement("descriptor"));
+        ElementContext context = contextManager.makeContext(element.getNodeOrThrow("settings"));
+        Pathfinding.Factory factory = context.provide(DependencyProvider.EMPTY);
 
         ConfigNode metaNode = element.getNodeOrThrow("meta");
 
@@ -87,14 +95,12 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Object2FloatMap<String> attributes =
                 ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
 
-        return new MobModel(key, descriptor, node, metaNode, displayName, equipment, attributes);
+        return new MobModel(key, entityType, factory, node, metaNode, displayName, equipment, attributes);
     }
 
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull MobModel model) throws ConfigProcessException {
         ConfigElement key = KEY_PROCESSOR.elementFromData(model.key());
-
-        ConfigElement descriptor = descriptorProcessor.elementFromData(model.getDescriptor());
 
         Optional<Component> displayName = model.getDisplayName();
         ConfigElement displayNameElement;
@@ -118,7 +124,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
         ConfigNode element = new LinkedConfigNode(7);
         element.put("key", key);
-        element.put("descriptor", descriptor);
+        element.put("settings", ConfigNode.of());
         element.put("meta", model.getMetaNode());
         element.put("displayName", displayNameElement);
         element.put("equipment", equipmentNode);

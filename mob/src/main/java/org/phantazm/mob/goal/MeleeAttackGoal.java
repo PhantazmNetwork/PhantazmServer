@@ -6,25 +6,24 @@ import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.mob.target.LastHitSelector;
-import org.phantazm.neuron.bindings.minestom.entity.NeuralEntity;
-import org.phantazm.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import org.phantazm.proxima.bindings.minestom.ProximaEntity;
+import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Collection;
 import java.util.Objects;
 
 @Model("mob.goal.melee_attack")
-public class MeleeAttackGoal implements NeuralGoal {
-
+public class MeleeAttackGoal implements ProximaGoal {
     private final Data data;
     private final Collection<Skill> skills;
     private final LastHitSelector<LivingEntity> lastHitSelector;
-    private final NeuralEntity entity;
+    private final ProximaEntity entity;
     private long ticksSinceLastAttack = 0L;
 
     @FactoryMethod
     public MeleeAttackGoal(@NotNull Data data, @NotNull @Child("skills") Collection<Skill> skills,
             @NotNull @Child("last_hit_selector") LastHitSelector<LivingEntity> lastHitSelector,
-            @NotNull NeuralEntity entity) {
+            @NotNull ProximaEntity entity) {
         this.data = Objects.requireNonNull(data, "data");
         this.skills = Objects.requireNonNull(skills, "skills");
         this.lastHitSelector = Objects.requireNonNull(lastHitSelector, "lastHitSelector");
@@ -44,7 +43,7 @@ public class MeleeAttackGoal implements NeuralGoal {
     @Override
     public void tick(long time) {
         if (ticksSinceLastAttack >= data.cooldown()) {
-            Entity target = entity.getTarget();
+            Entity target = entity.getTargetEntity();
             if (target == null) {
                 return;
             }

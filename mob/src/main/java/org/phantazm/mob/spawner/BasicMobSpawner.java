@@ -19,7 +19,7 @@ import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.EntityMeta;
@@ -32,9 +32,9 @@ import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.skill.Skill;
-import org.phantazm.neuron.bindings.minestom.entity.NeuralEntity;
-import org.phantazm.neuron.bindings.minestom.entity.Spawner;
-import org.phantazm.neuron.bindings.minestom.entity.goal.GoalGroup;
+import org.phantazm.proxima.bindings.minestom.ProximaEntity;
+import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public class BasicMobSpawner implements MobSpawner {
 
     private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
 
-    private final Spawner neuralSpawner;
+    private final Spawner proximaSpawner;
 
     private final ContextManager contextManager;
 
@@ -62,37 +62,38 @@ public class BasicMobSpawner implements MobSpawner {
     /**
      * Creates a new {@link BasicMobSpawner}.
      *
-     * @param neuralSpawner The {@link Spawner} to spawn backing {@link NeuralEntity}s
+     * @param proximaSpawner The {@link Spawner} to spawn backing {@link ProximaEntity}s
      */
     public BasicMobSpawner(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
-            @NotNull Spawner neuralSpawner, @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
+            @NotNull Spawner proximaSpawner, @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
         this.processorMap = Map.copyOf(processorMap);
-        this.neuralSpawner = Objects.requireNonNull(neuralSpawner, "neuralSpawner");
+        this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
     }
 
     @Override
-    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Point point, @NotNull MobStore mobStore,
+    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobStore mobStore,
             @NotNull MobModel model) {
-        NeuralEntity neuralEntity = neuralSpawner.spawnEntity(instance, point, model.getDescriptor());
-        setEntityMeta(neuralEntity, model);
-        setEquipment(neuralEntity, model);
-        setAttributes(neuralEntity, model);
-        setHealth(neuralEntity);
+        ProximaEntity proximaEntity = proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory());
 
-        Module module = new Module(this, mobStore, model, neuralEntity);
+        setEntityMeta(proximaEntity, model);
+        setEquipment(proximaEntity, model);
+        setAttributes(proximaEntity, model);
+        setHealth(proximaEntity);
+
+        Module module = new Module(this, mobStore, model, proximaEntity);
         DependencyProvider dependencyProvider = new ModuleDependencyProvider(keyParser, module);
         ElementContext context = contextManager.makeContext(model.getNode());
-        addGoals(context, dependencyProvider, neuralEntity);
+        addGoals(context, dependencyProvider, proximaEntity);
         Map<Key, Collection<Skill>> triggers = createTriggers(context, dependencyProvider);
 
-        PhantazmMob mob = new PhantazmMob(model, neuralEntity, triggers);
+        PhantazmMob mob = new PhantazmMob(model, proximaEntity, triggers);
         mobStore.registerMob(mob);
         return mob;
     }
 
-    private void setEntityMeta(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
+    private void setEntityMeta(@NotNull ProximaEntity neuralEntity, @NotNull MobModel model) {
         EntityMeta meta = neuralEntity.getEntityMeta();
         ConfigNode metaNode = model.getMetaNode();
         for (Method method : meta.getClass().getMethods()) {
@@ -147,13 +148,13 @@ public class BasicMobSpawner implements MobSpawner {
         }
     }
 
-    private void setEquipment(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
+    private void setEquipment(@NotNull ProximaEntity neuralEntity, @NotNull MobModel model) {
         for (Map.Entry<EquipmentSlot, ItemStack> entry : model.getEquipment().entrySet()) {
             neuralEntity.setEquipment(entry.getKey(), entry.getValue());
         }
     }
 
-    private void setAttributes(@NotNull NeuralEntity neuralEntity, @NotNull MobModel model) {
+    private void setAttributes(@NotNull ProximaEntity neuralEntity, @NotNull MobModel model) {
         for (Object2FloatArrayMap.Entry<String> entry : model.getAttributes().object2FloatEntrySet()) {
             Attribute attribute = Attribute.fromKey(entry.getKey());
             if (attribute != null) {
@@ -162,12 +163,12 @@ public class BasicMobSpawner implements MobSpawner {
         }
     }
 
-    private void setHealth(@NotNull NeuralEntity entity) {
+    private void setHealth(@NotNull ProximaEntity entity) {
         entity.setHealth(entity.getAttributeValue(Attribute.MAX_HEALTH));
     }
 
     private void addGoals(@NotNull ElementContext context, @NotNull DependencyProvider dependencyProvider,
-            @NotNull NeuralEntity entity) {
+            @NotNull ProximaEntity entity) {
         Collection<GoalGroup> goalGroups = context.provideCollection(ElementPath.of("goalGroups"), dependencyProvider);
 
         for (GoalGroup group : goalGroups) {
@@ -204,10 +205,10 @@ public class BasicMobSpawner implements MobSpawner {
 
         private final MobModel model;
 
-        private final NeuralEntity entity;
+        private final ProximaEntity entity;
 
         public Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull MobModel model,
-                @NotNull NeuralEntity entity) {
+                @NotNull ProximaEntity entity) {
             this.spawner = Objects.requireNonNull(spawner, "spawner");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
             this.model = Objects.requireNonNull(model, "model");
@@ -230,7 +231,7 @@ public class BasicMobSpawner implements MobSpawner {
             return entity;
         }
 
-        public @NotNull NeuralEntity getNeuralEntity() {
+        public @NotNull ProximaEntity getProximaEntity() {
             return entity;
         }
     }

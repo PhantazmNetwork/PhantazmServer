@@ -6,13 +6,14 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMaps;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.mob.skill.Skill;
-import org.phantazm.neuron.bindings.minestom.entity.MinestomDescriptor;
+import org.phantazm.proxima.bindings.minestom.Pathfinding;
 
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +26,9 @@ public class MobModel implements Keyed {
 
     private final Key key;
 
-    private final MinestomDescriptor descriptor;
+    private final EntityType entityType;
+
+    private final Pathfinding.Factory factory;
 
     private final ConfigNode node;
 
@@ -41,16 +44,18 @@ public class MobModel implements Keyed {
      * Creates a new mob model.
      *
      * @param key         The unique {@link Key} used to identify the mob
-     * @param descriptor  The {@link MinestomDescriptor} used for the mob's navigation
+     * @param entityType  The type of entity this model represents
+     * @param factory     The {@link Pathfinding.Factory} used to define the mob's navigation
      * @param displayName {@link Skill} The mob's display name, or null if it should not have one
      * @param equipment   The mob's equipment
      * @param attributes  The mob's attributes
      */
-    public MobModel(@NotNull Key key, @NotNull MinestomDescriptor descriptor, @NotNull ConfigNode node,
-            @NotNull ConfigNode metaNode, @Nullable Component displayName,
+    public MobModel(@NotNull Key key, @NotNull EntityType entityType, @NotNull Pathfinding.Factory factory,
+            @NotNull ConfigNode node, @NotNull ConfigNode metaNode, @Nullable Component displayName,
             @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
         this.key = Objects.requireNonNull(key, "key");
-        this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
+        this.entityType = Objects.requireNonNull(entityType, "entityType");
+        this.factory = Objects.requireNonNull(factory, "factory");
         this.node = Objects.requireNonNull(node, "node");
         this.metaNode = Objects.requireNonNull(metaNode, "metaNode");
         this.displayName = displayName;
@@ -68,13 +73,17 @@ public class MobModel implements Keyed {
         return key;
     }
 
+    public @NotNull EntityType getEntityType() {
+        return entityType;
+    }
+
     /**
-     * Gets the {@link MinestomDescriptor} used for the mob's navigation.
+     * Gets the {@link Pathfinding.Factory} used for the mob's navigation.
      *
-     * @return The {@link MinestomDescriptor} used for the mob's navigation
+     * @return The {@link Pathfinding.Factory} used for the mob's navigation
      */
-    public @NotNull MinestomDescriptor getDescriptor() {
-        return descriptor;
+    public @NotNull Pathfinding.Factory getFactory() {
+        return factory;
     }
 
     public @NotNull ConfigNode getNode() {

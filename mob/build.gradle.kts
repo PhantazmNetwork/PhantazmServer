@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api(projects.phantazmNeuronMinestom)
+    api(projects.phantazmProximaMinestom)
     implementation(projects.phantazmCore)
     implementation(projects.phantazmCommons)
     implementation(libs.adventure.text.minimessage)

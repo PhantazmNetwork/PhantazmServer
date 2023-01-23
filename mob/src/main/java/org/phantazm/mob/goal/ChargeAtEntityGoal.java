@@ -5,17 +5,17 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.target.TargetSelector;
-import org.phantazm.neuron.bindings.minestom.entity.NeuralEntity;
-import org.phantazm.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import org.phantazm.proxima.bindings.minestom.ProximaEntity;
+import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Objects;
 import java.util.Optional;
 
 @Model("mob.goal.charge_at_entity")
-public class ChargeAtEntityGoal implements NeuralGoal {
+public class ChargeAtEntityGoal implements ProximaGoal {
 
     private final Data data;
-    private final NeuralEntity entity;
+    private final ProximaEntity entity;
     private final TargetSelector<? extends Entity> selector;
     private Entity target;
     private long ticksSinceTargetChosen;
@@ -27,7 +27,7 @@ public class ChargeAtEntityGoal implements NeuralGoal {
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
     @FactoryMethod
-    public ChargeAtEntityGoal(@NotNull Data data, @NotNull NeuralEntity entity,
+    public ChargeAtEntityGoal(@NotNull Data data, @NotNull ProximaEntity entity,
             @NotNull @Child("selector") TargetSelector<? extends Entity> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.entity = Objects.requireNonNull(entity, "entity");
@@ -90,11 +90,11 @@ public class ChargeAtEntityGoal implements NeuralGoal {
 
         Optional<? extends Entity> newTargetOptional = selector.selectTarget();
         if (newTargetOptional.isPresent()) {
-            entity.setTarget(target = newTargetOptional.get());
+            entity.setDestination(target = newTargetOptional.get());
             ticksSinceCharge = 0L;
         }
         else {
-            entity.setTarget(target = null);
+            entity.setDestination(target = null);
             ticksSinceCharge = data.chargeInterval();
         }
     }

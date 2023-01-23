@@ -16,7 +16,7 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -26,7 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ProjectileMovementGoal implements NeuralGoal {
+public class ProjectileMovementGoal implements ProximaGoal {
 
     private final Entity entity;
 

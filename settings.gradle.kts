@@ -25,8 +25,6 @@ sequenceOf(
     "commons",
     "messaging",
     "mob",
-    "neuron",
-    "neuron-minestom",
     "proxima-minestom",
     "server",
     "velocity",

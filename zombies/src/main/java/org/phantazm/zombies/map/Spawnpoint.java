@@ -3,6 +3,7 @@ package org.phantazm.zombies.map;
 import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +29,7 @@ public class Spawnpoint {
     private final SpawnpointInfo spawnInfo;
     private final Function<? super Key, ? extends SpawnruleInfo> spawnrules;
     private final Instance instance;
-    private final Point spawnPoint;
+    private final Pos spawnPoint;
     private final MobStore mobStore;
     private final MobSpawner mobSpawner;
 
@@ -45,7 +46,7 @@ public class Spawnpoint {
             @NotNull MobSpawner mobSpawner) {
         this.spawnInfo = Objects.requireNonNull(spawnInfo, "spawnInfo");
         Vec3I spawnPosition = spawnInfo.position();
-        this.spawnPoint = mapOrigin.add(spawnPosition.x(), spawnPosition.y(), spawnPosition.z());
+        this.spawnPoint = Pos.fromPoint(mapOrigin.add(spawnPosition.x(), spawnPosition.y(), spawnPosition.z()));
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");

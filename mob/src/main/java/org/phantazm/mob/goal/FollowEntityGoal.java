@@ -5,20 +5,20 @@ import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.target.TargetSelector;
-import org.phantazm.neuron.bindings.minestom.entity.NeuralEntity;
-import org.phantazm.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import org.phantazm.proxima.bindings.minestom.ProximaEntity;
+import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A {@link NeuralGoal} that makes a {@link PhantazmMob} follow {@link Entity}s
+ * A {@link ProximaGoal} that makes a {@link PhantazmMob} follow {@link Entity}s
  */
 @Model("mob.goal.follow_entity")
-public class FollowEntityGoal implements NeuralGoal {
+public class FollowEntityGoal implements ProximaGoal {
 
     private final Data data;
-    private final NeuralEntity entity;
+    private final ProximaEntity entity;
     private final TargetSelector<? extends Entity> selector;
     private Entity target;
     private long ticksSinceTargetChosen;
@@ -29,7 +29,7 @@ public class FollowEntityGoal implements NeuralGoal {
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
     @FactoryMethod
-    public FollowEntityGoal(@NotNull Data data, @NotNull NeuralEntity entity,
+    public FollowEntityGoal(@NotNull Data data, @NotNull ProximaEntity entity,
             @NotNull @Child("selector") TargetSelector<? extends Entity> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.entity = Objects.requireNonNull(entity, "entity");
@@ -84,10 +84,10 @@ public class FollowEntityGoal implements NeuralGoal {
 
         Optional<? extends Entity> newTargetOptional = selector.selectTarget();
         if (newTargetOptional.isPresent()) {
-            entity.setTarget(target = newTargetOptional.get());
+            entity.setDestination(target = newTargetOptional.get());
         }
         else {
-            entity.setTarget(target = null);
+            entity.setDestination(target = null);
         }
     }
 

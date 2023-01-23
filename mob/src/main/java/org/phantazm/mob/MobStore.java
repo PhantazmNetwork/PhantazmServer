@@ -8,6 +8,7 @@ import org.phantazm.commons.Tickable;
 import org.phantazm.mob.skill.Skill;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A store of {@link PhantazmMob}s. Mobs should be registered to the store and events
@@ -15,7 +16,7 @@ import java.util.*;
  */
 public class MobStore implements Tickable {
 
-    private final Map<UUID, PhantazmMob> uuidToMob = new HashMap<>();
+    private final Map<UUID, PhantazmMob> uuidToMob = new ConcurrentHashMap<>();
 
     /**
      * Attempts to activate triggers for an {@link Entity}.

@@ -11,8 +11,11 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
@@ -28,6 +31,8 @@ import java.util.UUID;
 public class ProximaEntity extends LivingEntity {
     protected final Pathfinding pathfinding;
     protected final List<GoalGroup> goalGroups;
+
+    private Entity targetEntity;
 
     private PathTarget destination;
     private PathResult currentPath;
@@ -53,15 +58,35 @@ public class ProximaEntity extends LivingEntity {
         return pathfinding;
     }
 
-    public void setDestination(@NotNull PathTarget destination) {
+    private void cancelPath() {
+        this.destination = null;
+        pathfinding.getNavigator().cancel();
+        resetPath(System.currentTimeMillis());
+    }
+
+    public void setDestination(@Nullable PathTarget destination) {
         if (getInstance() == null) {
             throw new IllegalArgumentException("Cannot pathfind before an instance is set");
         }
 
-        this.destination = Objects.requireNonNull(destination);
+        if (destination == null) {
+            cancelPath();
+            return;
+        }
+
+        this.destination = destination;
     }
 
-    public void setDestination(@NotNull Entity targetEntity) {
+    public void setDestination(@Nullable Entity targetEntity) {
+        if (targetEntity == null || !targetEntity.isRemoved()) {
+            this.targetEntity = targetEntity;
+        }
+
+        if (targetEntity == null) {
+            cancelPath();
+            return;
+        }
+
         Instance ourInstance = getInstance();
         if (ourInstance == null) {
             throw new IllegalArgumentException("Cannot pathfind before an instance is set");
@@ -81,6 +106,22 @@ public class ProximaEntity extends LivingEntity {
                 Vec.EPSILON), (oldPosition, newPosition) -> oldPosition.distanceSquaredTo(newPosition) > 2);
     }
 
+    public @Nullable Entity getTargetEntity() {
+        return targetEntity;
+    }
+
+    public void attack(@NotNull Entity target, boolean swingHand) {
+        if (swingHand) {
+            swingMainHand();
+        }
+
+        EventDispatcher.call(new EntityAttackEvent(this, target));
+    }
+
+    public void attack(@NotNull Entity target) {
+        attack(target, false);
+    }
+
     /**
      * Adds a {@link GoalGroup} to this entity.
      *
@@ -94,6 +135,10 @@ public class ProximaEntity extends LivingEntity {
     @Override
     public void tick(long time) {
         Navigator navigator = pathfinding.getNavigator();
+
+        if (targetEntity.isRemoved()) {
+            targetEntity = null;
+        }
 
         if (navigator.navigationComplete()) {
             currentPath = navigator.getResult();

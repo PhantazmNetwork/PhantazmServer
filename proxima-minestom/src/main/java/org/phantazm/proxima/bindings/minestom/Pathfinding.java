@@ -26,7 +26,7 @@ import org.phantazm.proxima.bindings.minestom.controller.GroundController;
 import java.util.Objects;
 
 public class Pathfinding {
-    interface Factory {
+    public interface Factory {
         @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
                 @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler,
                 @NotNull EntityType entityType);

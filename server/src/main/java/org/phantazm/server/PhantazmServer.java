@@ -162,9 +162,8 @@ public final class PhantazmServer {
         return false;
     }
 
-    private static void initializeFeatures(EventNode<Event> global,
-            ServerConfig serverConfig, LobbiesConfig lobbiesConfig)
-            throws Exception {
+    private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
+            LobbiesConfig lobbiesConfig) throws Exception {
         KeyParser keyParser = new BasicKeyParser("phantazm");
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
@@ -184,10 +183,9 @@ public final class PhantazmServer {
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
         Messaging.initialize(global, serverConfig.serverInfoConfig().authType());
 
-        Neuron.initialize(global, contextManager, serverConfig.pathfinderConfig());
-        NeuronTest.initialize(global, Neuron.getSpawner());
+        Proxima.initialize(global, contextManager, serverConfig.pathfinderConfig());
 
-        Mob.initialize(contextManager, keyParser, Neuron.getSpawner(), Path.of("./mobs/"), new YamlCodec());
+        Mob.initialize(contextManager, keyParser, Proxima.getSpawner(), Path.of("./mobs/"), new YamlCodec());
         EquipmentFeature.initialize(keyParser, contextManager, Path.of("./equipment/"),
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())),
@@ -200,8 +198,7 @@ public final class PhantazmServer {
                                 new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
     }
 
-    private static void startServer(EventNode<Event> node, MinecraftServer server,
-            ServerConfig serverConfig) {
+    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
 
         if (infoConfig.optifineEnabled()) {

@@ -1,13 +1,11 @@
 package org.phantazm.server;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.ServerProcess;
 import net.minestom.server.event.Event;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -19,10 +17,8 @@ import org.phantazm.core.game.scene.lobby.*;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerViewProvider;
-import org.phantazm.neuron.bindings.minestom.chunk.NeuralChunk;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.lobby.LobbyConfig;
-import org.phantazm.zombies.listener.PlayerInteractBlockListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +55,7 @@ public final class Lobbies {
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         Files.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =
-                new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(), NeuralChunk::new);
+                new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(), DynamicChunk::new);
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =

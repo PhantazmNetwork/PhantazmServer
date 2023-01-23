@@ -12,6 +12,7 @@ import org.phantazm.server.config.server.*;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link ConfigProcessor} used for {@link ServerConfig}s.
@@ -19,6 +20,8 @@ import java.util.Locale;
 public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
     private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = ConfigProcessors.component();
+
+    private static final ConfigProcessor<TimeUnit> TIME_UNIT_PROCESSOR = ConfigProcessor.enumProcessor(TimeUnit.class);
 
     @Override
     public @NotNull ServerConfig dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -45,21 +48,18 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
         ConfigNode pathfinderNode = element.getNodeOrThrow("pathfinder");
         int threads = pathfinderNode.getNumberOrThrow("threads").intValue();
-        int cacheSize = pathfinderNode.getNumberOrThrow("cacheSize").intValue();
-        int updateQueueCapacity = pathfinderNode.getNumberOrThrow("updateQueueCapacity").intValue();
-        if (threads < 1) {
-            throw new ConfigProcessException("Invalid number of pathfinder threads, must be >= 1");
-        }
+        boolean asyncMode = pathfinderNode.getBooleanOrThrow("asyncMode");
+        int corePoolSize = pathfinderNode.getNumberOrThrow("corePoolSize").intValue();
+        int maximumPoolSize = pathfinderNode.getNumberOrThrow("maximumPoolSize").intValue();
+        int minimumRunnable = pathfinderNode.getNumberOrThrow("minimumRunnable").intValue();
+        long keepAliveTime = pathfinderNode.getNumberOrThrow("keepAliveTime").longValue();
+        TimeUnit keepAliveTimeUnit =
+                TIME_UNIT_PROCESSOR.dataFromElement(pathfinderNode.getElementOrThrow("keepAliveTimeUnit"));
 
-        if (cacheSize < 0) {
-            throw new ConfigProcessException("Pathfinder cache size must be >= 0");
-        }
+        PathfinderConfig pathfinderConfig =
+                new PathfinderConfig(threads, asyncMode, corePoolSize, maximumPoolSize, minimumRunnable, keepAliveTime,
+                        keepAliveTimeUnit);
 
-        if (updateQueueCapacity < 0) {
-            throw new ConfigProcessException("Update queue capacity must be > 0");
-        }
-
-        PathfinderConfig pathfinderConfig = new PathfinderConfig(threads, cacheSize, updateQueueCapacity);
         return new ServerConfig(serverInfoConfig, pingListConfig, pathfinderConfig);
     }
 
@@ -77,11 +77,16 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         PingListConfig pingListConfig = serverConfig.pingListConfig();
         pingList.put("description", COMPONENT_PROCESSOR.elementFromData(pingListConfig.description()));
 
-        ConfigNode pathfinder = new LinkedConfigNode(3);
+        ConfigNode pathfinder = new LinkedConfigNode(7);
         PathfinderConfig pathfinderConfig = serverConfig.pathfinderConfig();
         pathfinder.putNumber("threads", pathfinderConfig.threads());
-        pathfinder.putNumber("cacheSize", pathfinderConfig.cacheSize());
-        pathfinder.putNumber("updateQueueCapacity", pathfinderConfig.updateQueueCapacity());
+        pathfinder.putBoolean("asyncMode", pathfinderConfig.asyncMode());
+        pathfinder.putNumber("corePoolSize", pathfinderConfig.corePoolSize());
+        pathfinder.putNumber("maximumPoolSize", pathfinderConfig.maximumPoolSize());
+        pathfinder.putNumber("minimumRunnable", pathfinderConfig.minimumRunnable());
+        pathfinder.putNumber("keepAliveTime", pathfinderConfig.keepAliveTime());
+        pathfinder.put("keepAliveTimeUnit", TIME_UNIT_PROCESSOR.elementFromData(pathfinderConfig.keepAliveTimeUnit()));
+
 
         ConfigNode configNode = new LinkedConfigNode(3);
         configNode.put("serverInfo", serverInfo);

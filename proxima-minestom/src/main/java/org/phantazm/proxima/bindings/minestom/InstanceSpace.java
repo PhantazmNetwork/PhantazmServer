@@ -12,6 +12,8 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +29,19 @@ public class InstanceSpace extends ConcurrentCachingSpace {
         splitMap = new ConcurrentHashMap<>();
     }
 
-    private final Instance instance;
+    private final Reference<Instance> instanceReference;
 
     public InstanceSpace(@NotNull Instance instance) {
-        this.instance = Objects.requireNonNull(instance, "instance");
+        this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
     }
 
     @Override
     public @Nullable Solid loadSolid(int x, int y, int z) {
+        Instance instance = instanceReference.get();
+        if (instance == null) {
+            return null;
+        }
+
         Chunk chunk = instance.getChunk(x, z);
         if (chunk == null) {
             return null;
@@ -130,8 +137,8 @@ public class InstanceSpace extends ConcurrentCachingSpace {
         return cachedSolid(shape);
     }
 
-    public @NotNull Instance instance() {
-        return instance;
+    public @Nullable Instance instance() {
+        return instanceReference.get();
     }
 
     private static Block getBlock(Chunk chunk, int x, int y, int z) {

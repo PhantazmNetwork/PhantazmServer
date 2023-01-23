@@ -16,6 +16,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
+import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
@@ -38,7 +39,6 @@ import org.phantazm.core.hologram.ViewableHologram;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerViewProvider;
-import org.phantazm.neuron.bindings.minestom.chunk.NeuralChunk;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
@@ -158,7 +158,7 @@ final class ZombiesTest {
         });
 
         InstanceLoader instanceLoader =
-                new AnvilFileSystemInstanceLoader(Path.of("./zombies/instances/"), NeuralChunk::new);
+                new AnvilFileSystemInstanceLoader(Path.of("./zombies/instances/"), DynamicChunk::new);
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)

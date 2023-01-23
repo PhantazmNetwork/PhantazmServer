@@ -16,8 +16,8 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.goal.ProjectileMovementGoal;
 import org.phantazm.mob.spawner.MobSpawner;
-import org.phantazm.neuron.bindings.minestom.entity.NeuralEntity;
-import org.phantazm.neuron.bindings.minestom.entity.goal.GoalGroup;
+import org.phantazm.proxima.bindings.minestom.ProximaEntity;
+import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
@@ -94,7 +94,7 @@ public class ProjectileFirer implements Firer {
 
             endSelector.getEnd(start).ifPresent(end -> {
                 PhantazmMob mob = spawner.spawn(instance, start, mobStore, data.model());
-                NeuralEntity neuralEntity = mob.entity();
+                ProximaEntity neuralEntity = mob.entity();
                 neuralEntity.addGoalGroup(new GoalGroup(Collections.singleton(
                         new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
                 neuralEntity.setNoGravity(!data.hasGravity());

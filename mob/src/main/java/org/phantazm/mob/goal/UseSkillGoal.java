@@ -7,15 +7,15 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.skill.Skill;
-import org.phantazm.neuron.bindings.minestom.entity.goal.NeuralGoal;
+import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Objects;
 
 /**
- * A {@link NeuralGoal} that periodically uses a {@link Skill}.
+ * A {@link ProximaGoal} that periodically uses a {@link Skill}.
  */
 @Model("mob.goal.use_skill")
-public class UseSkillGoal implements NeuralGoal {
+public class UseSkillGoal implements ProximaGoal {
 
     private final Data data;
     private final Skill skill;

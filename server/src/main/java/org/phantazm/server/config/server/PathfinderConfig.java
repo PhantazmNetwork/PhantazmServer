@@ -1,22 +1,24 @@
 package org.phantazm.server.config.server;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Config for pathfinding.
  */
-public record PathfinderConfig(int threads, int cacheSize, int updateQueueCapacity) {
+public record PathfinderConfig(int threads,
+                               boolean asyncMode,
+                               int corePoolSize,
+                               int maximumPoolSize,
+                               int minimumRunnable,
+                               long keepAliveTime,
+                               TimeUnit keepAliveTimeUnit) {
     /**
      * The default PathfinderConfig.
      */
-    public static final PathfinderConfig DEFAULT =
-            new PathfinderConfig(Runtime.getRuntime().availableProcessors(), 1024, 1024);
+    public static final PathfinderConfig DEFAULT;
 
-    /**
-     * Creates a config for pathfinding.
-     *
-     * @param threads             the number of threads to use per instance for pathfinding operations
-     * @param cacheSize           the size allocated to the cache, used to minimize collision checks
-     * @param updateQueueCapacity the size of the update queue
-     */
-    public PathfinderConfig {
+    static {
+        int threads = Runtime.getRuntime().availableProcessors();
+        DEFAULT = new PathfinderConfig(threads, false, threads, threads, threads, 2, TimeUnit.MINUTES);
     }
 }

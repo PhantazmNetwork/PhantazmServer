@@ -23,7 +23,6 @@ import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.phantazm.commons.ConfigProcessors;
 import org.phantazm.core.config.processor.ItemStackConfigProcessors;
 import org.phantazm.core.config.processor.MinestomConfigProcessors;
-import org.phantazm.core.config.processor.VariantConfigProcessor;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.config.MobModelConfigProcessor;
 import org.phantazm.mob.goal.ChargeAtEntityGoal;
@@ -36,12 +35,7 @@ import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.mob.target.EntitySelector;
 import org.phantazm.mob.target.NearestPlayerSelector;
 import org.phantazm.mob.target.NearestPlayersSelector;
-import org.phantazm.neuron.bindings.minestom.entity.GroundMinestomDescriptor;
-import org.phantazm.neuron.bindings.minestom.entity.MinestomDescriptor;
-import org.phantazm.neuron.bindings.minestom.entity.Spawner;
-import org.phantazm.neuron.bindings.minestom.entity.config.GroundMinestomDescriptorConfigProcessor;
-import org.phantazm.neuron.node.Calculator;
-import org.phantazm.neuron.node.config.CalculatorConfigProcessor;
+import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,20 +52,11 @@ import java.util.stream.Stream;
  * Main entrypoint for PhantazmMob related features.
  */
 public final class Mob {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Mob.class);
-    private static final ConfigProcessor<MobModel> MODEL_PROCESSOR;
+
+    private static ConfigProcessor<MobModel> MODEL_PROCESSOR;
     private static MobSpawner mobSpawner;
     private static Map<Key, MobModel> models;
-
-    static {
-        ConfigProcessor<Calculator> calculatorProcessor = new CalculatorConfigProcessor();
-        ConfigProcessor<MinestomDescriptor> descriptorProcessor = new VariantConfigProcessor<>(
-                Map.of(GroundMinestomDescriptor.SERIAL_KEY,
-                        new GroundMinestomDescriptorConfigProcessor(calculatorProcessor))::get);
-
-        MODEL_PROCESSOR = new MobModelConfigProcessor(descriptorProcessor, ItemStackConfigProcessors.snbt());
-    }
 
     private Mob() {
         throw new UnsupportedOperationException();
@@ -80,6 +65,8 @@ public final class Mob {
     @SuppressWarnings("SameParameterValue")
     static void initialize(@NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
             @NotNull Spawner spawner, @NotNull Path mobPath, @NotNull ConfigCodec codec) {
+        MODEL_PROCESSOR = new MobModelConfigProcessor(contextManager, ItemStackConfigProcessors.snbt());
+
         registerElementClasses(contextManager);
 
         Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap = new HashMap<>();
