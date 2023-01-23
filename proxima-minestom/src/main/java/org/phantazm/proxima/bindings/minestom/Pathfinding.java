@@ -163,6 +163,6 @@ public class Pathfinding {
     }
 
     public long recalculationDelay(@NotNull PathResult pathResult) {
-        return pathResult.isSuccessful() ? pathResult.exploredCount() / 2 : pathResult.exploredCount() * 2L;
+        return pathResult.isSuccessful() ? pathResult.exploredCount() : pathResult.exploredCount() * 2L;
     }
 }
