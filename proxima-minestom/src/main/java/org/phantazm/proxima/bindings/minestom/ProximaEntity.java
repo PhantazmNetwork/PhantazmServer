@@ -134,9 +134,16 @@ public class ProximaEntity extends LivingEntity {
 
     @Override
     public void tick(long time) {
+        navigatorTick(time);
+        aiTick(time);
+
+        super.tick(time);
+    }
+
+    protected void navigatorTick(long time) {
         Navigator navigator = pathfinding.getNavigator();
 
-        if (targetEntity.isRemoved()) {
+        if (targetEntity != null && (targetEntity.isRemoved() || targetEntity.getInstance() != getInstance())) {
             targetEntity = null;
         }
 
@@ -146,16 +153,13 @@ public class ProximaEntity extends LivingEntity {
                 currentPath = null;
             }
         }
-        else if (destination != null && (time - lastPathfind < recalculationDelay && destination.hasChanged())) {
+        else if (destination != null && (time - lastPathfind > recalculationDelay && destination.hasChanged())) {
             navigator.navigate(position.x(), position.y(), position.z(), destination);
         }
 
-        if (currentPath != null && moveAlongPath(time)) {
+        if (currentPath != null && current != null && moveAlongPath(time)) {
             resetPath(time);
         }
-
-        aiTick(time);
-        super.tick(time);
     }
 
     protected void aiTick(long time) {

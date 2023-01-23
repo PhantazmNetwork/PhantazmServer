@@ -184,6 +184,7 @@ public final class PhantazmServer {
         Messaging.initialize(global, serverConfig.serverInfoConfig().authType());
 
         Proxima.initialize(global, contextManager, serverConfig.pathfinderConfig());
+        ProximaTest.initialize(global, Proxima.getSpawner());
 
         Mob.initialize(contextManager, keyParser, Proxima.getSpawner(), Path.of("./mobs/"), new YamlCodec());
         EquipmentFeature.initialize(keyParser, contextManager, Path.of("./equipment/"),

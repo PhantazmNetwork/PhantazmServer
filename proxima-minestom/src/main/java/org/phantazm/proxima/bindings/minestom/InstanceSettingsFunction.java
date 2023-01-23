@@ -36,7 +36,7 @@ public class InstanceSettingsFunction implements Function<Instance, InstanceSpaw
             int centerX = (int)Math.floor(border.getCenterX());
             int centerZ = (int)Math.floor(border.getCenterZ());
 
-            int diameter = (int)Math.floor(border.getDiameter());
+            int diameter = Math.min((int)Math.floor(border.getDiameter() / 2), 60000000);
             int halfDiameter = diameter / 2;
 
             Bounds3I bounds = Bounds3I.immutable(centerX - halfDiameter, minY, centerZ - halfDiameter, diameter, height,

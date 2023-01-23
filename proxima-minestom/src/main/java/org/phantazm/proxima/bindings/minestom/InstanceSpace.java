@@ -42,7 +42,7 @@ public class InstanceSpace extends ConcurrentCachingSpace {
             return null;
         }
 
-        Chunk chunk = instance.getChunk(x, z);
+        Chunk chunk = instance.getChunk(x >> 4, z >> 4);
         if (chunk == null) {
             return null;
         }
