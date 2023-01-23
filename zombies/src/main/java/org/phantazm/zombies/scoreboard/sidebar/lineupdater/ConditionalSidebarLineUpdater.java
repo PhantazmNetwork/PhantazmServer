@@ -60,8 +60,8 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
         }
 
         @DataObject
-        public record Data(@NotNull @DataPath("condition") String conditionPath,
-                           @NotNull @DataPath("updater") String updaterPath) {
+        public record Data(@NotNull @ChildPath("condition") String conditionPath,
+                           @NotNull @ChildPath("updater") String updaterPath) {
 
             public Data {
                 Objects.requireNonNull(conditionPath, "conditionPath");
@@ -73,7 +73,7 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("child_updaters") List<String> childUpdaterPaths) {
+    public record Data(@NotNull @ChildPath("child_updaters") List<String> childUpdaterPaths) {
 
         public Data {
             Objects.requireNonNull(childUpdaterPaths, "childUpdaterPaths");

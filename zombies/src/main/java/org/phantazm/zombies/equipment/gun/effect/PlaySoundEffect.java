@@ -47,7 +47,7 @@ public class PlaySoundEffect implements GunEffect {
      * @param sound                The {@link Sound} to play
      */
     @DataObject
-    public record Data(@NotNull @DataPath("audience_provider") String audienceProviderPath, @NotNull Sound sound) {
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath, @NotNull Sound sound) {
 
         /**
          * Creates a {@link Data}.

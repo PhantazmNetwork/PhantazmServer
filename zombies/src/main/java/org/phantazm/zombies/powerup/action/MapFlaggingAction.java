@@ -32,7 +32,7 @@ public class MapFlaggingAction implements Supplier<PowerupAction> {
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, @NotNull @DataPath("deactivation_predicate") String deactivationPredicate) {
+    public record Data(@NotNull Key flag, @NotNull @ChildPath("deactivation_predicate") String deactivationPredicate) {
     }
 
     private static class Action extends PowerupActionBase {

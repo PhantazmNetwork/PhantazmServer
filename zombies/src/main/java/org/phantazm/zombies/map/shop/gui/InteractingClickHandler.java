@@ -67,7 +67,7 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     @DataObject
     public record Data(@NotNull Set<ClickType> clickTypes,
                        boolean blacklist,
-                       @NotNull @DataPath("updating_item") String updatingItem,
-                       @NotNull @DataPath("click_interactor") String clickInteractor) {
+                       @NotNull @ChildPath("updating_item") String updatingItem,
+                       @NotNull @ChildPath("click_interactor") String clickInteractor) {
     }
 }

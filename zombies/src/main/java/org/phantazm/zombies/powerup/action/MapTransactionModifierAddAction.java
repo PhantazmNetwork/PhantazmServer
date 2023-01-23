@@ -32,7 +32,7 @@ public class MapTransactionModifierAddAction implements Supplier<PowerupAction> 
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("deactivation_predicate") String deactivationPredicate,
+    public record Data(@NotNull @ChildPath("deactivation_predicate") String deactivationPredicate,
                        @NotNull Key modifierGroup,
                        @NotNull Component displayName,
                        int amount,

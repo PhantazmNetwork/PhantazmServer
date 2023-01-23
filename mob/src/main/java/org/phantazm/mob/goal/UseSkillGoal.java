@@ -80,7 +80,7 @@ public class UseSkillGoal implements NeuralGoal {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("skill") String skillPath, long period) {
+    public record Data(@NotNull @ChildPath("skill") String skillPath, long period) {
 
         public Data {
             Objects.requireNonNull(skillPath, "skillPath");

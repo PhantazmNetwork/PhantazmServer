@@ -42,7 +42,7 @@ public class ExtraHealthLevel extends PerkLevelBase {
     public record Data(@NotNull Key levelKey,
                        @NotNull Set<Key> upgrades,
                        int bonusHealth,
-                       @NotNull @DataPath("updating_item") String updatingItem) implements PerkData {
+                       @NotNull @ChildPath("updating_item") String updatingItem) implements PerkData {
 
     }
 }

@@ -37,6 +37,6 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
     @DataObject
     public record Data(@NotNull Key equipmentKey,
                        @NotNull Key groupKey,
-                       @NotNull @DataPath("upgrade_path") String upgradePath) {
+                       @NotNull @ChildPath("upgrade_path") String upgradePath) {
     }
 }

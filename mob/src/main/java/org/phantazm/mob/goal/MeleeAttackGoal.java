@@ -68,8 +68,8 @@ public class MeleeAttackGoal implements NeuralGoal {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("skills") String skillPaths,
-                       @NotNull @DataPath("last_hit_selector") String lastHitSelectorPath,
+    public record Data(@NotNull @ChildPath("skills") String skillPaths,
+                       @NotNull @ChildPath("last_hit_selector") String lastHitSelectorPath,
                        long cooldown,
                        double rangeSquared) {
 

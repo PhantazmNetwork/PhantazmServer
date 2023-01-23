@@ -27,7 +27,7 @@ public class LocalizedInstanceSpawner implements Spawner {
 
     @Override
     public @NotNull ProximaEntity spawn(@NotNull Instance instance, @NotNull Point point,
-            @NotNull EntityType entityType, @NotNull PathfindingFactory factory) {
+            @NotNull EntityType entityType, @NotNull Pathfinding.Factory factory) {
         Pathfinding pathfinding = factory.make(pathfinder, nodeLocal, spaceHandler, entityType);
         return new ProximaEntity(entityType, UUID.randomUUID(), pathfinding);
     }

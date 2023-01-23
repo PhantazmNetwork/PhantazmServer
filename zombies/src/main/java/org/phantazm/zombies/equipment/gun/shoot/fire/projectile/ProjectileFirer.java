@@ -202,10 +202,10 @@ public class ProjectileFirer implements Firer {
      *                            before automatically exploding
      */
     @DataObject
-    public record Data(@NotNull @DataPath("end_selector") String endSelectorPath,
-                       @NotNull @DataPath("target_finder") String targetFinderPath,
-                       @NotNull @DataPath("collision_filter") String collisionFilterPath,
-                       @NotNull @DataPath("shot_handlers") Collection<String> shotHandlerPaths,
+    public record Data(@NotNull @ChildPath("end_selector") String endSelectorPath,
+                       @NotNull @ChildPath("target_finder") String targetFinderPath,
+                       @NotNull @ChildPath("collision_filter") String collisionFilterPath,
+                       @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlerPaths,
                        @NotNull MobModel model,
                        double power,
                        double spread,

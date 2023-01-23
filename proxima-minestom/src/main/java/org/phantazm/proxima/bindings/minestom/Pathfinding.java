@@ -8,6 +8,7 @@ import com.github.steanky.proxima.explorer.WalkExplorer;
 import com.github.steanky.proxima.node.Node;
 import com.github.steanky.proxima.node.NodeProcessor;
 import com.github.steanky.proxima.path.BasicNavigator;
+import com.github.steanky.proxima.path.PathResult;
 import com.github.steanky.proxima.path.PathSettings;
 import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.proxima.snapper.BasicNodeSnapper;
@@ -25,6 +26,12 @@ import org.phantazm.proxima.bindings.minestom.controller.GroundController;
 import java.util.Objects;
 
 public class Pathfinding {
+    interface Factory {
+        @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
+                @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler,
+                @NotNull EntityType entityType);
+    }
+
     protected final Pathfinder pathfinder;
     protected final ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal;
     protected final InstanceSpaceHandler spaceHandler;
@@ -111,22 +118,6 @@ public class Pathfinding {
                 fallTolerance(), Vec.EPSILON);
     }
 
-    protected float jumpHeight() {
-        return 1.0F;
-    }
-
-    protected float fallTolerance() {
-        return 4.0F;
-    }
-
-    protected float stepHeight() {
-        return 0.5F;
-    }
-
-    public long immobileThreshold() {
-        return 100L;
-    }
-
     protected @NotNull Explorer explorer() {
         return new WalkExplorer(nodeSnapper, pathLimiter);
     }
@@ -153,5 +144,25 @@ public class Pathfinding {
 
         this.pathSettings = null;
         this.navigator = null;
+    }
+
+    protected float jumpHeight() {
+        return 1.0F;
+    }
+
+    protected float fallTolerance() {
+        return 4.0F;
+    }
+
+    protected float stepHeight() {
+        return 0.5F;
+    }
+
+    public long immobileThreshold() {
+        return 100L;
+    }
+
+    public long recalculationDelay(@NotNull PathResult pathResult) {
+        return pathResult.isSuccessful() ? pathResult.exploredCount() / 2 : pathResult.exploredCount() * 2L;
     }
 }

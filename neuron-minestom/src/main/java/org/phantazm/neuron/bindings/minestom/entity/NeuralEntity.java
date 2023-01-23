@@ -61,11 +61,6 @@ public final class NeuralEntity extends LivingEntity implements Agent {
     }
 
     @Override
-    public void preTick(long time) {
-        navigator.tick(time);
-    }
-
-    @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
         PathContext context = provider.provideContext(instance);
 

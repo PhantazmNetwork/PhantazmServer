@@ -66,7 +66,7 @@ public class SoundShotHandler implements ShotHandler {
      * @param headshotSound        The sound to play for headshots
      */
     @DataObject
-    public record Data(@NotNull @DataPath("audience_provider") String audienceProviderPath,
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath,
                        @NotNull Sound sound,
                        @NotNull Sound headshotSound) {
 

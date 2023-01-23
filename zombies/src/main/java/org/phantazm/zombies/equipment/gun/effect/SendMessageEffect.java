@@ -48,7 +48,7 @@ public class SendMessageEffect implements GunEffect {
      * @param message              The {@link Component} to send to the {@link Audience}
      */
     @DataObject
-    public record Data(@NotNull @DataPath("audience_provider") String audienceProviderPath,
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath,
                        @NotNull Component message) {
 
         /**

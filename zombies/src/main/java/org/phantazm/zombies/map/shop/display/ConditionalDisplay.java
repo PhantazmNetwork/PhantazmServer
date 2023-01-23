@@ -75,7 +75,7 @@ public class ConditionalDisplay implements ShopDisplay {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("success_displays") List<String> successDisplays,
-                       @NotNull @DataPath("failure_displays") List<String> failureDisplays) {
+    public record Data(@NotNull @ChildPath("success_displays") List<String> successDisplays,
+                       @NotNull @ChildPath("failure_displays") List<String> failureDisplays) {
     }
 }

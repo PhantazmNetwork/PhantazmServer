@@ -63,7 +63,7 @@ public class BleedEntitiesSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath,
+    public record Data(@NotNull @ChildPath("selector") String selectorPath,
                        float bleedDamage,
                        long bleedInterval,
                        long bleedTime) {

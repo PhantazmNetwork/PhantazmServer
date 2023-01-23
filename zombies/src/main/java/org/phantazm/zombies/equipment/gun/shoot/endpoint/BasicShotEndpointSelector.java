@@ -140,7 +140,8 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
      * @param maxDistance         The maximum distance of the endpoint from the start
      */
     @DataObject
-    public record Data(@NotNull @DataPath("block_iterations") Collection<String> blockIterationPaths, int maxDistance) {
+    public record Data(@NotNull @ChildPath("block_iterations") Collection<String> blockIterationPaths,
+                       int maxDistance) {
 
         /**
          * Creates a {@link Data}.

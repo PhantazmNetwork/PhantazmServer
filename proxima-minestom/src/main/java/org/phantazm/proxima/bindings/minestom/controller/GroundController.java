@@ -38,21 +38,6 @@ public class GroundController implements Controller {
         this.step = step;
     }
 
-    @Override
-    public double getX() {
-        return entity.getPosition().x();
-    }
-
-    @Override
-    public double getY() {
-        return entity.getPosition().y();
-    }
-
-    @Override
-    public double getZ() {
-        return entity.getPosition().z();
-    }
-
     //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
     @Override
     public void advance(@NotNull Node current, @NotNull Node target) {

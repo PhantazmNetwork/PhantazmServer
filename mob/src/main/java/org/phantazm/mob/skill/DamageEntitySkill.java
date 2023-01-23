@@ -35,7 +35,7 @@ public class DamageEntitySkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath, float damage) {
+    public record Data(@NotNull @ChildPath("selector") String selectorPath, float damage) {
 
         public Data {
             Objects.requireNonNull(selectorPath, "selectorPath");

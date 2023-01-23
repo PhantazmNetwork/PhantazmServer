@@ -19,7 +19,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
 
     @FactoryMethod
     public OpenGuiInteractor(@NotNull Data data, @NotNull SlotDistributor slotDistributor,
-            @NotNull @Child("items") List<GuiItem> guiItems) {
+        @NotNull @Child("items") List<GuiItem> guiItems) {
         super(data);
         this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
         this.guiItems = Objects.requireNonNull(guiItems, "guiItems");
@@ -28,15 +28,15 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         interaction.player().getModule().getPlayerView().getPlayer().ifPresent(player -> player.openInventory(
-                Gui.builder(data.inventoryType, slotDistributor).setDynamic(data.dynamic).withItems(guiItems)
-                        .withTitle(data.title).build()));
+            Gui.builder(data.inventoryType, slotDistributor).setDynamic(data.dynamic).withItems(guiItems)
+                .withTitle(data.title).build()));
     }
 
     @DataObject
     public record Data(@NotNull Component title,
-                       @NotNull InventoryType inventoryType,
-                       @NotNull @DataPath("items") List<String> guiItems,
-                       boolean dynamic) {
+        @NotNull InventoryType inventoryType,
+        @NotNull @ChildPath("items") List<String> guiItems,
+        boolean dynamic) {
 
     }
 }

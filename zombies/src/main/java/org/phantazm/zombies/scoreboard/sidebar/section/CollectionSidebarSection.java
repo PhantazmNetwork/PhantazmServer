@@ -40,7 +40,7 @@ public class CollectionSidebarSection implements SidebarSection {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("line_updaters") Collection<String> lineUpdaterPaths) {
+    public record Data(@NotNull @ChildPath("line_updaters") Collection<String> lineUpdaterPaths) {
 
         public Data {
             Objects.requireNonNull(lineUpdaterPaths, "lineUpdaters");

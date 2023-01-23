@@ -45,7 +45,7 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     }
 
     @DataObject
-    record Data(@DataPath("target") String targetPath, int delayTicks, boolean resetOnInteract) {
+    record Data(@ChildPath("target") String targetPath, int delayTicks, boolean resetOnInteract) {
 
     }
 }

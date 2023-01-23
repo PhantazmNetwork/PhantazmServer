@@ -108,7 +108,7 @@ public class ChargeAtEntityGoal implements NeuralGoal {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath,
+    public record Data(@NotNull @ChildPath("selector") String selectorPath,
                        long retargetInterval,
                        double followRange,
                        long chargeInterval,

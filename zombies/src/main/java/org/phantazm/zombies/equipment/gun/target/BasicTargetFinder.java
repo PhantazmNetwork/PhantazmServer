@@ -95,11 +95,11 @@ public class BasicTargetFinder implements TargetFinder {
      * @param targetLimiterPath      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
      */
     @DataObject
-    public record Data(@NotNull @DataPath("entity_finder") String entityFinderPath,
-                       @NotNull @DataPath("target_tester") String targetTesterPath,
-                       @NotNull @DataPath("intersection_finder") String intersectionFinderPath,
-                       @NotNull @DataPath("headshot_tester") String headshotTesterPath,
-                       @NotNull @DataPath("target_limiter") String targetLimiterPath) {
+    public record Data(@NotNull @ChildPath("entity_finder") String entityFinderPath,
+                       @NotNull @ChildPath("target_tester") String targetTesterPath,
+                       @NotNull @ChildPath("intersection_finder") String intersectionFinderPath,
+                       @NotNull @ChildPath("headshot_tester") String headshotTesterPath,
+                       @NotNull @ChildPath("target_limiter") String targetLimiterPath) {
 
         /**
          * Creates a {@link Data}.

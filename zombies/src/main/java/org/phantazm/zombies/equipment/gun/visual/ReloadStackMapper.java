@@ -51,8 +51,8 @@ public class ReloadStackMapper implements GunStackMapper {
      * @param reloadTesterPath A path to the gun's {@link ReloadTester}
      */
     @DataObject
-    public record Data(@NotNull @DataPath("stats") String statsPath,
-                       @NotNull @DataPath("reload_tester") String reloadTesterPath) {
+    public record Data(@NotNull @ChildPath("stats") String statsPath,
+                       @NotNull @ChildPath("reload_tester") String reloadTesterPath) {
 
         /**
          * Creates a {@link Data}.

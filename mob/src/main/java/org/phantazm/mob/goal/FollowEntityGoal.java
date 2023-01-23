@@ -92,7 +92,7 @@ public class FollowEntityGoal implements NeuralGoal {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("selector") String selectorPath, long retargetInterval, double followRange) {
+    public record Data(@NotNull @ChildPath("selector") String selectorPath, long retargetInterval, double followRange) {
 
         public Data {
             Objects.requireNonNull(selectorPath, "selectorPath");

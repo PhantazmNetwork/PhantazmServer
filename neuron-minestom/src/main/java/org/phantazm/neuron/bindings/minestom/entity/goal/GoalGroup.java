@@ -76,7 +76,7 @@ public class GoalGroup implements Tickable {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("goals") Collection<String> goalPaths) {
+    public record Data(@NotNull @ChildPath("goals") Collection<String> goalPaths) {
 
         public Data {
             Objects.requireNonNull(goalPaths, "goalPaths");

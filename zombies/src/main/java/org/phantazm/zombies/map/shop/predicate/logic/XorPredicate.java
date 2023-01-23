@@ -29,6 +29,6 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("predicates") List<String> paths) {
+    public record Data(@NotNull @ChildPath("predicates") List<String> paths) {
     }
 }

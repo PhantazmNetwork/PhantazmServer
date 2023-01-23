@@ -75,6 +75,6 @@ public class IncrementalMetaDisplay implements ShopDisplay {
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("displays") List<String> displays, boolean cycle) {
+    public record Data(@NotNull @ChildPath("displays") List<String> displays, boolean cycle) {
     }
 }

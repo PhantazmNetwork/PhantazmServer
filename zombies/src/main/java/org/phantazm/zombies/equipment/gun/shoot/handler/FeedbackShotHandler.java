@@ -62,7 +62,7 @@ public class FeedbackShotHandler implements ShotHandler {
      * @param headshotMessage      The message to send for headshots
      */
     @DataObject
-    public record Data(@NotNull @DataPath("audience_provider") String audienceProviderPath,
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath,
                        @NotNull Component message,
                        @NotNull Component headshotMessage) {
 

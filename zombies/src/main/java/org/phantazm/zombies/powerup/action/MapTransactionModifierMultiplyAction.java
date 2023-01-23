@@ -32,7 +32,7 @@ public class MapTransactionModifierMultiplyAction implements Supplier<PowerupAct
     }
 
     @DataObject
-    public record Data(@NotNull @DataPath("deactivation_predicate") String deactivationPredicate,
+    public record Data(@NotNull @ChildPath("deactivation_predicate") String deactivationPredicate,
                        @NotNull Key modifierGroup,
                        @NotNull Component displayName,
                        double factor,
