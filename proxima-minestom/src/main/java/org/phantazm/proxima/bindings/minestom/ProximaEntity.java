@@ -134,10 +134,10 @@ public class ProximaEntity extends LivingEntity {
 
     @Override
     public void tick(long time) {
+        super.tick(time);
+
         navigatorTick(time);
         aiTick(time);
-
-        super.tick(time);
     }
 
     protected void navigatorTick(long time) {
@@ -154,7 +154,7 @@ public class ProximaEntity extends LivingEntity {
             }
         }
         else if (destination != null && (time - lastPathfind > recalculationDelay && destination.hasChanged())) {
-            navigator.navigate(position.x(), position.y(), position.z(), destination);
+            navigator.navigate(position.x(), position.y() + Vec.EPSILON, position.z(), destination);
         }
 
         if (currentPath != null && current != null && moveAlongPath(time)) {
@@ -209,7 +209,7 @@ public class ProximaEntity extends LivingEntity {
     }
 
     protected boolean withinDistance(@NotNull Node node) {
-        Pos position = getPosition();
+        Pos position = getPosition().add(0, Vec.EPSILON, 0);
         return node.x == position.blockX() && node.y == position.blockY() && node.z == position.blockZ();
     }
 

@@ -46,11 +46,10 @@ public class GroundController implements Controller {
         double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
 
         double dX = (target.x + 0.5) - entityPos.x();
-        double dY = exactTargetY - entityPos.y();
         double dZ = (target.z + 0.5) - entityPos.z();
 
         //slows down entities when they reach their position
-        double distSquared = dX * dX + dY * dY + dZ * dZ;
+        double distSquared = dX * dX + dZ * dZ;
         double speed = entity.getAttributeValue(Attribute.MOVEMENT_SPEED);
         if (speed > distSquared) {
             speed = distSquared;
