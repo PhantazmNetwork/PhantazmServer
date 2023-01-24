@@ -8,9 +8,7 @@ import com.github.steanky.proxima.resolver.PositionResolver;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.*;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Instance;
@@ -65,12 +63,12 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public void setDestination(@Nullable PathTarget destination) {
-        if (getInstance() == null) {
-            throw new IllegalArgumentException("Cannot pathfind before an instance is set");
+        if (destination == null && this.destination != null) {
+            cancelPath();
+            return;
         }
 
-        if (destination == null) {
-            cancelPath();
+        if (this.destination == destination) {
             return;
         }
 
@@ -78,6 +76,10 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public void setDestination(@Nullable Entity targetEntity) {
+        if (this.targetEntity == targetEntity) {
+            return;
+        }
+
         if (targetEntity == null || !targetEntity.isRemoved()) {
             this.targetEntity = targetEntity;
         }
@@ -87,17 +89,8 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
-        Instance ourInstance = getInstance();
-        if (ourInstance == null) {
-            throw new IllegalArgumentException("Cannot pathfind before an instance is set");
-        }
-
-        if (ourInstance != targetEntity.getInstance()) {
-            throw new IllegalArgumentException("Cannot pathfind to an entity in a different instance");
-        }
-
         this.destination = PathTarget.resolving(() -> {
-            if (targetEntity.isRemoved()) {
+            if (!isValidTarget(targetEntity)) {
                 return null;
             }
 
@@ -140,11 +133,23 @@ public class ProximaEntity extends LivingEntity {
         aiTick(time);
     }
 
+    protected boolean isValidTarget(@NotNull Entity other) {
+        boolean entityValid = !other.isRemoved() && other.getInstance() == getInstance();
+        if (entityValid && other instanceof Player player) {
+            GameMode mode = player.getGameMode();
+            return !(mode == GameMode.CREATIVE || mode == GameMode.SPECTATOR);
+        }
+
+        return entityValid;
+    }
+
     protected void navigatorTick(long time) {
         Navigator navigator = pathfinding.getNavigator();
 
-        if (targetEntity != null && (targetEntity.isRemoved() || targetEntity.getInstance() != getInstance())) {
+        if (targetEntity != null && !isValidTarget(targetEntity)) {
             targetEntity = null;
+            cancelPath();
+            return;
         }
 
         if (navigator.navigationComplete()) {
@@ -154,7 +159,7 @@ public class ProximaEntity extends LivingEntity {
             }
         }
         else if (destination != null && (time - lastPathfind > recalculationDelay && destination.hasChanged())) {
-            navigator.navigate(position.x(), position.y() + Vec.EPSILON, position.z(), destination);
+            navigator.navigate(position.x(), position.y(), position.z(), destination);
         }
 
         if (currentPath != null && current != null && moveAlongPath(time)) {
