@@ -209,7 +209,7 @@ public class ProximaEntity extends LivingEntity {
     }
 
     protected boolean withinDistance(@NotNull Node node) {
-        Pos position = getPosition().add(0, Vec.EPSILON, 0);
+        Pos position = getPosition();
         return node.x == position.blockX() && node.y == position.blockY() && node.z == position.blockZ();
     }
 

@@ -87,7 +87,7 @@ public class GroundController implements Controller {
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
             if (entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
-                double nodeDiff = exactTargetY - (current.y + current.blockOffset + current.jumpOffset);
+                double nodeDiff = exactTargetY - (current.y + current.blockOffset);
                 if (nodeDiff > step) {
                     entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(
                             MinecraftServer.TICK_PER_SECOND));

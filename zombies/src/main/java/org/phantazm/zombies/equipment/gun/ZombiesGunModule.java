@@ -49,14 +49,6 @@ public class ZombiesGunModule implements DependencyModule {
         return playerView;
     }
 
-    @Memoize
-    @Depend("zombies.dependency.gun.entity_supplier")
-    public @NotNull Supplier<Optional<? extends Entity>> getEntitySupplier() {
-        return getShooterSupplier();
-    }
-
-    @Memoize
-    @Depend("zombies.dependency.gun.shooter.supplier")
     public @NotNull Supplier<Optional<? extends Entity>> getShooterSupplier() {
         return playerView::getPlayer;
     }
