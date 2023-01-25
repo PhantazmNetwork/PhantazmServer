@@ -7,6 +7,7 @@ import com.github.steanky.element.core.path.ElementPath;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.ElementUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
@@ -21,8 +22,7 @@ import java.util.function.Supplier;
 
 public class BasicPowerupHandlerSource implements PowerupHandler.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicPowerupHandler.class);
-    private static final Consumer<ElementException> EXCEPTION_HANDLER =
-            e -> LOGGER.warn("Exception when loading powerup element", e);
+    private static final Consumer<? super ElementException> HANDLER = ElementUtils.logging(LOGGER, "powerup");
 
     private final Map<Key, PowerupInfo> powerups;
     private final ContextManager contextManager;
@@ -45,10 +45,10 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
             PowerupInfo data = dataEntry.getValue();
 
             Collection<Supplier<PowerupVisual>> visuals = contextManager.makeContext(data.visuals())
-                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider, EXCEPTION_HANDLER);
+                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider, HANDLER);
 
             Collection<Supplier<PowerupAction>> actions = contextManager.makeContext(data.actions())
-                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider, EXCEPTION_HANDLER);
+                    .provideCollection(ElementPath.EMPTY, mapDependencyProvider, HANDLER);
 
             Supplier<DeactivationPredicate> deactivationPredicateSupplier;
             try {
@@ -56,7 +56,7 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
                         contextManager.makeContext(data.deactivationPredicate()).provide(mapDependencyProvider);
             }
             catch (ElementException e) {
-                EXCEPTION_HANDLER.accept(e);
+                HANDLER.accept(e);
                 deactivationPredicateSupplier = () -> ImmediateDeactivationPredicate.INSTANCE;
             }
 

@@ -1,5 +1,6 @@
 package org.phantazm.server;
 
+import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
@@ -13,6 +14,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.ElementUtils;
 import org.phantazm.zombies.equipment.Equipment;
 import org.phantazm.zombies.equipment.EquipmentCreator;
 import org.phantazm.zombies.equipment.gun.*;
@@ -53,6 +55,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -61,6 +64,8 @@ import java.util.stream.Stream;
 final class EquipmentFeature {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentFeature.class);
+
+    private static final Consumer<? super ElementException> HANDLER = ElementUtils.logging(LOGGER, "equipment");
 
     private static Map<Key, Pair<GunData, List<ElementContext>>> gunLevelMap = null;
 
@@ -211,6 +216,7 @@ final class EquipmentFeature {
         FeatureUtils.check(gunLevelMap);
         FeatureUtils.check(keyParser);
 
+        DependencyProvider provider = new ModuleDependencyProvider(keyParser, gunModule);
         return new EquipmentCreator() {
             @Override
             public boolean hasEquipment(@NotNull Key equipmentKey) {
@@ -229,9 +235,17 @@ final class EquipmentFeature {
                 Map<Key, GunLevel> levels = new HashMap<>(pair.right().size());
                 Key rootLevel = pair.left().rootLevel();
                 for (ElementContext context : pair.right()) {
-                    DependencyProvider provider = new ModuleDependencyProvider(keyParser, gunModule);
-                    GunLevel level = context.provide(provider);
-                    levels.put(level.data().key(), level);
+                    try {
+                        GunLevel level = context.provide(provider);
+                        levels.put(level.data().key(), level);
+                    }
+                    catch (ElementException e) {
+                        HANDLER.accept(e);
+                    }
+                }
+
+                if (levels.isEmpty()) {
+                    return Optional.empty();
                 }
 
                 GunModel model = new GunModel(rootLevel, levels);

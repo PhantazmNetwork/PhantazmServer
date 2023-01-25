@@ -1,5 +1,6 @@
 package org.phantazm.mob.config;
 
+import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
@@ -20,18 +21,25 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ConfigProcessors;
+import org.phantazm.core.ElementUtils;
 import org.phantazm.mob.MobModel;
+import org.phantazm.proxima.bindings.minestom.GroundPathfindingFactory;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * A {@link ConfigProcessor} for {@link MobModel}s.
  */
 public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MobModelConfigProcessor.class);
+    private static final Consumer<? super ElementException> HANDLER = ElementUtils.logging(LOGGER, "pathfinding");
 
     private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR =
             ConfigProcessor.enumProcessor(EquipmentSlot.class);
@@ -71,7 +79,15 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
                 NamespaceID.from(KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("entityType"))));
 
         ElementContext context = contextManager.makeContext(element.getNodeOrThrow("settings"));
-        Pathfinding.Factory factory = context.provide(DependencyProvider.EMPTY);
+
+        Pathfinding.Factory factory;
+        try {
+            factory = context.provide(DependencyProvider.EMPTY);
+        }
+        catch (ElementException e) {
+            HANDLER.accept(e);
+            factory = new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F));
+        }
 
         ConfigNode metaNode = element.getNodeOrThrow("meta");
 

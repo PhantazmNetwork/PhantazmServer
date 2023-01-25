@@ -21,8 +21,7 @@ public class SidebarUpdater implements Activable {
     private int totalSize = 0;
 
     @FactoryMethod
-    public SidebarUpdater(@NotNull Data data, @NotNull Sidebar sidebar,
-            @NotNull @Child("sections") Collection<SidebarSection> sections) {
+    public SidebarUpdater(@NotNull Sidebar sidebar, @NotNull @Child("sections") Collection<SidebarSection> sections) {
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.sections = List.copyOf(sections);
         this.sizes = new int[sections.size()];

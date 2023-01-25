@@ -1,5 +1,6 @@
 package org.phantazm.mob.spawner;
 
+import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.context.ContextManager;
@@ -28,6 +29,7 @@ import net.minestom.server.item.ItemStack;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.ElementUtils;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
@@ -43,6 +45,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Basic implementation of a {@link MobSpawner}.
@@ -50,6 +53,10 @@ import java.util.*;
 public class BasicMobSpawner implements MobSpawner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMobSpawner.class);
+
+    private static final Consumer<? super ElementException> GOAL_HANDLER = ElementUtils.logging(LOGGER, "mob goal");
+    private static final Consumer<? super ElementException> TRIGGER_HANDLER =
+            ElementUtils.logging(LOGGER, "mob " + "trigger");
 
     private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
 
@@ -85,6 +92,7 @@ public class BasicMobSpawner implements MobSpawner {
         Module module = new Module(this, mobStore, model, proximaEntity);
         DependencyProvider dependencyProvider = new ModuleDependencyProvider(keyParser, module);
         ElementContext context = contextManager.makeContext(model.getNode());
+
         addGoals(context, dependencyProvider, proximaEntity);
         Map<Key, Collection<Skill>> triggers = createTriggers(context, dependencyProvider);
 
@@ -169,7 +177,8 @@ public class BasicMobSpawner implements MobSpawner {
 
     private void addGoals(@NotNull ElementContext context, @NotNull DependencyProvider dependencyProvider,
             @NotNull ProximaEntity entity) {
-        Collection<GoalGroup> goalGroups = context.provideCollection(ElementPath.of("goalGroups"), dependencyProvider);
+        Collection<GoalGroup> goalGroups =
+                context.provideCollection(ElementPath.of("goalGroups"), dependencyProvider, GOAL_HANDLER);
 
         for (GoalGroup group : goalGroups) {
             entity.addGoalGroup(group);
@@ -188,8 +197,8 @@ public class BasicMobSpawner implements MobSpawner {
             }
 
             Key key = keyParser.parseKey(stringKey);
-            skills.put(key,
-                    context.provideCollection(ElementPath.of("triggers").append(stringKey), dependencyProvider));
+            skills.put(key, context.provideCollection(ElementPath.of("triggers").append(stringKey), dependencyProvider,
+                    TRIGGER_HANDLER));
         }
 
         return skills;
