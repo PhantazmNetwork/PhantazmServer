@@ -13,6 +13,7 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -24,7 +25,7 @@ public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
         this.space = new InstanceSpace(instance);
         Objects.requireNonNull(root, "root");
 
-        this.child = EventNode.event("proxima_cache_synchronize_@" + System.identityHashCode(instance),
+        this.child = EventNode.event("proxima_cache_synchronize_{" + instance.getUniqueId() + "}",
                 EventFilter.from(InstanceEvent.class, Instance.class, InstanceEvent::getInstance),
                 event -> event.getInstance() == space.instance());
 
@@ -75,5 +76,10 @@ public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
     @Override
     public @NotNull Space space() {
         return space;
+    }
+
+    @Override
+    public @Nullable Instance instance() {
+        return space.instance();
     }
 }

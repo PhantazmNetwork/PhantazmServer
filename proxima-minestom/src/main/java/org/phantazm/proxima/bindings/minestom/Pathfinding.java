@@ -13,17 +13,23 @@ import com.github.steanky.proxima.path.PathSettings;
 import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.proxima.snapper.BasicNodeSnapper;
 import com.github.steanky.proxima.snapper.NodeSnapper;
+import com.github.steanky.toolkit.collection.Wrapper;
+import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import com.github.steanky.vector.Vec3IBiPredicate;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.instance.EntityTracker;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.controller.GroundController;
 
+import javax.swing.plaf.IconUIResource;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Pathfinding {
     public interface Factory {
@@ -127,7 +133,34 @@ public class Pathfinding {
     }
 
     protected @NotNull Heuristic heuristic() {
-        return Heuristic.DISTANCE_SQUARED;
+        return (fromX, fromY, fromZ, toX, toY, toZ) -> {
+            float distanceSquared = (float)Vec3D.distanceSquared(fromX, fromY, fromZ, toX, toY, toZ);
+
+            Instance instance = spaceHandler.instance();
+            if (instance == null) {
+                return distanceSquared;
+            }
+
+            EntityTracker tracker = instance.getEntityTracker();
+
+            Wrapper<Integer> count = Wrapper.of(0);
+            tracker.nearbyEntitiesUntil(new Vec(fromX + 0.5, fromY, fromZ + 0.5), 1,
+                    EntityTracker.Target.LIVING_ENTITIES, entity -> {
+                        if (entity instanceof ProximaEntity) {
+                            return count.apply(c -> c + 1) > 8;
+                        }
+
+                        return false;
+                    });
+
+            float randomPenalty = 0;
+            int actualCount = count.get();
+            if (actualCount > 1) {
+                randomPenalty = (ThreadLocalRandom.current().nextFloat() + 1) * actualCount;
+            }
+
+            return distanceSquared + count.get() / 5F + randomPenalty;
+        };
     }
 
     protected @NotNull NodeProcessor nodeProcessor() {
@@ -163,6 +196,10 @@ public class Pathfinding {
     }
 
     public long recalculationDelay(@NotNull PathResult pathResult) {
-        return pathResult.isSuccessful() ? pathResult.exploredCount() : pathResult.exploredCount() * 2L;
+        //randomize path recalculation delay
+        double factor = ThreadLocalRandom.current().nextDouble() + 0.5;
+
+        long count = pathResult.isSuccessful() ? pathResult.exploredCount() : pathResult.exploredCount() * 2L;
+        return (long)(count * factor);
     }
 }

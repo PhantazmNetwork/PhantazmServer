@@ -143,7 +143,15 @@ public class ProximaEntity extends LivingEntity {
         return entityValid;
     }
 
+    protected boolean canPathfind() {
+        return !isRemoved() && getInstance() != null;
+    }
+
     protected void navigatorTick(long time) {
+        if (!canPathfind()) {
+            return;
+        }
+
         Navigator navigator = pathfinding.getNavigator();
 
         if (targetEntity != null && !isValidTarget(targetEntity)) {
