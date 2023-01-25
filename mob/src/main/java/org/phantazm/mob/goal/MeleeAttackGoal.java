@@ -2,8 +2,10 @@ package org.phantazm.mob.goal;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.mob.target.LastHitSelector;
@@ -52,8 +54,13 @@ public class MeleeAttackGoal implements ProximaGoal {
             return;
         }
 
-        entity.attack(target, true);
+        entity.attack(target, data.swingHand);
         if (target instanceof LivingEntity livingEntity) {
+            Pos pos = entity.getPosition();
+            livingEntity.damage(DamageType.fromEntity(entity), data.damageAmount);
+            livingEntity.takeKnockback(0.4F * data.knockbackStrength, Math.sin(pos.yaw() * (Math.PI / 180)),
+                    -Math.cos(pos.yaw() * (Math.PI / 180)));
+
             lastHitSelector.setLastHit(livingEntity);
 
             for (Skill skill : skills) {
@@ -72,6 +79,9 @@ public class MeleeAttackGoal implements ProximaGoal {
     @DataObject
     public record Data(long cooldown,
                        double range,
+                       boolean swingHand,
+                       float damageAmount,
+                       float knockbackStrength,
                        @NotNull @ChildPath("skills") Collection<String> skillPaths,
                        @NotNull @ChildPath("last_hit_selector") String lastHitSelectorPath) {
 
