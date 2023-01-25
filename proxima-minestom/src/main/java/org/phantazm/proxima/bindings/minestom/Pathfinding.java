@@ -159,7 +159,7 @@ public class Pathfinding {
                 randomPenalty = (ThreadLocalRandom.current().nextFloat() + 1) * actualCount;
             }
 
-            return distanceSquared + count.get() / 5F + randomPenalty;
+            return distanceSquared + actualCount / 5F + randomPenalty;
         };
     }
 

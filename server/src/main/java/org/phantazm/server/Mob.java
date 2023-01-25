@@ -33,6 +33,7 @@ import org.phantazm.mob.skill.*;
 import org.phantazm.mob.spawner.BasicMobSpawner;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.mob.target.EntitySelector;
+import org.phantazm.mob.target.LastHitEntitySelector;
 import org.phantazm.mob.target.NearestPlayerSelector;
 import org.phantazm.mob.target.NearestPlayersSelector;
 import org.phantazm.proxima.bindings.minestom.Spawner;
@@ -137,6 +138,7 @@ public final class Mob {
         contextManager.registerElementClass(EntitySelector.class);
         contextManager.registerElementClass(NearestPlayerSelector.class);
         contextManager.registerElementClass(NearestPlayersSelector.class);
+        contextManager.registerElementClass(LastHitEntitySelector.class);
 
         LOGGER.info("Registered Mob element classes.");
     }

@@ -1,6 +1,7 @@
 package org.phantazm.mob.goal;
 
 import com.github.steanky.element.core.annotation.*;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ public class MeleeAttackGoal implements ProximaGoal {
     private final Collection<Skill> skills;
     private final LastHitSelector<LivingEntity> lastHitSelector;
     private final ProximaEntity entity;
-    private long ticksSinceLastAttack = 0L;
+    private long lastAttackTime = 0L;
 
     @FactoryMethod
     public MeleeAttackGoal(@NotNull Data data, @NotNull @Child("skills") Collection<Skill> skills,
@@ -32,45 +33,47 @@ public class MeleeAttackGoal implements ProximaGoal {
 
     @Override
     public boolean shouldStart() {
-        return true;
-    }
+        if ((System.currentTimeMillis() - lastAttackTime) / MinecraftServer.TICK_MS >= data.cooldown()) {
+            Entity target = entity.getTargetEntity();
+            if (target == null) {
+                return false;
+            }
 
-    @Override
-    public boolean shouldEnd() {
+            return entity.getDistanceSquared(target) <= data.range * data.range;
+        }
+
         return false;
     }
 
     @Override
-    public void tick(long time) {
-        if (ticksSinceLastAttack >= data.cooldown()) {
-            Entity target = entity.getTargetEntity();
-            if (target == null) {
-                return;
-            }
+    public void start() {
+        Entity target = entity.getTargetEntity();
+        if (target == null) {
+            return;
+        }
 
-            double distance = entity.getDistanceSquared(target);
-            if (distance <= data.rangeSquared()) {
-                entity.attack(target, true);
-                if (target instanceof LivingEntity livingEntity) {
-                    lastHitSelector.setLastHit(livingEntity);
+        entity.attack(target, true);
+        if (target instanceof LivingEntity livingEntity) {
+            lastHitSelector.setLastHit(livingEntity);
 
-                    for (Skill skill : skills) {
-                        skill.use();
-                    }
-                }
-                ticksSinceLastAttack = 0L;
+            for (Skill skill : skills) {
+                skill.use();
             }
         }
-        else {
-            ticksSinceLastAttack++;
-        }
+
+        lastAttackTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public boolean shouldEnd() {
+        return true;
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("skills") String skillPaths,
-                       @NotNull @ChildPath("last_hit_selector") String lastHitSelectorPath,
-                       long cooldown,
-                       double rangeSquared) {
+    public record Data(long cooldown,
+                       double range,
+                       @NotNull @ChildPath("skills") Collection<String> skillPaths,
+                       @NotNull @ChildPath("last_hit_selector") String lastHitSelectorPath) {
 
         public Data {
             Objects.requireNonNull(lastHitSelectorPath, "lastHitSelectorPath");
