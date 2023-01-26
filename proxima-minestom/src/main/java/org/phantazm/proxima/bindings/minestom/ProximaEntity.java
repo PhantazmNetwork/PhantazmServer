@@ -11,12 +11,14 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +47,8 @@ public class ProximaEntity extends LivingEntity {
     private double lastY;
     private double lastZ;
 
+    private int removalAnimationDelay = 1000;
+
     public ProximaEntity(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding) {
         super(entityType, uuid);
         this.pathfinding = Objects.requireNonNull(pathfinding, "pathfinding");
@@ -53,6 +57,10 @@ public class ProximaEntity extends LivingEntity {
 
     public @NotNull Pathfinding pathfinding() {
         return pathfinding;
+    }
+
+    public void setRemovalAnimationDelay(int delay) {
+        this.removalAnimationDelay = delay;
     }
 
     private void cancelPath() {
@@ -125,11 +133,29 @@ public class ProximaEntity extends LivingEntity {
     }
 
     @Override
-    public void tick(long time) {
-        super.tick(time);
+    public void update(long time) {
+        super.update(time);
 
         navigatorTick(time);
         aiTick(time);
+    }
+
+    @Override
+    public void kill() {
+        super.kill();
+
+        if (removalAnimationDelay > 0) {
+            scheduleRemove(Duration.of(removalAnimationDelay, TimeUnit.MILLISECOND));
+        }
+        else {
+            remove();
+        }
+    }
+
+    @Override
+    public void remove() {
+        super.remove();
+        cancelPath();
     }
 
     protected boolean isValidTarget(@NotNull Entity other) {
