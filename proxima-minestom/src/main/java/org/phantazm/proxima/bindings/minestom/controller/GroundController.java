@@ -13,7 +13,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.MathUtils;
-import org.phantazm.core.PhysicsUtils;
 
 import java.util.Objects;
 
@@ -48,7 +47,6 @@ public class GroundController implements Controller {
         double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
 
         double dX = (target.x + 0.5) - entityPos.x();
-        double dY = exactTargetY - entityPos.y();
         double dZ = (target.z + 0.5) - entityPos.z();
 
         //slows down entities when they reach their position
@@ -65,8 +63,6 @@ public class GroundController implements Controller {
         //make sure speedX and speedZ cannot extend past the target
         double speedX = Math.copySign(Math.min(Math.abs(vX), Math.abs(dX)), dX);
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
-
-        System.out.println(entityPos.y());
 
         if (jumping) {
             if (entityPos.y() > exactTargetY + Vec.EPSILON) {
