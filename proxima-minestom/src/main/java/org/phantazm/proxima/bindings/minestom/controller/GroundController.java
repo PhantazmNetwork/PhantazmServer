@@ -8,6 +8,8 @@ import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.MathUtils;
@@ -46,6 +48,7 @@ public class GroundController implements Controller {
         double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
 
         double dX = (target.x + 0.5) - entityPos.x();
+        double dY = exactTargetY - entityPos.y();
         double dZ = (target.z + 0.5) - entityPos.z();
 
         //slows down entities when they reach their position
@@ -63,14 +66,24 @@ public class GroundController implements Controller {
         double speedX = Math.copySign(Math.min(Math.abs(vX), Math.abs(dX)), dX);
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
 
+        System.out.println(entityPos.y());
+
         if (jumping) {
             if (entityPos.y() > exactTargetY + Vec.EPSILON) {
-                //jump completed successfully
-                PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
-                entity.refreshPosition(physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
+                Instance instance = entity.getInstance();
+                Chunk chunk = entity.getChunk();
 
-                entity.setVelocity(Vec.ZERO);
-                jumping = false;
+                assert instance != null;
+                assert chunk != null;
+
+                PhysicsResult physics = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
+                        new Pos(entityPos.x(), exactTargetY + Vec.EPSILON, entityPos.z()), new Vec(speedX, 0, speedZ),
+                        null);
+
+                if (!physics.hasCollision()) {
+                    entity.refreshPosition(physics.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
+                    jumping = false;
+                }
                 return;
             }
             else if (entity.isOnGround()) {
@@ -87,7 +100,7 @@ public class GroundController implements Controller {
             PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-            if (entityPos.y() < exactTargetY && PhysicsUtils.hasCollision(physicsResult)) {
+            if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
                 double nodeDiff = exactTargetY - (current.y + current.blockOffset);
                 if (nodeDiff > step) {
                     entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(
