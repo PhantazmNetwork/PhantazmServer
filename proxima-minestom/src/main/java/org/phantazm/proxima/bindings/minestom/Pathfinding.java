@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.controller.GroundController;
 
-import javax.swing.plaf.IconUIResource;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 

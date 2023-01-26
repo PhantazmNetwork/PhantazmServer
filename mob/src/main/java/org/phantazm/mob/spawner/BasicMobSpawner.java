@@ -56,7 +56,7 @@ public class BasicMobSpawner implements MobSpawner {
 
     private static final Consumer<? super ElementException> GOAL_HANDLER = ElementUtils.logging(LOGGER, "mob goal");
     private static final Consumer<? super ElementException> TRIGGER_HANDLER =
-            ElementUtils.logging(LOGGER, "mob " + "trigger");
+            ElementUtils.logging(LOGGER, "mob trigger");
 
     private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
 

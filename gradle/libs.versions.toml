@@ -9,7 +9,7 @@ examination = "1.3.0"
 
 junit-jupiter = "5.9.0"
 
-minestom = "dc2b7cd103"
+minestom = "eac419adde"
 
 toolkit = "0.3.0"
 
@@ -26,7 +26,7 @@ examination-string = { module = "net.kyori:examination-string", version.ref = "e
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
 
-element-core = { module = "com.github.steanky:element-core", version = "0.12.0" }
+element-core = { module = "com.github.steanky:element-core", version = "0.13.1" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }

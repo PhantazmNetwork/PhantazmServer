@@ -235,12 +235,9 @@ final class EquipmentFeature {
                 Map<Key, GunLevel> levels = new HashMap<>(pair.right().size());
                 Key rootLevel = pair.left().rootLevel();
                 for (ElementContext context : pair.right()) {
-                    try {
-                        GunLevel level = context.provide(provider);
+                    GunLevel level = context.provide(provider, HANDLER, () -> null);
+                    if (level != null) {
                         levels.put(level.data().key(), level);
-                    }
-                    catch (ElementException e) {
-                        HANDLER.accept(e);
                     }
                 }
 

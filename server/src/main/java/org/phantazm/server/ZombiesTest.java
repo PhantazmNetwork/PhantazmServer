@@ -18,7 +18,6 @@ import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
@@ -27,9 +26,9 @@ import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
 import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.BasicClientBlockHandlerSource;
-import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.gui.*;
@@ -70,9 +69,6 @@ final class ZombiesTest {
 
             Instance spawnInstance = event.getSpawningInstance();
             if (spawnInstance != null) {
-                ClientBlockHandler tracker = new InstanceClientBlockHandler(spawnInstance, global, -64, 384);
-                tracker.setClientBlock(Block.BARRIER, 1, 100, 1);
-
                 Hologram hologram = new InstanceHologram(new Vec(1, 101, 1), 0);
                 hologram.add(Component.text("This hologram should be...").color(TextColor.color(255, 0, 0)));
                 hologram.add(Component.text("...visible to everyone").color(TextColor.color(0, 255, 0)));
@@ -167,9 +163,11 @@ final class ZombiesTest {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(1, entry.getValue(), MinecraftServer.getInstanceManager(), instanceLoader,
                             sceneFallback, global, Mob.getMobSpawner(), Mob.getModels(),
-                            new BasicClientBlockHandlerSource(
-                                    instance -> new InstanceClientBlockHandler(instance, global, -64, 384)),
-                            contextManager, keyParser, ZombiesFeature.powerups(),
+                            new BasicClientBlockHandlerSource(instance -> {
+                                DimensionType dimensionType = instance.getDimensionType();
+                                return new InstanceClientBlockHandler(instance, global, dimensionType.getMinY(),
+                                        dimensionType.getHeight());
+                            }), contextManager, keyParser, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(Mob.getMobSpawner(), EquipmentFeature::createEquipmentCreator,
                                     corpseTeam));
             providers.put(entry.getKey(), provider);

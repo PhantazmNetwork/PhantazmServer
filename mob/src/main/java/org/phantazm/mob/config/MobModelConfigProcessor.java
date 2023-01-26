@@ -3,7 +3,6 @@ package org.phantazm.mob.config;
 import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
-import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigEntry;
@@ -80,14 +79,8 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
         ElementContext context = contextManager.makeContext(element.getNodeOrThrow("settings"));
 
-        Pathfinding.Factory factory;
-        try {
-            factory = context.provide(DependencyProvider.EMPTY);
-        }
-        catch (ElementException e) {
-            HANDLER.accept(e);
-            factory = new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F));
-        }
+        Pathfinding.Factory factory = context.provide(HANDLER,
+                () -> new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F)));
 
         ConfigNode metaNode = element.getNodeOrThrow("meta");
 

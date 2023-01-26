@@ -7,8 +7,9 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
-import net.minestom.server.event.EventListener;
+import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.InstanceUnregisterEvent;
 import net.minestom.server.event.instance.PreBlockChangeEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerChunkLoadEvent;
@@ -21,12 +22,13 @@ import net.minestom.server.listener.PlayerDiggingListener;
 import net.minestom.server.network.packet.server.play.BlockChangePacket;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * Supports instance-wide client blocks.
@@ -34,10 +36,14 @@ import java.util.function.Predicate;
  * @see ClientBlockHandlerSource
  */
 public class InstanceClientBlockHandler implements ClientBlockHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceClientBlockHandler.class);
+
     private final Reference<Instance> instance;
     private final Long2ObjectMap<Vec3I2ObjectMap<PositionedBlock>> clientBlocks;
     private final int chunkFloor;
     private final int chunkHeight;
+
+    private final EventNode<InstanceEvent> childNode;
 
     /**
      * <p>Constructs a new instance of this class bound to the provided {@link Instance}. This will add a few necessary
@@ -56,20 +62,19 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         this.chunkFloor = chunkFloor;
         this.chunkHeight = chunkHeight;
 
-        Predicate<InstanceEvent> filter = event -> event.getInstance() == this.instance.get();
-        Predicate<Object> expire = ignored -> {
-            Instance current = this.instance.get();
-            return current == null || !current.isRegistered();
-        };
+        this.childNode = EventNode.event("instance_client_block_handler{" + instance.getUniqueId() + "}",
+                EventFilter.from(InstanceEvent.class, Instance.class, InstanceEvent::getInstance), instanceEvent -> {
+                    Instance thisInstance = this.instance.get();
+                    return thisInstance != null && thisInstance == instanceEvent.getInstance();
+                });
 
-        globalNode.addListener(EventListener.builder(PlayerChunkLoadEvent.class).filter(filter).expireWhen(expire)
-                .handler(this::onPlayerChunkLoad).build());
-        globalNode.addListener(EventListener.builder(PreBlockChangeEvent.class).filter(filter).expireWhen(expire)
-                .handler(this::onPreBlockChange).build());
-        globalNode.addListener(EventListener.builder(PlayerBlockBreakEvent.class).filter(filter).expireWhen(expire)
-                .handler(this::onPlayerBlockBreak).build());
-        globalNode.addListener(EventListener.builder(PrePlayerStartDiggingEvent.class).filter(filter).expireWhen(expire)
-                .handler(this::onPrePlayerStartDigging).build());
+        childNode.addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
+        childNode.addListener(PlayerChunkLoadEvent.class, this::onPlayerChunkLoad);
+        childNode.addListener(PreBlockChangeEvent.class, this::onPreBlockChange);
+        childNode.addListener(PlayerBlockBreakEvent.class, this::onPlayerBlockBreak);
+        childNode.addListener(PrePlayerStartDiggingEvent.class, this::onPrePlayerStartDigging);
+
+        globalNode.addChild(childNode);
     }
 
     @Override
@@ -164,6 +169,21 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                     }
                 }
             }
+        }
+    }
+
+    private void onInstanceUnregister(InstanceUnregisterEvent event) {
+        this.instance.clear();
+        synchronized (clientBlocks) {
+            this.clientBlocks.clear();
+        }
+
+        EventNode<? super InstanceEvent> parent = childNode.getParent();
+        if (parent != null) {
+            parent.removeChild(childNode);
+        }
+        else {
+            LOGGER.warn("Orphaned event node " + childNode.getName());
         }
     }
 

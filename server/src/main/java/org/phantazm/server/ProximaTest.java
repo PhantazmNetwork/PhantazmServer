@@ -124,32 +124,5 @@ final class ProximaTest {
                 }
             }
         });
-
-        global.addListener(PlayerEntityInteractEvent.class, event -> {
-            Entity target = event.getTarget();
-            Entity player = event.getPlayer();
-
-            if (player.getPassengers().contains(target)) {
-                return;
-            }
-
-            if (player.getVehicle() != null) {
-                player.getVehicle().removePassenger(player);
-            }
-
-            event.getTarget().addPassenger(event.getPlayer());
-        });
-
-        global.addListener(PlayerPacketEvent.class, event -> {
-            if (event.getPlayer().getVehicle() == null) {
-                return;
-            }
-
-            if (event.getPacket() instanceof ClientSteerVehiclePacket packet) {
-                if (packet.flags() == 2) {
-                    event.getPlayer().getVehicle().removePassenger(event.getPlayer());
-                }
-            }
-        });
     }
 }
