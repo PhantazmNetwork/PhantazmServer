@@ -17,7 +17,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InstanceSpace extends ConcurrentCachingSpace {
@@ -32,7 +31,8 @@ public class InstanceSpace extends ConcurrentCachingSpace {
     private final Reference<Instance> instanceReference;
 
     public InstanceSpace(@NotNull Instance instance) {
-        this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
+        super(instance.getDimensionType().getMinY());
+        this.instanceReference = new WeakReference<>(instance);
     }
 
     @Override
@@ -141,6 +141,7 @@ public class InstanceSpace extends ConcurrentCachingSpace {
         return instanceReference.get();
     }
 
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static Block getBlock(Chunk chunk, int x, int y, int z) {
         synchronized (chunk) {
             return chunk.getBlock(x, y, z, Block.Getter.Condition.TYPE);
