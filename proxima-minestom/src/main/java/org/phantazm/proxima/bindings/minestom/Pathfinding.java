@@ -119,8 +119,8 @@ public class Pathfinding {
     }
 
     protected @NotNull NodeSnapper nodeSnapper() {
-        return new BasicNodeSnapper(spaceHandler.space(), entityType.width(), entityType.height(), jumpHeight(),
-                fallTolerance(), Vec.EPSILON);
+        return new BasicNodeSnapper(spaceHandler.space(), entityType.width(), entityType.height(), fallTolerance(),
+                jumpHeight(), Vec.EPSILON);
     }
 
     protected @NotNull Explorer explorer() {

@@ -64,10 +64,11 @@ public class GroundController implements Controller {
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
 
         if (jumping) {
-            if (entityPos.y() > exactTargetY) {
+            if (entityPos.y() > exactTargetY + Vec.EPSILON) {
                 //jump completed successfully
-                entity.refreshPosition(CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ)).newPosition()
-                        .withView(PositionUtils.getLookYaw(dX, dZ), 0));
+                PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
+                entity.refreshPosition(physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
+
                 entity.setVelocity(Vec.ZERO);
                 jumping = false;
                 return;
