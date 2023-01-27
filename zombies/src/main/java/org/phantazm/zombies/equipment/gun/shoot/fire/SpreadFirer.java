@@ -10,6 +10,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.GunState;
+import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
 
 import java.util.*;
 
@@ -95,6 +96,22 @@ public class SpreadFirer implements Firer {
             Vec newDirection = new Vec(Math.cos(newYaw) * Math.cos(newPitch), Math.sin(newPitch),
                     Math.sin(newYaw) * Math.cos(newPitch));
             subFirer.fire(state, start.withDirection(newDirection), previousHits);
+        }
+    }
+
+    @Override
+    public void addExtraShotHandler(@NotNull ShotHandler shotHandler) {
+        Objects.requireNonNull(shotHandler, "shotHandler");
+        for (Firer firer : subFirers) {
+            firer.addExtraShotHandler(shotHandler);
+        }
+    }
+
+    @Override
+    public void removeExtraShotHandler(@NotNull ShotHandler shotHandler) {
+        Objects.requireNonNull(shotHandler, "shotHandler");
+        for (Firer firer : subFirers) {
+            firer.removeExtraShotHandler(shotHandler);
         }
     }
 

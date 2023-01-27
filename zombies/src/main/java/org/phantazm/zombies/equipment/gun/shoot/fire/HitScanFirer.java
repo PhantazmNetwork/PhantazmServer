@@ -70,6 +70,11 @@ public class HitScanFirer implements Firer {
     }
 
     @Override
+    public @NotNull Collection<ShotHandler> getShotHandlers() {
+        return shotHandlers;
+    }
+
+    @Override
     public void tick(@NotNull GunState state, long time) {
         for (ShotHandler handler : shotHandlers) {
             handler.tick(state, time);

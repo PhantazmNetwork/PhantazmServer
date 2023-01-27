@@ -192,6 +192,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(KnockbackShotHandler.class);
         contextManager.registerElementClass(ParticleTrailShotHandler.class);
         contextManager.registerElementClass(PotionShotHandler.class);
+        contextManager.registerElementClass(SlowDownShotHandler.class);
         contextManager.registerElementClass(SoundShotHandler.class);
         contextManager.registerElementClass(StateShootTester.class);
         contextManager.registerElementClass(AroundEndFinder.class);

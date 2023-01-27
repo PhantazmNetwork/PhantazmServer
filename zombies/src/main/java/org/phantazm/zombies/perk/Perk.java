@@ -22,10 +22,7 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
     private PerkLevel currentLevel;
     private boolean redrawFlag;
 
-    private ZombiesPlayer currentPlayer;
-
-    public Perk(@NotNull PerkInfo perkInfo, @NotNull Map<Key, PerkLevel> perkLevels,
-            @NotNull ZombiesPlayer currentPlayer) {
+    public Perk(@NotNull PerkInfo perkInfo, @NotNull Map<Key, PerkLevel> perkLevels) {
         this.perkInfo = Objects.requireNonNull(perkInfo, "perkInfo");
         this.perkLevels = Objects.requireNonNull(perkLevels, "perkLevels");
         this.unmodifiableLevels = Set.copyOf(perkLevels.keySet());
@@ -36,19 +33,6 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
             throw new IllegalArgumentException(
                     "perk with root level key '" + rootLevel + "' does not have a corresponding perk level");
         }
-
-        this.currentPlayer = Objects.requireNonNull(currentPlayer, "currentPlayer");
-    }
-
-    public void setPlayer(@NotNull ZombiesPlayer newPlayer) {
-        Objects.requireNonNull(newPlayer, "newPlayer");
-        if (newPlayer == currentPlayer) {
-            return;
-        }
-
-        end();
-        currentPlayer = newPlayer;
-        start();
     }
 
     @Override
@@ -79,10 +63,10 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
             throw new IllegalArgumentException("no PerkLevel named '" + key + "'");
         }
 
-        currentLevel.end(currentPlayer);
+        currentLevel.end();
         currentLevel = newLevel;
 
-        newLevel.start(currentPlayer);
+        newLevel.start();
         redrawFlag = true;
     }
 
@@ -98,7 +82,7 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
 
     @Override
     public void start() {
-        currentLevel.start(currentPlayer);
+        currentLevel.start();
     }
 
     @Override
@@ -108,6 +92,6 @@ public class Perk implements Activable, InventoryObject, Keyed, Upgradable {
 
     @Override
     public void end() {
-        currentLevel.end(currentPlayer);
+        currentLevel.end();
     }
 }

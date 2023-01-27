@@ -221,6 +221,10 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         return model.levels().keySet();
     }
 
+    public @NotNull GunLevel getLevel() {
+        return level;
+    }
+
     @Override
     public void setLevel(@NotNull Key key) {
         Objects.requireNonNull(key, "key");

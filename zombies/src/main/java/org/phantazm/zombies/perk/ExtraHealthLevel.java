@@ -7,13 +7,16 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.item.UpdatingItem;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
+import java.util.Objects;
 import java.util.Set;
 
-@Model("zombies.perk.level.extra_health")
 public class ExtraHealthLevel extends PerkLevelBase {
-    @FactoryMethod
-    public ExtraHealthLevel(@NotNull Data data, @NotNull @Child("updating_item") UpdatingItem item) {
+
+    private final ZombiesPlayer user;
+
+    public ExtraHealthLevel(@NotNull Data data, @NotNull UpdatingItem item, @NotNull ZombiesPlayer user) {
         super(data, item);
+        this.user = Objects.requireNonNull(user, "user");
     }
 
     @Override
@@ -22,20 +25,33 @@ public class ExtraHealthLevel extends PerkLevelBase {
     }
 
     @Override
-    public void start(@NotNull ZombiesPlayer zombiesPlayer) {
-        //TODO: API for modifying health on ZombiesPlayer?
-        zombiesPlayer.getPlayer().ifPresent(player -> {
+    public void start() {
+        user.getPlayer().ifPresent(player -> {
             LivingEntityMeta meta = player.getLivingEntityMeta();
             meta.setHealth(meta.getHealth() + getData().bonusHealth);
         });
     }
 
     @Override
-    public void end(@NotNull ZombiesPlayer zombiesPlayer) {
-        zombiesPlayer.getPlayer().ifPresent(player -> {
+    public void end() {
+        user.getPlayer().ifPresent(player -> {
             LivingEntityMeta meta = player.getLivingEntityMeta();
             meta.setHealth(meta.getHealth() - getData().bonusHealth);
         });
+    }
+
+    @Model("zombies.perk.level.extra_health")
+    public record Creator(@NotNull Data data, @Child("updating_item") UpdatingItem item) implements PerkCreator {
+
+        @FactoryMethod
+        public Creator {
+
+        }
+
+        @Override
+        public PerkLevel createPerk(@NotNull ZombiesPlayer user) {
+            return new ExtraHealthLevel(data, item, user);
+        }
     }
 
     @DataObject

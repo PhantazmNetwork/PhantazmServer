@@ -34,6 +34,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
 
     long getReviveTime();
 
+    double getReviveSpeedMultiplier();
+
+    void setReviveSpeedMultiplier(double multiplier);
+
     default @NotNull Optional<Equipment> getHeldEquipment() {
         return getModule().getPlayerView().getPlayer().map(player -> {
             InventoryAccessRegistry profileSwitcher = getModule().getInventoryAccessRegistry();

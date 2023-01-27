@@ -18,6 +18,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     private final ZombiesPlayerModule module;
 
+    private double reviveSpeedMultiplier = 1.0F;
+
     public BasicZombiesPlayer(@NotNull ZombiesPlayerModule module) {
         this.module = Objects.requireNonNull(module, "module");
     }
@@ -29,7 +31,17 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
 
     @Override
     public long getReviveTime() {
-        return 30L;// todo: fast revive
+        return (long)(30L * reviveSpeedMultiplier);
+    }
+
+    @Override
+    public double getReviveSpeedMultiplier() {
+        return reviveSpeedMultiplier;
+    }
+
+    @Override
+    public void setReviveSpeedMultiplier(double multiplier) {
+        this.reviveSpeedMultiplier = multiplier;
     }
 
     @Override

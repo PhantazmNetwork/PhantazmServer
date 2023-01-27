@@ -107,6 +107,11 @@ public class ProjectileFirer implements Firer {
     }
 
     @Override
+    public @NotNull Collection<ShotHandler> getShotHandlers() {
+        return shotHandlers;
+    }
+
+    @Override
     public void tick(@NotNull GunState state, long time) {
         for (AliveProjectile aliveProjectile = removalQueue.peek();
                 aliveProjectile != null && (time - aliveProjectile.time()) / 50 > data.maxAliveTime();

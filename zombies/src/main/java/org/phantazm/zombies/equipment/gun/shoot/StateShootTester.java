@@ -17,6 +17,8 @@ public class StateShootTester implements ShootTester {
     private final GunStats stats;
     private final ReloadTester reloadTester;
 
+    private double shootSpeedMultiplier;
+
     /**
      * Creates a {@link StateShootTester}.
      *
@@ -48,6 +50,16 @@ public class StateShootTester implements ShootTester {
     @Override
     public boolean isShooting(@NotNull GunState state) {
         return state.ticksSinceLastShot() < stats.shootSpeed();
+    }
+
+    @Override
+    public double getShootSpeedMultiplier() {
+        return shootSpeedMultiplier;
+    }
+
+    @Override
+    public void setShootSpeedMultiplier(double multiplier) {
+        shootSpeedMultiplier = multiplier;
     }
 
     /**
