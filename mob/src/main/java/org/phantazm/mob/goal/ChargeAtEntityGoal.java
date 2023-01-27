@@ -1,6 +1,7 @@
 package org.phantazm.mob.goal;
 
 import com.github.steanky.element.core.annotation.*;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -60,14 +61,14 @@ public class ChargeAtEntityGoal implements ProximaGoal {
             return;
         }
 
-        if (ticksSinceTargetChosen >= data.retargetInterval()) {
+        if (ticksSinceTargetChosen / MinecraftServer.TICK_MS >= data.retargetInterval()) {
             refreshTarget();
         }
         else {
             ++ticksSinceTargetChosen;
         }
 
-        if (ticksSinceCharge >= data.chargeInterval()) {
+        if (ticksSinceCharge / MinecraftServer.TICK_MS >= data.chargeInterval()) {
             charge();
         }
         else {

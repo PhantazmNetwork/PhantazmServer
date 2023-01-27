@@ -40,6 +40,8 @@ public interface MapObjects {
 
     @NotNull Module module();
 
+    @NotNull Optional<Window> windowInRange(@NotNull Point origin, double distance);
+
     default @NotNull Optional<Window> nearestWindowInRange(@NotNull Point origin, double distance) {
         double distanceSquared = distance * distance;
 

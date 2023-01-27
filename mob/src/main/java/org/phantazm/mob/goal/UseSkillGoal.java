@@ -5,6 +5,7 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
@@ -32,25 +33,6 @@ public class UseSkillGoal implements ProximaGoal {
         this.skill = Objects.requireNonNull(skill, "skill");
     }
 
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String skillPath = element.getStringOrThrow("skillPath");
-                long period = element.getNumberOrThrow("period").longValue();
-
-                return new Data(skillPath, period);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                return ConfigNode.of("skillPath", data.skillPath(), "period", data.period());
-            }
-        };
-    }
-
     @Override
     public boolean shouldStart() {
         return true;
@@ -68,7 +50,7 @@ public class UseSkillGoal implements ProximaGoal {
 
     @Override
     public void tick(long time) {
-        if (time - lastUsage >= data.period()) {
+        if ((time - lastUsage) / MinecraftServer.TICK_MS >= data.period()) {
             skill.use();
             lastUsage = time;
         }

@@ -168,12 +168,12 @@ public class ProximaEntity extends LivingEntity {
         return entityValid;
     }
 
-    protected boolean canPathfind() {
+    protected boolean canNavigate() {
         return !isRemoved() && getInstance() != null;
     }
 
     protected void navigatorTick(long time) {
-        if (!canPathfind()) {
+        if (!canNavigate()) {
             return;
         }
 
@@ -191,9 +191,10 @@ public class ProximaEntity extends LivingEntity {
                 currentPath = null;
             }
         }
-        else if (destination != null && isOnGround() &&
+        else if (destination != null && pathfinding.canPathfind(this) &&
                 (time - lastPathfind > recalculationDelay && destination.hasChanged())) {
             navigator.navigate(position.x(), position.y(), position.z(), destination);
+            this.lastPathfind = time;
         }
 
         if (currentPath != null && current != null && moveAlongPath(time)) {

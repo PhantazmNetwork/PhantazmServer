@@ -162,6 +162,10 @@ public class Pathfinding {
         };
     }
 
+    public boolean canPathfind(@NotNull ProximaEntity proximaEntity) {
+        return proximaEntity.isOnGround();
+    }
+
     protected @NotNull NodeProcessor nodeProcessor() {
         return NodeProcessor.createDiagonals(nodeSnapper);
     }

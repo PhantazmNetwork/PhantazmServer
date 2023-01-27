@@ -4,8 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.map.Window;
+import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface WindowHandler extends Tickable {
@@ -14,6 +16,7 @@ public interface WindowHandler extends Tickable {
     @NotNull @Unmodifiable List<Window> windows();
 
     interface Source {
-        @NotNull WindowHandler make(@NotNull List<Window> windows);
+        @NotNull WindowHandler make(@NotNull MapObjects mapObjects,
+                @NotNull Collection<? extends ZombiesPlayer> players);
     }
 }

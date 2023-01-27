@@ -15,6 +15,7 @@ import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.equipment.Equipment;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
+import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
@@ -88,6 +89,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
     }
 
     default boolean canPickupPowerup(@NotNull Powerup powerup) {
+        return isAlive();
+    }
+
+    default boolean canRepairWindow() {
         return isAlive();
     }
 
