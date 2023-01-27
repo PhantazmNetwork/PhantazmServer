@@ -30,6 +30,7 @@ public class Window {
 
     private final Instance instance;
     private final WindowInfo windowInfo;
+    private final Bounds3I shiftedBounds;
     private final ClientBlockHandler clientBlockHandler;
     private final Point worldMin;
     private final Point center;
@@ -54,6 +55,7 @@ public class Window {
         Bounds3I frameRegion = windowInfo.frameRegion();
 
         this.instance = Objects.requireNonNull(instance, "instance");
+        this.shiftedBounds = frameRegion.immutable().shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ());
         this.windowInfo = Objects.requireNonNull(windowInfo, "data");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
 
@@ -149,6 +151,10 @@ public class Window {
 
     public @NotNull WindowInfo getWindowInfo() {
         return windowInfo;
+    }
+
+    public @NotNull Bounds3I getWindowBounds() {
+        return shiftedBounds;
     }
 
     /**

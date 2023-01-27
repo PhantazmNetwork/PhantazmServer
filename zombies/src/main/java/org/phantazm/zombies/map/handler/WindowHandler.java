@@ -16,7 +16,7 @@ public interface WindowHandler extends Tickable {
     @NotNull @Unmodifiable List<Window> windows();
 
     interface Source {
-        @NotNull WindowHandler make(@NotNull MapObjects mapObjects,
+        @NotNull WindowHandler make(@NotNull MapObjects.WindowTracker windowTracker,
                 @NotNull Collection<? extends ZombiesPlayer> players);
     }
 }

@@ -21,8 +21,8 @@ public class BasicWindowHandlerSource implements WindowHandler.Source {
     }
 
     @Override
-    public @NotNull WindowHandler make(@NotNull MapObjects mapObjects,
+    public @NotNull WindowHandler make(@NotNull MapObjects.WindowTracker windowTracker,
             @NotNull Collection<? extends ZombiesPlayer> players) {
-        return new BasicWindowHandler(mapObjects, players, repairRadius, repairInterval, coinsPerWindowBlock);
+        return new BasicWindowHandler(windowTracker, players, repairRadius, repairInterval, coinsPerWindowBlock);
     }
 }

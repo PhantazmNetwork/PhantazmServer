@@ -176,7 +176,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ShopHandler shopHandler = createShopHandler(mapObjects.shops());
 
-        WindowHandler windowHandler = createWindowHandler(mapObjects, zombiesPlayers.values());
+        WindowHandler windowHandler = createWindowHandler(mapObjects.windowTracker(), zombiesPlayers.values());
         windowHandlerWrapper.set(windowHandler);
 
         ZombiesMap map = new ZombiesMap(mapObjects, powerupHandler, roundHandler, shopHandler, windowHandler);
@@ -235,8 +235,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return shopHandlerSource.make(shops);
     }
 
-    private WindowHandler createWindowHandler(MapObjects mapObjects, Collection<? extends ZombiesPlayer> players) {
-        return windowHandlerSource.make(mapObjects, players);
+    private WindowHandler createWindowHandler(MapObjects.WindowTracker windowTracker,
+            Collection<? extends ZombiesPlayer> players) {
+        return windowHandlerSource.make(windowTracker, players);
     }
 
     private @NotNull EventNode<Event> createEventNode(@NotNull Instance instance,

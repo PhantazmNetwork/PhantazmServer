@@ -28,7 +28,7 @@ public class WindowBlockIteration implements BlockIteration {
 
             @Override
             public boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block) {
-                return mapObjects.windowAt(intersection).isEmpty();
+                return mapObjects.windowTracker().windowAt(intersection).isEmpty();
             }
         };
     }

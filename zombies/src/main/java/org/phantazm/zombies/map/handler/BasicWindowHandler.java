@@ -16,7 +16,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.*;
 
 public class BasicWindowHandler implements WindowHandler {
-    private static int POSITION_CHECK_INTERVAL = 200;
+    private static final int POSITION_CHECK_INTERVAL = 200;
 
     private static class RepairOperation {
         private final ZombiesPlayer zombiesPlayer;
@@ -30,9 +30,8 @@ public class BasicWindowHandler implements WindowHandler {
         }
     }
 
-    private final MapObjects mapObjects;
+    private final MapObjects.WindowTracker windowTracker;
     private final Collection<? extends ZombiesPlayer> players;
-    private final List<Window> windows;
     private final double repairRadius;
     private final long repairInterval;
     private final int coinsPerWindowBlock;
@@ -42,11 +41,11 @@ public class BasicWindowHandler implements WindowHandler {
 
     private long lastPositionCheck;
 
-    public BasicWindowHandler(@NotNull MapObjects mapObjects, @NotNull Collection<? extends ZombiesPlayer> players,
-            double repairRadius, long repairInterval, int coinsPerWindowBlock) {
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+    public BasicWindowHandler(@NotNull MapObjects.WindowTracker windowTracker,
+            @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius, long repairInterval,
+            int coinsPerWindowBlock) {
+        this.windowTracker = Objects.requireNonNull(windowTracker, "windowTracker");
         this.players = Objects.requireNonNull(players, "players");
-        this.windows = mapObjects.windows();
         this.repairRadius = repairRadius;
         this.repairInterval = repairInterval;
         this.repairOperationMap = new LinkedHashMap<>();
@@ -69,19 +68,19 @@ public class BasicWindowHandler implements WindowHandler {
     }
 
     private void addOperationIfNearby(ZombiesPlayer zombiesPlayer, Player player) {
-        mapObjects.nearestWindowInRange(player.getPosition(), repairRadius).ifPresent(
-                window -> repairOperationMap.put(player.getUuid(),
+        windowTracker.windowInRange(player.getPosition(), repairRadius).ifPresent(
+                window -> repairOperationMap.putIfAbsent(player.getUuid(),
                         new RepairOperation(zombiesPlayer, window, System.currentTimeMillis())));
     }
 
     @Override
     public @NotNull @Unmodifiable List<Window> windows() {
-        return windows;
+        return windowTracker.windows();
     }
 
     @Override
     public void tick(long time) {
-        if (time - lastPositionCheck > POSITION_CHECK_INTERVAL) {
+        if (time - lastPositionCheck >= POSITION_CHECK_INTERVAL) {
             for (ZombiesPlayer zombiesPlayer : players) {
                 Optional<Player> playerOptional = zombiesPlayer.getPlayer();
                 if (playerOptional.isPresent() && zombiesPlayer.canRepairWindow()) {

@@ -24,6 +24,14 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public interface MapObjects {
+    interface WindowTracker {
+        @NotNull Optional<Window> windowInRange(@NotNull Point origin, double distance);
+
+        @NotNull Optional<Window> windowAt(@NotNull Point origin);
+
+        @NotNull @Unmodifiable List<Window> windows();
+    }
+
     @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
 
     @Unmodifiable @NotNull List<Window> windows();
@@ -40,38 +48,7 @@ public interface MapObjects {
 
     @NotNull Module module();
 
-    @NotNull Optional<Window> windowInRange(@NotNull Point origin, double distance);
-
-    default @NotNull Optional<Window> nearestWindowInRange(@NotNull Point origin, double distance) {
-        double distanceSquared = distance * distance;
-
-        double nearestDistance = Double.POSITIVE_INFINITY;
-        Window nearestWindow = null;
-        for (Window window : windows()) {
-            double currentDistance = window.getCenter().distanceSquared(origin);
-            if (currentDistance < nearestDistance) {
-                nearestDistance = currentDistance;
-                nearestWindow = window;
-            }
-        }
-
-        if (nearestDistance < distanceSquared) {
-            return Optional.of(nearestWindow);
-        }
-
-        return Optional.empty();
-    }
-
-    default @NotNull Optional<Window> windowAt(@NotNull Point block) {
-        Vec3I vec = VecUtils.toBlockInt(block);
-        for (Window window : windows()) {
-            if (window.getWindowInfo().frameRegion().contains(vec)) {
-                return Optional.of(window);
-            }
-        }
-
-        return Optional.empty();
-    }
+    @NotNull WindowTracker windowTracker();
 
     default @NotNull Optional<Door> doorAt(@NotNull Point block) {
         Vec3I vec = VecUtils.toBlockInt(block);
