@@ -29,9 +29,8 @@ public class BasicShopHandler implements ShopHandler {
     }
 
     public void handleInteraction(@NotNull ZombiesPlayer player, @NotNull Point clicked, @NotNull Key interactionType) {
-        shopTracker.atPoint(clicked).ifPresent(shop -> {
-            shop.handleInteraction(new BasicPlayerInteraction(player, interactionType));
-        });
+        shopTracker.atPoint(clicked)
+                .ifPresent(shop -> shop.handleInteraction(new BasicPlayerInteraction(player, interactionType)));
     }
 
     @Override

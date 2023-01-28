@@ -14,18 +14,18 @@ import org.phantazm.commons.HashStrategies;
 import java.util.*;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unchecked")
 class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
     private final List<T> items;
-    private final Long2ObjectMap<T[]> chunkedItems;
+    private final Long2ObjectMap<Object[]> chunkedItems;
 
     BoundedTrackerImpl(@NotNull Collection<T> items) {
         this.items = List.copyOf(items);
         this.chunkedItems = chunkItems(items);
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T extends Bounded> Long2ObjectMap<T[]> chunkItems(Collection<T> items) {
-        Long2ObjectOpenHashMap<Set<T>> map = new Long2ObjectOpenHashMap<>();
+    private static <T extends Bounded> Long2ObjectMap<Object[]> chunkItems(Collection<T> items) {
+        Long2ObjectOpenHashMap<Set<Object>> map = new Long2ObjectOpenHashMap<>();
 
         for (T item : items) {
             List<Bounds3I> allBounds = item.bounds();
@@ -46,9 +46,9 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
             }
         }
 
-        Long2ObjectOpenHashMap<T[]> arrayMap = new Long2ObjectOpenHashMap<>(map.size());
-        for (Long2ObjectMap.Entry<Set<T>> entry : map.long2ObjectEntrySet()) {
-            arrayMap.put(entry.getLongKey(), (T[])entry.getValue().toArray(Object[]::new));
+        Long2ObjectOpenHashMap<Object[]> arrayMap = new Long2ObjectOpenHashMap<>(map.size());
+        for (Long2ObjectMap.Entry<Set<Object>> entry : map.long2ObjectEntrySet()) {
+            arrayMap.put(entry.getLongKey(), entry.getValue().toArray(Object[]::new));
         }
 
         return arrayMap;
@@ -67,12 +67,14 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
 
         for (int cx = startX; cx <= endX; cx++) {
             for (int cz = startZ; cz <= endZ; cz++) {
-                T[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(cx, cz));
+                Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(cx, cz));
                 if (chunkItems != null) {
-                    for (T item : chunkItems) {
-                        double thisDistance = origin.distanceSquared(item.center());
+                    for (Object item : chunkItems) {
+                        T boundedItem = (T)item;
+
+                        double thisDistance = origin.distanceSquared(boundedItem.center());
                         if (thisDistance < closestDistance && thisDistance <= distance * distance) {
-                            closest = item;
+                            closest = boundedItem;
                             closestDistance = thisDistance;
                         }
                     }
@@ -93,12 +95,14 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
 
         for (int cx = startX; cx <= endX; cx++) {
             for (int cz = startZ; cz <= endZ; cz++) {
-                T[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(cx, cz));
+                Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(cx, cz));
                 if (chunkItems != null) {
-                    for (T item : chunkItems) {
-                        double thisDistance = origin.distanceSquared(item.center());
+                    for (Object item : chunkItems) {
+                        T boundedItem = (T)item;
+
+                        double thisDistance = origin.distanceSquared(boundedItem.center());
                         if (thisDistance <= distance * distance) {
-                            consumer.accept(item);
+                            consumer.accept(boundedItem);
                         }
                     }
                 }
@@ -108,15 +112,16 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
 
     @Override
     public @NotNull Optional<T> atPoint(@NotNull Point point) {
-        T[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(point.chunkX(), point.chunkZ()));
+        Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(point.chunkX(), point.chunkZ()));
         if (chunkItems == null) {
             return Optional.empty();
         }
 
-        for (T item : chunkItems) {
-            for (Bounds3I bounds : item.bounds()) {
+        for (Object item : chunkItems) {
+            T boundedItem = (T)item;
+            for (Bounds3I bounds : boundedItem.bounds()) {
                 if (bounds.contains(point.blockX(), point.blockY(), point.blockZ())) {
-                    return Optional.of(item);
+                    return Optional.of(boundedItem);
                 }
             }
         }
