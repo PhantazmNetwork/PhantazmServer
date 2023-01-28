@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
+import org.phantazm.core.tracker.Bounded;
 import org.phantazm.zombies.map.action.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +23,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Represents a door. May be opened once.
+ * Represents a door. May be opened and closed.
  */
-public class Door {
+public class Door implements Bounded {
     private static final Logger LOGGER = LoggerFactory.getLogger(Door.class);
-    private static final Bounds3I[] EMPTY_BOUNDS_ARRAY = new Bounds3I[0];
 
     private final Instance instance;
     private final DoorInfo doorInfo;
@@ -63,7 +63,7 @@ public class Door {
             this.regions = Collections.emptyList();
         }
         else {
-            Bounds3I[] regionArray = doorInfo.regions().toArray(EMPTY_BOUNDS_ARRAY);
+            Bounds3I[] regionArray = doorInfo.regions().toArray(Bounds3I[]::new);
             for (int i = 0; i < regionArray.length; i++) {
                 regionArray[i] = regionArray[i].shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ());
             }
@@ -148,20 +148,6 @@ public class Door {
         blockMappings.clear();
     }
 
-    public @Unmodifiable @NotNull List<Bounds3I> regions() {
-        return regions;
-    }
-
-    /**
-     * Gets the center of the door, to which distances should be measured. This is equal to the center of the enclosing
-     * region.
-     *
-     * @return the center of the door
-     */
-    public @NotNull Point getCenter() {
-        return center;
-    }
-
     /**
      * Gets the enclosing region of this door, which is the smallest possible bounding box that encloses every
      * subregion for this door.
@@ -170,5 +156,15 @@ public class Door {
      */
     public @NotNull Bounds3I getEnclosing() {
         return enclosing;
+    }
+
+    @Override
+    public @NotNull @Unmodifiable List<Bounds3I> bounds() {
+        return regions;
+    }
+
+    @Override
+    public @NotNull Point center() {
+        return center;
     }
 }

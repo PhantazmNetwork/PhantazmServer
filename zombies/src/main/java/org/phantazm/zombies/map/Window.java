@@ -5,12 +5,14 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.VecUtils;
+import org.phantazm.core.tracker.Bounded;
 import org.phantazm.zombies.map.action.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +26,13 @@ import java.util.*;
  *
  * @see ClientBlockHandler
  */
-public class Window {
+public class Window implements Bounded {
     private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
     private static final Block DEFAULT_PADDING = Block.OAK_SLAB;
 
     private final Instance instance;
     private final WindowInfo windowInfo;
-    private final Bounds3I shiftedBounds;
+    private final List<Bounds3I> bounds;
     private final ClientBlockHandler clientBlockHandler;
     private final Point worldMin;
     private final Point center;
@@ -52,10 +54,10 @@ public class Window {
     public Window(@NotNull Point mapOrigin, @NotNull Instance instance, @NotNull WindowInfo windowInfo,
             @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
             @NotNull List<Action<Window>> breakActions) {
-        Bounds3I frameRegion = windowInfo.frameRegion();
+        Bounds3I region = windowInfo.frameRegion();
 
         this.instance = Objects.requireNonNull(instance, "instance");
-        this.shiftedBounds = frameRegion.immutable().shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ());
+        this.bounds = List.of(region.immutable().shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ()));
         this.windowInfo = Objects.requireNonNull(windowInfo, "data");
         this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
 
@@ -64,7 +66,7 @@ public class Window {
 
         Bounds3I frame = windowInfo.frameRegion();
 
-        worldMin = mapOrigin.add(frameRegion.originX(), frameRegion.originY(), frameRegion.originZ());
+        worldMin = mapOrigin.add(region.originX(), region.originY(), region.originZ());
         center = VecUtils.toPoint(frame.immutableCenter()).add(mapOrigin);
         volume = frame.volume();
 
@@ -151,10 +153,6 @@ public class Window {
 
     public @NotNull WindowInfo getWindowInfo() {
         return windowInfo;
-    }
-
-    public @NotNull Bounds3I getWindowBounds() {
-        return shiftedBounds;
     }
 
     /**
@@ -279,5 +277,15 @@ public class Window {
         int z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
 
         return worldMin.add(x, y, z);
+    }
+
+    @Override
+    public @NotNull @Unmodifiable List<Bounds3I> bounds() {
+        return bounds;
+    }
+
+    @Override
+    public @NotNull Point center() {
+        return center;
     }
 }

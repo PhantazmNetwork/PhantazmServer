@@ -5,6 +5,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -30,7 +31,7 @@ public class BasicWindowHandler implements WindowHandler {
         }
     }
 
-    private final MapObjects.WindowTracker windowTracker;
+    private final BoundedTracker<Window> windowTracker;
     private final Collection<? extends ZombiesPlayer> players;
     private final double repairRadius;
     private final long repairInterval;
@@ -41,7 +42,7 @@ public class BasicWindowHandler implements WindowHandler {
 
     private long lastPositionCheck;
 
-    public BasicWindowHandler(@NotNull MapObjects.WindowTracker windowTracker,
+    public BasicWindowHandler(@NotNull BoundedTracker<Window> windowTracker,
             @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius, long repairInterval,
             int coinsPerWindowBlock) {
         this.windowTracker = Objects.requireNonNull(windowTracker, "windowTracker");
@@ -68,14 +69,14 @@ public class BasicWindowHandler implements WindowHandler {
     }
 
     private void addOperationIfNearby(ZombiesPlayer zombiesPlayer, Player player) {
-        windowTracker.windowInRange(player.getPosition(), repairRadius).ifPresent(
+        windowTracker.closestInRange(player.getPosition(), repairRadius).ifPresent(
                 window -> repairOperationMap.putIfAbsent(player.getUuid(),
                         new RepairOperation(zombiesPlayer, window, System.currentTimeMillis())));
     }
 
     @Override
-    public @NotNull @Unmodifiable List<Window> windows() {
-        return windowTracker.windows();
+    public @NotNull BoundedTracker<Window> tracker() {
+        return windowTracker;
     }
 
     @Override

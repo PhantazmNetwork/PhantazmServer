@@ -67,7 +67,8 @@ public class PlayerDeathEventListener extends ZombiesPlayerEventListener<EntityD
     }
 
     private Component getRoomName(@NotNull Pos deathPosition) {
-        return mapObjects.roomAt(deathPosition).map(room -> room.getRoomInfo().displayName()).orElse(null);
+        return mapObjects.roomTracker().atPoint(deathPosition).map(room -> room.getRoomInfo().displayName())
+                .orElse(null);
     }
 
 }

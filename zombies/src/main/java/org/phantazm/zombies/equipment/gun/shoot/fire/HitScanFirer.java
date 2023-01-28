@@ -70,8 +70,13 @@ public class HitScanFirer implements Firer {
     }
 
     @Override
-    public @NotNull Collection<ShotHandler> getShotHandlers() {
-        return shotHandlers;
+    public void addExtraShotHandler(ShotHandler shotHandler) {
+
+    }
+
+    @Override
+    public void removeExtraShotHandler(ShotHandler shotHandler) {
+
     }
 
     @Override

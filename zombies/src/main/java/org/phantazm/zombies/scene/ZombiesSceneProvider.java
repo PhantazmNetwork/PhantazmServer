@@ -32,6 +32,7 @@ import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.DurationTickFormatter;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
@@ -174,7 +175,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 createPowerupHandler(instance, zombiesPlayers, mapObjects.mapDependencyProvider());
         powerupHandlerWrapper.set(powerupHandler);
 
-        ShopHandler shopHandler = createShopHandler(mapObjects.shops());
+        ShopHandler shopHandler = createShopHandler(mapObjects.shopTracker());
 
         WindowHandler windowHandler = createWindowHandler(mapObjects.windowTracker(), zombiesPlayers.values());
         windowHandlerWrapper.set(windowHandler);
@@ -231,11 +232,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return powerupHandlerSource.make(instance, playerMap, mapDependencyProvider);
     }
 
-    private ShopHandler createShopHandler(List<Shop> shops) {
-        return shopHandlerSource.make(shops);
+    private ShopHandler createShopHandler(BoundedTracker<Shop> shopTracker) {
+        return shopHandlerSource.make(shopTracker);
     }
 
-    private WindowHandler createWindowHandler(MapObjects.WindowTracker windowTracker,
+    private WindowHandler createWindowHandler(BoundedTracker<Window> windowTracker,
             Collection<? extends ZombiesPlayer> players) {
         return windowHandlerSource.make(windowTracker, players);
     }

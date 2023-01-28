@@ -35,7 +35,7 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
         if (!searchedDoor) {
             searchedDoor = true;
 
-            Optional<Door> doorOptional = mapObjects.get().doorAt(VecUtils.toPoint(data.doorPosition));
+            Optional<Door> doorOptional = mapObjects.get().doorTracker().atPoint(VecUtils.toPoint(data.doorPosition));
             boolean isPresent = doorOptional.isPresent();
             if (isPresent) {
                 door = doorOptional.get();

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.gui.SlotDistributor;
+import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobStore;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.map.*;
@@ -24,23 +25,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public interface MapObjects {
-    interface WindowTracker {
-        @NotNull Optional<Window> windowInRange(@NotNull Point origin, double distance);
-
-        @NotNull Optional<Window> windowAt(@NotNull Point origin);
-
-        @NotNull @Unmodifiable List<Window> windows();
-    }
-
     @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
-
-    @Unmodifiable @NotNull List<Window> windows();
-
-    @Unmodifiable @NotNull List<Shop> shops();
-
-    @Unmodifiable @NotNull List<Door> doors();
-
-    @Unmodifiable @NotNull List<Room> rooms();
 
     @Unmodifiable @NotNull List<Round> rounds();
 
@@ -48,47 +33,13 @@ public interface MapObjects {
 
     @NotNull Module module();
 
-    @NotNull WindowTracker windowTracker();
+    @NotNull BoundedTracker<Room> roomTracker();
 
-    default @NotNull Optional<Door> doorAt(@NotNull Point block) {
-        Vec3I vec = VecUtils.toBlockInt(block);
-        for (Door door : doors()) {
-            Bounds3I enclosing = door.getEnclosing();
-            if (enclosing.contains(vec)) {
-                for (Bounds3I subRegion : door.regions()) {
-                    if (subRegion.contains(vec)) {
-                        return Optional.of(door);
-                    }
-                }
-            }
-        }
+    @NotNull BoundedTracker<Window> windowTracker();
 
-        return Optional.empty();
-    }
+    @NotNull BoundedTracker<Shop> shopTracker();
 
-    default @NotNull Optional<Room> roomAt(@NotNull Point block) {
-        Vec3I vec = VecUtils.toBlockInt(block);
-        for (Room room : rooms()) {
-            for (Bounds3I region : room.roomBounds()) {
-                if (region.contains(vec)) {
-                    return Optional.of(room);
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    default @NotNull Optional<Shop> shopAt(@NotNull Point block) {
-        for (Shop shop : shops()) {
-            Vec3I trigger = shop.getShopInfo().triggerLocation();
-            if (block.sameBlock(trigger.x(), trigger.y(), trigger.z())) {
-                return Optional.of(shop);
-            }
-        }
-
-        return Optional.empty();
-    }
+    @NotNull BoundedTracker<Door> doorTracker();
 
     interface Source {
         @NotNull MapObjects make(@NotNull Instance instance,

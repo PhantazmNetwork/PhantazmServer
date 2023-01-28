@@ -100,7 +100,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Spawnpoint> spawnpoints =
                 buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobStore);
         List<Window> windows = buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler);
-        List<Shop> shops = buildShops(mapInfo.shops(), provider, instance);
+        List<Shop> shops = buildShops(origin, mapInfo.shops(), provider, instance);
         List<Door> doors = buildDoors(origin, mapInfo.doors(), provider, instance);
         List<Room> rooms = buildRooms(origin, mapInfo.rooms(), provider);
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor);
@@ -150,7 +150,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         return windows;
     }
 
-    private List<Shop> buildShops(List<ShopInfo> shopInfoList, DependencyProvider dependencyProvider,
+    private List<Shop> buildShops(Point mapOrigin, List<ShopInfo> shopInfoList, DependencyProvider dependencyProvider,
             Instance instance) {
         List<Shop> shops = new ArrayList<>(shopInfoList.size());
         for (ShopInfo shopInfo : shopInfoList) {
@@ -165,7 +165,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             List<ShopDisplay> displays =
                     shopContext.provideCollection(ElementPath.of("displays"), dependencyProvider, HANDLER);
 
-            shops.add(new Shop(shopInfo, instance, predicates, successInteractors, failureInteractors, displays));
+            shops.add(new Shop(mapOrigin, shopInfo, instance, predicates, successInteractors, failureInteractors,
+                    displays));
         }
 
         return shops;
