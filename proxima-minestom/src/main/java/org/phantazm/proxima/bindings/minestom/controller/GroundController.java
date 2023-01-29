@@ -15,6 +15,7 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
@@ -48,7 +49,7 @@ public class GroundController implements Controller {
 
     //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
     @Override
-    public void advance(@NotNull Node current, @NotNull Node target, long time) {
+    public void advance(@NotNull Node current, @NotNull Node target, @Nullable Point exactDestination) {
         Pos entityPos = entity.getPosition();
 
         double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
@@ -63,7 +64,7 @@ public class GroundController implements Controller {
             speed = distSquared;
         }
 
-        double radians = adjustAngle(Math.atan2(dZ, dX), time);
+        double radians = adjustAngle(Math.atan2(dZ, dX));
         double vX = Math.cos(radians) * speed;
         double vZ = Math.sin(radians) * speed;
 
@@ -103,6 +104,10 @@ public class GroundController implements Controller {
             PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
+            if (exactDestination != null && pos.distanceSquared(exactDestination) < 100) {
+                entity.lookAt(exactDestination);
+            }
+
             if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
                 double nodeDiff = exactTargetY - (current.y + current.blockOffset);
                 if (nodeDiff > step) {
@@ -120,7 +125,7 @@ public class GroundController implements Controller {
         }
     }
 
-    private double adjustAngle(double radians, long time) {
+    private double adjustAngle(double radians) {
         Instance instance = entity.getInstance();
         assert instance != null;
 
