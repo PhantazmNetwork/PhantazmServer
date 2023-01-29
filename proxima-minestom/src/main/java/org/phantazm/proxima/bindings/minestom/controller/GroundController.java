@@ -1,22 +1,29 @@
 package org.phantazm.proxima.bindings.minestom.controller;
 
 import com.github.steanky.proxima.node.Node;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.MathUtils;
+import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class GroundController implements Controller {
+    private static final double RANGE_DIVISOR = 2D;
+
     private final LivingEntity entity;
     private final double step;
 
@@ -41,7 +48,7 @@ public class GroundController implements Controller {
 
     //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
     @Override
-    public void advance(@NotNull Node current, @NotNull Node target) {
+    public void advance(@NotNull Node current, @NotNull Node target, long time) {
         Pos entityPos = entity.getPosition();
 
         double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
@@ -56,7 +63,7 @@ public class GroundController implements Controller {
             speed = distSquared;
         }
 
-        double radians = Math.atan2(dZ, dX);
+        double radians = adjustAngle(Math.atan2(dZ, dX), time);
         double vX = Math.cos(radians) * speed;
         double vZ = Math.sin(radians) * speed;
 
@@ -111,6 +118,28 @@ public class GroundController implements Controller {
 
             entity.refreshPosition(pos);
         }
+    }
+
+    private double adjustAngle(double radians, long time) {
+        Instance instance = entity.getInstance();
+        assert instance != null;
+
+        Wrapper<Integer> countWrapper = Wrapper.of(0);
+        Point position = entity.getPosition();
+        instance.getEntityTracker()
+                .nearbyEntitiesByChunkRange(position, 0, EntityTracker.Target.LIVING_ENTITIES, entity -> {
+                    if (entity != this.entity && entity.getPosition().distanceSquared(position) < 1 &&
+                            entity instanceof ProximaEntity) {
+                        countWrapper.apply(c -> c + 1);
+                    }
+                });
+
+        int count = countWrapper.get();
+        if (count == 0) {
+            return radians;
+        }
+
+        return radians + ThreadLocalRandom.current().nextDouble(-Math.PI / 2, Math.PI / 2);
     }
 
     @Override

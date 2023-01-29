@@ -4,10 +4,8 @@ import com.github.steanky.proxima.Navigator;
 import com.github.steanky.proxima.node.Node;
 import com.github.steanky.proxima.path.PathResult;
 import com.github.steanky.proxima.path.PathTarget;
-import com.github.steanky.proxima.resolver.PositionResolver;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityAttackEvent;
@@ -97,13 +95,12 @@ public class ProximaEntity extends LivingEntity {
         }
 
         this.destination = PathTarget.resolving(() -> {
-            if (!isValidTarget(targetEntity)) {
+            if (!pathfinding.isValidTarget(targetEntity)) {
                 return null;
             }
 
             return VecUtils.toDouble(targetEntity.getPosition());
-        }, PositionResolver.seekBelow(pathfinding.spaceHandler.space(), 8, targetEntity.getEntityType().width(),
-                Vec.EPSILON), (oldPosition, newPosition) -> oldPosition.distanceSquaredTo(newPosition) > 2);
+        }, pathfinding.positionResolverForTarget(targetEntity), pathfinding.targetChangePredicate(targetEntity));
     }
 
     public @Nullable Entity getTargetEntity() {
@@ -158,18 +155,8 @@ public class ProximaEntity extends LivingEntity {
         cancelPath();
     }
 
-    protected boolean isValidTarget(@NotNull Entity other) {
-        boolean entityValid = !other.isRemoved() && other.getInstance() == getInstance();
-        if (entityValid && other instanceof Player player) {
-            GameMode mode = player.getGameMode();
-            return !(mode == GameMode.CREATIVE || mode == GameMode.SPECTATOR);
-        }
-
-        return entityValid;
-    }
-
     protected boolean canNavigate() {
-        return !isRemoved() && getInstance() != null;
+        return !isDead() && getInstance() != null;
     }
 
     protected void navigatorTick(long time) {
@@ -179,7 +166,7 @@ public class ProximaEntity extends LivingEntity {
 
         Navigator navigator = pathfinding.getNavigator();
 
-        if (targetEntity != null && !isValidTarget(targetEntity)) {
+        if (targetEntity != null && !pathfinding.isValidTarget(targetEntity)) {
             targetEntity = null;
             cancelPath();
             return;
@@ -282,7 +269,7 @@ public class ProximaEntity extends LivingEntity {
                 lastMoved = time;
             }
 
-            controller.advance(current, target);
+            controller.advance(current, target, time);
 
             lastX = currentX;
             lastY = currentY;

@@ -245,7 +245,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
             @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler,
             @NotNull MobStore mobStore) {
-        EventNode<Event> node = EventNode.all(UUID.randomUUID().toString());
+        EventNode<Event> node = EventNode.all("phantazm_zombies_instance_{" + instance.getUniqueId() + "}");
 
         //entity events
         node.addListener(EntityDeathEvent.class,

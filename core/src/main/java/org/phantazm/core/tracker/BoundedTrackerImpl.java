@@ -34,8 +34,8 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
                 int startX = bounds.originX() >> 4;
                 int startZ = bounds.originZ() >> 4;
 
-                int endX = Math.max(0, bounds.maxX() - 1) >> 4;
-                int endZ = Math.max(0, bounds.maxZ() - 1) >> 4;
+                int endX = Math.max(bounds.originX(), bounds.maxX() - 1) >> 4;
+                int endZ = Math.max(bounds.originZ(), bounds.maxZ() - 1) >> 4;
 
                 for (int cx = startX; cx <= endX; cx++) {
                     for (int cz = startZ; cz <= endZ; cz++) {

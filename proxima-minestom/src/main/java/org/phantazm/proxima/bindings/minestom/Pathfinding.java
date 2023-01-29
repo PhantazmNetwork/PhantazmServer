@@ -11,6 +11,7 @@ import com.github.steanky.proxima.path.BasicNavigator;
 import com.github.steanky.proxima.path.PathResult;
 import com.github.steanky.proxima.path.PathSettings;
 import com.github.steanky.proxima.path.Pathfinder;
+import com.github.steanky.proxima.resolver.PositionResolver;
 import com.github.steanky.proxima.snapper.BasicNodeSnapper;
 import com.github.steanky.proxima.snapper.NodeSnapper;
 import com.github.steanky.toolkit.collection.Wrapper;
@@ -19,16 +20,17 @@ import com.github.steanky.vector.Vec3I;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import com.github.steanky.vector.Vec3IBiPredicate;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.*;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.controller.GroundController;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiPredicate;
 
 public class Pathfinding {
     public interface Factory {
@@ -73,6 +75,24 @@ public class Pathfinding {
     public @NotNull Controller getController(@NotNull LivingEntity livingEntity) {
         return Objects.requireNonNullElseGet(controller,
                 () -> controller = new GroundController(livingEntity, stepHeight()));
+    }
+
+    public @NotNull PositionResolver positionResolverForTarget(@NotNull Entity entity) {
+        return PositionResolver.seekBelow(spaceHandler.space(), 8, entity.getEntityType().width(), Vec.EPSILON);
+    }
+
+    public @NotNull BiPredicate<Vec3D, Vec3D> targetChangePredicate(@NotNull Entity entity) {
+        return (oldPosition, newPosition) -> oldPosition.distanceSquaredTo(newPosition) > 2;
+    }
+
+    public boolean isValidTarget(@NotNull Entity targetEntity) {
+        boolean entityValid = !targetEntity.isRemoved() && targetEntity.getInstance() == spaceHandler.instance();
+        if (entityValid && targetEntity instanceof Player player) {
+            GameMode mode = player.getGameMode();
+            return !(mode == GameMode.CREATIVE || mode == GameMode.SPECTATOR);
+        }
+
+        return entityValid;
     }
 
     protected @NotNull PathSettings generateSettings() {
@@ -132,34 +152,7 @@ public class Pathfinding {
     }
 
     protected @NotNull Heuristic heuristic() {
-        return (fromX, fromY, fromZ, toX, toY, toZ) -> {
-            float distanceSquared = (float)Vec3D.distanceSquared(fromX, fromY, fromZ, toX, toY, toZ);
-
-            Instance instance = spaceHandler.instance();
-            if (instance == null) {
-                return distanceSquared;
-            }
-
-            EntityTracker tracker = instance.getEntityTracker();
-
-            Wrapper<Integer> count = Wrapper.of(0);
-            tracker.nearbyEntitiesUntil(new Vec(fromX + 0.5, fromY, fromZ + 0.5), 1,
-                    EntityTracker.Target.LIVING_ENTITIES, entity -> {
-                        if (entity instanceof ProximaEntity) {
-                            return count.apply(c -> c + 1) > 8;
-                        }
-
-                        return false;
-                    });
-
-            float randomPenalty = 0;
-            int actualCount = count.get();
-            if (actualCount > 1) {
-                randomPenalty = (ThreadLocalRandom.current().nextFloat() + 1) * actualCount;
-            }
-
-            return distanceSquared + actualCount / 5F + randomPenalty;
-        };
+        return Heuristic.DISTANCE_SQUARED;
     }
 
     public boolean canPathfind(@NotNull ProximaEntity proximaEntity) {

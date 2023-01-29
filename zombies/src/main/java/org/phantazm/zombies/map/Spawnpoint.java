@@ -13,6 +13,7 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.ZombiesPlayerModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,11 +83,12 @@ public class Spawnpoint {
         double slaSquared = spawnrule.slaSquared();
         boolean inRange = false;
         for (ZombiesPlayer player : zombiesPlayers) {
-            if (!(player.getModule().getMeta().canTriggerSLA())) {
+            ZombiesPlayerModule module = player.getModule();
+            if (!(module.getMeta().canTriggerSLA())) {
                 continue;
             }
 
-            Optional<Player> playerOptional = player.getModule().getPlayerView().getPlayer();
+            Optional<Player> playerOptional = module.getPlayerView().getPlayer();
             if (playerOptional.isPresent()) {
                 if (VecUtils.toDouble(playerOptional.get().getPosition())
                         .distanceSquaredTo(this.spawnInfo.position().toImmutableDouble()) < slaSquared) {
