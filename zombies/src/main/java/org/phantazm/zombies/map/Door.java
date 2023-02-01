@@ -157,6 +157,10 @@ public class Door implements Bounded {
         return enclosing;
     }
 
+    public @NotNull DoorInfo doorInfo() {
+        return doorInfo;
+    }
+
     @Override
     public @NotNull @Unmodifiable List<Bounds3I> bounds() {
         return regions;

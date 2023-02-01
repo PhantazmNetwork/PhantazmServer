@@ -13,6 +13,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob.MobStore;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.equipment.Equipment;
+import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
@@ -92,6 +93,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
     }
 
     default boolean canPickupPowerup(@NotNull Powerup powerup) {
+        return isAlive();
+    }
+
+    default boolean canOpenDoor(@NotNull Door door) {
         return isAlive();
     }
 

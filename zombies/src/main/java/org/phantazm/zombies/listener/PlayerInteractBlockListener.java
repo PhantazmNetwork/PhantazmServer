@@ -4,6 +4,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.map.handler.DoorHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.map.shop.InteractionTypes;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -16,13 +17,16 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
 
     private final ShopHandler shopHandler;
 
+    private final DoorHandler doorHandler;
+
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerInteractBlockListener(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
-            @NotNull PlayerRightClickListener rightClickListener) {
+            @NotNull DoorHandler doorHandler, @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
         this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
+        this.doorHandler = Objects.requireNonNull(doorHandler, "doorHandler");
         this.rightClickListener = Objects.requireNonNull(rightClickListener, "rightClickListener");
     }
 
@@ -30,6 +34,7 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
     public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerBlockInteractEvent event) {
         if (event.getHand() == Player.Hand.MAIN) {
             shopHandler.handleInteraction(zombiesPlayer, event.getBlockPosition(), InteractionTypes.RIGHT_CLICK_BLOCK);
+            doorHandler.handleRightClick(zombiesPlayer, event.getBlockPosition());
             rightClickListener.onRightClick(zombiesPlayer, event.getPlayer().getHeldSlot());
         }
     }

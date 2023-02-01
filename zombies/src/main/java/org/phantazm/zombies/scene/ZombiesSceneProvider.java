@@ -75,6 +75,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final PowerupHandler.Source powerupHandlerSource;
     private final ShopHandler.Source shopHandlerSource;
     private final WindowHandler.Source windowHandlerSource;
+    private final DoorHandler.Source doorHandlerSource;
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
@@ -105,6 +106,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.windowHandlerSource =
                 new BasicWindowHandlerSource(settingsInfo.windowRepairRadius(), settingsInfo.windowRepairTicks(),
                         settingsInfo.repairCoins());
+        this.doorHandlerSource = new BasicDoorHandlerSource();
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -180,11 +182,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         WindowHandler windowHandler = createWindowHandler(mapObjects.windowTracker(), zombiesPlayers.values());
         windowHandlerWrapper.set(windowHandler);
 
-        ZombiesMap map = new ZombiesMap(mapObjects, powerupHandler, roundHandler, shopHandler, windowHandler);
+        DoorHandler doorHandler = createDoorHandler(mapObjects.doorTracker(), mapObjects.roomTracker());
+
+        ZombiesMap map =
+                new ZombiesMap(mapObjects, powerupHandler, roundHandler, shopHandler, windowHandler, doorHandler);
 
         EventNode<Event> childNode =
                 createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
-                        mobStore);
+                        doorHandler, mobStore);
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
@@ -241,10 +246,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return windowHandlerSource.make(windowTracker, players);
     }
 
+    private DoorHandler createDoorHandler(BoundedTracker<Door> doorTracker, BoundedTracker<Room> roomTracker) {
+        return doorHandlerSource.make(doorTracker, roomTracker);
+    }
+
     private @NotNull EventNode<Event> createEventNode(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
             @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler,
-            @NotNull MobStore mobStore) {
+            @NotNull DoorHandler doorHandler, @NotNull MobStore mobStore) {
         EventNode<Event> node = EventNode.all("phantazm_zombies_instance_{" + instance.getUniqueId() + "}");
 
         //entity events
@@ -262,7 +271,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         //various forms of clicking
         PlayerRightClickListener rightClickListener = new PlayerRightClickListener();
         node.addListener(PlayerBlockInteractEvent.class,
-                new PlayerInteractBlockListener(instance, zombiesPlayers, shopHandler, rightClickListener));
+                new PlayerInteractBlockListener(instance, zombiesPlayers, shopHandler, doorHandler,
+                        rightClickListener));
         node.addListener(PlayerEntityInteractEvent.class,
                 new PlayerInteractEntityListener(instance, zombiesPlayers, shopHandler, rightClickListener));
         node.addListener(PlayerUseItemEvent.class,
