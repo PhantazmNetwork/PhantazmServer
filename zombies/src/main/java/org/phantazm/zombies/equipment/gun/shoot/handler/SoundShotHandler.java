@@ -41,14 +41,14 @@ public class SoundShotHandler implements ShotHandler {
             Set<UUID> played = Collections.newSetFromMap(new IdentityHashMap<>(shot.regularTargets().size()));
             for (GunHit hit : shot.regularTargets()) {
                 if (played.add(hit.entity().getUuid())) {
-                    audience.playSound(data.sound(), hit.entity());
+                    audience.playSound(data.sound(), data.atShooter ? attacker : hit.entity());
                 }
             }
 
             played.clear();
             for (GunHit hit : shot.headshotTargets()) {
                 if (played.add(hit.entity().getUuid())) {
-                    audience.playSound(data.headshotSound(), hit.entity());
+                    audience.playSound(data.headshotSound(), data.atShooter ? attacker : hit.entity());
                 }
             }
         });
@@ -69,7 +69,8 @@ public class SoundShotHandler implements ShotHandler {
     @DataObject
     public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath,
                        @NotNull Sound sound,
-                       @NotNull Sound headshotSound) {
+                       @NotNull Sound headshotSound,
+                       boolean atShooter) {
 
         /**
          * Creates a {@link Data}.
