@@ -26,7 +26,7 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
             return;
         }
 
-        InventoryAccessRegistry profileSwitcher = zombiesPlayer.getModule().getInventoryAccessRegistry();
+        InventoryAccessRegistry profileSwitcher = zombiesPlayer.module().getInventoryAccessRegistry();
         if (!profileSwitcher.hasCurrentAccess()) {
             return;
         }

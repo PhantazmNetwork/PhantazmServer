@@ -12,7 +12,7 @@ public class PlayerRightClickListener {
 
     public void onRightClick(@NotNull ZombiesPlayer player, int slot) {
         if (player.isAlive()) {
-            InventoryAccessRegistry profileSwitcher = player.getModule().getInventoryAccessRegistry();
+            InventoryAccessRegistry profileSwitcher = player.module().getInventoryAccessRegistry();
             if (!profileSwitcher.hasCurrentAccess()) {
                 return;
             }

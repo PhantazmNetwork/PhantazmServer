@@ -30,7 +30,7 @@ public class ReviveHandlerTest {
         ZombiesPlayerModule module = mock(ZombiesPlayerModule.class);
         when(module.getMeta()).thenReturn(meta);
         reviver = mock(ZombiesPlayer.class);
-        when(reviver.getModule()).thenReturn(module);
+        when(reviver.module()).thenReturn(module);
     }
 
     @Test

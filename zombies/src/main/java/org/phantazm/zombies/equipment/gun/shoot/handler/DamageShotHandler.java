@@ -12,12 +12,10 @@ import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
-import org.phantazm.zombies.event.EntityGunDamageEvent;
-import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.event.EntityDamageByGunEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.beans.EventHandler;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
@@ -57,13 +55,13 @@ public class DamageShotHandler implements ShotHandler {
     private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
             boolean headshot) {
         boolean hasInstakill = mapObjects.module().flaggable().hasFlag(Flags.INSTA_KILL) ||
-                zombiesPlayer.get().getModule().flaggable().hasFlag(Flags.INSTA_KILL);
+                zombiesPlayer.get().module().flaggable().hasFlag(Flags.INSTA_KILL);
 
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
-            if (hasInstakill && !targetEntity.hasTag(Tags.RESIST_INSTAKILL)) {
-                EntityGunDamageEvent event =
-                        new EntityGunDamageEvent(gun, targetEntity, attacker, headshot, true, damage);
+            if (hasInstakill && !targetEntity.getTag(Tags.RESIST_INSTAKILL)) {
+                EntityDamageByGunEvent event =
+                        new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, true, damage);
                 EventDispatcher.call(event);
                 if (!event.isCancelled()) {
                     targetEntity.kill();
@@ -72,7 +70,8 @@ public class DamageShotHandler implements ShotHandler {
                 continue;
             }
 
-            EntityGunDamageEvent event = new EntityGunDamageEvent(gun, targetEntity, attacker, headshot, false, damage);
+            EntityDamageByGunEvent event =
+                    new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damage);
             EventDispatcher.call(event);
 
             if (!event.isCancelled()) {

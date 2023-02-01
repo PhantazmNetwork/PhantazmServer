@@ -24,14 +24,14 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         ZombiesPlayer player = interaction.player();
-        for (Equipment equipment : player.getModule().getEquipment()) {
+        for (Equipment equipment : player.module().getEquipment()) {
             if (equipment.key().equals(data.equipmentKey) && equipment instanceof Upgradable upgradable) {
                 return upgradePath.nextUpgrade(upgradable.currentLevel())
                         .filter(key -> upgradable.getSuggestedUpgrades().contains(key)).isPresent();
             }
         }
 
-        return interaction.player().getModule().getEquipmentHandler().canAddEquipment(data.groupKey);
+        return interaction.player().module().getEquipmentHandler().canAddEquipment(data.groupKey);
     }
 
     @DataObject

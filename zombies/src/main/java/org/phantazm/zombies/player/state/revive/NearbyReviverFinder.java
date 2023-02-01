@@ -44,7 +44,7 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
                 continue;
             }
 
-            ZombiesPlayerMeta meta = zombiesPlayer.getModule().getMeta();
+            ZombiesPlayerMeta meta = zombiesPlayer.module().getMeta();
             if (!(meta.isCanRevive() && !meta.isReviving())) {
                 continue;
             }

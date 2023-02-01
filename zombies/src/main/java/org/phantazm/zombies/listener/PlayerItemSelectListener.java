@@ -21,7 +21,7 @@ public class PlayerItemSelectListener extends ZombiesPlayerEventListener<PlayerC
 
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerChangeHeldSlotEvent event) {
-        InventoryAccessRegistry accessRegistry = zombiesPlayer.getModule().getInventoryAccessRegistry();
+        InventoryAccessRegistry accessRegistry = zombiesPlayer.module().getInventoryAccessRegistry();
         if (accessRegistry.hasCurrentAccess()) {
             InventoryProfile profile = accessRegistry.getCurrentAccess().profile();
             if (profile.hasInventoryObject(event.getPlayer().getHeldSlot())) {

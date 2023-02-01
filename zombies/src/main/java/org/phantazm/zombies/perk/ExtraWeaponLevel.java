@@ -30,7 +30,7 @@ public class ExtraWeaponLevel extends PerkLevelBase {
     @Override
     public void start() {
         InventoryObjectGroup group =
-                user.getModule().getInventoryAccessRegistry().getCurrentAccess().groups().get(getData().groupKey());
+                user.module().getInventoryAccessRegistry().getCurrentAccess().groups().get(getData().groupKey());
         if (group != null) {
             group.addSlot(getData().additionalSlot());
         }
@@ -39,7 +39,7 @@ public class ExtraWeaponLevel extends PerkLevelBase {
     @Override
     public void end() {
         InventoryObjectGroup group =
-                user.getModule().getInventoryAccessRegistry().getCurrentAccess().groups().get(getData().groupKey());
+                user.module().getInventoryAccessRegistry().getCurrentAccess().groups().get(getData().groupKey());
         if (group != null) {
             group.popInventoryObject();
             group.removeSlot(getData().additionalSlot());

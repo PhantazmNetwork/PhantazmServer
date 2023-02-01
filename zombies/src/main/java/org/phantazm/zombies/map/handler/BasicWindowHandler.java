@@ -4,14 +4,12 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.map.Window;
-import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.*;
@@ -112,13 +110,13 @@ public class BasicWindowHandler implements WindowHandler {
                 Window targetWindow = repairOperation.window;
                 if (!targetWindow.isFullyRepaired()) {
                     int repaired = targetWindow.updateIndex(
-                            targetWindow.getIndex() + zombiesPlayer.getModule().getMeta().getWindowRepairAmount());
+                            targetWindow.getIndex() + zombiesPlayer.module().getMeta().getWindowRepairAmount());
 
                     int baseGold = repaired * coinsPerWindowBlock;
-                    PlayerCoins coins = zombiesPlayer.getModule().getCoins();
+                    PlayerCoins coins = zombiesPlayer.module().getCoins();
 
                     TransactionResult result = coins.runTransaction(new Transaction(
-                            zombiesPlayer.getModule().compositeTransactionModifiers()
+                            zombiesPlayer.module().compositeTransactionModifiers()
                                     .modifiers(ModifierSourceGroups.WINDOW_COIN_GAIN), baseGold));
 
                     coins.applyTransaction(result);

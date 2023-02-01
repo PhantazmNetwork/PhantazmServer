@@ -71,7 +71,7 @@ public class BasicKnockedStateActivable implements Activable {
             Wrapper<Component> knockedDisplayName = Wrapper.ofNull(), reviverDisplayName = Wrapper.ofNull();
             CompletableFuture<Void> knockedFuture = playerView.getDisplayName().thenAccept(knockedDisplayName::set);
             CompletableFuture<Void> reviverFuture =
-                    reviver.getModule().getPlayerView().getDisplayName().thenAccept(reviverDisplayName::set);
+                    reviver.module().getPlayerView().getDisplayName().thenAccept(reviverDisplayName::set);
             CompletableFuture.allOf(knockedFuture, reviverFuture).thenAccept(v -> {
                 sendReviveStatus(reviver, knockedDisplayName.get(), reviverDisplayName.get());
             });
@@ -93,7 +93,7 @@ public class BasicKnockedStateActivable implements Activable {
 
     private void sendReviveStatus(@NotNull ZombiesPlayer reviver, @NotNull Component knockedDisplayName,
             @NotNull Component reviverDisplayName) {
-        reviver.getModule().getPlayerView().getPlayer().ifPresent(reviverPlayer -> {
+        reviver.module().getPlayerView().getPlayer().ifPresent(reviverPlayer -> {
             reviverPlayer.sendActionBar(
                     Component.textOfChildren(Component.text("Reviving "), knockedDisplayName, Component.text(" - "),
                             tickFormatter.format(reviveHandler.getTicksUntilRevive())));

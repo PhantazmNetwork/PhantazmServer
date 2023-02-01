@@ -15,6 +15,6 @@ public class CloseGuiInteractor implements ShopInteractor {
 
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        interaction.player().getModule().getPlayerView().getPlayer().ifPresent(Player::closeInventory);
+        interaction.player().module().getPlayerView().getPlayer().ifPresent(Player::closeInventory);
     }
 }

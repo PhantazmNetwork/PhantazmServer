@@ -15,7 +15,6 @@ import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.equipment.Equipment;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
-import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
@@ -30,7 +29,7 @@ import java.util.function.Function;
 
 public interface ZombiesPlayer extends Activable, Flaggable.Source {
 
-    @NotNull ZombiesPlayerModule getModule();
+    @NotNull ZombiesPlayerModule module();
 
     long getReviveTime();
 
@@ -39,8 +38,8 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
     void setReviveSpeedMultiplier(double multiplier);
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
-        return getModule().getPlayerView().getPlayer().map(player -> {
-            InventoryAccessRegistry profileSwitcher = getModule().getInventoryAccessRegistry();
+        return module().getPlayerView().getPlayer().map(player -> {
+            InventoryAccessRegistry profileSwitcher = module().getInventoryAccessRegistry();
             if (profileSwitcher.hasCurrentAccess()) {
                 InventoryAccess access = profileSwitcher.getCurrentAccess();
                 int slot = player.getHeldSlot();
@@ -59,9 +58,9 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
     @SuppressWarnings("unchecked")
     default <TContext> boolean setState(@NotNull PlayerStateKey<TContext> stateKey, @NotNull TContext context) {
         Function<TContext, ZombiesPlayerState> stateFunction =
-                (Function<TContext, ZombiesPlayerState>)getModule().getStateFunctions().get(stateKey);
+                (Function<TContext, ZombiesPlayerState>)module().getStateFunctions().get(stateKey);
         if (stateFunction != null) {
-            getModule().getStateSwitcher().setState(stateFunction.apply(context));
+            module().getStateSwitcher().setState(stateFunction.apply(context));
             return true;
         }
 
@@ -69,7 +68,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
     }
 
     default boolean isState(@NotNull PlayerStateKey<?> stateKey) {
-        return getModule().getStateSwitcher().getState().key().equals(stateKey.key());
+        return module().getStateSwitcher().getState().key().equals(stateKey.key());
     }
 
     default boolean isAlive() {
@@ -85,11 +84,11 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source {
     }
 
     default @NotNull Optional<Player> getPlayer() {
-        return getModule().getPlayerView().getPlayer();
+        return module().getPlayerView().getPlayer();
     }
 
     default @NotNull UUID getUUID() {
-        return getModule().getPlayerView().getUUID();
+        return module().getPlayerView().getUUID();
     }
 
     default boolean canPickupPowerup(@NotNull Powerup powerup) {

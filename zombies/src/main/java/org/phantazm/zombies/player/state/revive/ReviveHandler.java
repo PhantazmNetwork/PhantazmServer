@@ -67,15 +67,15 @@ public class ReviveHandler implements Activable {
             reviver = reviverFinder.get();
             if (reviver != null) {
                 ticksUntilDeath = deathTime;
-                reviver.getModule().getMeta().setReviving(true);
+                reviver.module().getMeta().setReviving(true);
                 ticksUntilRevive = reviver.getReviveTime();
             }
             else {
                 --ticksUntilDeath;
             }
         }
-        else if (!reviver.getModule().getMeta().isCanRevive() || !reviver.getModule().getMeta().isCrouching()) {
-            reviver.getModule().getMeta().setReviving(false);
+        else if (!reviver.module().getMeta().isCanRevive() || !reviver.module().getMeta().isCrouching()) {
+            reviver.module().getMeta().setReviving(false);
             reviver = null;
             ticksUntilRevive = -1;
         }
@@ -99,12 +99,12 @@ public class ReviveHandler implements Activable {
         }
 
         if (this.reviver != null) {
-            this.reviver.getModule().getMeta().setReviving(false);
+            this.reviver.module().getMeta().setReviving(false);
         }
         this.reviver = reviver;
         if (reviver != null) {
             ticksUntilDeath = deathTime;
-            reviver.getModule().getMeta().setReviving(true);
+            reviver.module().getMeta().setReviving(true);
             ticksUntilRevive = reviver.getReviveTime();
         }
         else {

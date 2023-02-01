@@ -86,12 +86,12 @@ public class InGameStage implements Stage {
             });
 
             for (Key equipmentKey : defaultEquipment) {
-                EquipmentHandler equipmentHandler = zombiesPlayer.getModule().getEquipmentHandler();
+                EquipmentHandler equipmentHandler = zombiesPlayer.module().getEquipmentHandler();
                 if (!equipmentHandler.canAddEquipment(gunsKey)) {
                     continue;
                 }
 
-                zombiesPlayer.getModule().getEquipmentCreator().createEquipment(equipmentKey).ifPresent(equipment -> {
+                zombiesPlayer.module().getEquipmentCreator().createEquipment(equipmentKey).ifPresent(equipment -> {
                     equipmentHandler.addEquipment(equipment, gunsKey);
                 });
             }

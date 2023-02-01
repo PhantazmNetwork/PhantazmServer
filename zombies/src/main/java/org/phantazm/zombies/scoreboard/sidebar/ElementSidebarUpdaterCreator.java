@@ -45,7 +45,7 @@ public class ElementSidebarUpdaterCreator implements Function<ZombiesPlayer, Sid
     public SidebarUpdater apply(ZombiesPlayer zombiesPlayer) {
         DependencyProvider composite =
                 DependencyProvider.composite(new ModuleDependencyProvider(keyParser, sidebarModule),
-                        new ModuleDependencyProvider(keyParser, zombiesPlayer.getModule()));
+                        new ModuleDependencyProvider(keyParser, zombiesPlayer.module()));
         return sidebarContext.provide(updaterPath, composite, HANDLER,
                 () -> new SidebarUpdater(new Sidebar(Component.empty()), List.of()));
     }

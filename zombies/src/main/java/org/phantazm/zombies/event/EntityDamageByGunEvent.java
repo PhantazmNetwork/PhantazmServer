@@ -8,7 +8,7 @@ import org.phantazm.zombies.equipment.gun.Gun;
 
 import java.util.Objects;
 
-public class EntityGunDamageEvent implements EntityInstanceEvent, CancellableEvent {
+public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableEvent {
     private final Gun gun;
     private final Entity damagedEntity;
     private final Entity shooter;
@@ -18,7 +18,7 @@ public class EntityGunDamageEvent implements EntityInstanceEvent, CancellableEve
 
     private boolean cancelled;
 
-    public EntityGunDamageEvent(@NotNull Gun gun, @NotNull Entity damagedEntity, @NotNull Entity shooter,
+    public EntityDamageByGunEvent(@NotNull Gun gun, @NotNull Entity damagedEntity, @NotNull Entity shooter,
             boolean isHeadshot, boolean isInstakill, float damage) {
         this.gun = Objects.requireNonNull(gun, "gun");
         this.damagedEntity = Objects.requireNonNull(damagedEntity, "damagedEntity");

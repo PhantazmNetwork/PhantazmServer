@@ -83,7 +83,7 @@ public class Spawnpoint {
         double slaSquared = spawnrule.slaSquared();
         boolean inRange = false;
         for (ZombiesPlayer player : zombiesPlayers) {
-            ZombiesPlayerModule module = player.getModule();
+            ZombiesPlayerModule module = player.module();
             if (!(module.getMeta().canTriggerSLA())) {
                 continue;
             }

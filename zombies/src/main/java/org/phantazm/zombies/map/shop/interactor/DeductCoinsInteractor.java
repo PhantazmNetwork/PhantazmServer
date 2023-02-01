@@ -19,9 +19,9 @@ public class DeductCoinsInteractor extends InteractorBase<DeductCoinsInteractor.
 
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        PlayerCoins coins = interaction.player().getModule().getCoins();
+        PlayerCoins coins = interaction.player().module().getCoins();
         TransactionResult result = coins.runTransaction(new Transaction(
-                interaction.player().getModule().compositeTransactionModifiers().modifiers(data.modifierType),
+                interaction.player().module().compositeTransactionModifiers().modifiers(data.modifierType),
                 -data.cost));
         coins.applyTransaction(result);
     }

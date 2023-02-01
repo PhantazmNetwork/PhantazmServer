@@ -33,7 +33,7 @@ public class RevivePlayersAction implements Action<Round> {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
                 zombiesPlayer.getPlayer().ifPresent(player -> player.teleport(respawnPos));
             }
-            else if (zombiesPlayer.getModule().getStateSwitcher()
+            else if (zombiesPlayer.module().getStateSwitcher()
                     .getState() instanceof KnockedPlayerState knockedPlayerState) {
                 knockedPlayerState.getReviveHandler().setReviver(null);
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);

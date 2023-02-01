@@ -37,7 +37,7 @@ public class QuickFireLevel extends PerkLevelBase {
 
     @Override
     public void tick(long time) {
-        for (Equipment equipment : user.getModule().getEquipment()) {
+        for (Equipment equipment : user.module().getEquipment()) {
             if (!(equipment instanceof Gun gun) || registeredTesters.contains(gun.getLevel().shootTester())) {
                 continue;
             }

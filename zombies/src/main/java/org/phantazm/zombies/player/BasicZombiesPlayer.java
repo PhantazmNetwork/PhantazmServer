@@ -25,7 +25,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     }
 
     @Override
-    public @NotNull ZombiesPlayerModule getModule() {
+    public @NotNull ZombiesPlayerModule module() {
         return module;
     }
 
