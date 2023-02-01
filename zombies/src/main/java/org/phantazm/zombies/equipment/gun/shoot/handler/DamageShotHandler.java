@@ -32,6 +32,7 @@ public class DamageShotHandler implements ShotHandler {
 
     private final Data data;
     private final Supplier<? extends ZombiesPlayer> zombiesPlayer;
+    private final MapObjects mapObjects;
 
     /**
      * Creates a new {@link DamageShotHandler} with the given {@link Data}.
@@ -39,9 +40,11 @@ public class DamageShotHandler implements ShotHandler {
      * @param data The {@link Data} to use
      */
     @FactoryMethod
-    public DamageShotHandler(@NotNull Data data, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayer) {
+    public DamageShotHandler(@NotNull Data data, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayer,
+            @NotNull MapObjects mapObjects) {
         this.data = Objects.requireNonNull(data, "data");
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
+        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }
 
     @Override
@@ -53,7 +56,8 @@ public class DamageShotHandler implements ShotHandler {
 
     private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
             boolean headshot) {
-        boolean hasInstakill = zombiesPlayer.get().getModule().flaggable().hasFlag(Flags.INSTA_KILL);
+        boolean hasInstakill = mapObjects.module().flaggable().hasFlag(Flags.INSTA_KILL) ||
+                zombiesPlayer.get().getModule().flaggable().hasFlag(Flags.INSTA_KILL);
 
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();

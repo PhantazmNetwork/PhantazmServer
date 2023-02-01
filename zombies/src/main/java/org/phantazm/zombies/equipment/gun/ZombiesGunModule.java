@@ -3,7 +3,6 @@ package org.phantazm.zombies.equipment.gun;
 import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
-import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
