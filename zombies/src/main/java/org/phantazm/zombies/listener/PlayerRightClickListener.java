@@ -11,23 +11,25 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 public class PlayerRightClickListener {
 
     public void onRightClick(@NotNull ZombiesPlayer player, int slot) {
-        InventoryAccessRegistry profileSwitcher = player.getModule().getInventoryAccessRegistry();
-        if (!profileSwitcher.hasCurrentAccess()) {
-            return;
-        }
+        if (player.isAlive()) {
+            InventoryAccessRegistry profileSwitcher = player.getModule().getInventoryAccessRegistry();
+            if (!profileSwitcher.hasCurrentAccess()) {
+                return;
+            }
 
-        InventoryAccess access = profileSwitcher.getCurrentAccess();
-        InventoryProfile profile = access.profile();
-        if (!profile.hasInventoryObject(slot)) {
-            return;
-        }
+            InventoryAccess access = profileSwitcher.getCurrentAccess();
+            InventoryProfile profile = access.profile();
+            if (!profile.hasInventoryObject(slot)) {
+                return;
+            }
 
-        InventoryObject object = profile.getInventoryObject(slot);
-        if (!(object instanceof Equipment equipment)) {
-            return;
-        }
+            InventoryObject object = profile.getInventoryObject(slot);
+            if (!(object instanceof Equipment equipment)) {
+                return;
+            }
 
-        equipment.rightClick();
+            equipment.rightClick();
+        }
     }
 
 }
