@@ -1,18 +1,19 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.Tags;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
+import org.phantazm.zombies.event.EntityGunDamageEvent;
 
+import java.beans.EventHandler;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
@@ -36,47 +37,36 @@ public class DamageShotHandler implements ShotHandler {
         this.data = Objects.requireNonNull(data, "data");
     }
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                float damage = element.getNumberOrThrow("damage").floatValue();
-                float headshotDamage = element.getNumberOrThrow("headshotDamage").floatValue();
-                if (damage < 0) {
-                    throw new ConfigProcessException("damage must be greater than or equal to 0");
-                }
-                if (headshotDamage < 0) {
-                    throw new ConfigProcessException("headshotDamage must be greater than or equal to 0");
-                }
-
-                return new Data(damage, headshotDamage);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.putNumber("damage", data.damage());
-                node.putNumber("headshotDamage", data.headshotDamage());
-                return node;
-            }
-        };
+    @Override
+    public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
+            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        handleDamageTargets(gun, attacker, shot.regularTargets(), data.damage, false);
+        handleDamageTargets(gun, attacker, shot.headshotTargets(), data.headshotDamage, true);
     }
 
-    @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-            @NotNull GunShot shot) {
-        for (GunHit target : shot.regularTargets()) {
-            target.entity().damage(DamageType.fromEntity(attacker), data.damage());
-        }
-        for (GunHit target : shot.headshotTargets()) {
-            target.entity().damage(DamageType.fromEntity(attacker), data.headshotDamage());
+    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
+            boolean headshot) {
+        boolean hasInstakill = attacker.getTag(Tags.HAS_INSTAKILL);
+
+        for (GunHit target : targets) {
+            LivingEntity targetEntity = target.entity();
+            if (hasInstakill && !targetEntity.hasTag(Tags.RESIST_INSTAKILL)) {
+                EntityGunDamageEvent event =
+                        new EntityGunDamageEvent(gun, targetEntity, attacker, headshot, true, damage);
+                EventDispatcher.call(event);
+                if (!event.isCancelled()) {
+                    targetEntity.kill();
+                }
+
+                continue;
+            }
+
+            EntityGunDamageEvent event = new EntityGunDamageEvent(gun, targetEntity, attacker, headshot, false, damage);
+            EventDispatcher.call(event);
+
+            if (!event.isCancelled()) {
+                targetEntity.damage(DamageType.fromEntity(attacker), damage);
+            }
         }
     }
 

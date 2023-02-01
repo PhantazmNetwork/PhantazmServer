@@ -12,6 +12,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
@@ -80,8 +81,8 @@ public class ChainShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-            @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
+            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
@@ -110,7 +111,7 @@ public class ChainShotHandler implements ShotHandler {
                 Vec direction =
                         Vec.fromPoint(entity.getPosition().add(0, boundingBox.height() / 2, 0).sub(hit.location()));
                 int initialSize = previousHits.size();
-                firer.fire(state, new Pos(hit.location()).withDirection(direction), previousHits);
+                firer.fire(gun, state, new Pos(hit.location()).withDirection(direction), previousHits);
                 if (previousHits.size() > initialSize && --attempts <= 0) {
                     return;
                 }

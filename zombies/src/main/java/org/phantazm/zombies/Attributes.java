@@ -1,4 +1,4 @@
-package org.phantazm.core;
+package org.phantazm.zombies;
 
 import net.minestom.server.attribute.Attribute;
 

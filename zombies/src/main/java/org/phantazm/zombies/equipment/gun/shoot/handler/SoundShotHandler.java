@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.audience.AudienceProvider;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -34,8 +35,8 @@ public class SoundShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-            @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
+            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         audienceProvider.provideAudience().ifPresent(audience -> {
             Set<UUID> played = Collections.newSetFromMap(new IdentityHashMap<>(shot.regularTargets().size()));
             for (GunHit hit : shot.regularTargets()) {

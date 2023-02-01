@@ -8,6 +8,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
@@ -69,8 +70,8 @@ public class IgniteShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-            @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
+            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
             target.entity().setFireForDuration(data.duration());
         }

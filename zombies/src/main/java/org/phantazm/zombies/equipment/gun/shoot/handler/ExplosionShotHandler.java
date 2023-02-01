@@ -1,17 +1,13 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 
@@ -39,37 +35,9 @@ public class ExplosionShotHandler implements ShotHandler {
         this.data = Objects.requireNonNull(data, "data");
     }
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                float radius = element.getNumberOrThrow("radius").floatValue();
-                if (radius < 0) {
-                    throw new ConfigProcessException("radius must be greater than or equal to 0");
-                }
-
-                return new Data(radius);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(1);
-                node.putNumber("radius", data.radius());
-                return node;
-            }
-        };
-    }
-
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-            @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
+            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.config.processor.ItemStackConfigProcessors;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.core.particle.data.ParticleData;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 
@@ -77,8 +78,8 @@ public class ParticleTrailShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-            @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
+            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;

@@ -13,6 +13,7 @@ import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
@@ -63,8 +64,8 @@ public class SlowDownShotHandler implements ShotHandler {
     }
 
     @Override
-    public void handle(@NotNull GunState state, @NotNull Entity attacker, @NotNull Collection<UUID> previousHits,
-            @NotNull GunShot shot) {
+    public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
+            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
             removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
             latestTimeMap.put(target.entity().getUuid(), selfTick + data.duration());

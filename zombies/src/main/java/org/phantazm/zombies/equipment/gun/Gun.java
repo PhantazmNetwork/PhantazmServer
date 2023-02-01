@@ -92,7 +92,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
         entitySupplier.get().ifPresent(entity -> {
             Pos start = entity.getPosition().add(0, entity.getEyeHeight(), 0);
-            level.firer().fire(state, start, new HashSet<>());
+            level.firer().fire(this, state, start, new HashSet<>());
         });
         for (GunEffect effect : level.shootEffects()) {
             effect.apply(state);

@@ -9,6 +9,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
 
@@ -76,10 +77,11 @@ public class SpreadFirer implements Firer {
     }
 
     @Override
-    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits) {
+    public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
+            @NotNull Collection<UUID> previousHits) {
         if (data.angleVariance() == 0) {
             for (Firer subFirer : subFirers) {
-                subFirer.fire(state, start, previousHits);
+                subFirer.fire(gun, state, start, previousHits);
             }
             return;
         }
@@ -95,7 +97,7 @@ public class SpreadFirer implements Firer {
 
             Vec newDirection = new Vec(Math.cos(newYaw) * Math.cos(newPitch), Math.sin(newPitch),
                     Math.sin(newYaw) * Math.cos(newPitch));
-            subFirer.fire(state, start.withDirection(newDirection), previousHits);
+            subFirer.fire(gun, state, start.withDirection(newDirection), previousHits);
         }
     }
 

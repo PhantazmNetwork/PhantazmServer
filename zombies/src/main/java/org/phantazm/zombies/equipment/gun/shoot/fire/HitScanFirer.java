@@ -5,6 +5,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
@@ -47,7 +48,8 @@ public class HitScanFirer implements Firer {
     }
 
     @Override
-    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits) {
+    public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
+            @NotNull Collection<UUID> previousHits) {
         entitySupplier.get().ifPresent(player -> {
             Optional<Point> endOptional = endSelector.getEnd(start);
             if (endOptional.isEmpty()) {
@@ -63,7 +65,7 @@ public class HitScanFirer implements Firer {
                 previousHits.add(hit.entity().getUuid());
             }
             for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(state, player, previousHits,
+                shotHandler.handle(gun, state, player, previousHits,
                         new GunShot(start, end, target.regular(), target.headshot()));
             }
         });

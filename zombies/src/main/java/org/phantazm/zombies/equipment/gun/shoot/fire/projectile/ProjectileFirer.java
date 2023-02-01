@@ -18,6 +18,7 @@ import org.phantazm.mob.goal.ProjectileMovementGoal;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
@@ -85,7 +86,8 @@ public class ProjectileFirer implements Firer {
     }
 
     @Override
-    public void fire(@NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits) {
+    public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
+            @NotNull Collection<UUID> previousHits) {
         entitySupplier.get().ifPresent(entity -> {
             Instance instance = entity.getInstance();
             if (instance == null) {
@@ -100,7 +102,7 @@ public class ProjectileFirer implements Firer {
                 neuralEntity.setNoGravity(!data.hasGravity());
                 mobStore.registerMob(mob);
 
-                firedShots.put(neuralEntity.getUuid(), new FiredShot(state, entity, start, previousHits));
+                firedShots.put(neuralEntity.getUuid(), new FiredShot(gun, state, entity, start, previousHits));
                 removalQueue.add(new AliveProjectile(new WeakReference<>(neuralEntity), System.currentTimeMillis()));
             });
         });
@@ -190,7 +192,8 @@ public class ProjectileFirer implements Firer {
             }
             for (ShotHandler shotHandler : shotHandlers) {
                 GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
-                shotHandler.handle(firedShot.state(), firedShot.shooter(), firedShot.previousHits(), shot);
+                shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
+                        shot);
             }
         }
 
@@ -244,7 +247,8 @@ public class ProjectileFirer implements Firer {
 
     }
 
-    private record FiredShot(@NotNull GunState state,
+    private record FiredShot(@NotNull Gun gun,
+                             @NotNull GunState state,
                              @NotNull Entity shooter,
                              @NotNull Pos start,
                              @NotNull Collection<UUID> previousHits) {

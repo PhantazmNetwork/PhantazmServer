@@ -3,14 +3,12 @@ package org.phantazm.zombies.equipment.gun.target.intersectionfinder;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.attribute.Attribute;
-import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.Attributes;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.core.RayUtils;
 
 import java.util.Optional;
