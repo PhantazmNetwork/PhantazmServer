@@ -94,7 +94,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
                 for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
                     Lobby oldLobby = playerLobbyMap.get(playerView.getUUID());
                     if (oldLobby != null && oldLobby != lobby) {
-                        oldLobby.leave(Collections.singleton(playerView.getUUID()));
+                        oldLobby.leave(List.of(playerView.getUUID()));
                     }
 
                     playerLobbyMap.put(playerView.getUUID(), lobby);
@@ -116,7 +116,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
         }
 
         for (UUID uuid : leavers) {
-            playerLobbyMap.get(uuid).leave(Collections.singleton(uuid));
+            playerLobbyMap.get(uuid).leave(List.of(uuid));
         }
 
         return RouteResult.SUCCESSFUL;

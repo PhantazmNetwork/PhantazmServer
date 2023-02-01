@@ -44,7 +44,7 @@ public class BasicPlayerCoinsTest {
     public void testAdd() {
         setup(0);
         int delta = 10;
-        TransactionResult result = coins.runTransaction(new Transaction(Collections.emptyList(), delta));
+        TransactionResult result = coins.runTransaction(new Transaction(List.of(), delta));
         assertEquals(delta, result.change());
         assertEquals(0, coins.getCoins());
     }
@@ -53,7 +53,7 @@ public class BasicPlayerCoinsTest {
     public void testRemove() {
         setup(0);
         int delta = -10;
-        TransactionResult result = coins.runTransaction(new Transaction(Collections.emptyList(), delta));
+        TransactionResult result = coins.runTransaction(new Transaction(List.of(), delta));
         assertEquals(delta, result.change());
     }
 

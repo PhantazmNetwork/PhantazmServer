@@ -1,8 +1,6 @@
 package org.phantazm.zombies.coin;
 
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.ai.EntityAIGroup;
-import net.minestom.server.utils.block.BlockIterator;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.coin.component.TransactionComponentCreator;

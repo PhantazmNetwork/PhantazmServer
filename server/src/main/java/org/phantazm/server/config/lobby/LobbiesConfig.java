@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.lobby.Lobby;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -44,8 +43,7 @@ public record LobbiesConfig(@NotNull Path instancesPath,
      * The default LobbiesConfig instance.
      */
     public static final LobbiesConfig DEFAULT =
-            new LobbiesConfig(DEFAULT_INSTANCES_PATH, DEFAULT_KICK_MESSAGE, DEFAULT_MAIN_LOBBY_NAME,
-                    Collections.emptyMap());
+            new LobbiesConfig(DEFAULT_INSTANCES_PATH, DEFAULT_KICK_MESSAGE, DEFAULT_MAIN_LOBBY_NAME, Map.of());
 
     /**
      * Creates a {@link LobbiesConfig}.

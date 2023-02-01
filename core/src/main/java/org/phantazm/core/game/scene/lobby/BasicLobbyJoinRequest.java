@@ -8,7 +8,7 @@ import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,7 +25,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
      * @param players The players in the request
      */
     public BasicLobbyJoinRequest(@NotNull Collection<PlayerView> players) {
-        this.players = Collections.unmodifiableCollection(Objects.requireNonNull(players, "players"));
+        this.players = List.copyOf(Objects.requireNonNull(players, "players"));
     }
 
     @Override

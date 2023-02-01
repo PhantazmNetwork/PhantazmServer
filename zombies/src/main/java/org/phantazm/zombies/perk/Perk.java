@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.InventoryObject;
-import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.upgrade.Upgradable;
 
 import java.util.Map;

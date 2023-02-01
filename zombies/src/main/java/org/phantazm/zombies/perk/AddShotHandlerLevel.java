@@ -13,7 +13,10 @@ import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class AddShotHandlerLevel extends PerkLevelBase {
 

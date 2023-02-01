@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,7 +59,7 @@ public class Door implements Bounded {
 
             enclosing = Bounds3I.immutable(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ(), 1, 1, 1);
             center = mapOrigin;
-            this.regions = Collections.emptyList();
+            this.regions = List.of();
         }
         else {
             Bounds3I[] regionArray = doorInfo.regions().toArray(Bounds3I[]::new);

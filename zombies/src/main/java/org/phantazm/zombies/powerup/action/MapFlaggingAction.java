@@ -5,8 +5,8 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.Powerup;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 
 import java.util.Objects;
 import java.util.function.Supplier;

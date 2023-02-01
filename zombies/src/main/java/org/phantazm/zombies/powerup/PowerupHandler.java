@@ -7,7 +7,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.Tickable;
-import org.phantazm.core.VecUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 

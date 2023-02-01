@@ -9,7 +9,6 @@ import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -65,10 +64,10 @@ public class MinimalFakePlayer extends Entity {
         if (skin != null) {
             PlayerInfoPacket.AddPlayer.Property skinProperty =
                     new PlayerInfoPacket.AddPlayer.Property("textures", skin.textures(), skin.signature());
-            properties = Collections.singletonList(skinProperty);
+            properties = List.of(skinProperty);
         }
         else {
-            properties = Collections.emptyList();
+            properties = List.of();
         }
 
         PlayerInfoPacket.Entry entry =

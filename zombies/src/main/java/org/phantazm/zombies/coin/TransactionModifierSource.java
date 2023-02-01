@@ -10,7 +10,7 @@ public interface TransactionModifierSource {
     TransactionModifierSource EMPTY = new TransactionModifierSource() {
         @Override
         public @NotNull Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
-            return Collections.emptyList();
+            return List.of();
         }
 
         @Override

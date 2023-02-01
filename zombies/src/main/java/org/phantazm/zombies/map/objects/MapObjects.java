@@ -2,14 +2,10 @@ package org.phantazm.zombies.map.objects;
 
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.toolkit.collection.Wrapper;
-import com.github.steanky.vector.Bounds3I;
-import com.github.steanky.vector.Vec3I;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.core.VecUtils;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobStore;

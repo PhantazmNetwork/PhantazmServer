@@ -7,7 +7,6 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.ethylene.mapper.type.Token;
 import com.github.steanky.toolkit.collection.Wrapper;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.time.TickFormatter;

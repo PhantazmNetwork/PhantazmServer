@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,8 +29,7 @@ public class LobbyRouterFallback implements SceneFallback {
 
     @Override
     public boolean fallback(@NotNull PlayerView player) {
-        return lobbyRouter.join(
-                new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(Collections.singleton(player)))).success();
+        return lobbyRouter.join(new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(List.of(player)))).success();
     }
 
 }

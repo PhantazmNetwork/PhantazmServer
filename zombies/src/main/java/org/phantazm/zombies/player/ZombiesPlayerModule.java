@@ -20,7 +20,7 @@ import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -100,7 +100,7 @@ public class ZombiesPlayerModule implements DependencyModule {
     }
 
     public @NotNull @UnmodifiableView Collection<Equipment> getEquipment() {
-        return Collections.emptyList();
+        return List.of();
     }
 
     public @NotNull InventoryAccessRegistry getInventoryAccessRegistry() {

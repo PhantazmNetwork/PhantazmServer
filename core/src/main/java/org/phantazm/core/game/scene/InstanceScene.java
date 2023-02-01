@@ -7,7 +7,10 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Basic Scene which corresponds to a single {@link Instance} and {@link SceneFallback} to route players.
@@ -21,7 +24,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
 
     protected final Map<UUID, PlayerView> players = new HashMap<>();
 
-    protected final Map<UUID, PlayerView> unmodifiablePlayers = Collections.unmodifiableMap(players);
+    protected final Map<UUID, PlayerView> unmodifiablePlayers = Map.copyOf(players);
 
     private boolean shutdown = false;
 

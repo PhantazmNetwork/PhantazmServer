@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map;
 
 import com.github.steanky.vector.Bounds3I;
-import com.github.steanky.vector.Vec3D;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;

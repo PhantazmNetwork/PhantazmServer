@@ -11,7 +11,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,7 +36,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
 
     @Override
     public @UnmodifiableView @NotNull Collection<PlayerView> getPlayers() {
-        return Collections.singleton(viewProvider.fromPlayer(event.getPlayer()));
+        return List.of(viewProvider.fromPlayer(event.getPlayer()));
     }
 
     @Override

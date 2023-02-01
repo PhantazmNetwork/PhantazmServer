@@ -1,7 +1,5 @@
 package org.phantazm.zombies.player;
 
-import com.github.steanky.element.core.dependency.DependencyProvider;
-import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
@@ -156,7 +154,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
                 Map.of(ZombiesPlayerStateKeys.ALIVE, aliveStateCreator, ZombiesPlayerStateKeys.DEAD,
                         (Function<DeadPlayerStateContext, ZombiesPlayerState>)context -> deadStateCreator.apply(context,
-                                Collections.emptyList()), ZombiesPlayerStateKeys.KNOCKED, knockedStateCreator,
+                                List.of()), ZombiesPlayerStateKeys.KNOCKED, knockedStateCreator,
                         ZombiesPlayerStateKeys.QUIT, quitStateCreator);
 
         ZombiesPlayerModule module =

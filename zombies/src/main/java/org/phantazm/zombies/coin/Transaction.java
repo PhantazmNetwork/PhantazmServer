@@ -4,12 +4,12 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 public record Transaction(@NotNull Collection<Modifier> modifiers, int initialChange) {
 
     public Transaction(int initialChange) {
-        this(Collections.emptyList(), initialChange);
+        this(List.of(), initialChange);
     }
 
     public interface Modifier {

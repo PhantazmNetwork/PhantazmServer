@@ -8,8 +8,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
-import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.Powerup;
 
 import java.util.Objects;

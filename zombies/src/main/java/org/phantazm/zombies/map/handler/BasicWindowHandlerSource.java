@@ -3,12 +3,9 @@ package org.phantazm.zombies.map.handler;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.map.Window;
-import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 
 public class BasicWindowHandlerSource implements WindowHandler.Source {
     private final double repairRadius;

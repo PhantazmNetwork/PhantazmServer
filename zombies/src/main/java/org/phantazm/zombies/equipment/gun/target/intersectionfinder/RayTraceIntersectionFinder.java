@@ -8,8 +8,8 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.Attributes;
 import org.phantazm.core.RayUtils;
+import org.phantazm.zombies.Attributes;
 
 import java.util.Optional;
 

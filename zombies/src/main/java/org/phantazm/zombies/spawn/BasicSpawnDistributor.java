@@ -52,7 +52,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
 
         if (spawnList.isEmpty()) {
             LOGGER.warn("Received empty spawn list");
-            return Collections.emptyList();
+            return List.of();
         }
 
         Collections.shuffle(spawnList, random);

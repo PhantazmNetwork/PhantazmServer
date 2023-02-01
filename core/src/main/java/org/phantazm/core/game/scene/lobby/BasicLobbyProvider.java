@@ -9,7 +9,6 @@ import org.phantazm.core.game.scene.SceneProviderAbstract;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.instance.InstanceLoader;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Phaser;
@@ -51,7 +50,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
-        this.lobbyPaths = Collections.unmodifiableList(Objects.requireNonNull(lobbyPaths, "lobbyPaths"));
+        this.lobbyPaths = List.copyOf(Objects.requireNonNull(lobbyPaths, "lobbyPaths"));
         this.fallback = Objects.requireNonNull(fallback, "fallback");
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.chunkViewDistance = chunkViewDistance;
