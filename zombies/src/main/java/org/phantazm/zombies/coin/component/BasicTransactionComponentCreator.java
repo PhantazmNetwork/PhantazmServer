@@ -14,9 +14,6 @@ public class BasicTransactionComponentCreator implements TransactionComponentCre
         if (change >= 0) {
             builder.append(Component.text("+"));
         }
-        else {
-            builder.append(Component.text("-"));
-        }
 
         builder.append(Component.text(change));
         builder.append(Component.text(" coins"));
