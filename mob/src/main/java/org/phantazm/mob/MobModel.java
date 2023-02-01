@@ -57,7 +57,7 @@ public class MobModel implements Keyed {
         this.entityType = Objects.requireNonNull(entityType, "entityType");
         this.factory = Objects.requireNonNull(factory, "factory");
         this.node = Objects.requireNonNull(node, "node");
-        this.metaNode = Objects.requireNonNull(metaNode, "metaNode");
+        this.metaNode = metaNode.immutableCopy();
         this.displayName = displayName;
         this.equipment = Map.copyOf(Objects.requireNonNull(equipment, "equipment"));
         this.attributes = Object2FloatMaps.unmodifiable(Objects.requireNonNull(attributes, "attributes"));

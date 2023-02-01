@@ -6,8 +6,9 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.MobStore;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.Flags;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -31,6 +32,7 @@ public class DamageShotHandler implements ShotHandler {
     private final Data data;
     private final Supplier<? extends ZombiesPlayer> zombiesPlayer;
     private final MapObjects mapObjects;
+    private final MobStore mobStore;
 
     /**
      * Creates a new {@link DamageShotHandler} with the given {@link Data}.
@@ -39,10 +41,11 @@ public class DamageShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public DamageShotHandler(@NotNull Data data, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayer,
-            @NotNull MapObjects mapObjects) {
+            @NotNull MapObjects mapObjects, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
@@ -59,7 +62,11 @@ public class DamageShotHandler implements ShotHandler {
 
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
-            if (hasInstakill && !targetEntity.getTag(Tags.RESIST_INSTAKILL)) {
+            PhantazmMob mob = mobStore.getMob(targetEntity.getUuid());
+            boolean resistInstaKill =
+                    mob != null && mob.model().getMetaNode().getBooleanOrDefault(false, "resistInstaKill");
+
+            if (hasInstakill && !resistInstaKill) {
                 EntityDamageByGunEvent event =
                         new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, true, damage);
                 EventDispatcher.call(event);
