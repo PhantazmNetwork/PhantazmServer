@@ -1,5 +1,6 @@
 package org.phantazm.zombies.player;
 
+import net.kyori.adventure.audience.Audience;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -28,7 +29,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
 
-public interface ZombiesPlayer extends Activable, Flaggable.Source {
+public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     @NotNull ZombiesPlayerModule module();
 

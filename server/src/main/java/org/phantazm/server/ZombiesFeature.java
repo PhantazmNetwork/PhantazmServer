@@ -12,6 +12,8 @@ import org.phantazm.core.item.StaticUpdatingItem;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.map.action.door.DoorSendMessageAction;
+import org.phantazm.zombies.map.action.door.DoorSendOpenedRoomsAction;
 import org.phantazm.zombies.map.action.room.SpawnMobsAction;
 import org.phantazm.zombies.map.action.round.AnnounceRoundAction;
 import org.phantazm.zombies.map.action.round.RevivePlayersAction;
@@ -68,11 +70,13 @@ public final class ZombiesFeature {
 
     private static void registerElementClasses(ContextManager contextManager) {
         LOGGER.info("Registering Zombies element classes...");
-        //Action<Room> and Action<Round>
+        //Action<Room>, Action<Round> and Action<Door>
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);
         contextManager.registerElementClass(SpawnMobsAction.class);
         contextManager.registerElementClass(SpawnPowerupAction.class);
+        contextManager.registerElementClass(DoorSendMessageAction.class);
+        contextManager.registerElementClass(DoorSendOpenedRoomsAction.class);
 
         //ShopPredicate
         contextManager.registerElementClass(StaticCostPredicate.class);
@@ -160,7 +164,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlaySoundAction.class);
         contextManager.registerElementClass(ModifyWindowsAction.class);
         contextManager.registerElementClass(SendTitleAction.class);
-        contextManager.registerElementClass(SendMessageAction.class);
+        contextManager.registerElementClass(PowerupSendMessageAction.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

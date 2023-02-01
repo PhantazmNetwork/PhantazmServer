@@ -13,6 +13,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.item.ItemStack;
@@ -24,10 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Initializes features related to Ethylene.
@@ -44,9 +44,9 @@ public final class Ethylene {
         Ethylene.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(sound())
-                        .withCustomSignature(vec3D()).withScalarSignature(key()).withScalarSignature(uuid())
-                        .withScalarSignature(component()).withScalarSignature(itemStack())
-                        .withScalarSignature(titlePartComponent())
+                        .withCustomSignature(style()).withCustomSignature(textColor()).withCustomSignature(vec3D())
+                        .withScalarSignature(key()).withScalarSignature(uuid()).withScalarSignature(component())
+                        .withScalarSignature(itemStack()).withScalarSignature(titlePartComponent())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withStandardSignatures().withStandardTypeImplementations().ignoringLengths().build();
 
@@ -75,6 +75,31 @@ public final class Ethylene {
                         }, sound -> List.of(sound.name(), sound.source(), sound.volume(), sound.pitch()),
                         Map.entry("name", Token.ofClass(Key.class)), Map.entry("source", Token.ofClass(Sound.Source.class)),
                         Map.entry("volume", Token.DOUBLE), Map.entry("pitch", Token.DOUBLE)).matchingNames().matchingTypeHints()
+                .build();
+    }
+
+    private static Signature<Style> style() {
+        return Signature.builder(Token.ofClass(Style.class), (ignored, args) -> {
+                            TextColor textColor = (TextColor)args[0];
+                            TextDecoration[] decorations = (TextDecoration[])args[1];
+                            return Style.style(textColor, decorations);
+                        }, style -> {
+                            Collection<Object> textColors = new ArrayList<>(1);
+                            textColors.add(style.color());
+                            return textColors;
+                        }, Map.entry("textColor", Token.ofClass(TextColor.class)),
+                        Map.entry("textDecorations", Token.ofClass(TextDecoration[].class))).matchingNames().matchingTypeHints()
+                .build();
+    }
+
+    private static Signature<TextColor> textColor() {
+        return Signature.builder(Token.ofClass(TextColor.class), (ignored, args) -> {
+                            int r = (int)args[0];
+                            int g = (int)args[1];
+                            int b = (int)args[2];
+                            return TextColor.color(r, g, b);
+                        }, textColor -> List.of(textColor.red(), textColor.green(), textColor.blue()), Map.entry("r", Token.INTEGER),
+                        Map.entry("g", Token.INTEGER), Map.entry("b", Token.INTEGER)).matchingNames().matchingTypeHints()
                 .build();
     }
 

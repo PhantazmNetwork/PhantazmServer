@@ -8,12 +8,14 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.tracker.Bounded;
 import org.phantazm.zombies.map.action.Action;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,8 @@ public class Door implements Bounded {
     private final Vec3I2ObjectMap<Block> blockMappings;
 
     private boolean isOpen;
+
+    private ZombiesPlayer lastInteractor;
 
     /**
      * Constructs a new instance of this class.
@@ -104,11 +108,12 @@ public class Door implements Bounded {
     /**
      * Opens this door, removing its blocks. If the door is already open, this method will do nothing.
      */
-    public void open() {
+    public void open(@Nullable ZombiesPlayer interactor) {
         if (isOpen) {
             return;
         }
 
+        this.lastInteractor = interactor;
         isOpen = true;
 
         for (Bounds3I region : regions) {
@@ -135,11 +140,12 @@ public class Door implements Bounded {
     /**
      * Closes this door. Has no effect if the door is already closed.
      */
-    public void close() {
+    public void close(@Nullable ZombiesPlayer interactor) {
         if (!isOpen) {
             return;
         }
 
+        this.lastInteractor = interactor;
         isOpen = false;
         blockMappings.forEach((x, y, z, block) -> instance.setBlock(x, y, z, block));
 
@@ -159,6 +165,10 @@ public class Door implements Bounded {
 
     public @NotNull DoorInfo doorInfo() {
         return doorInfo;
+    }
+
+    public @Nullable ZombiesPlayer lastInteractor() {
+        return lastInteractor;
     }
 
     @Override

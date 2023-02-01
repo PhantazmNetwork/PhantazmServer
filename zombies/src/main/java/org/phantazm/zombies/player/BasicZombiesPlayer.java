@@ -1,5 +1,7 @@
 package org.phantazm.zombies.player;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -10,11 +12,12 @@ import org.phantazm.zombies.equipment.Equipment;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("ClassCanBeRecord")
-public class BasicZombiesPlayer implements ZombiesPlayer {
+public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     private final ZombiesPlayerModule module;
 
@@ -110,5 +113,16 @@ public class BasicZombiesPlayer implements ZombiesPlayer {
     @Override
     public @NotNull Flaggable flags() {
         return module.flaggable();
+    }
+
+
+    @Override
+    public @NotNull Iterable<? extends Audience> audiences() {
+        Optional<Player> playerOptional = getPlayer();
+        if (playerOptional.isEmpty()) {
+            return List.of();
+        }
+
+        return List.of(playerOptional.get());
     }
 }

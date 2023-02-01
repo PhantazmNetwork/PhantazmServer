@@ -65,7 +65,7 @@ public class BasicDoorHandler implements DoorHandler {
 
                 if (result.isAffordable(coins)) {
                     coins.applyTransaction(result);
-                    door.open();
+                    door.open(player);
                 }
             }
         });

@@ -1,13 +1,16 @@
 package org.phantazm.zombies.map.objects;
 
 import com.github.steanky.element.core.dependency.DependencyProvider;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.shop.Shop;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class BasicMapObjects implements MapObjects {
@@ -21,6 +24,8 @@ public final class BasicMapObjects implements MapObjects {
     private final BoundedTracker<Shop> shopTracker;
     private final BoundedTracker<Door> doorTracker;
 
+    private final Map<? super Key, ? extends Room> roomMap;
+
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull List<Window> windows,
             @NotNull List<Shop> shops, @NotNull List<Door> doors, @NotNull List<Room> rooms,
             @NotNull List<Round> rounds, @NotNull DependencyProvider mapDependencyProvider, @NotNull Module module) {
@@ -33,6 +38,13 @@ public final class BasicMapObjects implements MapObjects {
         this.windowTracker = BoundedTracker.tracker(windows);
         this.shopTracker = BoundedTracker.tracker(shops);
         this.doorTracker = BoundedTracker.tracker(doors);
+
+        Map<Key, Room> map = new HashMap<>(rooms.size());
+        for (Room room : rooms) {
+            map.put(room.getRoomInfo().id(), room);
+        }
+
+        this.roomMap = Map.copyOf(map);
     }
 
     @Override
@@ -73,5 +85,10 @@ public final class BasicMapObjects implements MapObjects {
     @Override
     public @NotNull BoundedTracker<Door> doorTracker() {
         return doorTracker;
+    }
+
+    @Override
+    public @NotNull Map<? super Key, ? extends Room> roomMap() {
+        return roomMap;
     }
 }

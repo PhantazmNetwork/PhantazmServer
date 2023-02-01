@@ -13,12 +13,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.send_message")
-public class SendMessageAction implements Supplier<PowerupAction> {
+public class PowerupSendMessageAction implements Supplier<PowerupAction> {
     private final Data data;
     private final Instance instance;
 
     @FactoryMethod
-    public SendMessageAction(@NotNull Data data, @NotNull Instance instance) {
+    public PowerupSendMessageAction(@NotNull Data data, @NotNull Instance instance) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");
     }

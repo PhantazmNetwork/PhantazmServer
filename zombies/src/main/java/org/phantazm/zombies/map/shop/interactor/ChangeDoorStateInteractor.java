@@ -10,6 +10,7 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,16 +50,17 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
             }
         }
 
+        ZombiesPlayer player = interaction.player();
         if (door != null) {
             switch (data.type) {
-                case OPEN -> door.open();
-                case CLOSE -> door.close();
+                case OPEN -> door.open(player);
+                case CLOSE -> door.close(player);
                 case TOGGLE -> {
                     if (door.isOpen()) {
-                        door.close();
+                        door.close(player);
                     }
                     else {
-                        door.open();
+                        door.open(player);
                     }
                 }
             }
