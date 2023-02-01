@@ -29,6 +29,8 @@ public class BasicTransactionModifierSource implements TransactionModifierSource
             if (modifiers != null) {
                 mergedModifiers.addAll(modifiers);
             }
+
+            current.append('.');
         }
 
         return Collections.unmodifiableCollection(mergedModifiers);
