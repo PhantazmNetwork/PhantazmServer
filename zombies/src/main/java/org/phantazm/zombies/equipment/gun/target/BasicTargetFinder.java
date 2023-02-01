@@ -57,7 +57,7 @@ public class BasicTargetFinder implements TargetFinder {
             @NotNull Collection<UUID> previousHits) {
         Instance instance = shooter.getInstance();
         if (instance == null) {
-            return new Result(Collections.emptyList(), Collections.emptyList());
+            return new Result(List.of(), List.of());
         }
 
         Collection<LivingEntity> nearbyEntities = entityFinder.findEntities(instance, start, end);

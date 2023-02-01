@@ -50,38 +50,6 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
         this.blockIterations = List.copyOf(blockIteration);
     }
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Collection<String>> pathsProcessor = ConfigProcessor.STRING.collectionProcessor();
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Collection<String> blockIterationPaths =
-                        pathsProcessor.dataFromElement(element.getElementOrThrow("blockIterationPaths"));
-                int maxDistance = element.getNumberOrThrow("maxDistance").intValue();
-                if (maxDistance < 0) {
-                    throw new ConfigProcessException("maxDistance must be greater than or equal to 0");
-                }
-
-                return new Data(blockIterationPaths, maxDistance);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("blockIterationPaths", pathsProcessor.elementFromData(data.blockIterationPaths()));
-                node.putNumber("maxDistance", data.maxDistance());
-                return node;
-            }
-        };
-    }
-
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull Optional<Point> getEnd(@NotNull Pos start) {

@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -46,7 +47,8 @@ public class WallshotBlockIteration implements BlockIteration {
             @SuppressWarnings("UnstableApiUsage")
             @Override
             public boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block) {
-                if (!block.registry().collisionShape().relativeEnd().equals(Vec.ONE) ||
+                Shape blockShape = block.registry().collisionShape();
+                if ((!blockShape.isFullBlock() && !blockShape.isEmpty()) ||
                         data.passableBlocks().contains(block.key())) {
                     wallshot = true;
                     return false;

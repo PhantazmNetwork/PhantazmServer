@@ -37,36 +37,6 @@ public class DistanceTargetLimiter implements TargetLimiter {
         this.data = Objects.requireNonNull(data, "data");
     }
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                int targetLimit = element.getNumberOrThrow("targetLimit").intValue();
-                if (targetLimit < 0) {
-                    throw new ConfigProcessException("targetLimit must be greater than or equal to 0");
-                }
-                boolean prioritizeClosest = element.getBooleanOrThrow("prioritizeClosest");
-
-                return new Data(targetLimit, prioritizeClosest);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.putNumber("targetLimit", data.targetLimit());
-                node.putBoolean("prioritizeClosest", data.prioritizeClosest());
-
-                return node;
-            }
-        };
-    }
-
     @Override
     public @NotNull List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Pos start,
             @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
