@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 @Model("zombies.map.door.action.send_opened_rooms")
 public class DoorSendOpenedRoomsAction implements Action<Door> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorSendOpenedRoomsAction.class);
-    private static final Component UNKNOWN_PLAYER_COMPONENT = Component.text("...");
+    private static final Component UNKNOWN_COMPONENT = Component.text("...");
 
     private final Data data;
     private final Supplier<? extends MapObjects> mapObjects;
@@ -44,23 +44,25 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
     public void perform(@NotNull Door door) {
         ZombiesPlayer lastInteract = door.lastInteractor();
         if (lastInteract != null) {
-            lastInteract.module().getPlayerView().getDisplayName().whenComplete((component, err) -> {
+            lastInteract.module().getPlayerView().getUsername().whenComplete((username, err) -> {
                 if (err != null) {
                     LOGGER.warn("Error resolving display name of door-opening player", err);
                 }
 
-                if (component != null) {
-                    instance.sendTitlePart(data.openerNameTitlePart, component);
+                if (username != null) {
+                    instance.sendTitlePart(data.openerNameTitlePart,
+                            Component.text().style(data.openerNameFormatStyle).append(Component.text(username))
+                                    .build());
                 }
                 else {
-                    LOGGER.warn("Null display name");
-                    instance.sendTitlePart(data.openerNameTitlePart, UNKNOWN_PLAYER_COMPONENT);
+                    LOGGER.warn("Null username");
+                    instance.sendTitlePart(data.openerNameTitlePart, UNKNOWN_COMPONENT);
                 }
             });
         }
         else {
             LOGGER.warn("Interacting player was null, cannot announce opener");
-            instance.sendTitlePart(data.openerNameTitlePart, UNKNOWN_PLAYER_COMPONENT);
+            instance.sendTitlePart(data.openerNameTitlePart, UNKNOWN_COMPONENT);
         }
 
         TextComponent.Builder builder =
@@ -68,6 +70,8 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
 
         Map<? super Key, ? extends Room> roomMap = mapObjects.get().roomMap();
         List<Key> opensTo = door.doorInfo().opensTo();
+
+        boolean appendedRoom = false;
         for (int i = 0; i < opensTo.size(); i++) {
             Key target = opensTo.get(i);
             Room room = roomMap.get(target);
@@ -81,14 +85,22 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
             }
 
             builder.append(room.getRoomInfo().displayName());
+            appendedRoom = true;
+
             if (i < opensTo.size() - 1) {
                 builder.append(Component.text(", "));
             }
         }
+
+        if (!appendedRoom) {
+            builder.append(UNKNOWN_COMPONENT);
+        }
+
+        instance.sendTitlePart(data.openedRoomsTitlePart, builder.build());
     }
 
     @DataObject
-    public record Data(@NotNull String openerNameFormatMessage,
+    public record Data(@NotNull Style openerNameFormatStyle,
                        @NotNull Style openedRoomsFormatStyle,
                        @NotNull TitlePart<Component> openerNameTitlePart,
                        @NotNull TitlePart<Component> openedRoomsTitlePart) {
