@@ -115,6 +115,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
             String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
             Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
+            corpseEntity.setInstance(instance);
             corpseTeam.addMember(corpseUsername);
             TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.RED, false, false);
             Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
