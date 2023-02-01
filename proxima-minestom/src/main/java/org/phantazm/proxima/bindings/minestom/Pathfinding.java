@@ -192,6 +192,6 @@ public class Pathfinding {
         double factor = ThreadLocalRandom.current().nextDouble() + 0.5;
 
         long count = pathResult.isSuccessful() ? pathResult.exploredCount() : pathResult.exploredCount() * 2L;
-        return (long)(count * factor);
+        return Math.min((long)(count * factor), 3000);
     }
 }
