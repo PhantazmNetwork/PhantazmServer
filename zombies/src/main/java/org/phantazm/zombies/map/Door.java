@@ -4,6 +4,7 @@ import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.HashVec3I2ObjectMap;
 import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I2ObjectMap;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -15,13 +16,16 @@ import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.tracker.Bounded;
 import org.phantazm.zombies.map.action.Action;
+import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Represents a door. May be opened and closed.
@@ -39,6 +43,8 @@ public class Door implements Bounded {
     private final ArrayList<Hologram> holograms;
     private final List<Action<Door>> openActions;
 
+    private final Supplier<? extends MapObjects> mapObjects;
+
     private final Vec3I2ObjectMap<Block> blockMappings;
 
     private boolean isOpen;
@@ -52,7 +58,8 @@ public class Door implements Bounded {
      * @param instance the instance which this MapObject is in
      */
     public Door(@NotNull Point mapOrigin, @NotNull DoorInfo doorInfo, @NotNull Instance instance,
-            @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions) {
+            @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions,
+            @NotNull Supplier<? extends MapObjects> mapObjects) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.doorInfo = Objects.requireNonNull(doorInfo, "doorInfo");
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
@@ -82,6 +89,7 @@ public class Door implements Bounded {
         initHolograms(hologramInfo);
 
         this.openActions = List.copyOf(openActions);
+        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         this.blockMappings = new HashVec3I2ObjectMap<>(enclosing.originX(), enclosing.originX(), enclosing.originZ(),
                 enclosing.lengthX(), enclosing.lengthY(), enclosing.lengthZ());
     }
@@ -134,6 +142,16 @@ public class Door implements Bounded {
 
         for (Action<Door> action : openActions) {
             action.perform(this);
+        }
+
+        for (Key key : doorInfo.opensTo()) {
+            Room room = mapObjects.get().roomMap().get(key);
+            if (room != null) {
+                room.open();
+            }
+            else {
+                LOGGER.warn("Tried to open nonexistent room " + key);
+            }
         }
     }
 

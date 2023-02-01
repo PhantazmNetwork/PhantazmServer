@@ -101,7 +101,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobStore);
         List<Window> windows = buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler);
         List<Shop> shops = buildShops(origin, mapInfo.shops(), provider, instance);
-        List<Door> doors = buildDoors(origin, mapInfo.doors(), provider, instance);
+        List<Door> doors = buildDoors(origin, mapInfo.doors(), provider, instance, mapObjectsWrapper);
         List<Room> rooms = buildRooms(origin, mapInfo.rooms(), provider);
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor);
 
@@ -173,13 +173,13 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Door> buildDoors(Point mapOrigin, List<DoorInfo> doorInfoList, DependencyProvider dependencyProvider,
-            Instance instance) {
+            Instance instance, Wrapper<MapObjects> mapObjectsWrapper) {
         List<Door> doors = new ArrayList<>(doorInfoList.size());
         for (DoorInfo doorInfo : doorInfoList) {
             List<Action<Door>> openActions = contextManager.makeContext(doorInfo.openActions())
                     .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
-            doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions));
+            doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions, mapObjectsWrapper));
         }
 
         return doors;
