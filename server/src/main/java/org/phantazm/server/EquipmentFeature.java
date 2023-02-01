@@ -218,6 +218,7 @@ final class EquipmentFeature {
         FeatureUtils.check(keyParser);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, gunModule);
+
         return new EquipmentCreator() {
             @Override
             public boolean hasEquipment(@NotNull Key equipmentKey) {

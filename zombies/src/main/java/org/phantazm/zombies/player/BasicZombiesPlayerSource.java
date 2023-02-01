@@ -1,5 +1,8 @@
 package org.phantazm.zombies.player;
 
+import com.github.steanky.element.core.dependency.DependencyProvider;
+import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
+import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -91,8 +94,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         accessRegistry.switchAccess(accessKey);
         EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
 
+        Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
         ZombiesGunModule gunModule =
-                new ZombiesGunModule(playerView, mobSpawner, mobStore, eventNode, random, mapObjects);
+                new ZombiesGunModule(zombiesPlayerWrapper, playerView, mobSpawner, mobStore, eventNode, random,
+                        mapObjects);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(gunModule);
 
         Sidebar sidebar = new Sidebar(
@@ -158,6 +163,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, mapTransactionModifierSource,
                         playerTransactionModifierSource, flaggable);
-        return new BasicZombiesPlayer(module);
+
+        ZombiesPlayer player = new BasicZombiesPlayer(module);
+        zombiesPlayerWrapper.set(player);
+
+        return player;
     }
 }

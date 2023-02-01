@@ -6,17 +6,22 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.event.EntityGunDamageEvent;
+import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.map.objects.MapObjects;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.beans.EventHandler;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * A {@link ShotHandler} that deals damage to targets.
@@ -26,6 +31,7 @@ import java.util.UUID;
 public class DamageShotHandler implements ShotHandler {
 
     private final Data data;
+    private final Supplier<? extends ZombiesPlayer> zombiesPlayer;
 
     /**
      * Creates a new {@link DamageShotHandler} with the given {@link Data}.
@@ -33,8 +39,9 @@ public class DamageShotHandler implements ShotHandler {
      * @param data The {@link Data} to use
      */
     @FactoryMethod
-    public DamageShotHandler(@NotNull Data data) {
+    public DamageShotHandler(@NotNull Data data, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayer) {
         this.data = Objects.requireNonNull(data, "data");
+        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
     }
 
     @Override
@@ -46,7 +53,7 @@ public class DamageShotHandler implements ShotHandler {
 
     private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
             boolean headshot) {
-        boolean hasInstakill = attacker.getTag(Tags.HAS_INSTAKILL);
+        boolean hasInstakill = zombiesPlayer.get().getModule().flaggable().hasFlag(Flags.INSTA_KILL);
 
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();

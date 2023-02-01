@@ -3,6 +3,7 @@ package org.phantazm.zombies.equipment.gun;
 import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -11,6 +12,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.map.objects.MapObjects;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import java.util.function.Supplier;
 @Memoize
 @Depend
 public class ZombiesGunModule implements DependencyModule {
+    private final Supplier<? extends ZombiesPlayer> zombiesPlayer;
 
     private final PlayerView playerView;
 
@@ -35,14 +38,20 @@ public class ZombiesGunModule implements DependencyModule {
 
     private final MapObjects mapObjects;
 
-    public ZombiesGunModule(@NotNull PlayerView playerView, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
-            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
+    public ZombiesGunModule(@NotNull Supplier<? extends ZombiesPlayer> zombiesPlayer, @NotNull PlayerView playerView,
+            @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore, @NotNull EventNode<Event> eventNode,
+            @NotNull Random random, @NotNull MapObjects mapObjects) {
+        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.random = Objects.requireNonNull(random, "random");
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+    }
+
+    public @NotNull Supplier<? extends ZombiesPlayer> getZombiesPlayer() {
+        return zombiesPlayer;
     }
 
     public @NotNull PlayerView getPlayerView() {
