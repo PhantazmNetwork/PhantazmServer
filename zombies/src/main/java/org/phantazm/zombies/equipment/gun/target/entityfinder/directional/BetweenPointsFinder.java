@@ -29,7 +29,7 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
     @Override
     public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
             @NotNull Point end) {
-        Collection<LivingEntity> entities = new ArrayList<>(instance.getEntities().size());
+        Collection<LivingEntity> entities = new ArrayList<>();
         instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, entities::add);
 
         return entities;

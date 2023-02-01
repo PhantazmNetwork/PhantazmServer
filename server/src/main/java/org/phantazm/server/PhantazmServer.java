@@ -20,6 +20,7 @@ import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.Attributes;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
 import org.phantazm.core.game.scene.lobby.LobbyRouterFallback;
@@ -164,6 +165,8 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
             LobbiesConfig lobbiesConfig) throws Exception {
+        Attributes.register();
+
         KeyParser keyParser = new BasicKeyParser("phantazm");
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
