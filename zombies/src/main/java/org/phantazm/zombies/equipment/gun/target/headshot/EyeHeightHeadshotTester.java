@@ -5,7 +5,9 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.Attributes;
 
 /**
  * A {@link HeadshotTester} based on the eye height of the target.
@@ -21,7 +23,8 @@ public class EyeHeightHeadshotTester implements HeadshotTester {
 
     @Override
     public boolean isHeadshot(@NotNull Entity shooter, @NotNull Entity entity, @NotNull Point intersection) {
-        return intersection.y() >= entity.getPosition().y() + entity.getEyeHeight();
+        double eyeHeight = entity.getPosition().y() + entity.getEyeHeight();
+        return intersection.y() >= eyeHeight ||
+                (eyeHeight - intersection.y()) <= (entity.getBoundingBox().height()) - entity.getEyeHeight();
     }
-
 }
