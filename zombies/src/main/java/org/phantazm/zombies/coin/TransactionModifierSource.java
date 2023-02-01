@@ -73,51 +73,18 @@ public interface TransactionModifierSource {
         return new TransactionModifierSource() {
             @Override
             public @NotNull Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
-                return new AbstractCollection<>() {
-                    @Override
-                    public Iterator<Transaction.Modifier> iterator() {
-                        return new Iterator<>() {
-                            private int i = 0; //index of sourcesCopy
-                            private Iterator<Transaction.Modifier> iterator = null;
+                int size = 0;
+                for (TransactionModifierSource source : sourcesCopy) {
+                    size += source.modifiers(key).size();
+                }
 
-                            @Override
-                            public boolean hasNext() {
-                                if (i < sourcesCopy.length) {
-                                    while ((iterator == null || !iterator.hasNext()) && i < sourcesCopy.length) {
-                                        iterator = sourcesCopy[i++].modifiers(key).iterator();
-                                    }
+                List<Transaction.Modifier> modifiers = new ArrayList<>(size);
+                for (TransactionModifierSource transactionModifierSource : sourcesCopy) {
+                    modifiers.addAll(transactionModifierSource.modifiers(key));
+                }
 
-                                    return iterator.hasNext();
-                                }
-
-                                return false;
-                            }
-
-                            @Override
-                            public Transaction.Modifier next() {
-                                while (iterator == null || !iterator.hasNext()) {
-                                    if (i >= sourcesCopy.length) {
-                                        throw new NoSuchElementException();
-                                    }
-
-                                    iterator = sourcesCopy[i++].modifiers(key).iterator();
-                                }
-
-                                return iterator.next();
-                            }
-                        };
-                    }
-
-                    @Override
-                    public int size() {
-                        int size = 0;
-                        for (TransactionModifierSource source : sourcesCopy) {
-                            size += source.modifiers(key).size();
-                        }
-
-                        return size;
-                    }
-                };
+                modifiers.sort(Comparator.comparing(Transaction.Modifier::getPriority).reversed());
+                return Collections.unmodifiableCollection(modifiers);
             }
 
             @Override

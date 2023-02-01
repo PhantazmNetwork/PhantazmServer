@@ -1,5 +1,6 @@
 package org.phantazm.zombies.equipment.gun.target.headshot;
 
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,7 @@ public class EyeHeightHeadshotTesterTest {
         target = mock(Entity.class);
         targetPos = new Pos(1, 0, 0);
         when(target.getEyeHeight()).thenReturn(EYE_HEIGHT);
+        when(target.getBoundingBox()).thenReturn(new BoundingBox(1, 2, 1));
         when(target.getPosition()).thenReturn(targetPos);
     }
 
@@ -43,8 +45,14 @@ public class EyeHeightHeadshotTesterTest {
     }
 
     @Test
+    public void testCloseHeadshot() {
+        assertTrue(headshotTester.isHeadshot(shooter, target, targetPos.withY(targetPos.y() + EYE_HEIGHT - 0.5F)));
+    }
+
+
+    @Test
     public void testNonHeadshot() {
-        assertFalse(headshotTester.isHeadshot(shooter, target, targetPos.withY(targetPos.y() + EYE_HEIGHT - 0.1F)));
+        assertFalse(headshotTester.isHeadshot(shooter, target, targetPos.withY(targetPos.y() + EYE_HEIGHT - 0.6F)));
     }
 
 }
