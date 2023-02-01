@@ -271,7 +271,7 @@ public class ProximaEntity extends LivingEntity {
                 lastMoved = time;
             }
 
-            controller.advance(current, target, targetEntity != null ? targetEntity.getPosition() : null);
+            controller.advance(current, target, targetEntity);
 
             lastX = currentX;
             lastY = currentY;

@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
@@ -16,6 +17,7 @@ import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -24,12 +26,12 @@ import java.util.function.Supplier;
 @Cache
 public class GiveCoinsShotHandler implements ShotHandler {
     private final Data data;
-    private final Supplier<? extends ZombiesPlayer> player;
+    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     @FactoryMethod
-    public GiveCoinsShotHandler(@NotNull Data data, @NotNull Supplier<? extends ZombiesPlayer> player) {
+    public GiveCoinsShotHandler(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         this.data = Objects.requireNonNull(data, "data");
-        this.player = Objects.requireNonNull(player, "player");
+        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
     }
 
     @Override
@@ -40,18 +42,23 @@ public class GiveCoinsShotHandler implements ShotHandler {
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
             @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
-        ZombiesPlayer shooter = player.get();
-        PlayerCoins coins = player.get().module().getCoins();
+        UUID attackerId = attacker.getUuid();
+        ZombiesPlayer player = playerMap.get(attackerId);
+        if (player == null) {
+            return;
+        }
+
+        PlayerCoins coins = player.module().getCoins();
 
         for (GunHit ignored : shot.regularTargets()) {
             coins.runTransaction(new Transaction(
-                    shooter.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN),
+                    player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN),
                     data.normalCoins)).applyIfAffordable(coins);
         }
 
         for (GunHit ignored : shot.headshotTargets()) {
             coins.runTransaction(new Transaction(
-                    shooter.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN),
+                    player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN),
                     data.headshotCoins)).applyIfAffordable(coins);
         }
     }

@@ -51,6 +51,8 @@ public class Door implements Bounded {
 
     private ZombiesPlayer lastInteractor;
 
+    private final Object sync;
+
     /**
      * Constructs a new instance of this class.
      *
@@ -92,6 +94,8 @@ public class Door implements Bounded {
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         this.blockMappings = new HashVec3I2ObjectMap<>(enclosing.originX(), enclosing.originX(), enclosing.originZ(),
                 enclosing.lengthX(), enclosing.lengthY(), enclosing.lengthZ());
+
+        this.sync = new Object();
     }
 
     private void initHolograms(List<HologramInfo> hologramInfo) {
@@ -117,40 +121,42 @@ public class Door implements Bounded {
      * Opens this door, removing its blocks. If the door is already open, this method will do nothing.
      */
     public void open(@Nullable ZombiesPlayer interactor) {
-        if (isOpen) {
-            return;
-        }
-
-        this.lastInteractor = interactor;
-        isOpen = true;
-
-        for (Bounds3I region : regions) {
-            region.forEach((x, y, z) -> {
-                Block oldBlock = instance.getBlock(x, y, z);
-                blockMappings.put(x, y, z, oldBlock);
-                instance.setBlock(x, y, z, fillBlock);
-            });
-        }
-
-        for (Hologram hologram : holograms) {
-            hologram.clear();
-            hologram.trimToSize();
-        }
-
-        holograms.clear();
-        holograms.trimToSize();
-
-        for (Action<Door> action : openActions) {
-            action.perform(this);
-        }
-
-        for (Key key : doorInfo.opensTo()) {
-            Room room = mapObjects.get().roomMap().get(key);
-            if (room != null) {
-                room.open();
+        synchronized (sync) {
+            if (isOpen) {
+                return;
             }
-            else {
-                LOGGER.warn("Tried to open nonexistent room " + key);
+
+            this.lastInteractor = interactor;
+            isOpen = true;
+
+            for (Bounds3I region : regions) {
+                region.forEach((x, y, z) -> {
+                    Block oldBlock = instance.getBlock(x, y, z);
+                    blockMappings.put(x, y, z, oldBlock);
+                    instance.setBlock(x, y, z, fillBlock);
+                });
+            }
+
+            for (Hologram hologram : holograms) {
+                hologram.clear();
+                hologram.trimToSize();
+            }
+
+            holograms.clear();
+            holograms.trimToSize();
+
+            for (Action<Door> action : openActions) {
+                action.perform(this);
+            }
+
+            for (Key key : doorInfo.opensTo()) {
+                Room room = mapObjects.get().roomMap().get(key);
+                if (room != null) {
+                    room.open();
+                }
+                else {
+                    LOGGER.warn("Tried to open nonexistent room " + key);
+                }
             }
         }
     }
@@ -159,16 +165,18 @@ public class Door implements Bounded {
      * Closes this door. Has no effect if the door is already closed.
      */
     public void close(@Nullable ZombiesPlayer interactor) {
-        if (!isOpen) {
-            return;
+        synchronized (sync) {
+            if (!isOpen) {
+                return;
+            }
+
+            this.lastInteractor = interactor;
+            isOpen = false;
+            blockMappings.forEach((x, y, z, block) -> instance.setBlock(x, y, z, block));
+
+            initHolograms(doorInfo.holograms());
+            blockMappings.clear();
         }
-
-        this.lastInteractor = interactor;
-        isOpen = false;
-        blockMappings.forEach((x, y, z, block) -> instance.setBlock(x, y, z, block));
-
-        initHolograms(doorInfo.holograms());
-        blockMappings.clear();
     }
 
     /**

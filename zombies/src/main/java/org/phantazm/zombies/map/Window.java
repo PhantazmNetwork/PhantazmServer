@@ -42,6 +42,8 @@ public class Window implements Bounded {
     private final List<Action<Window>> repairActions;
     private final List<Action<Window>> breakActions;
 
+    private final Object sync;
+
     private int index;
 
     /**
@@ -63,6 +65,8 @@ public class Window implements Bounded {
 
         this.repairActions = List.copyOf(repairActions);
         this.breakActions = List.copyOf(breakActions);
+
+        this.sync = new Object();
 
         Bounds3I frame = windowInfo.frameRegion();
 
@@ -177,49 +181,51 @@ public class Window implements Bounded {
      * actual number of broken blocks
      */
     public int updateIndex(int newIndex) {
-        if (newIndex < 0) {
-            newIndex = 0;
-        }
-
-        newIndex = Math.min(newIndex, volume);
-
-        if (newIndex == index) {
-            return 0; //no change
-        }
-
-        if (newIndex < index) {
-            //play the break sound
-            instance.playSound(newIndex == 0 ? windowInfo.breakAllSound() : windowInfo.breakSound(), center);
-
-            for (int i = index - 1; i >= newIndex; i--) {
-                Point breakLocation = indexToCoordinate(i);
-                instance.setBlock(breakLocation, Block.AIR);
-                clientBlockHandler.setClientBlock(Block.BARRIER, breakLocation);
+        synchronized (sync) {
+            if (newIndex < 0) {
+                newIndex = 0;
             }
 
-            for (Action<Window> breakAction : breakActions) {
-                breakAction.perform(this);
+            newIndex = Math.min(newIndex, volume);
+
+            if (newIndex == index) {
+                return 0; //no change
             }
+
+            if (newIndex < index) {
+                //play the break sound
+                instance.playSound(newIndex == 0 ? windowInfo.breakAllSound() : windowInfo.breakSound(), center);
+
+                for (int i = index - 1; i >= newIndex; i--) {
+                    Point breakLocation = indexToCoordinate(i);
+                    instance.setBlock(breakLocation, Block.AIR);
+                    clientBlockHandler.setClientBlock(Block.BARRIER, breakLocation);
+                }
+
+                for (Action<Window> breakAction : breakActions) {
+                    breakAction.perform(this);
+                }
+            }
+            else {
+                //play the repair sound
+                instance.playSound(newIndex == volume ? windowInfo.repairAllSound() : windowInfo.repairSound(), center);
+
+                for (int i = index; i < newIndex; i++) {
+                    Point repairLocation = indexToCoordinate(i);
+                    instance.setBlock(repairLocation, repairBlocks.get(i));
+                    clientBlockHandler.removeClientBlock(repairLocation);
+                }
+
+                for (Action<Window> repairAction : repairActions) {
+                    repairAction.perform(this);
+                }
+            }
+
+            int oldIndex = index;
+            index = newIndex;
+
+            return newIndex - oldIndex;
         }
-        else {
-            //play the repair sound
-            instance.playSound(newIndex == volume ? windowInfo.repairAllSound() : windowInfo.repairSound(), center);
-
-            for (int i = index; i < newIndex; i++) {
-                Point repairLocation = indexToCoordinate(i);
-                instance.setBlock(repairLocation, repairBlocks.get(i));
-                clientBlockHandler.removeClientBlock(repairLocation);
-            }
-
-            for (Action<Window> repairAction : repairActions) {
-                repairAction.perform(this);
-            }
-        }
-
-        int oldIndex = index;
-        index = newIndex;
-
-        return newIndex - oldIndex;
     }
 
     /**

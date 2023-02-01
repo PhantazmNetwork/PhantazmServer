@@ -23,8 +23,6 @@ import java.util.function.Supplier;
 @Memoize
 @Depend
 public class ZombiesGunModule implements DependencyModule {
-    private final Supplier<? extends ZombiesPlayer> zombiesPlayer;
-
     private final PlayerView playerView;
 
     private final MobSpawner mobSpawner;
@@ -37,20 +35,14 @@ public class ZombiesGunModule implements DependencyModule {
 
     private final MapObjects mapObjects;
 
-    public ZombiesGunModule(@NotNull Supplier<? extends ZombiesPlayer> zombiesPlayer, @NotNull PlayerView playerView,
-            @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore, @NotNull EventNode<Event> eventNode,
-            @NotNull Random random, @NotNull MapObjects mapObjects) {
-        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
+    public ZombiesGunModule(@NotNull PlayerView playerView, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
+            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.random = Objects.requireNonNull(random, "random");
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
-    }
-
-    public @NotNull Supplier<? extends ZombiesPlayer> getZombiesPlayer() {
-        return zombiesPlayer;
     }
 
     public @NotNull PlayerView getPlayerView() {

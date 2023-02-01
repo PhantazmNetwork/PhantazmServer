@@ -21,6 +21,7 @@ import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -33,7 +34,6 @@ import java.util.function.Supplier;
 public class DamageShotHandler implements ShotHandler {
 
     private final Data data;
-    private final Supplier<? extends ZombiesPlayer> zombiesPlayer;
     private final MapObjects mapObjects;
     private final MobStore mobStore;
 
@@ -43,10 +43,8 @@ public class DamageShotHandler implements ShotHandler {
      * @param data The {@link Data} to use
      */
     @FactoryMethod
-    public DamageShotHandler(@NotNull Data data, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayer,
-            @NotNull MapObjects mapObjects, @NotNull MobStore mobStore) {
+    public DamageShotHandler(@NotNull Data data, @NotNull MapObjects mapObjects, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
-        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
@@ -60,8 +58,7 @@ public class DamageShotHandler implements ShotHandler {
 
     private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
             boolean headshot) {
-        boolean hasInstakill = mapObjects.module().flaggable().hasFlag(Flags.INSTA_KILL) ||
-                zombiesPlayer.get().module().flaggable().hasFlag(Flags.INSTA_KILL);
+        boolean hasInstakill = mapObjects.module().flaggable().hasFlag(Flags.INSTA_KILL);
 
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();

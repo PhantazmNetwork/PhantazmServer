@@ -4,9 +4,11 @@ import it.unimi.dsi.fastutil.Hash;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BasicFlaggable implements Flaggable {
     private final Set<Key> flags;
@@ -20,7 +22,7 @@ public class BasicFlaggable implements Flaggable {
     }
 
     public BasicFlaggable(int initialSize, float loadFactor) {
-        this.flags = new HashSet<>(initialSize, loadFactor);
+        this.flags = Collections.newSetFromMap(new ConcurrentHashMap<>(initialSize, loadFactor));
     }
 
     @Override

@@ -9,6 +9,7 @@ import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.EntityTracker;
@@ -23,8 +24,6 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GroundController implements Controller {
-    private static final double RANGE_DIVISOR = 2D;
-
     private final LivingEntity entity;
     private final double step;
 
@@ -49,7 +48,7 @@ public class GroundController implements Controller {
 
     //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
     @Override
-    public void advance(@NotNull Node current, @NotNull Node target, @Nullable Point exactDestination) {
+    public void advance(@NotNull Node current, @NotNull Node target, @Nullable Entity targetEntity) {
         Pos entityPos = entity.getPosition();
 
         double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
@@ -104,8 +103,8 @@ public class GroundController implements Controller {
             PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-            if (exactDestination != null && pos.distanceSquared(exactDestination) < 100) {
-                entity.lookAt(exactDestination);
+            if (targetEntity != null && targetEntity.getDistanceSquared(entity) < 100) {
+                entity.lookAt(targetEntity);
             }
 
             if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
