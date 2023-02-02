@@ -54,7 +54,7 @@ public class WallshotBlockIteration implements BlockIteration {
                     return false;
                 }
 
-                return !block.isAir();
+                return !blockShape.isEmpty();
             }
 
         };

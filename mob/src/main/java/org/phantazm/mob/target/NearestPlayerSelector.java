@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Objects;
 
 @Model("mob.selector.nearest_player")
+@Cache(false)
 public class NearestPlayerSelector extends FirstTargetSelector<Player> {
 
     /**

@@ -15,6 +15,7 @@ import java.util.Optional;
  * A {@link ProximaGoal} that makes a {@link PhantazmMob} follow {@link Entity}s
  */
 @Model("mob.goal.follow_entity")
+@Cache(false)
 public class FollowEntityGoal implements ProximaGoal {
 
     private final Data data;
@@ -39,12 +40,12 @@ public class FollowEntityGoal implements ProximaGoal {
 
     @Override
     public boolean shouldStart() {
-        return true;
+        return !entity.isDead();
     }
 
     @Override
     public boolean shouldEnd() {
-        return false;
+        return entity.isDead();
     }
 
     @Override

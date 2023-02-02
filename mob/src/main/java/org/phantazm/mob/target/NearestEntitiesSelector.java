@@ -35,7 +35,7 @@ public abstract class NearestEntitiesSelector<TTarget> implements TargetSelector
     public @NotNull Optional<Iterable<TTarget>> selectTarget() {
         Instance instance = entity.getInstance();
         if (instance == null) {
-            throw new IllegalStateException("Instance unset");
+            return Optional.empty();
         }
 
         Collection<Entity> entities = instance.getNearbyEntities(entity.getPosition(), range);
@@ -56,7 +56,7 @@ public abstract class NearestEntitiesSelector<TTarget> implements TargetSelector
             potentialTargets.add(entity);
         }
 
-        potentialTargets.sort(Comparator.comparingDouble(entity -> entity.getDistanceSquared(entity)));
+        potentialTargets.sort(Comparator.comparingDouble(entity -> entity.getDistanceSquared(this.entity)));
 
         int targetCount = Math.min(potentialTargets.size(), targetLimit);
         Collection<TTarget> targets = new ArrayList<>(targetCount);
