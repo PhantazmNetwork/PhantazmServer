@@ -12,6 +12,7 @@ import java.util.Objects;
  * A {@link GunStackMapper} that maps {@link ItemStack} based on a gun's current clip.
  */
 @Model("zombies.gun.stack_mapper.clip.stack_count")
+@Cache(false)
 public class ClipStackMapper implements GunStackMapper {
 
     private final ReloadTester reloadTester;

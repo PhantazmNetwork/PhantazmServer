@@ -43,40 +43,6 @@ public class ParticleTrailShotHandler implements ShotHandler {
         this.data = Objects.requireNonNull(data, "data");
     }
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<ParticleWrapper> particleProcessor =
-                ParticleWrapper.processor(ParticleData.processor(ItemStackConfigProcessors.snbt()));
-
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                ParticleWrapper particle = particleProcessor.dataFromElement(element.getElementOrThrow("particle"));
-                int trailCount = element.getNumberOrThrow("trailCount").intValue();
-                if (trailCount < 0) {
-                    throw new ConfigProcessException("trailCount must be greater than or equal to 0");
-                }
-
-                return new Data(particle, trailCount);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("particle", particleProcessor.elementFromData(data.particle()));
-                node.putNumber("trailCount", data.trailCount());
-
-                return node;
-            }
-        };
-    }
-
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
             @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {

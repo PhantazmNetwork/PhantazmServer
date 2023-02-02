@@ -27,7 +27,7 @@ import java.util.UUID;
  * A {@link ShotHandler} that deals damage to targets.
  */
 @Model("zombies.gun.shot_handler.damage")
-@Cache
+@Cache(false)
 public class DamageShotHandler implements ShotHandler {
 
     private final Data data;

@@ -23,7 +23,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @Model("zombies.gun.shot_handler.give_coins")
-@Cache
+@Cache(false)
 public class GiveCoinsShotHandler implements ShotHandler {
     private final Data data;
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;

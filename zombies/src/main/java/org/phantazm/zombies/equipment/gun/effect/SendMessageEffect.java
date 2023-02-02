@@ -13,6 +13,7 @@ import java.util.Objects;
  * A {@link GunEffect} that sends a message to an {@link Audience}.
  */
 @Model("zombies.gun.effect.send_message")
+@Cache(false)
 public class SendMessageEffect implements GunEffect {
 
     private final Data data;

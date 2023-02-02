@@ -1,9 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -54,6 +51,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
      *
      * @return A {@link ConfigProcessor} for {@link Data}s
      */
+    @ProcessorMethod
     public static @NotNull ConfigProcessor<Data> processor() {
         return new ConfigProcessor<>() {
 

@@ -36,39 +36,6 @@ public class IgniteShotHandler implements ShotHandler {
         this.data = Objects.requireNonNull(data, "data");
     }
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                int duration = element.getNumberOrThrow("duration").intValue();
-                if (duration < 0) {
-                    throw new ConfigProcessException("duration must be greater than or equal to 0");
-                }
-                int headshotDuration = element.getNumberOrThrow("headshotDuration").intValue();
-                if (headshotDuration < 0) {
-                    throw new ConfigProcessException("headshotDuration must be greater than or equal to 0");
-                }
-
-                return new Data(duration, headshotDuration);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.putNumber("duration", data.duration());
-                node.putNumber("headshotDuration", data.headshotDuration());
-                return node;
-            }
-        };
-    }
-
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
             @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {

@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 @Model("zombies.gun.firer.hit_scan")
 @Cache(false)
 public class HitScanFirer implements Firer {
-
     private final Supplier<Optional<? extends Entity>> entitySupplier;
     private final ShotEndpointSelector endSelector;
     private final TargetFinder targetFinder;

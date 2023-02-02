@@ -16,6 +16,7 @@ import java.util.*;
  * A {@link ShotHandler} that plays a {@link Sound}.
  */
 @Model("zombies.gun.shoot_handler.sound")
+@Cache(false)
 public class SoundShotHandler implements ShotHandler {
 
     private final Data data;

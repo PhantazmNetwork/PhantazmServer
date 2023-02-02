@@ -19,6 +19,7 @@ import java.util.UUID;
  * A {@link ShotHandler} that provides feedback to an {@link Audience}.
  */
 @Model("zombies.gun.shot_handler.message")
+@Cache(false)
 public class MessageShotHandler implements ShotHandler {
 
     private final Data data;

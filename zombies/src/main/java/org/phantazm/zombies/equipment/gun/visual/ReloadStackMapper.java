@@ -13,6 +13,7 @@ import java.util.Objects;
  * A {@link GunStackMapper} that maps based on a gun's reload progress.
  */
 @Model("zombies.gun.stack_mapper.reload.durability")
+@Cache(false)
 public class ReloadStackMapper implements GunStackMapper {
 
     private final GunStats stats;

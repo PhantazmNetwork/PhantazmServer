@@ -12,6 +12,7 @@ import java.util.Objects;
  * A {@link GunEffect} that plays a {@link Sound}.
  */
 @Model("zombies.gun.effect.play_sound")
+@Cache(false)
 public class PlaySoundEffect implements GunEffect {
 
     private final Data data;

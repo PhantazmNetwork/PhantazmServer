@@ -22,6 +22,7 @@ import java.util.*;
  * Basic implementation of a {@link TargetFinder}.
  */
 @Model("zombies.gun.target_finder.basic")
+@Cache(false)
 public class BasicTargetFinder implements TargetFinder {
 
     private final DirectionalEntityFinder entityFinder;

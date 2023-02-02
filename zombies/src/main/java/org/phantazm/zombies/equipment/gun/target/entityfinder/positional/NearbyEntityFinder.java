@@ -33,35 +33,6 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
         this.data = Objects.requireNonNull(data, "data");
     }
 
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                double range = element.getNumberOrThrow("range").doubleValue();
-                if (range < 0) {
-                    throw new ConfigProcessException("range must be greater than or equal to 0");
-                }
-
-                return new Data(range);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(1);
-                node.putNumber("range", data.range());
-
-                return node;
-            }
-        };
-    }
-
     @Override
     public @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Point start) {
         return instance.getNearbyEntities(start, data.range());

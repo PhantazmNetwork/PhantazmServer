@@ -1,5 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -21,6 +22,7 @@ import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import java.util.*;
 
 @Model("zombies.gun.shot_handler.slow_down")
+@Cache(false)
 public class SlowDownShotHandler implements ShotHandler {
 
     private static final UUID SLOW_DOWN_UUID = UUID.fromString("aa3a85a6-adca-4268-9940-f34402b1c91d");
