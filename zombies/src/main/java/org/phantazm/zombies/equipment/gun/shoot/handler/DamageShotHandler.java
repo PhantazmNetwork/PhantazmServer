@@ -18,13 +18,10 @@ import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
-import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * A {@link ShotHandler} that deals damage to targets.

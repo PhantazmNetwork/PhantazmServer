@@ -1,11 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -25,8 +20,8 @@ import java.util.*;
  * A {@link ShotHandler} which fires its own shots based on the entities that are hit.
  */
 @Model("zombies.gun.shot_handler.chain")
+@Cache(false)
 public class ChainShotHandler implements ShotHandler {
-
     private final Data data;
     private final PositionalEntityFinder finder;
     private final Firer firer;
@@ -44,40 +39,6 @@ public class ChainShotHandler implements ShotHandler {
         this.data = Objects.requireNonNull(data, "data");
         this.finder = Objects.requireNonNull(finder, "finder");
         this.firer = Objects.requireNonNull(firer, "firer");
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                String finderPath = element.getStringOrThrow("entityFinderPath");
-                String firerPath = element.getStringOrThrow("firerPath");
-                boolean ignorePreviousHits = element.getBooleanOrThrow("ignorePreviousHits");
-                int fireAttempts = element.getNumberOrThrow("fireAttempts").intValue();
-                if (fireAttempts < 0) {
-                    throw new ConfigProcessException("fireAttempts must be greater than or equal to 0");
-                }
-
-                return new Data(finderPath, firerPath, ignorePreviousHits, fireAttempts);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(4);
-                node.putString("entityFinderPath", data.finderPath());
-                node.putString("firerPath", data.firerPath());
-                node.putBoolean("ignorePreviousHits", data.ignorePreviousHits());
-                node.putNumber("fireAttempts", data.fireAttempts());
-
-                return node;
-            }
-        };
     }
 
     @Override
@@ -153,7 +114,5 @@ public class ChainShotHandler implements ShotHandler {
             Objects.requireNonNull(finderPath, "finderPath");
             Objects.requireNonNull(firerPath, "firerPath");
         }
-
     }
-
 }

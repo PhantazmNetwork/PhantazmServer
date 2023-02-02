@@ -1,11 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.fire;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
@@ -40,40 +35,6 @@ public class SpreadFirer implements Firer {
         this.data = Objects.requireNonNull(data, "data");
         this.random = Objects.requireNonNull(random, "random");
         this.subFirers = List.copyOf(subFirers);
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        ConfigProcessor<Collection<String>> collectionProcessor = ConfigProcessor.STRING.collectionProcessor();
-
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                Collection<String> subFirerKeys =
-                        collectionProcessor.dataFromElement(element.getElementOrThrow("subFirerPaths"));
-                float angleVariance = element.getNumberOrThrow("angleVariance").floatValue();
-                if (angleVariance < 0) {
-                    throw new ConfigProcessException("angleVariance must be greater than or equal to 0");
-                }
-
-                return new Data(subFirerKeys, angleVariance);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) throws ConfigProcessException {
-                ConfigNode node = new LinkedConfigNode(2);
-                node.put("subFirerPaths", collectionProcessor.elementFromData(data.subFirerPaths()));
-                node.putNumber("angleVariance", data.angleVariance());
-
-                return node;
-            }
-        };
     }
 
     @Override

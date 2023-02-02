@@ -34,7 +34,7 @@ class BasicPlayerView implements PlayerView {
     private final Object usernameLock = new Object();
     private final Object usernameRequestLock = new Object();
 
-    private Reference<Player> playerReference;
+    private volatile Reference<Player> playerReference;
 
     private volatile CompletableFuture<String> usernameRequest;
     private volatile String username;
