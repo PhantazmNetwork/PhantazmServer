@@ -18,11 +18,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PlayerDeathEventListener extends ZombiesPlayerEventListener<EntityDamageEvent> {
+public class PlayerDamageEventListener extends ZombiesPlayerEventListener<EntityDamageEvent> {
 
     private final MapObjects mapObjects;
 
-    public PlayerDeathEventListener(@NotNull Instance instance,
+    public PlayerDamageEventListener(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects) {
         super(instance, zombiesPlayers);
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
@@ -30,11 +30,17 @@ public class PlayerDeathEventListener extends ZombiesPlayerEventListener<EntityD
 
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
-        if (!zombiesPlayer.isAlive() || event.getDamage() < event.getEntity().getHealth()) {
+        if (!zombiesPlayer.canTakeDamage()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (event.getDamage() < event.getEntity().getHealth()) {
             return;
         }
 
         event.setCancelled(true);
+        zombiesPlayer.getPlayer().ifPresent(player -> player.setHealth(player.getMaxHealth()));
 
         Pos deathPosition = event.getEntity().getPosition();
         Component killer = getKiller(event);
@@ -68,7 +74,7 @@ public class PlayerDeathEventListener extends ZombiesPlayerEventListener<EntityD
 
     private Component getRoomName(@NotNull Pos deathPosition) {
         return mapObjects.roomTracker().atPoint(deathPosition).map(room -> room.getRoomInfo().displayName())
-                .orElse(null);
+                .orElse(Component.text("an unknown room"));
     }
 
 }

@@ -61,7 +61,7 @@ public class BasicDoorHandler implements DoorHandler {
                 PlayerCoins coins = player.module().getCoins();
                 TransactionModifierSource modifiers = player.module().compositeTransactionModifiers();
                 TransactionResult result = coins.runTransaction(
-                        new Transaction(modifiers.modifiers(ModifierSourceGroups.DOOR_COIN_LOSS), -sumCost));
+                        new Transaction(modifiers.modifiers(ModifierSourceGroups.DOOR_COIN_SPEND), -sumCost));
 
                 if (result.isAffordable(coins)) {
                     coins.applyTransaction(result);

@@ -6,9 +6,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.Player;
-import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.entity.*;
+import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
@@ -101,7 +100,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
                     ZombiesPlayerStateKeys.ALIVE.key(),
-                    Collections.singleton(new BasicAliveStateActivable(playerView, meta, sidebar)));
+                    List.of(new BasicAliveStateActivable(playerView, meta, sidebar)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
                 (context, activables) -> {
@@ -115,6 +114,15 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
             String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
             Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
+            Entity vehicle = new Entity(EntityType.ARMOR_STAND);
+
+            ArmorStandMeta armorStandMeta = (ArmorStandMeta)vehicle.getEntityMeta();
+            armorStandMeta.setInvisible(true);
+            armorStandMeta.setHasNoGravity(true);
+            vehicle.setInstance(instance, context.getKnockLocation().sub(0, 2, 0));
+
+            playerView.getPlayer().ifPresent(vehicle::addPassenger);
+
             corpseEntity.setInstance(instance);
             corpseTeam.addMember(corpseUsername);
             TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.RED, false, false);
@@ -127,6 +135,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     @Override
                     public void end() {
                         meta.setCorpse(null);
+                        vehicle.remove();
                     }
                 }));
             };
@@ -145,7 +154,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Function<NoContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT", NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
-                    Collections.singleton(new BasicQuitStateActivable(instance, playerView, meta, sidebar)));
+                    List.of(new BasicQuitStateActivable(instance, playerView, meta, sidebar)));
         };
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(aliveStateCreator.apply(NoContext.INSTANCE));
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
