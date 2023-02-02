@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -14,6 +15,7 @@ import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
+import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
@@ -27,11 +29,14 @@ import java.util.function.Supplier;
 public class GiveCoinsShotHandler implements ShotHandler {
     private final Data data;
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final MapObjects mapObjects;
 
     @FactoryMethod
-    public GiveCoinsShotHandler(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+    public GiveCoinsShotHandler(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull MapObjects mapObjects) {
         this.data = Objects.requireNonNull(data, "data");
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }
 
     @Override
@@ -48,22 +53,24 @@ public class GiveCoinsShotHandler implements ShotHandler {
             return;
         }
 
+        boolean isInstaKill = mapObjects.module().flaggable().hasFlag(Flags.INSTA_KILL);
+
         PlayerCoins coins = player.module().getCoins();
 
         for (GunHit ignored : shot.regularTargets()) {
             coins.runTransaction(new Transaction(
                     player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN),
-                    data.normalCoins)).applyIfAffordable(coins);
+                    isInstaKill ? data.instaKillCoins : data.normalCoins)).applyIfAffordable(coins);
         }
 
         for (GunHit ignored : shot.headshotTargets()) {
             coins.runTransaction(new Transaction(
                     player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN),
-                    data.headshotCoins)).applyIfAffordable(coins);
+                    isInstaKill ? data.instaKillCoins : data.headshotCoins)).applyIfAffordable(coins);
         }
     }
 
     @DataObject
-    public record Data(int normalCoins, int headshotCoins) {
+    public record Data(int normalCoins, int headshotCoins, int instaKillCoins) {
     }
 }
