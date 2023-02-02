@@ -3,9 +3,11 @@ package org.phantazm.zombies.listener;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.entity.damage.EntityDamage;
 import net.minestom.server.entity.damage.EntityProjectileDamage;
+import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -46,8 +48,15 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Component killer = getKiller(event);
         Component roomName = getRoomName(deathPosition);
 
+        Entity vehicle = new Entity(EntityType.ARMOR_STAND);
+
+        ArmorStandMeta armorStandMeta = (ArmorStandMeta)vehicle.getEntityMeta();
+        armorStandMeta.setInvisible(true);
+        armorStandMeta.setHasNoGravity(true);
+        vehicle.setInstance(event.getInstance(), deathPosition.sub(0, 2, 0));
+
         zombiesPlayer.setState(ZombiesPlayerStateKeys.KNOCKED,
-                new KnockedPlayerStateContext(deathPosition, roomName, killer));
+                new KnockedPlayerStateContext(deathPosition, roomName, killer, vehicle));
     }
 
     private Component getEntityName(@NotNull Entity entity) {

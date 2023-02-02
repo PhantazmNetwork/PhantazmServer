@@ -114,14 +114,6 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
             String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
             Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
-            Entity vehicle = new Entity(EntityType.ARMOR_STAND);
-
-            ArmorStandMeta armorStandMeta = (ArmorStandMeta)vehicle.getEntityMeta();
-            armorStandMeta.setInvisible(true);
-            armorStandMeta.setHasNoGravity(true);
-            vehicle.setInstance(instance, context.getKnockLocation().sub(0, 2, 0));
-
-            playerView.getPlayer().ifPresent(vehicle::addPassenger);
 
             corpseEntity.setInstance(instance);
             corpseTeam.addMember(corpseUsername);
@@ -135,7 +127,6 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     @Override
                     public void end() {
                         meta.setCorpse(null);
-                        vehicle.remove();
                     }
                 }));
             };
