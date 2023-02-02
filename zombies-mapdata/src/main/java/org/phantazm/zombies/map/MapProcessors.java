@@ -112,12 +112,15 @@ public final class MapProcessors {
             List<Bounds3I> regions = boundsList.dataFromElement(element.getListOrThrow("regions"));
             Sound openSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("openSound"));
             ConfigList openActions = element.getListOrThrow("openActions");
-            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound, openActions);
+            ConfigList closeActions = element.getListOrThrow("closeActions");
+            ConfigList failOpenActions = element.getListOrThrow("failOpenActions");
+            return new DoorInfo(id, opensTo, costs, hologramInfos, regions, openSound, openActions, closeActions,
+                    failOpenActions);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(DoorInfo doorInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(6);
+            ConfigNode node = new LinkedConfigNode(9);
             node.put("id", ConfigProcessors.key().elementFromData(doorInfo.id()));
             node.put("opensTo", keyList.elementFromData(doorInfo.opensTo()));
             node.put("costs", integerList.elementFromData(doorInfo.costs()));
@@ -125,6 +128,8 @@ public final class MapProcessors {
             node.put("regions", boundsList.elementFromData(doorInfo.regions()));
             node.put("openSound", ConfigProcessors.sound().elementFromData(doorInfo.openSound()));
             node.put("openActions", doorInfo.openActions());
+            node.put("closeActions", doorInfo.closeActions());
+            node.put("failOpenActions", doorInfo.failOpenActions());
             return node;
         }
     };

@@ -42,6 +42,8 @@ public class Door implements Bounded {
 
     private final ArrayList<Hologram> holograms;
     private final List<Action<Door>> openActions;
+    private final List<Action<Door>> closeActions;
+    private final List<Action<Door>> failOpenActions;
 
     private final Supplier<? extends MapObjects> mapObjects;
 
@@ -60,8 +62,8 @@ public class Door implements Bounded {
      * @param instance the instance which this MapObject is in
      */
     public Door(@NotNull Point mapOrigin, @NotNull DoorInfo doorInfo, @NotNull Instance instance,
-            @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions,
-            @NotNull Supplier<? extends MapObjects> mapObjects) {
+            @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions, @NotNull List<Action<Door>> closeActions,
+            @NotNull List<Action<Door>> failOpenActions, @NotNull Supplier<? extends MapObjects> mapObjects) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.doorInfo = Objects.requireNonNull(doorInfo, "doorInfo");
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
@@ -91,6 +93,8 @@ public class Door implements Bounded {
         initHolograms(hologramInfo);
 
         this.openActions = List.copyOf(openActions);
+        this.closeActions = List.copyOf(closeActions);
+        this.failOpenActions = List.copyOf(failOpenActions);
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         this.blockMappings = new HashVec3I2ObjectMap<>(enclosing.originX(), enclosing.originX(), enclosing.originZ(),
                 enclosing.lengthX(), enclosing.lengthY(), enclosing.lengthZ());
@@ -161,6 +165,20 @@ public class Door implements Bounded {
         }
     }
 
+    public void failOpen(@Nullable ZombiesPlayer zombiesPlayer) {
+        synchronized (sync) {
+            if (isOpen) {
+                return;
+            }
+
+            this.lastInteractor = zombiesPlayer;
+
+            for (Action<Door> failOpenAction : failOpenActions) {
+                failOpenAction.perform(this);
+            }
+        }
+    }
+
     /**
      * Closes this door. Has no effect if the door is already closed.
      */
@@ -176,6 +194,10 @@ public class Door implements Bounded {
 
             initHolograms(doorInfo.holograms());
             blockMappings.clear();
+
+            for (Action<Door> closeAction : closeActions) {
+                closeAction.perform(this);
+            }
         }
     }
 

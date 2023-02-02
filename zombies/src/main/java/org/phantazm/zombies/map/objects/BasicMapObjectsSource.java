@@ -179,7 +179,14 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             List<Action<Door>> openActions = contextManager.makeContext(doorInfo.openActions())
                     .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
-            doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions, mapObjectsWrapper));
+            List<Action<Door>> closeActions = contextManager.makeContext(doorInfo.closeActions())
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+
+            List<Action<Door>> failOpenActions = contextManager.makeContext(doorInfo.failOpenActions())
+                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+
+            doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions, closeActions, failOpenActions,
+                    mapObjectsWrapper));
         }
 
         return doors;

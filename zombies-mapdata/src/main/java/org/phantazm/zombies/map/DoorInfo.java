@@ -20,7 +20,9 @@ public record DoorInfo(@NotNull Key id,
                        @NotNull List<HologramInfo> holograms,
                        @NotNull List<Bounds3I> regions,
                        @NotNull Sound openSound,
-                       @NotNull ConfigList openActions) {
+                       @NotNull ConfigList openActions,
+                       @NotNull ConfigList closeActions,
+                       @NotNull ConfigList failOpenActions) {
 
     /**
      * The default sound played when a door opens.
@@ -46,6 +48,9 @@ public record DoorInfo(@NotNull Key id,
         Objects.requireNonNull(holograms, "holograms");
         Objects.requireNonNull(regions, "regions");
         Objects.requireNonNull(openSound, "openSound");
+        Objects.requireNonNull(openActions, "openActions");
+        Objects.requireNonNull(closeActions, "closeActions");
+        Objects.requireNonNull(failOpenActions, "failOpenActions");
     }
 
     /**
@@ -56,6 +61,6 @@ public record DoorInfo(@NotNull Key id,
      */
     public DoorInfo(@NotNull Key id, @NotNull List<Bounds3I> regions) {
         this(id, new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), regions, DEFAULT_OPEN_SOUND,
-                new ArrayConfigList(0));
+                new ArrayConfigList(0), new ArrayConfigList(0), new ArrayConfigList(0));
     }
 }

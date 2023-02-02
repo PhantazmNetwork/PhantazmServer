@@ -67,6 +67,9 @@ public class BasicDoorHandler implements DoorHandler {
                     coins.applyTransaction(result);
                     door.open(player);
                 }
+                else {
+                    door.failOpen(player);
+                }
             }
         });
     }
