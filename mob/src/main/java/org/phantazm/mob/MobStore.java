@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * pertaining to mobs should be handled by the store.
  */
 public class MobStore implements Tickable {
-
     private final Map<UUID, PhantazmMob> uuidToMob = new ConcurrentHashMap<>();
 
     /**

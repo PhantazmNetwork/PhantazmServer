@@ -109,6 +109,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         return isAlive();
     }
 
+    default boolean canBeTargeted() {
+        return isAlive();
+    }
+
     interface Source {
 
         @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
