@@ -36,6 +36,7 @@ import org.phantazm.mob.target.EntitySelector;
 import org.phantazm.mob.target.LastHitEntitySelector;
 import org.phantazm.mob.target.NearestPlayerSelector;
 import org.phantazm.mob.target.NearestPlayersSelector;
+import org.phantazm.mob.validator.AlwaysValid;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,6 +140,9 @@ public final class Mob {
         contextManager.registerElementClass(NearestPlayerSelector.class);
         contextManager.registerElementClass(NearestPlayersSelector.class);
         contextManager.registerElementClass(LastHitEntitySelector.class);
+
+        //mob validators
+        contextManager.registerElementClass(AlwaysValid.class);
 
         LOGGER.info("Registered Mob element classes.");
     }
