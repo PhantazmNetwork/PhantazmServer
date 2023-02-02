@@ -10,6 +10,7 @@ import org.phantazm.mob.target.TargetSelector;
 import java.util.Objects;
 
 @Model("mob.skill.knockback")
+@Cache(false)
 public class KnockbackEntitySkill implements Skill {
 
     private final Data data;

@@ -1,5 +1,6 @@
 package org.phantazm.mob.skill;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
@@ -12,6 +13,7 @@ import org.phantazm.mob.spawner.MobSpawner;
 import java.util.Objects;
 
 @Model("mob.skill.duplicate_self")
+@Cache(false)
 public class DuplicateSelfSkill implements Skill {
 
     private final MobStore mobStore;

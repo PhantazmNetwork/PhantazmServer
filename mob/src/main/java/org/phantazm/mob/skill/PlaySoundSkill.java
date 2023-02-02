@@ -12,6 +12,7 @@ import java.util.Objects;
  * A {@link Skill} that plays a {@link Sound}.
  */
 @Model("mob.skill.play_sound")
+@Cache(false)
 public class PlaySoundSkill implements Skill {
 
     private final Data data;

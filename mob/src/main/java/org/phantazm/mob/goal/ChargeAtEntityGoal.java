@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Model("mob.goal.charge_at_entity")
+@Cache(false)
 public class ChargeAtEntityGoal implements ProximaGoal {
 
     private final Data data;

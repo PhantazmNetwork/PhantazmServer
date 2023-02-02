@@ -1,5 +1,6 @@
 package org.phantazm.mob.target;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -13,6 +14,7 @@ import java.util.Optional;
  * A {@link TargetSelector} that selects nearby players.
  */
 @Model("mob.selector.nearest_players")
+@Cache(false)
 public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
 
     /**

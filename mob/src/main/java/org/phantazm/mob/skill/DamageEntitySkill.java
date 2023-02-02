@@ -10,6 +10,7 @@ import org.phantazm.mob.target.TargetSelector;
 import java.util.Objects;
 
 @Model("mob.skill.damage")
+@Cache(false)
 public class DamageEntitySkill implements Skill {
 
     private final Data data;

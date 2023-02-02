@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 
 @Model("mob.skill.bleed")
+@Cache(false)
 public class BleedEntitiesSkill implements Skill {
 
     private final Collection<BleedContext> bleeding = new LinkedList<>();
