@@ -19,7 +19,9 @@ public class Room implements Bounded {
     private final Point center;
     private final List<Bounds3I> unmodifiableRegions;
     private final RoomInfo roomInfo;
-    private boolean isOpen;
+    private volatile boolean isOpen;
+
+    private final Object sync;
 
     /**
      * Constructs a new instance of this class.
@@ -38,6 +40,8 @@ public class Room implements Bounded {
 
         this.unmodifiableRegions = Collections.unmodifiableList(list);
         this.roomInfo = Objects.requireNonNull(roomInfo, "roomInfo");
+
+        this.sync = new Object();
     }
 
     public @UnmodifiableView @NotNull List<Bounds3I> roomBounds() {
@@ -53,13 +57,15 @@ public class Room implements Bounded {
     }
 
     public void open() {
-        if (isOpen) {
-            return;
-        }
+        synchronized (sync) {
+            if (isOpen) {
+                return;
+            }
 
-        isOpen = true;
-        for (Action<Room> action : openActions) {
-            action.perform(this);
+            isOpen = true;
+            for (Action<Room> action : openActions) {
+                action.perform(this);
+            }
         }
     }
 

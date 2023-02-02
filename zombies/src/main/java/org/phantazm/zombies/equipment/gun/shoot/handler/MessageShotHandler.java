@@ -18,20 +18,20 @@ import java.util.UUID;
 /**
  * A {@link ShotHandler} that provides feedback to an {@link Audience}.
  */
-@Model("zombies.gun.shot_handler.feedback")
-public class FeedbackShotHandler implements ShotHandler {
+@Model("zombies.gun.shot_handler.message")
+public class MessageShotHandler implements ShotHandler {
 
     private final Data data;
     private final AudienceProvider audienceProvider;
 
     /**
-     * Creates a {@link FeedbackShotHandler}.
+     * Creates a {@link MessageShotHandler}.
      *
-     * @param data             The {@link Data} for this {@link FeedbackShotHandler}
-     * @param audienceProvider The {@link AudienceProvider} for this {@link FeedbackShotHandler}
+     * @param data             The {@link Data} for this {@link MessageShotHandler}
+     * @param audienceProvider The {@link AudienceProvider} for this {@link MessageShotHandler}
      */
     @FactoryMethod
-    public FeedbackShotHandler(@NotNull Data data,
+    public MessageShotHandler(@NotNull Data data,
             @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data, "data");
         this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
@@ -56,9 +56,9 @@ public class FeedbackShotHandler implements ShotHandler {
     }
 
     /**
-     * Data for a {@link FeedbackShotHandler}.
+     * Data for a {@link MessageShotHandler}.
      *
-     * @param audienceProviderPath A path to the {@link FeedbackShotHandler}'s {@link AudienceProvider}
+     * @param audienceProviderPath A path to the {@link MessageShotHandler}'s {@link AudienceProvider}
      * @param message              The message to send for regular hits
      * @param headshotMessage      The message to send for headshots
      */

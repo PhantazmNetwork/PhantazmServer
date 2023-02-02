@@ -16,40 +16,46 @@ public class BasicPlayerCoins implements PlayerCoins {
 
     private final TransactionComponentCreator componentCreator;
 
-    private int coins;
+    private volatile int coins;
+
+    private final Object sync;
 
     public BasicPlayerCoins(@NotNull PlayerView playerView, @NotNull TransactionComponentCreator componentCreator,
             int initialCoins) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.componentCreator = Objects.requireNonNull(componentCreator, "componentCreator");
         this.coins = initialCoins;
+
+        this.sync = new Object();
     }
 
     @Override
     public @NotNull TransactionResult runTransaction(@NotNull Transaction transaction) {
-        List<Transaction.Modifier> modifiers = new ArrayList<>(transaction.modifiers());
-        modifiers.sort(Comparator.comparingInt(Transaction.Modifier::getPriority).reversed());
+        synchronized (sync) {
+            List<Transaction.Modifier> modifiers = new ArrayList<>(transaction.modifiers());
+            modifiers.sort(Comparator.comparingInt(Transaction.Modifier::getPriority).reversed());
 
-        List<Component> modifierNames = new ArrayList<>(modifiers.size());
-        int change = transaction.initialChange();
-        for (Transaction.Modifier modifier : modifiers) {
-            int newChange = modifier.modify(change);
-            if (change != newChange) {
-                modifierNames.add(modifier.getDisplayName());
+            List<Component> modifierNames = new ArrayList<>(modifiers.size());
+            int change = transaction.initialChange();
+            for (Transaction.Modifier modifier : modifiers) {
+                int newChange = modifier.modify(change);
+                if (change != newChange) {
+                    modifierNames.add(modifier.getDisplayName());
+                }
+
+                change = newChange;
             }
 
-            change = newChange;
-        }
+            int newCoins = coins + change;
+            if (change < 0 && newCoins > coins) {
+                change = -(coins - Integer.MIN_VALUE);
+            }
+            else if (change > 0 && newCoins < coins) {
+                change = Integer.MAX_VALUE - coins;
+            }
 
-        int newCoins = coins + change;
-        if (change < 0 && newCoins > coins) {
-            change = -(coins - Integer.MIN_VALUE);
+            return new TransactionResult(modifierNames, change);
         }
-        else if (change > 0 && newCoins < coins) {
-            change = Integer.MAX_VALUE - coins;
-        }
-
-        return new TransactionResult(modifierNames, change);
     }
 
     @Override
@@ -59,14 +65,17 @@ public class BasicPlayerCoins implements PlayerCoins {
 
     @Override
     public void applyTransaction(@NotNull TransactionResult result) {
-        if (!result.hasChange()) {
-            return;
-        }
+        synchronized (sync) {
+            if (!result.hasChange()) {
+                return;
+            }
 
-        coins += result.change();
-        playerView.getPlayer().ifPresent(player -> {
-            Component message = componentCreator.createTransactionComponent(result.modifierNames(), result.change());
-            player.sendMessage(message);
-        });
+            coins += result.change();
+            playerView.getPlayer().ifPresent(player -> {
+                Component message =
+                        componentCreator.createTransactionComponent(result.modifierNames(), result.change());
+                player.sendMessage(message);
+            });
+        }
     }
 }

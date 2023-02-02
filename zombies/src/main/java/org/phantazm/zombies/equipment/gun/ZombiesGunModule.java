@@ -13,16 +13,16 @@ import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 @SuppressWarnings("ClassCanBeRecord")
 @Memoize
 @Depend
 public class ZombiesGunModule implements DependencyModule {
+
+    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+
     private final PlayerView playerView;
 
     private final MobSpawner mobSpawner;
@@ -35,14 +35,20 @@ public class ZombiesGunModule implements DependencyModule {
 
     private final MapObjects mapObjects;
 
-    public ZombiesGunModule(@NotNull PlayerView playerView, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
+    public ZombiesGunModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull PlayerView playerView, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
+        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.random = Objects.requireNonNull(random, "random");
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+    }
+
+    public @NotNull Map<? super UUID, ? extends ZombiesPlayer> getPlayerMap() {
+        return playerMap;
     }
 
     public @NotNull PlayerView getPlayerView() {

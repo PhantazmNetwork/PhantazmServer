@@ -92,7 +92,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
 
         ZombiesGunModule gunModule =
-                new ZombiesGunModule(playerView, mobSpawner, mobStore, eventNode, random, mapObjects);
+                new ZombiesGunModule(zombiesPlayers, playerView, mobSpawner, mobStore, eventNode, random, mapObjects);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(gunModule);
 
         Sidebar sidebar = new Sidebar(

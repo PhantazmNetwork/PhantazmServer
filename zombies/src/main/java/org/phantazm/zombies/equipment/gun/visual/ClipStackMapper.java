@@ -22,7 +22,7 @@ public class ClipStackMapper implements GunStackMapper {
      * @param reloadTester The {@link ReloadTester} to use to determine whether the gun is currently reloading
      */
     @FactoryMethod
-    public ClipStackMapper(@NotNull Data data, @NotNull @Child("reload_tester") ReloadTester reloadTester) {
+    public ClipStackMapper(@NotNull @Child("reload_tester") ReloadTester reloadTester) {
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
     }
 

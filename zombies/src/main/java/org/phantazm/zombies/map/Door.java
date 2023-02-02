@@ -47,9 +47,9 @@ public class Door implements Bounded {
 
     private final Vec3I2ObjectMap<Block> blockMappings;
 
-    private boolean isOpen;
+    private volatile boolean isOpen;
 
-    private ZombiesPlayer lastInteractor;
+    private volatile ZombiesPlayer lastInteractor;
 
     private final Object sync;
 

@@ -44,7 +44,7 @@ public class Window implements Bounded {
 
     private final Object sync;
 
-    private int index;
+    private volatile int index;
 
     /**
      * Creates a new (fully-repaired) window.
