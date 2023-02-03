@@ -4,6 +4,7 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.attribute.Attribute;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.instance.Instance;
@@ -91,6 +92,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
             context.getVehicle().remove();
+            player.teleport(Pos.fromPoint(context.getKnockLocation()));
         });
     }
 

@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.*;
-import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
@@ -106,7 +105,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
         Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateCreator = context -> {
-            Hologram hologram = new InstanceHologram(context.getKnockLocation(), 1.0);
+            Hologram hologram =
+                    new InstanceHologram(context.getKnockLocation().add(0, 0.5, 0), 0, Hologram.Alignment.LOWER);
+            hologram.setInstance(instance);
+
             PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
             String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
             Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
@@ -126,10 +128,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     }
                 }));
             };
+
             ReviveHandler reviveHandler =
                     new ReviveHandler(() -> aliveStateCreator.apply(NoContext.INSTANCE), deadStateSupplier,
                             new NearbyReviverFinder(zombiesPlayers, playerView, mapSettingsInfo.reviveRadius()), 500L);
-
 
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,

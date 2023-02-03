@@ -25,6 +25,7 @@ public class Corpse implements Activable {
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
     }
 
+    @Override
     public void start() {
         hologram.add(Component.text("------", NamedTextColor.YELLOW));
         hologram.add(Component.empty());
@@ -69,7 +70,7 @@ public class Corpse implements Activable {
 
             @Override
             public void end() {
-                Corpse.this.disable();
+                Corpse.this.remove();
             }
         };
     }
@@ -78,7 +79,7 @@ public class Corpse implements Activable {
         return new Activable() {
             @Override
             public void end() {
-                Corpse.this.remove();
+                Corpse.this.disable();
             }
         };
     }
