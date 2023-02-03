@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobStore;
+import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.RoundHandler;
@@ -39,6 +40,8 @@ public interface MapObjects {
     @NotNull BoundedTracker<Door> doorTracker();
 
     @NotNull Map<? super Key, ? extends Room> roomMap();
+
+    @NotNull MobSpawner mobSpawner();
 
     interface Source {
         @NotNull MapObjects make(@NotNull Instance instance,

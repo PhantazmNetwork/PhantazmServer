@@ -22,7 +22,6 @@ public class FollowEntityGoal implements ProximaGoal {
     private final Data data;
     private final ProximaEntity entity;
     private final TargetSelector<? extends Entity> selector;
-    private final TargetValidator validator;
     private Entity target;
     private long ticksSinceTargetChosen;
 
@@ -33,12 +32,10 @@ public class FollowEntityGoal implements ProximaGoal {
      */
     @FactoryMethod
     public FollowEntityGoal(@NotNull Data data, @NotNull ProximaEntity entity,
-            @NotNull @Child("selector") TargetSelector<? extends Entity> selector,
-            @NotNull @Child("validator") TargetValidator validator) {
+            @NotNull @Child("selector") TargetSelector<? extends Entity> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.entity = Objects.requireNonNull(entity, "entity");
         this.selector = Objects.requireNonNull(selector, "selector");
-        this.validator = Objects.requireNonNull(validator, "validator");
         this.ticksSinceTargetChosen = data.retargetInterval();
     }
 
@@ -59,7 +56,7 @@ public class FollowEntityGoal implements ProximaGoal {
 
     @Override
     public void tick(long time) {
-        if ((target != null && target.isRemoved()) || (target != null && !validator.valid(target))) {
+        if (target != null && target.isRemoved()) {
             target = null;
             refreshTarget();
             return;
@@ -81,31 +78,18 @@ public class FollowEntityGoal implements ProximaGoal {
     private void refreshTarget() {
         ticksSinceTargetChosen = 0L;
 
-        // already check if target removed
-        if (target != null && target.getPosition().distanceSquared(entity.getPosition()) <= data.followRange()) {
-            return;
-        }
-
         Optional<? extends Entity> newTargetOptional = selector.selectTarget();
         if (newTargetOptional.isPresent()) {
             Entity newTarget = newTargetOptional.get();
-            if (validator.valid(newTarget)) {
-                entity.setDestination(target = null);
-                return;
-            }
-
             entity.setDestination(target = newTarget);
+            return;
         }
-        else {
-            entity.setDestination(target = null);
-        }
+
+        entity.setDestination(target = null);
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selectorPath,
-                       @NotNull @ChildPath("validator") String validatorPath,
-                       long retargetInterval,
-                       double followRange) {
+    public record Data(@NotNull @ChildPath("selector") String selectorPath, long retargetInterval, double followRange) {
 
         public Data {
             Objects.requireNonNull(selectorPath, "selectorPath");

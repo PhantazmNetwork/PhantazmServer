@@ -3,6 +3,7 @@ package org.phantazm.mob.target;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.validator.TargetValidator;
 
 import java.util.*;
 
@@ -11,7 +12,7 @@ import java.util.*;
  *
  * @param <TTarget>> A mapped type of the target {@link Entity}
  */
-public abstract class NearestEntitiesSelector<TTarget> implements TargetSelector<Iterable<TTarget>> {
+public abstract class NearestEntitiesSelector<TTarget extends Entity> implements TargetSelector<Iterable<TTarget>> {
 
     private final Entity entity;
 
@@ -19,16 +20,20 @@ public abstract class NearestEntitiesSelector<TTarget> implements TargetSelector
 
     private final int targetLimit;
 
+    private final TargetValidator targetValidator;
+
     /**
      * Creates a {@link NearestEntitiesSelector}.
      *
      * @param range       The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      */
-    public NearestEntitiesSelector(@NotNull Entity entity, double range, int targetLimit) {
+    public NearestEntitiesSelector(@NotNull Entity entity, double range, int targetLimit,
+            @NotNull TargetValidator targetValidator) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.range = range;
         this.targetLimit = targetLimit;
+        this.targetValidator = Objects.requireNonNull(targetValidator, "targetValidator");
     }
 
     @Override
@@ -48,7 +53,7 @@ public abstract class NearestEntitiesSelector<TTarget> implements TargetSelector
             }
 
             TTarget target = targetOptional.get();
-            if (!isTargetValid(entity, target)) {
+            if (!targetValidator.valid(target)) {
                 continue;
             }
 
@@ -92,14 +97,4 @@ public abstract class NearestEntitiesSelector<TTarget> implements TargetSelector
      * @return The mapped target
      */
     protected abstract @NotNull Optional<TTarget> mapTarget(@NotNull Entity entity);
-
-    /**
-     * Checks if a target is valid.
-     *
-     * @param targetEntity The target {@link Entity}
-     * @param target       The mapped target
-     * @return Whether the target is valid
-     */
-    protected abstract boolean isTargetValid(@NotNull Entity targetEntity, @NotNull TTarget target);
-
 }

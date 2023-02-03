@@ -1,14 +1,18 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.item.AnimatedUpdatingItem;
 import org.phantazm.core.item.StaticUpdatingItem;
+import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
@@ -27,6 +31,9 @@ import org.phantazm.zombies.map.shop.predicate.logic.AndPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.NotPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.OrPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.XorPredicate;
+import org.phantazm.zombies.mob.BasicMobSpawner;
+import org.phantazm.zombies.mob.BasicMobSpawnerSource;
+import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.perk.*;
 import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
 import org.phantazm.zombies.powerup.PowerupInfo;
@@ -57,15 +64,21 @@ public final class ZombiesFeature {
 
     private static Map<Key, MapInfo> maps;
     private static Map<Key, PowerupInfo> powerups;
+    private static MobSpawnerSource mobSpawnerSource;
+
     private static ContextManager contextManager;
 
-    static void initialize(@NotNull ContextManager contextManager) throws IOException {
+    static void initialize(@NotNull ContextManager contextManager,
+            @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
+            @NotNull KeyParser keyParser) throws IOException {
         ZombiesFeature.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         registerElementClasses(contextManager);
 
         ConfigCodec codec = new YamlCodec();
         ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec));
         ZombiesFeature.powerups = loadFeature("powerup", new FileSystemPowerupLoader(POWERUPS_FOLDER, codec));
+
+        ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, contextManager, keyParser);
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
@@ -209,5 +222,9 @@ public final class ZombiesFeature {
 
     public static @NotNull ContextManager mapObjectBuilder() {
         return FeatureUtils.check(contextManager);
+    }
+
+    public static @NotNull MobSpawnerSource mobSpawnerSource() {
+        return FeatureUtils.check(mobSpawnerSource);
     }
 }

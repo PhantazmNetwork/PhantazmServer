@@ -9,6 +9,8 @@ import org.phantazm.mob.PhantazmMob;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 
+import java.util.UUID;
+
 /**
  * A spawner for {@link PhantazmMob}s.
  * While {@link Spawner} spawns {@link ProximaEntity}s, this spawns {@link PhantazmMob}s.
@@ -26,5 +28,4 @@ public interface MobSpawner {
      */
     @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos point, @NotNull MobStore mobStore,
             @NotNull MobModel model);
-
 }

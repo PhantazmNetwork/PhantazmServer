@@ -1,12 +1,11 @@
 package org.phantazm.mob.target;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.validator.AlwaysValid;
+import org.phantazm.mob.validator.TargetValidator;
 
 import java.util.Optional;
 
@@ -21,8 +20,9 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
      * Creates a {@link NearestPlayersSelector}.
      */
     @FactoryMethod
-    public NearestPlayersSelector(@NotNull Data data, @NotNull Entity entity) {
-        super(entity, data.range(), data.targetLimit());
+    public NearestPlayersSelector(@NotNull Data data, @NotNull Entity entity,
+            @NotNull @Child("validator") TargetValidator targetValidator) {
+        super(entity, data.range(), data.targetLimit(), targetValidator);
     }
 
     @Override
@@ -34,13 +34,8 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
         return Optional.empty();
     }
 
-    @Override
-    protected boolean isTargetValid(@NotNull Entity targetEntity, @NotNull Player target) {
-        return true;
-    }
-
     @DataObject
-    public record Data(double range, int targetLimit) {
+    public record Data(@NotNull @ChildPath("validator") String targetValidatorPath, double range, int targetLimit) {
 
     }
 

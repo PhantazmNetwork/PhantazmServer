@@ -36,6 +36,8 @@ import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.map.shop.interactor.ShopInteractor;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
+import org.phantazm.zombies.mob.BasicMobSpawner;
+import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.spawn.BasicSpawnDistributor;
@@ -53,17 +55,17 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
     private final MapInfo mapInfo;
     private final ContextManager contextManager;
-    private final MobSpawner mobSpawner;
+    private final MobSpawnerSource mobSpawnerSource;
     private final Map<Key, MobModel> mobModels;
     private final ClientBlockHandlerSource clientBlockHandlerSource;
     private final KeyParser keyParser;
 
     public BasicMapObjectsSource(@NotNull MapInfo mapInfo, @NotNull ContextManager contextManager,
-            @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
+            @NotNull MobSpawnerSource mobSpawnerSource, @NotNull Map<Key, MobModel> mobModels,
             @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
-        this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
+        this.mobSpawnerSource = Objects.requireNonNull(mobSpawnerSource, "mobSpawnerSource");
         this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
         this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource, "clientBlockHandlerSource");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
@@ -74,6 +76,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
             @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler) {
+
+
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, playerMap.values());
@@ -88,6 +92,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                         mapSettingsInfo.pitch());
 
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
+        MobSpawner mobSpawner = mobSpawnerSource.make(mapObjectsWrapper);
 
         Module module = new Module(instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
                 slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler, mobStore);
@@ -98,7 +103,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
         List<Spawnpoint> spawnpoints =
-                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobStore);
+                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobStore, mobSpawner);
         List<Window> windows = buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler);
         List<Shop> shops = buildShops(origin, mapInfo.shops(), provider, instance);
         List<Door> doors = buildDoors(origin, mapInfo.doors(), provider, instance, mapObjectsWrapper);
@@ -106,7 +111,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor);
 
         MapObjects mapObjects =
-                new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds, provider, module);
+                new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds, provider, mobSpawner, module);
         mapObjectsWrapper.set(mapObjects);
 
         return mapObjects;
@@ -124,7 +129,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Spawnpoint> buildSpawnpoints(Point mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
-            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobStore mobStore) {
+            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobStore mobStore, MobSpawner mobSpawner) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
             spawnpoints.add(

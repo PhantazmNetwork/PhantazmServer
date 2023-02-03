@@ -1,4 +1,4 @@
-package org.phantazm.mob.spawner;
+package org.phantazm.zombies.mob;
 
 import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.annotation.Depend;
@@ -34,9 +34,12 @@ import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.skill.Skill;
+import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
+import org.phantazm.zombies.map.objects.MapObjects;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,12 +49,12 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Basic implementation of a {@link MobSpawner}.
  */
 public class BasicMobSpawner implements MobSpawner {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMobSpawner.class);
 
     private static final Consumer<? super ElementException> GOAL_HANDLER = ElementUtils.logging(LOGGER, "mob goal");
@@ -66,17 +69,21 @@ public class BasicMobSpawner implements MobSpawner {
 
     private final KeyParser keyParser;
 
+    private final Supplier<? extends MapObjects> mapObjects;
+
     /**
      * Creates a new {@link BasicMobSpawner}.
      *
      * @param proximaSpawner The {@link Spawner} to spawn backing {@link ProximaEntity}s
      */
     public BasicMobSpawner(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
-            @NotNull Spawner proximaSpawner, @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
+            @NotNull Spawner proximaSpawner, @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
+            @NotNull Supplier<? extends MapObjects> mapObjects) {
         this.processorMap = Map.copyOf(processorMap);
         this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
     }
 
     @Override
@@ -89,7 +96,7 @@ public class BasicMobSpawner implements MobSpawner {
         setAttributes(proximaEntity, model);
         setHealth(proximaEntity);
 
-        Module module = new Module(this, mobStore, model, proximaEntity);
+        Module module = new Module(this, mobStore, model, proximaEntity, mapObjects);
         DependencyProvider dependencyProvider = new ModuleDependencyProvider(keyParser, module);
         ElementContext context = contextManager.makeContext(model.getNode());
 
@@ -216,12 +223,15 @@ public class BasicMobSpawner implements MobSpawner {
 
         private final ProximaEntity entity;
 
-        public Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull MobModel model,
-                @NotNull ProximaEntity entity) {
+        private final Supplier<? extends MapObjects> mapObjects;
+
+        private Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull MobModel model,
+                @NotNull ProximaEntity entity, @NotNull Supplier<? extends MapObjects> mapObjects) {
             this.spawner = Objects.requireNonNull(spawner, "spawner");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
             this.model = Objects.requireNonNull(model, "model");
             this.entity = Objects.requireNonNull(entity, "entity");
+            this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         }
 
         public @NotNull MobSpawner getSpawner() {
@@ -242,6 +252,10 @@ public class BasicMobSpawner implements MobSpawner {
 
         public @NotNull ProximaEntity getProximaEntity() {
             return entity;
+        }
+
+        public @NotNull Supplier<? extends MapObjects> mapObjects() {
+            return mapObjects;
         }
     }
 }

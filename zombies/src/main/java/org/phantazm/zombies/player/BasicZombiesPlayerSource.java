@@ -55,16 +55,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
-
-    private final MobSpawner mobSpawner;
-
     private final Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction;
 
     private final Team corpseTeam;
 
-    public BasicZombiesPlayerSource(@NotNull MobSpawner mobSpawner,
-            @NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction, @NotNull Team corpseTeam) {
-        this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
+    public BasicZombiesPlayerSource(@NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction,
+            @NotNull Team corpseTeam) {
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
         this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
     }
@@ -74,7 +70,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-            @NotNull MobStore mobStore) {
+            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner) {
         TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
 
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();

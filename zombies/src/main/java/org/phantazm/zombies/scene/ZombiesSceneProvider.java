@@ -44,6 +44,9 @@ import org.phantazm.zombies.map.handler.*;
 import org.phantazm.zombies.map.objects.BasicMapObjectsSource;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.map.shop.Shop;
+import org.phantazm.zombies.mob.BasicMobSpawner;
+import org.phantazm.zombies.mob.BasicMobSpawnerSource;
+import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
 import org.phantazm.zombies.powerup.PowerupHandler;
@@ -79,10 +82,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
-            @NotNull EventNode<Event> eventNode, @NotNull MobSpawner mobSpawner, @NotNull Map<Key, MobModel> mobModels,
-            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull ContextManager contextManager,
-            @NotNull KeyParser keyParser, @NotNull Map<Key, PowerupInfo> powerups,
-            ZombiesPlayer.Source zombiesPlayerSource) {
+            @NotNull EventNode<Event> eventNode, @NotNull MobSpawnerSource mobSpawnerSource,
+            @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
+            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
+            @NotNull Map<Key, PowerupInfo> powerups, ZombiesPlayer.Source zombiesPlayerSource) {
         super(maximumScenes);
         this.contexts = new IdentityHashMap<>(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
@@ -96,9 +99,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         MapSettingsInfo settingsInfo = mapInfo.settings();
 
-        this.mapObjectSource =
-                new BasicMapObjectsSource(mapInfo, contextManager, mobSpawner, mobModels, clientBlockHandlerSource,
-                        keyParser);
+        this.mapObjectSource = new BasicMapObjectsSource(mapInfo, contextManager, mobSpawnerSource, mobModels,
+                clientBlockHandlerSource, keyParser);
         this.zombiesPlayerSource = Objects.requireNonNull(zombiesPlayerSource, "zombiesPlayerSource");
         this.powerupHandlerSource =
                 new BasicPowerupHandlerSource(powerups, contextManager, settingsInfo.powerupPickupRadius());
@@ -204,7 +206,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
             return zombiesPlayerSource.createPlayer(zombiesPlayers, settings, instance, playerView,
                     mapObjects.module().modifierSource(), new BasicFlaggable(), childNode, mapObjects.module().random(),
-                    mapObjects, mobStore);
+                    mapObjects, mobStore, mapObjects.mobSpawner());
         };
 
         ZombiesScene scene = new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, settings, stageTransition,

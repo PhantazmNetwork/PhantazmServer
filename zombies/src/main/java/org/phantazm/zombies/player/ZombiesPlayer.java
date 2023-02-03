@@ -12,6 +12,7 @@ import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob.MobStore;
+import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.equipment.Equipment;
 import org.phantazm.zombies.map.Door;
@@ -119,7 +120,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
                 @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
                 @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
                 @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-                @NotNull MobStore mobStore);
+                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner);
 
     }
 

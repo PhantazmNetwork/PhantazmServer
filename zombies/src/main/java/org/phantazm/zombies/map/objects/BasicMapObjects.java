@@ -5,6 +5,7 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.tracker.BoundedTracker;
+import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.shop.Shop;
 
@@ -24,11 +25,14 @@ public final class BasicMapObjects implements MapObjects {
     private final BoundedTracker<Shop> shopTracker;
     private final BoundedTracker<Door> doorTracker;
 
+    private final MobSpawner mobSpawner;
+
     private final Map<? super Key, ? extends Room> roomMap;
 
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull List<Window> windows,
             @NotNull List<Shop> shops, @NotNull List<Door> doors, @NotNull List<Room> rooms,
-            @NotNull List<Round> rounds, @NotNull DependencyProvider mapDependencyProvider, @NotNull Module module) {
+            @NotNull List<Round> rounds, @NotNull DependencyProvider mapDependencyProvider,
+            @NotNull MobSpawner mobSpawner, @NotNull Module module) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
         this.mapDependencyProvider = Objects.requireNonNull(mapDependencyProvider, "mapDependencyProvider");
@@ -38,6 +42,7 @@ public final class BasicMapObjects implements MapObjects {
         this.windowTracker = BoundedTracker.tracker(windows);
         this.shopTracker = BoundedTracker.tracker(shops);
         this.doorTracker = BoundedTracker.tracker(doors);
+        this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
 
         Map<Key, Room> map = new HashMap<>(rooms.size());
         for (Room room : rooms) {
@@ -90,5 +95,10 @@ public final class BasicMapObjects implements MapObjects {
     @Override
     public @NotNull Map<? super Key, ? extends Room> roomMap() {
         return roomMap;
+    }
+
+    @Override
+    public @NotNull MobSpawner mobSpawner() {
+        return mobSpawner;
     }
 }

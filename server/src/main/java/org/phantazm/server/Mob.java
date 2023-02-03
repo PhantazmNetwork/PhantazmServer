@@ -1,7 +1,6 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
@@ -30,14 +29,12 @@ import org.phantazm.mob.goal.FollowEntityGoal;
 import org.phantazm.mob.goal.MeleeAttackGoal;
 import org.phantazm.mob.goal.UseSkillGoal;
 import org.phantazm.mob.skill.*;
-import org.phantazm.mob.spawner.BasicMobSpawner;
-import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.mob.target.EntitySelector;
 import org.phantazm.mob.target.LastHitEntitySelector;
 import org.phantazm.mob.target.NearestPlayerSelector;
 import org.phantazm.mob.target.NearestPlayersSelector;
 import org.phantazm.mob.validator.AlwaysValid;
-import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,16 +54,15 @@ public final class Mob {
     private static final Logger LOGGER = LoggerFactory.getLogger(Mob.class);
 
     private static ConfigProcessor<MobModel> MODEL_PROCESSOR;
-    private static MobSpawner mobSpawner;
     private static Map<Key, MobModel> models;
+    private static Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
 
     private Mob() {
         throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings("SameParameterValue")
-    static void initialize(@NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
-            @NotNull Spawner spawner, @NotNull Path mobPath, @NotNull ConfigCodec codec) {
+    static void initialize(@NotNull ContextManager contextManager, @NotNull Path mobPath, @NotNull ConfigCodec codec) {
         MODEL_PROCESSOR = new MobModelConfigProcessor(contextManager, ItemStackConfigProcessors.snbt());
 
         registerElementClasses(contextManager);
@@ -114,7 +110,8 @@ public final class Mob {
                 MinestomConfigProcessors.villagerData());
         processorMap.put(BooleanObjectPair.of(false, Entity.Pose.class.getName()),
                 ConfigProcessor.enumProcessor(Entity.Pose.class));
-        mobSpawner = new BasicMobSpawner(processorMap, spawner, contextManager, keyParser);
+
+        Mob.processorMap = Map.copyOf(processorMap);
 
         loadModels(mobPath, codec);
     }
@@ -143,6 +140,7 @@ public final class Mob {
 
         //mob validators
         contextManager.registerElementClass(AlwaysValid.class);
+        contextManager.registerElementClass(ZombiesPlayerValidator.class);
 
         LOGGER.info("Registered Mob element classes.");
     }
@@ -195,15 +193,6 @@ public final class Mob {
     }
 
     /**
-     * Gets the global {@link MobSpawner}.
-     *
-     * @return The global {@link MobSpawner}.
-     */
-    public static @NotNull MobSpawner getMobSpawner() {
-        return FeatureUtils.check(mobSpawner);
-    }
-
-    /**
      * Gets the loaded {@link MobModel}s.
      *
      * @return The loaded {@link MobModel}s
@@ -211,5 +200,9 @@ public final class Mob {
     @SuppressWarnings("unused")
     public static @NotNull @Unmodifiable Map<Key, MobModel> getModels() {
         return FeatureUtils.check(models);
+    }
+
+    public static @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> getProcessorMap() {
+        return FeatureUtils.check(processorMap);
     }
 }

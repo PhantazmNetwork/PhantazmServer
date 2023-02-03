@@ -190,13 +190,13 @@ public final class PhantazmServer {
         Proxima.initialize(global, contextManager, serverConfig.pathfinderConfig());
         ProximaTest.initialize(global, Proxima.getSpawner());
 
-        Mob.initialize(contextManager, keyParser, Proxima.getSpawner(), Path.of("./mobs/"), new YamlCodec());
+        Mob.initialize(contextManager, Path.of("./mobs/"), new YamlCodec());
         EquipmentFeature.initialize(keyParser, contextManager, Path.of("./equipment/"),
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())),
                 mappingProcessorSource.processorFor(Token.ofClass(GunData.class)));
 
-        ZombiesFeature.initialize(contextManager);
+        ZombiesFeature.initialize(contextManager, Mob.getProcessorMap(), Proxima.getSpawner(), keyParser);
         ZombiesTest.initialize(global, ZombiesFeature.maps(), viewProvider, commandManager, contextManager, keyParser,
                 new CompositeFallback(
                         List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),

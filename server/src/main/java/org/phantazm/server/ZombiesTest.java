@@ -162,14 +162,13 @@ final class ZombiesTest {
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(1, entry.getValue(), MinecraftServer.getInstanceManager(), instanceLoader,
-                            sceneFallback, global, Mob.getMobSpawner(), Mob.getModels(),
+                            sceneFallback, global, ZombiesFeature.mobSpawnerSource(), Mob.getModels(),
                             new BasicClientBlockHandlerSource(instance -> {
                                 DimensionType dimensionType = instance.getDimensionType();
                                 return new InstanceClientBlockHandler(instance, global, dimensionType.getMinY(),
                                         dimensionType.getHeight());
                             }), contextManager, keyParser, ZombiesFeature.powerups(),
-                            new BasicZombiesPlayerSource(Mob.getMobSpawner(), EquipmentFeature::createEquipmentCreator,
-                                    corpseTeam));
+                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
             providers.put(entry.getKey(), provider);
         }
         ZombiesSceneRouter sceneRouter = new ZombiesSceneRouter(providers);
