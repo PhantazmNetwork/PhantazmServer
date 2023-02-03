@@ -111,7 +111,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
             Entity corpseEntity = new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
 
-            corpseEntity.setInstance(instance);
+            corpseEntity.setInstance(instance, context.getKnockLocation().add(0, 0.5, 0));
             corpseTeam.addMember(corpseUsername);
             TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.RED, false, false);
             Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
@@ -129,6 +129,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             ReviveHandler reviveHandler =
                     new ReviveHandler(() -> aliveStateCreator.apply(NoContext.INSTANCE), deadStateSupplier,
                             new NearbyReviverFinder(zombiesPlayers, playerView, mapSettingsInfo.reviveRadius()), 500L);
+
+
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
                             meta, sidebar), corpse.asKnockActivable(reviveHandler), new Activable() {

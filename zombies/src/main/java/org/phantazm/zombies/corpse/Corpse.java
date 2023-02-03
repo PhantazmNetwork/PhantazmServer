@@ -64,7 +64,7 @@ public class Corpse implements Activable {
 
             @Override
             public void tick(long time) {
-                Corpse.this.tick(time);
+                Corpse.this.tick(reviveHandler);
             }
 
             @Override
