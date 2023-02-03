@@ -2,6 +2,10 @@ package org.phantazm.zombies.corpse;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
@@ -27,20 +31,22 @@ public class Corpse implements Activable {
 
     @Override
     public void start() {
-        hologram.add(Component.text("------", NamedTextColor.YELLOW));
+        hologram.add(Component.text("███████████████", NamedTextColor.YELLOW));
         hologram.add(Component.empty());
         hologram.add(Component.empty());
-        hologram.add(Component.text("------", NamedTextColor.YELLOW));
+        hologram.add(Component.text("███████████████", NamedTextColor.YELLOW));
         corpseEntity.setPose(Entity.Pose.SLEEPING);
     }
 
     public void tick(@NotNull ReviveHandler reviveHandler) {
         if (reviveHandler.isReviving()) {
-            hologram.set(1, Component.text("reviving", NamedTextColor.GREEN));
+            hologram.set(1,
+                    Component.text("REVIVING...").style(Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD)));
             hologram.set(2, tickFormatter.format(reviveHandler.getTicksUntilRevive()));
         }
         else {
-            hologram.set(1, Component.text("dying", NamedTextColor.RED));
+            hologram.set(1, Component.text("HOLD SNEAK TO REVIVE!")
+                    .style(Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD)));
             hologram.set(2, tickFormatter.format(reviveHandler.getTicksUntilDeath()));
         }
     }

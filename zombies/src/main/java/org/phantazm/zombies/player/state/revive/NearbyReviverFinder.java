@@ -48,6 +48,10 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
             if (!(meta.isCanRevive() && !meta.isReviving())) {
                 continue;
             }
+            
+            if (!meta.isCrouching()) {
+                continue;
+            }
 
             Optional<Player> reviverPlayerOptional = zombiesPlayer.getPlayer();
             if (reviverPlayerOptional.isEmpty()) {
