@@ -140,7 +140,7 @@ public class GroundController implements Controller {
             return speed;
         }
 
-        return speed * (1 + Math.min(count / 20D, 1));
+        return speed * (0.5 + Math.min(count / 20.0, 1));
     }
 
     private int nearbyEntities() {
