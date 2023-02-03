@@ -1,7 +1,10 @@
 package org.phantazm.zombies.player.state.revive;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.EntityTracker;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -34,36 +37,54 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
         if (knockedPlayerOptional.isEmpty()) {
             return null;
         }
-        Point knockedPosition = knockedPlayerOptional.get().getPosition();
+        Player knockedPlayer = knockedPlayerOptional.get();
+        Point knockedPosition = knockedPlayer.getPosition();
 
-        for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-            if (zombiesPlayer.getUUID().equals(playerView.getUUID())) {
-                continue;
-            }
-            if (!zombiesPlayer.isAlive()) {
-                continue;
-            }
-
-            ZombiesPlayerMeta meta = zombiesPlayer.module().getMeta();
-            if (!(meta.isCanRevive() && !meta.isReviving())) {
-                continue;
-            }
-            
-            if (!meta.isCrouching()) {
-                continue;
-            }
-
-            Optional<Player> reviverPlayerOptional = zombiesPlayer.getPlayer();
-            if (reviverPlayerOptional.isEmpty()) {
-                continue;
-            }
-
-            Player player = reviverPlayerOptional.get();
-            if (player.getPosition().distance(knockedPosition) <= reviveRadius) {
-                return zombiesPlayer;
-            }
+        Instance instance = knockedPlayer.getInstance();
+        if (instance == null) {
+            return null;
         }
 
-        return null;
+        Wrapper<ZombiesPlayer> playerWrapper = Wrapper.ofNull();
+        instance.getEntityTracker()
+                .nearbyEntitiesUntil(knockedPosition, reviveRadius, EntityTracker.Target.PLAYERS, candidate -> {
+                    UUID candidateUUID = candidate.getUuid();
+                    ZombiesPlayer zombiesPlayer = zombiesPlayers.get(candidateUUID);
+                    if (zombiesPlayer == null) {
+                        return false;
+                    }
+
+                    if (candidateUUID.equals(playerView.getUUID())) {
+                        return false;
+                    }
+
+                    if (!zombiesPlayer.isAlive()) {
+                        return false;
+                    }
+
+                    ZombiesPlayerMeta meta = zombiesPlayer.module().getMeta();
+                    if (!(meta.isCanRevive() && !meta.isReviving())) {
+                        return false;
+                    }
+
+                    if (!meta.isCrouching()) {
+                        return false;
+                    }
+
+                    Optional<Player> reviverPlayerOptional = zombiesPlayer.getPlayer();
+                    if (reviverPlayerOptional.isEmpty()) {
+                        return false;
+                    }
+
+                    Player player = reviverPlayerOptional.get();
+                    if (player.getPosition().distance(knockedPosition) <= reviveRadius) {
+                        playerWrapper.set(zombiesPlayer);
+                        return true;
+                    }
+
+                    return false;
+                });
+
+        return playerWrapper.get();
     }
 }
