@@ -31,7 +31,6 @@ import org.phantazm.zombies.map.shop.predicate.logic.AndPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.NotPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.OrPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.XorPredicate;
-import org.phantazm.zombies.mob.BasicMobSpawner;
 import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.perk.*;
@@ -45,7 +44,9 @@ import org.phantazm.zombies.powerup.visual.ItemVisual;
 import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
 import org.phantazm.zombies.scoreboard.sidebar.lineupdater.*;
 import org.phantazm.zombies.scoreboard.sidebar.lineupdater.condition.AliveCondition;
+import org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator.CoinsUpdaterCreator;
 import org.phantazm.zombies.scoreboard.sidebar.section.CollectionSidebarSection;
+import org.phantazm.zombies.scoreboard.sidebar.section.ZombiesPlayersSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +131,8 @@ public final class ZombiesFeature {
         //Sidebar
         contextManager.registerElementClass(SidebarUpdater.class);
         contextManager.registerElementClass(CollectionSidebarSection.class);
-        contextManager.registerElementClass(CoinsSidebarLineUpdater.class);
+        contextManager.registerElementClass(ZombiesPlayersSection.class);
+        contextManager.registerElementClass(CoinsUpdaterCreator.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.ChildUpdater.class);
         contextManager.registerElementClass(AliveCondition.class);

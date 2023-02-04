@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@Model("zombies.sidebar.lineupdater.player_state")
+@Model("zombies.sidebar.line_updater.player_state")
 @Cache(false)
 public class PlayerStateSidebarLineUpdater implements SidebarLineUpdater {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlayerStateSidebarLineUpdater.class);

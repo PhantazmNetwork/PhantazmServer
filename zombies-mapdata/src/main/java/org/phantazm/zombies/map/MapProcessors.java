@@ -339,7 +339,7 @@ public final class MapProcessors {
         }
     };
 
-    private static final ConfigProcessor<ConfigNode> scoreboard = new ConfigProcessor<>() {
+    private static final ConfigProcessor<ConfigNode> sidebar = new ConfigProcessor<>() {
         @Override
         public @NotNull ConfigNode dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             if (!element.isNode()) {
@@ -457,7 +457,7 @@ public final class MapProcessors {
         return evaluation;
     }
 
-    public static @NotNull ConfigProcessor<ConfigNode> scoreboard() {
-        return scoreboard;
+    public static @NotNull ConfigProcessor<ConfigNode> sidebar() {
+        return sidebar;
     }
 }

@@ -5,6 +5,8 @@ plugins {
 dependencies {
     api(projects.phantazmCommons)
     api(libs.ethylene.core)
+    api(libs.ethylene.mapper)
+    api(libs.commons.lang3)
     api(libs.caffeine)
     api(libs.element.core)
     api(libs.toolkit.collection)

@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-@Model("zombies.sidebar.lineupdater.remaining_zombies")
+@Model("zombies.sidebar.line_updater.remaining_zombies")
 public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
 
     private final Supplier<? extends Optional<Round>> roundSupplier;

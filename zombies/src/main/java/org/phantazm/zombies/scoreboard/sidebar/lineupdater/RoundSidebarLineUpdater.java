@@ -10,7 +10,7 @@ import org.phantazm.zombies.map.handler.RoundHandler;
 import java.util.Objects;
 import java.util.Optional;
 
-@Model("zombies.sidebar.lineupdater.round")
+@Model("zombies.sidebar.line_updater.round")
 public class RoundSidebarLineUpdater implements SidebarLineUpdater {
 
     private final RoundHandler roundHandler;

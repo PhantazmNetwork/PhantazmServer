@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
-@Model("zombies.sidebar.lineupdater.joined_players")
+@Model("zombies.sidebar.line_updater.joined_players")
 public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
 
     private final Collection<ZombiesPlayer> zombiesPlayers;

@@ -4,12 +4,13 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
 
-@Model("zombies.sidebar.lineupdater.constant")
+@Model("zombies.sidebar.line_updater.constant")
 public class ConstantSidebarLineUpdater implements SidebarLineUpdater {
 
     private final Data data;

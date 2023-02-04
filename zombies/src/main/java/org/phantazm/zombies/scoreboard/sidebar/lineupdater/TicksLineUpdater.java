@@ -14,7 +14,7 @@ import org.phantazm.core.time.TickFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
-@Model("zombies.sidebar.lineupdater.ticks")
+@Model("zombies.sidebar.line_updater.ticks")
 public class TicksLineUpdater implements SidebarLineUpdater {
 
     private static final ElementFactory<Data, TicksLineUpdater> FACTORY =

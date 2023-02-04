@@ -10,12 +10,16 @@ import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 @Memoize
 @Depend
 @SuppressWarnings("ClassCanBeRecord")
 public class SidebarModule implements DependencyModule {
+
+    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
 
@@ -27,14 +31,19 @@ public class SidebarModule implements DependencyModule {
 
     private final int maxPlayers;
 
-    public SidebarModule(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart, @NotNull Component date,
-            int maxPlayers) {
+    public SidebarModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull RoundHandler roundHandler,
+            @NotNull Wrapper<Long> ticksSinceStart, @NotNull Component date, int maxPlayers) {
+        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
         this.date = Objects.requireNonNull(date, "date");
         this.maxPlayers = maxPlayers;
+    }
+
+    public @NotNull Map<? super UUID, ? extends ZombiesPlayer> getZombiesPlayerMap() {
+        return playerMap;
     }
 
     public @NotNull Collection<? extends ZombiesPlayer> getZombiesPlayers() {

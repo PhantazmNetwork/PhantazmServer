@@ -28,7 +28,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
     private static final String ROUNDS_PATH = "rounds";
     private static final String SPAWNRULES_PATH = "spawnrules";
     private static final String SPAWNPOINTS_PATH = "spawnpoints";
-    private static final String SCOREBOARD_PATH = "scoreboard";
+    private static final String SIDEBAR_PATH = "sidebar";
 
     private final String mapInfoName;
     private final BiPredicate<Path, BasicFileAttributes> configPredicate;
@@ -107,10 +107,9 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate,
                 file -> spawnpoints.add(Configuration.read(file, codec, MapProcessors.spawnpointInfo())));
 
-        String scoreboardSettingsPath =
+        String sidebarSettingsPath =
                 "settings" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
-        scoreboard =
-                Configuration.read(paths.scoreboard.resolve(scoreboardSettingsPath), codec, MapProcessors.scoreboard());
+        scoreboard = Configuration.read(paths.sidebar.resolve(sidebarSettingsPath), codec, MapProcessors.sidebar());
 
         return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, scoreboard);
     }
@@ -133,7 +132,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         FileUtils.deleteRecursivelyIfExists(paths.rounds);
         FileUtils.deleteRecursivelyIfExists(paths.spawnrules);
         FileUtils.deleteRecursivelyIfExists(paths.spawnpoints);
-        FileUtils.deleteRecursivelyIfExists(paths.scoreboard);
+        FileUtils.deleteRecursivelyIfExists(paths.sidebar);
 
         Files.createDirectories(paths.rooms);
         Files.createDirectories(paths.doors);
@@ -142,7 +141,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         Files.createDirectories(paths.rounds);
         Files.createDirectories(paths.spawnrules);
         Files.createDirectories(paths.spawnpoints);
-        Files.createDirectories(paths.scoreboard);
+        Files.createDirectories(paths.sidebar);
 
         String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension();
 
@@ -189,7 +188,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
                     MapProcessors.spawnpointInfo().elementFromData(spawnpoint), codec);
         }
 
-        Configuration.write(paths.scoreboard.resolve("settings" + extension), data.scoreboard(), codec);
+        Configuration.write(paths.sidebar.resolve("settings" + extension), data.scoreboard(), codec);
     }
 
     @Override
@@ -221,11 +220,11 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
                                Path rounds,
                                Path spawnrules,
                                Path spawnpoints,
-                               Path scoreboard) {
+                               Path sidebar) {
         private FolderPaths(Path root) {
             this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH),
                     root.resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH),
-                    root.resolve(SPAWNPOINTS_PATH), root.resolve(SCOREBOARD_PATH));
+                    root.resolve(SPAWNPOINTS_PATH), root.resolve(SIDEBAR_PATH));
         }
     }
 }

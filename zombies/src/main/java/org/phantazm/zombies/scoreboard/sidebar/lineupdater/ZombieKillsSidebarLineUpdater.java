@@ -10,7 +10,7 @@ import org.phantazm.zombies.kill.PlayerKills;
 import java.util.Objects;
 import java.util.Optional;
 
-@Model("zombies.sidebar.lineupdater.zombie_kills")
+@Model("zombies.sidebar.line_updater.zombie_kills")
 public class ZombieKillsSidebarLineUpdater implements SidebarLineUpdater {
 
     private final PlayerKills playerKills;

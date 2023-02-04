@@ -8,6 +8,7 @@ import org.phantazm.zombies.scoreboard.sidebar.lineupdater.SidebarLineUpdater;
 import java.util.*;
 
 @Model("zombies.sidebar.section.collection")
+@Cache(false)
 public class CollectionSidebarSection implements SidebarSection {
 
     private final Collection<SidebarLineUpdater> lineUpdaters;

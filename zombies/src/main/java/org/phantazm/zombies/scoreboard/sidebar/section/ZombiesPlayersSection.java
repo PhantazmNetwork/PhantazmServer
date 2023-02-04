@@ -1,28 +1,34 @@
 package org.phantazm.zombies.scoreboard.sidebar.section;
 
+import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator.PlayerUpdaterCreator;
 import org.phantazm.zombies.scoreboard.sidebar.lineupdater.SidebarLineUpdater;
 
 import java.util.*;
 
-public abstract class ZombiesPlayersSection implements SidebarSection {
-
+@Model("zombies.sidebar.section.zombies_players")
+@Cache(false)
+public class ZombiesPlayersSection implements SidebarSection {
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
-
     private final List<SidebarLineUpdater> lineUpdaters;
+    private final PlayerUpdaterCreator playerUpdaterCreator;
 
-    public ZombiesPlayersSection(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+    @FactoryMethod
+    public ZombiesPlayersSection(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull @Child("creator_path") PlayerUpdaterCreator playerUpdaterCreator) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.lineUpdaters = new ArrayList<>(zombiesPlayers.size());//TODO: max players
+        this.lineUpdaters = new ArrayList<>(zombiesPlayers.size());
+        this.playerUpdaterCreator = Objects.requireNonNull(playerUpdaterCreator, "playerUpdaterCreator");
     }
 
     @Override
     public void invalidateCache() {
         lineUpdaters.clear();
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            lineUpdaters.add(createLineUpdater(zombiesPlayer));
+            lineUpdaters.add(playerUpdaterCreator.forPlayer(zombiesPlayer));
         }
     }
 
@@ -41,6 +47,7 @@ public abstract class ZombiesPlayersSection implements SidebarSection {
         return updates;
     }
 
-    protected abstract @NotNull SidebarLineUpdater createLineUpdater(@NotNull ZombiesPlayer zombiesPlayer);
-
+    @DataObject
+    public record Data(@NotNull @ChildPath("creator_path") String creatorPath) {
+    }
 }
