@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Model("zombies.sidebar.updater")
 public class SidebarUpdater implements Activable {
+    private static final int MAX_SIDEBAR_ROWS = 15;
 
     private final Sidebar sidebar;
     private final List<SidebarSection> sections;
@@ -39,25 +40,32 @@ public class SidebarUpdater implements Activable {
             section.invalidateCache();
         }
 
-        int clampedSize = Math.min(totalSize, 15);
+        int clampedSize = Math.min(totalSize, MAX_SIDEBAR_ROWS);
         for (int i = 0; i < clampedSize; i++) {
-            sidebar.createLine(new Sidebar.ScoreboardLine(lineId(i), Component.empty(), clampedSize - i));
+            sidebar.createLine(new Sidebar.ScoreboardLine(lineId(i), Component.empty(), clampedSize - i - 1));
         }
     }
 
     @Override
     public void tick(long time) {
         refreshSections();
-        for (int i = 0; i < sections.size(); i++) {
-            List<Optional<Component>> newLines = sections.get(i).update(time);
-            for (int j = 0; j < newLines.size(); j++) {
-                int index = i + j;
-                if (0 <= index && index < 15) {
-                    newLines.get(j).ifPresent(newLine -> {
-                        String lineId = lineId(index);
+        int index = 0;
+        for (SidebarSection section : sections) {
+            List<Optional<Component>> newLines = section.update(time);
+
+            for (Optional<Component> line : newLines) {
+                if (0 <= index && index < MAX_SIDEBAR_ROWS) {
+                    int finalIndex = index;
+                    line.ifPresent(newLine -> {
+                        String lineId = lineId(finalIndex);
                         sidebar.updateLineContent(lineId, newLine);
                     });
                 }
+                else {
+                    return;
+                }
+
+                index++;
             }
         }
     }
@@ -86,8 +94,8 @@ public class SidebarUpdater implements Activable {
                 section.invalidateCache();
             }
 
-            int oldClampedSize = Math.min(totalSize, 15);
-            int newClampedSize = Math.min(newTotalSize, 15);
+            int oldClampedSize = Math.min(totalSize, MAX_SIDEBAR_ROWS);
+            int newClampedSize = Math.min(newTotalSize, MAX_SIDEBAR_ROWS);
             if (oldClampedSize < newClampedSize) {
                 for (int i = oldClampedSize; i < newClampedSize; i++) {
                     sidebar.createLine(new Sidebar.ScoreboardLine(lineId(i), Component.empty(), newClampedSize - i));

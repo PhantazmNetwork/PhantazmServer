@@ -117,7 +117,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             corpseEntity.setInstance(instance, context.getKnockLocation().add(0, 0.25, 0));
             corpseTeam.addMember(corpseUsername);
-            TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.RED, false, false);
+            TickFormatter tickFormatter =
+                    new DurationTickFormatter(new DurationTickFormatter.Data(NamedTextColor.RED, false, false));
             Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
 
             Supplier<ZombiesPlayerState> deadStateSupplier = () -> {

@@ -1,5 +1,6 @@
 package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Model("zombies.sidebar.line_updater.joined_players")
+@Cache(false)
 public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
 
     private final Collection<ZombiesPlayer> zombiesPlayers;

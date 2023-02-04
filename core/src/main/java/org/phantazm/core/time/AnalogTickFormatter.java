@@ -1,5 +1,9 @@
 package org.phantazm.core.time;
 
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
@@ -8,24 +12,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+@Model("core.tick_formatter.analog")
+@Cache
 public class AnalogTickFormatter implements TickFormatter {
+    private final Data data;
 
-    private final TextColor digitColor;
-
-    private final TextColor separatorColor;
-
-    private boolean ceil;
-
-    public AnalogTickFormatter(@NotNull TextColor digitColor, @NotNull TextColor separatorColor, boolean ceil) {
-        this.digitColor = Objects.requireNonNull(digitColor, "digitColor");
-        this.separatorColor = Objects.requireNonNull(separatorColor, "separatorColor");
-        this.ceil = ceil;
+    @FactoryMethod
+    public AnalogTickFormatter(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
     public @NotNull Component format(long ticks) {
         long elapsedSeconds;
-        if (ceil) {
+        if (data.ceil) {
             elapsedSeconds = (long)Math.ceil((double)ticks / MinecraftServer.TICK_PER_SECOND);
         }
         else {
@@ -35,8 +35,8 @@ public class AnalogTickFormatter implements TickFormatter {
         long minutes = (elapsedSeconds % 3600) / 60;
         long seconds = elapsedSeconds % 60;
 
-        Component separator = Component.text(":", separatorColor);
-        TextComponent.Builder builder = Component.text().color(digitColor);
+        Component separator = Component.text(":", data.separatorColor);
+        TextComponent.Builder builder = Component.text().color(data.digitColor);
         if (hours != 0) {
             builder.append(Component.text(hours)).append(separator);
         }
@@ -45,5 +45,10 @@ public class AnalogTickFormatter implements TickFormatter {
         builder.append(Component.text(String.format("%02d", seconds)));
 
         return builder.build();
+    }
+
+    @DataObject
+    public record Data(@NotNull TextColor digitColor, @NotNull TextColor separatorColor, boolean ceil) {
+
     }
 }

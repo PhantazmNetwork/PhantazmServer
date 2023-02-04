@@ -1,33 +1,48 @@
 package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
 
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
+@Model("zombies.sidebar.line_updater.date")
+@Cache(false)
 public class DateLineUpdater implements SidebarLineUpdater {
+    private final Data data;
+    private final DateTimeFormatter formatter;
+    private Component cached;
 
-    private final Component date;
-
-    private boolean baked = false;
-
-    public DateLineUpdater(@NotNull Component date) {
-        this.date = Objects.requireNonNull(date, "date");
+    @FactoryMethod
+    public DateLineUpdater(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data, "date");
+        this.formatter = DateTimeFormatter.ofPattern(data.dateFormat);
+        this.cached = null;
     }
 
     @Override
     public void invalidateCache() {
-        baked = false;
+        cached = null;
     }
 
     @Override
     public @NotNull Optional<Component> tick(long time) {
-        if (baked) {
-            return Optional.empty();
+        if (cached == null) {
+            cached = Component.text(formatter.format(LocalDateTime.now())).style(data.dateStyle);
         }
+        
+        return Optional.of(cached);
+    }
 
-        baked = true;
-        return Optional.of(date);
+    @DataObject
+    public record Data(@NotNull Style dateStyle, @NotNull String dateFormat) {
+
     }
 }

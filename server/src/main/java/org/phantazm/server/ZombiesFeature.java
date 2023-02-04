@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.item.AnimatedUpdatingItem;
 import org.phantazm.core.item.StaticUpdatingItem;
 import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
@@ -45,7 +46,9 @@ import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
 import org.phantazm.zombies.scoreboard.sidebar.lineupdater.*;
 import org.phantazm.zombies.scoreboard.sidebar.lineupdater.condition.AliveCondition;
 import org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator.CoinsUpdaterCreator;
+import org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator.ZombieKillsUpdaterCreator;
 import org.phantazm.zombies.scoreboard.sidebar.section.CollectionSidebarSection;
+import org.phantazm.zombies.scoreboard.sidebar.section.ZombiesPlayerSection;
 import org.phantazm.zombies.scoreboard.sidebar.section.ZombiesPlayersSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,12 +70,10 @@ public final class ZombiesFeature {
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
 
-    private static ContextManager contextManager;
-
     static void initialize(@NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
             @NotNull KeyParser keyParser) throws IOException {
-        ZombiesFeature.contextManager = Objects.requireNonNull(contextManager, "contextManager");
+        Attributes.registerAll();
         registerElementClasses(contextManager);
 
         ConfigCodec codec = new YamlCodec();
@@ -132,17 +133,19 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(SidebarUpdater.class);
         contextManager.registerElementClass(CollectionSidebarSection.class);
         contextManager.registerElementClass(ZombiesPlayersSection.class);
+        contextManager.registerElementClass(ZombiesPlayerSection.class);
         contextManager.registerElementClass(CoinsUpdaterCreator.class);
+        contextManager.registerElementClass(ZombieKillsUpdaterCreator.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.ChildUpdater.class);
         contextManager.registerElementClass(AliveCondition.class);
         contextManager.registerElementClass(ConstantSidebarLineUpdater.class);
+        contextManager.registerElementClass(DateLineUpdater.class);
         contextManager.registerElementClass(JoinedPlayersSidebarLineUpdater.class);
         contextManager.registerElementClass(PlayerStateSidebarLineUpdater.class);
         contextManager.registerElementClass(RemainingZombiesSidebarLineUpdater.class);
         contextManager.registerElementClass(RoundSidebarLineUpdater.class);
         contextManager.registerElementClass(TicksLineUpdater.class);
-        contextManager.registerElementClass(ZombieKillsSidebarLineUpdater.class);
 
         //ClickHandlers
         contextManager.registerElementClass(InteractingClickHandler.class);
@@ -220,10 +223,6 @@ public final class ZombiesFeature {
 
     public static @NotNull @Unmodifiable Map<Key, PowerupInfo> powerups() {
         return FeatureUtils.check(powerups);
-    }
-
-    public static @NotNull ContextManager mapObjectBuilder() {
-        return FeatureUtils.check(contextManager);
     }
 
     public static @NotNull MobSpawnerSource mobSpawnerSource() {

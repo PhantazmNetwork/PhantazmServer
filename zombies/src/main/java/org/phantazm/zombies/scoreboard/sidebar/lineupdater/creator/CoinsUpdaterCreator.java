@@ -10,6 +10,7 @@ import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.coin.PlayerCoins;
@@ -79,11 +80,8 @@ public class CoinsUpdaterCreator implements PlayerUpdaterCreator {
                 lastCoins = newCoins;
                 cacheInvalidated = false;
 
-                Component formattedName = Component.text(playerName).style(data.nameStyle);
-                Component formattedCoins = Component.text(newCoins).style(data.coinsStyle);
-
-                return Optional.of(Component.join(JoinConfiguration.builder().build(), formattedName, data.divider,
-                        formattedCoins));
+                return Optional.of(
+                        MiniMessage.miniMessage().deserialize(String.format(data.formatString, playerName, newCoins)));
             }
 
             return Optional.empty();
@@ -91,6 +89,6 @@ public class CoinsUpdaterCreator implements PlayerUpdaterCreator {
     }
 
     @DataObject
-    public record Data(@NotNull Style nameStyle, @NotNull Component divider, @NotNull Style coinsStyle) {
+    public record Data(@NotNull String formatString) {
     }
 }

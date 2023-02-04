@@ -166,8 +166,6 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
             LobbiesConfig lobbiesConfig) throws Exception {
-        Attributes.registerAll();
-
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
@@ -179,6 +177,8 @@ public final class PhantazmServer {
         Element.initialize(mappingProcessorSource, keyParser);
 
         ContextManager contextManager = Element.getContextManager();
+
+        TickFormatterFeature.initialize(contextManager);
 
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());

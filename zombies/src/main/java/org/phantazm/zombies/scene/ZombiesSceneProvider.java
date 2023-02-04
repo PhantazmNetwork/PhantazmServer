@@ -306,7 +306,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Stage idle = new IdleStage(zombiesPlayers);
 
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
-        TickFormatter tickFormatter = new DurationTickFormatter(NamedTextColor.YELLOW, true, false);
+        TickFormatter tickFormatter =
+                new DurationTickFormatter(new DurationTickFormatter.Data(NamedTextColor.YELLOW, true, false));
 
         Stage countdown =
                 new CountdownStage(instance, zombiesPlayers, messages, random, 400L, alertTicks, tickFormatter,
