@@ -1,5 +1,6 @@
 package org.phantazm.zombies.stage;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -32,5 +33,10 @@ public class IdleStage implements Stage {
     @Override
     public boolean hasPermanentPlayers() {
         return false;
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return StageKeys.IDLE_STAGE;
     }
 }

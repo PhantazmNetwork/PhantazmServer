@@ -11,6 +11,7 @@ import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.stage.StageKeys;
 
 import java.util.*;
 
@@ -55,6 +56,10 @@ public class BasicWindowHandler implements WindowHandler {
 
     @Override
     public void handleCrouchStateChange(@NotNull ZombiesPlayer zombiesPlayer, boolean crouching) {
+        if (!zombiesPlayer.inStage(StageKeys.IN_GAME)) {
+            return;
+        }
+
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
 
         if (!crouching || playerOptional.isEmpty() || !zombiesPlayer.canRepairWindow()) {

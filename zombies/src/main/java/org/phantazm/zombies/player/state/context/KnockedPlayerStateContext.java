@@ -3,6 +3,9 @@ package org.phantazm.zombies.player.state.context;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.metadata.other.ArmorStandMeta;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,11 +22,21 @@ public class KnockedPlayerStateContext {
 
     private final Entity vehicle;
 
-    public KnockedPlayerStateContext(@NotNull Point knockLocation, @Nullable Component knockRoom,
-            @Nullable Component killer, @NotNull Entity vehicle) {
+    public KnockedPlayerStateContext(@NotNull Instance instance, @NotNull Point knockLocation,
+            @Nullable Component knockRoom, @Nullable Component killer) {
         this.knockLocation = Objects.requireNonNull(knockLocation, "knockLocation");
         this.knockRoom = knockRoom;
         this.killer = killer;
+
+
+        Entity vehicle = new Entity(EntityType.ARMOR_STAND);
+
+        ArmorStandMeta armorStandMeta = (ArmorStandMeta)vehicle.getEntityMeta();
+        armorStandMeta.setInvisible(true);
+        armorStandMeta.setHasNoGravity(true);
+        armorStandMeta.setMarker(true);
+        vehicle.setInstance(instance, knockLocation.sub(0, 1, 0));
+
         this.vehicle = Objects.requireNonNull(vehicle, "vehicle");
     }
 

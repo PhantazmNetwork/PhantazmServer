@@ -106,10 +106,6 @@ public class GroundController implements Controller {
             PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-            if (targetEntity != null && targetEntity.getDistanceSquared(entity) < 100) {
-                entity.lookAt(targetEntity);
-            }
-
             if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
                 double nodeDiff = exactTargetY - (current.y + current.blockOffset);
                 if (nodeDiff > step) {

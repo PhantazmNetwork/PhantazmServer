@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player;
 
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -23,12 +24,14 @@ import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.powerup.Powerup;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
@@ -39,6 +42,8 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     double getReviveSpeedMultiplier();
 
     void setReviveSpeedMultiplier(double multiplier);
+
+    @NotNull ZombiesScene getScene();
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         return module().getPlayerView().getPlayer().map(player -> {
@@ -114,9 +119,14 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         return isAlive();
     }
 
+    default boolean inStage(@NotNull Key stageKey) {
+        return getScene().getCurrentStage().key().equals(stageKey);
+    }
+
     interface Source {
 
-        @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+        @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
+                @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
                 @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
                 @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
                 @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,

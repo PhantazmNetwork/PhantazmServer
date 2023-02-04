@@ -5,25 +5,31 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.equipment.Equipment;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
+
+    private final ZombiesScene scene;
 
     private final ZombiesPlayerModule module;
 
     private double reviveSpeedMultiplier = 1.0F;
 
-    public BasicZombiesPlayer(@NotNull ZombiesPlayerModule module) {
+    public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module) {
+        this.scene = Objects.requireNonNull(scene, "scene");
         this.module = Objects.requireNonNull(module, "module");
     }
 
@@ -45,6 +51,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     @Override
     public void setReviveSpeedMultiplier(double multiplier) {
         this.reviveSpeedMultiplier = multiplier;
+    }
+
+    @Override
+    public @NotNull ZombiesScene getScene() {
+        return scene;
     }
 
     @Override

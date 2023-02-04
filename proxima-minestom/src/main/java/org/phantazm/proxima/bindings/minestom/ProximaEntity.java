@@ -175,6 +175,10 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
+        if (targetEntity != null && getDistanceSquared(targetEntity) < 100) {
+            lookAt(targetEntity);
+        }
+
         if (navigator.navigationComplete()) {
             currentPath = navigator.getResult();
             if (!initPath(currentPath)) {

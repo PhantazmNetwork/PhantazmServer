@@ -132,4 +132,9 @@ public class InGameStage implements Stage {
             sidebarUpdater.end();
         }
     }
+
+    @Override
+    public @NotNull Key key() {
+        return StageKeys.IN_GAME;
+    }
 }

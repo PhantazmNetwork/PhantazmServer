@@ -47,6 +47,7 @@ import org.phantazm.zombies.player.state.revive.BasicKnockedStateActivable;
 import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -65,7 +66,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     }
 
     @Override
-    public @NotNull ZombiesPlayer createPlayer(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+    public @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
@@ -159,6 +161,6 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, mapTransactionModifierSource,
                         playerTransactionModifierSource, flaggable);
 
-        return new BasicZombiesPlayer(module);
+        return new BasicZombiesPlayer(scene, module);
     }
 }

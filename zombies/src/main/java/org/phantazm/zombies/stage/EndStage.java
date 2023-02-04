@@ -1,11 +1,17 @@
 package org.phantazm.zombies.stage;
 
 import com.github.steanky.toolkit.collection.Wrapper;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.corpse.Corpse;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.state.PlayerStateSwitcher;
+import org.phantazm.zombies.player.state.ZombiesPlayerState;
+import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
+import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
 
 import java.util.*;
@@ -61,6 +67,15 @@ public class EndStage implements Stage {
     public void start() {
         instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F),
                 Sound.Emitter.self());
+
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            PlayerStateSwitcher switcher = zombiesPlayer.module().getStateSwitcher();
+            ZombiesPlayerState state = switcher.getState();
+
+            if (state.key().equals(ZombiesPlayerStateKeys.KNOCKED.key())) {
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.killed(null, null));
+            }
+        }
     }
 
     @Override
@@ -79,5 +94,10 @@ public class EndStage implements Stage {
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {
             sidebarUpdater.end();
         }
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return StageKeys.END;
     }
 }

@@ -10,6 +10,7 @@ import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.DoorInfo;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.stage.StageKeys;
 
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +32,10 @@ public class BasicDoorHandler implements DoorHandler {
 
     @Override
     public void handleRightClick(@NotNull ZombiesPlayer player, @NotNull Point clicked) {
+        if (!player.inStage(StageKeys.IN_GAME)) {
+            return;
+        }
+
         doorTracker.atPoint(clicked).ifPresent(door -> {
             Optional<Player> playerOptional = player.getPlayer();
             if (playerOptional.isEmpty()) {

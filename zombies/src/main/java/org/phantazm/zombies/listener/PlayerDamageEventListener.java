@@ -48,15 +48,8 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Component killer = getKiller(event);
         Component roomName = getRoomName(deathPosition);
 
-        Entity vehicle = new Entity(EntityType.ARMOR_STAND);
-
-        ArmorStandMeta armorStandMeta = (ArmorStandMeta)vehicle.getEntityMeta();
-        armorStandMeta.setInvisible(true);
-        armorStandMeta.setHasNoGravity(true);
-        vehicle.setInstance(event.getInstance(), deathPosition.sub(0, 2, 0));
-
         zombiesPlayer.setState(ZombiesPlayerStateKeys.KNOCKED,
-                new KnockedPlayerStateContext(deathPosition, roomName, killer, vehicle));
+                new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
     }
 
     private Component getEntityName(@NotNull Entity entity) {

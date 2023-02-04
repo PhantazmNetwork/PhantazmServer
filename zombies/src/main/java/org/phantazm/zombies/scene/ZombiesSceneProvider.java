@@ -204,14 +204,16 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 createStageTransition(instance, settings.introMessages(), mapObjects.module().random(),
                         zombiesPlayers.values(), spawnPos, roundHandler, ticksSinceStart, sidebarModule);
 
+        Wrapper<ZombiesScene> sceneWrapper = Wrapper.ofNull();
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-            return zombiesPlayerSource.createPlayer(zombiesPlayers, settings, instance, playerView,
+            return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings, instance, playerView,
                     mapObjects.module().modifierSource(), new BasicFlaggable(), childNode, mapObjects.module().random(),
                     mapObjects, mobStore, mapObjects.mobSpawner());
         };
 
         ZombiesScene scene = new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, settings, stageTransition,
                 playerCreator);
+        sceneWrapper.set(scene);
 
         eventNode.addChild(childNode);
         contexts.put(scene, new SceneContext(childNode));

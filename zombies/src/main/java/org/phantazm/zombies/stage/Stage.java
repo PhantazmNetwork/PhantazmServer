@@ -1,5 +1,7 @@
 package org.phantazm.zombies.stage;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -11,7 +13,7 @@ import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-public interface Stage extends Activable {
+public interface Stage extends Activable, Keyed {
 
     boolean shouldContinue();
 
@@ -23,6 +25,8 @@ public interface Stage extends Activable {
 
     class Builder {
 
+        private final Key key;
+
         private final Collection<Activable> activables = new ArrayList<>();
 
         private BooleanSupplier continueCondition;
@@ -33,6 +37,10 @@ public interface Stage extends Activable {
         };
 
         private boolean hasPermanentPlayers;
+
+        public Builder(@NotNull Key key) {
+            this.key = Objects.requireNonNull(key, "key");
+        }
 
         public @NotNull Builder setContinueCondition(@NotNull BooleanSupplier continueCondition) {
             this.continueCondition = Objects.requireNonNull(continueCondition, "continueCondition");
@@ -68,6 +76,11 @@ public interface Stage extends Activable {
             Objects.requireNonNull(continueCondition, "continueCondition");
 
             return new Stage() {
+
+                @Override
+                public @NotNull Key key() {
+                    return key;
+                }
 
                 @Override
                 public void start() {

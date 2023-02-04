@@ -2,6 +2,7 @@ package org.phantazm.zombies.stage;
 
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongList;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public class CountdownStage implements Stage {
-
     private final Instance instance;
 
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
@@ -102,4 +102,8 @@ public class CountdownStage implements Stage {
         }
     }
 
+    @Override
+    public @NotNull Key key() {
+        return StageKeys.COUNTDOWN;
+    }
 }

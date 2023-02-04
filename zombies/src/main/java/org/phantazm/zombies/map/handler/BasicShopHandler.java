@@ -7,6 +7,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.map.BasicPlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.stage.StageKeys;
 
 import java.util.Objects;
 
@@ -25,6 +26,10 @@ public class BasicShopHandler implements ShopHandler {
     }
 
     public void handleInteraction(@NotNull ZombiesPlayer player, @NotNull Point clicked, @NotNull Key interactionType) {
+        if (!player.inStage(StageKeys.IN_GAME)) {
+            return;
+        }
+
         shopTracker.atPoint(clicked)
                 .ifPresent(shop -> shop.handleInteraction(new BasicPlayerInteraction(player, interactionType)));
     }
