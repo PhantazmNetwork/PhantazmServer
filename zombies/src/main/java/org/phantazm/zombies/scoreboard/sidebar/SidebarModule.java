@@ -27,18 +27,15 @@ public class SidebarModule implements DependencyModule {
 
     private final Wrapper<Long> ticksSinceStart;
 
-    private final Component date;
-
     private final int maxPlayers;
 
     public SidebarModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull RoundHandler roundHandler,
-            @NotNull Wrapper<Long> ticksSinceStart, @NotNull Component date, int maxPlayers) {
+            @NotNull Wrapper<Long> ticksSinceStart, int maxPlayers) {
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
-        this.date = Objects.requireNonNull(date, "date");
         this.maxPlayers = maxPlayers;
     }
 
@@ -56,10 +53,6 @@ public class SidebarModule implements DependencyModule {
 
     public @NotNull Wrapper<Long> getTicksSinceStart() {
         return ticksSinceStart;
-    }
-
-    public @NotNull Component getDate() {
-        return date;
     }
 
     public int getMaxPlayers() {

@@ -194,11 +194,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         doorHandler, mobStore);
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        String dateString = StringUtils.center(dateFormatter.format(LocalDate.now()), 16);
-        Component date = Component.text(dateString, TextColor.color(7040896));
         SidebarModule sidebarModule =
-                new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart, date,
+                new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
                         settings.maxPlayers());
         StageTransition stageTransition =
                 createStageTransition(instance, settings.introMessages(), mapObjects.module().random(),
