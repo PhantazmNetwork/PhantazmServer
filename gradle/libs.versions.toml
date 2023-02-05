@@ -58,7 +58,7 @@ mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version 
 
 proxima-core = { module = "com.github.steanky:proxima-core", version = "0.3.3" }
 
-renderer = { module = "com.github.0x3C50:Renderer", version = "90737050df" }
+renderer = { module = "com.github.0x3C50:Renderer", version = "044558f035" }
 
 satin = { module = "io.github.ladysnake:satin", version = "1.9.0" }
 

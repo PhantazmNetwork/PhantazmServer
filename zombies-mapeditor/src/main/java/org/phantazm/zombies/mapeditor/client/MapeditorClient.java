@@ -4,12 +4,10 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.netty.buffer.Unpooled;
-import me.x150.renderer.event.EventListener;
-import me.x150.renderer.event.EventType;
+import me.x150.MessageSubscription;
 import me.x150.renderer.event.Events;
-import me.x150.renderer.event.Shift;
-import me.x150.renderer.event.events.RenderEvent;
-import me.x150.renderer.renderer.Renderer3d;
+import me.x150.renderer.event.RenderEvent;
+import me.x150.renderer.render.Renderer3d;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -73,7 +71,7 @@ public class MapeditorClient implements ClientModInitializer {
         Path defaultMapDirectory = FabricLoader.getInstance().getConfigDir().resolve(MAPEDITOR_PATH);
 
         ObjectRenderer renderer = new Renderer();
-        Events.registerEventHandlerClass(renderer);
+        Events.manager.registerSubscribers(renderer);
 
         EditorSession editorSession =
                 new BasicEditorSession(renderer, new FileSystemMapLoader(defaultMapDirectory, codec),
@@ -170,15 +168,15 @@ public class MapeditorClient implements ClientModInitializer {
         private boolean renderThroughWalls = false;
         private RenderObject[] baked;
 
-        @EventListener(value = EventType.WORLD_RENDER, shift = Shift.POST)
-        void worldRender(@NotNull RenderEvent event) {
+        @MessageSubscription
+        void worldRender(@NotNull RenderEvent.World event) {
             if (!enabled) {
                 return;
             }
 
-            MatrixStack stack = event.getStack();
+            MatrixStack stack = event.getMatrixStack();
             if (renderThroughWalls) {
-                Renderer3d.startRenderingThroughWalls();
+                Renderer3d.renderThroughWalls();
             }
 
             if (baked == null) {
@@ -193,31 +191,29 @@ public class MapeditorClient implements ClientModInitializer {
 
                 boolean resetWallRender = false;
                 if (!renderThroughWalls && object.renderThroughWalls) {
-                    Renderer3d.startRenderingThroughWalls();
+                    Renderer3d.renderThroughWalls();
                     resetWallRender = true;
                 }
 
                 switch (object.type) {
                     case FILLED -> {
                         for (int i = 0; i < object.bounds.length; i += 2) {
-                            Renderer3d.renderFilled(object.bounds[i], object.bounds[i + 1], object.color)
-                                    .drawWithoutVBO(stack);
+                            Renderer3d.renderFilled(stack, object.color, object.bounds[i], object.bounds[i + 1]);
                         }
                     }
                     case OUTLINE -> {
                         for (int i = 0; i < object.bounds.length; i += 2) {
-                            Renderer3d.renderOutline(object.bounds[i], object.bounds[i + 1], object.color)
-                                    .drawWithoutVBO(stack);
+                            Renderer3d.renderOutline(stack, object.color, object.bounds[i], object.bounds[i + 1]);
                         }
                     }
                 }
 
                 if (resetWallRender) {
-                    Renderer3d.stopRenderingThroughWalls();
+                    Renderer3d.stopRenderThroughWalls();
                 }
             }
 
-            Renderer3d.stopRenderingThroughWalls();
+            Renderer3d.stopRenderThroughWalls();
         }
 
         private void bake() {

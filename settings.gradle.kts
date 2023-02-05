@@ -30,7 +30,7 @@ sequenceOf(
     "velocity",
     "zombies",
     "zombies-mapdata",
-    //"zombies-mapeditor" //disabled to speed up compilation
+    "zombies-mapeditor" //disabled to speed up compilation
 ).forEach {
     include(":phantazm-$it")
     project(":phantazm-$it").projectDir = file(it)

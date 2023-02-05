@@ -2,7 +2,6 @@ package org.phantazm.zombies.mapeditor.client;
 
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3I;
-import me.x150.renderer.renderer.color.Color;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -23,6 +22,7 @@ import org.phantazm.zombies.mapeditor.client.render.RenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
