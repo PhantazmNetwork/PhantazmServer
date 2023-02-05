@@ -22,6 +22,8 @@ public class ZombiesPlayerMeta {
 
     private int windowRepairAmount = 1;
 
+    private long ticksPerHeal = 20;
+
     public Optional<Corpse> getCorpse() {
         return Optional.ofNullable(corpse);
     }
@@ -76,5 +78,13 @@ public class ZombiesPlayerMeta {
 
     public void setWindowRepairAmount(int amount) {
         this.windowRepairAmount = amount;
+    }
+
+    public long getTicksPerHeal() {
+        return ticksPerHeal;
+    }
+
+    public void setTicksPerHeal(long ticksPerHeal) {
+        this.ticksPerHeal = ticksPerHeal;
     }
 }

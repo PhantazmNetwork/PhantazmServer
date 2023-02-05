@@ -1,6 +1,9 @@
 package org.phantazm.zombies.player.state;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.potion.Potion;
+import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
@@ -10,12 +13,13 @@ import org.phantazm.zombies.player.ZombiesPlayerMeta;
 import java.util.Objects;
 
 public class BasicAliveStateActivable implements Activable {
-
     private final PlayerView playerView;
 
     private final ZombiesPlayerMeta meta;
 
     private final Sidebar sidebar;
+
+    private long lastHeal;
 
     public BasicAliveStateActivable(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
             @NotNull Sidebar sidebar) {
@@ -39,12 +43,24 @@ public class BasicAliveStateActivable implements Activable {
     }
 
     @Override
+    public void tick(long time) {
+        if ((time - lastHeal) / MinecraftServer.TICK_MS >= meta.getTicksPerHeal()) {
+            playerView.getPlayer().ifPresent(player -> {
+                player.setHealth(player.getHealth() + 0.5F);
+            });
+
+            lastHeal = time;
+        }
+    }
+
+    @Override
     public void end() {
         playerView.getPlayer().ifPresent(player -> {
             player.setInvisible(false);
             player.setAllowFlying(false);
             player.setFlying(false);
             player.setGameMode(GameMode.ADVENTURE);
+            player.clearEffects();
             sidebar.addViewer(player);
         });
     }

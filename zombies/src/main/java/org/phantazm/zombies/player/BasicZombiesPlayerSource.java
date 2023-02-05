@@ -76,6 +76,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
 
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
+        meta.setTicksPerHeal(mapSettingsInfo.healTicks());
+
         PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
         PlayerKills kills = new BasicPlayerKills();
         InventoryProfile profile = new BasicInventoryProfile(9);

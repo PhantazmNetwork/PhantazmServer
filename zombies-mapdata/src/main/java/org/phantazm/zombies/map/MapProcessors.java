@@ -230,6 +230,7 @@ public final class MapProcessors {
             double powerupPickupRadius = element.getNumberOrThrow("powerupPickupRadius").doubleValue();
             long windowRepairTicks = element.getNumberOrThrow("windowRepairTicks").longValue();
             long corpseDeathTicks = element.getNumberOrThrow("corpseDeathTicks").longValue();
+            long healTicks = element.getNumberOrThrow("healTicks").longValue();
             double reviveRadius = element.getNumberOrThrow("reviveRadius").doubleValue();
             boolean canWallshoot = element.getBooleanOrThrow("canWallshoot");
             boolean perksLostOnDeath = element.getBooleanOrThrow("perksLostOnDeath");
@@ -241,8 +242,8 @@ public final class MapProcessors {
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
-                    corpseDeathTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest,
-                    milestoneRounds, defaultEquipment);
+                    corpseDeathTicks, healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks,
+                    rollsPerChest, milestoneRounds, defaultEquipment);
         }
 
         @Override
@@ -273,6 +274,7 @@ public final class MapProcessors {
             node.putNumber("powerupPickupRadius", mapConfig.powerupPickupRadius());
             node.putNumber("windowRepairTicks", mapConfig.windowRepairTicks());
             node.putNumber("corpseDeathTicks", mapConfig.corpseDeathTicks());
+            node.putNumber("healTicks", mapConfig.healTicks());
             node.putNumber("reviveRadius", mapConfig.reviveRadius());
             node.putBoolean("canWallshoot", mapConfig.canWallshoot());
             node.putBoolean("perksLostOnDeath", mapConfig.perksLostOnDeath());

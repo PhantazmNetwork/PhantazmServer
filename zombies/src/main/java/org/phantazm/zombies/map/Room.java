@@ -38,14 +38,10 @@ public class Room implements Bounded {
 
         this.center = VecUtils.toPoint(Bounds3I.enclosingImmutable(list.toArray(Bounds3I[]::new)).immutableCenter());
 
-        this.unmodifiableRegions = Collections.unmodifiableList(list);
+        this.unmodifiableRegions = List.copyOf(list);
         this.roomInfo = Objects.requireNonNull(roomInfo, "roomInfo");
 
         this.sync = new Object();
-    }
-
-    public @UnmodifiableView @NotNull List<Bounds3I> roomBounds() {
-        return unmodifiableRegions;
     }
 
     public @NotNull RoomInfo getRoomInfo() {
