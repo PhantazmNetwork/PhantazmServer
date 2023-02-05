@@ -40,7 +40,7 @@ public class Corpse implements Activable {
         if (reviveHandler.isReviving()) {
             hologram.set(1,
                     Component.text("REVIVING...").style(Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD)));
-            hologram.set(2, tickFormatter.format(reviveHandler.getTicksUntilRevive()));
+            hologram.set(2, tickFormatter.format(reviveHandler.getTicksUntilRevive()).append(Component.text("s")));
         }
         else {
             hologram.set(1, Component.text("HOLD SNEAK TO REVIVE!")

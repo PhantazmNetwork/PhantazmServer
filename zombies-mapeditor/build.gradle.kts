@@ -21,6 +21,14 @@ repositories {
             includeGroup("com.github.0x3C50")
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven("https://maven.fabricmc.net")
+        }
+        filter {
+            includeGroup("net.fabricmc")
+        }
+    }
     maven("https://server.bbkr.space/artifactory/libs-release")
     maven("https://ladysnake.jfrog.io/artifactory/mods")
 }
@@ -39,19 +47,10 @@ dependencies {
         }
     }
 
-    sequenceOf(
-        "fabric-events-interaction-v0",
-        "fabric-key-binding-api-v1",
-        "fabric-lifecycle-events-v1",
-        "fabric-networking-api-v1"
-    ).forEach {
-        modImplementation(fabricApi.module(it, fabricApiVersion))
-    }
     modImplementation(libs.fabric.loader)
     modImplementation(libs.libgui)
-    modImplementation(libs.renderer) {
-        exclude("net.fabricmc.fabric-api", "fabric-api") // Satin includes the entire Fabric API
-    }
+    modImplementation(libs.fabric.api)
+    modImplementation(libs.renderer)
 
     implementation(projects.phantazmCommons)
     implementation(projects.phantazmMessaging)

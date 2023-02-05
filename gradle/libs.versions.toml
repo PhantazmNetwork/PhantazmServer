@@ -38,6 +38,7 @@ ethylene-yaml = { module = "com.github.steanky:ethylene-yaml", version.ref = "et
 ethylene-mapper = { module = "com.github.steanky:ethylene-mapper", version.ref = "ethylene" }
 
 fabric-loader = { module = "net.fabricmc:fabric-loader", version = "0.14.9" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.68.1+1.19.3" }
 
 fastutil = { module = "it.unimi.dsi:fastutil", version = "8.5.8" }
 
@@ -46,9 +47,9 @@ jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 
-libgui = { module = "io.github.cottonmc:LibGui", version = "6.0.1+1.19" }
+libgui = { module = "io.github.cottonmc:LibGui", version = "6.5.2+1.19.3" }
 
-minecraft = { module = "com.mojang:minecraft", version = "1.19.2" }
+minecraft = { module = "com.mojang:minecraft", version = "1.19.3" }
 
 minestom = { module = "org.phantazm.Minestom:Minestom", version.ref = "minestom" }
 
@@ -60,7 +61,7 @@ proxima-core = { module = "com.github.steanky:proxima-core", version = "0.3.3" }
 
 renderer = { module = "com.github.0x3C50:Renderer", version = "044558f035" }
 
-satin = { module = "io.github.ladysnake:satin", version = "1.9.0" }
+satin = { module = "io.github.ladysnake:satin", version = "1.10.0" }
 
 snakeyaml = { module = "org.snakeyaml:snakeyaml-engine", version = "2.3" }
 
@@ -71,9 +72,9 @@ vector-core = { module = "com.github.steanky:vector-core", version = "0.9.1" }
 
 velocity-api = { module = "com.velocitypowered:velocity-api", version = "3.1.2-SNAPSHOT" }
 
-yarn-mappings = { module = "net.fabricmc:yarn", version = "1.19.2+build.9" }
+yarn-mappings = { module = "net.fabricmc:yarn", version = "1.19.3+build.5" }
 
 [plugins]
-fabric-loom = { id = "fabric-loom", version = "1.0.4" }
+fabric-loom = { id = "fabric-loom", version = "1.1.8" }
 
 shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }

@@ -40,7 +40,11 @@ public class ShootExpEffect implements GunEffect {
             float exp = state.ammo() > 0
                         ? (float)state.ticksSinceLastShot() / stats.shootSpeed()
                         : 0F; // TODO: fix for fire speed
-            playerView.getPlayer().ifPresent(player -> player.setExp(exp));
+
+            if (exp >= 0 && exp <= 1) {
+                playerView.getPlayer().ifPresent(player -> player.setExp(exp));
+            }
+
             currentlyActive = true;
         }
         else if (currentlyActive) {
