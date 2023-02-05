@@ -6,9 +6,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Model("zombies.map.shop.upgrade_path.linear")
 public class LinearUpgradePath implements UpgradePath {
@@ -21,11 +19,21 @@ public class LinearUpgradePath implements UpgradePath {
 
     @Override
     public @NotNull Optional<Key> nextUpgrade(@NotNull Key key) {
-        return Optional.ofNullable(data.upgrades.get(key));
+        Iterator<Key> iterator = data.upgrades.iterator();
+        while (iterator.hasNext()) {
+            Key upgrade = iterator.next();
+            if (upgrade.equals(key)) {
+                if (iterator.hasNext()) {
+                    return Optional.of(iterator.next());
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     @DataObject
-    public record Data(@NotNull Map<Key, Key> upgrades) {
+    public record Data(@NotNull List<Key> upgrades) {
 
     }
 }

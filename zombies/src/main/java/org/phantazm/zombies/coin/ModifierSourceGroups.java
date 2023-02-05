@@ -16,4 +16,6 @@ public final class ModifierSourceGroups {
     public static Key WINDOW_COIN_GAIN = Key.key(Namespaces.PHANTAZM, "coin_gain.window");
 
     public static Key DOOR_COIN_SPEND = Key.key(Namespaces.PHANTAZM, "coin_spend.door");
+
+    public static Key SHOP_COIN_SPEND = Key.key(Namespaces.PHANTAZM, "coin_spend.shop");
 }
