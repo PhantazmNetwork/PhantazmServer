@@ -20,16 +20,21 @@ public class AndPredicate extends PredicateBase<AndPredicate.Data> {
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
+        boolean failed = false;
         for (ShopPredicate predicate : predicates) {
             if (!predicate.canInteract(interaction)) {
-                return false;
+                failed = true;
+
+                if (data.shortCircuit) {
+                    return false;
+                }
             }
         }
 
-        return true;
+        return !failed;
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("predicates") List<String> paths) {
+    public record Data(boolean shortCircuit, @NotNull @ChildPath("predicates") List<String> paths) {
     }
 }

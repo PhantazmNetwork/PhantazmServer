@@ -20,16 +20,21 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
+        boolean succeeded = false;
         for (ShopPredicate predicate : predicates) {
             if (predicate.canInteract(interaction)) {
-                return true;
+                succeeded = true;
+
+                if (data.shortCircuit) {
+                    return true;
+                }
             }
         }
 
-        return false;
+        return succeeded;
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("predicates") List<String> paths) {
+    public record Data(boolean shortCircuit, @NotNull @ChildPath("predicates") List<String> paths) {
     }
 }

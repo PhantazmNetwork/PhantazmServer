@@ -23,7 +23,7 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
         int successes = 0;
         for (ShopPredicate predicate : predicates) {
             if (predicate.canInteract(interaction)) {
-                if (++successes > 1) {
+                if (++successes > 1 && data.shortCircuit) {
                     return false;
                 }
             }
@@ -33,6 +33,6 @@ public class XorPredicate extends PredicateBase<XorPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("predicates") List<String> paths) {
+    public record Data(boolean shortCircuit, @NotNull @ChildPath("predicates") List<String> paths) {
     }
 }
