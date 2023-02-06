@@ -63,7 +63,6 @@ Next, set the `proxySecret` field in `./run/server-1/server-config.toml`, and th
 
 ### Running
 
-
 The proxy will (by default) bind to `0.0.0.0:25565` and the server to `0.0.0.0:25567`, so you can connect through the proxy by adding the `localhost` server address in your Minecraft client.
 
 If you're using IntelliJ, you can launch this testing server using the `Run server` run configuration (the server will use unsafe mode), or the server and proxy at once using the `Run server + Velocity` configuration.
@@ -77,10 +76,17 @@ And the proxy: \
 `cd ./run/velocity` \
 `java -jar velocity.jar`
 
+This setup will generate the required binaries to run the server. Dependency artifacts are stored in the `./libs` folder in a hierarchical structure according to their group name. 
+
+### Configuration
+
+After running, Phantazm will generate two files, named `lobbies-config.toml` and `server-config.toml`, in the same directory as the `server.jar` file. You can use these to set up basic server parameters, such as the IP address and port to bind to. 
+
+Details and tutorials for how to configure more complicated aspects of Phantazm are included in the [wiki](https://github.com/PhantazmNetwork/PhantazmServer/wiki).
+
 ## Maintainers
 
-[Steank](https://github.com/Steanky) \
-[thamid](https://github.com/tahmid-23)
+[Steank](https://github.com/Steanky) 
 
 ## Contributing
 
