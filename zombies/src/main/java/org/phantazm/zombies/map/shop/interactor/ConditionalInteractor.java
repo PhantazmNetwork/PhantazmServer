@@ -36,10 +36,10 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
     }
 
     @DataObject
-    record Data(Evaluation evaluation,
-                @ChildPath("predicates") List<String> predicates,
-                @ChildPath("success_interactors") List<String> successInteractors,
-                @ChildPath("failure_interactors") List<String> failureInteractors) {
+    public record Data(@NotNull Evaluation evaluation,
+                       @NotNull @ChildPath("predicates") List<String> predicates,
+                       @NotNull @ChildPath("success_interactors") List<String> successInteractors,
+                       @NotNull @ChildPath("failure_interactors") List<String> failureInteractors) {
 
     }
 }

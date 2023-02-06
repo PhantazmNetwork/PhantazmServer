@@ -102,6 +102,7 @@ public final class ZombiesFeature {
         //ShopPredicate
         contextManager.registerElementClass(StaticCostPredicate.class);
         contextManager.registerElementClass(MapFlagPredicate.class);
+        contextManager.registerElementClass(InteractingPredicate.class);
         contextManager.registerElementClass(PlayerFlagPredicate.class);
         contextManager.registerElementClass(PlayerStatePredicate.class);
         contextManager.registerElementClass(UuidPredicate.class);
