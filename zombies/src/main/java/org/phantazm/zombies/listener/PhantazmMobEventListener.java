@@ -11,10 +11,8 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class PhantazmMobEventListener<TEvent extends EntityInstanceEvent> implements Consumer<TEvent> {
-
-    private final Instance instance;
-
-    private final MobStore mobStore;
+    protected final Instance instance;
+    protected final MobStore mobStore;
 
     public PhantazmMobEventListener(@NotNull Instance instance, @NotNull MobStore mobStore) {
         this.instance = Objects.requireNonNull(instance, "instance");

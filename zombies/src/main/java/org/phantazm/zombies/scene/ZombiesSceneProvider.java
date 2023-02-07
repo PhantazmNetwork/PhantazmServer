@@ -199,7 +199,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         EventNode<Event> childNode =
                 createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
-                        doorHandler, powerupHandler, mobStore);
+                        doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore);
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         SidebarModule sidebarModule =
@@ -273,13 +273,15 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private @NotNull EventNode<Event> createEventNode(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
             @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler,
-            @NotNull DoorHandler doorHandler, @NotNull PowerupHandler powerupHandler, @NotNull MobStore mobStore) {
+            @NotNull DoorHandler doorHandler, @NotNull BoundedTracker<Room> roomTracker,
+            @NotNull BoundedTracker<Window> windowTracker, @NotNull PowerupHandler powerupHandler,
+            @NotNull MobStore mobStore) {
         EventNode<Event> node = EventNode.all("phantazm_zombies_instance_{" + instance.getUniqueId() + "}");
 
         //entity events
         node.addListener(EntityDeathEvent.class,
-                new PhantazmMobDeathListener(keyParser, instance, mobStore, roundHandler::currentRound,
-                        powerupHandler));
+                new PhantazmMobDeathListener(keyParser, instance, mobStore, roundHandler::currentRound, powerupHandler,
+                        roomTracker, windowTracker));
         node.addListener(EntityDamageEvent.class, new PlayerDamageMobListener(instance, mobStore, zombiesPlayers));
 
         //player events
