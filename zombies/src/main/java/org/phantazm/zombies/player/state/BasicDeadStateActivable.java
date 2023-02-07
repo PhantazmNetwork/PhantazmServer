@@ -14,15 +14,10 @@ import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import java.util.Objects;
 
 public class BasicDeadStateActivable implements Activable {
-
     private final DeadPlayerStateContext context;
-
     private final Instance instance;
-
     private final PlayerView playerView;
-
     private final ZombiesPlayerMeta meta;
-
     private final Sidebar sidebar;
 
     public BasicDeadStateActivable(@NotNull DeadPlayerStateContext context, @NotNull Instance instance,

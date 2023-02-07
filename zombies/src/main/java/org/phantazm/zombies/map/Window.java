@@ -4,6 +4,7 @@ import com.github.steanky.vector.Bounds3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jglrxavpok.hephaistos.nbt.NBT;
@@ -45,6 +46,7 @@ public class Window implements Bounded {
     private final Object sync;
 
     private volatile int index;
+    private volatile long lastBreakTime;
 
     /**
      * Creates a new (fully-repaired) window.
@@ -273,6 +275,18 @@ public class Window implements Bounded {
      */
     public @NotNull Point getCenter() {
         return center;
+    }
+
+    public @NotNull Object sync() {
+        return sync;
+    }
+
+    public void setLastBreakTime(long time) {
+        this.lastBreakTime = time;
+    }
+
+    public long getLastBreakTime() {
+        return lastBreakTime;
     }
 
     private Point indexToCoordinate(int index) {
