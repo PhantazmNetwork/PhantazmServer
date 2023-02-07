@@ -41,6 +41,7 @@ public class MeleeAttackGoal implements GoalCreator {
         private final Collection<Skill> skills;
         private final LastHitSelector<LivingEntity> lastHitSelector;
         private final PhantazmMob mob;
+
         private long lastAttackTime;
 
         @FactoryMethod

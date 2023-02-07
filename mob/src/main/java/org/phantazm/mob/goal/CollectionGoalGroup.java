@@ -1,11 +1,11 @@
 package org.phantazm.mob.goal;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public class CollectionGoalGroup implements GoalGroup {
     private final ProximaGoal[] goals;
@@ -15,82 +15,55 @@ public class CollectionGoalGroup implements GoalGroup {
 
     public CollectionGoalGroup(@NotNull Collection<ProximaGoal> goals) {
         this.goals = goals.toArray(ProximaGoal[]::new);
-        this.activeGoalIndex = 0;
     }
 
     @Override
     public void tick(long time) {
         if (activeGoal == null) {
-            ProximaGoal target = null;
-            int targetIndex = 0;
-
             for (int i = 0; i < goals.length; i++) {
                 ProximaGoal goal = goals[i];
-
-                if (!goal.shouldStart()) {
-                    break;
-                }
-
-                target = goal;
-                targetIndex = i;
-            }
-
-            if (target != null) {
-                activeGoal = target;
-                activeGoalIndex = targetIndex;
-
-                target.start();
-            }
-
-            return;
-        }
-
-        ProximaGoal target = null;
-        int targetIndex = 0;
-        for (int i = activeGoalIndex + 1; i < goals.length; i++) {
-            ProximaGoal goal = goals[i];
-
-            if (!goal.shouldStart()) {
-                break;
-            }
-
-            target = goal;
-            targetIndex = i;
-        }
-
-        if (target != null) {
-            activeGoal.end();
-
-            activeGoal = target;
-            activeGoalIndex = targetIndex;
-
-            target.start();
-            return;
-        }
-
-        if (activeGoal.shouldEnd()) {
-            for (int i = activeGoalIndex - 1; i >= 0 && i < goals.length; i--) {
-                ProximaGoal goal = goals[i];
-
                 if (goal.shouldStart()) {
-                    target = goal;
-                    targetIndex = i;
+                    goal.start();
+                    activeGoal = goal;
+                    activeGoalIndex = i;
                     break;
                 }
             }
 
-            activeGoal.end();
-
-            activeGoal = target;
-            activeGoalIndex = targetIndex;
             return;
         }
 
         activeGoal.tick(time);
+
+        int nextIndex = activeGoalIndex + 1;
+        if (nextIndex < goals.length) {
+            ProximaGoal nextGoal = goals[nextIndex];
+            if (nextGoal.shouldStart()) {
+                activeGoal.end();
+
+                nextGoal.start();
+                activeGoal = nextGoal;
+                activeGoalIndex = nextIndex;
+                return;
+            }
+        }
+
+        if (activeGoal.shouldEnd()) {
+            activeGoal.end();
+            for (int i = activeGoalIndex - 1; i >= 0 && i < goals.length; i--) {
+                ProximaGoal goal = goals[i];
+                if (goal.shouldStart()) {
+                    goal.start();
+                    activeGoal = goal;
+                    activeGoalIndex = i;
+                    break;
+                }
+            }
+        }
     }
 
     @Override
-    public @Nullable ProximaGoal currentGoal() {
-        return activeGoal;
+    public @NotNull Optional<ProximaGoal> currentGoal() {
+        return Optional.ofNullable(activeGoal);
     }
 }

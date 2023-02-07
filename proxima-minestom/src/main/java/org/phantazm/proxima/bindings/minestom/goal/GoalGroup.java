@@ -1,8 +1,10 @@
 package org.phantazm.proxima.bindings.minestom.goal;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 
+import java.util.Optional;
+
 public interface GoalGroup extends Tickable {
-    @Nullable ProximaGoal currentGoal();
+    @NotNull Optional<ProximaGoal> currentGoal();
 }
