@@ -1,5 +1,7 @@
 package org.phantazm.zombies.map.handler;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -17,6 +19,7 @@ import java.util.*;
 
 public class BasicWindowHandler implements WindowHandler {
     private static final int POSITION_CHECK_INTERVAL = 200;
+    private static final int UNREPAIRABLE_BREAK_DELAY = 1000;
 
     private static class RepairOperation {
         private final ZombiesPlayer zombiesPlayer;
@@ -114,6 +117,14 @@ public class BasicWindowHandler implements WindowHandler {
             if (elapsedTicks >= repairInterval) {
                 Window targetWindow = repairOperation.window;
                 if (!targetWindow.isFullyRepaired()) {
+                    long timeElapsedSinceLastBroken = time - targetWindow.getLastBreakTime();
+                    if (timeElapsedSinceLastBroken < UNREPAIRABLE_BREAK_DELAY) {
+                        zombiesPlayer.sendMessage(Component.text("You can't repair windows while enemies are nearby!")
+                                .color(NamedTextColor.RED));
+                        repairOperation.lastRepairTime = time;
+                        return;
+                    }
+
                     int repaired = targetWindow.updateIndex(
                             targetWindow.getIndex() + zombiesPlayer.module().getMeta().getWindowRepairAmount());
 
