@@ -8,6 +8,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.spawner.MobSpawner;
 
 import java.util.Objects;
@@ -15,36 +16,28 @@ import java.util.Objects;
 @Model("mob.skill.duplicate_self")
 @Cache(false)
 public class DuplicateSelfSkill implements Skill {
-
     private final MobStore mobStore;
-
     private final MobSpawner spawner;
 
-    private final MobModel model;
-
-    private final Entity entity;
-
     @FactoryMethod
-    public DuplicateSelfSkill(@NotNull MobStore mobStore, @NotNull MobSpawner spawner, @NotNull MobModel model,
-            @NotNull Entity entity) {
+    public DuplicateSelfSkill(@NotNull MobStore mobStore, @NotNull MobSpawner spawner) {
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.spawner = Objects.requireNonNull(spawner, "spawner");
-        this.model = Objects.requireNonNull(model, "model");
-        this.entity = Objects.requireNonNull(entity, "entity");
     }
 
     @Override
-    public void use() {
+    public void use(@NotNull PhantazmMob self) {
+        Entity entity = self.entity();
         Instance instance = entity.getInstance();
         if (instance == null) {
             return;
         }
 
-        spawner.spawn(instance, entity.getPosition(), mobStore, model);
+        spawner.spawn(instance, entity.getPosition(), mobStore, self.model());
     }
 
     @Override
-    public void tick(long time) {
+    public void tick(long time, @NotNull PhantazmMob self) {
 
     }
 }

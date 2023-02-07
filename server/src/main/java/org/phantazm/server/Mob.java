@@ -24,10 +24,7 @@ import org.phantazm.core.config.processor.ItemStackConfigProcessors;
 import org.phantazm.core.config.processor.MinestomConfigProcessors;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.config.MobModelConfigProcessor;
-import org.phantazm.mob.goal.ChargeAtEntityGoal;
-import org.phantazm.mob.goal.FollowEntityGoal;
-import org.phantazm.mob.goal.MeleeAttackGoal;
-import org.phantazm.mob.goal.UseSkillGoal;
+import org.phantazm.mob.goal.*;
 import org.phantazm.mob.skill.*;
 import org.phantazm.mob.target.EntitySelector;
 import org.phantazm.mob.target.LastHitEntitySelector;
@@ -118,6 +115,9 @@ public final class Mob {
 
     private static void registerElementClasses(@NotNull ContextManager contextManager) {
         LOGGER.info("Registering Mob element classes...");
+
+        //goal appliers
+        contextManager.registerElementClass(CollectionGoalApplier.class);
 
         //mob goals
         contextManager.registerElementClass(FollowEntityGoal.class);

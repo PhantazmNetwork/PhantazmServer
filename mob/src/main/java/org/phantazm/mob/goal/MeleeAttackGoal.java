@@ -7,6 +7,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.mob.target.LastHitSelector;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
@@ -16,65 +17,85 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Model("mob.goal.melee_attack")
-@Cache(false)
-public class MeleeAttackGoal implements ProximaGoal {
+@Cache
+public class MeleeAttackGoal implements GoalCreator {
     private final Data data;
     private final Collection<Skill> skills;
     private final LastHitSelector<LivingEntity> lastHitSelector;
-    private final ProximaEntity entity;
-    private long lastAttackTime = 0L;
 
     @FactoryMethod
     public MeleeAttackGoal(@NotNull Data data, @NotNull @Child("skills") Collection<Skill> skills,
-            @NotNull @Child("last_hit_selector") LastHitSelector<LivingEntity> lastHitSelector,
-            @NotNull ProximaEntity entity) {
+            @NotNull @Child("last_hit_selector") LastHitSelector<LivingEntity> lastHitSelector) {
         this.data = Objects.requireNonNull(data, "data");
         this.skills = Objects.requireNonNull(skills, "skills");
         this.lastHitSelector = Objects.requireNonNull(lastHitSelector, "lastHitSelector");
-        this.entity = Objects.requireNonNull(entity, "entity");
     }
 
     @Override
-    public boolean shouldStart() {
-        if ((System.currentTimeMillis() - lastAttackTime) / MinecraftServer.TICK_MS >= data.cooldown()) {
-            Entity target = entity.getTargetEntity();
+    public @NotNull ProximaGoal create(@NotNull PhantazmMob mob) {
+        return new Goal(data, skills, lastHitSelector, mob);
+    }
+
+    private static class Goal implements ProximaGoal {
+        private final Data data;
+        private final Collection<Skill> skills;
+        private final LastHitSelector<LivingEntity> lastHitSelector;
+        private final PhantazmMob mob;
+        private long lastAttackTime;
+
+        @FactoryMethod
+        public Goal(@NotNull Data data, @NotNull Collection<Skill> skills,
+                @NotNull LastHitSelector<LivingEntity> lastHitSelector, @NotNull PhantazmMob mob) {
+            this.data = Objects.requireNonNull(data, "data");
+            this.skills = Objects.requireNonNull(skills, "skills");
+            this.lastHitSelector = Objects.requireNonNull(lastHitSelector, "lastHitSelector");
+            this.mob = Objects.requireNonNull(mob, "mob");
+        }
+
+        @Override
+        public boolean shouldStart() {
+            ProximaEntity self = mob.entity();
+            if ((System.currentTimeMillis() - lastAttackTime) / MinecraftServer.TICK_MS >= data.cooldown()) {
+                Entity target = self.getTargetEntity();
+                if (target == null) {
+                    return false;
+                }
+
+                return self.getDistanceSquared(target) <= data.range * data.range;
+            }
+
+            return false;
+        }
+
+        @Override
+        public void start() {
+            ProximaEntity self = mob.entity();
+            Entity target = self.getTargetEntity();
             if (target == null) {
-                return false;
+                return;
             }
 
-            return entity.getDistanceSquared(target) <= data.range * data.range;
-        }
+            self.attack(target, data.swingHand);
+            if (target instanceof LivingEntity livingEntity) {
+                Pos pos = self.getPosition();
+                livingEntity.damage(DamageType.fromEntity(self), data.damageAmount);
+                livingEntity.takeKnockback(0.4F * data.knockbackStrength, Math.sin(pos.yaw() * (Math.PI / 180)),
+                        -Math.cos(pos.yaw() * (Math.PI / 180)));
 
-        return false;
-    }
+                lastHitSelector.setLastHit(livingEntity);
 
-    @Override
-    public void start() {
-        Entity target = entity.getTargetEntity();
-        if (target == null) {
-            return;
-        }
-
-        entity.attack(target, data.swingHand);
-        if (target instanceof LivingEntity livingEntity) {
-            Pos pos = entity.getPosition();
-            livingEntity.damage(DamageType.fromEntity(entity), data.damageAmount);
-            livingEntity.takeKnockback(0.4F * data.knockbackStrength, Math.sin(pos.yaw() * (Math.PI / 180)),
-                    -Math.cos(pos.yaw() * (Math.PI / 180)));
-
-            lastHitSelector.setLastHit(livingEntity);
-
-            for (Skill skill : skills) {
-                skill.use();
+                for (Skill skill : skills) {
+                    skill.use(mob);
+                }
             }
+
+            lastAttackTime = System.currentTimeMillis();
         }
 
-        lastAttackTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public boolean shouldEnd() {
-        return true;
+        @Override
+        public boolean shouldEnd() {
+            return true;
+        }
     }
 
     @DataObject

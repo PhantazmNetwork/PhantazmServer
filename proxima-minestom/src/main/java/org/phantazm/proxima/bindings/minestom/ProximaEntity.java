@@ -12,7 +12,6 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.utils.time.TimeUnit;
-import org.antlr.v4.runtime.misc.Predicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.VecUtils;

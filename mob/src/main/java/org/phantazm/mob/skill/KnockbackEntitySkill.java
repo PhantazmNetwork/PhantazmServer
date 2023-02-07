@@ -5,6 +5,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.target.TargetSelector;
 
 import java.util.Objects;
@@ -12,28 +13,25 @@ import java.util.Objects;
 @Model("mob.skill.knockback")
 @Cache(false)
 public class KnockbackEntitySkill implements Skill {
-
     private final Data data;
-    private final Entity user;
     private final TargetSelector<? extends LivingEntity> selector;
 
     @FactoryMethod
-    public KnockbackEntitySkill(@NotNull Data data, @NotNull Entity user,
+    public KnockbackEntitySkill(@NotNull Data data,
             @NotNull @Child("selector") TargetSelector<? extends LivingEntity> selector) {
         this.data = Objects.requireNonNull(data, "data");
-        this.user = Objects.requireNonNull(user, "user");
         this.selector = Objects.requireNonNull(selector, "selector");
     }
 
     @Override
-    public void tick(long time) {
+    public void tick(long time, @NotNull PhantazmMob self) {
 
     }
 
     @Override
-    public void use() {
-        selector.selectTarget().ifPresent(livingEntity -> {
-            Pos position = user.getPosition();
+    public void use(@NotNull PhantazmMob self) {
+        selector.selectTarget(self).ifPresent(livingEntity -> {
+            Pos position = self.entity().getPosition();
             double yaw = Math.toRadians(position.yaw());
 
             livingEntity.takeKnockback(data.knockback(), Math.sin(yaw), -Math.cos(yaw));

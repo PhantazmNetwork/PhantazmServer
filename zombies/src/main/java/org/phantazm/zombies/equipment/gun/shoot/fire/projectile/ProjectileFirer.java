@@ -14,10 +14,10 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob.goal.CollectionGoalGroup;
 import org.phantazm.mob.goal.ProjectileMovementGoal;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
-import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -97,7 +97,7 @@ public class ProjectileFirer implements Firer {
             endSelector.getEnd(start).ifPresent(end -> {
                 PhantazmMob mob = spawner.spawn(instance, start, mobStore, data.model());
                 ProximaEntity neuralEntity = mob.entity();
-                neuralEntity.addGoalGroup(new GoalGroup(Collections.singleton(
+                neuralEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
                         new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
                 neuralEntity.setNoGravity(!data.hasGravity());
                 mobStore.registerMob(mob);

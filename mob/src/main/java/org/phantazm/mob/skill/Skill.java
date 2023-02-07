@@ -1,12 +1,15 @@
 package org.phantazm.mob.skill;
 
-import org.phantazm.commons.Tickable;
+import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 
-public interface Skill extends Tickable {
+public interface Skill {
 
     /**
      * Uses the skill.
      */
-    void use();
+    void use(@NotNull PhantazmMob self);
+
+    void tick(long time, @NotNull PhantazmMob self);
 
 }

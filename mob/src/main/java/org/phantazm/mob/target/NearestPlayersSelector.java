@@ -20,9 +20,8 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
      * Creates a {@link NearestPlayersSelector}.
      */
     @FactoryMethod
-    public NearestPlayersSelector(@NotNull Data data, @NotNull Entity entity,
-            @NotNull @Child("validator") TargetValidator targetValidator) {
-        super(entity, data.range(), data.targetLimit(), targetValidator);
+    public NearestPlayersSelector(@NotNull Data data, @NotNull @Child("validator") TargetValidator targetValidator) {
+        super(data.range(), data.targetLimit(), targetValidator);
     }
 
     @Override
@@ -35,7 +34,7 @@ public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("validator") String targetValidatorPath, double range, int targetLimit) {
+    public record Data(double range, int targetLimit, @NotNull @ChildPath("validator") String targetValidatorPath) {
 
     }
 

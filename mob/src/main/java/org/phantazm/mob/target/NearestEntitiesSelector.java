@@ -3,6 +3,7 @@ package org.phantazm.mob.target;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.validator.TargetValidator;
 
 import java.util.*;
@@ -13,13 +14,8 @@ import java.util.*;
  * @param <TTarget>> A mapped type of the target {@link Entity}
  */
 public abstract class NearestEntitiesSelector<TTarget extends Entity> implements TargetSelector<Iterable<TTarget>> {
-
-    private final Entity entity;
-
     private final double range;
-
     private final int targetLimit;
-
     private final TargetValidator targetValidator;
 
     /**
@@ -28,16 +24,15 @@ public abstract class NearestEntitiesSelector<TTarget extends Entity> implements
      * @param range       The euclidean distance range of the selector
      * @param targetLimit The maximum number of targets to select
      */
-    public NearestEntitiesSelector(@NotNull Entity entity, double range, int targetLimit,
-            @NotNull TargetValidator targetValidator) {
-        this.entity = Objects.requireNonNull(entity, "entity");
+    public NearestEntitiesSelector(double range, int targetLimit, @NotNull TargetValidator targetValidator) {
         this.range = range;
         this.targetLimit = targetLimit;
         this.targetValidator = Objects.requireNonNull(targetValidator, "targetValidator");
     }
 
     @Override
-    public @NotNull Optional<Iterable<TTarget>> selectTarget() {
+    public @NotNull Optional<Iterable<TTarget>> selectTarget(@NotNull PhantazmMob self) {
+        Entity entity = self.entity();
         Instance instance = entity.getInstance();
         if (instance == null) {
             return Optional.empty();
@@ -46,8 +41,8 @@ public abstract class NearestEntitiesSelector<TTarget extends Entity> implements
         Collection<Entity> entities = instance.getNearbyEntities(entity.getPosition(), range);
         Map<UUID, TTarget> targetMap = new HashMap<>(entities.size());
         List<Entity> potentialTargets = new ArrayList<>(entities.size());
-        for (Entity entity : entities) {
-            Optional<TTarget> targetOptional = mapTarget(entity);
+        for (Entity nearby : entities) {
+            Optional<TTarget> targetOptional = mapTarget(nearby);
             if (targetOptional.isEmpty()) {
                 continue;
             }
@@ -57,11 +52,11 @@ public abstract class NearestEntitiesSelector<TTarget extends Entity> implements
                 continue;
             }
 
-            targetMap.put(entity.getUuid(), targetOptional.get());
-            potentialTargets.add(entity);
+            targetMap.put(nearby.getUuid(), targetOptional.get());
+            potentialTargets.add(nearby);
         }
 
-        potentialTargets.sort(Comparator.comparingDouble(entity -> entity.getDistanceSquared(this.entity)));
+        potentialTargets.sort(Comparator.comparingDouble(e -> e.getDistanceSquared(entity)));
 
         int targetCount = Math.min(potentialTargets.size(), targetLimit);
         Collection<TTarget> targets = new ArrayList<>(targetCount);

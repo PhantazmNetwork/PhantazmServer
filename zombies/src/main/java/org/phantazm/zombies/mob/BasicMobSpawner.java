@@ -3,7 +3,6 @@ package org.phantazm.zombies.mob;
 import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
-import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
@@ -21,7 +20,6 @@ import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.instance.Instance;
@@ -33,13 +31,12 @@ import org.phantazm.core.ElementUtils;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob.goal.GoalApplier;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.Spawner;
-import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 import org.phantazm.zombies.map.objects.MapObjects;
-import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,20 +53,17 @@ import java.util.function.Supplier;
  */
 public class BasicMobSpawner implements MobSpawner {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMobSpawner.class);
-
     private static final Consumer<? super ElementException> GOAL_HANDLER = ElementUtils.logging(LOGGER, "mob goal");
     private static final Consumer<? super ElementException> TRIGGER_HANDLER =
             ElementUtils.logging(LOGGER, "mob trigger");
 
+    private static final ElementPath GOAL_APPLIERS_PATH = ElementPath.of("goalAppliers");
+    private static final ElementPath TRIGGERS_PATH = ElementPath.of("triggers");
+
     private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
-
     private final Spawner proximaSpawner;
-
-    private final ContextManager contextManager;
-
     private final KeyParser keyParser;
-
-    private final Supplier<? extends MapObjects> mapObjects;
+    private final DependencyProvider mobDependencyProvider;
 
     /**
      * Creates a new {@link BasicMobSpawner}.
@@ -77,13 +71,13 @@ public class BasicMobSpawner implements MobSpawner {
      * @param proximaSpawner The {@link Spawner} to spawn backing {@link ProximaEntity}s
      */
     public BasicMobSpawner(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
-            @NotNull Spawner proximaSpawner, @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
-            @NotNull Supplier<? extends MapObjects> mapObjects) {
+            @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser,
+            @NotNull Supplier<? extends MapObjects> mapObjects, @NotNull MobStore mobStore) {
         this.processorMap = Map.copyOf(processorMap);
         this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
-        this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+
+        this.mobDependencyProvider = new ModuleDependencyProvider(keyParser, new Module(this, mobStore, mapObjects));
     }
 
     @Override
@@ -96,14 +90,11 @@ public class BasicMobSpawner implements MobSpawner {
         setAttributes(proximaEntity, model);
         setHealth(proximaEntity);
 
-        Module module = new Module(this, mobStore, model, proximaEntity, mapObjects);
-        DependencyProvider dependencyProvider = new ModuleDependencyProvider(keyParser, module);
-        ElementContext context = contextManager.makeContext(model.getNode());
-
-        addGoals(context, dependencyProvider, proximaEntity);
-        Map<Key, Collection<Skill>> triggers = createTriggers(context, dependencyProvider);
+        Map<Key, Collection<Skill>> triggers = createTriggers(model.getContext(), mobDependencyProvider);
 
         PhantazmMob mob = new PhantazmMob(model, proximaEntity, triggers);
+        addGoals(model.getContext(), mobDependencyProvider, mob);
+
         mobStore.registerMob(mob);
         return mob;
     }
@@ -183,12 +174,12 @@ public class BasicMobSpawner implements MobSpawner {
     }
 
     private void addGoals(@NotNull ElementContext context, @NotNull DependencyProvider dependencyProvider,
-            @NotNull ProximaEntity entity) {
-        Collection<GoalGroup> goalGroups =
-                context.provideCollection(ElementPath.of("goalGroups"), dependencyProvider, GOAL_HANDLER);
+            @NotNull PhantazmMob mob) {
+        Collection<GoalApplier> goalAppliers =
+                context.provideCollection(GOAL_APPLIERS_PATH, dependencyProvider, GOAL_HANDLER);
 
-        for (GoalGroup group : goalGroups) {
-            entity.addGoalGroup(group);
+        for (GoalApplier goalApplier : goalAppliers) {
+            goalApplier.apply(mob);
         }
     }
 
@@ -204,8 +195,8 @@ public class BasicMobSpawner implements MobSpawner {
             }
 
             Key key = keyParser.parseKey(stringKey);
-            skills.put(key, context.provideCollection(ElementPath.of("triggers").append(stringKey), dependencyProvider,
-                    TRIGGER_HANDLER));
+            skills.put(key,
+                    context.provideCollection(TRIGGERS_PATH.append(stringKey), dependencyProvider, TRIGGER_HANDLER));
         }
 
         return skills;
@@ -214,23 +205,14 @@ public class BasicMobSpawner implements MobSpawner {
     @Depend
     @Memoize
     public static class Module implements DependencyModule {
-
         private final MobSpawner spawner;
-
         private final MobStore mobStore;
-
-        private final MobModel model;
-
-        private final ProximaEntity entity;
-
         private final Supplier<? extends MapObjects> mapObjects;
 
-        private Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull MobModel model,
-                @NotNull ProximaEntity entity, @NotNull Supplier<? extends MapObjects> mapObjects) {
+        private Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore,
+                @NotNull Supplier<? extends MapObjects> mapObjects) {
             this.spawner = Objects.requireNonNull(spawner, "spawner");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-            this.model = Objects.requireNonNull(model, "model");
-            this.entity = Objects.requireNonNull(entity, "entity");
             this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         }
 
@@ -240,18 +222,6 @@ public class BasicMobSpawner implements MobSpawner {
 
         public @NotNull MobStore getMobStore() {
             return mobStore;
-        }
-
-        public @NotNull MobModel getModel() {
-            return model;
-        }
-
-        public @NotNull Entity getEntity() {
-            return entity;
-        }
-
-        public @NotNull ProximaEntity getProximaEntity() {
-            return entity;
         }
 
         public @NotNull Supplier<? extends MapObjects> mapObjects() {

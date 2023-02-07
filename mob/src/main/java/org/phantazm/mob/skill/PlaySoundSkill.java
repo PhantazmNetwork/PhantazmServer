@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.target.TargetSelector;
 
 import java.util.Objects;
@@ -14,7 +15,6 @@ import java.util.Objects;
 @Model("mob.skill.play_sound")
 @Cache(false)
 public class PlaySoundSkill implements Skill {
-
     private final Data data;
     private final TargetSelector<? extends Audience> selector;
 
@@ -30,8 +30,8 @@ public class PlaySoundSkill implements Skill {
     }
 
     @Override
-    public void use() {
-        selector.selectTarget().ifPresent(audience -> {
+    public void use(@NotNull PhantazmMob self) {
+        selector.selectTarget(self).ifPresent(audience -> {
             if (data.followAudience()) {
                 audience.playSound(data.sound(), Sound.Emitter.self());
             }
@@ -42,7 +42,7 @@ public class PlaySoundSkill implements Skill {
     }
 
     @Override
-    public void tick(long time) {
+    public void tick(long time, @NotNull PhantazmMob self) {
 
     }
 

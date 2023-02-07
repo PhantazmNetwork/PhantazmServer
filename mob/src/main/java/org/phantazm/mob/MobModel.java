@@ -1,5 +1,6 @@
 package org.phantazm.mob;
 
+import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMaps;
@@ -12,51 +13,32 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.mob.goal.GoalCreator;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A model for the configuration of a {@link PhantazmMob}.
  */
 public class MobModel implements Keyed {
-
     private final Key key;
-
     private final EntityType entityType;
-
     private final Pathfinding.Factory factory;
-
-    private final ConfigNode node;
-
+    private final ElementContext nodeContext;
     private final ConfigNode metaNode;
-
     private final Component displayName;
-
     private final Map<EquipmentSlot, ItemStack> equipment;
-
     private final Object2FloatMap<String> attributes;
 
-    /**
-     * Creates a new mob model.
-     *
-     * @param key         The unique {@link Key} used to identify the mob
-     * @param entityType  The type of entity this model represents
-     * @param factory     The {@link Pathfinding.Factory} used to define the mob's navigation
-     * @param displayName {@link Skill} The mob's display name, or null if it should not have one
-     * @param equipment   The mob's equipment
-     * @param attributes  The mob's attributes
-     */
     public MobModel(@NotNull Key key, @NotNull EntityType entityType, @NotNull Pathfinding.Factory factory,
-            @NotNull ConfigNode node, @NotNull ConfigNode metaNode, @Nullable Component displayName,
+            @NotNull ElementContext nodeContext, @NotNull ConfigNode metaNode, @Nullable Component displayName,
             @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
         this.key = Objects.requireNonNull(key, "key");
         this.entityType = Objects.requireNonNull(entityType, "entityType");
         this.factory = Objects.requireNonNull(factory, "factory");
-        this.node = Objects.requireNonNull(node, "node");
+        this.nodeContext = Objects.requireNonNull(nodeContext, "nodeContext");
         this.metaNode = metaNode.immutableCopy();
         this.displayName = displayName;
         this.equipment = Map.copyOf(Objects.requireNonNull(equipment, "equipment"));
@@ -86,8 +68,8 @@ public class MobModel implements Keyed {
         return factory;
     }
 
-    public @NotNull ConfigNode getNode() {
-        return node;
+    public @NotNull ElementContext getContext() {
+        return nodeContext;
     }
 
     public @NotNull ConfigNode getMetaNode() {

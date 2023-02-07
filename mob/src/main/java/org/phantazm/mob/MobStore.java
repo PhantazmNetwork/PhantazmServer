@@ -14,8 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A store of {@link PhantazmMob}s. Mobs should be registered to the store and events
- * pertaining to mobs should be handled by the store.
+ * A store of {@link PhantazmMob}s.
  */
 public class MobStore implements Tickable {
     private final Map<UUID, PhantazmMob> uuidToMob = new ConcurrentHashMap<>();
@@ -32,7 +31,7 @@ public class MobStore implements Tickable {
             Collection<Skill> triggerInstance = mob.triggers().get(key);
             if (triggerInstance != null) {
                 for (Skill skill : triggerInstance) {
-                    skill.use();
+                    skill.use(mob);
                 }
             }
         }
@@ -89,7 +88,7 @@ public class MobStore implements Tickable {
         for (PhantazmMob mob : uuidToMob.values()) {
             for (Collection<Skill> triggerSkills : mob.triggers().values()) {
                 for (Skill skill : triggerSkills) {
-                    skill.tick(time);
+                    skill.tick(time, mob);
                 }
             }
         }

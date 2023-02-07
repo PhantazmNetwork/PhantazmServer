@@ -1,10 +1,10 @@
 package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.target.TargetSelector;
 
 import java.util.Collection;
@@ -18,26 +18,24 @@ public class BleedEntitiesSkill implements Skill {
 
     private final Collection<BleedContext> bleeding = new LinkedList<>();
     private final Data data;
-    private final DamageType damageType;
     private final TargetSelector<? extends LivingEntity> selector;
 
     @FactoryMethod
-    public BleedEntitiesSkill(@NotNull Data data, @NotNull Entity user,
+    public BleedEntitiesSkill(@NotNull Data data,
             @NotNull @Child("selector") TargetSelector<? extends LivingEntity> selector) {
         this.data = Objects.requireNonNull(data, "data");
-        this.damageType = DamageType.fromEntity(Objects.requireNonNull(user, "user"));
         this.selector = Objects.requireNonNull(selector, "selector");
     }
 
     @Override
-    public void use() {
-        selector.selectTarget().ifPresent(livingEntity -> {
+    public void use(@NotNull PhantazmMob self) {
+        selector.selectTarget(self).ifPresent(livingEntity -> {
             bleeding.add(new BleedContext(livingEntity, 0L));
         });
     }
 
     @Override
-    public void tick(long time) {
+    public void tick(long time, @NotNull PhantazmMob self) {
         Iterator<BleedContext> contextIterator = bleeding.iterator();
         if (!contextIterator.hasNext()) {
             return;
@@ -54,7 +52,7 @@ public class BleedEntitiesSkill implements Skill {
             long ticksSinceStart = bleedContext.ticksSinceStart();
             bleedContext.setTicksSinceStart(ticksSinceStart + 1);
             if (ticksSinceStart % data.bleedInterval() == 0) {
-                livingEntity.damage(damageType, data.bleedDamage());
+                livingEntity.damage(DamageType.fromEntity(self.entity()), data.bleedDamage());
                 contextIterator.remove();
             }
             if (ticksSinceStart >= data.bleedTime()) {

@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -13,18 +14,15 @@ import java.util.Optional;
  * A {@link TargetSelector} that selects itself.
  */
 @Model("mob.selector.entity")
-@Cache(false)
+@Cache
 public class EntitySelector implements TargetSelector<Entity> {
-
-    private final Entity entity;
-
     @FactoryMethod
-    public EntitySelector(@NotNull Entity entity) {
-        this.entity = Objects.requireNonNull(entity, "entity");
+    public EntitySelector() {
+
     }
 
     @Override
-    public @NotNull Optional<Entity> selectTarget() {
-        return Optional.of(entity);
+    public @NotNull Optional<Entity> selectTarget(@NotNull PhantazmMob self) {
+        return Optional.of(self.entity());
     }
 }

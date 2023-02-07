@@ -18,6 +18,6 @@ public interface TargetSelector<TTarget> {
      *
      * @return An {@link Optional} of the target that is empty if no target could be found
      */
-    @NotNull Optional<TTarget> selectTarget();
+    @NotNull Optional<TTarget> selectTarget(@NotNull PhantazmMob self);
 
 }

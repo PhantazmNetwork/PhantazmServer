@@ -11,7 +11,6 @@ import org.phantazm.proxima.bindings.minestom.GroundPathfindingFactory;
 import org.phantazm.proxima.bindings.minestom.InstanceSettingsFunction;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
-import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 import org.phantazm.server.config.server.PathfinderConfig;
 
 import java.util.concurrent.ForkJoinPool;
@@ -45,7 +44,6 @@ public final class Proxima {
     }
 
     private static void registerElementClasses(@NotNull ContextManager contextManager) {
-        contextManager.registerElementClass(GoalGroup.class);
         contextManager.registerElementClass(GroundPathfindingFactory.class);
     }
 

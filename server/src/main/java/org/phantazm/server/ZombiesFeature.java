@@ -86,7 +86,7 @@ public final class ZombiesFeature {
         ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec));
         ZombiesFeature.powerups = loadFeature("powerup", new FileSystemPowerupLoader(POWERUPS_FOLDER, codec));
 
-        ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, contextManager, keyParser);
+        ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
     }
 
     private static void registerElementClasses(ContextManager contextManager) {

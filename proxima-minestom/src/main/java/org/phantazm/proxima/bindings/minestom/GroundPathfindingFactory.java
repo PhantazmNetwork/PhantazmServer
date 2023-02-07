@@ -1,5 +1,6 @@
 package org.phantazm.proxima.bindings.minestom;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 @Model("proxima.path_settings.ground")
+@Cache
 public class GroundPathfindingFactory implements Pathfinding.Factory {
     private final Data data;
 

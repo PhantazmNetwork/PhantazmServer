@@ -1,6 +1,7 @@
 package org.phantazm.mob.target;
 
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -34,8 +35,8 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
     }
 
     @Override
-    public @NotNull Optional<TTo> selectTarget() {
-        return delegate.selectTarget().map(this::map);
+    public @NotNull Optional<TTo> selectTarget(@NotNull PhantazmMob self) {
+        return delegate.selectTarget(self).map(this::map);
     }
 
     /**

@@ -104,7 +104,8 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Object2FloatMap<String> attributes =
                 ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
 
-        return new MobModel(key, entityType, factory, node, metaNode, displayName, equipment, attributes);
+        return new MobModel(key, entityType, factory, contextManager.makeContext(node), metaNode, displayName,
+                equipment, attributes);
     }
 
     @Override
@@ -138,7 +139,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         element.put("displayName", displayNameElement);
         element.put("equipment", equipmentNode);
         element.put("attributes", attributes);
-        for (ConfigEntry entry : model.getNode().entryCollection()) {
+        for (ConfigEntry entry : model.getContext().root().entryCollection()) {
             if (!element.containsKey(entry.getKey())) {
                 element.put(entry.getKey(), entry.getValue());
             }
