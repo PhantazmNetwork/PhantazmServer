@@ -223,7 +223,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         eventNode.addChild(childNode);
         contexts.put(scene, new SceneContext(childNode));
 
-
         InstanceSpawner.InstanceSettings instanceSettings = instanceSpaceFunction.apply(instance);
         instanceSettings.spaceHandler().space().setOverrideFunction((x, y, z) -> {
             if (windowHandler.tracker().atPoint(x, y, z).isPresent()) {

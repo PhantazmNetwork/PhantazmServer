@@ -20,31 +20,40 @@ public class CollectionGoalGroup implements GoalGroup {
     @Override
     public void tick(long time) {
         if (activeGoal == null) {
+            ProximaGoal highestStart = null;
+            int highestStartIndex = 0;
             for (int i = 0; i < goals.length; i++) {
                 ProximaGoal goal = goals[i];
                 if (goal.shouldStart()) {
-                    goal.start();
-                    activeGoal = goal;
-                    activeGoalIndex = i;
+                    highestStart = goal;
+                    highestStartIndex = i;
+                }
+                else {
                     break;
                 }
+            }
+
+            if (highestStart != null) {
+                highestStart.start();
+                activeGoal = highestStart;
+                activeGoalIndex = highestStartIndex;
             }
 
             return;
         }
 
-        activeGoal.tick(time);
-
         int nextIndex = activeGoalIndex + 1;
         if (nextIndex < goals.length) {
-            ProximaGoal nextGoal = goals[nextIndex];
-            if (nextGoal.shouldStart()) {
-                activeGoal.end();
+            for (int i = nextIndex; i < goals.length; i++) {
+                ProximaGoal nextGoal = goals[i];
+                if (nextGoal.shouldStart()) {
+                    activeGoal.end();
 
-                nextGoal.start();
-                activeGoal = nextGoal;
-                activeGoalIndex = nextIndex;
-                return;
+                    nextGoal.start();
+                    activeGoal = nextGoal;
+                    activeGoalIndex = i;
+                    return;
+                }
             }
         }
 
@@ -60,6 +69,8 @@ public class CollectionGoalGroup implements GoalGroup {
                 }
             }
         }
+
+        activeGoal.tick(time);
     }
 
     @Override
