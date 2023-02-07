@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Model("zombies.sidebar.line_updater.creator.kills")
-@Cache
+@Cache(false)
 public class ZombieKillsUpdaterCreator implements PlayerUpdaterCreator {
     private final Data data;
 

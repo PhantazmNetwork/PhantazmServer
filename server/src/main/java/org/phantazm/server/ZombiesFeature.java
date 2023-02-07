@@ -45,7 +45,7 @@ import org.phantazm.zombies.powerup.visual.HologramVisual;
 import org.phantazm.zombies.powerup.visual.ItemVisual;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.phantazm.zombies.sidebar.lineupdater.*;
-import org.phantazm.zombies.sidebar.lineupdater.condition.AliveCondition;
+import org.phantazm.zombies.sidebar.lineupdater.condition.StateConditionCreator;
 import org.phantazm.zombies.sidebar.lineupdater.creator.CoinsUpdaterCreator;
 import org.phantazm.zombies.sidebar.lineupdater.creator.ConditionalUpdaterCreator;
 import org.phantazm.zombies.sidebar.lineupdater.creator.StateUpdaterCreator;
@@ -140,7 +140,6 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(ZombiesPlayerSection.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.ChildUpdater.class);
-        contextManager.registerElementClass(AliveCondition.class);
         contextManager.registerElementClass(ConstantSidebarLineUpdater.class);
         contextManager.registerElementClass(DateLineUpdater.class);
         contextManager.registerElementClass(JoinedPlayersSidebarLineUpdater.class);
@@ -153,6 +152,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(ZombieKillsUpdaterCreator.class);
         contextManager.registerElementClass(ConditionalUpdaterCreator.class);
         contextManager.registerElementClass(StateUpdaterCreator.class);
+
+        contextManager.registerElementClass(StateConditionCreator.class);
 
         //ClickHandlers
         contextManager.registerElementClass(InteractingClickHandler.class);

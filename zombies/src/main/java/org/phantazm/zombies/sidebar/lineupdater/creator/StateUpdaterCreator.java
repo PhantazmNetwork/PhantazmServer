@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Model("zombies.sidebar.line_updater.creator.state")
-@Cache
+@Cache(false)
 public class StateUpdaterCreator implements PlayerUpdaterCreator {
     private final Data data;
 

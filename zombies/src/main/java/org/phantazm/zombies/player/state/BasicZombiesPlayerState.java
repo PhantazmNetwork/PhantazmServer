@@ -11,11 +11,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class BasicZombiesPlayerState implements ZombiesPlayerState {
-
     private final Component displayName;
-
     private final Key key;
-
     private final Collection<Activable> actions;
 
     public BasicZombiesPlayerState(@NotNull Component displayName, @NotNull Key key,

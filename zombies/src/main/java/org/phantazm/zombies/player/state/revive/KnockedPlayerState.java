@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class KnockedPlayerState implements ZombiesPlayerState {
+    private static final Component DISPLAY_NAME = Component.text("REVIVE").color(NamedTextColor.YELLOW);
 
     private final ReviveHandler reviveHandler;
 
@@ -54,7 +55,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     @Override
     public @NotNull Component getDisplayName() {
-        return Component.text("REVIVE").color(NamedTextColor.YELLOW);
+        return DISPLAY_NAME;
     }
 
     @Override
