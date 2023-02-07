@@ -35,6 +35,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private static final Logger LOGGER = LoggerFactory.getLogger(PhantazmMobDeathListener.class);
     private static final BoundingBox POWERUP_BOUNDING_BOX = new BoundingBox(0.25, 0.5, 0.25);
     private static final Vec DOWNWARD_SEARCH_VECTOR = new Vec(0, -10, 0);
+    private static final Vec OFFSET = new Vec(0.5, 0, 0.5);
 
     private final KeyParser keyParser;
     private final Supplier<? extends Optional<Round>> roundSupplier;
@@ -102,12 +103,14 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
             Bounds3I frameRegion = nearestWindow.getWindowInfo().frameRegion();
             Point windowCenter = nearestWindow.center();
             Point toWindow = windowCenter.sub(position);
-            Vec axis = new Vec(Math.signum(toWindow.x()), 0, Math.signum(toWindow.z()));
 
-            Vec mulVec = new Vec(Math.abs(axis.x()) * (frameRegion.lengthX() >> 1), 0,
-                    Math.abs(axis.z()) * (frameRegion.lengthZ() >> 1));
+            Vec axis = new Vec(Integer.signum((int)Math.rint(toWindow.x())), 0,
+                    Integer.signum((int)Math.rint(toWindow.z())));
 
-            Point spawnCandidate = windowCenter.add(axis.mul(mulVec));
+            Vec mulVec = new Vec(Math.abs(axis.x()) * (frameRegion.lengthX() / 2D), 0,
+                    Math.abs(axis.z()) * (frameRegion.lengthZ() / 2D));
+
+            Point spawnCandidate = windowCenter.add(axis.mul(mulVec)).add(axis.mul(OFFSET));
             if (roomTracker.atPoint(spawnCandidate).isEmpty()) {
                 LOGGER.warn("Tried to adjust powerup location to " + spawnCandidate + ", but it is not inside a room");
             }
