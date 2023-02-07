@@ -1,26 +1,26 @@
 package org.phantazm.zombies.event;
 
-import net.minestom.server.entity.Entity;
-import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob.PhantazmMobInstanceEvent;
 import org.phantazm.zombies.map.Window;
 
 import java.util.Objects;
 
-public class EntityBreakWindowEvent implements EntityInstanceEvent {
-    private final Entity entity;
+public class MobBreakWindowEvent implements PhantazmMobInstanceEvent {
+    private final PhantazmMob phantazmMob;
     private final Window window;
     private final int amount;
 
-    public EntityBreakWindowEvent(@NotNull Entity entity, @NotNull Window window, int amount) {
-        this.entity = Objects.requireNonNull(entity, "entity");
+    public MobBreakWindowEvent(@NotNull PhantazmMob phantazmMob, @NotNull Window window, int amount) {
+        this.phantazmMob = Objects.requireNonNull(phantazmMob, "phantazmMob");
         this.window = Objects.requireNonNull(window, "window");
         this.amount = amount;
     }
 
     @Override
-    public @NotNull Entity getEntity() {
-        return entity;
+    public @NotNull PhantazmMob getPhantazmMob() {
+        return phantazmMob;
     }
 
     public @NotNull Window getWindow() {

@@ -5,12 +5,14 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
+import org.phantazm.zombies.event.PlayerRepairWindowEvent;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.stage.StageKeys;
@@ -136,6 +138,13 @@ public class BasicWindowHandler implements WindowHandler {
                                     .modifiers(ModifierSourceGroups.WINDOW_COIN_GAIN), baseGold));
 
                     coins.applyTransaction(result);
+
+                    if (repaired != 0) {
+                        zombiesPlayer.getPlayer().ifPresent(player -> {
+                            EventDispatcher.call(
+                                    new PlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired));
+                        });
+                    }
                 }
 
                 repairOperation.lastRepairTime = time;

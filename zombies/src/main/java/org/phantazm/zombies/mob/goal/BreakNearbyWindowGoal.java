@@ -5,14 +5,14 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.goal.GoalCreator;
-import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
-import org.phantazm.zombies.event.EntityBreakWindowEvent;
+import org.phantazm.zombies.event.MobBreakWindowEvent;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.objects.MapObjects;
 
@@ -34,17 +34,17 @@ public class BreakNearbyWindowGoal implements GoalCreator {
 
     @Override
     public @NotNull ProximaGoal create(@NotNull PhantazmMob mob) {
-        return new Goal(data, mapObjects.get().windowTracker(), mob.entity());
+        return new Goal(data, mapObjects.get().windowTracker(), mob);
     }
 
     private static final class Goal implements ProximaGoal {
         private final Data data;
         private final BoundedTracker<Window> windowTracker;
-        private final ProximaEntity self;
+        private final PhantazmMob self;
 
         private long lastBreakCheck;
 
-        private Goal(Data data, BoundedTracker<Window> windowTracker, ProximaEntity self) {
+        private Goal(Data data, BoundedTracker<Window> windowTracker, PhantazmMob self) {
             this.data = data;
             this.self = self;
             this.windowTracker = windowTracker;
@@ -53,7 +53,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
 
         @Override
         public void start() {
-            
+
         }
 
         @Override
@@ -63,9 +63,10 @@ public class BreakNearbyWindowGoal implements GoalCreator {
                 return;
             }
 
-            long elapsedTicks = (time - lastBreakCheck) / MinecraftServer.TICK_MS;
-            if (elapsedTicks > data.breakTicks) {
-                windowTracker.closestInRange(self.getPosition().add(0, self.getBoundingBox().height() / 2, 0),
+            long ticksSinceLastBreak = (time - lastBreakCheck) / MinecraftServer.TICK_MS;
+            Entity entity = self.entity();
+            if (ticksSinceLastBreak > data.breakTicks) {
+                windowTracker.closestInRange(entity.getPosition().add(0, entity.getBoundingBox().height() / 2, 0),
                         data.breakRadius).ifPresent(window -> {
                     window.setLastBreakTime(time);
 
@@ -74,7 +75,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
 
                     int amount = window.updateIndex(targetIndex);
                     if (amount != 0) {
-                        EventDispatcher.call(new EntityBreakWindowEvent(self, window, -amount));
+                        EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
                     }
                 });
 
