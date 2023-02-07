@@ -4,12 +4,9 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.Spawner;
-
-import java.util.UUID;
 
 /**
  * A spawner for {@link PhantazmMob}s.
@@ -26,6 +23,5 @@ public interface MobSpawner {
      * @param model    The {@link MobModel} of the {@link PhantazmMob} to spawn
      * @return A new {@link PhantazmMob}
      */
-    @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos point, @NotNull MobStore mobStore,
-            @NotNull MobModel model);
+    @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos point, @NotNull MobModel model);
 }

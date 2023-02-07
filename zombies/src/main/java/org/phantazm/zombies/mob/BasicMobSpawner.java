@@ -40,6 +40,7 @@ import org.phantazm.zombies.map.objects.MapObjects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -63,6 +64,7 @@ public class BasicMobSpawner implements MobSpawner {
     private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
     private final Spawner proximaSpawner;
     private final KeyParser keyParser;
+    private final MobStore mobStore;
     private final DependencyProvider mobDependencyProvider;
 
     /**
@@ -76,13 +78,13 @@ public class BasicMobSpawner implements MobSpawner {
         this.processorMap = Map.copyOf(processorMap);
         this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
 
         this.mobDependencyProvider = new ModuleDependencyProvider(keyParser, new Module(this, mobStore, mapObjects));
     }
 
     @Override
-    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobStore mobStore,
-            @NotNull MobModel model) {
+    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobModel model) {
         ProximaEntity proximaEntity = proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory());
 
         setEntityMeta(proximaEntity, model);
@@ -95,7 +97,7 @@ public class BasicMobSpawner implements MobSpawner {
         PhantazmMob mob = new PhantazmMob(model, proximaEntity, triggers);
         addGoals(model.getContext(), mobDependencyProvider, mob);
 
-        mobStore.registerMob(mob);
+        this.mobStore.registerMob(mob);
         return mob;
     }
 

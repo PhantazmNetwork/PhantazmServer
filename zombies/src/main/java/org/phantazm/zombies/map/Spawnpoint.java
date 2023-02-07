@@ -110,6 +110,6 @@ public class Spawnpoint {
      */
     public @NotNull PhantazmMob spawn(@NotNull MobModel model) {
         Objects.requireNonNull(model, "model");
-        return mobSpawner.spawn(instance, spawnPoint, mobStore, model);
+        return mobSpawner.spawn(instance, spawnPoint, model);
     }
 }

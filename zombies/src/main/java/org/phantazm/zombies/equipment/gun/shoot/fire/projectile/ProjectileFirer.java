@@ -95,7 +95,7 @@ public class ProjectileFirer implements Firer {
             }
 
             endSelector.getEnd(start).ifPresent(end -> {
-                PhantazmMob mob = spawner.spawn(instance, start, mobStore, data.model());
+                PhantazmMob mob = spawner.spawn(instance, start, data.model());
                 ProximaEntity neuralEntity = mob.entity();
                 neuralEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
                         new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
