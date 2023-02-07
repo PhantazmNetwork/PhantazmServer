@@ -3,6 +3,7 @@ package org.phantazm.core.inventory;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.player.PlayerView;
 
 /**
  * Keeps track of and switches between {@link InventoryProfile}s.
@@ -28,10 +29,11 @@ public interface InventoryAccessRegistry {
     /**
      * Switches the inventory's view to another view based on a {@link Key}.
      *
-     * @param key The {@link Key} of the profile to switch to, or to switch to no profile
+     * @param key        The {@link Key} of the profile to switch to, or to switch to no profile
+     * @param playerView
      * @throws IllegalArgumentException If no {@link InventoryProfile} is registered with the {@link Key}
      */
-    void switchAccess(@Nullable Key key);
+    void switchAccess(@Nullable Key key, @NotNull PlayerView playerView);
 
     /**
      * Registers a {@link InventoryProfile} to the view.

@@ -5,11 +5,9 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
-import org.phantazm.zombies.equipment.Equipment;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.scene.ZombiesScene;
@@ -17,7 +15,6 @@ import org.phantazm.zombies.scene.ZombiesScene;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
@@ -61,23 +58,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     @Override
     public void start() {
         module.getStateSwitcher().start();
-        getPlayer().ifPresent(player -> {
-            InventoryAccessRegistry accessRegistry = module.getInventoryAccessRegistry();
-            if (accessRegistry.hasCurrentAccess()) {
-                InventoryProfile profile = accessRegistry.getCurrentAccess().profile();
-                for (int slot = 0; slot < profile.getSlotCount(); ++slot) {
-                    if (profile.hasInventoryObject(slot)) {
-                        InventoryObject inventoryObject = profile.getInventoryObject(slot);
-                        if (inventoryObject.shouldRedraw()) {
-                            player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
-                        }
-                        if (slot == player.getHeldSlot() && inventoryObject instanceof Equipment equipment) {
-                            equipment.setSelected(true);
-                        }
-                    }
-                }
-            }
-        });
     }
 
     @Override

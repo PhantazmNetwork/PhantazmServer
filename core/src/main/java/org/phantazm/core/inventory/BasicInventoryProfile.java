@@ -58,5 +58,4 @@ public class BasicInventoryProfile implements InventoryProfile {
     public int getSlotCount() {
         return objects.length;
     }
-
 }

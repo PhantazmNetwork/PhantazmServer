@@ -7,9 +7,10 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Namespaces;
-import org.phantazm.zombies.equipment.EquipmentHandler;
+import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.state.InventoryKeys;
 import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
 
 import java.util.*;
@@ -79,7 +80,6 @@ public class InGameStage implements Stage {
 
     @Override
     public void start() {
-        Key gunsKey = Key.key(Namespaces.PHANTAZM, "inventory.group.gun");
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             zombiesPlayer.getPlayer().ifPresent(player -> {
                 player.teleport(spawnPos);
@@ -87,12 +87,12 @@ public class InGameStage implements Stage {
 
             for (Key equipmentKey : defaultEquipment) {
                 EquipmentHandler equipmentHandler = zombiesPlayer.module().getEquipmentHandler();
-                if (!equipmentHandler.canAddEquipment(gunsKey)) {
+                if (!equipmentHandler.canAddEquipment(InventoryKeys.GUN_INVENTORY_GROUP)) {
                     continue;
                 }
 
                 zombiesPlayer.module().getEquipmentCreator().createEquipment(equipmentKey).ifPresent(equipment -> {
-                    equipmentHandler.addEquipment(equipment, gunsKey);
+                    equipmentHandler.addEquipment(equipment, InventoryKeys.GUN_INVENTORY_GROUP);
                 });
             }
         }

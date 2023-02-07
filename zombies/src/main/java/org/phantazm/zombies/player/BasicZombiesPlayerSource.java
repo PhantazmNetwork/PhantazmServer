@@ -21,7 +21,6 @@ import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.inventory.*;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.time.DurationTickFormatter;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.mob.MobStore;
@@ -32,8 +31,8 @@ import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.coin.component.BasicTransactionComponentCreator;
 import org.phantazm.zombies.corpse.Corpse;
-import org.phantazm.zombies.equipment.EquipmentCreator;
-import org.phantazm.zombies.equipment.EquipmentHandler;
+import org.phantazm.core.equipment.EquipmentCreator;
+import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.equipment.gun.ZombiesGunModule;
 import org.phantazm.zombies.kill.BasicPlayerKills;
 import org.phantazm.zombies.kill.PlayerKills;
@@ -80,14 +79,18 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
         PlayerKills kills = new BasicPlayerKills();
-        InventoryProfile profile = new BasicInventoryProfile(9);
-        InventoryAccess inventoryAccess = new InventoryAccess(profile,
-                Map.of(Key.key(Namespaces.PHANTAZM, "inventory.group.gun"),
-                        new BasicInventoryObjectGroup(profile, IntSet.of(1, 2))));
+
+        InventoryProfile livingProfile = new BasicInventoryProfile(9);
+        InventoryAccess livingInventoryAccess = new InventoryAccess(livingProfile,
+                Map.of(InventoryKeys.GUN_INVENTORY_GROUP,
+                        new BasicInventoryObjectGroup(livingProfile, IntSet.of(1, 2))));
+
+        InventoryAccess deadInventoryAccess = new InventoryAccess(new BasicInventoryProfile(9), Map.of());
+
         InventoryAccessRegistry accessRegistry = new BasicInventoryAccessRegistry();
-        Key accessKey = Key.key(Namespaces.PHANTAZM, "inventory.access.default");
-        accessRegistry.registerAccess(accessKey, inventoryAccess);
-        accessRegistry.switchAccess(accessKey);
+        accessRegistry.registerAccess(InventoryKeys.DEFAULT_ACCESS, livingInventoryAccess);
+        accessRegistry.registerAccess(InventoryKeys.DEAD_ACCESS, deadInventoryAccess);
+
         EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
 
         ZombiesGunModule gunModule =
@@ -100,12 +103,13 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
                     ZombiesPlayerStateKeys.ALIVE.key(),
-                    List.of(new BasicAliveStateActivable(playerView, meta, sidebar)));
+                    List.of(new BasicAliveStateActivable(accessRegistry, playerView, meta, sidebar)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
                 (context, activables) -> {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
-                    combinedActivables.add(new BasicDeadStateActivable(context, instance, playerView, meta, sidebar));
+                    combinedActivables.add(
+                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta, sidebar));
                     return new BasicZombiesPlayerState(Component.text("DEAD", NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };

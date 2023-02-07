@@ -11,11 +11,12 @@ import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.InventoryAccess;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
+import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
-import org.phantazm.zombies.equipment.Equipment;
+import org.phantazm.core.equipment.Equipment;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -31,7 +32,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 

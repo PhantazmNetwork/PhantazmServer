@@ -3,7 +3,7 @@ package org.phantazm.zombies.map.shop.predicate;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.equipment.Equipment;
+import org.phantazm.core.equipment.Equipment;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.UpgradePath;
 import org.phantazm.zombies.player.ZombiesPlayer;

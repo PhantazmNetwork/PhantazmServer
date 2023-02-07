@@ -2,27 +2,26 @@ package org.phantazm.zombies.player.state;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.potion.Potion;
-import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
+import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayerMeta;
 
 import java.util.Objects;
 
 public class BasicAliveStateActivable implements Activable {
+    private final InventoryAccessRegistry accessRegistry;
     private final PlayerView playerView;
-
     private final ZombiesPlayerMeta meta;
-
     private final Sidebar sidebar;
 
     private long lastHeal;
 
-    public BasicAliveStateActivable(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
-            @NotNull Sidebar sidebar) {
+    public BasicAliveStateActivable(@NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
+            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar) {
+        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
@@ -37,6 +36,9 @@ public class BasicAliveStateActivable implements Activable {
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
         });
+
+        accessRegistry.switchAccess(InventoryKeys.DEFAULT_ACCESS, playerView);
+
         meta.setInGame(true);
         meta.setCanRevive(true);
         meta.setCanTriggerSLA(true);

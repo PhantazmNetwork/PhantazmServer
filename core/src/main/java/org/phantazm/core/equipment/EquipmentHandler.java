@@ -1,4 +1,4 @@
-package org.phantazm.zombies.equipment;
+package org.phantazm.core.equipment;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;

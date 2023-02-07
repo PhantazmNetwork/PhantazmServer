@@ -1,4 +1,4 @@
-package org.phantazm.zombies.equipment;
+package org.phantazm.core.equipment;
 
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.entity.Player;

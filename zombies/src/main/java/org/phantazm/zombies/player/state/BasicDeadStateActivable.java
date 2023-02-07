@@ -7,6 +7,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
+import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayerMeta;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
@@ -14,14 +15,17 @@ import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import java.util.Objects;
 
 public class BasicDeadStateActivable implements Activable {
+    private final InventoryAccessRegistry accessRegistry;
     private final DeadPlayerStateContext context;
     private final Instance instance;
     private final PlayerView playerView;
     private final ZombiesPlayerMeta meta;
     private final Sidebar sidebar;
 
-    public BasicDeadStateActivable(@NotNull DeadPlayerStateContext context, @NotNull Instance instance,
-            @NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar) {
+    public BasicDeadStateActivable(@NotNull InventoryAccessRegistry accessRegistry,
+            @NotNull DeadPlayerStateContext context, @NotNull Instance instance, @NotNull PlayerView playerView,
+            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar) {
+        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
@@ -39,6 +43,9 @@ public class BasicDeadStateActivable implements Activable {
         playerView.getDisplayName().thenAccept(displayName -> {
             instance.sendMessage(buildDeathMessage(displayName));
         });
+
+        accessRegistry.switchAccess(InventoryKeys.DEAD_ACCESS, playerView);
+
         meta.setInGame(true);
         meta.setCanRevive(false);
         meta.setCanTriggerSLA(false);

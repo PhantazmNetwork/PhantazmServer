@@ -7,7 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.item.UpdatingItem;
-import org.phantazm.zombies.equipment.Equipment;
+import org.phantazm.core.equipment.Equipment;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.shoot.ShootTester;
 import org.phantazm.zombies.player.ZombiesPlayer;

@@ -3,6 +3,8 @@ package org.phantazm.core.inventory;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.equipment.Equipment;
+import org.phantazm.core.player.PlayerView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,9 +14,7 @@ import java.util.Objects;
  * Basic implementation of an {@link InventoryAccessRegistry}.
  */
 public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
-
     private final Map<Key, InventoryAccess> accessMap = new HashMap<>();
-
     private InventoryAccess currentAccess = null;
 
     @Override
@@ -32,7 +32,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     @Override
-    public void switchAccess(@Nullable Key key) {
+    public void switchAccess(@Nullable Key key, @NotNull PlayerView playerView) {
         if (key == null) {
             currentAccess = null;
         }
@@ -42,7 +42,8 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
                 throw new IllegalArgumentException("No matching inventory access found");
             }
 
-            currentAccess = accessMap.get(key);
+            currentAccess = access;
+            applyTo(access, playerView);
         }
     }
 
@@ -67,6 +68,29 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         }
 
         accessMap.remove(key);
+    }
+
+    private void applyTo(InventoryAccess currentAccess, PlayerView playerView) {
+        playerView.getPlayer().ifPresent(player -> {
+            player.getInventory().clear();
+
+            InventoryProfile profile = currentAccess.profile();
+
+            for (int slot = 0; slot < profile.getSlotCount(); slot++) {
+                if (!profile.hasInventoryObject(slot)) {
+                    continue;
+                }
+
+                InventoryObject inventoryObject = profile.getInventoryObject(slot);
+                if (inventoryObject.shouldRedraw()) {
+                    player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
+                }
+
+                if (slot == player.getHeldSlot() && inventoryObject instanceof Equipment equipment) {
+                    equipment.setSelected(true);
+                }
+            }
+        });
     }
 
 }
