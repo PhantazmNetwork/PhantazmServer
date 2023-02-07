@@ -54,7 +54,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     @Override
     public @NotNull Component getDisplayName() {
-        return Component.text("KNOCKED", NamedTextColor.YELLOW);
+        return Component.text("REVIVE").color(NamedTextColor.YELLOW);
     }
 
     @Override

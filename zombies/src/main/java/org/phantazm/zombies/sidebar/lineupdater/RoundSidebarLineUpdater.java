@@ -1,10 +1,9 @@
-package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
+package org.phantazm.zombies.sidebar.lineupdater;
 
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.handler.RoundHandler;

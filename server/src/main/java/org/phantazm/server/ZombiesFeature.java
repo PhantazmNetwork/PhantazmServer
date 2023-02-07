@@ -4,11 +4,6 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.bridge.ConfigSource;
-import com.github.steanky.ethylene.core.loader.BasicPathInspector;
-import com.github.steanky.ethylene.core.loader.DirectoryTreeConfigSource;
-import com.github.steanky.ethylene.core.loader.RegistrableCodecResolver;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
@@ -48,14 +43,16 @@ import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
 import org.phantazm.zombies.powerup.visual.HologramVisual;
 import org.phantazm.zombies.powerup.visual.ItemVisual;
-import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
-import org.phantazm.zombies.scoreboard.sidebar.lineupdater.*;
-import org.phantazm.zombies.scoreboard.sidebar.lineupdater.condition.AliveCondition;
-import org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator.CoinsUpdaterCreator;
-import org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator.ZombieKillsUpdaterCreator;
-import org.phantazm.zombies.scoreboard.sidebar.section.CollectionSidebarSection;
-import org.phantazm.zombies.scoreboard.sidebar.section.ZombiesPlayerSection;
-import org.phantazm.zombies.scoreboard.sidebar.section.ZombiesPlayersSection;
+import org.phantazm.zombies.sidebar.SidebarUpdater;
+import org.phantazm.zombies.sidebar.lineupdater.*;
+import org.phantazm.zombies.sidebar.lineupdater.condition.AliveCondition;
+import org.phantazm.zombies.sidebar.lineupdater.creator.CoinsUpdaterCreator;
+import org.phantazm.zombies.sidebar.lineupdater.creator.ConditionalUpdaterCreator;
+import org.phantazm.zombies.sidebar.lineupdater.creator.StateUpdaterCreator;
+import org.phantazm.zombies.sidebar.lineupdater.creator.ZombieKillsUpdaterCreator;
+import org.phantazm.zombies.sidebar.section.CollectionSidebarSection;
+import org.phantazm.zombies.sidebar.section.ZombiesPlayerSection;
+import org.phantazm.zombies.sidebar.section.ZombiesPlayersSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +61,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 public final class ZombiesFeature {
     public static final Path MAPS_FOLDER = Path.of("./zombies/maps");
@@ -143,8 +138,6 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(CollectionSidebarSection.class);
         contextManager.registerElementClass(ZombiesPlayersSection.class);
         contextManager.registerElementClass(ZombiesPlayerSection.class);
-        contextManager.registerElementClass(CoinsUpdaterCreator.class);
-        contextManager.registerElementClass(ZombieKillsUpdaterCreator.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.class);
         contextManager.registerElementClass(ConditionalSidebarLineUpdater.ChildUpdater.class);
         contextManager.registerElementClass(AliveCondition.class);
@@ -155,6 +148,11 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(RemainingZombiesSidebarLineUpdater.class);
         contextManager.registerElementClass(RoundSidebarLineUpdater.class);
         contextManager.registerElementClass(TicksLineUpdater.class);
+
+        contextManager.registerElementClass(CoinsUpdaterCreator.class);
+        contextManager.registerElementClass(ZombieKillsUpdaterCreator.class);
+        contextManager.registerElementClass(ConditionalUpdaterCreator.class);
+        contextManager.registerElementClass(StateUpdaterCreator.class);
 
         //ClickHandlers
         contextManager.registerElementClass(InteractingClickHandler.class);

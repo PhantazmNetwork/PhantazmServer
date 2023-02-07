@@ -1,4 +1,4 @@
-package org.phantazm.zombies.scoreboard.sidebar;
+package org.phantazm.zombies.sidebar;
 
 import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.context.ElementContext;

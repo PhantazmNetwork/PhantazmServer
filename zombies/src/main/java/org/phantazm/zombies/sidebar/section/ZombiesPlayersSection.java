@@ -1,11 +1,11 @@
-package org.phantazm.zombies.scoreboard.sidebar.section;
+package org.phantazm.zombies.sidebar.section;
 
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator.PlayerUpdaterCreator;
-import org.phantazm.zombies.scoreboard.sidebar.lineupdater.SidebarLineUpdater;
+import org.phantazm.zombies.sidebar.lineupdater.creator.PlayerUpdaterCreator;
+import org.phantazm.zombies.sidebar.lineupdater.SidebarLineUpdater;
 
 import java.util.*;
 

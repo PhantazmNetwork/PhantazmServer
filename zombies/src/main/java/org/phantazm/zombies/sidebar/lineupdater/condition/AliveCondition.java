@@ -1,4 +1,4 @@
-package org.phantazm.zombies.scoreboard.sidebar.lineupdater.condition;
+package org.phantazm.zombies.sidebar.lineupdater.condition;
 
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;

@@ -1,56 +1,52 @@
-package org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator;
+package org.phantazm.zombies.sidebar.lineupdater.creator;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.ZombiesPlayerModule;
-import org.phantazm.zombies.scoreboard.sidebar.lineupdater.SidebarLineUpdater;
+import org.phantazm.zombies.player.state.PlayerStateSwitcher;
+import org.phantazm.zombies.player.state.ZombiesPlayerState;
+import org.phantazm.zombies.sidebar.lineupdater.SidebarLineUpdater;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@Model("zombies.sidebar.line_updater.creator.coins")
-@Cache(false)
-public class CoinsUpdaterCreator implements PlayerUpdaterCreator {
+@Model("zombies.sidebar.line_updater.creator.state")
+@Cache
+public class StateUpdaterCreator implements PlayerUpdaterCreator {
     private final Data data;
 
     @FactoryMethod
-    public CoinsUpdaterCreator(@NotNull Data data) {
+    public StateUpdaterCreator(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
     @Override
     public @NotNull SidebarLineUpdater forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
-        ZombiesPlayerModule module = zombiesPlayer.module();
-        return new Updater(data, module.getPlayerView(), module.getCoins());
+        return new Updater(data, zombiesPlayer.module().getPlayerView(), zombiesPlayer.module().getStateSwitcher());
     }
 
     private static class Updater implements SidebarLineUpdater {
         private final Data data;
         private final PlayerView playerView;
-        private final PlayerCoins coins;
+        private final PlayerStateSwitcher stateSwitcher;
 
-        private CompletableFuture<String> playerNameFuture;
-        private int lastCoins;
+        private CompletableFuture<? extends String> playerNameFuture;
+        private ZombiesPlayerState lastState;
         private boolean cacheInvalidated;
 
-        private Updater(@NotNull Data data, @NotNull PlayerView playerView, @NotNull PlayerCoins coins) {
+        @FactoryMethod
+        public Updater(@NotNull Data data, @NotNull PlayerView playerView, @NotNull PlayerStateSwitcher stateSwitcher) {
             this.data = Objects.requireNonNull(data, "data");
             this.playerView = Objects.requireNonNull(playerView, "playerView");
-            this.coins = Objects.requireNonNull(coins, "coins");
+            this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
             this.cacheInvalidated = true;
         }
 
@@ -75,13 +71,14 @@ public class CoinsUpdaterCreator implements PlayerUpdaterCreator {
                 return Optional.empty();
             }
 
-            int newCoins = coins.getCoins();
-            if (cacheInvalidated || lastCoins != newCoins) {
-                lastCoins = newCoins;
-                cacheInvalidated = false;
+            ZombiesPlayerState currentState = stateSwitcher.getState();
+            if (cacheInvalidated || currentState != lastState) {
+                this.lastState = currentState;
+                this.cacheInvalidated = false;
 
+                Component first = MiniMessage.miniMessage().deserialize(String.format(data.formatString, playerName));
                 return Optional.of(
-                        MiniMessage.miniMessage().deserialize(String.format(data.formatString, playerName, newCoins)));
+                        Component.join(JoinConfiguration.noSeparators(), first, currentState.getDisplayName()));
             }
 
             return Optional.empty();

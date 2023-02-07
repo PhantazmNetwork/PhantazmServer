@@ -1,4 +1,4 @@
-package org.phantazm.zombies.scoreboard.sidebar.section;
+package org.phantazm.zombies.sidebar.section;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;

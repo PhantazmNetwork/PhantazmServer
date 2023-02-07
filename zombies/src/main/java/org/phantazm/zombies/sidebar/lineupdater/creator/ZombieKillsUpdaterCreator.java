@@ -1,4 +1,4 @@
-package org.phantazm.zombies.scoreboard.sidebar.lineupdater.creator;
+package org.phantazm.zombies.sidebar.lineupdater.creator;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
@@ -9,7 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.kill.PlayerKills;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.scoreboard.sidebar.lineupdater.SidebarLineUpdater;
+import org.phantazm.zombies.sidebar.lineupdater.SidebarLineUpdater;
 
 import java.util.Objects;
 import java.util.Optional;

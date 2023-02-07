@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.*;
@@ -101,8 +102,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                 Component.text(StringUtils.center("ZOMBIES", 16), NamedTextColor.YELLOW, TextDecoration.BOLD));
 
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
-            return new BasicZombiesPlayerState(Component.text("ALIVE", NamedTextColor.GREEN),
-                    ZombiesPlayerStateKeys.ALIVE.key(),
+            return new BasicZombiesPlayerState(Component.text("ALIVE"), ZombiesPlayerStateKeys.ALIVE.key(),
                     List.of(new BasicAliveStateActivable(accessRegistry, playerView, meta, sidebar)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
@@ -110,7 +110,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
                     combinedActivables.add(
                             new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta, sidebar));
-                    return new BasicZombiesPlayerState(Component.text("DEAD", NamedTextColor.RED),
+                    return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
         Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateCreator = context -> {
@@ -153,7 +153,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     }));
         };
         Function<NoContext, ZombiesPlayerState> quitStateCreator = unused -> {
-            return new BasicZombiesPlayerState(Component.text("QUIT", NamedTextColor.RED),
+            return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
                     List.of(new BasicQuitStateActivable(instance, playerView, meta, sidebar)));
         };

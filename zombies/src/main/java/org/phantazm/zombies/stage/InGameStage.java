@@ -6,12 +6,11 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Namespaces;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.InventoryKeys;
-import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
+import org.phantazm.zombies.sidebar.SidebarUpdater;
 
 import java.util.*;
 import java.util.function.Function;

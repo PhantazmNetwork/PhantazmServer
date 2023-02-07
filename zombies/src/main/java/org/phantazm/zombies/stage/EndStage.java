@@ -6,13 +6,12 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.corpse.Corpse;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
-import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
+import org.phantazm.zombies.sidebar.SidebarUpdater;
 
 import java.util.*;
 import java.util.function.Function;

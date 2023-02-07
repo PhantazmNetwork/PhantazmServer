@@ -1,4 +1,4 @@
-package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
+package org.phantazm.zombies.sidebar.lineupdater;
 
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.text.Component;

@@ -8,7 +8,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.scoreboard.sidebar.SidebarUpdater;
+import org.phantazm.zombies.sidebar.SidebarUpdater;
 
 import java.util.*;
 import java.util.function.Function;

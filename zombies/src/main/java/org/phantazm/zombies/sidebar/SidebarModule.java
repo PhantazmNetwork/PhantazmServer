@@ -1,4 +1,4 @@
-package org.phantazm.zombies.scoreboard.sidebar;
+package org.phantazm.zombies.sidebar;
 
 import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;

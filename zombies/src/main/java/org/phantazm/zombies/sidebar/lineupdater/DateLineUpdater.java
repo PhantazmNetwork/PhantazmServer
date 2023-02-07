@@ -1,4 +1,4 @@
-package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
+package org.phantazm.zombies.sidebar.lineupdater;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
@@ -37,7 +37,7 @@ public class DateLineUpdater implements SidebarLineUpdater {
         if (cached == null) {
             cached = Component.text(formatter.format(LocalDateTime.now())).style(data.dateStyle);
         }
-        
+
         return Optional.of(cached);
     }
 

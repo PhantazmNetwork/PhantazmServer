@@ -1,4 +1,4 @@
-package org.phantazm.zombies.scoreboard.sidebar.lineupdater;
+package org.phantazm.zombies.sidebar.lineupdater;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
