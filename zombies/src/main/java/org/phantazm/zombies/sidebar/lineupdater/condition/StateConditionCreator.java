@@ -37,11 +37,11 @@ public class StateConditionCreator implements PlayerConditionCreator {
 
         @Override
         public boolean getAsBoolean() {
-            return zombiesPlayer.module().getStateSwitcher().getState().key().equals(data.state);
+            return zombiesPlayer.module().getStateSwitcher().getState().key().equals(data.state) != data.requireAbsent;
         }
     }
 
     @DataObject
-    public record Data(@NotNull Key state) {
+    public record Data(@NotNull Key state, boolean requireAbsent) {
     }
 }
