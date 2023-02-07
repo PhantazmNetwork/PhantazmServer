@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map;
 
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.collection.ArrayConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
@@ -161,14 +162,16 @@ public final class MapProcessors {
         public WaveInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             long delayTicks = element.getNumberOrThrow("delayTicks").longValue();
             List<SpawnInfo> spawns = spawnInfoList.dataFromElement(element.getListOrThrow("spawns"));
-            return new WaveInfo(delayTicks, spawns);
+            ConfigList spawnActions = element.getListOrDefault(ArrayConfigList::new, "spawnActions");
+            return new WaveInfo(delayTicks, spawns, spawnActions);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(WaveInfo waveInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(2);
+            ConfigNode node = new LinkedConfigNode(3);
             node.putNumber("delayTicks", waveInfo.delayTicks());
             node.put("spawns", spawnInfoList.elementFromData(waveInfo.spawns()));
+            node.put("spawnActions", waveInfo.spawnActions());
             return node;
         }
     };

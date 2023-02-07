@@ -25,6 +25,7 @@ import org.phantazm.core.gui.BasicSlotDistributor;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.BasicTransactionModifierSource;
 import org.phantazm.zombies.coin.TransactionModifierSource;
@@ -220,7 +221,10 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             List<WaveInfo> waveInfo = roundInfo.waves();
             List<Wave> waves = new ArrayList<>(waveInfo.size());
             for (WaveInfo wave : roundInfo.waves()) {
-                waves.add(new Wave(wave));
+                List<Action<List<PhantazmMob>>> spawnActions = contextManager.makeContext(wave.spawnActions())
+                        .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+
+                waves.add(new Wave(wave, spawnActions));
             }
 
             rounds.add(new Round(roundInfo, waves, startActions, endActions, spawnDistributor, spawnpoints));

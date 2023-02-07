@@ -66,6 +66,8 @@ public class Round implements Tickable {
     public void removeMob(@NotNull PhantazmMob mob) {
         if (spawnedMobs.remove(mob)) {
             totalMobCount--;
+
+
         }
     }
 
@@ -168,7 +170,8 @@ public class Round implements Tickable {
 
             long timeSinceLastWave = (time - waveStartTime) / MinecraftServer.TICK_MS;
             if (waveIndex < waves.size() && timeSinceLastWave > currentWave.getWaveInfo().delayTicks()) {
-                spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
+                List<PhantazmMob> mobs = spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
+                currentWave.onSpawn(mobs);
 
                 waveStartTime = time;
                 if (++waveIndex >= waves.size()) {

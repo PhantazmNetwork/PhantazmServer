@@ -35,6 +35,6 @@ public class SpawnPowerupAction implements Action<Round> {
     }
 
     @DataObject
-    public record Data(Key powerup, Vec3D spawnPosition) {
+    public record Data(@NotNull Key powerup, @NotNull Vec3D spawnPosition) {
     }
 }
