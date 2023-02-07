@@ -36,7 +36,6 @@ import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.map.shop.interactor.ShopInteractor;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
-import org.phantazm.zombies.mob.BasicMobSpawner;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
@@ -103,7 +102,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
         List<Spawnpoint> spawnpoints =
-                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobStore, mobSpawner);
+                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner);
         List<Window> windows = buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler);
         List<Shop> shops = buildShops(origin, mapInfo.shops(), provider, instance);
         List<Door> doors = buildDoors(origin, mapInfo.doors(), provider, instance, mapObjectsWrapper);
@@ -129,11 +128,10 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Spawnpoint> buildSpawnpoints(Point mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
-            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobStore mobStore, MobSpawner mobSpawner) {
+            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobSpawner mobSpawner) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
-            spawnpoints.add(
-                    new Spawnpoint(mapOrigin, spawnpointInfo, instance, spawnruleInfoMap::get, mobStore, mobSpawner));
+            spawnpoints.add(new Spawnpoint(mapOrigin, spawnpointInfo, instance, spawnruleInfoMap::get, mobSpawner));
         }
 
         return spawnpoints;

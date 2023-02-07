@@ -15,12 +15,10 @@ import java.util.Objects;
 @Model("mob.skill.duplicate_self")
 @Cache(false)
 public class DuplicateSelfSkill implements Skill {
-    private final MobStore mobStore;
     private final MobSpawner spawner;
 
     @FactoryMethod
-    public DuplicateSelfSkill(@NotNull MobStore mobStore, @NotNull MobSpawner spawner) {
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+    public DuplicateSelfSkill(@NotNull MobSpawner spawner) {
         this.spawner = Objects.requireNonNull(spawner, "spawner");
     }
 

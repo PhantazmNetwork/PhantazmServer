@@ -31,7 +31,6 @@ public class Spawnpoint {
     private final Function<? super Key, ? extends SpawnruleInfo> spawnrules;
     private final Instance instance;
     private final Pos spawnPoint;
-    private final MobStore mobStore;
     private final MobSpawner mobSpawner;
 
     /**
@@ -43,14 +42,12 @@ public class Spawnpoint {
      * @param mobSpawner        the function used to actually spawn mobs in the world
      */
     public Spawnpoint(@NotNull Point mapOrigin, @NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
-            @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobStore mobStore,
-            @NotNull MobSpawner mobSpawner) {
+            @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner) {
         this.spawnInfo = Objects.requireNonNull(spawnInfo, "spawnInfo");
         Vec3I spawnPosition = spawnInfo.position();
         this.spawnPoint = Pos.fromPoint(mapOrigin.add(spawnPosition.x(), spawnPosition.y(), spawnPosition.z()));
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
         this.instance = Objects.requireNonNull(instance, "instance");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
     }
 
