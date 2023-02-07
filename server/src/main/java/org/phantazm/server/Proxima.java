@@ -6,18 +6,19 @@ import com.github.steanky.proxima.path.BasicPathOperation;
 import com.github.steanky.proxima.path.Pathfinder;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.proxima.bindings.minestom.GroundPathfindingFactory;
-import org.phantazm.proxima.bindings.minestom.InstanceSettingsFunction;
-import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
-import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.proxima.bindings.minestom.*;
 import org.phantazm.server.config.server.PathfinderConfig;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public final class Proxima {
     private static Pathfinder pathfinder;
+    private static Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction;
+    private static InstanceSpaceHandler instanceSpaceHandler;
     private static Spawner spawner;
 
     private Proxima() {
@@ -40,7 +41,8 @@ public final class Proxima {
                 corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime, keepAliveTimeUnit);
 
         pathfinder = new BasicAsyncPathfinder(fjp, BasicPathOperation::new, 1000000);
-        spawner = new InstanceSpawner(pathfinder, new InstanceSettingsFunction(globalNode));
+        settingsFunction = new InstanceSettingsFunction(globalNode);
+        spawner = new InstanceSpawner(pathfinder, settingsFunction);
     }
 
     private static void registerElementClasses(@NotNull ContextManager contextManager) {
@@ -49,6 +51,10 @@ public final class Proxima {
 
     public static @NotNull Pathfinder getPathfinder() {
         return FeatureUtils.check(pathfinder);
+    }
+
+    public static @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction() {
+        return FeatureUtils.check(settingsFunction);
     }
 
     public static @NotNull Spawner getSpawner() {

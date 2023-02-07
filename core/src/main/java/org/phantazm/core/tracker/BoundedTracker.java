@@ -16,6 +16,8 @@ public interface BoundedTracker<T extends Bounded> {
 
     @NotNull Optional<T> atPoint(@NotNull Point point);
 
+    @NotNull Optional<T> atPoint(int x, int y, int z);
+
     @NotNull @Unmodifiable List<T> items();
 
     static <T extends Bounded> @NotNull BoundedTracker<T> tracker(@NotNull Collection<T> collection) {

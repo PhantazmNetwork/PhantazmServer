@@ -115,7 +115,12 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
 
     @Override
     public @NotNull Optional<T> atPoint(@NotNull Point point) {
-        Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(point.chunkX(), point.chunkZ()));
+        return atPoint(point.blockX(), point.blockY(), point.blockZ());
+    }
+
+    @Override
+    public @NotNull Optional<T> atPoint(int x, int y, int z) {
+        Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(x >> 4, z >> 4));
         if (chunkItems == null) {
             return Optional.empty();
         }
@@ -123,7 +128,7 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
         for (Object item : chunkItems) {
             T boundedItem = (T)item;
             for (Bounds3I bounds : boundedItem.bounds()) {
-                if (bounds.contains(point.blockX(), point.blockY(), point.blockZ())) {
+                if (bounds.contains(x, y, z)) {
                     return Optional.of(boundedItem);
                 }
             }

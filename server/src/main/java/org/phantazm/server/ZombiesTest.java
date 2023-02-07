@@ -38,6 +38,7 @@ import org.phantazm.core.hologram.ViewableHologram;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
@@ -48,6 +49,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 final class ZombiesTest {
     private static boolean holograms = false;
@@ -56,10 +58,11 @@ final class ZombiesTest {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> global, @NotNull Map<Key, MapInfo> maps,
-            @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
-            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
-            @NotNull SceneFallback sceneFallback) {
+    static void initialize(@NotNull EventNode<Event> global,
+            @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
+            @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
+            @NotNull CommandManager commandManager, @NotNull ContextManager contextManager,
+            @NotNull KeyParser keyParser, @NotNull SceneFallback sceneFallback) {
         global.addListener(PlayerLoginEvent.class, event -> {
             if (holograms) {
                 return;
@@ -160,15 +163,14 @@ final class ZombiesTest {
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
-            ZombiesSceneProvider provider =
-                    new ZombiesSceneProvider(1, entry.getValue(), MinecraftServer.getInstanceManager(), instanceLoader,
-                            sceneFallback, global, ZombiesFeature.mobSpawnerSource(), Mob.getModels(),
-                            new BasicClientBlockHandlerSource(instance -> {
-                                DimensionType dimensionType = instance.getDimensionType();
-                                return new InstanceClientBlockHandler(instance, global, dimensionType.getMinY(),
-                                        dimensionType.getHeight());
-                            }), contextManager, keyParser, ZombiesFeature.powerups(),
-                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
+            ZombiesSceneProvider provider = new ZombiesSceneProvider(1, instanceSpaceFunction, entry.getValue(),
+                    MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, global,
+                    ZombiesFeature.mobSpawnerSource(), Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
+                DimensionType dimensionType = instance.getDimensionType();
+                return new InstanceClientBlockHandler(instance, global, dimensionType.getMinY(),
+                        dimensionType.getHeight());
+            }), contextManager, keyParser, ZombiesFeature.powerups(),
+                    new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
             providers.put(entry.getKey(), provider);
         }
         ZombiesSceneRouter sceneRouter = new ZombiesSceneRouter(providers);

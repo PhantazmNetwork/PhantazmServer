@@ -1,6 +1,5 @@
 package org.phantazm.proxima.bindings.minestom;
 
-import com.github.steanky.proxima.space.Space;
 import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
@@ -14,18 +13,24 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.LogicUtils;
 
 import java.util.Objects;
 
 public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
     private final InstanceSpace space;
+    private final EventNode<Event> root;
     private final EventNode<InstanceEvent> child;
 
-    public BasicInstanceSpaceHandler(@NotNull Instance instance, @NotNull EventNode<Event> root) {
-        this.space = new InstanceSpace(instance);
-        Objects.requireNonNull(root, "root");
+    private final Object sync;
+    private volatile boolean eventsRegistered;
 
-        this.child = EventNode.event("proxima_cache_synchronize_{" + instance.getUniqueId() + "}",
+    public BasicInstanceSpaceHandler(@NotNull InstanceSpace instanceSpace, @NotNull EventNode<Event> root) {
+        this.space = Objects.requireNonNull(instanceSpace, "instanceSpace");
+        this.root = Objects.requireNonNull(root, "root");
+
+        this.child = EventNode.event("proxima_cache_synchronize_{" +
+                        LogicUtils.nullCoalesce(instanceSpace.instance(), Instance::getUniqueId) + "}",
                 EventFilter.from(InstanceEvent.class, Instance.class, InstanceEvent::getInstance),
                 event -> event.getInstance() == space.instance());
 
@@ -33,7 +38,18 @@ public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
         this.child.addListener(InstanceChunkUnloadEvent.class, this::chunkUnload);
         this.child.addListener(BlockChangeEvent.class, this::blockChange);
 
-        root.addChild(this.child);
+        this.sync = new Object();
+    }
+
+    public void registerEvents() {
+        synchronized (sync) {
+            if (eventsRegistered) {
+                return;
+            }
+
+            root.addChild(this.child);
+            eventsRegistered = true;
+        }
     }
 
     private void unregisterInstance(InstanceUnregisterEvent event) {
@@ -74,7 +90,7 @@ public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
     }
 
     @Override
-    public @NotNull Space space() {
+    public @NotNull InstanceSpace space() {
         return space;
     }
 

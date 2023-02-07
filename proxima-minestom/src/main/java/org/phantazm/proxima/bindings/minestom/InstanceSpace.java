@@ -3,6 +3,7 @@ package org.phantazm.proxima.bindings.minestom;
 import com.github.steanky.proxima.solid.Solid;
 import com.github.steanky.proxima.space.ConcurrentCachingSpace;
 import com.github.steanky.vector.Bounds3D;
+import com.github.steanky.vector.Vec3IFunction;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
@@ -17,6 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InstanceSpace extends ConcurrentCachingSpace {
@@ -29,10 +31,16 @@ public class InstanceSpace extends ConcurrentCachingSpace {
     }
 
     private final Reference<Instance> instanceReference;
+    private volatile Vec3IFunction<? extends Solid> overrideFunction;
 
     public InstanceSpace(@NotNull Instance instance) {
+        this(instance, (x, y, z) -> null);
+    }
+
+    public InstanceSpace(@NotNull Instance instance, @NotNull Vec3IFunction<? extends Solid> overrideFunction) {
         super(instance.getDimensionType().getMinY());
-        this.instanceReference = new WeakReference<>(instance);
+        this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
+        this.overrideFunction = Objects.requireNonNull(overrideFunction, "overrideFunction");
     }
 
     @Override
@@ -47,7 +55,10 @@ public class InstanceSpace extends ConcurrentCachingSpace {
             return null;
         }
 
-        instance.getBlock(x, y, z);
+        Solid override = overrideFunction.apply(x, y, z);
+        if (override != null) {
+            return override;
+        }
 
         Block block = getBlock(chunk, x, y, z);
         if (block == null) {
@@ -139,6 +150,10 @@ public class InstanceSpace extends ConcurrentCachingSpace {
 
     public @Nullable Instance instance() {
         return instanceReference.get();
+    }
+
+    public void setOverrideFunction(@NotNull Vec3IFunction<? extends Solid> overrideFunction) {
+        this.overrideFunction = Objects.requireNonNull(overrideFunction, "overrideFunction");
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")

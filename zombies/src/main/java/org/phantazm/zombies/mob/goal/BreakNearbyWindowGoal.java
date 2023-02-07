@@ -53,7 +53,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
 
         @Override
         public void start() {
-
+            
         }
 
         @Override
@@ -73,7 +73,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
                     int targetIndex = index - data.breakCount;
 
                     int amount = window.updateIndex(targetIndex);
-                    if (amount != 1) {
+                    if (amount != 0) {
                         EventDispatcher.call(new EntityBreakWindowEvent(self, window, -amount));
                     }
                 });

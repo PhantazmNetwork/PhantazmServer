@@ -5,6 +5,7 @@ import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.element.core.path.ElementPath;
+import com.github.steanky.proxima.solid.Solid;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
@@ -13,6 +14,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityDamageEvent;
@@ -38,6 +40,8 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.mob.trigger.MobTrigger;
 import org.phantazm.mob.trigger.MobTriggers;
+import org.phantazm.proxima.bindings.minestom.InstanceSpaceHandler;
+import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.zombies.listener.*;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.*;
@@ -64,6 +68,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, ZombiesJoinRequest> {
+    private final Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction;
     private final IdentityHashMap<ZombiesScene, SceneContext> contexts;
     private final MapInfo mapInfo;
     private final InstanceManager instanceManager;
@@ -80,13 +85,16 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final WindowHandler.Source windowHandlerSource;
     private final DoorHandler.Source doorHandlerSource;
 
-    public ZombiesSceneProvider(int maximumScenes, @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager,
-            @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
-            @NotNull EventNode<Event> eventNode, @NotNull MobSpawnerSource mobSpawnerSource,
-            @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
-            @NotNull Map<Key, PowerupInfo> powerups, ZombiesPlayer.Source zombiesPlayerSource) {
+    public ZombiesSceneProvider(int maximumScenes,
+            @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
+            @NotNull MapInfo mapInfo, @NotNull InstanceManager instanceManager, @NotNull InstanceLoader instanceLoader,
+            @NotNull SceneFallback sceneFallback, @NotNull EventNode<Event> eventNode,
+            @NotNull MobSpawnerSource mobSpawnerSource, @NotNull Map<Key, MobModel> mobModels,
+            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull ContextManager contextManager,
+            @NotNull KeyParser keyParser, @NotNull Map<Key, PowerupInfo> powerups,
+            @NotNull ZombiesPlayer.Source zombiesPlayerSource) {
         super(maximumScenes);
+        this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.contexts = new IdentityHashMap<>(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
@@ -214,6 +222,17 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         eventNode.addChild(childNode);
         contexts.put(scene, new SceneContext(childNode));
+
+
+        InstanceSpawner.InstanceSettings instanceSettings = instanceSpaceFunction.apply(instance);
+        instanceSettings.spaceHandler().space().setOverrideFunction((x, y, z) -> {
+            if (windowHandler.tracker().atPoint(x, y, z).isPresent()) {
+                return Solid.EMPTY;
+            }
+
+            return null;
+        });
+
         return scene;
     }
 

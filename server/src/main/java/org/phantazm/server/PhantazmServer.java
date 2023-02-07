@@ -30,7 +30,6 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.server.ServerConfig;
 import org.phantazm.server.config.server.ServerInfoConfig;
-import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.data.GunData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,8 +196,8 @@ public final class PhantazmServer {
                 mappingProcessorSource.processorFor(Token.ofClass(GunData.class)));
 
         ZombiesFeature.initialize(contextManager, Mob.getProcessorMap(), Proxima.getSpawner(), keyParser);
-        ZombiesTest.initialize(global, ZombiesFeature.maps(), viewProvider, commandManager, contextManager, keyParser,
-                new CompositeFallback(
+        ZombiesTest.initialize(global, Proxima.instanceSettingsFunction(), ZombiesFeature.maps(), viewProvider,
+                commandManager, contextManager, keyParser, new CompositeFallback(
                         List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),
                                 new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
     }
