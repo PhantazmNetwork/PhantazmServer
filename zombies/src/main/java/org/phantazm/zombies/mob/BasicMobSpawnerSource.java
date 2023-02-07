@@ -1,6 +1,5 @@
 package org.phantazm.zombies.mob;
 
-import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
@@ -28,8 +27,6 @@ public class BasicMobSpawnerSource implements MobSpawnerSource {
 
     @Override
     public @NotNull MobSpawner make(@NotNull Supplier<? extends MapObjects> mapObjects, @NotNull MobStore mobStore) {
-
-
         return new BasicMobSpawner(processorMap, proximaSpawner, keyParser, mapObjects, mobStore);
     }
 }
