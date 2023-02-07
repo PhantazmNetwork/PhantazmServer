@@ -38,9 +38,7 @@ public class BasicDeadStateActivable implements Activable {
     public void start() {
         playerView.getPlayer().ifPresent(player -> {
             player.setInvisible(true);
-            player.setAllowFlying(true);
-            player.setFlying(true);
-            player.setGameMode(GameMode.ADVENTURE);
+            player.setGameMode(GameMode.SPECTATOR);
             sidebar.addViewer(player);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
@@ -55,8 +53,6 @@ public class BasicDeadStateActivable implements Activable {
     public void end() {
         playerView.getPlayer().ifPresent(player -> {
             player.setInvisible(false);
-            player.setFlying(false);
-            player.setAllowFlying(false);
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
         });
