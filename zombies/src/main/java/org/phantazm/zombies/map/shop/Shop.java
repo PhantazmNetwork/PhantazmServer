@@ -55,6 +55,12 @@ public class Shop implements Tickable, Bounded {
         return shopInfo;
     }
 
+    public void initialize() {
+        for (ShopDisplay display : displays) {
+            display.initialize(this);
+        }
+    }
+
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         boolean interact = shopInfo.predicateEvaluation().evaluate(predicates, interaction);
         List<ShopInteractor> interactorsToCall = interact ? successInteractors : failureInteractors;

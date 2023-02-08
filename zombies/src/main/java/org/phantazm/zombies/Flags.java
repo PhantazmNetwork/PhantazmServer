@@ -4,5 +4,7 @@ import net.kyori.adventure.key.Key;
 import org.phantazm.commons.Namespaces;
 
 public class Flags {
-    public static final Key INSTA_KILL = Key.key(Namespaces.PHANTAZM, "insta_kill");
+    public static final Key INSTA_KILL = Key.key(Namespaces.PHANTAZM, "zombies.map.flag.insta_kill");
+
+    public static final Key POWER = Key.key(Namespaces.PHANTAZM, "zombies.map.flag.power");
 }

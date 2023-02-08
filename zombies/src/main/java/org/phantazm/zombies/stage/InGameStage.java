@@ -8,6 +8,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.map.handler.RoundHandler;
+import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.InventoryKeys;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
@@ -16,27 +17,21 @@ import java.util.*;
 import java.util.function.Function;
 
 public class InGameStage implements Stage {
-
     private final Instance instance;
-
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
-
     private final Map<UUID, SidebarUpdater> sidebarUpdaters = new HashMap<>();
-
     private final Pos spawnPos;
-
     private final RoundHandler roundHandler;
-
     private final Wrapper<Long> ticksSinceStart;
-
     private final Collection<Key> defaultEquipment;
-
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
+    private final ShopHandler shopHandler;
 
     public InGameStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull Collection<Key> defaultEquipment,
-            @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
+            @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
+            @NotNull ShopHandler shopHandler) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.spawnPos = Objects.requireNonNull(spawnPos, "spawnPos");
@@ -44,6 +39,7 @@ public class InGameStage implements Stage {
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
         this.defaultEquipment = Objects.requireNonNull(defaultEquipment, "defaultEquipment");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
+        this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
     }
 
     @Override
@@ -95,6 +91,7 @@ public class InGameStage implements Stage {
                 });
             }
         }
+        shopHandler.initialize();
         ticksSinceStart.set(0L);
         roundHandler.setCurrentRound(0);
     }

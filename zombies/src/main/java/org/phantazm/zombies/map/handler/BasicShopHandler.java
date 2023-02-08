@@ -38,4 +38,11 @@ public class BasicShopHandler implements ShopHandler {
     public @NotNull BoundedTracker<Shop> tracker() {
         return shopTracker;
     }
+
+    @Override
+    public void initialize() {
+        for (Shop shop : shopTracker.items()) {
+            shop.initialize();
+        }
+    }
 }

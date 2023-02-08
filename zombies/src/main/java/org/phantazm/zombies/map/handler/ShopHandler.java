@@ -14,6 +14,8 @@ public interface ShopHandler extends Tickable {
 
     @NotNull @UnmodifiableView BoundedTracker<Shop> tracker();
 
+    void initialize();
+
     interface Source {
         @NotNull ShopHandler make(@NotNull BoundedTracker<Shop> shops);
     }

@@ -94,8 +94,10 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
         MobSpawner mobSpawner = mobSpawnerSource.make(mapObjectsWrapper, mobStore);
 
-        Module module = new Module(instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
-                slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler, mobStore);
+        Module module =
+                new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
+                        slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
+                        mobStore);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -236,6 +238,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     @Memoize
     @Depend
     public static class Module implements DependencyModule, MapObjects.Module {
+        private final KeyParser keyParser;
         private final Instance instance;
         private final Random random;
         private final Supplier<? extends RoundHandler> roundHandlerSupplier;
@@ -249,11 +252,13 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Wrapper<WindowHandler> windowHandler;
         private final MobStore mobStore;
 
-        private Module(Instance instance, Random random, Supplier<? extends RoundHandler> roundHandlerSupplier,
-                Flaggable flaggable, TransactionModifierSource transactionModifierSource,
-                SlotDistributor slotDistributor, Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
+        private Module(KeyParser keyParser, Instance instance, Random random,
+                Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
+                TransactionModifierSource transactionModifierSource, SlotDistributor slotDistributor,
+                Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
                 Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
                 Wrapper<WindowHandler> windowHandler, MobStore mobStore) {
+            this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
             this.instance = Objects.requireNonNull(instance, "instance");
             this.random = Objects.requireNonNull(random, "random");
             this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
@@ -266,6 +271,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
             this.windowHandler = Objects.requireNonNull(windowHandler, "windowHandler");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        }
+
+        @Override
+        public @NotNull KeyParser keyParser() {
+            return keyParser;
         }
 
         @Override

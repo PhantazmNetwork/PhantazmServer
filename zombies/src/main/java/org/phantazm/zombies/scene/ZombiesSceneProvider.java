@@ -198,7 +198,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         settings.maxPlayers());
         StageTransition stageTransition =
                 createStageTransition(instance, settings.introMessages(), mapObjects.module().random(),
-                        zombiesPlayers.values(), spawnPos, roundHandler, ticksSinceStart, sidebarModule);
+                        zombiesPlayers.values(), spawnPos, roundHandler, ticksSinceStart, sidebarModule, shopHandler);
 
         Wrapper<ZombiesScene> sceneWrapper = Wrapper.ofNull();
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
@@ -311,7 +311,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull List<Component> messages, @NotNull Random random,
             @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
             @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
-            @NotNull SidebarModule sidebarModule) {
+            @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
         Stage idle = new IdleStage(zombiesPlayers);
 
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
@@ -324,7 +324,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
                 mapInfo.settings().defaultEquipment(),
-                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")));
+                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler);
         Stage end = new EndStage(instance, zombiesPlayers, 200L,
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")));
         return new StageTransition(idle, countdown, inGame, end);

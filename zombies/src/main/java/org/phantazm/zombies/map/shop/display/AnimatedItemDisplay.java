@@ -18,7 +18,6 @@ import java.util.List;
 public class AnimatedItemDisplay extends ItemDisplayBase {
     private final Data data;
 
-    private int loopCount;
     private int frameIndex;
     private long timeAtLastFrame;
     private ItemAnimationFrame currentFrame;
@@ -31,7 +30,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
 
     @Override
     public void tick(long time) {
-        if (data.frames.isEmpty() || (data.loops >= 0 && loopCount > data.loops)) {
+        if (data.frames.isEmpty()) {
             return;
         }
 
@@ -45,7 +44,6 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
         if ((timeAtLastFrame - time) / MinecraftServer.TICK_MS > currentFrame.delayTicks()) {
             if (++frameIndex >= data.frames.size()) {
                 frameIndex = 0;
-                loopCount++;
             }
 
             currentFrame = data.frames.get(frameIndex);
@@ -57,13 +55,12 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
     @Override
     public void destroy(@NotNull Shop shop) {
         super.destroy(shop);
-        loopCount = 0;
         frameIndex = 0;
         timeAtLastFrame = 0;
         currentFrame = null;
     }
 
     @DataObject
-    public record Data(@NotNull Vec3D offset, @NotNull List<ItemAnimationFrame> frames, int loops) {
+    public record Data(@NotNull Vec3D offset, @NotNull List<ItemAnimationFrame> frames) {
     }
 }

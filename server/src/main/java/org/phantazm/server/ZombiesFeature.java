@@ -26,6 +26,8 @@ import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
 import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
 import org.phantazm.zombies.map.shop.LinearUpgradePath;
 import org.phantazm.zombies.map.shop.display.*;
+import org.phantazm.zombies.map.shop.display.creator.EquipmentUpgradeCostDisplayCreator;
+import org.phantazm.zombies.map.shop.display.creator.LinkedPlayerDisplayCreator;
 import org.phantazm.zombies.map.shop.gui.InteractingClickHandler;
 import org.phantazm.zombies.map.shop.interactor.*;
 import org.phantazm.zombies.map.shop.predicate.*;
@@ -128,10 +130,15 @@ public final class ZombiesFeature {
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
+        contextManager.registerElementClass(PlayerDisplay.class);
         contextManager.registerElementClass(StaticItemDisplay.class);
         contextManager.registerElementClass(ConditionalDisplay.class);
         contextManager.registerElementClass(IncrementalMetaDisplay.class);
         contextManager.registerElementClass(AnimatedItemDisplay.class);
+        contextManager.registerElementClass(LinkedPlayerDisplayCreator.class);
+        contextManager.registerElementClass(EmptyDisplay.class);
+
+        contextManager.registerElementClass(EquipmentUpgradeCostDisplayCreator.class);
 
         //Sidebar
         contextManager.registerElementClass(SidebarUpdater.class);

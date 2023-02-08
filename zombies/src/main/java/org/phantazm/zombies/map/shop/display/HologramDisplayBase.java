@@ -1,14 +1,25 @@
 package org.phantazm.zombies.map.shop.display;
 
-import net.minestom.server.coordinate.Vec;
+import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.hologram.Hologram;
-import org.phantazm.core.hologram.InstanceHologram;
+import org.phantazm.zombies.map.shop.Shop;
+
+import java.util.Objects;
 
 public abstract class HologramDisplayBase implements ShopDisplay {
     protected final Hologram hologram;
 
-    public HologramDisplayBase() {
+    public HologramDisplayBase(@NotNull Hologram hologram) {
         //initial origin does not matter, the location will be set in initialize
-        this.hologram = new InstanceHologram(Vec.ZERO, 0, Hologram.Alignment.LOWER);
+        this.hologram = Objects.requireNonNull(hologram, "hologram");
+    }
+
+    @Override
+    public void destroy(@NotNull Shop shop) {
+        hologram.clear();
+    }
+
+    public @NotNull Hologram hologram() {
+        return hologram;
     }
 }

@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map.objects;
 
 import com.github.steanky.element.core.dependency.DependencyProvider;
+import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
@@ -51,6 +52,8 @@ public interface MapObjects {
     }
 
     interface Module {
+        @NotNull KeyParser keyParser();
+
         @NotNull Instance instance();
 
         @NotNull Random random();
