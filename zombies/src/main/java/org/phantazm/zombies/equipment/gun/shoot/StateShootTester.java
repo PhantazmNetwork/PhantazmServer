@@ -65,22 +65,22 @@ public class StateShootTester implements ShootTester {
     /**
      * Data for a {@link StateShootTester}.
      *
-     * @param statsPath        A path to the gun's {@link GunStats}
-     * @param reloadTesterPath A path to the gun's {@link ReloadTester}
+     * @param stats        A path to the gun's {@link GunStats}
+     * @param reloadTester A path to the gun's {@link ReloadTester}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("stats") String statsPath,
-                       @NotNull @ChildPath("reload_tester") String reloadTesterPath) {
+    public record Data(@NotNull @ChildPath("stats") String stats,
+                       @NotNull @ChildPath("reload_tester") String reloadTester) {
 
         /**
          * Creates a {@link Data}.
          *
-         * @param statsPath        A path to the gun's {@link GunStats}
-         * @param reloadTesterPath A path to the gun's {@link ReloadTester}
+         * @param stats        A path to the gun's {@link GunStats}
+         * @param reloadTester A path to the gun's {@link ReloadTester}
          */
         public Data {
-            Objects.requireNonNull(statsPath, "statsPath");
-            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
+            Objects.requireNonNull(stats, "stats");
+            Objects.requireNonNull(reloadTester, "reloadTester");
         }
 
     }

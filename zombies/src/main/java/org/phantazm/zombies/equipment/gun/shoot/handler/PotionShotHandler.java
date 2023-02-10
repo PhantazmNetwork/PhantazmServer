@@ -22,7 +22,6 @@ import java.util.UUID;
 @Model("zombies.gun.shot_handler.potion")
 @Cache
 public class PotionShotHandler implements ShotHandler {
-
     private final Data data;
 
     /**
@@ -59,12 +58,5 @@ public class PotionShotHandler implements ShotHandler {
      */
     @DataObject
     public record Data(@NotNull Potion potion, @NotNull Potion headshotPotion) {
-
-        public Data {
-            Objects.requireNonNull(potion, "potion");
-            Objects.requireNonNull(headshotPotion, "headshotPotion");
-        }
-
     }
-
 }

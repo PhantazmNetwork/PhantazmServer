@@ -88,21 +88,11 @@ public class SpreadFirer implements Firer {
     /**
      * Data for a {@link SpreadFirer}.
      *
-     * @param subFirerPaths A {@link Collection} of paths to the {@link SpreadFirer}'s sub-{@link Firer}s
+     * @param subFirers     A {@link Collection} of paths to the {@link SpreadFirer}'s sub-{@link Firer}s
      * @param angleVariance The maximum angle variance for each sub-{@link Firer}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("sub_firers") Collection<String> subFirerPaths, float angleVariance) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param subFirerPaths A {@link Collection} of paths to the {@link SpreadFirer}'s sub-{@link Firer}s
-         * @param angleVariance The maximum angle variance for each sub-{@link Firer}
-         */
-        public Data {
-            Objects.requireNonNull(subFirerPaths, "subFirerPaths");
-        }
+    public record Data(@NotNull @ChildPath("sub_firers") Collection<String> subFirers, float angleVariance) {
 
     }
 

@@ -66,32 +66,15 @@ public class ReloadActionBarEffect implements GunEffect {
     /**
      * Data for an {@link ReloadActionBarEffect}.
      *
-     * @param statsPath                  A path to the guns's {@link GunStats}
-     * @param audienceProviderPath       A path to the {@link ReloadActionBarEffect}'s {@link AudienceProvider}
-     * @param reloadTesterPath           A path to the gun's {@link ReloadTester}
-     * @param reloadActionBarChooserPath A path to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
+     * @param stats                  A path to the guns's {@link GunStats}
+     * @param audienceProvider       A path to the {@link ReloadActionBarEffect}'s {@link AudienceProvider}
+     * @param reloadTester           A path to the gun's {@link ReloadTester}
+     * @param reloadActionBarChooser A path to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("stats") String statsPath,
-                       @NotNull @ChildPath("audience_provider") String audienceProviderPath,
-                       @NotNull @ChildPath("reload_tester") String reloadTesterPath,
-                       @NotNull @ChildPath("reload_action_bar_chooser") String reloadActionBarChooserPath) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param statsPath                  A path to the guns's {@link GunStats}
-         * @param audienceProviderPath       A path to the {@link ReloadActionBarEffect}'s {@link AudienceProvider}
-         * @param reloadTesterPath           A path to the gun's {@link ReloadTester}
-         * @param reloadActionBarChooserPath A path to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
-         */
-        public Data {
-            Objects.requireNonNull(statsPath, "statsPath");
-            Objects.requireNonNull(audienceProviderPath, "audienceProviderPath");
-            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
-            Objects.requireNonNull(reloadActionBarChooserPath, "reloadActionBarChooserPath");
-        }
-
+    public record Data(@NotNull @ChildPath("stats") String stats,
+                       @NotNull @ChildPath("audience_provider") String audienceProvider,
+                       @NotNull @ChildPath("reload_tester") String reloadTester,
+                       @NotNull @ChildPath("reload_action_bar_chooser") String reloadActionBarChooser) {
     }
-
 }

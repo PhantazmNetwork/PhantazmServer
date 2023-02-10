@@ -134,17 +134,6 @@ public class GuardianBeamShotHandler implements ShotHandler {
      */
     @DataObject
     public record Data(@NotNull EntityType entityType, long beamTime) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param entityType The entity type of the guardian to create a beam with
-         * @param beamTime   The time in ticks the beam will last
-         */
-        public Data {
-            Objects.requireNonNull(entityType, "entityType");
-        }
-
     }
 
     private record Beam(@NotNull Reference<Instance> instance,

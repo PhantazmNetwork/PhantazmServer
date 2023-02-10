@@ -204,47 +204,26 @@ public class ProjectileFirer implements Firer {
     /**
      * Data for a {@link ProjectileFirer}.
      *
-     * @param endSelectorPath     A path to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
-     * @param targetFinderPath    A path to the {@link ProjectileFirer}'s {@link TargetFinder}
-     * @param collisionFilterPath A path to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
-     * @param shotHandlerPaths    A {@link Collection} of paths to the {@link ProjectileFirer}'s {@link ShotHandler}s
-     * @param power               The power of the {@link ProjectileFirer}'s projectiles
-     * @param spread              The spread of the {@link ProjectileFirer}'s projectiles
-     * @param hasGravity          Whether the {@link ProjectileFirer}'s projectiles have gravity
-     * @param maxAliveTime        The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
-     *                            before automatically exploding
+     * @param endSelector     A path to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinder    A path to the {@link ProjectileFirer}'s {@link TargetFinder}
+     * @param collisionFilter A path to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
+     * @param shotHandlers    A {@link Collection} of paths to the {@link ProjectileFirer}'s {@link ShotHandler}s
+     * @param power           The power of the {@link ProjectileFirer}'s projectiles
+     * @param spread          The spread of the {@link ProjectileFirer}'s projectiles
+     * @param hasGravity      Whether the {@link ProjectileFirer}'s projectiles have gravity
+     * @param maxAliveTime    The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
+     *                        before automatically exploding
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("end_selector") String endSelectorPath,
-                       @NotNull @ChildPath("target_finder") String targetFinderPath,
-                       @NotNull @ChildPath("collision_filter") String collisionFilterPath,
-                       @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlerPaths,
+    public record Data(@NotNull @ChildPath("end_selector") String endSelector,
+                       @NotNull @ChildPath("target_finder") String targetFinder,
+                       @NotNull @ChildPath("collision_filter") String collisionFilter,
+                       @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlers,
                        @NotNull MobModel model,
                        double power,
                        double spread,
                        boolean hasGravity,
                        long maxAliveTime) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param endSelectorPath     A path to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
-         * @param targetFinderPath    A path to the {@link ProjectileFirer}'s {@link TargetFinder}
-         * @param collisionFilterPath A path to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
-         * @param shotHandlerPaths    A {@link Collection} of paths to the {@link ProjectileFirer}'s {@link ShotHandler}s
-         * @param power               The power of the {@link ProjectileFirer}'s projectiles
-         * @param spread              The spread of the {@link ProjectileFirer}'s projectiles
-         * @param hasGravity          Whether the {@link ProjectileFirer}'s projectiles have gravity
-         * @param maxAliveTime        The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live
-         */
-        public Data {
-            Objects.requireNonNull(endSelectorPath, "endSelectorPath");
-            Objects.requireNonNull(targetFinderPath, "targetFinderPath");
-            Objects.requireNonNull(collisionFilterPath, "collisionFilterPath");
-            Objects.requireNonNull(shotHandlerPaths, "shotHandlerPaths");
-            Objects.requireNonNull(model, "model");
-        }
-
     }
 
     private record FiredShot(@NotNull Gun gun,

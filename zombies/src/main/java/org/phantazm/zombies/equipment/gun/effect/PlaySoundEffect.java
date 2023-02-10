@@ -44,23 +44,10 @@ public class PlaySoundEffect implements GunEffect {
     /**
      * Data for an {@link PlaySoundEffect}.
      *
-     * @param audienceProviderPath A path to the {@link PlaySoundEffect}'s {@link AudienceProvider}
-     * @param sound                The {@link Sound} to play
+     * @param audienceProvider A path to the {@link PlaySoundEffect}'s {@link AudienceProvider}
+     * @param sound            The {@link Sound} to play
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath, @NotNull Sound sound) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param audienceProviderPath A path to the {@link PlaySoundEffect}'s {@link AudienceProvider}
-         * @param sound                The {@link Sound} to play
-         */
-        public Data {
-            Objects.requireNonNull(audienceProviderPath, "audienceProviderPath");
-            Objects.requireNonNull(sound, "sound");
-        }
-
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider, @NotNull Sound sound) {
     }
-
 }

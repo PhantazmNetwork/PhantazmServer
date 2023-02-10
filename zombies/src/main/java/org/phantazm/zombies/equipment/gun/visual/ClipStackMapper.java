@@ -39,20 +39,9 @@ public class ClipStackMapper implements GunStackMapper {
     /**
      * Data for a {@link ClipStackMapper}.
      *
-     * @param reloadTesterPath A path to the gun's {@link ReloadTester}
+     * @param reloadTester A path to the gun's {@link ReloadTester}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("reload_tester") String reloadTesterPath) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param reloadTesterPath A path to the gun's {@link ReloadTester}
-         */
-        public Data {
-            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
-        }
-
+    public record Data(@NotNull @ChildPath("reload_tester") String reloadTester) {
     }
-
 }

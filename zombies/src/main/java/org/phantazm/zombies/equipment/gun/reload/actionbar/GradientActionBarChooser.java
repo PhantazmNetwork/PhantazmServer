@@ -45,20 +45,5 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
      */
     @DataObject
     public record Data(@NotNull Component message, @NotNull RGBLike from, @NotNull RGBLike to) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param message The message to send
-         * @param from    The starting color of the gradient
-         * @param to      The ending color of the gradient
-         */
-        public Data {
-            Objects.requireNonNull(message, "message");
-            Objects.requireNonNull(from, "from");
-            Objects.requireNonNull(to, "to");
-        }
-
     }
-
 }

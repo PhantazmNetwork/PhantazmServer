@@ -24,7 +24,6 @@ import java.util.*;
 @Model("zombies.gun.target_finder.basic")
 @Cache(false)
 public class BasicTargetFinder implements TargetFinder {
-
     private final DirectionalEntityFinder entityFinder;
     private final TargetTester targetTester;
     private final IntersectionFinder intersectionFinder;
@@ -89,35 +88,19 @@ public class BasicTargetFinder implements TargetFinder {
     /**
      * Data for a {@link BasicTargetFinder}.
      *
-     * @param entityFinderPath       A path to the {@link BasicTargetFinder}'s {@link DirectionalEntityFinder}
-     * @param targetTesterPath       A path to the {@link BasicTargetFinder}'s {@link TargetTester}
-     * @param intersectionFinderPath A path to the {@link BasicTargetFinder}'s {@link IntersectionFinder}
-     * @param headshotTesterPath     A path to the {@link BasicTargetFinder}'s {@link HeadshotTester}
-     * @param targetLimiterPath      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
+     * @param entityFinder       A path to the {@link BasicTargetFinder}'s {@link DirectionalEntityFinder}
+     * @param targetTester       A path to the {@link BasicTargetFinder}'s {@link TargetTester}
+     * @param intersectionFinder A path to the {@link BasicTargetFinder}'s {@link IntersectionFinder}
+     * @param headshotTester     A path to the {@link BasicTargetFinder}'s {@link HeadshotTester}
+     * @param targetLimiter      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("entity_finder") String entityFinderPath,
-                       @NotNull @ChildPath("target_tester") String targetTesterPath,
-                       @NotNull @ChildPath("intersection_finder") String intersectionFinderPath,
-                       @NotNull @ChildPath("headshot_tester") String headshotTesterPath,
-                       @NotNull @ChildPath("target_limiter") String targetLimiterPath) {
+    public record Data(@NotNull @ChildPath("entity_finder") String entityFinder,
+                       @NotNull @ChildPath("target_tester") String targetTester,
+                       @NotNull @ChildPath("intersection_finder") String intersectionFinder,
+                       @NotNull @ChildPath("headshot_tester") String headshotTester,
+                       @NotNull @ChildPath("target_limiter") String targetLimiter) {
 
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param entityFinderPath       A path to the {@link BasicTargetFinder}'s {@link DirectionalEntityFinder}
-         * @param targetTesterPath       A path to the {@link BasicTargetFinder}'s {@link TargetTester}
-         * @param intersectionFinderPath A path to the {@link BasicTargetFinder}'s {@link IntersectionFinder}
-         * @param headshotTesterPath     A path to the {@link BasicTargetFinder}'s {@link HeadshotTester}
-         * @param targetLimiterPath      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
-         */
-        public Data {
-            Objects.requireNonNull(entityFinderPath, "entityFinderPath");
-            Objects.requireNonNull(targetTesterPath, "targetTesterPath");
-            Objects.requireNonNull(intersectionFinderPath, "intersectionFinderPath");
-            Objects.requireNonNull(headshotTesterPath, "headshotTesterPath");
-            Objects.requireNonNull(targetLimiterPath, "targetLimiterPath");
-        }
 
     }
 

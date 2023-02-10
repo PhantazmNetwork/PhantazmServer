@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 @Model("zombies.gun.block_iteration.block")
 @Cache
 public class BasicBlockIteration implements BlockIteration {
-
     private static final Context CONTEXT = new Context() {
         @SuppressWarnings("UnstableApiUsage")
         @Override

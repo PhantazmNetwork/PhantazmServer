@@ -99,23 +99,10 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
     /**
      * Data for a {@link BasicShotEndpointSelector}.
      *
-     * @param blockIterationPaths Paths to the {@link BasicShotEndpointSelector}'s {@link BlockIteration}
-     * @param maxDistance         The maximum distance of the endpoint from the start
+     * @param blockIterations Paths to the {@link BasicShotEndpointSelector}'s {@link BlockIteration}
+     * @param maxDistance     The maximum distance of the endpoint from the start
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("block_iterations") Collection<String> blockIterationPaths,
-                       int maxDistance) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param blockIterationPaths A path to the {@link BasicShotEndpointSelector}'s {@link BlockIteration}
-         * @param maxDistance         The maximum distance of the endpoint from the start
-         */
-        public Data {
-            Objects.requireNonNull(blockIterationPaths, "blockIterationPaths");
-        }
-
+    public record Data(@NotNull @ChildPath("block_iterations") Collection<String> blockIterations, int maxDistance) {
     }
-
 }

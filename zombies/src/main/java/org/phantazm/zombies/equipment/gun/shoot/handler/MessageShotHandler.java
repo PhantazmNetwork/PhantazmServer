@@ -21,7 +21,6 @@ import java.util.UUID;
 @Model("zombies.gun.shot_handler.message")
 @Cache(false)
 public class MessageShotHandler implements ShotHandler {
-
     private final Data data;
     private final AudienceProvider audienceProvider;
 
@@ -59,22 +58,13 @@ public class MessageShotHandler implements ShotHandler {
     /**
      * Data for a {@link MessageShotHandler}.
      *
-     * @param audienceProviderPath A path to the {@link MessageShotHandler}'s {@link AudienceProvider}
-     * @param message              The message to send for regular hits
-     * @param headshotMessage      The message to send for headshots
+     * @param audienceProvider A path to the {@link MessageShotHandler}'s {@link AudienceProvider}
+     * @param message          The message to send for regular hits
+     * @param headshotMessage  The message to send for headshots
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath,
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
                        @NotNull Component message,
                        @NotNull Component headshotMessage) {
-
-        public Data {
-            Objects.requireNonNull(audienceProviderPath, "audienceProviderPath");
-            Objects.requireNonNull(message, "message");
-            Objects.requireNonNull(headshotMessage, "headshotMessage");
-        }
-
     }
-
-
 }

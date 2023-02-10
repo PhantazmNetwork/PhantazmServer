@@ -90,28 +90,14 @@ public class HitScanFirer implements Firer {
     /**
      * Data for a {@link HitScanFirer}.
      *
-     * @param endSelectorPath  A path to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
-     * @param targetFinderPath A path to the {@link HitScanFirer}'s {@link TargetFinder}
-     * @param shotHandlerPaths A path to the {@link HitScanFirer}'s {@link ShotHandler}s
+     * @param endSelector  A path to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
+     * @param targetFinder A path to the {@link HitScanFirer}'s {@link TargetFinder}
+     * @param shotHandlers A path to the {@link HitScanFirer}'s {@link ShotHandler}s
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("end_selector") String endSelectorPath,
-                       @NotNull @ChildPath("target_finder") String targetFinderPath,
-                       @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlerPaths) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param endSelectorPath  A path to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
-         * @param targetFinderPath A path to the {@link HitScanFirer}'s {@link TargetFinder}
-         * @param shotHandlerPaths A path to the {@link HitScanFirer}'s {@link ShotHandler}s
-         */
-        public Data {
-            Objects.requireNonNull(endSelectorPath, "endSelectorPath");
-            Objects.requireNonNull(targetFinderPath, "targetFinderPath");
-            Objects.requireNonNull(shotHandlerPaths, "shotHandlerPaths");
-        }
-
+    public record Data(@NotNull @ChildPath("end_selector") String endSelector,
+                       @NotNull @ChildPath("target_finder") String targetFinder,
+                       @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlers) {
     }
 
 }

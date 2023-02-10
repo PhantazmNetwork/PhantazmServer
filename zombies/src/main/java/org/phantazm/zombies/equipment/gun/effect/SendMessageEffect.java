@@ -45,24 +45,10 @@ public class SendMessageEffect implements GunEffect {
     /**
      * Data for a {@link SendMessageEffect}.
      *
-     * @param audienceProviderPath A path to the {@link SendMessageEffect}'s {@link AudienceProvider}
-     * @param message              The {@link Component} to send to the {@link Audience}
+     * @param audienceProvider A path to the {@link SendMessageEffect}'s {@link AudienceProvider}
+     * @param message          The {@link Component} to send to the {@link Audience}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath,
-                       @NotNull Component message) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param audienceProviderPath A path to the {@link SendMessageEffect}'s {@link AudienceProvider}
-         * @param message              The {@link Component} to send to the {@link Audience}
-         */
-        public Data {
-            Objects.requireNonNull(audienceProviderPath, "audienceProviderPath");
-            Objects.requireNonNull(message, "message");
-        }
-
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider, @NotNull Component message) {
     }
-
 }

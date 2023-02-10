@@ -16,7 +16,6 @@ import java.util.Objects;
 @Model("zombies.gun.effect.ammo_level")
 @Cache(false)
 public class AmmoLevelEffect implements GunEffect {
-
     private final PlayerView playerView;
     private boolean currentlyActive = false;
 

@@ -78,17 +78,5 @@ public class ParticleTrailShotHandler implements ShotHandler {
      */
     @DataObject
     public record Data(@NotNull ParticleWrapper particle, int trailCount) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param particle   The {@link ParticleWrapper} to use for the trail
-         * @param trailCount The number of particles to create in the trail
-         */
-        public Data {
-            Objects.requireNonNull(particle, "particle");
-        }
-
     }
-
 }

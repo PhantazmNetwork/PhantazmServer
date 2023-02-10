@@ -16,7 +16,6 @@ import java.util.Objects;
 @Model("zombies.gun.firer.projectile.collision_filter.phantazm_mob")
 @Cache(false)
 public class PhantazmMobProjectileCollisionFilter implements ProjectileCollisionFilter {
-
     private final MobStore mobStore;
 
     /**

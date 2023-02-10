@@ -41,16 +41,5 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
      */
     @DataObject
     public record Data(@NotNull Component message) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param message The message to send
-         */
-        public Data {
-            Objects.requireNonNull(message, "message");
-        }
-
     }
-
 }

@@ -44,20 +44,9 @@ public class StateReloadTester implements ReloadTester {
     /**
      * Data for a {@link StateReloadTester}.
      *
-     * @param statsPath A path to the gun's {@link GunStats}
+     * @param stats A path to the gun's {@link GunStats}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("stats") String statsPath) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param statsPath A path to the gun's {@link GunStats}
-         */
-        public Data {
-            Objects.requireNonNull(statsPath, "statsPath");
-        }
-
+    public record Data(@NotNull @ChildPath("stats") String stats) {
     }
-
 }

@@ -18,7 +18,6 @@ import java.util.*;
 @Model("zombies.gun.shoot_handler.sound")
 @Cache(false)
 public class SoundShotHandler implements ShotHandler {
-
     private final Data data;
     private final AudienceProvider audienceProvider;
 
@@ -63,29 +62,14 @@ public class SoundShotHandler implements ShotHandler {
     /**
      * Data for a {@link SoundShotHandler}.
      *
-     * @param audienceProviderPath A path to the {@link SoundShotHandler}'s {@link AudienceProvider}
-     * @param sound                The sound to play for regular targets
-     * @param headshotSound        The sound to play for headshots
+     * @param audienceProvider A path to the {@link SoundShotHandler}'s {@link AudienceProvider}
+     * @param sound            The sound to play for regular targets
+     * @param headshotSound    The sound to play for headshots
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("audience_provider") String audienceProviderPath,
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
                        @NotNull Sound sound,
                        @NotNull Sound headshotSound,
                        boolean atShooter) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param audienceProviderPath A path to the {@link SoundShotHandler}'s {@link AudienceProvider}
-         * @param sound                The sound to play for regular targets
-         * @param headshotSound        The sound to play for headshots
-         */
-        public Data {
-            Objects.requireNonNull(audienceProviderPath, "audienceProviderPath");
-            Objects.requireNonNull(sound, "sound");
-            Objects.requireNonNull(headshotSound, "headshotSound");
-        }
-
     }
-
 }
