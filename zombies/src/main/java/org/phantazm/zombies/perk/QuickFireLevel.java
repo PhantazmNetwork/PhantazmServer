@@ -37,7 +37,7 @@ public class QuickFireLevel extends PerkLevelBase {
 
     @Override
     public void tick(long time) {
-        for (Equipment equipment : user.module().getEquipment()) {
+        for (Equipment equipment : user.module().getEquipmentHandler().getEquipment(getData().groupKey)) {
             if (!(equipment instanceof Gun gun) || registeredTesters.contains(gun.getLevel().shootTester())) {
                 continue;
             }
@@ -71,6 +71,7 @@ public class QuickFireLevel extends PerkLevelBase {
 
     @DataObject
     public record Data(@NotNull Key levelKey,
+                       @NotNull Key groupKey,
                        @NotNull Set<Key> upgrades,
                        @NotNull @ChildPath("updating_item") String updatingItemPath,
                        double multiplier) implements PerkData {

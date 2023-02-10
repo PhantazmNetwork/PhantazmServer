@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.Equipment;
+import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.UpgradePath;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -31,6 +32,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
     public boolean canInteract(@NotNull PlayerInteraction interaction) {
         ZombiesPlayer player = interaction.player();
         ZombiesPlayerModule module = player.module();
+        EquipmentHandler handler = module.getEquipmentHandler();
 
         if (data.mustHoldItemToUpgrade) {
             Optional<Equipment> heldEquipment = player.getHeldEquipment();
@@ -57,7 +59,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
             if (!data.allowDuplicate) {
                 //if duplicates are not allowed: check for them
-                for (Equipment equipment : module.getEquipment()) {
+                for (Equipment equipment : handler.getEquipment(data.groupKey)) {
                     if (equipment.key().equals(data.equipmentKey)) {
                         return false;
                     }
@@ -71,7 +73,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
         //check if we can upgrade our equipment
         boolean foundSameType = false;
-        for (Equipment equipment : module.getEquipment()) {
+        for (Equipment equipment : handler.getEquipment(data.groupKey)) {
             if (equipment.key().equals(data.equipmentKey)) {
                 foundSameType = true;
 

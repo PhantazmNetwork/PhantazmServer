@@ -99,10 +99,6 @@ public class ZombiesPlayerModule implements DependencyModule {
         return equipmentCreator;
     }
 
-    public @NotNull @UnmodifiableView Collection<Equipment> getEquipment() {
-        return List.of();
-    }
-
     public @NotNull InventoryAccessRegistry getInventoryAccessRegistry() {
         return profileSwitcher;
     }

@@ -250,7 +250,7 @@ final class EquipmentFeature {
                 }
 
                 GunModel model = new GunModel(rootLevel, levels);
-                Gun gun = new Gun(gunModule.getPlayerView()::getPlayer, model);
+                Gun gun = new Gun(equipmentKey, gunModule.getPlayerView()::getPlayer, model);
 
                 return Optional.of((TEquipment)gun);
             }

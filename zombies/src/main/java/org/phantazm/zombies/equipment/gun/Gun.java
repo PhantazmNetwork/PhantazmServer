@@ -22,19 +22,13 @@ import java.util.function.Supplier;
  * The gun's {@link Firer} is responsible for the actual shooting.
  */
 public class Gun extends CachedInventoryObject implements Equipment, Upgradable {
-
+    private final Key equipmentKey;
     private final Supplier<Optional<? extends Entity>> entitySupplier;
-
     private final GunModel model;
-
     private final Set<GunLevel> tickingLevels;
-
     private Key levelKey;
-
     private GunLevel level;
-
     private GunState state;
-
     private boolean reloadComplete = false;
 
     /**
@@ -43,7 +37,9 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
      * @param entitySupplier A {@link Supplier} that provides the owner of the {@link Gun}
      * @param model          The {@link GunModel} of the {@link Gun}
      */
-    public Gun(@NotNull Supplier<Optional<? extends Entity>> entitySupplier, @NotNull GunModel model) {
+    public Gun(@NotNull Key equipmentKey, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+            @NotNull GunModel model) {
+        this.equipmentKey = Objects.requireNonNull(equipmentKey, "equipmentKey");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.model = Objects.requireNonNull(model, "model");
         this.tickingLevels = Collections.newSetFromMap(new IdentityHashMap<>(model.levels().size()));
@@ -260,6 +256,6 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
     @Override
     public @NotNull Key key() {
-        return model.rootLevel();
+        return equipmentKey;
     }
 }

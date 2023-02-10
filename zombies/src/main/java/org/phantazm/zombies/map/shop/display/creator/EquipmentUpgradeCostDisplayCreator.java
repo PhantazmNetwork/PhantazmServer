@@ -56,7 +56,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
         private Optional<Integer> computeCost() {
             boolean foundEquipment = false;
-            for (Equipment equipment : zombiesPlayer.module().getEquipment()) {
+            for (Equipment equipment : zombiesPlayer.module().getEquipmentHandler().getEquipment(data.groupKey)) {
                 if (!equipment.key().equals(data.equipmentKey)) {
                     continue;
                 }
@@ -66,9 +66,11 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
                     Optional<Key> levelOptional = upgradePath.nextUpgrade(upgradable.currentLevel());
                     if (levelOptional.isPresent()) {
                         Key level = levelOptional.get();
-                        int cost = data.upgradeCosts.get(level);
+                        Integer cost = data.upgradeCosts.get(level);
 
-                        return Optional.of(applyModifiers(cost));
+                        if (cost != null) {
+                            return Optional.of(applyModifiers(cost));
+                        }
                     }
                 }
             }
@@ -90,7 +92,8 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
         private void updateCostDisplay() {
             Optional<Integer> costOptional = computeCost();
             if (costOptional.isPresent()) {
-                Component text = MiniMessage.miniMessage().deserialize(String.format(data.formatString, computeCost()));
+                Component text =
+                        MiniMessage.miniMessage().deserialize(String.format(data.formatString, costOptional.get()));
                 if (hologram.isEmpty()) {
                     hologram.add(text);
                 }
@@ -126,6 +129,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
     public record Data(@NotNull Vec3D position,
                        @NotNull String formatString,
                        @NotNull Key equipmentKey,
+                       @NotNull Key groupKey,
                        int baseCost,
                        @NotNull Map<Key, Integer> upgradeCosts,
                        @NotNull Key costModifier,

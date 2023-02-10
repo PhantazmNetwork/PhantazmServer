@@ -25,7 +25,7 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         ZombiesPlayer player = interaction.player();
-        for (Equipment equipment : player.module().getEquipment()) {
+        for (Equipment equipment : player.module().getEquipmentHandler().getEquipment(data.groupKey)) {
             if (equipment.key().equals(data.equipmentKey) && equipment instanceof Upgradable upgradable) {
                 upgradePath.nextUpgrade(upgradable.currentLevel()).ifPresent(upgradeKey -> {
                     if (upgradable.getSuggestedUpgrades().contains(upgradeKey)) {
