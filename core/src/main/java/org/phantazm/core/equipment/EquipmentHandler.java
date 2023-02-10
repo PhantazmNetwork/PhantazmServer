@@ -61,6 +61,10 @@ public class EquipmentHandler {
 
         InventoryAccess access = accessRegistry.getCurrentAccess();
         InventoryObjectGroup group = access.groups().get(groupKey);
+        if (group == null) {
+            return List.of();
+        }
+
         IntSet slots = group.getSlots();
 
         InventoryProfile profile = access.profile();
