@@ -89,35 +89,18 @@ public record GunLevel(@NotNull Data data,
 
     @DataObject
     public record Data(@NotNull Key key,
-                       @NotNull @ChildPath("stats") String statsPath,
-                       @NotNull @ChildPath("shoot_tester") String shootTesterPath,
-                       @NotNull @ChildPath("reload_tester") String reloadTesterPath,
-                       @NotNull @ChildPath("firer") String firerPath,
-                       @NotNull @ChildPath("activate_effects") Collection<String> activateEffectPaths,
-                       @NotNull @ChildPath("shoot_effects") Collection<String> shootEffectPaths,
-                       @NotNull @ChildPath("reload_effects") Collection<String> reloadEffectPaths,
-                       @NotNull @ChildPath("tick_effects") Collection<String> tickEffectPaths,
-                       @NotNull @ChildPath("no_ammo_effects") Collection<String> noAmmoEffectPaths,
-                       @NotNull @ChildPath("gun_stack_mappers") Collection<String> gunStackMapperPaths,
+                       @NotNull @ChildPath("stats") String stats,
+                       @NotNull @ChildPath("shoot_tester") String shootTester,
+                       @NotNull @ChildPath("reload_tester") String reloadTester,
+                       @NotNull @ChildPath("firer") String firer,
+                       @NotNull @ChildPath("activate_effects") Collection<String> activateEffects,
+                       @NotNull @ChildPath("shoot_effects") Collection<String> shootEffects,
+                       @NotNull @ChildPath("reload_effects") Collection<String> reloadEffects,
+                       @NotNull @ChildPath("tick_effects") Collection<String> tickEffects,
+                       @NotNull @ChildPath("no_ammo_effects") Collection<String> noAmmoEffects,
+                       @NotNull @ChildPath("gun_stack_mappers") Collection<String> gunStackMappers,
                        @NotNull ItemStack stack,
                        @NotNull Set<Key> upgrades) {
-
-        public Data {
-            Objects.requireNonNull(key, "key");
-            Objects.requireNonNull(statsPath, "statsPath");
-            Objects.requireNonNull(shootTesterPath, "shootTesterPath");
-            Objects.requireNonNull(reloadTesterPath, "reloadTesterPath");
-            Objects.requireNonNull(firerPath, "firerPath");
-            verifyCollection(activateEffectPaths, "activateEffectPaths");
-            verifyCollection(shootEffectPaths, "shootEffectPaths");
-            verifyCollection(reloadEffectPaths, "reloadEffectPaths");
-            verifyCollection(tickEffectPaths, "tickEffectPaths");
-            verifyCollection(noAmmoEffectPaths, "noAmmoEffectPaths");
-            verifyCollection(gunStackMapperPaths, "gunStackMapperPaths");
-            Objects.requireNonNull(stack, "stack");
-            verifyCollection(upgrades, "upgrades");
-        }
-
     }
 
 }
