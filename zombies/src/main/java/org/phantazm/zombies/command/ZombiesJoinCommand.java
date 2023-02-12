@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ZombiesJoinCommand extends Command {
+    private static final Argument<String> MAP_KEY_ARGUMENT = ArgumentType.String("map-key");
 
     public ZombiesJoinCommand(@NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser,
             @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider) {
@@ -32,8 +33,7 @@ public class ZombiesJoinCommand extends Command {
         Objects.requireNonNull(maps, "maps");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
-        Argument<String> mapKeyArgument = ArgumentType.String("map-key");
-        mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
+        MAP_KEY_ARGUMENT.setSuggestionCallback((sender, context, suggestion) -> {
             for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
                 suggestion.addEntry(
                         new SuggestionEntry(entry.getKey().asString(), entry.getValue().settings().displayName()));
@@ -48,7 +48,7 @@ public class ZombiesJoinCommand extends Command {
             return false;
         }, (sender, context) -> {
             @Subst("test_map")
-            String mapKeyString = context.get(mapKeyArgument);
+            String mapKeyString = context.get(MAP_KEY_ARGUMENT);
             if (!keyParser.isValidKey(mapKeyString)) {
                 sender.sendMessage(Component.text("Invalid key!", NamedTextColor.RED));
                 return;
@@ -60,11 +60,10 @@ public class ZombiesJoinCommand extends Command {
                 return;
             }
 
-            RouteResult result = router.join(new ZombiesRouteRequest(mapKey, () -> {
-                return Collections.singleton(viewProvider.fromPlayer((Player)sender));
-            }));
+            RouteResult result = router.join(new ZombiesRouteRequest(mapKey,
+                    () -> Collections.singleton(viewProvider.fromPlayer((Player)sender))));
             result.message().ifPresent(sender::sendMessage);
-        }, mapKeyArgument);
+        }, MAP_KEY_ARGUMENT);
     }
 
 }

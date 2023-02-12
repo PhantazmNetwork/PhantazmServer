@@ -8,12 +8,31 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandManager;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.instance.DynamicChunk;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
+import net.minestom.server.scoreboard.Team;
+import net.minestom.server.scoreboard.TeamManager;
+import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.core.BasicClientBlockHandlerSource;
+import org.phantazm.core.InstanceClientBlockHandler;
+import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
+import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.item.AnimatedUpdatingItem;
 import org.phantazm.core.item.StaticUpdatingItem;
+import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
@@ -36,6 +55,7 @@ import org.phantazm.zombies.map.shop.predicate.logic.OrPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.XorPredicate;
 import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
+import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
 import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
@@ -43,6 +63,9 @@ import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
 import org.phantazm.zombies.powerup.visual.HologramVisual;
 import org.phantazm.zombies.powerup.visual.ItemVisual;
+import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene.ZombiesSceneProvider;
+import org.phantazm.zombies.scene.ZombiesSceneRouter;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.phantazm.zombies.sidebar.lineupdater.*;
 import org.phantazm.zombies.sidebar.lineupdater.condition.StateConditionCreator;
@@ -58,35 +81,66 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 
 public final class ZombiesFeature {
     public static final Path MAPS_FOLDER = Path.of("./zombies/maps");
     public static final Path POWERUPS_FOLDER = Path.of("./zombies/powerups");
+    public static final Path INSTANCES_FOLDER = Path.of("./zombies/instances");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
 
     private static Map<Key, MapInfo> maps;
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
+    private static ZombiesSceneRouter sceneRouter;
 
-    static void initialize(@NotNull ContextManager contextManager,
+    static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
-            @NotNull KeyParser keyParser) throws IOException {
+            @NotNull KeyParser keyParser,
+            @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
+            @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
+            @NotNull SceneFallback sceneFallback) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
         ConfigCodec codec = new YamlCodec();
         ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec));
         ZombiesFeature.powerups = loadFeature("powerup", new FileSystemPowerupLoader(POWERUPS_FOLDER, codec));
-
         ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
+
+        InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(INSTANCES_FOLDER, DynamicChunk::new);
+
+        Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
+        TeamManager teamManager = MinecraftServer.getTeamManager();
+        Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
+                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
+        for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
+            ZombiesSceneProvider provider = new ZombiesSceneProvider(1, instanceSpaceFunction, entry.getValue(),
+                    MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
+                    ZombiesFeature.mobSpawnerSource(), Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
+                DimensionType dimensionType = instance.getDimensionType();
+                return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
+                        dimensionType.getHeight());
+            }), contextManager, keyParser, ZombiesFeature.powerups(),
+                    new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
+            providers.put(entry.getKey(), provider);
+        }
+
+        ZombiesFeature.sceneRouter = new ZombiesSceneRouter(providers);
+
+        MinecraftServer.getSchedulerManager()
+                .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
+                        TaskSchedule.tick(1));
+
+        commandManager.register(
+                new ZombiesCommand(sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
         LOGGER.info("Registering Zombies element classes...");
+
         //Action<Room>, Action<Round>, Action<Door>, and Action<Wave>
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);
@@ -231,5 +285,13 @@ public final class ZombiesFeature {
 
     public static @NotNull MobSpawnerSource mobSpawnerSource() {
         return FeatureUtils.check(mobSpawnerSource);
+    }
+
+    public static @NotNull Optional<ZombiesScene> getPlayerScene(@NotNull UUID playerUUID) {
+        return FeatureUtils.check(sceneRouter).getScene(playerUUID);
+    }
+
+    public static @NotNull ZombiesSceneRouter zombiesSceneRouter() {
+        return FeatureUtils.check(sceneRouter);
     }
 }

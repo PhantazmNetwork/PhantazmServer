@@ -167,9 +167,6 @@ public final class PhantazmServer {
             LobbiesConfig lobbiesConfig) throws Exception {
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
 
-        CommandManager commandManager = MinecraftServer.getCommandManager();
-        ServerCommandFeature.initialize(commandManager);
-
         Ethylene.initialize(keyParser);
 
         MappingProcessorSource mappingProcessorSource = Ethylene.getMappingProcessorSource();
@@ -195,11 +192,14 @@ public final class PhantazmServer {
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())),
                 mappingProcessorSource.processorFor(Token.ofClass(GunData.class)));
 
-        ZombiesFeature.initialize(contextManager, Mob.getProcessorMap(), Proxima.getSpawner(), keyParser);
-        ZombiesTest.initialize(global, Proxima.instanceSettingsFunction(), ZombiesFeature.maps(), viewProvider,
-                commandManager, contextManager, keyParser, new CompositeFallback(
+        CommandManager commandManager = MinecraftServer.getCommandManager();
+        ZombiesFeature.initialize(global, contextManager, Mob.getProcessorMap(), Proxima.getSpawner(), keyParser,
+                Proxima.instanceSettingsFunction(), viewProvider, commandManager, new CompositeFallback(
                         List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),
                                 new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
+
+        ZombiesTest.initialize(global);
+        ServerCommandFeature.initialize(commandManager);
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {

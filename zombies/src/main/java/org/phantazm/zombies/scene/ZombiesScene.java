@@ -30,17 +30,11 @@ import java.util.*;
 import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
-
     private final ZombiesMap map;
-
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
-
     private final MapSettingsInfo mapSettingsInfo;
-
     private final StageTransition stageTransition;
-
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
 
     private boolean joinable = true;
@@ -52,7 +46,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         super(instance, fallback);
 
         this.map = Objects.requireNonNull(map, "map");
-        this.zombiesPlayers = zombiesPlayers;
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
@@ -112,22 +106,20 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
         for (PlayerView view : newPlayers) {
-            view.getPlayer().ifPresent(player -> {
-                player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
-                    if (throwable != null) {
-                        LOGGER.warn("Failed to send {} to an instance", player.getUuid(), throwable);
-                        return;
-                    }
+            view.getPlayer().ifPresent(player -> player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.warn("Failed to send {} to an instance", player.getUuid(), throwable);
+                    return;
+                }
 
-                    ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-                    zombiesPlayer.start();
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                    zombiesPlayers.put(view.getUUID(), zombiesPlayer);
-                    players.put(view.getUUID(), view);
+                ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+                zombiesPlayer.start();
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                zombiesPlayers.put(view.getUUID(), zombiesPlayer);
+                players.put(view.getUUID(), view);
 
-                    stage.onJoin(zombiesPlayer);
-                });
-            });
+                stage.onJoin(zombiesPlayer);
+            }));
         }
 
         return RouteResult.SUCCESSFUL;

@@ -1,6 +1,8 @@
-package org.phantazm.core.game.scene;
+package org.phantazm.server;
 
+import org.phantazm.core.game.scene.SceneKey;
 import org.phantazm.core.game.scene.lobby.LobbyRouter;
+import org.phantazm.zombies.scene.ZombiesSceneRouter;
 
 /**
  * A static class container for reusable {@link SceneKey}s.

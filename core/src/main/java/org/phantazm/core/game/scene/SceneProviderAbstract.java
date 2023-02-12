@@ -10,11 +10,8 @@ import java.util.*;
  */
 public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TRequest extends SceneJoinRequest>
         implements SceneProvider<TScene, TRequest> {
-
     private final Collection<TScene> scenes = new ArrayList<>();
-
     private final Collection<TScene> unmodifiableScenes = Collections.unmodifiableCollection(scenes);
-
     private final int maximumScenes;
 
     /**

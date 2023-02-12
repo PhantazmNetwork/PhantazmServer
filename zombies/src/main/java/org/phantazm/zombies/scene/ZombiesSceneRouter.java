@@ -11,11 +11,8 @@ import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
 
-// TODO: almost everything is copied from LobbySceneRouter, but trying to create a base creates a lot of generics
 public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
-
     private final Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders;
-
     private final Map<UUID, ZombiesScene> playerSceneMap = new HashMap<>();
 
     private final Map<UUID, PlayerView> unmodifiablePlayers = new AbstractMap<>() {
@@ -57,12 +54,15 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
     };
 
     private boolean shutdown = false;
-
     private boolean joinable = true;
 
     public ZombiesSceneRouter(
             @NotNull Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders) {
         this.sceneProviders = Objects.requireNonNull(sceneProviders, "sceneProviders");
+    }
+
+    public @NotNull Optional<ZombiesScene> getScene(@NotNull UUID uuid) {
+        return Optional.ofNullable(playerSceneMap.get(uuid));
     }
 
     @Override

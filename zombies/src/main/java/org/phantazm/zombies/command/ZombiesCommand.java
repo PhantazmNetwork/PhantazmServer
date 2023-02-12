@@ -8,14 +8,18 @@ import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.scene.ZombiesRouteRequest;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
 
 public class ZombiesCommand extends Command {
-
     public ZombiesCommand(@NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser,
-            @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider) {
+            @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
+            @NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
         super("zombies");
 
         Objects.requireNonNull(router, "router");
@@ -24,6 +28,6 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(viewProvider, "viewProvider");
 
         addSubcommand(new ZombiesJoinCommand(router, keyParser, maps, viewProvider));
+        addSubcommand(new GiveCoinsCommand(sceneMapper));
     }
-
 }

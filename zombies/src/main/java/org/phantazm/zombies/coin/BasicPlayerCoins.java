@@ -11,13 +11,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class BasicPlayerCoins implements PlayerCoins {
-
     private final PlayerView playerView;
-
     private final TransactionComponentCreator componentCreator;
-
     private volatile int coins;
-
     private final Object sync;
 
     public BasicPlayerCoins(@NotNull PlayerView playerView, @NotNull TransactionComponentCreator componentCreator,
@@ -76,6 +72,13 @@ public class BasicPlayerCoins implements PlayerCoins {
                         componentCreator.createTransactionComponent(result.modifierNames(), result.change());
                 player.sendMessage(message);
             });
+        }
+    }
+
+    @Override
+    public void set(int newValue) {
+        synchronized (sync) {
+            coins = newValue;
         }
     }
 }

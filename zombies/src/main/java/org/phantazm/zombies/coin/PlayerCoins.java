@@ -3,7 +3,6 @@ package org.phantazm.zombies.coin;
 import org.jetbrains.annotations.NotNull;
 
 public interface PlayerCoins {
-
     @NotNull TransactionResult runTransaction(@NotNull Transaction transaction);
 
     default @NotNull TransactionResult modify(int change) {
@@ -14,4 +13,5 @@ public interface PlayerCoins {
 
     void applyTransaction(@NotNull TransactionResult result);
 
+    void set(int newValue);
 }
