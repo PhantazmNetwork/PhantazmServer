@@ -48,7 +48,7 @@ public class InventoryAccessRegistryTest {
 
         inventoryAccessRegistry.switchAccess(firstKey, mockPlayer);
 
-        assertSame(inventoryProfile, inventoryAccessRegistry.getCurrentAccess().profile());
+        assertSame(inventoryProfile, inventoryAccessRegistry.getCurrentAccess().orElseThrow().profile());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class InventoryAccessRegistryTest {
         inventoryAccessRegistry.switchAccess(firstKey, mockPlayer);
         inventoryAccessRegistry.switchAccess(secondKey, mockPlayer);
 
-        assertSame(secondInventoryProfile, inventoryAccessRegistry.getCurrentAccess().profile());
+        assertSame(secondInventoryProfile, inventoryAccessRegistry.getCurrentAccess().orElseThrow().profile());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class InventoryAccessRegistryTest {
 
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> inventoryAccessRegistry.switchAccess(secondKey, mockPlayer));
-        assertSame(inventoryProfile, inventoryAccessRegistry.getCurrentAccess().profile());
+        assertSame(inventoryProfile, inventoryAccessRegistry.getCurrentAccess().orElseThrow().profile());
     }
 
 }

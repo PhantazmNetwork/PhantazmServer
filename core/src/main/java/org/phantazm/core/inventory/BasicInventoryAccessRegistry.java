@@ -9,41 +9,36 @@ import org.phantazm.core.player.PlayerView;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Basic implementation of an {@link InventoryAccessRegistry}.
  */
 public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     private final Map<Key, InventoryAccess> accessMap = new HashMap<>();
+    private final Object sync = new Object();
     private InventoryAccess currentAccess = null;
 
     @Override
-    public boolean hasCurrentAccess() {
-        return currentAccess != null;
-    }
-
-    @Override
-    public @NotNull InventoryAccess getCurrentAccess() {
-        if (!hasCurrentAccess()) {
-            throw new IllegalStateException("No inventory profile set");
-        }
-
-        return currentAccess;
+    public @NotNull Optional<InventoryAccess> getCurrentAccess() {
+        return Optional.ofNullable(currentAccess);
     }
 
     @Override
     public void switchAccess(@Nullable Key key, @NotNull PlayerView playerView) {
-        if (key == null) {
-            currentAccess = null;
-        }
-        else {
-            InventoryAccess access = accessMap.get(key);
-            if (access == null) {
-                throw new IllegalArgumentException("No matching inventory access found");
+        synchronized (sync) {
+            if (key == null) {
+                currentAccess = null;
             }
+            else {
+                InventoryAccess access = accessMap.get(key);
+                if (access == null) {
+                    throw new IllegalArgumentException("No matching inventory access found");
+                }
 
-            currentAccess = access;
-            applyTo(access, playerView);
+                currentAccess = access;
+                applyTo(access, playerView);
+            }
         }
     }
 
@@ -52,22 +47,26 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(profile, "profile");
 
-        if (accessMap.containsKey(key)) {
-            throw new IllegalArgumentException("Inventory profile already registered");
-        }
+        synchronized (sync) {
+            if (accessMap.containsKey(key)) {
+                throw new IllegalArgumentException("Inventory profile already registered");
+            }
 
-        accessMap.put(key, profile);
+            accessMap.put(key, profile);
+        }
     }
 
     @Override
     public void unregisterAccess(@NotNull Key key) {
         Objects.requireNonNull(key, "key");
 
-        if (!accessMap.containsKey(key)) {
-            throw new IllegalArgumentException("Inventory profile not yet registered");
-        }
+        synchronized (sync) {
+            if (!accessMap.containsKey(key)) {
+                throw new IllegalArgumentException("Inventory profile not yet registered");
+            }
 
-        accessMap.remove(key);
+            accessMap.remove(key);
+        }
     }
 
     private void applyTo(InventoryAccess currentAccess, PlayerView playerView) {

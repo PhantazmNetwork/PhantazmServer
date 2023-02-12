@@ -6,10 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.inventory.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class EquipmentHandler {
     private final InventoryAccessRegistry accessRegistry;
@@ -23,11 +20,14 @@ public class EquipmentHandler {
         Objects.requireNonNull(equipment, "equipment");
         Objects.requireNonNull(groupKey, "groupKey");
 
-        if (!accessRegistry.hasCurrentAccess()) {
+        Optional<InventoryAccess> accessOptional = accessRegistry.getCurrentAccess();
+        if (accessOptional.isEmpty()) {
             throw new IllegalStateException("Inventory access registry does not have current access");
         }
 
-        InventoryObjectGroup group = accessRegistry.getCurrentAccess().groups().get(groupKey);
+        InventoryAccess currentAccess = accessOptional.get();
+
+        InventoryObjectGroup group = currentAccess.groups().get(groupKey);
         if (group == null) {
             throw new IllegalArgumentException("No group with key " + groupKey);
 
@@ -43,23 +43,27 @@ public class EquipmentHandler {
     public boolean canAddEquipment(@NotNull Key groupKey) {
         Objects.requireNonNull(groupKey, "groupKey");
 
-        if (!accessRegistry.hasCurrentAccess()) {
+        Optional<InventoryAccess> accessOptional = accessRegistry.getCurrentAccess();
+
+        if (accessOptional.isEmpty()) {
             return false;
         }
 
-        InventoryObjectGroup group = accessRegistry.getCurrentAccess().groups().get(groupKey);
+        InventoryObjectGroup group = accessOptional.get().groups().get(groupKey);
         if (group == null) {
-            throw new IllegalArgumentException("No group with key " + groupKey);
+            return false;
         }
+
         return !group.isFull();
     }
 
     public @NotNull @Unmodifiable Collection<Equipment> getEquipment(@NotNull Key groupKey) {
-        if (!accessRegistry.hasCurrentAccess()) {
+        Optional<InventoryAccess> accessOptional = accessRegistry.getCurrentAccess();
+        if (accessOptional.isEmpty()) {
             return List.of();
         }
 
-        InventoryAccess access = accessRegistry.getCurrentAccess();
+        InventoryAccess access = accessOptional.get();
         InventoryObjectGroup group = access.groups().get(groupKey);
         if (group == null) {
             return List.of();

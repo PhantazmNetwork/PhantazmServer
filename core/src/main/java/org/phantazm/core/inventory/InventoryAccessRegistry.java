@@ -5,26 +5,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.player.PlayerView;
 
+import java.util.Optional;
+
 /**
  * Keeps track of and switches between {@link InventoryProfile}s.
  */
 // TODO: rewrite javadocs
 public interface InventoryAccessRegistry {
-
     /**
-     * Checks whether the profile switcher has a current {@link InventoryProfile}.
+     * Gets the current {@link InventoryProfile} set by the view, if it exists.
      *
-     * @return Whether the profile switcher has a current {@link InventoryProfile}
+     * @return an Optional containing the current view, or the empty optional if there is no current view
      */
-    boolean hasCurrentAccess();
-
-    /**
-     * Gets the current {@link InventoryProfile} set by the view. This should be checked first with {@link #hasCurrentAccess()}.
-     *
-     * @return The current view
-     * @throws IllegalStateException If no current {@link InventoryProfile} is set
-     */
-    @NotNull InventoryAccess getCurrentAccess();
+    @NotNull Optional<InventoryAccess> getCurrentAccess();
 
     /**
      * Switches the inventory's view to another view based on a {@link Key}.

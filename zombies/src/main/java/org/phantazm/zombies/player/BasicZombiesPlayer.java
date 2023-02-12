@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     private final ZombiesScene scene;
@@ -85,9 +84,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     private void inventoryTick(Player player, long time) {
-        InventoryAccessRegistry accessRegistry = module.getInventoryAccessRegistry();
-        if (accessRegistry.hasCurrentAccess()) {
-            InventoryProfile profile = accessRegistry.getCurrentAccess().profile();
+        module.getInventoryAccessRegistry().getCurrentAccess().ifPresent(inventoryAccess -> {
+            InventoryProfile profile = inventoryAccess.profile();
             for (int slot = 0; slot < profile.getSlotCount(); ++slot) {
                 if (profile.hasInventoryObject(slot)) {
                     InventoryObject inventoryObject = profile.getInventoryObject(slot);
@@ -98,7 +96,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
                     }
                 }
             }
-        }
+        });
     }
 
     @Override

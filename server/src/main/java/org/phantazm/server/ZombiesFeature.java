@@ -36,7 +36,6 @@ import org.phantazm.zombies.map.shop.predicate.logic.OrPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.XorPredicate;
 import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
-import org.phantazm.zombies.perk.*;
 import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
 import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
@@ -169,14 +168,6 @@ public final class ZombiesFeature {
 
         //UpgradePath
         contextManager.registerElementClass(LinearUpgradePath.class);
-
-        //PerkLevels
-        contextManager.registerElementClass(AddShotHandlerLevel.Creator.class);
-        contextManager.registerElementClass(ExtraHealthLevel.Creator.class);
-        contextManager.registerElementClass(ExtraWeaponLevel.Creator.class);
-        contextManager.registerElementClass(FastReviveLevel.Creator.class);
-        contextManager.registerElementClass(QuickFireLevel.Creator.class);
-        contextManager.registerElementClass(SpeedLevel.Creator.class);
 
         //DeactivationPredicates
         contextManager.registerElementClass(TimedDeactivationPredicate.class);

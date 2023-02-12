@@ -46,16 +46,19 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     @NotNull ZombiesScene getScene();
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
-        return module().getPlayerView().getPlayer().map(player -> {
-            InventoryAccessRegistry profileSwitcher = module().getInventoryAccessRegistry();
-            if (profileSwitcher.hasCurrentAccess()) {
-                InventoryAccess access = profileSwitcher.getCurrentAccess();
-                int slot = player.getHeldSlot();
-                if (access.profile().hasInventoryObject(slot)) {
-                    InventoryObject object = access.profile().getInventoryObject(slot);
-                    if (object instanceof Equipment equipment) {
-                        return equipment;
-                    }
+        Optional<Player> playerOptional = module().getPlayerView().getPlayer();
+        if (playerOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Player player = playerOptional.get();
+        return module().getInventoryAccessRegistry().getCurrentAccess().map(inventoryAccess -> {
+            int slot = player.getHeldSlot();
+            InventoryProfile profile = inventoryAccess.profile();
+            if (profile.hasInventoryObject(slot)) {
+                InventoryObject object = profile.getInventoryObject(slot);
+                if (object instanceof Equipment equipment) {
+                    return equipment;
                 }
             }
 
