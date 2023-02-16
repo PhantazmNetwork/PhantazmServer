@@ -7,12 +7,15 @@ if (localSettings.exists()) {
     apply(localSettings)
 }
 
-//necessary for phantazm-zombies-mapeditor module which contains a Fabric mod
 pluginManagement {
     repositories {
+        //necessary for phantazm-zombies-mapeditor module which contains a Fabric mod
         maven("https://maven.fabricmc.net/") {
             name = "Fabric"
         }
+
+
+        maven("https://dl.cloudsmith.io/public/steanky/element/maven/")
         mavenCentral()
         gradlePluginPortal()
     }
