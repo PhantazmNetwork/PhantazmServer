@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
+import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
@@ -17,11 +18,12 @@ public class Corpse implements Activable {
 
     private final Hologram hologram;
 
-    private final Entity corpseEntity;
+    private final MinimalFakePlayer corpseEntity;
 
     private final TickFormatter tickFormatter;
 
-    public Corpse(@NotNull Hologram hologram, @NotNull Entity corpseEntity, @NotNull TickFormatter tickFormatter) {
+    public Corpse(@NotNull Hologram hologram, @NotNull MinimalFakePlayer corpseEntity,
+            @NotNull TickFormatter tickFormatter) {
         this.hologram = Objects.requireNonNull(hologram, "hologram");
         this.corpseEntity = Objects.requireNonNull(corpseEntity, "corpseEntity");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
@@ -33,6 +35,8 @@ public class Corpse implements Activable {
         hologram.add(Component.empty());
         hologram.add(Component.empty());
         hologram.add(Component.text("███████████████", NamedTextColor.YELLOW));
+
+        corpseEntity.init();
         corpseEntity.setPose(Entity.Pose.SLEEPING);
     }
 
