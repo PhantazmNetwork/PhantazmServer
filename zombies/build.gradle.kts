@@ -1,6 +1,6 @@
 plugins {
     id("phantazm.minestom-library-conventions")
-    id("com.github.steanky.element-autodoc") version "0.1.0"
+    id("com.github.steanky.element-autodoc") version "0.1.1"
 }
 
 dependencies {
@@ -10,9 +10,9 @@ dependencies {
 }
 
 elementAutodoc {
-    projectDescription.set("Test description")
+    projectDescription.set("Phantazm's official 'Zombies' minigame")
     projectUrl.set("https://www.phantazm.org")
-    founded.set(1676253017L)
+    founded.set(1642244496L)
     maintainers.set(listOf("Steank"))
 }
 
