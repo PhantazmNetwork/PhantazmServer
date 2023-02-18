@@ -1,4 +1,4 @@
-package org.phantazm.zombies.player.state.revive;
+package org.phantazm.zombies.player.state;
 
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.text.Component;
@@ -16,6 +16,7 @@ import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerMeta;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
+import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -112,7 +113,7 @@ public class BasicKnockedStateActivable implements Activable {
     private void sendDyingStatus() {
         playerView.getPlayer().ifPresent(player -> {
             player.sendActionBar(Component.textOfChildren(Component.text("You are dying - "),
-                    tickFormatter.format(reviveHandler.getTicksUntilRevive())));
+                    tickFormatter.format(Math.max(reviveHandler.getTicksUntilRevive(), 0))));
         });
     }
 

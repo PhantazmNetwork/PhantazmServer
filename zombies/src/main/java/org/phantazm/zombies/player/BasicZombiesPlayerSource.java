@@ -1,10 +1,8 @@
 package org.phantazm.zombies.player;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.*;
@@ -16,7 +14,6 @@ import net.minestom.server.scoreboard.Team;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
-import org.phantazm.commons.Namespaces;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
@@ -44,7 +41,7 @@ import org.phantazm.zombies.player.state.*;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.context.NoContext;
-import org.phantazm.zombies.player.state.revive.BasicKnockedStateActivable;
+import org.phantazm.zombies.player.state.BasicKnockedStateActivable;
 import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
