@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
@@ -66,19 +67,20 @@ public class BreakNearbyWindowGoal implements GoalCreator {
             long ticksSinceLastBreak = (time - lastBreakCheck) / MinecraftServer.TICK_MS;
             Entity entity = self.entity();
             if (ticksSinceLastBreak > data.breakTicks) {
-                windowTracker.closestInRangeToCenter(
-                                entity.getPosition().add(0, entity.getBoundingBox().height() / 2, 0), data.breakRadius)
-                        .ifPresent(window -> {
-                            window.setLastBreakTime(time);
+                BoundingBox boundingBox = entity.getBoundingBox();
 
-                            int index = window.getIndex();
-                            int targetIndex = index - data.breakCount;
+                windowTracker.closestInRangeToBounds(entity.getPosition().add(0, boundingBox.height() / 2, 0),
+                        boundingBox.width(), boundingBox.height(), data.breakRadius).ifPresent(window -> {
+                    window.setLastBreakTime(time);
 
-                            int amount = window.updateIndex(targetIndex);
-                            if (amount != 0) {
-                                EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
-                            }
-                        });
+                    int index = window.getIndex();
+                    int targetIndex = index - data.breakCount;
+
+                    int amount = window.updateIndex(targetIndex);
+                    if (amount != 0) {
+                        EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
+                    }
+                });
 
                 lastBreakCheck = time;
             }

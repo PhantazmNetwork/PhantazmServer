@@ -91,7 +91,9 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
                 return;
             }
 
-            Optional<Window> windowOptional = windowTracker.closestInRangeToCenter(position, 10);
+            Optional<Window> windowOptional =
+                    windowTracker.closestInRangeToBounds(position, POWERUP_BOUNDING_BOX.width(),
+                            POWERUP_BOUNDING_BOX.height(), 10);
             if (windowOptional.isEmpty()) {
                 LOGGER.warn("Spawning powerup at location " + position +
                         " that does not have a nearby window and is not in a room");

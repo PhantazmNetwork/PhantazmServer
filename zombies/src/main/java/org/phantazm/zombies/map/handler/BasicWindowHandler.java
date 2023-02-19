@@ -3,6 +3,7 @@ package org.phantazm.zombies.map.handler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -77,7 +78,11 @@ public class BasicWindowHandler implements WindowHandler {
     }
 
     private void addOperationIfNearby(ZombiesPlayer zombiesPlayer, Player player) {
-        windowTracker.closestInRangeToCenter(player.getPosition(), repairRadius).ifPresent(
+        BoundingBox boundingBox = player.getBoundingBox();
+        double width = boundingBox.width();
+        double height = boundingBox.height();
+
+        windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius).ifPresent(
                 window -> repairOperationMap.putIfAbsent(player.getUuid(),
                         new RepairOperation(zombiesPlayer, window, System.currentTimeMillis())));
     }
