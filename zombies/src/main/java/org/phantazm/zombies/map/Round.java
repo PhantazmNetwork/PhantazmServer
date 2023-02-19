@@ -26,7 +26,6 @@ public class Round implements Tickable {
     private final SpawnDistributor spawnDistributor;
     private final List<Spawnpoint> spawnpoints;
     private final List<PhantazmMob> spawnedMobs;
-    private final List<PhantazmMob> unmodifiableSpawnedMobs;
 
     private boolean isActive;
     private long waveStartTime;
@@ -55,7 +54,6 @@ public class Round implements Tickable {
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
 
         this.spawnedMobs = new ArrayList<>();
-        this.unmodifiableSpawnedMobs = Collections.unmodifiableList(spawnedMobs);
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
     }
 
@@ -66,13 +64,11 @@ public class Round implements Tickable {
     public void removeMob(@NotNull PhantazmMob mob) {
         if (spawnedMobs.remove(mob)) {
             totalMobCount--;
-
-
         }
     }
 
-    public @UnmodifiableView @NotNull List<PhantazmMob> getSpawnedMobs() {
-        return unmodifiableSpawnedMobs;
+    public @Unmodifiable @NotNull List<PhantazmMob> getSpawnedMobs() {
+        return List.copyOf(spawnedMobs);
     }
 
     public int getTotalMobCount() {

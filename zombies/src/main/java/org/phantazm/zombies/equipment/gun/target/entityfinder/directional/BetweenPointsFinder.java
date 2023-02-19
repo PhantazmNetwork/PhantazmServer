@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
@@ -30,7 +31,9 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
     public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
             @NotNull Point end) {
         Collection<LivingEntity> entities = new ArrayList<>();
-        instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, entities::add);
+        instance.getEntityTracker()
+                .nearbyEntities(start, end.sub(start).distance(Vec.ZERO), EntityTracker.Target.LIVING_ENTITIES,
+                        entities::add);
 
         return entities;
     }

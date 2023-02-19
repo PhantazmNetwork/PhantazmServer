@@ -11,6 +11,7 @@ import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene.ZombiesScene;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -26,9 +27,9 @@ public class GiveCoinsCommand extends Command {
             ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
     private static final Argument<Integer> COIN_AMOUNT_ARGUMENT = ArgumentType.Integer("amount");
 
-
     public GiveCoinsCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
         super("coins");
+        Objects.requireNonNull(sceneMapper, "sceneMapper");
 
         addConditionalSyntax((sender, commandString) -> sender instanceof Player, (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();

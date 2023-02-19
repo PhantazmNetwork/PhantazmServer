@@ -24,7 +24,7 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
 
     BoundedTrackerImpl(@NotNull Collection<T> items) {
         this.items = List.copyOf(items);
-        this.chunkedItems = chunkItems(items);
+        this.chunkedItems = chunkItems(this.items);
     }
 
     private static <T extends Bounded> Long2ObjectMap<Object[]> chunkItems(Collection<T> items) {
