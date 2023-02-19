@@ -10,9 +10,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public interface BoundedTracker<T extends Bounded> {
-    @NotNull Optional<T> closestInRange(@NotNull Point origin, double distance);
+    @NotNull Optional<T> closestInRangeToCenter(@NotNull Point origin, double distance);
 
-    void forEachInRange(@NotNull Point origin, double distance, @NotNull Consumer<? super T> consumer);
+    @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height, double distance);
+
+    void forEachInRangeToCenter(@NotNull Point origin, double distance, @NotNull Consumer<? super T> consumer);
 
     @NotNull Optional<T> atPoint(@NotNull Point point);
 

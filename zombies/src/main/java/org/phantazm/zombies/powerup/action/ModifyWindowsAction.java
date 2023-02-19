@@ -42,7 +42,7 @@ public class ModifyWindowsAction implements Supplier<PowerupAction> {
 
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
-            windowHandler.get().tracker().forEachInRange(powerup.spawnLocation(), data.radius, window -> {
+            windowHandler.get().tracker().forEachInRangeToCenter(powerup.spawnLocation(), data.radius, window -> {
                 if (data.shouldBreak) {
                     window.updateIndex(0);
                 }

@@ -77,7 +77,7 @@ public class BasicWindowHandler implements WindowHandler {
     }
 
     private void addOperationIfNearby(ZombiesPlayer zombiesPlayer, Player player) {
-        windowTracker.closestInRange(player.getPosition(), repairRadius).ifPresent(
+        windowTracker.closestInRangeToCenter(player.getPosition(), repairRadius).ifPresent(
                 window -> repairOperationMap.putIfAbsent(player.getUuid(),
                         new RepairOperation(zombiesPlayer, window, System.currentTimeMillis())));
     }

@@ -66,18 +66,19 @@ public class BreakNearbyWindowGoal implements GoalCreator {
             long ticksSinceLastBreak = (time - lastBreakCheck) / MinecraftServer.TICK_MS;
             Entity entity = self.entity();
             if (ticksSinceLastBreak > data.breakTicks) {
-                windowTracker.closestInRange(entity.getPosition().add(0, entity.getBoundingBox().height() / 2, 0),
-                        data.breakRadius).ifPresent(window -> {
-                    window.setLastBreakTime(time);
+                windowTracker.closestInRangeToCenter(
+                                entity.getPosition().add(0, entity.getBoundingBox().height() / 2, 0), data.breakRadius)
+                        .ifPresent(window -> {
+                            window.setLastBreakTime(time);
 
-                    int index = window.getIndex();
-                    int targetIndex = index - data.breakCount;
+                            int index = window.getIndex();
+                            int targetIndex = index - data.breakCount;
 
-                    int amount = window.updateIndex(targetIndex);
-                    if (amount != 0) {
-                        EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
-                    }
-                });
+                            int amount = window.updateIndex(targetIndex);
+                            if (amount != 0) {
+                                EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
+                            }
+                        });
 
                 lastBreakCheck = time;
             }

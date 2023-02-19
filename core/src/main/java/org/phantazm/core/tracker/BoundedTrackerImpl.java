@@ -1,6 +1,7 @@
 package org.phantazm.core.tracker;
 
 import com.github.steanky.vector.Bounds3I;
+import com.github.steanky.vector.Vec3D;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
@@ -10,6 +11,7 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.HashStrategies;
+import org.phantazm.commons.MathUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -58,7 +60,7 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
     }
 
     @Override
-    public @NotNull Optional<T> closestInRange(@NotNull Point origin, double distance) {
+    public @NotNull Optional<T> closestInRangeToCenter(@NotNull Point origin, double distance) {
         int startX = (int)Math.floor(origin.x() - distance) >> 4;
         int startZ = (int)Math.floor(origin.z() - distance) >> 4;
 
@@ -89,7 +91,51 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
     }
 
     @Override
-    public void forEachInRange(@NotNull Point origin, double distance, @NotNull Consumer<? super T> consumer) {
+    public @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height,
+            double distance) {
+        int startX = (int)Math.floor(origin.x() - distance) >> 4;
+        int startZ = (int)Math.floor(origin.z() - distance) >> 4;
+
+        int endX = (int)Math.floor(origin.x() + distance - Vec.EPSILON) >> 4;
+        int endZ = (int)Math.floor(origin.z() + distance - Vec.EPSILON) >> 4;
+
+        T closest = null;
+        double closestDistance = Double.POSITIVE_INFINITY;
+
+        double halfWidth = width / 2;
+
+        for (int cx = startX; cx <= endX; cx++) {
+            for (int cz = startZ; cz <= endZ; cz++) {
+                Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(cx, cz));
+                if (chunkItems != null) {
+                    for (Object item : chunkItems) {
+                        T boundedItem = (T)item;
+
+                        for (Bounds3I bounds : boundedItem.bounds()) {
+                            double boundX = MathUtils.clamp(origin.x(), bounds.originX(), bounds.maxX());
+                            double boundY = MathUtils.clamp(origin.y(), bounds.originY(), bounds.maxY());
+                            double boundZ = MathUtils.clamp(origin.z(), bounds.originZ(), bounds.maxZ());
+
+                            double agentX = MathUtils.clamp(boundX, origin.x() - halfWidth, origin.x() + halfWidth);
+                            double agentY = MathUtils.clamp(boundY, origin.y(), origin.y() + height);
+                            double agentZ = MathUtils.clamp(boundZ, origin.z() - halfWidth, origin.z() + halfWidth);
+
+                            double thisDistance = Vec3D.distanceSquared(boundX, boundY, boundZ, agentX, agentY, agentZ);
+                            if (thisDistance < distance * distance && thisDistance < closestDistance) {
+                                closest = boundedItem;
+                                closestDistance = thisDistance;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return Optional.ofNullable(closest);
+    }
+
+    @Override
+    public void forEachInRangeToCenter(@NotNull Point origin, double distance, @NotNull Consumer<? super T> consumer) {
         int startX = (int)Math.floor(origin.x() - distance) >> 4;
         int startZ = (int)Math.floor(origin.z() - distance) >> 4;
 

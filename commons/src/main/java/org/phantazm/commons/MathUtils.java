@@ -16,6 +16,10 @@ public final class MathUtils {
         return (int)Math.ceil(dividend / divisor);
     }
 
+    public static double clamp(double value, double min, double max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
     /**
      * Computes the lambertW (product logarithm) for a given real value and branch.
      *
