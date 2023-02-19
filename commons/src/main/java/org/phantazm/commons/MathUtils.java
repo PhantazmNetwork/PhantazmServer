@@ -16,6 +16,20 @@ public final class MathUtils {
         return (int)Math.ceil(dividend / divisor);
     }
 
+    /**
+     * Clamps the provided value between min and max.
+     * <p>
+     * The behavior of this function is undefined if:
+     * <ul>
+     *     <li>{@code min > max}</li>
+     *     <li>any of the parameters are non-finite</li>
+     * </ul>
+     *
+     * @param value the value
+     * @param min   the minimum
+     * @param max   the maximum
+     * @return the clamped value
+     */
     public static double clamp(double value, double min, double max) {
         return Math.min(Math.max(value, min), max);
     }
@@ -103,17 +117,5 @@ public final class MathUtils {
         }
 
         return w;
-    }
-
-    /**
-     * Returns a {@code double} value representing the distance between {@code x} and the largest double value that is
-     * smaller than or equal to {@code x} and is a mathematical integer. This is equivalent to
-     * {@code x - Math.floor(x)}.
-     *
-     * @param x the value to find the floor offset for
-     * @return a non-negative double value
-     */
-    public static double floorOffset(double x) {
-        return x - Math.floor(x);
     }
 }
