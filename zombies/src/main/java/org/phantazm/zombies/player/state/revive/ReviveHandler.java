@@ -11,13 +11,12 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ReviveHandler implements Activable {
-
     private final Supplier<? extends ZombiesPlayerState> defaultStateSupplier;
-
     private final Supplier<? extends ZombiesPlayerState> deathStateSupplier;
-
     private final Supplier<? extends ZombiesPlayer> reviverFinder;
+
     private final long deathTime;
+
     private ZombiesPlayerState cachedDefaultState = null;
     private ZombiesPlayerState cachedDeathState = null;
     private ZombiesPlayer reviver;
@@ -37,10 +36,16 @@ public class ReviveHandler implements Activable {
 
     public @NotNull Optional<ZombiesPlayerState> getSuggestedState() {
         if (cachedDeathState != null) {
-            return Optional.of(cachedDeathState);
+            ZombiesPlayerState state = cachedDeathState;
+            this.cachedDeathState = null;
+
+            return Optional.of(state);
         }
         if (cachedDefaultState != null) {
-            return Optional.of(cachedDefaultState);
+            ZombiesPlayerState state = cachedDefaultState;
+            this.cachedDefaultState = null;
+
+            return Optional.of(state);
         }
 
         return Optional.empty();
