@@ -10,6 +10,9 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.stage.Stage;
+import org.phantazm.zombies.stage.StageKeys;
+import org.phantazm.zombies.stage.StageTransition;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,22 +24,28 @@ public class RoundCommand extends Command {
         super("round");
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
-        Argument<Integer> roundArgument = ArgumentType.Integer("round").min(1);
-        roundArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            UUID uuid = ((Player)sender).getUuid();
-            sceneMapper.apply(uuid).ifPresent(scene -> {
-                int count = scene.getMap().roundHandler().roundCount();
+        Argument<Integer> roundArgument =
+                ArgumentType.Integer("round-number").min(1).setSuggestionCallback((sender, context, suggestion) -> {
+                    UUID uuid = ((Player)sender).getUuid();
+                    sceneMapper.apply(uuid).ifPresent(scene -> {
+                        int count = scene.getMap().roundHandler().roundCount();
 
-                for (int i = 0; i < count; i++) {
-                    suggestion.addEntry(
-                            new SuggestionEntry(Integer.toString(i + 1), Component.text("Round " + (i + 1))));
-                }
-            });
-        });
+                        for (int i = 0; i < count; i++) {
+                            suggestion.addEntry(
+                                    new SuggestionEntry(Integer.toString(i + 1), Component.text("Round " + (i + 1))));
+                        }
+                    });
+                });
 
         addConditionalSyntax((sender, commandString) -> sender instanceof Player, (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
+                StageTransition transition = scene.getStageTransition();
+                Stage current = transition.getCurrentStage();
+                if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
+                    transition.setCurrentStage(StageKeys.IN_GAME);
+                }
+
                 RoundHandler handler = scene.getMap().roundHandler();
                 int roundCount = handler.roundCount();
                 int roundIndex = context.get(roundArgument) - 1;

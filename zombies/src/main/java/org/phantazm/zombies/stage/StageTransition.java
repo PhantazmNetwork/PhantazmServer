@@ -1,5 +1,6 @@
 package org.phantazm.zombies.stage;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 
@@ -39,7 +40,16 @@ public class StageTransition implements Tickable {
         return currentStageIndex == stages.length;
     }
 
-    public void setCurrentStageIndex(int currentStageIndex) {
+    public void setCurrentStage(@NotNull Key stageKey) {
+        for (int i = 0; i < stages.length; i++) {
+            if (stages[i].key().equals(stageKey)) {
+                setCurrentStageIndex(i);
+                return;
+            }
+        }
+    }
+
+    private void setCurrentStageIndex(int currentStageIndex) {
         if (currentStageIndex < 0 || currentStageIndex > stages.length) {
             throw new IllegalArgumentException("Invalid stage index: " + currentStageIndex);
         }

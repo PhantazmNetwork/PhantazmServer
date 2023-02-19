@@ -72,6 +72,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         return map;
     }
 
+    public @NotNull StageTransition getStageTransition() {
+        return stageTransition;
+    }
+
     @Override
     public @NotNull RouteResult join(@NotNull ZombiesJoinRequest joinRequest) {
         Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
