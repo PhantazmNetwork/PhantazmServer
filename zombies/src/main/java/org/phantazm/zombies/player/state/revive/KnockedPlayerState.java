@@ -47,6 +47,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
 
     @Override
     public void end() {
+        reviveHandler.setReviver(null);
         reviveHandler.end();
         for (Activable activable : activables) {
             activable.end();

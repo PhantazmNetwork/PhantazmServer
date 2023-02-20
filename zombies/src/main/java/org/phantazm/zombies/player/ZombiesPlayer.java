@@ -90,6 +90,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         return isState(ZombiesPlayerStateKeys.DEAD);
     }
 
+    default boolean isKnocked() {
+        return isState(ZombiesPlayerStateKeys.KNOCKED);
+    }
+
     default boolean hasQuit() {
         return isState(ZombiesPlayerStateKeys.QUIT);
     }

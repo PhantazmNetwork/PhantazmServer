@@ -29,13 +29,12 @@ public class RevivePlayersAction implements Action<Round> {
     @Override
     public void perform(@NotNull Round round) {
         for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-            if (zombiesPlayer.isDead()) {
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                zombiesPlayer.getPlayer().ifPresent(player -> player.teleport(respawnPos));
-            }
-            else if (zombiesPlayer.module().getStateSwitcher()
-                    .getState() instanceof KnockedPlayerState knockedPlayerState) {
-                knockedPlayerState.getReviveHandler().setReviver(null);
+            boolean dead = zombiesPlayer.isDead();
+            if (dead || zombiesPlayer.isKnocked()) {
+                if (dead) {
+                    zombiesPlayer.getPlayer().ifPresent(player -> player.teleport(respawnPos));
+                }
+
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
             }
         }
