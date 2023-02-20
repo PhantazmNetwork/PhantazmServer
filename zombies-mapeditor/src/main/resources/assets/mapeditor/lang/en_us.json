@@ -24,5 +24,9 @@
     "gui.mapeditor.no_map": "No map",
     "gui.mapeditor.delete_map_query": "Delete map?",
     "gui.mapeditor.overwrite_map_query": "Loading will revert any unsaved changes and maps. Continue?",
-    "gui.mapeditor.display_settings": "Display settings"
+    "gui.mapeditor.display_settings": "Display settings",
+    "gui.mapeditor.link_window": "Link to a window?",
+    "gui.mapeditor.explicit_window_link": "Linking to window at %d, %d, %d",
+    "gui.mapeditor.nearest_window_link": "Linking to nearest window.",
+    "gui.mapeditor.coordinate_display": "Map coordinates: %d, %d, %d"
 }

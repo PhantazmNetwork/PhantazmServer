@@ -33,6 +33,7 @@ public class Spawnpoint {
     private final MobSpawner mobSpawner;
 
     private final Window linkedWindow;
+    private final Room linkedRoom;
 
     /**
      * Constructs a new instance of this class.
@@ -44,7 +45,7 @@ public class Spawnpoint {
      */
     public Spawnpoint(@NotNull Point mapOrigin, @NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
             @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner,
-            @NotNull BoundedTracker<Window> windowTracker) {
+            @NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker) {
         this.spawnInfo = Objects.requireNonNull(spawnInfo, "spawnInfo");
 
         Vec3I spawnPosition = spawnInfo.position();
@@ -56,9 +57,8 @@ public class Spawnpoint {
         if (spawnInfo.linkToWindow()) {
             Vec3I linkedWindowPosition = spawnInfo.linkedWindow();
             if (linkedWindowPosition != null) {
-                Optional<Window> linkedWindow =
-                        windowTracker.atPoint(linkedWindowPosition.x(), linkedWindowPosition.y(),
-                                linkedWindowPosition.z());
+                Optional<Window> linkedWindow = windowTracker.atPoint(linkedWindowPosition.x() + mapOrigin.blockX(),
+                        linkedWindowPosition.y() + mapOrigin.blockY(), linkedWindowPosition.z() + mapOrigin.blockZ());
                 if (linkedWindow.isEmpty()) {
                     LOGGER.warn(
                             "No linked window found at " + linkedWindowPosition + ", for spawnpoint at ~" + spawnPoint);
@@ -82,6 +82,11 @@ public class Spawnpoint {
         }
         else {
             this.linkedWindow = null;
+        }
+
+        this.linkedRoom = roomTracker.atPoint(spawnPoint).orElse(null);
+        if (linkedRoom == null && linkedWindow == null) {
+            LOGGER.warn("No linked room or window found for spawnpoint at ~" + spawnPoint);
         }
     }
 
@@ -109,6 +114,9 @@ public class Spawnpoint {
             else if (!linkedRoom.get().isOpen()) {
                 return false;
             }
+        }
+        else if (linkedRoom != null && !linkedRoom.isOpen()) {
+            return false;
         }
 
         Key spawnruleKey = spawnInfo.spawnRule();

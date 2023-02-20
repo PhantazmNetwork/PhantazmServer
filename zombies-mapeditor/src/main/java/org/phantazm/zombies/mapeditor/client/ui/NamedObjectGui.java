@@ -39,6 +39,13 @@ public class NamedObjectGui extends SimplePanelGui {
         textFieldName.setTextPredicate(TextPredicates.validKeyPredicate());
         textFieldName.setText(initialName == null ? StringUtils.EMPTY : initialName);
 
+        addToPanel();
+    }
+
+    /**
+     * Adds the text field and button to the GUI.
+     */
+    protected void addToPanel() {
         gridPanelRoot.add(textFieldName, 0, 0, 5, 1);
         gridPanelRoot.add(buttonAdd, 0, 2, 5, 1);
     }

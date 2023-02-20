@@ -109,6 +109,26 @@ public final class TranslationKeys {
      * asking the player if they really want to do so.
      */
     public static final String GUI_MAPEDITOR_OVERWRITE_MAP_QUERY = "gui.mapeditor.overwrite_map_query";
+    /**
+     * The label shown on the toggle for controlling spawnpoint linking to windows.
+     */
+    public static final String GUI_MAPEDITOR_LINK_WINDOW = "gui.mapeditor.link_window";
+
+    /**
+     * The label shown when making an explicit window linking.
+     */
+    public static final String GUI_MAPEDITOR_EXPLICIT_WINDOW_LINK = "gui.mapeditor.explicit_window_link";
+
+    /**
+     * The label shown when making an inferred (distance-based) window linking.
+     */
+    public static final String GUI_MAPEDITOR_NEAREST_WINDOW_LINK = "gui.mapeditor.nearest_window_link";
+
+    /**
+     * The text displayed in the top-level corner of the screen while a map is active and the player is looking at a
+     * block.
+     */
+    public static final String GUI_MAPEDITOR_COORDINATE_DISPLAY = "gui.mapeditor.coordinate_display";
 
     private TranslationKeys() {
         throw new UnsupportedOperationException();

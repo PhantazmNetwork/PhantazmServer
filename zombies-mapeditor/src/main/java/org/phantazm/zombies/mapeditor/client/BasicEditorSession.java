@@ -5,9 +5,12 @@ import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
@@ -44,6 +47,9 @@ public class BasicEditorSession implements EditorSession {
     private static final Color SPAWNPOINT_COLOR = new Color(252, 243, 1, 64);
     private static final Color SHOP_COLOR = new Color(255, 72, 5, 64);
 
+    private static final Color COORDINATE_DISPLAY_COLOR = Color.WHITE;
+    private static final Color MOBILE_CURSOR_COLOR = new Color(200, 200, 200, 32);
+
     private static final Vec3i ONE = new Vec3i(1, 1, 1);
     private static final Vec3d HALF = new Vec3d(0.5, 0.5, 0.5);
 
@@ -51,6 +57,9 @@ public class BasicEditorSession implements EditorSession {
     private static final Key OUTLINE_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.selection_outline");
     private static final Key CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.cursor");
     private static final Key ORIGIN_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.origin");
+
+    private static final Key COORDINATE_DISPLAY_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.coordinate_display");
+    private static final Key MOBILE_CURSOR_KEY = Key.key(Namespaces.PHANTAZM, "mapeditor.mobile_cursor");
 
     private final ObjectRenderer renderer;
     private final Path mapFolder;
@@ -116,6 +125,33 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
+    public void handleBlockLookChange(@NotNull BlockHitResult newHitResult) {
+        if (currentMap == null) {
+            return;
+        }
+
+        Vec3I origin = currentMap.settings().origin();
+        BlockPos pos = newHitResult.getBlockPos();
+
+        renderer.putText(new ObjectRenderer.TextObject(COORDINATE_DISPLAY_KEY, COORDINATE_DISPLAY_COLOR, 10, 10,
+                Text.translatable(TranslationKeys.GUI_MAPEDITOR_COORDINATE_DISPLAY, pos.getX() - origin.x(),
+                        pos.getY() - origin.y(), pos.getZ() - origin.z())));
+
+        renderer.putObject(new ObjectRenderer.RenderObject(MOBILE_CURSOR_KEY, ObjectRenderer.RenderType.FILLED,
+                MOBILE_CURSOR_COLOR, true, true,
+                new Vec3d(pos.getX() + ObjectRenderer.EPSILON, pos.getY() + ObjectRenderer.EPSILON,
+                        pos.getZ() + ObjectRenderer.EPSILON),
+                new Vec3d(1 - 2 * ObjectRenderer.EPSILON, 1 - 2 * ObjectRenderer.EPSILON,
+                        1 - 2 * ObjectRenderer.EPSILON)));
+    }
+
+    @Override
+    public void handleBlockLookMiss() {
+        renderer.removeText(COORDINATE_DISPLAY_KEY);
+        renderer.removeObject(MOBILE_CURSOR_KEY);
+    }
+
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -172,8 +208,7 @@ public class BasicEditorSession implements EditorSession {
         int lenY = Math.abs(second.y() - first.y());
         int lenZ = Math.abs(second.z() - first.z());
 
-
-        return Bounds3I.immutable(minX, minY, minZ, lenX, lenY, lenZ);
+        return Bounds3I.immutable(minX, minY, minZ, lenX + 1, lenY + 1, lenZ + 1);
     }
 
     @Override
@@ -334,7 +369,7 @@ public class BasicEditorSession implements EditorSession {
     public void refreshWindows() {
         requireMap();
 
-        renderer.removeIf(key -> key.value().startsWith("window."));
+        renderer.removeObjectIf(key -> key.value().startsWith("window."));
         int i = 0;
         for (WindowInfo window : currentMap.windows()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "window." + i++),
@@ -348,7 +383,7 @@ public class BasicEditorSession implements EditorSession {
     public void refreshSpawnpoints() {
         requireMap();
 
-        renderer.removeIf(key -> key.value().startsWith("spawnpoint."));
+        renderer.removeObjectIf(key -> key.value().startsWith("spawnpoint."));
         int i = 0;
         for (SpawnpointInfo spawnpointInfo : currentMap.spawnpoints()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "spawnpoint." + i++),
@@ -362,7 +397,7 @@ public class BasicEditorSession implements EditorSession {
     public void refreshShops() {
         requireMap();
 
-        renderer.removeIf(key -> key.value().startsWith("shop."));
+        renderer.removeObjectIf(key -> key.value().startsWith("shop."));
         int i = 0;
         for (ShopInfo shopInfo : currentMap.shops()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "shop." + i++),
@@ -409,7 +444,8 @@ public class BasicEditorSession implements EditorSession {
     }
 
     private void refreshMap() {
-        renderer.removeIf(key -> !(key.equals(CURSOR_KEY) || key.equals(OUTLINE_KEY) || key.equals(SELECTION_KEY)));
+        renderer.removeObjectIf(
+                key -> !(key.equals(CURSOR_KEY) || key.equals(OUTLINE_KEY) || key.equals(SELECTION_KEY)));
 
         if (currentMap == null) {
             return;

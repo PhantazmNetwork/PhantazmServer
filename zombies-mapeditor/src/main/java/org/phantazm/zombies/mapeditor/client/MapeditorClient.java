@@ -18,7 +18,9 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -30,6 +32,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.phantazm.commons.Namespaces;
@@ -87,7 +91,6 @@ public class MapeditorClient implements ClientModInitializer {
                 new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
                         TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
-
         PacketSerializer clientToServer = PacketSerializers.clientToServerSerializer(
                 () -> new PacketByteBufDataWriter(new PacketByteBuf(Unpooled.buffer())),
                 data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));
@@ -133,27 +136,48 @@ public class MapeditorClient implements ClientModInitializer {
                     });
         }
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (mapeditorBinding.wasPressed()) {
-                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(editorSession)));
-            }
-            else if (newObject.wasPressed()) {
+        ClientTickEvents.END_CLIENT_TICK.register(new ClientTickEvents.EndTick() {
+            private BlockHitResult lastBlockLook;
+
+            @Override
+            public void onEndTick(MinecraftClient client) {
                 ClientPlayerEntity player = client.player;
                 if (player == null) {
                     return;
                 }
 
-                if (!editorSession.hasMap()) {
-                    player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP), true);
-                    return;
+                HitResult hitResult = client.crosshairTarget;
+                if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
+                    BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+                    if (lastBlockLook == null || !lastBlockLook.getBlockPos().equals(blockHitResult.getBlockPos())) {
+                        editorSession.handleBlockLookChange(blockHitResult);
+                        lastBlockLook = blockHitResult;
+                    }
                 }
 
-                if (!editorSession.hasSelection()) {
-                    player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION), true);
-                    return;
+                if ((hitResult == null || hitResult.getType() != HitResult.Type.BLOCK) && lastBlockLook != null) {
+                    editorSession.handleBlockLookMiss();
+                    lastBlockLook = null;
                 }
 
-                MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewObjectGui(editorSession)));
+                if (mapeditorBinding.wasPressed()) {
+                    MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(editorSession)));
+                }
+                else if (newObject.wasPressed()) {
+                    if (!editorSession.hasMap()) {
+                        player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP),
+                                true);
+                        return;
+                    }
+
+                    if (!editorSession.hasSelection()) {
+                        player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION),
+                                true);
+                        return;
+                    }
+
+                    MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewObjectGui(editorSession)));
+                }
             }
         });
 
@@ -161,12 +185,17 @@ public class MapeditorClient implements ClientModInitializer {
     }
 
     private static class Renderer implements ObjectRenderer {
-        private static final RenderObject[] EMPTY_RENDER_OBJECT_ARRAY = new RenderObject[0];
         private final Map<Key, RenderObject> renderObjects = new HashMap<>();
-        private final Collection<RenderObject> values = renderObjects.values();
+        private final Map<Key, TextObject> textObjects = new HashMap<>();
+
+        private final Collection<RenderObject> objectValues = renderObjects.values();
+        private final Collection<TextObject> textValues = textObjects.values();
+
         private boolean enabled;
         private boolean renderThroughWalls = false;
-        private RenderObject[] baked;
+
+        private RenderObject[] bakedObjects;
+        private TextObject[] bakedText;
 
         @MessageSubscription
         void worldRender(@NotNull RenderEvent.World event) {
@@ -179,11 +208,11 @@ public class MapeditorClient implements ClientModInitializer {
                 Renderer3d.renderThroughWalls();
             }
 
-            if (baked == null) {
-                bake();
+            if (bakedObjects == null) {
+                bakeObjects();
             }
 
-            for (ObjectRenderer.RenderObject object : baked) {
+            for (ObjectRenderer.RenderObject object : bakedObjects) {
                 if (!object.shouldRender) {
                     //don't render objects whose rendering is disabled
                     continue;
@@ -216,30 +245,60 @@ public class MapeditorClient implements ClientModInitializer {
             Renderer3d.stopRenderThroughWalls();
         }
 
-        private void bake() {
-            baked = values.toArray(EMPTY_RENDER_OBJECT_ARRAY);
+        @MessageSubscription
+        void hudRender(@NotNull RenderEvent.Hud event) {
+            if (!enabled) {
+                return;
+            }
+
+            TextRenderer renderer = MinecraftClient.getInstance().textRenderer;
+
+            if (bakedText == null) {
+                bakeText();
+            }
+
+            MatrixStack stack = event.getMatrixStack();
+            for (ObjectRenderer.TextObject textObject : bakedText) {
+                renderer.draw(stack, textObject.text, textObject.x, textObject.y, textObject.color.getRGB());
+            }
+        }
+
+        private void bakeObjects() {
+            bakedObjects = objectValues.toArray(RenderObject[]::new);
+        }
+
+        private void bakeText() {
+            bakedText = textValues.toArray(TextObject[]::new);
         }
 
         @Override
         public void removeObject(@NotNull Key key) {
             Objects.requireNonNull(key, "key");
             if (renderObjects.remove(key) != null) {
-                baked = null;
+                bakedObjects = null;
             }
         }
 
         @Override
-        public void removeIf(@NotNull Predicate<? super Key> keyPredicate) {
+        public void removeText(@NotNull Key key) {
+            Objects.requireNonNull(key, "key");
+            if (textObjects.remove(key) != null) {
+                bakedText = null;
+            }
+        }
+
+        @Override
+        public void removeObjectIf(@NotNull Predicate<? super Key> keyPredicate) {
             Objects.requireNonNull(keyPredicate, "keyPredicate");
             if (renderObjects.keySet().removeIf(keyPredicate)) {
-                baked = null;
+                bakedObjects = null;
             }
         }
 
         @Override
-        public void forEach(@NotNull Consumer<? super RenderObject> consumer) {
+        public void forEachObject(@NotNull Consumer<? super RenderObject> consumer) {
             Objects.requireNonNull(consumer, "object");
-            for (RenderObject sample : values) {
+            for (RenderObject sample : objectValues) {
                 consumer.accept(sample);
             }
         }
@@ -248,31 +307,45 @@ public class MapeditorClient implements ClientModInitializer {
         public void putObject(@NotNull RenderObject value) {
             Objects.requireNonNull(value, "value");
 
-            RenderObject oldObject = renderObjects.get(value.key);
+            if (tryUpdateInPlace(value, bakedObjects, renderObjects)) {
+                renderObjects.put(value.key, value);
+                bakedObjects = null;
+            }
+        }
+
+        @Override
+        public void putText(@NotNull TextObject value) {
+            Objects.requireNonNull(value, "value");
+
+            if (tryUpdateInPlace(value, bakedText, textObjects)) {
+                textObjects.put(value.key, value);
+                bakedText = null;
+            }
+        }
+
+        private static <TObject extends Keyed> boolean tryUpdateInPlace(TObject newObject, TObject[] baked,
+                Map<Key, TObject> map) {
+            Key newKey = newObject.key();
+            TObject oldObject = map.get(newKey);
             if (oldObject != null) {
                 if (baked != null) {
-                    //to avoid having to re-bake, we can find the object in the render array and update in-place
                     int i = 0;
-                    for (RenderObject object : baked) {
-                        if (object.key.equals(value.key)) {
-                            if (oldObject != value) {
-                                //update the object present in the map only if necessary
-                                renderObjects.put(value.key, value);
+                    for (TObject object : baked) {
+                        if (object.key().equals(newKey)) {
+                            if (oldObject != newObject) {
+                                map.put(newKey, newObject);
                             }
 
-                            baked[i] = value;
-                            return;
+                            baked[i] = newObject;
+                            return false;
                         }
 
                         i++;
                     }
-
-                    //should never fail to find the object, but in case we do, falling through is acceptable
                 }
             }
 
-            renderObjects.put(value.key, value);
-            baked = null;
+            return true;
         }
 
         @Override
@@ -303,7 +376,10 @@ public class MapeditorClient implements ClientModInitializer {
         @Override
         public void clear() {
             renderObjects.clear();
-            baked = null;
+            textObjects.clear();
+
+            bakedObjects = null;
+            bakedText = null;
         }
     }
 }

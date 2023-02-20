@@ -1,6 +1,8 @@
 package org.phantazm.zombies.mapeditor.client.render;
 
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,18 +33,25 @@ public interface ObjectRenderer {
     void removeObject(@NotNull Key key);
 
     /**
+     * Removes a {@link TextObject} with the given name from the render list, stopping it from appearing.
+     *
+     * @param key the id of the text to remove
+     */
+    void removeText(@NotNull Key key);
+
+    /**
      * Removes all {@link RenderObject} instances whose key matches the given predicate.
      *
      * @param keyPredicate the predicate determining which objects to remove
      */
-    void removeIf(@NotNull Predicate<? super Key> keyPredicate);
+    void removeObjectIf(@NotNull Predicate<? super Key> keyPredicate);
 
     /**
      * Enumerates every {@link RenderObject}, calling the given Consumer with every instance.
      *
      * @param consumer the consumer to call
      */
-    void forEach(@NotNull Consumer<? super RenderObject> consumer);
+    void forEachObject(@NotNull Consumer<? super RenderObject> consumer);
 
     /**
      * Adds an object to this renderer.
@@ -50,6 +59,13 @@ public interface ObjectRenderer {
      * @param value the object to add
      */
     void putObject(@NotNull RenderObject value);
+
+    /**
+     * Adds some text to this renderer.
+     *
+     * @param value the text to add
+     */
+    void putText(@NotNull TextObject value);
 
     /**
      * If true, this renderer will render ALL objects through even opaque blocks. If false, this renderer will only
@@ -110,9 +126,61 @@ public interface ObjectRenderer {
     }
 
     /**
+     * Some static, renderable text, to be placed on the HUD, using the standard Minecraft font.
+     */
+    final class TextObject implements Keyed {
+        /**
+         * The name of this object.
+         */
+        public final Key key;
+
+
+        /**
+         * The color of the text.
+         */
+        public final Color color;
+
+        /**
+         * The x-position of the text (number of units from the left of the screen).
+         */
+        public final float x;
+
+        /**
+         * The y-position of the text (number of units from the top of the screen).
+         */
+        public final float y;
+
+        /**
+         * The actual text to render.
+         */
+        public final Text text;
+
+        /**
+         * Creates a new instance of this class.
+         *
+         * @param color the color to render
+         * @param x     the x-position
+         * @param y     the y-position
+         * @param text  the text to render
+         */
+        public TextObject(@NotNull Key key, @NotNull Color color, float x, float y, @NotNull Text text) {
+            this.key = Objects.requireNonNull(key, "key");
+            this.color = Objects.requireNonNull(color, "color");
+            this.x = x;
+            this.y = y;
+            this.text = Objects.requireNonNull(text, "text");
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return key;
+        }
+    }
+
+    /**
      * A named, renderable object.
      */
-    final class RenderObject {
+    final class RenderObject implements Keyed {
         /**
          * The name of this object.
          */
@@ -186,6 +254,11 @@ public interface ObjectRenderer {
             }
 
             return false;
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return key;
         }
     }
 }

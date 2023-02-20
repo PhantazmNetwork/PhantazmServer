@@ -120,7 +120,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         BoundedTracker<Window> windowTracker = BoundedTracker.tracker(windows);
 
         List<Spawnpoint> spawnpoints =
-                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner, windowTracker);
+                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner, windowTracker,
+                        roomTracker);
 
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor);
 
@@ -145,11 +146,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
     private List<Spawnpoint> buildSpawnpoints(Point mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
             Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobSpawner mobSpawner,
-            BoundedTracker<Window> windowTracker) {
+            BoundedTracker<Window> windowTracker, BoundedTracker<Room> roomTracker) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
             spawnpoints.add(new Spawnpoint(mapOrigin, spawnpointInfo, instance, spawnruleInfoMap::get, mobSpawner,
-                    windowTracker));
+                    windowTracker, roomTracker));
         }
 
         return spawnpoints;

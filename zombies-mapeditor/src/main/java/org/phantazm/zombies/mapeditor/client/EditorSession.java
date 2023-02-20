@@ -35,6 +35,18 @@ public interface EditorSession {
             @NotNull BlockHitResult blockHitResult);
 
     /**
+     * Called whenever the player changes what block they're looking at.
+     *
+     * @param newHitResult the new {@link BlockHitResult}
+     */
+    void handleBlockLookChange(@NotNull BlockHitResult newHitResult);
+
+    /**
+     * Called whenever the player stops looking at a block.
+     */
+    void handleBlockLookMiss();
+
+    /**
      * Queries if the editor is enabled or not.
      *
      * @return true if the editor is enabled, false otherwise
