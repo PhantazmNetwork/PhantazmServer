@@ -84,11 +84,11 @@ public class Window implements Bounded {
 
         Optional<Room> closestRoom =
                 roomTracker.closestInRangeToBounds(center.sub(0, frame.lengthY() / 2D, 0), frame.lengthX(),
-                        frame.lengthY(), frame.lengthZ(), 5);
+                        frame.lengthY(), frame.lengthZ(), 10);
         if (closestRoom.isEmpty()) {
             this.linkedRoom = null;
-            LOGGER.warn("No linkable room found within 5 blocks for window at ~" + center);
-            LOGGER.warn("If any spawnpoints link to this window, they will always be able to spawn.");
+            LOGGER.warn("No linkable room found within 10 blocks for window at ~" + center);
+            LOGGER.warn("If any spawnpoints link to this window, they will never be able to spawn.");
         }
         else {
             this.linkedRoom = closestRoom.get();
