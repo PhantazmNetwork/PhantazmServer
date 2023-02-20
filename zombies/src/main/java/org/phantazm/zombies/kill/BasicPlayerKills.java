@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 
 public class BasicPlayerKills implements PlayerKills {
-
     private int kills = 0;
 
     @Override

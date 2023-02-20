@@ -1,6 +1,6 @@
 plugins {
     id("phantazm.minestom-library-conventions")
-    id("com.github.steanky.element-autodoc") version "0.1.1"
+    id("com.github.steanky.element-autodoc") version "0.1.2"
 }
 
 dependencies {

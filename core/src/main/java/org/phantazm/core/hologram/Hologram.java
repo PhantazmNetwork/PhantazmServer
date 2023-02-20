@@ -12,10 +12,16 @@ import java.util.List;
  * {@link Component} list this object represents.
  */
 public interface Hologram extends List<Component> {
+    /**
+     * Updates the alignment of the hologram.
+     *
+     * @param alignment the new alignment
+     */
     void setAlignment(@NotNull Alignment alignment);
 
     /**
-     * Gets the current location of the hologram. This is the center of all the hologram lines to be displayed.
+     * Gets the current location of the hologram. Depending on the alignment used, this is either the center, bottom,
+     * or top of the hologram lines.
      *
      * @return the center location of the hologram
      */

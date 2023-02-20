@@ -29,23 +29,25 @@ public final class BasicMapObjects implements MapObjects {
 
     private final Map<? super Key, ? extends Room> roomMap;
 
-    public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull List<Window> windows,
-            @NotNull List<Shop> shops, @NotNull List<Door> doors, @NotNull List<Room> rooms,
-            @NotNull List<Round> rounds, @NotNull DependencyProvider mapDependencyProvider,
-            @NotNull MobSpawner mobSpawner, @NotNull Module module) {
+    public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull BoundedTracker<Window> windows,
+            @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
+            @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
+            @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Module module) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
+
         this.mapDependencyProvider = Objects.requireNonNull(mapDependencyProvider, "mapDependencyProvider");
         this.module = Objects.requireNonNull(module, "module");
 
-        this.roomTracker = BoundedTracker.tracker(rooms);
-        this.windowTracker = BoundedTracker.tracker(windows);
-        this.shopTracker = BoundedTracker.tracker(shops);
-        this.doorTracker = BoundedTracker.tracker(doors);
+        this.windowTracker = Objects.requireNonNull(windows, "windows");
+        this.shopTracker = Objects.requireNonNull(shops, "shops");
+        this.doorTracker = Objects.requireNonNull(doors, "doors");
+        this.roomTracker = Objects.requireNonNull(rooms, "rooms");
+
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
 
-        Map<Key, Room> map = new HashMap<>(rooms.size());
-        for (Room room : rooms) {
+        Map<Key, Room> map = new HashMap<>(rooms.items().size());
+        for (Room room : rooms.items()) {
             map.put(room.getRoomInfo().id(), room);
         }
 

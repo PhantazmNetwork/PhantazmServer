@@ -23,6 +23,7 @@ import org.phantazm.core.ElementUtils;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.gui.BasicSlotDistributor;
 import org.phantazm.core.gui.SlotDistributor;
+import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
@@ -104,16 +105,28 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Point origin = VecUtils.toPoint(mapSettingsInfo.origin());
 
         Map<Key, SpawnruleInfo> spawnruleInfoMap = buildSpawnrules(mapInfo.spawnrules());
-        List<Spawnpoint> spawnpoints =
-                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner);
-        List<Window> windows = buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler);
+
         List<Shop> shops = buildShops(origin, mapInfo.shops(), provider, instance);
+        BoundedTracker<Shop> shopTracker = BoundedTracker.tracker(shops);
+
         List<Door> doors = buildDoors(origin, mapInfo.doors(), provider, instance, mapObjectsWrapper);
+        BoundedTracker<Door> doorTracker = BoundedTracker.tracker(doors);
+
         List<Room> rooms = buildRooms(origin, mapInfo.rooms(), provider);
+        BoundedTracker<Room> roomTracker = BoundedTracker.tracker(rooms);
+
+        List<Window> windows =
+                buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler, roomTracker);
+        BoundedTracker<Window> windowTracker = BoundedTracker.tracker(windows);
+
+        List<Spawnpoint> spawnpoints =
+                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner, windowTracker);
+
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor);
 
         MapObjects mapObjects =
-                new BasicMapObjects(spawnpoints, windows, shops, doors, rooms, rounds, provider, mobSpawner, module);
+                new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
+                        mobSpawner, module);
         mapObjectsWrapper.set(mapObjects);
 
         return mapObjects;
@@ -131,17 +144,21 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Spawnpoint> buildSpawnpoints(Point mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
-            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobSpawner mobSpawner) {
+            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobSpawner mobSpawner,
+            BoundedTracker<Window> windowTracker) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
-            spawnpoints.add(new Spawnpoint(mapOrigin, spawnpointInfo, instance, spawnruleInfoMap::get, mobSpawner));
+            spawnpoints.add(new Spawnpoint(mapOrigin, spawnpointInfo, instance, spawnruleInfoMap::get, mobSpawner,
+                    windowTracker));
         }
 
         return spawnpoints;
     }
 
     private List<Window> buildWindows(Point mapOrigin, List<WindowInfo> windowInfoList,
-            DependencyProvider dependencyProvider, Instance instance, ClientBlockHandler clientBlockHandler) {
+            DependencyProvider dependencyProvider, Instance instance, ClientBlockHandler clientBlockHandler,
+            BoundedTracker<Room> roomTracker) {
+
         List<Window> windows = new ArrayList<>(windowInfoList.size());
         for (WindowInfo windowInfo : windowInfoList) {
             List<Action<Window>> repairActions = contextManager.makeContext(windowInfo.repairActions())
@@ -150,7 +167,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             List<Action<Window>> breakActions = contextManager.makeContext(windowInfo.breakActions())
                     .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
-            windows.add(new Window(mapOrigin, instance, windowInfo, clientBlockHandler, repairActions, breakActions));
+            windows.add(new Window(mapOrigin, instance, windowInfo, clientBlockHandler, repairActions, breakActions,
+                    roomTracker));
         }
 
         return windows;

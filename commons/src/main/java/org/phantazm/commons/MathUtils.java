@@ -24,6 +24,8 @@ public final class MathUtils {
      *     <li>{@code min > max}</li>
      *     <li>any of the parameters are non-finite</li>
      * </ul>
+     * <p>
+     * Otherwise, this function acts as if by calling {@code Math.min(Math.max(value, min), max)}.
      *
      * @param value the value
      * @param min   the minimum

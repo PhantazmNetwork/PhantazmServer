@@ -4,7 +4,6 @@ import com.github.steanky.vector.Bounds3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jglrxavpok.hephaistos.nbt.NBT;
@@ -14,6 +13,7 @@ import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.tracker.Bounded;
+import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.map.action.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +43,8 @@ public class Window implements Bounded {
     private final List<Action<Window>> repairActions;
     private final List<Action<Window>> breakActions;
 
+    private final Room linkedRoom;
+
     private final Object sync;
 
     private volatile int index;
@@ -57,7 +59,7 @@ public class Window implements Bounded {
      */
     public Window(@NotNull Point mapOrigin, @NotNull Instance instance, @NotNull WindowInfo windowInfo,
             @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
-            @NotNull List<Action<Window>> breakActions) {
+            @NotNull List<Action<Window>> breakActions, @NotNull BoundedTracker<Room> roomTracker) {
         Bounds3I region = windowInfo.frameRegion();
 
         this.instance = Objects.requireNonNull(instance, "instance");
@@ -78,6 +80,18 @@ public class Window implements Bounded {
 
         if (volume == 0) {
             throw new IllegalArgumentException("Zero-volume window");
+        }
+
+        Optional<Room> closestRoom =
+                roomTracker.closestInRangeToBounds(center.sub(0, frame.lengthY() / 2D, 0), frame.lengthX(),
+                        frame.lengthY(), frame.lengthZ(), 5);
+        if (closestRoom.isEmpty()) {
+            this.linkedRoom = null;
+            LOGGER.warn("No linkable room found within 5 blocks for window at ~" + center);
+            LOGGER.warn("If any spawnpoints link to this window, they will always be able to spawn.");
+        }
+        else {
+            this.linkedRoom = closestRoom.get();
         }
 
         List<String> repairBlockSnbts = windowInfo.repairBlocks();
@@ -277,16 +291,16 @@ public class Window implements Bounded {
         return center;
     }
 
-    public @NotNull Object sync() {
-        return sync;
-    }
-
     public void setLastBreakTime(long time) {
         this.lastBreakTime = time;
     }
 
     public long getLastBreakTime() {
         return lastBreakTime;
+    }
+
+    public @NotNull Optional<Room> getLinkedRoom() {
+        return Optional.ofNullable(linkedRoom);
     }
 
     private Point indexToCoordinate(int index) {

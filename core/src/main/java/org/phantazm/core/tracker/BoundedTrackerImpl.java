@@ -91,7 +91,7 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
     }
 
     @Override
-    public @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height,
+    public @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height, double depth,
             double distance) {
         int startX = (int)Math.floor(origin.x() - distance) >> 4;
         int startZ = (int)Math.floor(origin.z() - distance) >> 4;
@@ -103,6 +103,7 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
         double closestDistance = Double.POSITIVE_INFINITY;
 
         double halfWidth = width / 2;
+        double halfDepth = depth / 2;
 
         for (int cx = startX; cx <= endX; cx++) {
             for (int cz = startZ; cz <= endZ; cz++) {
@@ -118,7 +119,7 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
 
                             double agentX = MathUtils.clamp(boundX, origin.x() - halfWidth, origin.x() + halfWidth);
                             double agentY = MathUtils.clamp(boundY, origin.y(), origin.y() + height);
-                            double agentZ = MathUtils.clamp(boundZ, origin.z() - halfWidth, origin.z() + halfWidth);
+                            double agentZ = MathUtils.clamp(boundZ, origin.z() - halfDepth, origin.z() + halfDepth);
 
                             double thisDistance = Vec3D.distanceSquared(boundX, boundY, boundZ, agentX, agentY, agentZ);
                             if (thisDistance < distance * distance && thisDistance < closestDistance) {
@@ -157,11 +158,6 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
                 }
             }
         }
-    }
-
-    @Override
-    public @NotNull Optional<T> atPoint(@NotNull Point point) {
-        return atPoint(point.blockX(), point.blockY(), point.blockZ());
     }
 
     @Override

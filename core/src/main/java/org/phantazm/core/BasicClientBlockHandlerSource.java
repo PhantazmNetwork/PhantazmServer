@@ -14,6 +14,7 @@ import java.util.function.Function;
 public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
     private final Function<? super Instance, ? extends ClientBlockHandler> blockHandlerFunction;
     private final Map<Instance, ClientBlockHandler> map;
+    private final Object sync;
 
     /**
      * Creates a new instance of this class given the provided {@link ClientBlockHandler}-producing function. This
@@ -25,11 +26,14 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
             @NotNull Function<? super Instance, ? extends ClientBlockHandler> handlerFunction) {
         this.blockHandlerFunction = Objects.requireNonNull(handlerFunction, "handlerFunction");
         this.map = new WeakHashMap<>();
+        this.sync = new Object();
     }
 
     @Override
     public @NotNull ClientBlockHandler forInstance(@NotNull Instance instance) {
-        return map.computeIfAbsent(Objects.requireNonNull(instance, "instance"),
-                world -> Objects.requireNonNull(this.blockHandlerFunction.apply(world), "handler"));
+        synchronized (sync) {
+            return map.computeIfAbsent(Objects.requireNonNull(instance, "instance"),
+                    world -> Objects.requireNonNull(this.blockHandlerFunction.apply(world), "handler"));
+        }
     }
 }

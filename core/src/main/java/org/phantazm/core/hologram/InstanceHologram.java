@@ -59,9 +59,12 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     @Override
     public void setAlignment(@NotNull Alignment alignment) {
-        if (alignment != this.alignment) {
-            this.alignment = alignment;
-            updateArmorStands();
+        Objects.requireNonNull(alignment, "alignmnet");
+        synchronized (sync) {
+            if (alignment != this.alignment) {
+                this.alignment = alignment;
+                updateArmorStands();
+            }
         }
     }
 
@@ -171,11 +174,11 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
         int armorStandCount = armorStands.size();
         double totalHeight = gap * (armorStandCount - 1) + armorStandCount * MESSAGE_HEIGHT;
-        double topCornerHeight = location.y() + totalHeight / 2;
+        double topEdgeHeight = location.y() + totalHeight / 2;
 
         for (int i = 0; i < armorStandCount; i++) {
             Entity armorStand = armorStands.get(i);
-            Pos pos = new Pos(location.x(), topCornerHeight - (i * (gap + MESSAGE_HEIGHT)), location.z());
+            Pos pos = new Pos(location.x(), topEdgeHeight - (i * (gap + MESSAGE_HEIGHT)), location.z());
             switch (alignment) {
                 case CENTERED -> pos = pos.add(0, totalHeight / 2, 0);
                 case LOWER -> pos = pos.add(0, totalHeight, 0);

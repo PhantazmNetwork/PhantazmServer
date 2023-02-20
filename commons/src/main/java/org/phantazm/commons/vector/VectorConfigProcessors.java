@@ -25,7 +25,7 @@ public final class VectorConfigProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(@NotNull Vec3D vec3D) {
+        public @NotNull ConfigElement elementFromData(Vec3D vec3D) {
             ConfigNode node = new LinkedConfigNode(3);
             node.putNumber("x", vec3D.x());
             node.putNumber("y", vec3D.y());

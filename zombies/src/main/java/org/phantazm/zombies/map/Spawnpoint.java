@@ -7,9 +7,8 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.VecUtils;
+import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -33,6 +32,8 @@ public class Spawnpoint {
     private final Pos spawnPoint;
     private final MobSpawner mobSpawner;
 
+    private final Window linkedWindow;
+
     /**
      * Constructs a new instance of this class.
      *
@@ -42,13 +43,46 @@ public class Spawnpoint {
      * @param mobSpawner        the function used to actually spawn mobs in the world
      */
     public Spawnpoint(@NotNull Point mapOrigin, @NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
-            @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner) {
+            @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner,
+            @NotNull BoundedTracker<Window> windowTracker) {
         this.spawnInfo = Objects.requireNonNull(spawnInfo, "spawnInfo");
+
         Vec3I spawnPosition = spawnInfo.position();
         this.spawnPoint = Pos.fromPoint(mapOrigin.add(spawnPosition.x(), spawnPosition.y(), spawnPosition.z()));
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
+
+        if (spawnInfo.linkToWindow()) {
+            Vec3I linkedWindowPosition = spawnInfo.linkedWindow();
+            if (linkedWindowPosition != null) {
+                Optional<Window> linkedWindow =
+                        windowTracker.atPoint(linkedWindowPosition.x(), linkedWindowPosition.y(),
+                                linkedWindowPosition.z());
+                if (linkedWindow.isEmpty()) {
+                    LOGGER.warn(
+                            "No linked window found at " + linkedWindowPosition + ", for spawnpoint at ~" + spawnPoint);
+                    this.linkedWindow = null;
+                }
+                else {
+                    this.linkedWindow = linkedWindow.get();
+                }
+            }
+            else {
+                Optional<Window> linkedWindow =
+                        windowTracker.closestInRangeToBounds(spawnPoint.add(0.5, 0, 0.5), 1, 1, 10);
+                if (linkedWindow.isEmpty()) {
+                    LOGGER.warn("No window to link to found within 10 blocks of spawnpoint at ~" + spawnPoint);
+                    this.linkedWindow = null;
+                }
+                else {
+                    this.linkedWindow = linkedWindow.get();
+                }
+            }
+        }
+        else {
+            this.linkedWindow = null;
+        }
     }
 
     /**
@@ -64,12 +98,24 @@ public class Spawnpoint {
         Objects.requireNonNull(model, "model");
         Objects.requireNonNull(spawnType, "spawnType");
 
+        if (linkedWindow != null) {
+            Optional<Room> linkedRoom = linkedWindow.getLinkedRoom();
+            if (linkedRoom.isEmpty()) {
+                LOGGER.warn("Linked window at ~" + linkedWindow.getCenter() + " does not have a linked room, for" +
+                        " spawnpoint at ~" + spawnPoint);
+                LOGGER.warn("Because of the missing link, spawning will be disallowed");
+                return false;
+            }
+            else if (!linkedRoom.get().isOpen()) {
+                return false;
+            }
+        }
+
         Key spawnruleKey = spawnInfo.spawnRule();
         SpawnruleInfo spawnrule = spawnrules.apply(spawnruleKey);
 
         if (spawnrule == null) {
-            LOGGER.warn("Unrecognized spawnrule " + spawnruleKey + " at " + spawnInfo.position() + "; mob not allowed" +
-                    " to spawn");
+            LOGGER.warn("Unrecognized spawnrule " + spawnruleKey + " at " + spawnPoint + "; mob not allowed to spawn");
             return false;
         }
 
@@ -87,8 +133,7 @@ public class Spawnpoint {
 
             Optional<Player> playerOptional = module.getPlayerView().getPlayer();
             if (playerOptional.isPresent()) {
-                if (VecUtils.toDouble(playerOptional.get().getPosition())
-                        .distanceSquaredTo(this.spawnInfo.position().toImmutableDouble()) < slaSquared) {
+                if (playerOptional.get().getPosition().distanceSquared(spawnPoint.add(0.5, 0, 0.5)) < slaSquared) {
                     inRange = true;
                     break;
                 }

@@ -12,11 +12,19 @@ import java.util.function.Consumer;
 public interface BoundedTracker<T extends Bounded> {
     @NotNull Optional<T> closestInRangeToCenter(@NotNull Point origin, double distance);
 
-    @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height, double distance);
+    @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height, double depth,
+            double distance);
+
+    default @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height,
+            double distance) {
+        return closestInRangeToBounds(origin, width, height, width, distance);
+    }
 
     void forEachInRangeToCenter(@NotNull Point origin, double distance, @NotNull Consumer<? super T> consumer);
 
-    @NotNull Optional<T> atPoint(@NotNull Point point);
+    default @NotNull Optional<T> atPoint(@NotNull Point point) {
+        return atPoint(point.blockX(), point.blockY(), point.blockZ());
+    }
 
     @NotNull Optional<T> atPoint(int x, int y, int z);
 

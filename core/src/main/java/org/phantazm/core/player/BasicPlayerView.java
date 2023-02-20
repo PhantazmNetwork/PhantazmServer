@@ -27,6 +27,8 @@ import java.util.concurrent.CompletableFuture;
  * @see BasicPlayerViewProvider
  */
 class BasicPlayerView implements PlayerView {
+    private static final Reference<Player> NULL_REFERENCE = new WeakReference<>(null);
+
     private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
     private final UUID uuid;
@@ -126,8 +128,15 @@ class BasicPlayerView implements PlayerView {
 
         //if null or offline, update the reference (may still be null)
         player = connectionManager.getPlayer(uuid);
-        playerReference = new WeakReference<>(player);
-        return Optional.ofNullable(player);
+
+        if (player == null) {
+            playerReference = NULL_REFERENCE;
+            return Optional.empty();
+        }
+        else {
+            playerReference = new WeakReference<>(player);
+            return Optional.of(player);
+        }
     }
 
 }

@@ -49,7 +49,18 @@ public final class MapProcessors {
         public SpawnpointInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Vec3I position = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("position"));
             Key spawnRule = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnRule"));
-            return new SpawnpointInfo(position, spawnRule);
+            boolean linkToWindow = element.getBooleanOrDefault(true, "linkToWindow");
+
+            ConfigElement positionElement = element.getElementOrDefault((ConfigElement)null, "linkedWindowPosition");
+            Vec3I linkedWindowPosition;
+            if (positionElement != null) {
+                linkedWindowPosition = VectorConfigProcessors.vec3I().dataFromElement(positionElement);
+            }
+            else {
+                linkedWindowPosition = null;
+            }
+
+            return new SpawnpointInfo(position, spawnRule, linkToWindow, linkedWindowPosition);
         }
 
         @Override
@@ -57,6 +68,15 @@ public final class MapProcessors {
             ConfigNode node = new LinkedConfigNode(2);
             node.put("position", VectorConfigProcessors.vec3I().elementFromData(spawnpointInfo.position()));
             node.put("spawnRule", ConfigProcessors.key().elementFromData(spawnpointInfo.spawnRule()));
+            if (!spawnpointInfo.linkToWindow()) {
+                node.putBoolean("linkToWindow", false);
+            }
+
+            Vec3I linkedWindow = spawnpointInfo.linkedWindow();
+            if (linkedWindow != null) {
+                node.put("linkedWindowPosition", VectorConfigProcessors.vec3I().elementFromData(linkedWindow));
+            }
+
             return node;
         }
     };
