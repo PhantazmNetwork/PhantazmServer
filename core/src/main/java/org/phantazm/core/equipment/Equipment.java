@@ -8,7 +8,6 @@ import org.phantazm.core.inventory.InventoryObject;
  * Represents a piece of equipment that {@link Player}s may use.
  */
 public interface Equipment extends InventoryObject, Keyed {
-
     /**
      * Invoked when a {@link Player} changes their slot to or from the one containing this {@link Equipment}.
      *
