@@ -5,7 +5,6 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.map.Flaggable;
@@ -101,7 +100,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public @NotNull Flaggable flags() {
-        return module.flaggable();
+        return module.flags();
     }
 
 

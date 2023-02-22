@@ -5,12 +5,10 @@ import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
-import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.kill.PlayerKills;
@@ -19,8 +17,6 @@ import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -129,7 +125,7 @@ public class ZombiesPlayerModule implements DependencyModule {
         return compositeTransactionModifierSource;
     }
 
-    public @NotNull Flaggable flaggable() {
+    public @NotNull Flaggable flags() {
         return flaggable;
     }
 }

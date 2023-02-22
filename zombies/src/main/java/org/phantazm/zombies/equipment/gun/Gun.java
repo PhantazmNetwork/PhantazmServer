@@ -10,7 +10,7 @@ import org.phantazm.core.equipment.Equipment;
 import org.phantazm.zombies.equipment.gun.effect.GunEffect;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.visual.GunStackMapper;
-import org.phantazm.zombies.upgrade.Upgradable;
+import org.phantazm.core.equipment.Upgradable;
 
 import java.util.*;
 import java.util.function.Consumer;

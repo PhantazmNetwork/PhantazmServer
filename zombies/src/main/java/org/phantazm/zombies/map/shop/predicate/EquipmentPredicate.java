@@ -3,7 +3,7 @@ package org.phantazm.zombies.map.shop.predicate;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
-import org.phantazm.zombies.upgrade.Upgradable;
+import org.phantazm.core.equipment.Upgradable;
 
 public interface EquipmentPredicate {
     boolean canUpgrade(@NotNull PlayerInteraction playerInteraction, @NotNull Upgradable upgradeTarget,

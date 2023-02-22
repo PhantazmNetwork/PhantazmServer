@@ -10,7 +10,7 @@ import org.phantazm.zombies.equipment.gun.reload.ReloadTester;
 import org.phantazm.zombies.equipment.gun.shoot.ShootTester;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.visual.GunStackMapper;
-import org.phantazm.zombies.upgrade.UpgradeNode;
+import org.phantazm.core.equipment.UpgradeNode;
 
 import java.util.Collection;
 import java.util.Objects;

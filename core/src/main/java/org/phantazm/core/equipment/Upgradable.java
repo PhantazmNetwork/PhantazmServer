@@ -1,4 +1,4 @@
-package org.phantazm.zombies.upgrade;
+package org.phantazm.core.equipment;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;

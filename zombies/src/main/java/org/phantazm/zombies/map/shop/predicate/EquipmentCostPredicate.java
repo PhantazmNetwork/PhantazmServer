@@ -11,7 +11,7 @@ import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
-import org.phantazm.zombies.upgrade.Upgradable;
+import org.phantazm.core.equipment.Upgradable;
 
 import java.util.Map;
 import java.util.Objects;

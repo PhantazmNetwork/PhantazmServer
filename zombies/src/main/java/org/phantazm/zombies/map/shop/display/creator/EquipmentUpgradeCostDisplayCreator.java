@@ -13,11 +13,11 @@ import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.hologram.ViewableHologram;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.map.shop.Shop;
-import org.phantazm.zombies.map.shop.UpgradePath;
+import org.phantazm.core.equipment.UpgradePath;
 import org.phantazm.zombies.map.shop.display.HologramDisplayBase;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.upgrade.Upgradable;
+import org.phantazm.core.equipment.Upgradable;
 
 import java.util.*;
 

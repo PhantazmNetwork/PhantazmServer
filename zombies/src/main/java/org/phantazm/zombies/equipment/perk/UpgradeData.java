@@ -1,12 +1,11 @@
-package org.phantazm.zombies.upgrade;
+package org.phantazm.zombies.equipment.perk;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public interface UpgradeNodeData {
-    @NotNull Key levelKey();
-
+@FunctionalInterface
+public interface UpgradeData {
     @NotNull Set<Key> upgrades();
 }

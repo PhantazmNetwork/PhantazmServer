@@ -1,10 +1,11 @@
-package org.phantazm.zombies.map.shop;
+package org.phantazm.core.equipment;
 
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.equipment.UpgradePath;
 
 import java.util.*;
 

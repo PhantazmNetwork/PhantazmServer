@@ -43,7 +43,7 @@ import org.phantazm.zombies.map.action.round.AnnounceRoundAction;
 import org.phantazm.zombies.map.action.round.RevivePlayersAction;
 import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
 import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
-import org.phantazm.zombies.map.shop.LinearUpgradePath;
+import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.zombies.map.shop.display.*;
 import org.phantazm.zombies.map.shop.display.creator.EquipmentUpgradeCostDisplayCreator;
 import org.phantazm.zombies.map.shop.gui.InteractingClickHandler;
