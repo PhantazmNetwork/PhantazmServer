@@ -58,7 +58,7 @@ public class FlaggingPerkLevel implements PerkLevelCreator {
     @DataObject
     public record Data(@NotNull Set<Key> upgrades,
                        @NotNull Key flag,
-                       @NotNull @ChildPath("perk_visual_creator") String perkVisualCreator) implements UpgradeData {
+                       @NotNull @ChildPath("perk_visual_creator") String perkVisual) implements UpgradeData {
 
     }
 }
