@@ -39,10 +39,6 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     long getReviveTime();
 
-    double getReviveSpeedMultiplier();
-
-    void setReviveSpeedMultiplier(double multiplier);
-
     @NotNull ZombiesScene getScene();
 
     default @NotNull Optional<Equipment> getHeldEquipment() {

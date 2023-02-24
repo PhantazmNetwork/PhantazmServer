@@ -7,6 +7,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.scene.ZombiesScene;
@@ -21,8 +22,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     private final ZombiesPlayerModule module;
 
-    private double reviveSpeedMultiplier = 1.0F;
-
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module) {
         this.scene = Objects.requireNonNull(scene, "scene");
         this.module = Objects.requireNonNull(module, "module");
@@ -35,17 +34,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public long getReviveTime() {
-        return (long)(30L * reviveSpeedMultiplier);
-    }
-
-    @Override
-    public double getReviveSpeedMultiplier() {
-        return reviveSpeedMultiplier;
-    }
-
-    @Override
-    public void setReviveSpeedMultiplier(double multiplier) {
-        this.reviveSpeedMultiplier = multiplier;
+        return getPlayer().map(player -> (long)player.getAttributeValue(Attributes.REVIVE_SPEED)).orElse(30L);
     }
 
     @Override
