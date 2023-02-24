@@ -18,10 +18,11 @@ import java.util.UUID;
         Modifies a player attribute for the duration the perk is active.
                 
         Player attributes can be any of the attributes listed on https://minecraft.fandom.com/wiki/Attribute. However,
-        only a subset of these *currently* have any effect. These include:
+        only a subset of these *currently* have any effect. These are:
                 
         * `generic.max_health`
         * `generic.movement_speed`
+        * `generic.knockback_resistance`
                 
         There are also several custom attributes defined by Phantazm Zombies:
                 
