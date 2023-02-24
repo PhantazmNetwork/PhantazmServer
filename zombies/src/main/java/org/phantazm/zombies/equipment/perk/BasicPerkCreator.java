@@ -23,6 +23,10 @@ public class BasicPerkCreator implements PerkCreator {
         this.equipmentKey = Objects.requireNonNull(equipmentKey, "equipmentKey");
         this.rootLevel = Objects.requireNonNull(rootLevel, "rootLevel");
         this.perkLevelCreators = Map.copyOf(perkLevelCreators);
+
+        if (!this.perkLevelCreators.containsKey(rootLevel)) {
+            throw new IllegalArgumentException("Level map does not contain root level '" + rootLevel + "'");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -95,6 +99,10 @@ public class BasicPerkCreator implements PerkCreator {
 
         @Override
         public void setLevel(@NotNull Key key) {
+            if (key.equals(currentLevelKey)) {
+                return;
+            }
+
             PerkLevel newLevel = perkLevelMap.get(key);
             if (newLevel == null) {
                 throw new IllegalArgumentException("Level '" + key + "' does not exist");

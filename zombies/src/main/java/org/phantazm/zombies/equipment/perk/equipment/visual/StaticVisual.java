@@ -1,4 +1,4 @@
-package org.phantazm.zombies.equipment.perk.visual;
+package org.phantazm.zombies.equipment.perk.equipment.visual;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
@@ -30,7 +30,7 @@ public class StaticVisual implements PerkVisualCreator {
     private static class Visual implements PerkVisual {
         private final Data data;
 
-        private Visual(@NotNull Data data) {
+        private Visual(Data data) {
             this.data = Objects.requireNonNull(data, "data");
         }
 
@@ -43,9 +43,14 @@ public class StaticVisual implements PerkVisualCreator {
         public boolean shouldCompute() {
             return false;
         }
+
+        @Override
+        public void tick(long time) {
+
+        }
     }
 
     @DataObject
-    public record Data(@NotNull @Description("The item this visual will show.") ItemStack item) {
+    public record Data(@NotNull @Description("The item this visual will show") ItemStack item) {
     }
 }

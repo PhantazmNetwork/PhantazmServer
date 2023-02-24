@@ -43,8 +43,4 @@ public interface ShootTester {
      */
     boolean isShooting(@NotNull GunState state);
 
-    double getShootSpeedMultiplier();
-
-    void setShootSpeedMultiplier(double multiplier);
-
 }
