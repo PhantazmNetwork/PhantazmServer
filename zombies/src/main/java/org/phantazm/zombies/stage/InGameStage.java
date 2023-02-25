@@ -6,13 +6,11 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerModule;
-import org.phantazm.zombies.player.state.InventoryKeys;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 
 import java.util.*;
@@ -26,12 +24,13 @@ public class InGameStage implements Stage {
     private final RoundHandler roundHandler;
     private final Wrapper<Long> ticksSinceStart;
     private final Map<Key, List<Key>> defaultEquipment;
+    private final Set<Key> equipmentGroups;
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final ShopHandler shopHandler;
 
     public InGameStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
-            @NotNull Map<Key, List<Key>> defaultEquipment,
+            @NotNull Map<Key, List<Key>> defaultEquipment, @NotNull Set<Key> equipmentGroups,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
             @NotNull ShopHandler shopHandler) {
         this.instance = Objects.requireNonNull(instance, "instance");
@@ -40,6 +39,7 @@ public class InGameStage implements Stage {
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
         this.defaultEquipment = Objects.requireNonNull(defaultEquipment, "defaultEquipment");
+        this.equipmentGroups = Objects.requireNonNull(equipmentGroups, "equipmentGroups");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
         this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
     }
@@ -99,7 +99,12 @@ public class InGameStage implements Stage {
                     }
                 }
             }
+
+            for (Key group : equipmentGroups) {
+                equipmentHandler.applyDefaults(group);
+            }
         }
+
         shopHandler.initialize();
         ticksSinceStart.set(0L);
         roundHandler.setCurrentRound(0);

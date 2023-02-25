@@ -322,8 +322,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new CountdownStage(instance, zombiesPlayers, messages, random, 400L, alertTicks, tickFormatter,
                         newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
 
+        MapSettingsInfo settings = mapInfo.settings();
         Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
-                mapInfo.settings().defaultEquipment(),
+                settings.defaultEquipment(), settings.equipmentGroups().keySet(),
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler);
         Stage end = new EndStage(instance, zombiesPlayers, 200L,
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")));

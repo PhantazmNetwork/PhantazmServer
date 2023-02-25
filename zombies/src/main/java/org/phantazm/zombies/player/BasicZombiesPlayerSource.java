@@ -1,7 +1,6 @@
 package org.phantazm.zombies.player;
 
 import com.github.steanky.toolkit.collection.Wrapper;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -11,10 +10,14 @@ import net.minestom.server.entity.*;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.Team;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTException;
+import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.hologram.Hologram;
@@ -36,6 +39,7 @@ import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.equipment.gun.ZombiesEquipmentModule;
 import org.phantazm.zombies.kill.BasicPlayerKills;
 import org.phantazm.zombies.kill.PlayerKills;
+import org.phantazm.zombies.map.EquipmentGroupInfo;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
@@ -49,6 +53,7 @@ import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
 
+import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -84,14 +89,31 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         InventoryProfile livingProfile = new BasicInventoryProfile(9);
 
-        Map<Key, IntSet> equipmentGroups = mapSettingsInfo.equipmentGroups();
+        Map<Key, EquipmentGroupInfo> equipmentGroups = mapSettingsInfo.equipmentGroups();
 
         Map.Entry<Key, InventoryObjectGroup>[] inventoryObjectGroupEntries = new Map.Entry[equipmentGroups.size()];
-        Iterator<Map.Entry<Key, IntSet>> iterator = equipmentGroups.entrySet().iterator();
+        Iterator<Map.Entry<Key, EquipmentGroupInfo>> iterator = equipmentGroups.entrySet().iterator();
         for (int i = 0; i < inventoryObjectGroupEntries.length; i++) {
-            Map.Entry<Key, IntSet> entry = iterator.next();
-            inventoryObjectGroupEntries[i] =
-                    Map.entry(entry.getKey(), new BasicInventoryObjectGroup(livingProfile, entry.getValue()));
+            Map.Entry<Key, EquipmentGroupInfo> entry = iterator.next();
+            EquipmentGroupInfo groupInfo = entry.getValue();
+
+            String defaultItemString = groupInfo.defaultItem();
+
+            ItemStack itemStack = null;
+            if (!defaultItemString.isEmpty()) {
+                try {
+                    if (new SNBTParser(
+                            new StringReader(groupInfo.defaultItem())).parse() instanceof NBTCompound compound) {
+                        itemStack = ItemStack.fromItemNBT(compound);
+                    }
+                }
+                catch (NBTException ignored) {
+                }
+            }
+
+            inventoryObjectGroupEntries[i] = Map.entry(entry.getKey(),
+                    new BasicInventoryObjectGroup(livingProfile, groupInfo.slots(),
+                            itemStack == null ? null : new StaticInventoryObject(itemStack)));
         }
 
         InventoryAccess livingInventoryAccess =

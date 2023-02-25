@@ -81,14 +81,36 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<IntSet> intSetProcessor =
+            ConfigProcessor.INTEGER.collectionProcessor(IntOpenHashSet::new);
+    private static final ConfigProcessor<EquipmentGroupInfo> equipmentGroupInfo = new ConfigProcessor<>() {
+        @Override
+        public EquipmentGroupInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String defaultItem = element.getStringOrDefault("", "defaultItem");
+            IntSet slots = intSetProcessor.dataFromElement(element.getElementOrThrow("slots"));
+            return new EquipmentGroupInfo(defaultItem, slots);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(EquipmentGroupInfo equipmentGroupInfo)
+                throws ConfigProcessException {
+            String defaultItem = equipmentGroupInfo.defaultItem();
+            if (defaultItem.isEmpty()) {
+                return ConfigNode.of("slots", intSetProcessor.elementFromData(equipmentGroupInfo.slots()));
+            }
+
+            return ConfigNode.of("defaultItem", defaultItem, "slots",
+                    intSetProcessor.elementFromData(equipmentGroupInfo.slots()));
+        }
+    };
+
     private static final ConfigProcessor<List<Key>> keyList = ConfigProcessors.key().listProcessor();
     private static final ConfigProcessor<Set<Key>> keySet = ConfigProcessors.key().collectionProcessor(HashSet::new);
     private static final ConfigProcessor<Map<Key, List<Key>>> keyToListKeyMap =
             ConfigProcessor.mapProcessor(ConfigProcessors.key(), keyList, HashMap::new);
 
-    private static final ConfigProcessor<Map<Key, IntSet>> keyToIntSetMap =
-            ConfigProcessor.mapProcessor(ConfigProcessors.key(),
-                    ConfigProcessor.INTEGER.collectionProcessor(IntOpenHashSet::new), HashMap::new);
+    private static final ConfigProcessor<Map<Key, EquipmentGroupInfo>> keyToEquipmentGroup =
+            ConfigProcessor.mapProcessor(ConfigProcessors.key(), equipmentGroupInfo, HashMap::new);
     private static final ConfigProcessor<SpawnruleInfo> spawnruleInfo = new ConfigProcessor<>() {
         @Override
         public SpawnruleInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -268,8 +290,8 @@ public final class MapProcessors {
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             Map<Key, List<Key>> defaultEquipment =
                     keyToListKeyMap.dataFromElement(element.getElementOrThrow("defaultEquipment"));
-            Map<Key, IntSet> equipmentGroups =
-                    keyToIntSetMap.dataFromElement(element.getElementOrThrow("equipmentGroups"));
+            Map<Key, EquipmentGroupInfo> equipmentGroups =
+                    keyToEquipmentGroup.dataFromElement(element.getElementOrThrow("equipmentGroups"));
             return new MapSettingsInfo(mapDataVersion, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
@@ -314,7 +336,7 @@ public final class MapProcessors {
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());
             node.put("milestoneRounds", integerList.elementFromData(mapConfig.milestoneRounds()));
             node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
-            node.put("equipmentGroups", keyToIntSetMap.elementFromData(mapConfig.equipmentGroups()));
+            node.put("equipmentGroups", keyToEquipmentGroup.elementFromData(mapConfig.equipmentGroups()));
             return node;
         }
     };

@@ -2,6 +2,7 @@ package org.phantazm.core.inventory;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 /**
@@ -66,4 +67,5 @@ public interface InventoryObjectGroup {
 
     @NotNull InventoryProfile getProfile();
 
+    @Nullable InventoryObject defaultObject();
 }

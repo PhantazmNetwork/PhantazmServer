@@ -9,7 +9,6 @@ import org.phantazm.commons.Tickable;
  * Represents an item in an {@link AbstractInventory}.
  */
 public interface InventoryObject extends Tickable {
-
     /**
      * Gets the currently associated {@link ItemStack}.
      *
@@ -23,5 +22,4 @@ public interface InventoryObject extends Tickable {
      * @return Whether this inventory object should be redrawn
      */
     boolean shouldRedraw();
-
 }

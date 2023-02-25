@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
@@ -26,6 +27,11 @@ public class InventoryObjectGroupTest {
             @Override
             public @NotNull InventoryObject popInventoryObject() {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public @Nullable InventoryObject defaultObject() {
+                return null;
             }
 
         };

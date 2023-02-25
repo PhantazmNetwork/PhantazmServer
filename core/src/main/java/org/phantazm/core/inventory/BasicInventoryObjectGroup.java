@@ -2,25 +2,33 @@ package org.phantazm.core.inventory;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.function.Function;
+import org.jetbrains.annotations.Nullable;
 
 public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
+    private final InventoryObject defaultObject;
 
     public BasicInventoryObjectGroup(@NotNull InventoryProfile profile, @NotNull IntSet slots,
-            @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
-        super(profile, slots, unmodifiableMapper);
+            @Nullable InventoryObject defaultObject) {
+        super(profile, slots);
+        this.defaultObject = defaultObject;
     }
 
     public BasicInventoryObjectGroup(@NotNull InventoryProfile profile, @NotNull IntSet slots) {
-        super(profile, slots);
+        this(profile, slots, null);
     }
 
     @Override
     public void pushInventoryObject(@NotNull InventoryObject toPush) {
+        InventoryProfile profile = getProfile();
         for (int slot : getSlots()) {
-            if (!getProfile().hasInventoryObject(slot)) {
-                getProfile().setInventoryObject(slot, toPush);
+            if (defaultObject != null) {
+                if (!profile.hasInventoryObject(slot) || profile.getInventoryObject(slot).equals(defaultObject)) {
+                    profile.setInventoryObject(slot, toPush);
+                    return;
+                }
+            }
+            else if (!profile.hasInventoryObject(slot)) {
+                profile.setInventoryObject(slot, toPush);
                 return;
             }
         }
@@ -30,14 +38,28 @@ public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
 
     @Override
     public @NotNull InventoryObject popInventoryObject() {
+        InventoryProfile profile = getProfile();
         for (int i = getSlots().size(); i >= 0; i--) {
-            if (getProfile().hasInventoryObject(i)) {
-                InventoryObject object = getProfile().getInventoryObject(i);
-                getProfile().removeInventoryObject(i);
-                return object;
+            if (profile.hasInventoryObject(i)) {
+                InventoryObject object = profile.getInventoryObject(i);
+
+                if (!object.equals(defaultObject)) {
+                    profile.removeInventoryObject(i);
+
+                    if (defaultObject != null) {
+                        profile.setInventoryObject(i, defaultObject);
+                    }
+
+                    return object;
+                }
             }
         }
 
         throw new IllegalStateException("All slots are empty");
+    }
+
+    @Override
+    public @Nullable InventoryObject defaultObject() {
+        return defaultObject;
     }
 }

@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map;
 
 import com.github.steanky.vector.Vec3I;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +42,7 @@ public record MapSettingsInfo(int mapDataVersion,
                               int rollsPerChest,
                               @NotNull List<Integer> milestoneRounds,
                               @NotNull Map<Key, List<Key>> defaultEquipment,
-                              @NotNull Map<Key, IntSet> equipmentGroups) {
+                              @NotNull Map<Key, EquipmentGroupInfo> equipmentGroups) {
 
     public static final int MAP_DATA_VERSION = 1;
 

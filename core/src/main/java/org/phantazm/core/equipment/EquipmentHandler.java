@@ -84,4 +84,22 @@ public class EquipmentHandler {
 
         return List.copyOf(equipmentList);
     }
+
+    public void applyDefaults(@NotNull Key groupKey) {
+        accessRegistry.getCurrentAccess().ifPresent(access -> {
+            InventoryObjectGroup group = access.groups().get(groupKey);
+            InventoryObject defaultObject;
+            if (group == null || (defaultObject = group.defaultObject()) == null) {
+                return;
+            }
+
+            InventoryProfile profile = access.profile();
+            IntSet slots = group.getSlots();
+            for (int slot : slots) {
+                if (!profile.hasInventoryObject(slot)) {
+                    profile.setInventoryObject(slot, defaultObject);
+                }
+            }
+        });
+    }
 }
