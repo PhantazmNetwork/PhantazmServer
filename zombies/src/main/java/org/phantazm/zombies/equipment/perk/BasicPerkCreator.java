@@ -49,8 +49,8 @@ public class BasicPerkCreator implements PerkCreator {
         private Key currentLevelKey;
         private PerkLevel currentLevel;
 
-        private Basic(@NotNull Key equipmentKey, @NotNull Key rootLevel, @NotNull Map<Key, PerkLevel> perkLevelMap) {
-            this.equipmentKey = Objects.requireNonNull(equipmentKey, "equipmentKey");
+        private Basic(Key equipmentKey, Key rootLevel, Map<Key, PerkLevel> perkLevelMap) {
+            this.equipmentKey = equipmentKey;
             this.perkLevelMap = Map.copyOf(perkLevelMap);
 
             this.currentLevelKey = Objects.requireNonNull(rootLevel);

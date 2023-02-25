@@ -1,5 +1,6 @@
 package org.phantazm.zombies.player;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -31,7 +32,7 @@ import org.phantazm.zombies.coin.component.BasicTransactionComponentCreator;
 import org.phantazm.zombies.corpse.Corpse;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
-import org.phantazm.zombies.equipment.gun.ZombiesGunModule;
+import org.phantazm.zombies.equipment.gun.ZombiesEquipmentModule;
 import org.phantazm.zombies.kill.BasicPlayerKills;
 import org.phantazm.zombies.kill.PlayerKills;
 import org.phantazm.zombies.map.Flaggable;
@@ -53,11 +54,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
-    private final Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction;
+    private final Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction;
 
     private final Team corpseTeam;
 
-    public BasicZombiesPlayerSource(@NotNull Function<ZombiesGunModule, EquipmentCreator> equipmentCreatorFunction,
+    public BasicZombiesPlayerSource(
+            @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
             @NotNull Team corpseTeam) {
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
         this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
@@ -91,9 +93,11 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
 
-        ZombiesGunModule gunModule =
-                new ZombiesGunModule(zombiesPlayers, playerView, mobSpawner, mobStore, eventNode, random, mapObjects);
-        EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(gunModule);
+        Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
+        ZombiesEquipmentModule equipmentModule =
+                new ZombiesEquipmentModule(zombiesPlayers, playerView, mobSpawner, mobStore, eventNode, random,
+                        mapObjects, zombiesPlayerWrapper);
+        EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 
         Sidebar sidebar = new Sidebar(
                 Component.text(StringUtils.center("ZOMBIES", 16), NamedTextColor.YELLOW, TextDecoration.BOLD));
@@ -167,6 +171,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, mapTransactionModifierSource,
                         playerTransactionModifierSource, flaggable);
 
-        return new BasicZombiesPlayer(scene, module);
+        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module);
+        zombiesPlayerWrapper.set(zombiesPlayer);
+        return zombiesPlayer;
     }
 }

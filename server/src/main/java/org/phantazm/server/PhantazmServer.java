@@ -30,7 +30,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.server.ServerConfig;
 import org.phantazm.server.config.server.ServerInfoConfig;
-import org.phantazm.zombies.equipment.gun.data.GunData;
+import org.phantazm.zombies.equipment.EquipmentData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snakeyaml.engine.v2.api.Dump;
@@ -187,10 +187,10 @@ public final class PhantazmServer {
         ProximaTest.initialize(global, Proxima.getSpawner());
 
         Mob.initialize(contextManager, Path.of("./mobs/"), new YamlCodec());
-        EquipmentFeature.initialize(keyParser, contextManager, Path.of("./equipment/"),
+        EquipmentFeature.initialize(keyParser, contextManager,
                 new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                         () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build())),
-                mappingProcessorSource.processorFor(Token.ofClass(GunData.class)));
+                mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
         ZombiesFeature.initialize(global, contextManager, Mob.getProcessorMap(), Proxima.getSpawner(), keyParser,

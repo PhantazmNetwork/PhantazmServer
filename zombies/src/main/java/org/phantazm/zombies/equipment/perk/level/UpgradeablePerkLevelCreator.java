@@ -15,6 +15,7 @@ import java.util.*;
         Upgradeable perk level.
                 
         Each level consists of:
+        * The level key for this level
         * Allowable upgrade keys
         * A single "perk equipment", which controls the visual and any interactive effects of the perk
         * Any number of "perk effects", which control the persistent, passive effects granted by having the perk
@@ -45,8 +46,14 @@ public class UpgradeablePerkLevelCreator implements PerkLevelCreator {
         return new BasicPerkLevel(data.upgrades, equipment.forPlayer(zombiesPlayer), List.of(perkEffects));
     }
 
+    @Override
+    public @NotNull Key levelKey() {
+        return data.key;
+    }
+
     @DataObject
-    public record Data(@NotNull @Description("Possible upgrades for this level") Set<Key> upgrades,
+    public record Data(@NotNull @Description("The level key for this level") Key key,
+                       @NotNull @Description("Possible upgrades for this level") Set<Key> upgrades,
                        @NotNull @Description("The equipment controlling this perk's visuals") @ChildPath(
                                "equipment") String equipment,
                        @NotNull @Description("The perk effect(s) which are applied for this level") @ChildPath(

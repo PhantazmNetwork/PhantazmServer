@@ -49,7 +49,7 @@ public class FlaggingPerkEffectCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @Description("The flag to be set on the player to whom this perk belongs.") Key flag) {
+    public record Data(@NotNull @Description("The flag to be set on the player to whom this perk belongs") Key flag) {
 
     }
 }

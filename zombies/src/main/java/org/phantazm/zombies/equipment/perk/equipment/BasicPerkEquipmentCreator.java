@@ -20,17 +20,15 @@ import java.util.Objects;
         * An "interactor" that handles player interactions, like right-clicking, left-clicking, or selecting
         * A "visual" that controls how the perk looks
         """)
-@Model("zombies.perk.equipment")
+@Model("zombies.perk.equipment.basic")
 @Cache(false)
-public class BasicPerkEquipment implements PerkEquipmentCreator {
-    private final Key equipmentKey;
+public class BasicPerkEquipmentCreator implements PerkEquipmentCreator {
     private final PerkInteractorCreator interactor;
     private final PerkVisualCreator visual;
 
     @FactoryMethod
-    public BasicPerkEquipment(@NotNull Key equipmentKey, @NotNull @Child("interactor") PerkInteractorCreator interactor,
+    public BasicPerkEquipmentCreator(@NotNull @Child("interactor") PerkInteractorCreator interactor,
             @NotNull @Child("visual") PerkVisualCreator visual) {
-        this.equipmentKey = Objects.requireNonNull(equipmentKey, "equipmentKey");
         this.interactor = Objects.requireNonNull(interactor, "interactor");
         this.visual = Objects.requireNonNull(visual, "visual");
     }
@@ -39,16 +37,14 @@ public class BasicPerkEquipment implements PerkEquipmentCreator {
     public @NotNull PerkEquipment forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
         PerkInteractor perkInteractor = interactor.forPlayer(zombiesPlayer);
         PerkVisual perkVisual = visual.forPlayer(zombiesPlayer);
-        return new Equipment(equipmentKey, perkInteractor, perkVisual);
+        return new Equipment(perkInteractor, perkVisual);
     }
 
     private static class Equipment implements PerkEquipment {
-        private final Key equipmentKey;
         private final PerkInteractor interactor;
         private final PerkVisual visual;
 
-        private Equipment(Key equipmentKey, PerkInteractor interactor, PerkVisual visual) {
-            this.equipmentKey = equipmentKey;
+        private Equipment(PerkInteractor interactor, PerkVisual visual) {
             this.interactor = interactor;
             this.visual = visual;
         }
@@ -70,7 +66,7 @@ public class BasicPerkEquipment implements PerkEquipmentCreator {
 
         @Override
         public @NotNull Key key() {
-            return equipmentKey;
+            return Key.key("phantazm", "null");
         }
 
         @Override

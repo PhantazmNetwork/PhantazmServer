@@ -11,7 +11,6 @@ import java.util.*;
 public class EquipmentHandler {
     private final InventoryAccessRegistry accessRegistry;
 
-
     public EquipmentHandler(@NotNull InventoryAccessRegistry accessRegistry) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
     }

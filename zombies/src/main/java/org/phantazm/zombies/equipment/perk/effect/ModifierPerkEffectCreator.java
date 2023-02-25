@@ -2,6 +2,7 @@ package org.phantazm.zombies.equipment.perk.effect;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.attribute.Attribute;
@@ -46,6 +47,7 @@ import java.util.UUID;
 public class ModifierPerkEffectCreator implements PerkEffectCreator {
     private final Data data;
 
+    @FactoryMethod
     public ModifierPerkEffectCreator(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
@@ -62,9 +64,9 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
         private final UUID uuid;
         private final String name;
 
-        public Effect(@NotNull Data data, @NotNull ZombiesPlayer zombiesPlayer) {
+        private Effect(Data data, ZombiesPlayer zombiesPlayer) {
             this.data = data;
-            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
+            this.zombiesPlayer = zombiesPlayer;
 
             this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
             this.uuid = UUID.randomUUID();
@@ -84,10 +86,10 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @Description("The modifier name.") String attribute,
-                       @Description("The amount by which to modify this attribute.") double amount,
+    public record Data(@NotNull @Description("The modifier name") String attribute,
+                       @Description("The amount by which to modify this attribute") double amount,
                        @NotNull @Description(
-                               "The operation to use in order to modify this attribute.") AttributeOperation attributeOperation) {
+                               "The operation to use in order to modify this attribute") AttributeOperation attributeOperation) {
 
     }
 }

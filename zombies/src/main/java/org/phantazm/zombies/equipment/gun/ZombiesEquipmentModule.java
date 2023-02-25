@@ -19,25 +19,20 @@ import java.util.function.Supplier;
 @SuppressWarnings("ClassCanBeRecord")
 @Memoize
 @Depend
-public class ZombiesGunModule implements DependencyModule {
-
+public class ZombiesEquipmentModule implements DependencyModule {
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
-
     private final PlayerView playerView;
-
     private final MobSpawner mobSpawner;
-
     private final MobStore mobStore;
-
     private final EventNode<Event> eventNode;
-
     private final Random random;
-
     private final MapObjects mapObjects;
+    private final Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier;
 
-    public ZombiesGunModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+    public ZombiesEquipmentModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull PlayerView playerView, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
-            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects) {
+            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
+            @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier) {
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
@@ -45,6 +40,7 @@ public class ZombiesGunModule implements DependencyModule {
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.random = Objects.requireNonNull(random, "random");
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.zombiesPlayerSupplier = Objects.requireNonNull(zombiesPlayerSupplier, "zombiesPlayerSupplier");
     }
 
     public @NotNull Map<? super UUID, ? extends ZombiesPlayer> getPlayerMap() {
@@ -55,11 +51,11 @@ public class ZombiesGunModule implements DependencyModule {
         return playerView;
     }
 
-    public @NotNull Supplier<Optional<? extends Entity>> getShooterSupplier() {
+    public @NotNull Supplier<Optional<? extends Entity>> getPlayerSupplier() {
         return playerView::getPlayer;
     }
 
-    public @NotNull UUID getShooterUUID() {
+    public @NotNull UUID getPlayerUUID() {
         return playerView.getUUID();
     }
 
@@ -81,5 +77,9 @@ public class ZombiesGunModule implements DependencyModule {
 
     public @NotNull MapObjects getMapObjects() {
         return mapObjects;
+    }
+
+    public @NotNull Supplier<? extends ZombiesPlayer> getZombiesPlayerSupplier() {
+        return zombiesPlayerSupplier;
     }
 }

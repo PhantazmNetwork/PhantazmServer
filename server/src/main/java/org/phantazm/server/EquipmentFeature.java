@@ -17,10 +17,11 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentCreator;
+import org.phantazm.zombies.equipment.EquipmentTypes;
 import org.phantazm.zombies.equipment.gun.*;
 import org.phantazm.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import org.phantazm.zombies.equipment.gun.audience.PlayerAudienceProvider;
-import org.phantazm.zombies.equipment.gun.data.GunData;
+import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.equipment.gun.effect.*;
 import org.phantazm.zombies.equipment.gun.reload.StateReloadTester;
 import org.phantazm.zombies.equipment.gun.reload.actionbar.GradientActionBarChooser;
@@ -47,6 +48,16 @@ import org.phantazm.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
 import org.phantazm.zombies.equipment.gun.target.tester.PhantazmMobTargetTester;
 import org.phantazm.zombies.equipment.gun.visual.ClipStackMapper;
 import org.phantazm.zombies.equipment.gun.visual.ReloadStackMapper;
+import org.phantazm.zombies.equipment.perk.BasicPerkCreator;
+import org.phantazm.zombies.equipment.perk.PerkCreator;
+import org.phantazm.zombies.equipment.perk.effect.FlaggingPerkEffectCreator;
+import org.phantazm.zombies.equipment.perk.effect.ModifierPerkEffectCreator;
+import org.phantazm.zombies.equipment.perk.equipment.BasicPerkEquipmentCreator;
+import org.phantazm.zombies.equipment.perk.equipment.visual.StaticVisualCreator;
+import org.phantazm.zombies.equipment.perk.level.NonUpgradeablePerkLevelCreator;
+import org.phantazm.zombies.equipment.perk.level.PerkLevelCreator;
+import org.phantazm.zombies.equipment.perk.level.UpgradeablePerkLevelCreator;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,28 +73,19 @@ import java.util.stream.Stream;
  * Main entrypoint for equipment features.
  */
 final class EquipmentFeature {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentFeature.class);
-
     private static final Consumer<? super ElementException> HANDLER = ElementUtils.logging(LOGGER, "equipment");
+    private static final Path EQUIPMENT_PATH = Path.of("./equipment/");
 
-    private static Map<Key, Pair<GunData, List<ElementContext>>> gunLevelMap = null;
-
+    private static Map<Key, Pair<EquipmentData, List<ElementContext>>> equipmentLevelMap;
     private static KeyParser keyParser = null;
 
     private EquipmentFeature() {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Initialize equipment features.
-     *
-     * @param equipmentPath The {@link Path} to the equipment folder
-     * @param codec         A {@link ConfigCodec} for serialization
-     */
     static void initialize(@NotNull KeyParser keyParser, @NotNull ContextManager contextManager,
-            @NotNull Path equipmentPath, @NotNull ConfigCodec codec,
-            @NotNull ConfigProcessor<GunData> gunDataProcessor) {
+            @NotNull ConfigCodec codec, @NotNull ConfigProcessor<EquipmentData> gunDataProcessor) {
         EquipmentFeature.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         registerElementClasses(contextManager);
 
@@ -94,72 +96,80 @@ final class EquipmentFeature {
         else {
             ending = "." + codec.getPreferredExtension();
         }
-        PathMatcher matcher = equipmentPath.getFileSystem().getPathMatcher("glob:**" + ending);
 
-        Path guns = equipmentPath.resolve("guns");
+        PathMatcher matcher = EQUIPMENT_PATH.getFileSystem().getPathMatcher("glob:**" + ending);
+
+        Path guns = EQUIPMENT_PATH.resolve("guns");
+        Path perks = EQUIPMENT_PATH.resolve("perks");
         try {
             Files.createDirectories(guns);
+            Files.createDirectories(perks);
         }
         catch (IOException e) {
-            LOGGER.warn("Failed to create guns directory.", e);
+            LOGGER.warn("Failed to create a necessary equipment directory.", e);
             return;
         }
 
-        gunLevelMap = new HashMap<>();
-        try (Stream<Path> gunDirectories = Files.list(guns)) {
-            for (Path gunDirectory : (Iterable<? extends Path>)gunDirectories::iterator) {
-                if (!Files.isDirectory(gunDirectory)) {
-                    continue;
-                }
+        List<Path> equipmentDirectories = List.of(guns, perks);
+        Map<Key, Pair<EquipmentData, List<ElementContext>>> equipmentLevelMap = new HashMap<>();
 
-                String infoFileName = codec.getPreferredExtensions().isEmpty()
-                                      ? "settings"
-                                      : "settings." + codec.getPreferredExtension();
-                Path infoPath = gunDirectory.resolve(infoFileName);
-                if (!Files.isRegularFile(infoPath)) {
-                    LOGGER.warn("No gun settings file at {}.", infoPath);
-                    continue;
-                }
+        for (Path equipmentDirectory : equipmentDirectories) {
+            try (Stream<Path> gunDirectories = Files.list(equipmentDirectory)) {
+                for (Path gunDirectory : (Iterable<? extends Path>)gunDirectories::iterator) {
+                    if (!Files.isDirectory(gunDirectory)) {
+                        continue;
+                    }
 
-                GunData gunData;
-                try {
-                    gunData = Configuration.read(infoPath, codec, gunDataProcessor);
-                }
-                catch (ConfigProcessException e) {
-                    LOGGER.warn("Failed to read gun settings file at {}.", infoPath, e);
-                    continue;
-                }
+                    String infoFileName = codec.getPreferredExtensions().isEmpty()
+                                          ? "settings"
+                                          : "settings." + codec.getPreferredExtension();
+                    Path infoPath = gunDirectory.resolve(infoFileName);
+                    if (!Files.isRegularFile(infoPath)) {
+                        LOGGER.warn("No equipment settings file at {}.", infoPath);
+                        continue;
+                    }
 
-                List<ElementContext> levelData = new ArrayList<>();
-                Path levelsPath = gunDirectory.resolve("levels");
-                try (Stream<Path> levelDirectories = Files.list(levelsPath)) {
-                    for (Path levelFile : (Iterable<? extends Path>)levelDirectories::iterator) {
-                        if (!(Files.isRegularFile(levelFile) && matcher.matches(levelFile))) {
-                            continue;
-                        }
+                    EquipmentData equipmentData;
+                    try {
+                        equipmentData = Configuration.read(infoPath, codec, gunDataProcessor);
+                    }
+                    catch (ConfigProcessException e) {
+                        LOGGER.warn("Failed to read equipment settings file at {}.", infoPath, e);
+                        continue;
+                    }
 
-                        try {
-                            ConfigNode node = Configuration.read(levelFile, codec, ConfigProcessor.CONFIG_NODE);
-                            levelData.add(contextManager.makeContext(node));
-                        }
-                        catch (IOException e) {
-                            LOGGER.warn("Failed to read level file at {}.", levelFile, e);
+                    List<ElementContext> levelData = new ArrayList<>();
+                    Path levelsPath = gunDirectory.resolve("levels");
+                    try (Stream<Path> levelDirectories = Files.list(levelsPath)) {
+                        for (Path levelFile : (Iterable<? extends Path>)levelDirectories::iterator) {
+                            if (!(Files.isRegularFile(levelFile) && matcher.matches(levelFile))) {
+                                continue;
+                            }
+
+                            try {
+                                ConfigNode node = Configuration.read(levelFile, codec, ConfigProcessor.CONFIG_NODE);
+                                levelData.add(contextManager.makeContext(node));
+                            }
+                            catch (IOException e) {
+                                LOGGER.warn("Failed to read level file at {}.", levelFile, e);
+                            }
                         }
                     }
-                }
-                catch (IOException e) {
-                    LOGGER.warn("Failed to read levels directory at {}.", levelsPath, e);
-                    continue;
-                }
+                    catch (IOException e) {
+                        LOGGER.warn("Failed to list levels directory at {}.", levelsPath, e);
+                        continue;
+                    }
 
-                gunLevelMap.put(gunData.name(), Pair.of(gunData, levelData));
+                    equipmentLevelMap.put(equipmentData.name(), Pair.of(equipmentData, levelData));
+                }
+            }
+            catch (IOException e) {
+                LOGGER.warn("Failed to list equipment directory at {}", guns, e);
             }
         }
-        catch (IOException e) {
-            LOGGER.warn("Failed to list guns directory at {}", guns, e);
-        }
 
-        LOGGER.info("Loaded {} guns.", gunLevelMap.size());
+        EquipmentFeature.equipmentLevelMap = Map.copyOf(equipmentLevelMap);
+        LOGGER.info("Loaded {} equipment.", equipmentLevelMap.size());
     }
 
     private static void registerElementClasses(@NotNull ContextManager contextManager) {
@@ -211,34 +221,108 @@ final class EquipmentFeature {
         contextManager.registerElementClass(ReloadStackMapper.class);
         contextManager.registerElementClass(GunStats.class);
 
+        //PerkEffectCreators
+        contextManager.registerElementClass(FlaggingPerkEffectCreator.class);
+        contextManager.registerElementClass(ModifierPerkEffectCreator.class);
+
+        //PerkInteractorCreators
+        //none created (yet), would be used for abilities
+
+        //PerkVisualCreators
+        contextManager.registerElementClass(StaticVisualCreator.class);
+
+        //PerkEquipmentCreators
+        contextManager.registerElementClass(BasicPerkEquipmentCreator.class);
+
+        //PerkLevelCreators
+        contextManager.registerElementClass(NonUpgradeablePerkLevelCreator.class);
+        contextManager.registerElementClass(UpgradeablePerkLevelCreator.class);
+
         LOGGER.info("Registered Equipment element classes.");
     }
 
-    public static @NotNull EquipmentCreator createEquipmentCreator(@NotNull ZombiesGunModule gunModule) {
-        Objects.requireNonNull(gunModule, "gunModule");
-        FeatureUtils.check(gunLevelMap);
+    public static @NotNull EquipmentCreator createEquipmentCreator(@NotNull ZombiesEquipmentModule equipmentModule) {
+        Objects.requireNonNull(equipmentModule, "equipmentModule");
+        FeatureUtils.check(equipmentLevelMap);
         FeatureUtils.check(keyParser);
 
-        DependencyProvider provider = new ModuleDependencyProvider(keyParser, gunModule);
+        DependencyProvider provider = new ModuleDependencyProvider(keyParser, equipmentModule);
+
+        Map<Key, PerkCreator> perkCreatorMap = new HashMap<>();
+        for (Map.Entry<Key, Pair<EquipmentData, List<ElementContext>>> equipmentEntry : equipmentLevelMap.entrySet()) {
+            Pair<EquipmentData, List<ElementContext>> pair = equipmentEntry.getValue();
+            EquipmentData data = pair.first();
+
+
+            if (!EquipmentTypes.PERK.equals(pair.left().type())) {
+                continue;
+            }
+
+            Map<Key, PerkLevelCreator> perkLevels = new HashMap<>(pair.right().size());
+            for (ElementContext context : pair.right()) {
+                PerkLevelCreator perkLevelCreator = context.provide(provider, HANDLER, () -> null);
+                if (perkLevelCreator != null) {
+                    perkLevels.put(perkLevelCreator.levelKey(), perkLevelCreator);
+                }
+            }
+
+            if (!perkLevels.containsKey(data.rootLevel())) {
+                LOGGER.warn("Perk {} does not contain root level {}", data.name(), data.rootLevel());
+                continue;
+            }
+
+            Key equipmentName = data.name();
+            perkCreatorMap.put(equipmentName, new BasicPerkCreator(equipmentName, data.rootLevel(), perkLevels));
+        }
+
+        Map<Key, PerkCreator> perkMap = Map.copyOf(perkCreatorMap);
 
         return new EquipmentCreator() {
             @Override
             public boolean hasEquipment(@NotNull Key equipmentKey) {
-                return gunLevelMap.containsKey(equipmentKey);
+                return equipmentLevelMap.containsKey(equipmentKey);
             }
 
             @SuppressWarnings("unchecked")
             @NotNull
             @Override
             public <TEquipment extends Equipment> Optional<TEquipment> createEquipment(@NotNull Key equipmentKey) {
-                Pair<GunData, List<ElementContext>> pair = gunLevelMap.get(equipmentKey);
+                Pair<EquipmentData, List<ElementContext>> pair = equipmentLevelMap.get(equipmentKey);
                 if (pair == null) {
                     return Optional.empty();
                 }
 
-                Map<Key, GunLevel> levels = new HashMap<>(pair.right().size());
+                Key equipmentType = pair.left().type();
+                if (EquipmentTypes.PERK.equals(equipmentType)) {
+                    return (Optional<TEquipment>)loadPerk(equipmentKey);
+                }
+                else if (EquipmentTypes.GUN.equals(equipmentType)) {
+                    return (Optional<TEquipment>)loadGun(pair, equipmentKey);
+                }
+                else {
+                    return Optional.empty();
+                }
+            }
+
+            private Optional<Equipment> loadPerk(Key equipmentKey) {
+                PerkCreator perkCreator = perkMap.get(equipmentKey);
+                if (perkCreator == null) {
+                    return Optional.empty();
+                }
+
+                ZombiesPlayer zombiesPlayer = equipmentModule.getZombiesPlayerSupplier().get();
+                if (zombiesPlayer == null) {
+                    return Optional.empty();
+                }
+
+                return Optional.of(perkCreator.forPlayer(zombiesPlayer));
+            }
+
+            private Optional<Equipment> loadGun(Pair<EquipmentData, List<ElementContext>> pair, Key equipmentKey) {
+                List<ElementContext> contexts = pair.right();
+                Map<Key, GunLevel> levels = new HashMap<>(contexts.size());
                 Key rootLevel = pair.left().rootLevel();
-                for (ElementContext context : pair.right()) {
+                for (ElementContext context : contexts) {
                     GunLevel level = context.provide(provider, HANDLER, () -> null);
                     if (level != null) {
                         levels.put(level.data().key(), level);
@@ -250,9 +334,9 @@ final class EquipmentFeature {
                 }
 
                 GunModel model = new GunModel(rootLevel, levels);
-                Gun gun = new Gun(equipmentKey, gunModule.getPlayerView()::getPlayer, model);
+                Gun gun = new Gun(equipmentKey, equipmentModule.getPlayerView()::getPlayer, model);
 
-                return Optional.of((TEquipment)gun);
+                return Optional.of(gun);
             }
         };
     }

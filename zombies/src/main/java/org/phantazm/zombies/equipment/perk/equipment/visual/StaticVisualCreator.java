@@ -14,11 +14,11 @@ import java.util.Objects;
 @Description("A perk visual that is a static, unchanging item.")
 @Model("zombies.perk.visual.static")
 @Cache
-public class StaticVisual implements PerkVisualCreator {
+public class StaticVisualCreator implements PerkVisualCreator {
     private final Data data;
 
     @FactoryMethod
-    public StaticVisual(@NotNull Data data) {
+    public StaticVisualCreator(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
     }
 
