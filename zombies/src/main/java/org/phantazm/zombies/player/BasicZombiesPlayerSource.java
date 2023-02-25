@@ -121,7 +121,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         InventoryAccess deadInventoryAccess = new InventoryAccess(new BasicInventoryProfile(9), Map.of());
 
         InventoryAccessRegistry accessRegistry = new BasicInventoryAccessRegistry(playerView);
-        accessRegistry.registerAccess(InventoryKeys.DEFAULT_ACCESS, livingInventoryAccess);
+        accessRegistry.registerAccess(InventoryKeys.ALIVE_ACCESS, livingInventoryAccess);
         accessRegistry.registerAccess(InventoryKeys.DEAD_ACCESS, deadInventoryAccess);
 
         EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
@@ -192,7 +192,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     ZombiesPlayerStateKeys.QUIT.key(),
                     List.of(new BasicQuitStateActivable(instance, playerView, meta, sidebar)));
         };
-        PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(aliveStateCreator.apply(NoContext.INSTANCE));
+        PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
                 Map.of(ZombiesPlayerStateKeys.ALIVE, aliveStateCreator, ZombiesPlayerStateKeys.DEAD,
                         (Function<DeadPlayerStateContext, ZombiesPlayerState>)context -> deadStateCreator.apply(context,

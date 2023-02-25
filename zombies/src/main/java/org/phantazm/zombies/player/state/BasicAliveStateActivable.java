@@ -37,7 +37,7 @@ public class BasicAliveStateActivable implements Activable {
             sidebar.addViewer(player);
         });
 
-        accessRegistry.switchAccess(InventoryKeys.DEFAULT_ACCESS);
+        accessRegistry.switchAccess(InventoryKeys.ALIVE_ACCESS);
 
         meta.setInGame(true);
         meta.setCanRevive(true);
@@ -65,5 +65,7 @@ public class BasicAliveStateActivable implements Activable {
             player.clearEffects();
             sidebar.addViewer(player);
         });
+
+        accessRegistry.switchAccess(null);
     }
 }

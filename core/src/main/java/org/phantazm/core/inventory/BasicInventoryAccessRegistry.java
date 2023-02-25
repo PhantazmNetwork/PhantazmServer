@@ -34,6 +34,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         synchronized (sync) {
             if (key == null) {
                 currentAccess = null;
+                applyTo(null);
             }
             else {
                 InventoryAccess access = accessMap.get(key);
@@ -46,7 +47,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
                 }
 
                 currentAccess = access;
-                applyTo(access, playerView);
+                applyTo(access);
             }
         }
     }
@@ -113,7 +114,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         });
     }
 
-    private void applyTo(InventoryAccess newAccess, PlayerView playerView) {
+    private void applyTo(InventoryAccess newAccess) {
         playerView.getPlayer().ifPresent(player -> {
             player.getInventory().clear();
 
@@ -131,20 +132,22 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
                 object.end();
             }
 
-            InventoryProfile newProfile = newAccess.profile();
-            for (int slot = 0; slot < newProfile.getSlotCount(); slot++) {
-                if (!newProfile.hasInventoryObject(slot)) {
-                    continue;
-                }
+            if (newAccess != null) {
+                InventoryProfile newProfile = newAccess.profile();
+                for (int slot = 0; slot < newProfile.getSlotCount(); slot++) {
+                    if (!newProfile.hasInventoryObject(slot)) {
+                        continue;
+                    }
 
-                InventoryObject inventoryObject = newProfile.getInventoryObject(slot);
-                inventoryObject.start();
+                    InventoryObject inventoryObject = newProfile.getInventoryObject(slot);
+                    inventoryObject.start();
 
-                //don't ask for redraw when we initially set the item
-                player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
+                    //don't ask for redraw when we initially set the item
+                    player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
 
-                if (slot == player.getHeldSlot() && inventoryObject instanceof Equipment equipment) {
-                    equipment.setSelected(true);
+                    if (slot == player.getHeldSlot() && inventoryObject instanceof Equipment equipment) {
+                        equipment.setSelected(true);
+                    }
                 }
             }
         });

@@ -9,22 +9,34 @@ public class PlayerStateSwitcher implements Activable {
 
     private ZombiesPlayerState state;
 
-    public PlayerStateSwitcher(@NotNull ZombiesPlayerState defaultState) {
-        this.state = Objects.requireNonNull(defaultState, "defaultState");
+    public PlayerStateSwitcher() {
+
     }
 
     @Override
     public void start() {
+        if (state == null) {
+            return;
+        }
+
         state.start();
     }
 
     @Override
     public void tick(long time) {
+        if (state == null) {
+            return;
+        }
+
         state.tick(time).ifPresent(this::setState);
     }
 
     @Override
     public void end() {
+        if (state == null) {
+            return;
+        }
+
         state.end();
     }
 
@@ -33,7 +45,10 @@ public class PlayerStateSwitcher implements Activable {
     }
 
     public void setState(@NotNull ZombiesPlayerState state) {
-        this.state.end();
+        if (this.state != null) {
+            this.state.end();
+        }
+
         this.state = state;
         this.state.start();
     }

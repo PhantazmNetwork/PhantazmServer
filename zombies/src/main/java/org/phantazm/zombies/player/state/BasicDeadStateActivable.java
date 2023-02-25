@@ -58,6 +58,8 @@ public class BasicDeadStateActivable implements Activable {
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
         });
+
+        accessRegistry.switchAccess(null);
     }
 
     private @NotNull Component buildDeathMessage(@NotNull Component displayName) {
