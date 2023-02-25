@@ -6,10 +6,12 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.ZombiesPlayerModule;
 import org.phantazm.zombies.player.state.InventoryKeys;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 
@@ -23,13 +25,13 @@ public class InGameStage implements Stage {
     private final Pos spawnPos;
     private final RoundHandler roundHandler;
     private final Wrapper<Long> ticksSinceStart;
-    private final Collection<Key> defaultEquipment;
+    private final Map<Key, List<Key>> defaultEquipment;
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final ShopHandler shopHandler;
 
     public InGameStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
-            @NotNull Collection<Key> defaultEquipment,
+            @NotNull Map<Key, List<Key>> defaultEquipment,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
             @NotNull ShopHandler shopHandler) {
         this.instance = Objects.requireNonNull(instance, "instance");
@@ -80,15 +82,22 @@ public class InGameStage implements Stage {
                 player.teleport(spawnPos);
             });
 
-            for (Key equipmentKey : defaultEquipment) {
-                EquipmentHandler equipmentHandler = zombiesPlayer.module().getEquipmentHandler();
-                if (!equipmentHandler.canAddEquipment(InventoryKeys.GUN_INVENTORY_GROUP)) {
+            ZombiesPlayerModule module = zombiesPlayer.module();
+            EquipmentHandler equipmentHandler = module.getEquipmentHandler();
+            for (Key groupKey : defaultEquipment.keySet()) {
+                if (!equipmentHandler.canAddEquipment(groupKey)) {
                     continue;
                 }
 
-                zombiesPlayer.module().getEquipmentCreator().createEquipment(equipmentKey).ifPresent(equipment -> {
-                    equipmentHandler.addEquipment(equipment, InventoryKeys.GUN_INVENTORY_GROUP);
-                });
+                for (Key key : defaultEquipment.get(groupKey)) {
+                    module.getEquipmentCreator().createEquipment(key).ifPresent(equipment -> {
+                        equipmentHandler.addEquipment(equipment, groupKey);
+                    });
+
+                    if (!equipmentHandler.canAddEquipment(groupKey)) {
+                        break;
+                    }
+                }
             }
         }
         shopHandler.initialize();

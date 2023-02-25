@@ -17,9 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ConfigProcessors;
 import org.phantazm.commons.vector.VectorConfigProcessors;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Contains static {@link ConfigProcessor} instances used for serializing or deserializing various map-related data
@@ -83,6 +81,8 @@ public final class MapProcessors {
 
     private static final ConfigProcessor<List<Key>> keyList = ConfigProcessors.key().listProcessor();
     private static final ConfigProcessor<Set<Key>> keySet = ConfigProcessors.key().collectionProcessor(HashSet::new);
+    private static final ConfigProcessor<Map<Key, List<Key>>> keyToListKeyMap =
+            ConfigProcessor.mapProcessor(ConfigProcessors.key(), keyList, HashMap::new);
     private static final ConfigProcessor<SpawnruleInfo> spawnruleInfo = new ConfigProcessor<>() {
         @Override
         public SpawnruleInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -260,7 +260,8 @@ public final class MapProcessors {
             long baseReviveTicks = element.getNumberOrThrow("baseReviveTicks").longValue();
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
-            List<Key> defaultEquipment = keyList.dataFromElement(element.getElementOrThrow("defaultEquipment"));
+            Map<Key, List<Key>> defaultEquipment =
+                    keyToListKeyMap.dataFromElement(element.getElementOrThrow("defaultEquipment"));
             return new MapSettingsInfo(mapDataVersion, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
@@ -304,7 +305,7 @@ public final class MapProcessors {
             node.putNumber("baseReviveTicks", mapConfig.baseReviveTicks());
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());
             node.put("milestoneRounds", integerList.elementFromData(mapConfig.milestoneRounds()));
-            node.put("defaultEquipment", keyList.elementFromData(mapConfig.defaultEquipment()));
+            node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
             return node;
         }
     };

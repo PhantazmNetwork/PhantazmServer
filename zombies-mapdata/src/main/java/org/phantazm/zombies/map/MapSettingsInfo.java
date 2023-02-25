@@ -5,9 +5,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Defines the general settings for a map.
@@ -43,7 +41,7 @@ public record MapSettingsInfo(int mapDataVersion,
                               long baseReviveTicks,
                               int rollsPerChest,
                               @NotNull List<Integer> milestoneRounds,
-                              @NotNull List<Key> defaultEquipment) {
+                              @NotNull Map<Key, List<Key>> defaultEquipment) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -78,7 +76,8 @@ public record MapSettingsInfo(int mapDataVersion,
      * @param baseReviveTicks        the base number of ticks it takes to revive a player
      * @param rollsPerChest          the number of rolls a lucky chest can have before it moves to another location
      * @param milestoneRounds        "special" rounds whose times are recorded and saved
-     * @param defaultEquipment       the initial equipment players receive when the game starts
+     * @param defaultEquipment       the initial equipment players receive when the game starts; the keys correspond to
+     *                               the inventory object group they should be placed in
      */
     public MapSettingsInfo {
         Objects.requireNonNull(id, "id");
@@ -104,6 +103,6 @@ public record MapSettingsInfo(int mapDataVersion,
         this(MAP_DATA_VERSION, id, List.of(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0),
                 Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false, false, 30, 5,
-                new ArrayList<>(0), new ArrayList<>(0));
+                new ArrayList<>(0), new HashMap<>(0));
     }
 }
