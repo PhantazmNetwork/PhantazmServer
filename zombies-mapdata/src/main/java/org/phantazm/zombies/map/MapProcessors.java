@@ -10,6 +10,8 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -83,6 +85,10 @@ public final class MapProcessors {
     private static final ConfigProcessor<Set<Key>> keySet = ConfigProcessors.key().collectionProcessor(HashSet::new);
     private static final ConfigProcessor<Map<Key, List<Key>>> keyToListKeyMap =
             ConfigProcessor.mapProcessor(ConfigProcessors.key(), keyList, HashMap::new);
+
+    private static final ConfigProcessor<Map<Key, IntSet>> keyToIntSetMap =
+            ConfigProcessor.mapProcessor(ConfigProcessors.key(),
+                    ConfigProcessor.INTEGER.collectionProcessor(IntOpenHashSet::new), HashMap::new);
     private static final ConfigProcessor<SpawnruleInfo> spawnruleInfo = new ConfigProcessor<>() {
         @Override
         public SpawnruleInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -262,12 +268,14 @@ public final class MapProcessors {
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             Map<Key, List<Key>> defaultEquipment =
                     keyToListKeyMap.dataFromElement(element.getElementOrThrow("defaultEquipment"));
+            Map<Key, IntSet> equipmentGroups =
+                    keyToIntSetMap.dataFromElement(element.getElementOrThrow("equipmentGroups"));
             return new MapSettingsInfo(mapDataVersion, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
                     corpseDeathTicks, healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks,
-                    rollsPerChest, milestoneRounds, defaultEquipment);
+                    rollsPerChest, milestoneRounds, defaultEquipment, equipmentGroups);
         }
 
         @Override
@@ -306,6 +314,7 @@ public final class MapProcessors {
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());
             node.put("milestoneRounds", integerList.elementFromData(mapConfig.milestoneRounds()));
             node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
+            node.put("equipmentGroups", keyToIntSetMap.elementFromData(mapConfig.equipmentGroups()));
             return node;
         }
     };

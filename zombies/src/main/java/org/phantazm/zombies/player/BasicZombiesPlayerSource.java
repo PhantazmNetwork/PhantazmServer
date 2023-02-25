@@ -2,6 +2,7 @@ package org.phantazm.zombies.player;
 
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -65,6 +66,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
@@ -81,10 +83,19 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         PlayerKills kills = new BasicPlayerKills();
 
         InventoryProfile livingProfile = new BasicInventoryProfile(9);
-        InventoryAccess livingInventoryAccess = new InventoryAccess(livingProfile,
-                Map.of(InventoryKeys.GUN_INVENTORY_GROUP,
-                        new BasicInventoryObjectGroup(livingProfile, IntSet.of(1, 2))));
 
+        Map<Key, IntSet> equipmentGroups = mapSettingsInfo.equipmentGroups();
+
+        Map.Entry<Key, InventoryObjectGroup>[] inventoryObjectGroupEntries = new Map.Entry[equipmentGroups.size()];
+        Iterator<Map.Entry<Key, IntSet>> iterator = equipmentGroups.entrySet().iterator();
+        for (int i = 0; i < inventoryObjectGroupEntries.length; i++) {
+            Map.Entry<Key, IntSet> entry = iterator.next();
+            inventoryObjectGroupEntries[i] =
+                    Map.entry(entry.getKey(), new BasicInventoryObjectGroup(livingProfile, entry.getValue()));
+        }
+
+        InventoryAccess livingInventoryAccess =
+                new InventoryAccess(livingProfile, Map.ofEntries(inventoryObjectGroupEntries));
         InventoryAccess deadInventoryAccess = new InventoryAccess(new BasicInventoryProfile(9), Map.of());
 
         InventoryAccessRegistry accessRegistry = new BasicInventoryAccessRegistry();
