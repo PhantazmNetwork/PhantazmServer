@@ -63,10 +63,8 @@ public class GroundController implements Controller {
             speed = distSquared;
         }
 
-        int count = nearbyEntities();
-        double radians = adjustAngle(count, Math.atan2(dZ, dX));
+        double radians = Math.atan2(dZ, dX);
 
-        speed = adjustSpeed(count, speed);
         double vX = Math.cos(radians) * speed;
         double vZ = Math.sin(radians) * speed;
 
@@ -121,39 +119,6 @@ public class GroundController implements Controller {
 
             entity.refreshPosition(pos);
         }
-    }
-
-    private double adjustAngle(int count, double radians) {
-        if (count == 0) {
-            return radians;
-        }
-
-        return radians + ThreadLocalRandom.current().nextDouble(-Math.PI / 2, Math.PI / 2);
-    }
-
-    private double adjustSpeed(int count, double speed) {
-        if (count == 0) {
-            return speed;
-        }
-
-        return speed * (0.5 + Math.min(count / 20.0, 1));
-    }
-
-    private int nearbyEntities() {
-        Instance instance = entity.getInstance();
-        assert instance != null;
-
-        Wrapper<Integer> countWrapper = Wrapper.of(0);
-        Point position = entity.getPosition();
-        instance.getEntityTracker()
-                .nearbyEntitiesByChunkRange(position, 0, EntityTracker.Target.LIVING_ENTITIES, entity -> {
-                    if (entity != this.entity && entity.getPosition().distanceSquared(position) < 1 &&
-                            entity instanceof ProximaEntity) {
-                        countWrapper.apply(c -> c + 1);
-                    }
-                });
-
-        return countWrapper.get();
     }
 
     @Override

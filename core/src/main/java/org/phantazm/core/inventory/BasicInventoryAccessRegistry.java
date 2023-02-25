@@ -33,8 +33,8 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     public void switchAccess(@Nullable Key key) {
         synchronized (sync) {
             if (key == null) {
-                currentAccess = null;
                 applyTo(null);
+                currentAccess = null;
             }
             else {
                 InventoryAccess access = accessMap.get(key);
