@@ -1,7 +1,9 @@
 package org.phantazm.core.inventory;
 
+import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
+import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -29,8 +31,8 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
     public InventoryObjectGroupAbstract(@NotNull InventoryProfile profile, @NotNull IntSet slots,
             @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
         this.profile = Objects.requireNonNull(profile, "profile");
-        this.slots = Objects.requireNonNull(slots, "slots");
-        this.unmodifiableSlots = Objects.requireNonNull(unmodifiableMapper.apply(slots), "mapped slots");
+        this.slots = new IntRBTreeSet(slots);
+        this.unmodifiableSlots = Objects.requireNonNull(unmodifiableMapper.apply(this.slots), "mapped slots");
     }
 
     /**

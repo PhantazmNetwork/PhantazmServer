@@ -41,7 +41,7 @@ public class StaticVisualCreator implements PerkVisualCreator {
 
         @Override
         public boolean shouldCompute() {
-            return false;
+            return true;
         }
 
         @Override

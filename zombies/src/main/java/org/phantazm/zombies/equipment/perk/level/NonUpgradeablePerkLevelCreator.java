@@ -56,6 +56,6 @@ public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
                        @NotNull @Description("The equipment controlling this perk's visuals") @ChildPath(
                                "equipment") String equipment,
                        @NotNull @Description("The perk effect(s) which are applied for this level") @ChildPath(
-                               "perk_effects") String perkEffects) {
+                               "perk_effects") Collection<String> effects) {
     }
 }

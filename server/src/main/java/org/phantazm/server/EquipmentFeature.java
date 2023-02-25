@@ -53,6 +53,7 @@ import org.phantazm.zombies.equipment.perk.PerkCreator;
 import org.phantazm.zombies.equipment.perk.effect.FlaggingPerkEffectCreator;
 import org.phantazm.zombies.equipment.perk.effect.ModifierPerkEffectCreator;
 import org.phantazm.zombies.equipment.perk.equipment.BasicPerkEquipmentCreator;
+import org.phantazm.zombies.equipment.perk.equipment.interactor.NoInteractorCreator;
 import org.phantazm.zombies.equipment.perk.equipment.visual.StaticVisualCreator;
 import org.phantazm.zombies.equipment.perk.level.NonUpgradeablePerkLevelCreator;
 import org.phantazm.zombies.equipment.perk.level.PerkLevelCreator;
@@ -75,6 +76,7 @@ import java.util.stream.Stream;
 final class EquipmentFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentFeature.class);
     private static final Consumer<? super ElementException> HANDLER = ElementUtils.logging(LOGGER, "equipment");
+    
     private static final Path EQUIPMENT_PATH = Path.of("./equipment/");
 
     private static Map<Key, Pair<EquipmentData, List<ElementContext>>> equipmentLevelMap;
@@ -226,7 +228,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(ModifierPerkEffectCreator.class);
 
         //PerkInteractorCreators
-        //none created (yet), would be used for abilities
+        contextManager.registerElementClass(NoInteractorCreator.class);
 
         //PerkVisualCreators
         contextManager.registerElementClass(StaticVisualCreator.class);
@@ -252,7 +254,6 @@ final class EquipmentFeature {
         for (Map.Entry<Key, Pair<EquipmentData, List<ElementContext>>> equipmentEntry : equipmentLevelMap.entrySet()) {
             Pair<EquipmentData, List<ElementContext>> pair = equipmentEntry.getValue();
             EquipmentData data = pair.first();
-
 
             if (!EquipmentTypes.PERK.equals(pair.left().type())) {
                 continue;
