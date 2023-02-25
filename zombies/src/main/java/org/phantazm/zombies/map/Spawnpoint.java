@@ -26,6 +26,7 @@ import java.util.function.Function;
  */
 public class Spawnpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(Spawnpoint.class);
+
     private final SpawnpointInfo spawnInfo;
     private final Function<? super Key, ? extends SpawnruleInfo> spawnrules;
     private final Instance instance;
@@ -111,11 +112,13 @@ public class Spawnpoint {
                 LOGGER.warn("Because of the missing link, spawning will be disallowed");
                 return false;
             }
-            else if (!linkedRoom.get().isOpen()) {
+
+            Room room = linkedRoom.get();
+            if (!room.isOpen() && !room.getRoomInfo().isSpawn()) {
                 return false;
             }
         }
-        else if (linkedRoom != null && !linkedRoom.isOpen()) {
+        else if (linkedRoom != null && !linkedRoom.isOpen() && !linkedRoom.getRoomInfo().isSpawn()) {
             return false;
         }
 

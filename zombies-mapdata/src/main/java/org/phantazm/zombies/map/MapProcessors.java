@@ -187,17 +187,22 @@ public final class MapProcessors {
         @Override
         public RoomInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            boolean isSpawn = element.getBooleanOrDefault(false, "isSpawn");
             Component displayName =
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("displayName"));
             List<Bounds3I> regions = boundsList.dataFromElement(element.getElementOrThrow("regions"));
             ConfigList openActions = element.getListOrThrow("openActions");
-            return new RoomInfo(id, displayName, regions, openActions);
+            return new RoomInfo(id, isSpawn, displayName, regions, openActions);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(RoomInfo roomInfo) throws ConfigProcessException {
-            ConfigNode node = new LinkedConfigNode(4);
+            ConfigNode node = new LinkedConfigNode(5);
             node.put("id", ConfigProcessors.key().elementFromData(roomInfo.id()));
+            if (roomInfo.isSpawn()) {
+                node.putBoolean("isSpawn", true);
+            }
+
             node.put("displayName", ConfigProcessors.component().elementFromData(roomInfo.displayName()));
             node.put("regions", boundsList.elementFromData(roomInfo.regions()));
             node.put("openActions", roomInfo.openActions());
