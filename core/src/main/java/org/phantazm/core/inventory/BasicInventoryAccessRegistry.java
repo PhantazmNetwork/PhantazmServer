@@ -18,6 +18,11 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     private final Map<Key, InventoryAccess> accessMap = new HashMap<>();
     private final Object sync = new Object();
     private InventoryAccess currentAccess = null;
+    private final PlayerView playerView;
+
+    public BasicInventoryAccessRegistry(@NotNull PlayerView playerView) {
+        this.playerView = Objects.requireNonNull(playerView, "playerView");
+    }
 
     @Override
     public @NotNull Optional<InventoryAccess> getCurrentAccess() {
@@ -25,7 +30,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     @Override
-    public void switchAccess(@Nullable Key key, @NotNull PlayerView playerView) {
+    public void switchAccess(@Nullable Key key) {
         synchronized (sync) {
             if (key == null) {
                 currentAccess = null;
@@ -34,6 +39,10 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
                 InventoryAccess access = accessMap.get(key);
                 if (access == null) {
                     throw new IllegalArgumentException("No matching inventory access found");
+                }
+
+                if (access == currentAccess) {
+                    return;
                 }
 
                 currentAccess = access;
@@ -69,21 +78,70 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         }
     }
 
-    private void applyTo(InventoryAccess currentAccess, PlayerView playerView) {
+    @Override
+    public boolean canPushTo(@NotNull Key groupKey) {
+        Optional<InventoryAccess> accessOptional = getCurrentAccess();
+        if (accessOptional.isPresent()) {
+            InventoryAccess inventoryAccess = accessOptional.get();
+            InventoryObjectGroup group = inventoryAccess.groups().get(groupKey);
+            return group != null && !group.isFull();
+        }
+
+        return false;
+    }
+
+    @Override
+    public void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object) {
+        Optional<InventoryAccess> accessOptional = getCurrentAccess();
+        if (accessOptional.isEmpty()) {
+            throw new IllegalArgumentException("No current access");
+        }
+
+        InventoryAccess access = accessOptional.get();
+        InventoryObjectGroup group = access.groups().get(groupKey);
+        if (group == null) {
+            throw new IllegalArgumentException("Group " + groupKey + " does not exist");
+        }
+
+        int slot = group.pushInventoryObject(object);
+        object.start();
+
+        playerView.getPlayer().ifPresent(player -> {
+            if (player.getHeldSlot() == slot && object instanceof Equipment equipment) {
+                equipment.setSelected(true);
+            }
+        });
+    }
+
+    private void applyTo(InventoryAccess newAccess, PlayerView playerView) {
         playerView.getPlayer().ifPresent(player -> {
             player.getInventory().clear();
 
-            InventoryProfile profile = currentAccess.profile();
-
-            for (int slot = 0; slot < profile.getSlotCount(); slot++) {
-                if (!profile.hasInventoryObject(slot)) {
+            InventoryProfile oldProfile = this.currentAccess.profile();
+            for (int slot = 0; slot < oldProfile.getSlotCount(); slot++) {
+                if (!oldProfile.hasInventoryObject(slot)) {
                     continue;
                 }
 
-                InventoryObject inventoryObject = profile.getInventoryObject(slot);
-                if (inventoryObject.shouldRedraw()) {
-                    player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
+                InventoryObject object = oldProfile.getInventoryObject(slot);
+                if (slot == player.getHeldSlot() && object instanceof Equipment equipment) {
+                    equipment.setSelected(false);
                 }
+
+                object.end();
+            }
+
+            InventoryProfile newProfile = newAccess.profile();
+            for (int slot = 0; slot < newProfile.getSlotCount(); slot++) {
+                if (!newProfile.hasInventoryObject(slot)) {
+                    continue;
+                }
+
+                InventoryObject inventoryObject = newProfile.getInventoryObject(slot);
+                inventoryObject.start();
+
+                //don't ask for redraw when we initially set the item
+                player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
 
                 if (slot == player.getHeldSlot() && inventoryObject instanceof Equipment equipment) {
                     equipment.setSelected(true);

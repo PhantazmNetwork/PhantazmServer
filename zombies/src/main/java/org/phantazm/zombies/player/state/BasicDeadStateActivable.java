@@ -44,7 +44,7 @@ public class BasicDeadStateActivable implements Activable {
             instance.sendMessage(buildDeathMessage(displayName));
         });
 
-        accessRegistry.switchAccess(InventoryKeys.DEAD_ACCESS, playerView);
+        accessRegistry.switchAccess(InventoryKeys.DEAD_ACCESS);
 
         meta.setInGame(true);
         meta.setCanRevive(false);

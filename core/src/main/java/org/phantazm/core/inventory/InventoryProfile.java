@@ -1,6 +1,7 @@
 package org.phantazm.core.inventory;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A profile of an inventory.
@@ -31,14 +32,14 @@ public interface InventoryProfile {
      * @param object The {@link InventoryObject} to put in, or null to remove the inventory object
      * @throws IllegalStateException If an {@link InventoryObject} is in the current slot
      */
-    void setInventoryObject(int slot, @NotNull InventoryObject object);
+    @Nullable InventoryObject setInventoryObject(int slot, @NotNull InventoryObject object);
 
     /**
      * Removes the {@link InventoryObject} within a certain slot.
      *
      * @param slot The slot to remove an {@link InventoryObject} from
      */
-    void removeInventoryObject(int slot);
+    @NotNull InventoryObject removeInventoryObject(int slot);
 
     /**
      * Gets the number of slots this profile holds.

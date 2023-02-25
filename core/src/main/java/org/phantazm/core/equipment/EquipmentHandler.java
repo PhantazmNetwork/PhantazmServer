@@ -4,7 +4,9 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.*;
+import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
 
@@ -19,41 +21,17 @@ public class EquipmentHandler {
         Objects.requireNonNull(equipment, "equipment");
         Objects.requireNonNull(groupKey, "groupKey");
 
-        Optional<InventoryAccess> accessOptional = accessRegistry.getCurrentAccess();
-        if (accessOptional.isEmpty()) {
-            throw new IllegalStateException("Inventory access registry does not have current access");
+        if (!accessRegistry.canPushTo(groupKey)) {
+            throw new IllegalArgumentException("Can't push to group " + groupKey);
         }
 
-        InventoryAccess currentAccess = accessOptional.get();
-
-        InventoryObjectGroup group = currentAccess.groups().get(groupKey);
-        if (group == null) {
-            throw new IllegalArgumentException("No group with key " + groupKey);
-
-        }
-
-        if (!canAddEquipment(groupKey)) {
-            throw new IllegalArgumentException("Cannot add equipment to group " + groupKey);
-        }
-
-        group.pushInventoryObject(equipment);
+        accessRegistry.pushObject(groupKey, equipment);
     }
 
     public boolean canAddEquipment(@NotNull Key groupKey) {
         Objects.requireNonNull(groupKey, "groupKey");
 
-        Optional<InventoryAccess> accessOptional = accessRegistry.getCurrentAccess();
-
-        if (accessOptional.isEmpty()) {
-            return false;
-        }
-
-        InventoryObjectGroup group = accessOptional.get().groups().get(groupKey);
-        if (group == null) {
-            return false;
-        }
-
-        return !group.isFull();
+        return accessRegistry.canPushTo(groupKey);
     }
 
     public @NotNull @Unmodifiable Collection<Equipment> getEquipment(@NotNull Key groupKey) {
@@ -79,7 +57,6 @@ public class EquipmentHandler {
                     equipmentList.add(equipment);
                 }
             }
-
         }
 
         return List.copyOf(equipmentList);

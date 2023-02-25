@@ -22,11 +22,10 @@ public interface InventoryAccessRegistry {
     /**
      * Switches the inventory's view to another view based on a {@link Key}.
      *
-     * @param key        The {@link Key} of the profile to switch to, or to switch to no profile
-     * @param playerView
+     * @param key The {@link Key} of the profile to switch to, or to switch to no profile
      * @throws IllegalArgumentException If no {@link InventoryProfile} is registered with the {@link Key}
      */
-    void switchAccess(@Nullable Key key, @NotNull PlayerView playerView);
+    void switchAccess(@Nullable Key key);
 
     /**
      * Registers a {@link InventoryProfile} to the view.
@@ -45,4 +44,7 @@ public interface InventoryAccessRegistry {
      */
     void unregisterAccess(@NotNull Key key);
 
+    boolean canPushTo(@NotNull Key groupKey);
+
+    void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object);
 }

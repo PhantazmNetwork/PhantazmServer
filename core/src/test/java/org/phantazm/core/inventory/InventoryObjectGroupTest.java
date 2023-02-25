@@ -20,7 +20,7 @@ public class InventoryObjectGroupTest {
         return new InventoryObjectGroupAbstract(profile, slots) {
 
             @Override
-            public void pushInventoryObject(@NotNull InventoryObject toPush) {
+            public int pushInventoryObject(@NotNull InventoryObject toPush) {
                 throw new UnsupportedOperationException();
             }
 

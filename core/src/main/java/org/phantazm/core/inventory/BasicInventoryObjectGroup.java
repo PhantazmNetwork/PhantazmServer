@@ -18,18 +18,25 @@ public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
     }
 
     @Override
-    public void pushInventoryObject(@NotNull InventoryObject toPush) {
+    public int pushInventoryObject(@NotNull InventoryObject toPush) {
         InventoryProfile profile = getProfile();
         for (int slot : getSlots()) {
             if (defaultObject != null) {
-                if (!profile.hasInventoryObject(slot) || profile.getInventoryObject(slot).equals(defaultObject)) {
+                if (!profile.hasInventoryObject(slot)) {
                     profile.setInventoryObject(slot, toPush);
-                    return;
+                    return slot;
+                }
+
+                InventoryObject existingObject = profile.getInventoryObject(slot);
+                if (existingObject.equals(defaultObject)) {
+                    profile.removeInventoryObject(slot);
+                    profile.setInventoryObject(slot, toPush);
+                    return slot;
                 }
             }
             else if (!profile.hasInventoryObject(slot)) {
                 profile.setInventoryObject(slot, toPush);
-                return;
+                return slot;
             }
         }
 

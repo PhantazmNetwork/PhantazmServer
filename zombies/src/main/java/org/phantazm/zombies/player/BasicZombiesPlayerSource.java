@@ -120,7 +120,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                 new InventoryAccess(livingProfile, Map.ofEntries(inventoryObjectGroupEntries));
         InventoryAccess deadInventoryAccess = new InventoryAccess(new BasicInventoryProfile(9), Map.of());
 
-        InventoryAccessRegistry accessRegistry = new BasicInventoryAccessRegistry();
+        InventoryAccessRegistry accessRegistry = new BasicInventoryAccessRegistry(playerView);
         accessRegistry.registerAccess(InventoryKeys.DEFAULT_ACCESS, livingInventoryAccess);
         accessRegistry.registerAccess(InventoryKeys.DEAD_ACCESS, deadInventoryAccess);
 

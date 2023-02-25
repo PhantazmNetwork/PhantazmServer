@@ -31,7 +31,8 @@ public class InventoryAccessRegistryTest {
 
     @Test
     public void testDuplicateRegistration() {
-        InventoryAccessRegistry inventoryAccessRegistry = new BasicInventoryAccessRegistry();
+        InventoryAccessRegistry inventoryAccessRegistry =
+                new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
         InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
 
         inventoryAccessRegistry.registerAccess(firstKey, newAccess(inventoryProfile));
@@ -42,39 +43,41 @@ public class InventoryAccessRegistryTest {
 
     @Test
     public void testSwitchInitialProfile() {
-        InventoryAccessRegistry inventoryAccessRegistry = new BasicInventoryAccessRegistry();
+        InventoryAccessRegistry inventoryAccessRegistry =
+                new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
         InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
         inventoryAccessRegistry.registerAccess(firstKey, newAccess(inventoryProfile));
 
-        inventoryAccessRegistry.switchAccess(firstKey, mockPlayer);
+        inventoryAccessRegistry.switchAccess(firstKey);
 
         assertSame(inventoryProfile, inventoryAccessRegistry.getCurrentAccess().orElseThrow().profile());
     }
 
     @Test
     public void testSwitchNewProfile() {
-        InventoryAccessRegistry inventoryAccessRegistry = new BasicInventoryAccessRegistry();
+        InventoryAccessRegistry inventoryAccessRegistry =
+                new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
         InventoryProfile firstInventoryProfile = new BasicInventoryProfile(1);
         InventoryProfile secondInventoryProfile = new BasicInventoryProfile(1);
         inventoryAccessRegistry.registerAccess(firstKey, newAccess(firstInventoryProfile));
         inventoryAccessRegistry.registerAccess(secondKey, newAccess(secondInventoryProfile));
 
-        inventoryAccessRegistry.switchAccess(firstKey, mockPlayer);
-        inventoryAccessRegistry.switchAccess(secondKey, mockPlayer);
+        inventoryAccessRegistry.switchAccess(firstKey);
+        inventoryAccessRegistry.switchAccess(secondKey);
 
         assertSame(secondInventoryProfile, inventoryAccessRegistry.getCurrentAccess().orElseThrow().profile());
     }
 
     @Test
     public void testSwitchUnregisteredProfile() {
-        InventoryAccessRegistry inventoryAccessRegistry = new BasicInventoryAccessRegistry();
+        InventoryAccessRegistry inventoryAccessRegistry =
+                new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
         InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
         inventoryAccessRegistry.registerAccess(firstKey, newAccess(inventoryProfile));
 
-        inventoryAccessRegistry.switchAccess(firstKey, mockPlayer);
+        inventoryAccessRegistry.switchAccess(firstKey);
 
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> inventoryAccessRegistry.switchAccess(secondKey, mockPlayer));
+        assertThrowsExactly(IllegalArgumentException.class, () -> inventoryAccessRegistry.switchAccess(secondKey));
         assertSame(inventoryProfile, inventoryAccessRegistry.getCurrentAccess().orElseThrow().profile());
     }
 

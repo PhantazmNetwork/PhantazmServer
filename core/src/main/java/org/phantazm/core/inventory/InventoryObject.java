@@ -3,12 +3,13 @@ package org.phantazm.core.inventory;
 import net.minestom.server.inventory.AbstractInventory;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Activable;
 import org.phantazm.commons.Tickable;
 
 /**
  * Represents an item in an {@link AbstractInventory}.
  */
-public interface InventoryObject extends Tickable {
+public interface InventoryObject extends Activable {
     /**
      * Gets the currently associated {@link ItemStack}.
      *

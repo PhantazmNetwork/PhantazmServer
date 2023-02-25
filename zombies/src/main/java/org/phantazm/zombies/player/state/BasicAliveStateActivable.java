@@ -37,7 +37,7 @@ public class BasicAliveStateActivable implements Activable {
             sidebar.addViewer(player);
         });
 
-        accessRegistry.switchAccess(InventoryKeys.DEFAULT_ACCESS, playerView);
+        accessRegistry.switchAccess(InventoryKeys.DEFAULT_ACCESS);
 
         meta.setInGame(true);
         meta.setCanRevive(true);

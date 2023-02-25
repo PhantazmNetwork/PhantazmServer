@@ -35,23 +35,27 @@ public class BasicInventoryProfile implements InventoryProfile {
     }
 
     @Override
-    public void setInventoryObject(int slot, @NotNull InventoryObject object) {
+    public @NotNull InventoryObject setInventoryObject(int slot, @NotNull InventoryObject object) {
         Objects.requireNonNull(object, "object");
 
         if (hasInventoryObject(slot)) {
             throw new IllegalArgumentException("Can't set inventory object in occupied slot");
         }
 
+        InventoryObject old = objects[slot];
         objects[slot] = object;
+        return old;
     }
 
     @Override
-    public void removeInventoryObject(int slot) {
+    public @NotNull InventoryObject removeInventoryObject(int slot) {
         if (!hasInventoryObject(slot)) {
             throw new IllegalArgumentException("Can't remove inventory object from unoccupied slot");
         }
 
+        InventoryObject old = objects[slot];
         objects[slot] = null;
+        return old;
     }
 
     @Override

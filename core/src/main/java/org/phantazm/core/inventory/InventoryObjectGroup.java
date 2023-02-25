@@ -55,7 +55,7 @@ public interface InventoryObjectGroup {
      * @param toPush The {@link InventoryObject} to push
      * @throws IllegalArgumentException If the group's representation is full (check this against {@link #isFull()})
      */
-    void pushInventoryObject(@NotNull InventoryObject toPush);
+    int pushInventoryObject(@NotNull InventoryObject toPush);
 
     /**
      * Computes the next slot that an {@link InventoryObject} should be popped from.
