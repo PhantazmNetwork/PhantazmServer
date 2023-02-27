@@ -4,9 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.*;
-import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
 
@@ -15,6 +13,10 @@ public class EquipmentHandler {
 
     public EquipmentHandler(@NotNull InventoryAccessRegistry accessRegistry) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
+    }
+
+    public @NotNull InventoryAccessRegistry accessRegistry() {
+        return accessRegistry;
     }
 
     public void addEquipment(@NotNull Equipment equipment, @NotNull Key groupKey) {
@@ -62,7 +64,7 @@ public class EquipmentHandler {
         return List.copyOf(equipmentList);
     }
 
-    public void applyDefaults(@NotNull Key groupKey) {
+    public void refreshGroup(@NotNull Key groupKey) {
         accessRegistry.getCurrentAccess().ifPresent(access -> {
             InventoryObjectGroup group = access.groups().get(groupKey);
             InventoryObject defaultObject;

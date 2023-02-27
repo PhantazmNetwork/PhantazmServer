@@ -24,31 +24,18 @@ import java.util.function.Function;
 @Depend
 @Memoize
 public class ZombiesPlayerModule implements DependencyModule {
-
     private final PlayerView playerView;
-
     private final ZombiesPlayerMeta meta;
-
     private final PlayerCoins coins;
-
     private final PlayerKills kills;
-
     private final EquipmentHandler equipmentHandler;
-
     private final EquipmentCreator equipmentCreator;
-
     private final InventoryAccessRegistry profileSwitcher;
-
     private final PlayerStateSwitcher stateSwitcher;
-
     private final Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions;
-
     private final Sidebar sidebar;
-
     private final TransactionModifierSource playerTransactionModifierSource;
-
     private final TransactionModifierSource compositeTransactionModifierSource;
-
     private final Flaggable flaggable;
 
     public ZombiesPlayerModule(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,

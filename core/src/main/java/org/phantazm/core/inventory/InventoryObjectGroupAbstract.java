@@ -14,11 +14,8 @@ import java.util.function.Function;
  * Abstract implementation of an {@link InventoryObjectGroup}.
  */
 public abstract class InventoryObjectGroupAbstract implements InventoryObjectGroup {
-
     private final InventoryProfile profile;
-
     private final IntSet slots;
-
     private final IntSet unmodifiableSlots;
 
     /**

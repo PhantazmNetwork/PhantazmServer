@@ -101,7 +101,7 @@ public class InGameStage implements Stage {
             }
 
             for (Key group : equipmentGroups) {
-                equipmentHandler.applyDefaults(group);
+                equipmentHandler.refreshGroup(group);
             }
         }
 
