@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
+import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
@@ -15,6 +16,7 @@ import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.map.action.Action;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Description("""
         An entity action that sets an entity on fire for a configurable amount of time, health, and damage interval.
@@ -22,7 +24,10 @@ import java.util.*;
 @Model("zombies.perk.effect.shot_entity.apply_fire")
 @Cache(false)
 public class ApplyFireShotEffect implements Action<Entity>, Tickable {
+    private static final Map<Data, Pair<String, String>> DATA_PAIR_MAP = new ConcurrentHashMap<>();
+
     private final Data data;
+
     private final Tag<Long> timeTag;
     private final Tag<Long> timeSinceLastDamage;
 
@@ -31,8 +36,12 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
     @FactoryMethod
     public ApplyFireShotEffect(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
-        this.timeTag = Tag.Long(UUID.randomUUID().toString()).defaultValue(-1L);
-        this.timeSinceLastDamage = Tag.Long(UUID.randomUUID().toString()).defaultValue(-1L);
+
+        Pair<String, String> stringPair = DATA_PAIR_MAP.computeIfAbsent(data,
+                key -> Pair.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
+
+        this.timeTag = Tag.Long(stringPair.left()).defaultValue(-1L);
+        this.timeSinceLastDamage = Tag.Long(stringPair.right()).defaultValue(-1L);
 
         this.activeEntities = new LinkedList<>();
     }
@@ -59,14 +68,8 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
         }
 
         long lastApply = entity.getTag(timeTag);
-        if (lastApply == -1) {
-            //entity never should have been added to the queue
-            stopFire(entity);
-            return true;
-        }
-
-        if (time - lastApply / MinecraftServer.TICK_MS >= data.fireTicks) {
-            //fire has expired
+        if (lastApply == -1 || (time - lastApply) / MinecraftServer.TICK_MS >= data.fireTicks) {
+            //fire has expired, or never should have been applied in the first place
             stopFire(entity);
             return true;
         }
