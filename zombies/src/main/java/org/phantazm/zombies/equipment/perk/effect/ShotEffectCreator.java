@@ -1,0 +1,94 @@
+package org.phantazm.zombies.equipment.perk.effect;
+
+import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.document.Description;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventListener;
+import net.minestom.server.event.EventNode;
+import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.event.EntityDamageByGunEvent;
+import org.phantazm.zombies.map.action.Action;
+import org.phantazm.zombies.player.ZombiesPlayer;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+@Description("An effect that can perform arbitrary actions on entities shot by the player who has the effect.")
+@Model("zombies.perk.effect.shot")
+@Cache(false)
+public class ShotEffectCreator implements PerkEffectCreator {
+    private final EventNode<Event> rootNode;
+    private final Collection<Action<Entity>> actions;
+
+    @FactoryMethod
+    public ShotEffectCreator(@NotNull EventNode<Event> rootNode,
+            @NotNull @Child("action") Collection<Action<Entity>> actions) {
+        this.rootNode = Objects.requireNonNull(rootNode, "rootNode");
+        this.actions = List.copyOf(actions);
+    }
+
+    @Override
+    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+        return new Effect(rootNode, zombiesPlayer, actions);
+    }
+
+    private static class Effect implements PerkEffect {
+        private final EventNode<Event> rootNode;
+        private final ZombiesPlayer zombiesPlayer;
+        private final Collection<Action<Entity>> actions;
+
+        private final EventListener<EntityDamageByGunEvent> listener;
+
+        private Effect(EventNode<Event> rootNode, ZombiesPlayer zombiesPlayer, Collection<Action<Entity>> actions) {
+            this.rootNode = rootNode;
+            this.zombiesPlayer = zombiesPlayer;
+            this.actions = actions;
+
+            this.listener = new EventListener<>() {
+                @Override
+                public @NotNull Class<EntityDamageByGunEvent> eventType() {
+                    return EntityDamageByGunEvent.class;
+                }
+
+                @Override
+                public @NotNull Result run(@NotNull EntityDamageByGunEvent event) {
+                    onEntityDamageByGun(event);
+                    return Result.SUCCESS;
+                }
+            };
+        }
+
+        @Override
+        public void start() {
+            rootNode.addListener(listener);
+        }
+
+        @Override
+        public void end() {
+            rootNode.removeListener(listener);
+        }
+
+        private void onEntityDamageByGun(EntityDamageByGunEvent event) {
+            Entity shooter = event.getShooter();
+            if (!(shooter instanceof Player player)) {
+                return;
+            }
+
+            UUID uuid = player.getUuid();
+            if (uuid.equals(zombiesPlayer.getUUID())) {
+                for (Action<Entity> action : actions) {
+                    action.perform(event.getEntity());
+                }
+            }
+        }
+    }
+
+    @DataObject
+    public record Data(@NotNull @ChildPath("action") @Description(
+            "The actions to be executed on the entities that are hit by gun shots") Collection<String> actions) {
+    }
+}

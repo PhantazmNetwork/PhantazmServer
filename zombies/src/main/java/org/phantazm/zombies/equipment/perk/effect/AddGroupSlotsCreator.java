@@ -44,8 +44,8 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
 
         @Override
         public void start() {
-            handler.accessRegistry().getCurrentAccess().ifPresent(inventoryAccess -> {
-                InventoryObjectGroup group = inventoryAccess.groups().get(data.group);
+            handler.accessRegistry().getCurrentAccess().ifPresent(access -> {
+                InventoryObjectGroup group = access.groups().get(data.group);
                 if (group == null) {
                     return;
                 }
@@ -63,8 +63,8 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
 
         @Override
         public void end() {
-            handler.accessRegistry().getCurrentAccess().ifPresent(inventoryAccess -> {
-                InventoryObjectGroup group = inventoryAccess.groups().get(data.group);
+            handler.accessRegistry().getCurrentAccess().ifPresent(access -> {
+                InventoryObjectGroup group = access.groups().get(data.group);
                 if (group == null) {
                     return;
                 }
@@ -82,7 +82,8 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull Key group, @NotNull IntSet additionalSlots) {
+    public record Data(@NotNull @Description("The equipment group key") Key group,
+                       @NotNull @Description("The additional slots to add to this group") IntSet additionalSlots) {
 
     }
 }

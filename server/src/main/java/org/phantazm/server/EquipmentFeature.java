@@ -50,8 +50,11 @@ import org.phantazm.zombies.equipment.gun.visual.ClipStackMapper;
 import org.phantazm.zombies.equipment.gun.visual.ReloadStackMapper;
 import org.phantazm.zombies.equipment.perk.BasicPerkCreator;
 import org.phantazm.zombies.equipment.perk.PerkCreator;
+import org.phantazm.zombies.equipment.perk.effect.AddGroupSlotsCreator;
 import org.phantazm.zombies.equipment.perk.effect.FlaggingPerkEffectCreator;
 import org.phantazm.zombies.equipment.perk.effect.ModifierPerkEffectCreator;
+import org.phantazm.zombies.equipment.perk.effect.ShotEffectCreator;
+import org.phantazm.zombies.equipment.perk.effect.shot.ApplyAttributeShotEffect;
 import org.phantazm.zombies.equipment.perk.equipment.BasicPerkEquipmentCreator;
 import org.phantazm.zombies.equipment.perk.equipment.interactor.NoInteractorCreator;
 import org.phantazm.zombies.equipment.perk.equipment.visual.StaticVisualCreator;
@@ -76,7 +79,7 @@ import java.util.stream.Stream;
 final class EquipmentFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentFeature.class);
     private static final Consumer<? super ElementException> HANDLER = ElementUtils.logging(LOGGER, "equipment");
-    
+
     private static final Path EQUIPMENT_PATH = Path.of("./equipment/");
 
     private static Map<Key, Pair<EquipmentData, List<ElementContext>>> equipmentLevelMap;
@@ -226,6 +229,11 @@ final class EquipmentFeature {
         //PerkEffectCreators
         contextManager.registerElementClass(FlaggingPerkEffectCreator.class);
         contextManager.registerElementClass(ModifierPerkEffectCreator.class);
+        contextManager.registerElementClass(AddGroupSlotsCreator.class);
+        contextManager.registerElementClass(ShotEffectCreator.class);
+
+        //ShotEffects
+        contextManager.registerElementClass(ApplyAttributeShotEffect.class);
 
         //PerkInteractorCreators
         contextManager.registerElementClass(NoInteractorCreator.class);
