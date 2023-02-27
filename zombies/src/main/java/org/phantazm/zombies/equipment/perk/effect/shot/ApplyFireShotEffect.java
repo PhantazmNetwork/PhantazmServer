@@ -25,6 +25,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
     private final Data data;
     private final Tag<Long> timeTag;
     private final Tag<Long> timeSinceLastDamage;
+
     private final Deque<Entity> activeEntities;
 
     @FactoryMethod
@@ -32,6 +33,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
         this.data = Objects.requireNonNull(data, "data");
         this.timeTag = Tag.Long(UUID.randomUUID().toString()).defaultValue(-1L);
         this.timeSinceLastDamage = Tag.Long(UUID.randomUUID().toString()).defaultValue(-1L);
+
         this.activeEntities = new LinkedList<>();
     }
 
@@ -48,11 +50,11 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
 
     @Override
     public void tick(long time) {
-        activeEntities.removeIf(entity -> process(entity, time));
+        activeEntities.removeIf(entity -> process((LivingEntity)entity, time));
     }
 
-    private boolean process(Entity entity, long time) {
-        if (entity.isRemoved()) {
+    private boolean process(LivingEntity entity, long time) {
+        if (entity.isRemoved() || entity.isDead()) {
             return true;
         }
 
@@ -79,10 +81,8 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
         return false;
     }
 
-    private void doDamage(Entity entity) {
-        if (entity instanceof LivingEntity livingEntity) {
-            livingEntity.damage(DamageType.ON_FIRE, data.damage);
-        }
+    private void doDamage(LivingEntity entity) {
+        entity.damage(DamageType.ON_FIRE, data.damage);
     }
 
     private void stopFire(Entity entity) {
@@ -92,6 +92,8 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
     }
 
     @DataObject
-    public record Data(int fireTicks, int damageInterval, float damage) {
+    public record Data(@Description("The number of ticks the hit entity will be set on fire") int fireTicks,
+                       @Description("The number of ticks between fire damage applications") int damageInterval,
+                       @Description("The amount of damage dealt on each application") float damage) {
     }
 }
