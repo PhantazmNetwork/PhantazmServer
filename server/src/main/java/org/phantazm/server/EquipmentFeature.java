@@ -55,6 +55,7 @@ import org.phantazm.zombies.equipment.perk.effect.FlaggingPerkEffectCreator;
 import org.phantazm.zombies.equipment.perk.effect.ModifierPerkEffectCreator;
 import org.phantazm.zombies.equipment.perk.effect.ShotEffectCreator;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyAttributeShotEffect;
+import org.phantazm.zombies.equipment.perk.effect.shot.ApplyFireShotEffect;
 import org.phantazm.zombies.equipment.perk.equipment.BasicPerkEquipmentCreator;
 import org.phantazm.zombies.equipment.perk.equipment.interactor.NoInteractorCreator;
 import org.phantazm.zombies.equipment.perk.equipment.visual.StaticVisualCreator;
@@ -234,6 +235,7 @@ final class EquipmentFeature {
 
         //ShotEffects
         contextManager.registerElementClass(ApplyAttributeShotEffect.class);
+        contextManager.registerElementClass(ApplyFireShotEffect.class);
 
         //PerkInteractorCreators
         contextManager.registerElementClass(NoInteractorCreator.class);

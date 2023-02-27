@@ -8,6 +8,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -43,6 +44,8 @@ public class ShotEffectCreator implements PerkEffectCreator {
 
         private final EventListener<EntityDamageByGunEvent> listener;
 
+        private final Tickable[] tickableActions;
+
         private Effect(EventNode<Event> rootNode, ZombiesPlayer zombiesPlayer, Collection<Action<Entity>> actions) {
             this.rootNode = rootNode;
             this.zombiesPlayer = zombiesPlayer;
@@ -60,11 +63,22 @@ public class ShotEffectCreator implements PerkEffectCreator {
                     return Result.SUCCESS;
                 }
             };
+
+            this.tickableActions =
+                    actions.stream().filter(action -> action instanceof Tickable).map(action -> (Tickable)action)
+                            .toArray(Tickable[]::new);
         }
 
         @Override
         public void start() {
             rootNode.addListener(listener);
+        }
+
+        @Override
+        public void tick(long time) {
+            for (Tickable tickable : tickableActions) {
+                tickable.tick(time);
+            }
         }
 
         @Override
