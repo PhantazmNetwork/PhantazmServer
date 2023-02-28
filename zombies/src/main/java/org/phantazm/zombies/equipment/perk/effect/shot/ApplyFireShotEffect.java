@@ -17,6 +17,7 @@ import org.phantazm.zombies.map.action.Action;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Description("""
         An entity action that sets an entity on fire for a configurable amount of time, health, and damage interval.
@@ -24,46 +25,51 @@ import java.util.concurrent.ConcurrentHashMap;
 @Model("zombies.perk.effect.shot_entity.apply_fire")
 @Cache(false)
 public class ApplyFireShotEffect implements Action<Entity>, Tickable {
-    private static final Map<Data, Pair<String, String>> DATA_PAIR_MAP = new ConcurrentHashMap<>();
+    private static final Map<Data, Pair<String, String>> NAMES = new ConcurrentHashMap<>();
 
     private final Data data;
 
     private final Tag<Long> timeTag;
     private final Tag<Long> timeSinceLastDamage;
 
-    private final Deque<Entity> activeEntities;
+    private final Deque<LivingEntity> activeEntities;
 
     @FactoryMethod
     public ApplyFireShotEffect(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
 
-        Pair<String, String> stringPair = DATA_PAIR_MAP.computeIfAbsent(data,
-                key -> Pair.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
+        Pair<String, String> stringPair =
+                NAMES.computeIfAbsent(data, key -> Pair.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
 
         this.timeTag = Tag.Long(stringPair.left()).defaultValue(-1L);
         this.timeSinceLastDamage = Tag.Long(stringPair.right()).defaultValue(-1L);
 
-        this.activeEntities = new LinkedList<>();
+        this.activeEntities = new ConcurrentLinkedDeque<>();
     }
 
     @Override
     public void perform(@NotNull Entity entity) {
-        if (!(entity instanceof LivingEntity)) {
+        if (!(entity instanceof LivingEntity livingEntity)) {
             //can't set non-LivingEntity on fire as they have no health
             return;
         }
 
+        long tag = entity.getTag(timeTag);
         entity.setTag(timeTag, System.currentTimeMillis());
-        activeEntities.add(entity);
+
+        if (tag == -1) {
+            activeEntities.add(livingEntity);
+        }
     }
 
     @Override
     public void tick(long time) {
-        activeEntities.removeIf(entity -> process((LivingEntity)entity, time));
+        activeEntities.removeIf(entity -> process(entity, time));
     }
 
     private boolean process(LivingEntity entity, long time) {
         if (entity.isRemoved() || entity.isDead()) {
+            stopFire(entity);
             return true;
         }
 

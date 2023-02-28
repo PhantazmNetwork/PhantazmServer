@@ -34,7 +34,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public long getReviveTime() {
-        return getPlayer().map(player -> (long)player.getAttributeValue(Attributes.REVIVE_SPEED)).orElse(30L);
+        return getPlayer().map(player -> (long)player.getAttributeValue(Attributes.REVIVE_SPEED))
+                .orElse((long)Attributes.REVIVE_SPEED.defaultValue());
     }
 
     @Override

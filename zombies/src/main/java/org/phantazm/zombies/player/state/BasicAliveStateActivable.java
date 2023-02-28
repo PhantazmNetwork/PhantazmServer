@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.player.ZombiesPlayerMeta;
 
 import java.util.Objects;
@@ -46,13 +47,13 @@ public class BasicAliveStateActivable implements Activable {
 
     @Override
     public void tick(long time) {
-        if ((time - lastHeal) / MinecraftServer.TICK_MS >= meta.getTicksPerHeal()) {
-            playerView.getPlayer().ifPresent(player -> {
-                player.setHealth(player.getHealth() + 0.5F);
-            });
+        playerView.getPlayer().ifPresent(player -> {
+            if ((time - lastHeal) / MinecraftServer.TICK_MS >= (int)player.getAttributeValue(Attributes.HEAL_TICKS)) {
+                player.setHealth(player.getHealth() + 1F);
+            }
 
             lastHeal = time;
-        }
+        });
     }
 
     @Override

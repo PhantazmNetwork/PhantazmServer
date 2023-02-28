@@ -22,6 +22,11 @@ public final class Attributes {
     public static final Attribute REVIVE_SPEED = new Attribute("phantazm.revive_speed", 30F, 100F);
 
     /**
+     * Number of ticks between each heal.
+     */
+    public static final Attribute HEAL_TICKS = new Attribute("phantazm.heal_rate", 20F, 1000F);
+
+    /**
      * The "nil" attribute. Used as a fallback when the desired attribute cannot be found.
      */
     public static final Attribute NIL = new Attribute("phantazm.nil", 0F, 1F);
@@ -30,6 +35,7 @@ public final class Attributes {
         HITBOX_EXPANSION.register();
         FIRE_RATE_MULTIPLIER.register();
         REVIVE_SPEED.register();
+        HEAL_TICKS.register();
         NIL.register();
     }
 }

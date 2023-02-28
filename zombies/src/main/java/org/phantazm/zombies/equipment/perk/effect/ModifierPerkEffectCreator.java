@@ -29,9 +29,11 @@ import java.util.UUID;
                 
         * `phantazm.fire_rate`
         * `phantazm.revive_speed`
+        * `phantazm.heal_rate`
                 
         `phantazm.fire_rate` is itself a multiplier. Its base value is 1. `phantazm.revive_speed` is the number of ticks
-        it takes to revive a player. It defaults to 30.
+        it takes to revive a player. It defaults to 30. `phantazm.heal_rate` is the number of ticks between every
+        regeneration of a single hitpoint. It defaults to 20.
                 
         These attributes can be modified by providing some amount and an AttributeOperation. The operation may be any of
         the following values:

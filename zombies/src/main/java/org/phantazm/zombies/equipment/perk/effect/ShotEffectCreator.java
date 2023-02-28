@@ -102,7 +102,8 @@ public class ShotEffectCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("action") @Description(
-            "The actions to be executed on the entities that are hit by gun shots") Collection<String> actions) {
+    public record Data(@NotNull @Description(
+            "The actions to be executed on the entities that are hit by gun shots") @ChildPath(
+            "action") Collection<String> actions) {
     }
 }
