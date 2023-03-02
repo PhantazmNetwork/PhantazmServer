@@ -88,8 +88,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
             }
 
             if (block != null) {
-                return RayUtils.rayTrace(new BoundingBox(1D, 1D, 1D), blockLocation.add(0.5D, 0D, 0.5D), start)
-                        .orElse(null);
+                return RayUtils.rayTrace(new BoundingBox(1D, 1D, 1D), blockLocation, start).orElse(null);
             }
 
             return null;

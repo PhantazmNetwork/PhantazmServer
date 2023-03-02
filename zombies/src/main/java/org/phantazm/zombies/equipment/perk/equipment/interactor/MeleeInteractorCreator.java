@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
 import com.github.steanky.toolkit.collection.Wrapper;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -72,13 +73,16 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 instance.getEntityTracker()
                         .raytraceCandidates(eyePos, targetPos, EntityTracker.Target.LIVING_ENTITIES, hit -> {
                             if (mobStore.hasMob(hit.getUuid())) {
-                                RayUtils.rayTrace(hit.getBoundingBox(), hit.getPosition(), eyePos).ifPresent(vec -> {
-                                    HitResult closestHit = closest.get();
-                                    if (closestHit == null ||
-                                            closestHit.hitPos.distanceSquared(eyePos) < vec.distanceSquared(eyePos)) {
-                                        closest.set(new HitResult(hit, vec));
-                                    }
-                                });
+                                BoundingBox boundingBox = hit.getBoundingBox();
+                                RayUtils.rayTrace(boundingBox,
+                                                hit.getPosition().sub(boundingBox.width(), 0, boundingBox.depth()), eyePos)
+                                        .ifPresent(vec -> {
+                                            HitResult closestHit = closest.get();
+                                            if (closestHit == null || closestHit.hitPos.distanceSquared(eyePos) <
+                                                    vec.distanceSquared(eyePos)) {
+                                                closest.set(new HitResult(hit, vec));
+                                            }
+                                        });
                             }
                         });
 

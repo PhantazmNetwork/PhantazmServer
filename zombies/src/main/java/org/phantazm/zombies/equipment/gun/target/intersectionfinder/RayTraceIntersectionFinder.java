@@ -3,6 +3,7 @@ package org.phantazm.zombies.equipment.gun.target.intersectionfinder;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -35,7 +36,10 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
             expand = 0;
         }
 
-        return RayUtils.rayTrace(entity.getBoundingBox().expand(expand, expand, expand), entity.getPosition(), start);
+
+        BoundingBox boundingBox = entity.getBoundingBox();
+        return RayUtils.rayTrace(boundingBox.expand(expand, expand, expand),
+                entity.getPosition().sub(boundingBox.width(), 0, boundingBox.depth()), start);
     }
 
 }
