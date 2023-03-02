@@ -68,8 +68,12 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
             if (type.bitsHave(flags)) {
                 long currentTime = System.currentTimeMillis();
                 if (lastActivated == -1 || (currentTime - lastActivated) / MinecraftServer.TICK_MS >= data.cooldown) {
-                    lastActivated = currentTime;
-                    return supplier.getAsBoolean();
+                    boolean success = supplier.getAsBoolean();
+
+                    if (success) {
+                        lastActivated = currentTime;
+                    }
+                    return success;
                 }
 
                 return false;
@@ -113,9 +117,9 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("delegate") @Description("The interactor to delegate to") String delegate,
-                       @Description("The cooldown, in ticks") int cooldown,
+    public record Data(@Description("The cooldown, in ticks") int cooldown,
                        @NotNull @Description(
-                               "What interaction(s) the cooldown will be applied to") DelegateType[] types) {
+                               "What interaction(s) the cooldown will be applied to") DelegateType[] types,
+                       @NotNull @ChildPath("delegate") @Description("The interactor to delegate to") String delegate) {
     }
 }
