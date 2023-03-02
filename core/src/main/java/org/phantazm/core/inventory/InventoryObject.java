@@ -4,7 +4,6 @@ import net.minestom.server.inventory.AbstractInventory;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
-import org.phantazm.commons.Tickable;
 
 /**
  * Represents an item in an {@link AbstractInventory}.

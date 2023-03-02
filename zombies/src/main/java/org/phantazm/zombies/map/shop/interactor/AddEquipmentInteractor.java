@@ -5,10 +5,10 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentHandler;
-import org.phantazm.zombies.map.shop.PlayerInteraction;
-import org.phantazm.core.equipment.UpgradePath;
-import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.core.equipment.Upgradable;
+import org.phantazm.core.equipment.UpgradePath;
+import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 

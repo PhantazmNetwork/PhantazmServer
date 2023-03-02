@@ -15,7 +15,6 @@ import com.github.steanky.proxima.resolver.PositionResolver;
 import com.github.steanky.proxima.snapper.BasicNodeSnapper;
 import com.github.steanky.proxima.snapper.NodeSnapper;
 import com.github.steanky.vector.Vec3D;
-import com.github.steanky.vector.Vec3I;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import com.github.steanky.vector.Vec3IBiPredicate;
 import net.minestom.server.coordinate.Vec;

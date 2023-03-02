@@ -6,12 +6,12 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.equipment.Upgradable;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
-import org.phantazm.core.equipment.Upgradable;
 
 import java.util.Map;
 import java.util.Objects;

@@ -2,7 +2,6 @@ package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;

@@ -1,9 +1,9 @@
 package org.phantazm.zombies.equipment.perk.equipment.interactor;
 
 public interface PerkInteractor {
-    void setSelected(boolean selected);
+    boolean setSelected(boolean selected);
 
-    void leftClick();
+    boolean leftClick();
 
-    void rightClick();
+    boolean rightClick();
 }

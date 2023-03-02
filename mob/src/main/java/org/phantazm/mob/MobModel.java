@@ -13,11 +13,11 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.mob.goal.GoalCreator;
-import org.phantazm.mob.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A model for the configuration of a {@link PhantazmMob}.

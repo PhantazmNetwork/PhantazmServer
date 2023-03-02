@@ -1,11 +1,9 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
-import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -13,9 +11,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.particle.ParticleCreator;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.config.processor.ItemStackConfigProcessors;
 import org.phantazm.core.particle.ParticleWrapper;
-import org.phantazm.core.particle.data.ParticleData;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;

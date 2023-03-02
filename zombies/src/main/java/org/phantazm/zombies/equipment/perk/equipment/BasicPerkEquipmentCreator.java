@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.document.Description;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.zombies.equipment.perk.equipment.interactor.PerkInteractor;
 import org.phantazm.zombies.equipment.perk.equipment.interactor.PerkInteractorCreator;
 import org.phantazm.zombies.equipment.perk.equipment.visual.PerkVisual;
@@ -56,17 +57,17 @@ public class BasicPerkEquipmentCreator implements PerkEquipmentCreator {
 
         @Override
         public void rightClick() {
-            interactor.rightClick();
+            visual.rightClick(interactor.rightClick());
         }
 
         @Override
         public void leftClick() {
-            interactor.leftClick();
+            visual.leftClick(interactor.leftClick());
         }
 
         @Override
         public @NotNull Key key() {
-            return Key.key("phantazm", "null");
+            return Key.key(Namespaces.PHANTAZM, "null");
         }
 
         @Override

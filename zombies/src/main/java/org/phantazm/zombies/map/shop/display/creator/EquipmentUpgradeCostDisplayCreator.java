@@ -10,16 +10,19 @@ import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.Equipment;
+import org.phantazm.core.equipment.Upgradable;
+import org.phantazm.core.equipment.UpgradePath;
 import org.phantazm.core.hologram.ViewableHologram;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.map.shop.Shop;
-import org.phantazm.core.equipment.UpgradePath;
 import org.phantazm.zombies.map.shop.display.HologramDisplayBase;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.core.equipment.Upgradable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @Model("zombies.map.shop.display.creator.equipment_cost")
 @Cache(false)

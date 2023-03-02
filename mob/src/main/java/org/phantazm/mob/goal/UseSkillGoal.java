@@ -5,7 +5,6 @@ import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.skill.Skill;
-import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Objects;

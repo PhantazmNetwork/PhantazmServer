@@ -8,4 +8,8 @@ public interface PerkVisual extends Tickable {
     @NotNull ItemStack computeItemStack();
 
     boolean shouldCompute();
+
+    void leftClick(boolean success);
+
+    void rightClick(boolean success);
 }

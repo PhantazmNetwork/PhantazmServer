@@ -5,9 +5,11 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.equipment.UpgradePath;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Model("zombies.map.shop.upgrade_path.linear")
 public class LinearUpgradePath implements UpgradePath {

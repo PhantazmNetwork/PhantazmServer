@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
@@ -22,7 +21,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Model("zombies.gun.shot_handler.give_coins")
 @Cache(false)

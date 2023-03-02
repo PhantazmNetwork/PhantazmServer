@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.zombies.equipment.perk.effect.PerkEffect;
 import org.phantazm.zombies.equipment.perk.equipment.PerkEquipment;
 
@@ -36,6 +37,8 @@ public class BasicPerkLevel implements PerkLevel {
         for (PerkEffect effect : effects) {
             effect.tick(time);
         }
+
+        equipment.tick(time);
     }
 
     @Override
@@ -62,7 +65,7 @@ public class BasicPerkLevel implements PerkLevel {
 
     @Override
     public @NotNull Key key() {
-        return equipment.key();
+        return Key.key(Namespaces.PHANTAZM, "null");
     }
 
     @Override

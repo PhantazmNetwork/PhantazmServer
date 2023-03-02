@@ -7,24 +7,26 @@ import com.github.steanky.element.core.annotation.document.Description;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-@Description("Interactor that does nothing.")
+@Description("""
+        Interactor that does nothing. Since all perks require an interactor, this is useful as a "placeholder" of sorts.
+        """)
 @Model("zombies.perk.interactor.none")
 @Cache
 public class NoInteractorCreator implements PerkInteractorCreator {
     private static final PerkInteractor INTERACTOR = new PerkInteractor() {
         @Override
-        public void setSelected(boolean selected) {
-
+        public boolean setSelected(boolean selected) {
+            return true;
         }
 
         @Override
-        public void leftClick() {
-
+        public boolean leftClick() {
+            return true;
         }
 
         @Override
-        public void rightClick() {
-
+        public boolean rightClick() {
+            return true;
         }
     };
 

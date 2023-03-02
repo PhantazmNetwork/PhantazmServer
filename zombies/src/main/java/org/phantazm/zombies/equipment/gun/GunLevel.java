@@ -5,12 +5,12 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.core.equipment.UpgradeNode;
 import org.phantazm.zombies.equipment.gun.effect.GunEffect;
 import org.phantazm.zombies.equipment.gun.reload.ReloadTester;
 import org.phantazm.zombies.equipment.gun.shoot.ShootTester;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.visual.GunStackMapper;
-import org.phantazm.core.equipment.UpgradeNode;
 
 import java.util.Collection;
 import java.util.Objects;

@@ -6,7 +6,6 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.spawner.MobSpawner;
 

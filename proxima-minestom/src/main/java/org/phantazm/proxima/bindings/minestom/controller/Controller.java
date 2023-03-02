@@ -1,7 +1,6 @@
 package org.phantazm.proxima.bindings.minestom.controller;
 
 import com.github.steanky.proxima.node.Node;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

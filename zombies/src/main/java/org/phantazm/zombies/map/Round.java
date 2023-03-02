@@ -3,7 +3,6 @@ package org.phantazm.zombies.map;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.Tickable;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.map.action.Action;
@@ -12,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 

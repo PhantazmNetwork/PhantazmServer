@@ -1,27 +1,22 @@
 package org.phantazm.proxima.bindings.minestom.controller;
 
 import com.github.steanky.proxima.node.Node;
-import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Chunk;
-import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.MathUtils;
-import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class GroundController implements Controller {
     private final LivingEntity entity;

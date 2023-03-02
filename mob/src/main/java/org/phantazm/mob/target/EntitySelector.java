@@ -7,7 +7,6 @@ import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**

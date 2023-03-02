@@ -3,7 +3,6 @@ package org.phantazm.core.inventory;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.core.player.PlayerView;
 
 import java.util.Optional;
 

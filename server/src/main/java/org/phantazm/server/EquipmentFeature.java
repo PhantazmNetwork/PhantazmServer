@@ -17,11 +17,11 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentCreator;
+import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.equipment.EquipmentTypes;
 import org.phantazm.zombies.equipment.gun.*;
 import org.phantazm.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import org.phantazm.zombies.equipment.gun.audience.PlayerAudienceProvider;
-import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.equipment.gun.effect.*;
 import org.phantazm.zombies.equipment.gun.reload.StateReloadTester;
 import org.phantazm.zombies.equipment.gun.reload.actionbar.GradientActionBarChooser;
@@ -57,6 +57,8 @@ import org.phantazm.zombies.equipment.perk.effect.ShotEffectCreator;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyAttributeShotEffect;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyFireShotEffect;
 import org.phantazm.zombies.equipment.perk.equipment.BasicPerkEquipmentCreator;
+import org.phantazm.zombies.equipment.perk.equipment.interactor.CooldownInteractorCreator;
+import org.phantazm.zombies.equipment.perk.equipment.interactor.MeleeInteractorCreator;
 import org.phantazm.zombies.equipment.perk.equipment.interactor.NoInteractorCreator;
 import org.phantazm.zombies.equipment.perk.equipment.visual.StaticVisualCreator;
 import org.phantazm.zombies.equipment.perk.level.NonUpgradeablePerkLevelCreator;
@@ -238,6 +240,8 @@ final class EquipmentFeature {
         contextManager.registerElementClass(ApplyFireShotEffect.class);
 
         //PerkInteractorCreators
+        contextManager.registerElementClass(CooldownInteractorCreator.class);
+        contextManager.registerElementClass(MeleeInteractorCreator.class);
         contextManager.registerElementClass(NoInteractorCreator.class);
 
         //PerkVisualCreators

@@ -45,6 +45,16 @@ public class StaticVisualCreator implements PerkVisualCreator {
         }
 
         @Override
+        public void leftClick(boolean success) {
+
+        }
+
+        @Override
+        public void rightClick(boolean success) {
+
+        }
+
+        @Override
         public void tick(long time) {
 
         }

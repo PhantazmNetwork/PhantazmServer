@@ -79,9 +79,10 @@ public class MeleeAttackGoal implements GoalCreator {
             self.attack(target, data.swingHand);
             if (target instanceof LivingEntity livingEntity) {
                 Pos pos = self.getPosition();
+
+                double angle = pos.yaw() * (Math.PI / 180);
                 livingEntity.damage(DamageType.fromEntity(self), data.damageAmount);
-                livingEntity.takeKnockback(0.4F * data.knockbackStrength, Math.sin(pos.yaw() * (Math.PI / 180)),
-                        -Math.cos(pos.yaw() * (Math.PI / 180)));
+                livingEntity.takeKnockback(0.4F * data.knockbackStrength, Math.sin(angle), -Math.cos(angle));
 
                 lastHitSelector.setLastHit(livingEntity);
 

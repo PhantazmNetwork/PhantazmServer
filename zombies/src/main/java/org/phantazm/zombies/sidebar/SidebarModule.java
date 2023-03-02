@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.toolkit.collection.Wrapper;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;

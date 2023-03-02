@@ -4,8 +4,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.map.handler.ShopHandler;
-import org.phantazm.zombies.map.shop.InteractionTypes;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Map;

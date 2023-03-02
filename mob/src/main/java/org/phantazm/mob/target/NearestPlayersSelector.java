@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.validator.AlwaysValid;
 import org.phantazm.mob.validator.TargetValidator;
 
 import java.util.Optional;

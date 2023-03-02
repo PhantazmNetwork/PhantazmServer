@@ -9,7 +9,6 @@ import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.NoContext;
-import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 
 import java.util.Map;
 import java.util.Objects;

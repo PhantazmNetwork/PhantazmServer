@@ -3,8 +3,6 @@ package org.phantazm.zombies.player.state;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 
-import java.util.Objects;
-
 public class PlayerStateSwitcher implements Activable {
 
     private ZombiesPlayerState state;
