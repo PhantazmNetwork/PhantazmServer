@@ -39,7 +39,7 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
 
         BoundingBox boundingBox = entity.getBoundingBox();
         return RayUtils.rayTrace(boundingBox.expand(expand, expand, expand),
-                entity.getPosition().sub(boundingBox.width(), 0, boundingBox.depth()), start);
+                entity.getPosition().sub(boundingBox.width() / 2, 0, boundingBox.depth() / 2), start);
     }
 
 }

@@ -75,14 +75,14 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                             if (mobStore.hasMob(hit.getUuid())) {
                                 BoundingBox boundingBox = hit.getBoundingBox();
                                 RayUtils.rayTrace(boundingBox,
-                                                hit.getPosition().sub(boundingBox.width(), 0, boundingBox.depth()), eyePos)
-                                        .ifPresent(vec -> {
-                                            HitResult closestHit = closest.get();
-                                            if (closestHit == null || closestHit.hitPos.distanceSquared(eyePos) <
-                                                    vec.distanceSquared(eyePos)) {
-                                                closest.set(new HitResult(hit, vec));
-                                            }
-                                        });
+                                        hit.getPosition().sub(boundingBox.width() / 2, 0, boundingBox.depth() / 2),
+                                        eyePos).ifPresent(vec -> {
+                                    HitResult closestHit = closest.get();
+                                    if (closestHit == null ||
+                                            vec.distanceSquared(eyePos) < closestHit.pos.distanceSquared(eyePos)) {
+                                        closest.set(new HitResult(hit, vec));
+                                    }
+                                });
                             }
                         });
 
@@ -111,7 +111,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                                "The amount of knockback the weapon deals; 1 is the vanilla knockback from an unarmed hand") float knockback) {
     }
 
-    private record HitResult(LivingEntity entity, Vec hitPos) {
+    private record HitResult(LivingEntity entity, Vec pos) {
 
     }
 }
