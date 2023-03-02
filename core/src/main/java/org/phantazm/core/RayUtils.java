@@ -37,6 +37,7 @@ public class RayUtils {
         double minX = shapeStart.x() + shapeLocation.x();
         double minY = shapeStart.y() + shapeLocation.y();
         double minZ = shapeStart.z() + shapeLocation.z();
+
         double maxX = shapeEnd.x() + shapeLocation.x();
         double maxY = shapeEnd.y() + shapeLocation.y();
         double maxZ = shapeEnd.z() + shapeLocation.z();

@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -74,12 +75,14 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                         .raytraceCandidates(eyePos, targetPos, EntityTracker.Target.LIVING_ENTITIES, hit -> {
                             if (mobStore.hasMob(hit.getUuid())) {
                                 BoundingBox boundingBox = hit.getBoundingBox();
-                                RayUtils.rayTrace(boundingBox,
-                                        hit.getPosition().sub(boundingBox.width() / 2, 0, boundingBox.depth() / 2),
-                                        eyePos).ifPresent(vec -> {
+                                Pos hitPosition = hit.getPosition();
+
+                                RayUtils.rayTrace(boundingBox, hitPosition, eyePos).ifPresent(vec -> {
                                     HitResult closestHit = closest.get();
-                                    if (closestHit == null ||
-                                            vec.distanceSquared(eyePos) < closestHit.pos.distanceSquared(eyePos)) {
+                                    if ((closestHit == null ||
+                                            vec.distanceSquared(eyePos) < closestHit.pos.distanceSquared(eyePos)) &&
+                                            CollisionUtils.isLineOfSightReachingShape(instance, player.getChunk(),
+                                                    eyePos, hitPosition, boundingBox)) {
                                         closest.set(new HitResult(hit, vec));
                                     }
                                 });
@@ -87,7 +90,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                         });
 
                 HitResult hit = closest.get();
-                if (hit == null) {
+                if (hit == null || hit.pos.distanceSquared(eyePos) > data.reach * data.reach) {
                     return false;
                 }
 
