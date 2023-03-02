@@ -54,7 +54,8 @@ public class NewRoomGui extends NamedObjectGui {
             List<Bounds3I> bounds = new ArrayList<>(1);
             bounds.add(selected);
 
-            RoomInfo newRoom = new RoomInfo(roomKey, Component.text(roomKey.value()), bounds, new ArrayConfigList(0));
+            RoomInfo newRoom =
+                    new RoomInfo(roomKey, false, Component.text(roomKey.value()), bounds, new ArrayConfigList(0));
             session.setLastRoom(newRoom);
             currentMap.rooms().add(newRoom);
             session.refreshRooms();
