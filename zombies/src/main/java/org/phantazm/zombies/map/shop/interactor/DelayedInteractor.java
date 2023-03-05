@@ -16,7 +16,7 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     private long startTime;
 
     @FactoryMethod
-    public DelayedInteractor(@NotNull Data data, @Child("target") ShopInteractor target) {
+    public DelayedInteractor(@NotNull Data data, @NotNull @Child("target") ShopInteractor target) {
         super(data);
         this.target = Objects.requireNonNull(target, "target");
     }

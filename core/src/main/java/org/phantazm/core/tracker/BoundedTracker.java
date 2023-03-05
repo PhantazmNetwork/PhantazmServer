@@ -22,11 +22,11 @@ public interface BoundedTracker<T extends Bounded> {
 
     void forEachInRangeToCenter(@NotNull Point origin, double distance, @NotNull Consumer<? super T> consumer);
 
+    @NotNull Optional<T> atPoint(int x, int y, int z);
+
     default @NotNull Optional<T> atPoint(@NotNull Point point) {
         return atPoint(point.blockX(), point.blockY(), point.blockZ());
     }
-
-    @NotNull Optional<T> atPoint(int x, int y, int z);
 
     @NotNull @Unmodifiable List<T> items();
 

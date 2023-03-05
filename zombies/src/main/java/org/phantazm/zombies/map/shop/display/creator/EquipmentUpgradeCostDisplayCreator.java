@@ -108,7 +108,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
         @Override
         public void initialize(@NotNull Shop shop) {
-            hologram.setInstance(shop.getInstance(), shop.computeAbsolutePosition(VecUtils.toPoint(data.position())));
+            hologram.setInstance(shop.instance(), shop.computeAbsolutePosition(VecUtils.toPoint(data.position())));
             hologram.clear();
 
             updateCostDisplay();

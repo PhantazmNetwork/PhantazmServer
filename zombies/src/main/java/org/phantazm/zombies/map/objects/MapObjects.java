@@ -9,6 +9,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.gui.SlotDistributor;
+import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
@@ -48,7 +49,8 @@ public interface MapObjects {
         @NotNull MapObjects make(@NotNull Instance instance,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
-                @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler);
+                @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler,
+                @NotNull SongPlayer songPlayer);
     }
 
     interface Module {
@@ -79,5 +81,7 @@ public interface MapObjects {
         @NotNull Supplier<? extends WindowHandler> windowHandler();
 
         @NotNull MobStore mobStore();
+
+        @NotNull SongPlayer songPlayer();
     }
 }

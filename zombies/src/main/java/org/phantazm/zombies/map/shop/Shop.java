@@ -24,6 +24,7 @@ public class Shop implements Tickable, Bounded {
 
     private final Instance instance;
     private final ShopInfo shopInfo;
+
     private final List<ShopPredicate> predicates;
     private final List<ShopInteractor> successInteractors;
     private final List<ShopInteractor> failureInteractors;
@@ -41,23 +42,48 @@ public class Shop implements Tickable, Bounded {
 
         this.instance = Objects.requireNonNull(instance, "instance");
         this.shopInfo = Objects.requireNonNull(shopInfo, "shopInfo");
+
         this.predicates = List.copyOf(predicates);
         this.successInteractors = List.copyOf(successInteractors);
         this.failureInteractors = List.copyOf(failureInteractors);
         this.displays = List.copyOf(displays);
     }
 
-    public @NotNull Instance getInstance() {
+    public @NotNull @Unmodifiable List<ShopPredicate> predicates() {
+        return predicates;
+    }
+
+    public @NotNull @Unmodifiable List<ShopInteractor> successInteractors() {
+        return successInteractors;
+    }
+
+    public @NotNull @Unmodifiable List<ShopInteractor> failureInteractors() {
+        return failureInteractors;
+    }
+
+    public @NotNull @Unmodifiable List<ShopDisplay> displays() {
+        return displays;
+    }
+
+    public @NotNull Instance instance() {
         return instance;
     }
 
-    public @NotNull ShopInfo getShopInfo() {
+    public @NotNull ShopInfo info() {
         return shopInfo;
     }
 
     public void initialize() {
         for (ShopDisplay display : displays) {
             display.initialize(this);
+        }
+
+        for (ShopInteractor interactor : successInteractors) {
+            interactor.initialize(this);
+        }
+
+        for (ShopInteractor interactor : failureInteractors) {
+            interactor.initialize(this);
         }
     }
 
@@ -81,12 +107,16 @@ public class Shop implements Tickable, Bounded {
 
     @Override
     public void tick(long time) {
+        for (ShopDisplay display : displays) {
+            display.tick(time);
+        }
+
         for (ShopInteractor interactor : successInteractors) {
             interactor.tick(time);
         }
 
-        for (ShopDisplay display : displays) {
-            display.tick(time);
+        for (ShopInteractor interactor : failureInteractors) {
+            interactor.tick(time);
         }
     }
 

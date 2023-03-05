@@ -20,7 +20,6 @@ import java.util.Collection;
 @Model("zombies.gun.entity_finder.directional.between_points")
 @Cache
 public class BetweenPointsFinder implements DirectionalEntityFinder {
-
     @FactoryMethod
     public BetweenPointsFinder() {
 
@@ -35,5 +34,4 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
 
         return entities;
     }
-
 }

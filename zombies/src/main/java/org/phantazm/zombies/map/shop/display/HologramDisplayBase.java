@@ -18,8 +18,4 @@ public abstract class HologramDisplayBase implements ShopDisplay {
     public void destroy(@NotNull Shop shop) {
         hologram.clear();
     }
-
-    public @NotNull Hologram hologram() {
-        return hologram;
-    }
 }

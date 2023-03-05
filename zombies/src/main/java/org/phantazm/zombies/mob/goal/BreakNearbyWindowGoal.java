@@ -47,14 +47,9 @@ public class BreakNearbyWindowGoal implements GoalCreator {
 
         private Goal(Data data, BoundedTracker<Window> windowTracker, PhantazmMob self) {
             this.data = data;
-            this.self = self;
             this.windowTracker = windowTracker;
+            this.self = self;
             this.lastBreakCheck = -1;
-        }
-
-        @Override
-        public void start() {
-
         }
 
         @Override
@@ -69,8 +64,8 @@ public class BreakNearbyWindowGoal implements GoalCreator {
             if (ticksSinceLastBreak > data.breakTicks) {
                 BoundingBox boundingBox = entity.getBoundingBox();
 
-                windowTracker.closestInRangeToBounds(entity.getPosition().add(0, boundingBox.height() / 2, 0),
-                        boundingBox.width(), boundingBox.height(), data.breakRadius).ifPresent(window -> {
+                windowTracker.closestInRangeToBounds(entity.getPosition(), boundingBox.width(), boundingBox.height(),
+                        data.breakRadius).ifPresent(window -> {
                     window.setLastBreakTime(time);
 
                     int index = window.getIndex();

@@ -25,7 +25,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
 
     @Override
     public void initialize(@NotNull Shop shop) {
-        hologram.setInstance(shop.getInstance(), shop.computeAbsolutePosition(VecUtils.toPoint(data.info.position())));
+        hologram.setInstance(shop.instance(), shop.computeAbsolutePosition(VecUtils.toPoint(data.info.position())));
         hologram.clear();
 
         hologram.addAll(data.info.text());

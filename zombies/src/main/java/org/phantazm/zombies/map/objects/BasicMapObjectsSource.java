@@ -23,6 +23,7 @@ import org.phantazm.core.ElementUtils;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.gui.BasicSlotDistributor;
 import org.phantazm.core.gui.SlotDistributor;
+import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
@@ -76,9 +77,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     public @NotNull MapObjects make(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
-            @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler) {
-
-
+            @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler,
+            @NotNull SongPlayer songPlayer) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, playerMap.values());
@@ -98,7 +98,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Module module =
                 new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
                         slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
-                        mobStore);
+                        mobStore, songPlayer);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -270,13 +270,14 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Wrapper<PowerupHandler> powerupHandler;
         private final Wrapper<WindowHandler> windowHandler;
         private final MobStore mobStore;
+        private final SongPlayer songPlayer;
 
         private Module(KeyParser keyParser, Instance instance, Random random,
                 Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
                 TransactionModifierSource transactionModifierSource, SlotDistributor slotDistributor,
                 Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
                 Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
-                Wrapper<WindowHandler> windowHandler, MobStore mobStore) {
+                Wrapper<WindowHandler> windowHandler, MobStore mobStore, SongPlayer songPlayer) {
             this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
             this.instance = Objects.requireNonNull(instance, "instance");
             this.random = Objects.requireNonNull(random, "random");
@@ -290,6 +291,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
             this.windowHandler = Objects.requireNonNull(windowHandler, "windowHandler");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+            this.songPlayer = Objects.requireNonNull(songPlayer, "songPlayer");
         }
 
         @Override
@@ -360,6 +362,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull MobStore mobStore() {
             return mobStore;
+        }
+
+        @Override
+        public @NotNull SongPlayer songPlayer() {
+            return songPlayer;
         }
     }
 }

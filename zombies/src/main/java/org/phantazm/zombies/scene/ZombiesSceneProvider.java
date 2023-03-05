@@ -29,6 +29,8 @@ import org.phantazm.core.game.scene.SceneProviderAbstract;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.sound.BasicSongPlayer;
+import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.time.DurationTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
@@ -168,9 +170,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Wrapper<PowerupHandler> powerupHandlerWrapper = Wrapper.ofNull();
         Wrapper<WindowHandler> windowHandlerWrapper = Wrapper.ofNull();
 
+        SongPlayer songPlayer = new BasicSongPlayer();
         MapObjects mapObjects =
                 createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, powerupHandlerWrapper,
-                        windowHandlerWrapper);
+                        windowHandlerWrapper, songPlayer);
+
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
         roundHandlerWrapper.set(roundHandler);
 
@@ -186,7 +190,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         DoorHandler doorHandler = createDoorHandler(mapObjects.doorTracker(), mapObjects.roomTracker());
 
         ZombiesMap map =
-                new ZombiesMap(mapObjects, powerupHandler, roundHandler, shopHandler, windowHandler, doorHandler);
+                new ZombiesMap(mapObjects, songPlayer, powerupHandler, roundHandler, shopHandler, windowHandler,
+                        doorHandler);
 
         EventNode<Event> childNode =
                 createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
@@ -238,9 +243,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private MapObjects createMapObjects(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore,
-            Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler) {
+            Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler, SongPlayer songPlayer) {
         return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, powerupHandler,
-                windowHandler);
+                windowHandler, songPlayer);
     }
 
     private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,

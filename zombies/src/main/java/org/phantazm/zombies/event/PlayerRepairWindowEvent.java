@@ -10,12 +10,14 @@ import java.util.Objects;
 public class PlayerRepairWindowEvent implements ZombiesPlayerEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
+    private final Window window;
     private final int amount;
 
     public PlayerRepairWindowEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, @NotNull Window window,
             int amount) {
         this.player = Objects.requireNonNull(player, "player");
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
+        this.window = Objects.requireNonNull(window, "window");
         this.amount = amount;
     }
 
@@ -27,6 +29,10 @@ public class PlayerRepairWindowEvent implements ZombiesPlayerEvent {
     @Override
     public @NotNull ZombiesPlayer getZombiesPlayer() {
         return zombiesPlayer;
+    }
+
+    public @NotNull Window getWindow() {
+        return window;
     }
 
     public int getAmount() {
