@@ -1,12 +1,9 @@
 package org.phantazm.server;
 
-import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -15,22 +12,20 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.timer.TaskSchedule;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.*;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.hologram.ViewableHologram;
+import org.phantazm.core.sound.BasicSongPlayer;
+import org.phantazm.core.sound.SongLoader;
+import org.phantazm.core.sound.SongPlayer;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +36,7 @@ final class ZombiesTest {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> global) {
+    static void initialize(@NotNull EventNode<Event> global, @NotNull SongLoader songLoader) {
         global.addListener(PlayerLoginEvent.class, event -> {
             if (holograms) {
                 return;
@@ -72,21 +67,21 @@ final class ZombiesTest {
             }
         });
 
+        SongPlayer songPlayer = new BasicSongPlayer();
         global.addListener(EventListener.builder(PlayerChatEvent.class).ignoreCancelled(false).handler(event -> {
             if (event.getMessage().equals("P")) {
                 Component message = Component.text("Play Pigstep", TextColor.color(0, 255, 0));
                 Gui gui = Gui.builder(InventoryType.CHEST_6_ROW, new BasicSlotDistributor(1)).setDynamic(true).withItem(
                         GuiItem.builder().withItem(ItemStack.of(Material.MUSIC_DISC_PIGSTEP).withDisplayName(message))
                                 .withUpdater(new ItemUpdater() {
-                                    private static final Component[] FRAMES =
-                                            new Component[] {Component.text("Play Pigstep", TextColor.color(0, 255, 0)),
-                                                    Component.text("Play Pigstep.", TextColor.color(0, 0, 255)),
-                                                    Component.text("Play Pigstep..", TextColor.color(255, 0, 0)),
-                                                    Component.text("Play Pigstep...", TextColor.color(255, 255, 0)),
-                                                    Component.text("Play Pigstep....", TextColor.color(255, 0, 255)),
-                                                    Component.text("Play Pigstep.....", TextColor.color(0, 255, 255)),
-                                                    Component.text("Play Pigstep......",
-                                                            TextColor.color(255, 255, 255))};
+                                    private static final Component[] FRAMES = new Component[] {
+                                            Component.text("Play Nyan Cat", TextColor.color(0, 255, 0)),
+                                            Component.text("Play Nyan Cat.", TextColor.color(0, 0, 255)),
+                                            Component.text("Play Nyan Cat..", TextColor.color(255, 0, 0)),
+                                            Component.text("Play Nyan Cat...", TextColor.color(255, 255, 0)),
+                                            Component.text("Play Nyan Cat....", TextColor.color(255, 0, 255)),
+                                            Component.text("Play Nyan Cat.....", TextColor.color(0, 255, 255)),
+                                            Component.text("Play Nyan Cat......", TextColor.color(255, 255, 255))};
                                     private long lastUpdate = 0;
                                     private int curFrame = 0;
 
@@ -111,14 +106,9 @@ final class ZombiesTest {
                                         return false;
                                     }
                                 }).withClickHandler(((ClickHandler)(owner, player, slot, clickType) -> {
-                                    player.sendMessage(Component.text("Playing pigstep."));
-                                    pigstepRandomPitch(player);
-
-                                    for (int i = 1; i < 50; i++) {
-                                        player.scheduler()
-                                                .scheduleTask(() -> pigstepRandomPitch(player), TaskSchedule.millis(100 * i),
-                                                        TaskSchedule.stop());
-                                    }
+                                    player.sendMessage(Component.text("Playing a song."));
+                                    List<SongPlayer.Note> notes = songLoader.getNotes(Key.key("phantazm:song" + ".nyan_cat"));
+                                    songPlayer.play(player, Sound.Emitter.self(), notes);
 
                                     player.closeInventory();
                                 }).filter(GuiItem.ClickType.LEFT_CLICK)).build()).build();
@@ -130,14 +120,12 @@ final class ZombiesTest {
             Player player = event.getPlayer();
             Inventory inventory = player.getOpenInventory();
 
+            long time = System.currentTimeMillis();
             if (inventory instanceof Gui gui) {
-                gui.tick(System.currentTimeMillis());
+                gui.tick(time);
             }
-        });
-    }
 
-    private static void pigstepRandomPitch(Player player) {
-        player.playSound(Sound.sound(Key.key("minecraft:music_disc.pigstep"), Sound.Source.RECORD, 100,
-                (float)Math.random() * 2F), Sound.Emitter.self());
+            songPlayer.tick(time);
+        });
     }
 }

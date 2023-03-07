@@ -96,7 +96,7 @@ public class BasicSongPlayer implements SongPlayer {
 
                     nextNoteIndex = ++this.noteIndex;
                     if (nextNoteIndex < this.notes.size()) {
-                        nextNote = this.notes.get(nextNoteIndex);
+                        this.nextNote = nextNote = this.notes.get(nextNoteIndex);
                     }
                     else {
                         if (this.loop) {

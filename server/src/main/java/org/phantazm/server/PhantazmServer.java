@@ -165,8 +165,9 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
             LobbiesConfig lobbiesConfig) throws Exception {
-        KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
+        SongFeature.initialize();
 
+        KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
         Ethylene.initialize(keyParser);
 
         MappingProcessorSource mappingProcessorSource = Ethylene.getMappingProcessorSource();
@@ -198,7 +199,7 @@ public final class PhantazmServer {
                         List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),
                                 new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
 
-        ZombiesTest.initialize(global);
+        ZombiesTest.initialize(global, SongFeature.songLoader());
         ServerCommandFeature.initialize(commandManager);
     }
 
