@@ -19,6 +19,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
                       @NotNull List<RoundInfo> rounds,
                       @NotNull List<SpawnruleInfo> spawnrules,
                       @NotNull List<SpawnpointInfo> spawnpoints,
+                      @NotNull List<LuckyChestInfo> luckyChests,
                       @NotNull ConfigNode scoreboard) implements Keyed {
     /**
      * Constructs a new instances of this record.
@@ -41,6 +42,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
         Objects.requireNonNull(rounds, "rounds");
         Objects.requireNonNull(spawnrules, "spawnrules");
         Objects.requireNonNull(spawnpoints, "spawnpoints");
+        Objects.requireNonNull(luckyChests, "luckyChests");
         Objects.requireNonNull(scoreboard, "scoreboard");
     }
 

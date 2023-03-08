@@ -29,6 +29,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
     private static final String SPAWNRULES_PATH = "spawnrules";
     private static final String SPAWNPOINTS_PATH = "spawnpoints";
     private static final String SIDEBAR_PATH = "sidebar";
+    private static final String LUCKY_CHESTS_PATH = "lucky_chests";
 
     private final String mapInfoName;
     private final BiPredicate<Path, BasicFileAttributes> configPredicate;
@@ -83,6 +84,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         List<RoundInfo> rounds = new ArrayList<>();
         List<SpawnruleInfo> spawnrules = new ArrayList<>();
         List<SpawnpointInfo> spawnpoints = new ArrayList<>();
+        List<LuckyChestInfo> luckyChests = new ArrayList<>();
         ConfigNode scoreboard;
 
         FileUtils.forEachFileMatching(paths.rooms, configPredicate,
@@ -107,11 +109,15 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate,
                 file -> spawnpoints.add(Configuration.read(file, codec, MapProcessors.spawnpointInfo())));
 
+        FileUtils.forEachFileMatching(paths.luckyChests, configPredicate,
+                file -> luckyChests.add(Configuration.read(file, codec, MapProcessors.luckyChest())));
+
         String sidebarSettingsPath =
                 "settings" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         scoreboard = Configuration.read(paths.sidebar.resolve(sidebarSettingsPath), codec, MapProcessors.sidebar());
 
-        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, scoreboard);
+        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, luckyChests,
+                scoreboard);
     }
 
     @Override
@@ -132,6 +138,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         FileUtils.deleteRecursivelyIfExists(paths.rounds);
         FileUtils.deleteRecursivelyIfExists(paths.spawnrules);
         FileUtils.deleteRecursivelyIfExists(paths.spawnpoints);
+        FileUtils.deleteRecursivelyIfExists(paths.luckyChests);
         FileUtils.deleteRecursivelyIfExists(paths.sidebar);
 
         Files.createDirectories(paths.rooms);
@@ -141,7 +148,9 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         Files.createDirectories(paths.rounds);
         Files.createDirectories(paths.spawnrules);
         Files.createDirectories(paths.spawnpoints);
+        Files.createDirectories(paths.luckyChests);
         Files.createDirectories(paths.sidebar);
+
 
         String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension();
 
@@ -188,6 +197,14 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
                     MapProcessors.spawnpointInfo().elementFromData(spawnpoint), codec);
         }
 
+        List<LuckyChestInfo> luckyChests = data.luckyChests();
+        for (int i = 0; i < luckyChests.size(); i++) {
+            LuckyChestInfo luckyChest = luckyChests.get(i);
+            Configuration.write(
+                    paths.spawnpoints.resolve(getPositionString(luckyChest.location()) + "-" + i + extension),
+                    MapProcessors.luckyChest().elementFromData(luckyChest), codec);
+        }
+
         Configuration.write(paths.sidebar.resolve("settings" + extension), data.scoreboard(), codec);
     }
 
@@ -220,11 +237,12 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
                                Path rounds,
                                Path spawnrules,
                                Path spawnpoints,
-                               Path sidebar) {
+                               Path sidebar,
+                               Path luckyChests) {
         private FolderPaths(Path root) {
             this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH),
                     root.resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH),
-                    root.resolve(SPAWNPOINTS_PATH), root.resolve(SIDEBAR_PATH));
+                    root.resolve(SPAWNPOINTS_PATH), root.resolve(SIDEBAR_PATH), root.resolve(LUCKY_CHESTS_PATH));
         }
     }
 }

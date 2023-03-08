@@ -6,16 +6,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.tracker.Bounded;
+import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.zombies.map.action.Action;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Room implements Bounded {
+public class Room extends BoundedBase {
     private final List<Action<Room>> openActions;
-    private final Point center;
-    private final List<Bounds3I> unmodifiableRegions;
     private final RoomInfo roomInfo;
     private volatile boolean isOpen;
 
@@ -27,18 +26,9 @@ public class Room implements Bounded {
      * @param roomInfo the backing data object
      */
     public Room(@NotNull Point mapOrigin, @NotNull RoomInfo roomInfo, @NotNull List<Action<Room>> openActions) {
+        super(mapOrigin, roomInfo.regions().toArray(new Bounds3I[0]));
         this.openActions = List.copyOf(openActions);
-
-        List<Bounds3I> list = new ArrayList<>(roomInfo.regions().size());
-        for (Bounds3I region : roomInfo.regions()) {
-            list.add(region.shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ()));
-        }
-
-        this.center = VecUtils.toPoint(Bounds3I.enclosingImmutable(list.toArray(Bounds3I[]::new)).immutableCenter());
-
-        this.unmodifiableRegions = List.copyOf(list);
         this.roomInfo = Objects.requireNonNull(roomInfo, "roomInfo");
-
         this.sync = new Object();
     }
 
@@ -61,15 +51,5 @@ public class Room implements Bounded {
                 action.perform(this);
             }
         }
-    }
-
-    @Override
-    public @NotNull @Unmodifiable List<Bounds3I> bounds() {
-        return unmodifiableRegions;
-    }
-
-    @Override
-    public @NotNull Point center() {
-        return center;
     }
 }

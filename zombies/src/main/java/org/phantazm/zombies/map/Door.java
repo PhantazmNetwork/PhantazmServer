@@ -15,6 +15,7 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.tracker.Bounded;
+import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -29,14 +30,13 @@ import java.util.function.Supplier;
 /**
  * Represents a door. May be opened and closed.
  */
-public class Door implements Bounded {
+public class Door extends BoundedBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(Door.class);
 
     private final Instance instance;
     private final DoorInfo doorInfo;
     private final Block fillBlock;
     private final Bounds3I enclosing;
-    private final Point center;
     private final List<Bounds3I> regions;
 
     private final ArrayList<Hologram> holograms;
@@ -63,6 +63,8 @@ public class Door implements Bounded {
     public Door(@NotNull Point mapOrigin, @NotNull DoorInfo doorInfo, @NotNull Instance instance,
             @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions, @NotNull List<Action<Door>> closeActions,
             @NotNull List<Action<Door>> failOpenActions, @NotNull Supplier<? extends MapObjects> mapObjects) {
+        super(mapOrigin, doorInfo.regions());
+
         this.instance = Objects.requireNonNull(instance, "instance");
         this.doorInfo = Objects.requireNonNull(doorInfo, "doorInfo");
         this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
@@ -72,7 +74,6 @@ public class Door implements Bounded {
             LOGGER.warn("Door has no regions, enclosing bounds and center set to map origin");
 
             enclosing = Bounds3I.immutable(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ(), 1, 1, 1);
-            center = mapOrigin;
             this.regions = List.of();
         }
         else {
@@ -82,7 +83,6 @@ public class Door implements Bounded {
             }
 
             enclosing = Bounds3I.enclosingImmutable(regionArray);
-            center = VecUtils.toPoint(enclosing.immutableCenter());
             this.regions = List.of(regionArray);
         }
 

@@ -13,6 +13,7 @@ import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.tracker.Bounded;
+import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.map.action.Action;
 import org.slf4j.Logger;
@@ -27,16 +28,14 @@ import java.util.*;
  *
  * @see ClientBlockHandler
  */
-public class Window implements Bounded {
+public class Window extends BoundedBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
     private static final Block DEFAULT_PADDING = Block.OAK_SLAB;
 
     private final Instance instance;
     private final WindowInfo windowInfo;
-    private final List<Bounds3I> bounds;
     private final ClientBlockHandler clientBlockHandler;
     private final Point worldMin;
-    private final Point center;
     private final int volume;
     private final ArrayList<Block> repairBlocks;
 
@@ -60,12 +59,11 @@ public class Window implements Bounded {
     public Window(@NotNull Point mapOrigin, @NotNull Instance instance, @NotNull WindowInfo windowInfo,
             @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
             @NotNull List<Action<Window>> breakActions, @NotNull BoundedTracker<Room> roomTracker) {
-        Bounds3I region = windowInfo.frameRegion();
+        super(mapOrigin, windowInfo.frameRegion());
 
         this.instance = Objects.requireNonNull(instance, "instance");
-        this.bounds = List.of(region.immutable().shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ()));
         this.windowInfo = Objects.requireNonNull(windowInfo, "data");
-        this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockTracker");
+        this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockHandler");
 
         this.repairActions = List.copyOf(repairActions);
         this.breakActions = List.copyOf(breakActions);
@@ -73,9 +71,7 @@ public class Window implements Bounded {
         this.sync = new Object();
 
         Bounds3I frame = windowInfo.frameRegion();
-
-        worldMin = mapOrigin.add(region.originX(), region.originY(), region.originZ());
-        center = VecUtils.toPoint(frame.immutableCenter()).add(mapOrigin);
+        worldMin = mapOrigin.add(frame.originX(), frame.originY(), frame.originZ());
         volume = frame.volume();
 
         if (volume == 0) {
@@ -311,15 +307,5 @@ public class Window implements Bounded {
         int z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
 
         return worldMin.add(x, y, z);
-    }
-
-    @Override
-    public @NotNull @Unmodifiable List<Bounds3I> bounds() {
-        return bounds;
-    }
-
-    @Override
-    public @NotNull Point center() {
-        return center;
     }
 }

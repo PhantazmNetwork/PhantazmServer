@@ -107,7 +107,7 @@ final class ZombiesTest {
                                     }
                                 }).withClickHandler(((ClickHandler)(owner, player, slot, clickType) -> {
                                     player.sendMessage(Component.text("Playing a song."));
-                                    List<SongPlayer.Note> notes = songLoader.getNotes(Key.key("phantazm:song" + ".nyan_cat"));
+                                    List<SongPlayer.Note> notes = songLoader.getNotes(Key.key("phantazm:song.nyan_cat"));
                                     songPlayer.play(player, Sound.Emitter.self(), notes);
 
                                     player.closeInventory();
@@ -115,17 +115,5 @@ final class ZombiesTest {
                 event.getPlayer().openInventory(gui);
             }
         }).build());
-
-        global.addListener(PlayerTickEvent.class, event -> {
-            Player player = event.getPlayer();
-            Inventory inventory = player.getOpenInventory();
-
-            long time = System.currentTimeMillis();
-            if (inventory instanceof Gui gui) {
-                gui.tick(time);
-            }
-
-            songPlayer.tick(time);
-        });
     }
 }

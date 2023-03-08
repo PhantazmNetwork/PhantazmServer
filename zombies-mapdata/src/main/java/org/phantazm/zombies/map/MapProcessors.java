@@ -417,6 +417,19 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<LuckyChestInfo> luckyChest = new ConfigProcessor<>() {
+        @Override
+        public LuckyChestInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Vec3I location = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("location"));
+            return new LuckyChestInfo(location);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(LuckyChestInfo luckyChestInfo) throws ConfigProcessException {
+            return ConfigNode.of("location", VectorConfigProcessors.vec3I().elementFromData(luckyChestInfo.location()));
+        }
+    };
+
     private MapProcessors() {
         throw new UnsupportedOperationException();
     }
@@ -521,5 +534,9 @@ public final class MapProcessors {
 
     public static @NotNull ConfigProcessor<ConfigNode> sidebar() {
         return sidebar;
+    }
+
+    public static @NotNull ConfigProcessor<LuckyChestInfo> luckyChest() {
+        return luckyChest;
     }
 }
