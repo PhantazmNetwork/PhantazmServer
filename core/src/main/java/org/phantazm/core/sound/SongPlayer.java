@@ -17,6 +17,8 @@ public interface SongPlayer extends Tickable {
 
     interface Song {
         void stop();
+
+        boolean isFinished();
     }
 
     record Note(@NotNull Sound sound, int ticks) {

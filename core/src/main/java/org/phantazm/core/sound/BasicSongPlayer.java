@@ -69,6 +69,11 @@ public class BasicSongPlayer implements SongPlayer {
             }
         }
 
+        @Override
+        public boolean isFinished() {
+            return this.stopped;
+        }
+
         private boolean tick(long time) {
             if (this.stopped) {
                 return true;
