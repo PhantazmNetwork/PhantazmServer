@@ -1,6 +1,5 @@
 package org.phantazm.zombies.map.shop;
 
-import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
@@ -8,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.VecUtils;
-import org.phantazm.core.tracker.Bounded;
 import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.zombies.map.ShopInfo;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;

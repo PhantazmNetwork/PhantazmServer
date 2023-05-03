@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
-import org.phantazm.core.tracker.Bounded;
 import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.map.objects.MapObjects;

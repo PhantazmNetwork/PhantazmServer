@@ -421,7 +421,7 @@ public final class MapProcessors {
         @Override
         public LuckyChestInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Vec3I location = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("location"));
-            return new LuckyChestInfo(location);
+            return new LuckyChestInfo(location, Key.key("minecraft:null"));
         }
 
         @Override

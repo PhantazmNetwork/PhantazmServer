@@ -148,7 +148,6 @@ public class Round implements Tickable {
             totalMobCount += spawns.size();
         }
 
-
         return spawns;
     }
 
