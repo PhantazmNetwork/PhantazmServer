@@ -39,14 +39,6 @@ public class NBSSongLoader implements SongLoader {
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
     }
 
-    private static float normalizeKey(int key) {
-        int normalized = MathUtils.clamp(key, MIN_KEY, MAX_KEY);
-        int uses = normalized - MIN_KEY;
-
-        double pow = Math.pow(2, (uses - 12) / 12D);
-        return (float)MathUtils.clamp(pow, 0, 2);
-    }
-
     @Override
     public void load() {
         Map<Key, List<SongPlayer.Note>> map = new HashMap<>();
@@ -128,8 +120,8 @@ public class NBSSongLoader implements SongLoader {
     }
 
     /**
-     * Utilities for reading from .nbs files encoded according to the OpenNBS 5 spec. Backwards compatible up to version
-     * 4.
+     * Utilities for reading from .nbs files encoded according to the OpenNBS 5 spec. Backwards compatible only with
+     * version 4.
      */
     private static class OpenNBSv5 {
 
@@ -139,7 +131,7 @@ public class NBSSongLoader implements SongLoader {
 
         /**
          * Loads a file according to the OpenNBS spec 5.0 (reference <a href="https://opennbs.org/nbs">here</a>). Logs an
-         * error using this class and returns an empty Optional if there is some problem. This will correctly read
+         * error and returns an empty Optional if there is some problem. This will correctly read
          * files encoded in Version 4 as well.
          *
          * @param path the file to load from
@@ -281,6 +273,14 @@ public class NBSSongLoader implements SongLoader {
 
             return Optional.empty();
         }
+    }
+
+    private static float normalizeKey(int key) {
+        int normalized = MathUtils.clamp(key, MIN_KEY, MAX_KEY);
+        int uses = normalized - MIN_KEY;
+
+        double pow = Math.pow(2, (uses - 12) / 12D);
+        return (float)MathUtils.clamp(pow, 0, 2);
     }
 
     private static short normalizeTick(short tempo, short tick) {
