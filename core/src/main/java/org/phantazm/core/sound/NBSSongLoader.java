@@ -49,7 +49,6 @@ public class NBSSongLoader implements SongLoader {
             LOGGER.warn("Error creating song directory");
         }
 
-        LOGGER.info("Loading songs...");
         try (Stream<Path> pathStream = Files.list(rootPath)) {
             pathStream.forEach(path -> {
                 String fileName = path.getFileName().toString();

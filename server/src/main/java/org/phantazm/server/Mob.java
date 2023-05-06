@@ -115,8 +115,6 @@ public final class Mob {
     }
 
     private static void registerElementClasses(@NotNull ContextManager contextManager) {
-        LOGGER.info("Registering Mob element classes...");
-
         //goal appliers
         contextManager.registerElementClass(CollectionGoalApplier.class);
 

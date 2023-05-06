@@ -40,8 +40,6 @@ public final class Ethylene {
     private static KeyParser keyParser;
 
     static void initialize(@NotNull KeyParser keyParser) {
-        LOGGER.info("Initializing Ethylene...");
-
         Ethylene.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(sound())

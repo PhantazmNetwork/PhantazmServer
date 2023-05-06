@@ -139,8 +139,6 @@ public final class ZombiesFeature {
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
-        LOGGER.info("Registering Zombies element classes...");
-
         //Action<Room>, Action<Round>, Action<Door>, and Action<Wave>
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);
@@ -246,14 +244,10 @@ public final class ZombiesFeature {
     }
 
     private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) throws IOException {
-        LOGGER.info("Loading " + featureName + "s...");
-
         List<String> dataNames = loader.loadableData();
         Map<Key, T> data = new HashMap<>(dataNames.size());
 
         for (String dataName : dataNames) {
-            LOGGER.info("Trying to load " + featureName + " from " + dataName);
-
             try {
                 T feature = loader.load(dataName);
                 Key id = feature.key();

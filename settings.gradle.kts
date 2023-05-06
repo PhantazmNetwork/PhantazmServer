@@ -33,7 +33,7 @@ sequenceOf(
     "velocity",
     "zombies",
     "zombies-mapdata",
-    "zombies-mapeditor" //disabled to speed up compilation
+    //"zombies-mapeditor" //disable to speed up compilation (also if Loom decides to randomly error)
 ).forEach {
     include(":phantazm-$it")
     project(":phantazm-$it").projectDir = file(it)
