@@ -60,6 +60,7 @@ public class NBSSongLoader implements SongLoader {
                     if (versionOptional.isPresent() &&
                             (notesOptional = loadVersioned(versionOptional.getAsInt(), path)).isPresent()) {
                         List<SongPlayer.Note> notes = notesOptional.get();
+
                         //safe to pass result of lastIndexOf since we know fileName contains a '.'
                         @Subst(Constants.NAMESPACE_OR_KEY)
                         String extensionless = fileName.substring(0, fileName.lastIndexOf('.'));
@@ -171,7 +172,7 @@ public class NBSSongLoader implements SongLoader {
                 String midiSchematicFileName = readPrefixedString(stream);
                 byte loop = readByte(stream);
                 byte maxLoopCount = readByte(stream);
-                short loopStartTick = readByte(stream);
+                short loopStartTick = readShort(stream);
 
                 List<NBSNote> notes = new ArrayList<>();
 
@@ -226,21 +227,20 @@ public class NBSSongLoader implements SongLoader {
                 int customInstruments = readUnsignedByte(stream);
                 Key[] customInstrumentKeys = new Key[customInstruments];
                 for (int i = 0; i < customInstruments; i++) {
-                    String instrumentName = readPrefixedString(stream);
-
                     @Subst(Constants.NAMESPACE_OR_KEY)
+                    String instrumentName = readPrefixedString(stream);
                     String soundFile = readPrefixedString(stream);
 
                     byte soundKey = readByte(stream);
                     byte pressPianoKey = readByte(stream);
 
-                    if (!Key.parseable(soundFile)) {
-                        LOGGER.warn("Bad custom instrument {} in {}, must be a valid Minecraft resource key", soundFile,
-                                path);
+                    if (!Key.parseable(instrumentName)) {
+                        LOGGER.warn("Bad custom instrument {} in {}, must be a valid Minecraft resource key",
+                                instrumentName, path);
                         return Optional.empty();
                     }
                     else {
-                        customInstrumentKeys[i] = Key.key(soundFile);
+                        customInstrumentKeys[i] = Key.key(instrumentName);
                     }
                 }
 
@@ -267,7 +267,7 @@ public class NBSSongLoader implements SongLoader {
                 return Optional.of(actualNotes);
             }
             catch (IOException e) {
-                LOGGER.warn("IOException loading song in {}", path);
+                LOGGER.warn("IOException loading song in {}: {}", path, e);
             }
 
             return Optional.empty();
@@ -291,12 +291,20 @@ public class NBSSongLoader implements SongLoader {
         if (length < 0) {
             throw new IOException("Invalid data");
         }
+        else if (length == 0) {
+            return "";
+        }
 
         return StandardCharsets.UTF_8.decode(ByteBuffer.wrap(readExact(stream, length))).toString();
     }
 
     private static int readUnsignedByte(InputStream stream) throws IOException {
-        return readByte(stream) & 0xFF;
+        int result = stream.read();
+        if (result == -1) {
+            throw new EOFException();
+        }
+
+        return result;
     }
 
     private static byte readByte(InputStream stream) throws IOException {
