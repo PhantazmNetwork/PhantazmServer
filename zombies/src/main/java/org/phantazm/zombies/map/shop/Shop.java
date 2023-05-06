@@ -1,12 +1,10 @@
 package org.phantazm.zombies.map.shop;
 
-import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
-import org.phantazm.core.VecUtils;
 import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.zombies.map.ShopInfo;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
@@ -17,8 +15,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class Shop extends BoundedBase implements Tickable {
-    private final Point mapOrigin;
-
     private final Instance instance;
     private final ShopInfo shopInfo;
 
@@ -30,9 +26,7 @@ public class Shop extends BoundedBase implements Tickable {
     public Shop(@NotNull Point mapOrigin, @NotNull ShopInfo shopInfo, @NotNull Instance instance,
             @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
             @NotNull List<ShopInteractor> failureInteractors, @NotNull List<ShopDisplay> displays) {
-        super(VecUtils.toPoint(
-                shopInfo.triggerLocation().add(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ())));
-        this.mapOrigin = Objects.requireNonNull(mapOrigin, "mapOrigin");
+        super(mapOrigin, shopInfo.trigger());
 
         this.instance = Objects.requireNonNull(instance, "instance");
         this.shopInfo = Objects.requireNonNull(shopInfo, "shopInfo");
@@ -92,11 +86,6 @@ public class Shop extends BoundedBase implements Tickable {
         for (ShopDisplay display : displays) {
             display.update(this, interaction, interact);
         }
-    }
-
-    public @NotNull Point computeAbsolutePosition(@NotNull Point offset) {
-        Vec3I location = shopInfo.triggerLocation().add(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ());
-        return VecUtils.toVec(location).add(0.5).add(offset);
     }
 
     @Override

@@ -165,8 +165,9 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         }
 
         for (ShopInfo shop : data.shops()) {
-            Configuration.write(paths.shops.resolve(
-                            getPositionString(shop.triggerLocation()) + "-" + shop.id().value() + extension),
+            Bounds3I trigger = shop.trigger();
+            Vec3I origin = Vec3I.immutable(trigger.originX(), trigger.originY(), trigger.originZ());
+            Configuration.write(paths.shops.resolve(getPositionString(origin) + "-" + shop.id().value() + extension),
                     MapProcessors.shopInfo().elementFromData(shop), codec);
         }
 

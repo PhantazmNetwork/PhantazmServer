@@ -382,8 +382,8 @@ public final class MapProcessors {
         @Override
         public ShopInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
-            Vec3I triggerLocation =
-                    VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("triggerLocation"));
+            Bounds3I triggerLocation =
+                    VectorConfigProcessors.bounds3I().dataFromElement(element.getElementOrThrow("trigger"));
             Evaluation predicateEvaluation =
                     evaluation.dataFromElement(element.getElementOrThrow("predicateEvaluation"));
             ConfigNode data = element.getNodeOrThrow("data");
@@ -394,7 +394,7 @@ public final class MapProcessors {
         public @NotNull ConfigElement elementFromData(ShopInfo shopInfo) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(3);
             node.put("id", ConfigProcessors.key().elementFromData(shopInfo.id()));
-            node.put("triggerLocation", VectorConfigProcessors.vec3I().elementFromData(shopInfo.triggerLocation()));
+            node.put("trigger", VectorConfigProcessors.bounds3I().elementFromData(shopInfo.trigger()));
             node.put("predicateEvaluation", evaluation.elementFromData(shopInfo.predicateEvaluation()));
             node.put("data", shopInfo.data());
             return node;

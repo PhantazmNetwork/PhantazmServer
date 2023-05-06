@@ -400,9 +400,8 @@ public class BasicEditorSession implements EditorSession {
         int i = 0;
         for (ShopInfo shopInfo : currentMap.shops()) {
             renderer.putObject(new ObjectRenderer.RenderObject(Key.key(Namespaces.PHANTAZM, "shop." + i++),
-                    ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true, false, RenderUtils.arrayFromRegion(
-                    Bounds3I.immutable(shopInfo.triggerLocation(), Vec3I.immutable(1, 1, 1)),
-                    currentMap.settings().origin(), new Vec3d[2], 0)));
+                    ObjectRenderer.RenderType.FILLED, SHOP_COLOR, true, false,
+                    RenderUtils.arrayFromRegion(shopInfo.trigger(), currentMap.settings().origin(), new Vec3d[2], 0)));
         }
     }
 

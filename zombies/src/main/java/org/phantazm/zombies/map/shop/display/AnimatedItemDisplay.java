@@ -8,6 +8,7 @@ import com.github.steanky.vector.Vec3D;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.VecUtils;
 import org.phantazm.core.item.ItemAnimationFrame;
 import org.phantazm.zombies.map.shop.Shop;
 
@@ -24,7 +25,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
 
     @FactoryMethod
     public AnimatedItemDisplay(@NotNull Data data) {
-        super(data.frames.isEmpty() ? ItemStack.AIR : data.frames.get(0).itemStack(), data.offset);
+        super(data.frames.isEmpty() ? ItemStack.AIR : data.frames.get(0).itemStack(), VecUtils.toPoint(data.offset));
         this.data = data;
     }
 

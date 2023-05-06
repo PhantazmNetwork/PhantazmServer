@@ -1,7 +1,7 @@
 package org.phantazm.zombies.mapeditor.client.ui;
 
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.vector.Vec3I;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.vector.Bounds3I;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Namespaces;
@@ -28,7 +28,7 @@ public class NewShopGui extends NamedObjectGui {
         Objects.requireNonNull(session, "session");
 
         MapInfo currentMap = session.getMap();
-        Vec3I firstSelected = session.getFirstSelection();
+        Bounds3I selection = session.getSelection();
         buttonAdd.setOnClick(() -> {
             String value = textFieldName.getText();
             if (value.isEmpty()) {
@@ -36,10 +36,7 @@ public class NewShopGui extends NamedObjectGui {
             }
 
             Key typeKey = Key.key(Namespaces.PHANTAZM, value);
-            Vec3I origin = currentMap.settings().origin();
-
-            currentMap.shops().add(new ShopInfo(typeKey, firstSelected.sub(origin), Evaluation.ALL_TRUE,
-                    new LinkedConfigNode(0)));
+            currentMap.shops().add(new ShopInfo(typeKey, selection, Evaluation.ALL_TRUE, ConfigNode.of()));
             session.refreshShops();
             ScreenUtils.closeCurrentScreen();
         });
