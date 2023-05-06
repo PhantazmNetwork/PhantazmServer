@@ -39,6 +39,8 @@ public class MinestomConfigProcessors {
             new ProtocolObjectConfigProcessor<>(Particle::fromNamespaceId);
     private static final ConfigProcessor<PotionEffect> POTION_EFFECT =
             new ProtocolObjectConfigProcessor<>(PotionEffect::fromNamespaceId);
+
+
     private static final ConfigProcessor<Potion> POTION = new ConfigProcessor<>() {
 
         @Override

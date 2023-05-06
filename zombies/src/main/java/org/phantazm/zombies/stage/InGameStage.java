@@ -90,9 +90,8 @@ public class InGameStage implements Stage {
                 }
 
                 for (Key key : defaultEquipment.get(groupKey)) {
-                    module.getEquipmentCreator().createEquipment(key).ifPresent(equipment -> {
-                        equipmentHandler.addEquipment(equipment, groupKey);
-                    });
+                    module.getEquipmentCreator().createEquipment(key)
+                            .ifPresent(equipment -> equipmentHandler.addEquipment(equipment, groupKey));
 
                     if (!equipmentHandler.canAddEquipment(groupKey)) {
                         break;

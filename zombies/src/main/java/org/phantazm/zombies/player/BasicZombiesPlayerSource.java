@@ -52,6 +52,8 @@ import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.*;
@@ -60,6 +62,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicZombiesPlayerSource.class);
+
     private final Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction;
 
     private final Team corpseTeam;
@@ -93,6 +97,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Map.Entry<Key, InventoryObjectGroup>[] inventoryObjectGroupEntries = new Map.Entry[equipmentGroups.size()];
         Iterator<Map.Entry<Key, EquipmentGroupInfo>> iterator = equipmentGroups.entrySet().iterator();
+
         for (int i = 0; i < inventoryObjectGroupEntries.length; i++) {
             Map.Entry<Key, EquipmentGroupInfo> entry = iterator.next();
             EquipmentGroupInfo groupInfo = entry.getValue();
@@ -107,7 +112,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         itemStack = ItemStack.fromItemNBT(compound);
                     }
                 }
-                catch (NBTException ignored) {
+                catch (NBTException e) {
+                    LOGGER.warn("Failed to load item in slot {} because its NBT string is invalid: {}", i, e);
                 }
             }
 

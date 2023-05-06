@@ -66,7 +66,7 @@ public class StageTransition implements Tickable {
         }
     }
 
-    public Stage getCurrentStage() {
+    public @NotNull Stage getCurrentStage() {
         return currentStage;
     }
 }

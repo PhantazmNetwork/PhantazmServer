@@ -30,7 +30,7 @@ public class StateConditionCreator implements PlayerConditionCreator {
         private final Data data;
         private final ZombiesPlayer zombiesPlayer;
 
-        public Condition(Data data, ZombiesPlayer zombiesPlayer) {
+        private Condition(Data data, ZombiesPlayer zombiesPlayer) {
             this.data = Objects.requireNonNull(data, "data");
             this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
         }
