@@ -1,6 +1,6 @@
 package org.phantazm.server;
 
-import com.github.steanky.ethylene.codec.json.JsonCodec;
+import com.github.steanky.element.core.key.KeyParser;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.sound.NBSSongLoader;
 import org.phantazm.core.sound.SongLoader;
@@ -12,8 +12,8 @@ public class SongFeature {
 
     private static SongLoader songLoader;
 
-    static void initialize() {
-        SongFeature.songLoader = new NBSSongLoader(SONG_PATH, new JsonCodec());
+    static void initialize(@NotNull KeyParser keyParser) {
+        SongFeature.songLoader = new NBSSongLoader(SONG_PATH, keyParser);
         SongFeature.songLoader.load();
     }
 
