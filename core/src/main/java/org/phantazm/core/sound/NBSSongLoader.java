@@ -156,27 +156,34 @@ public class NBSSongLoader implements SongLoader {
                 byte vanillaInstrumentCount = readByte(stream);
                 short songLength = readShort(stream);
                 short layerCount = readShort(stream);
+
                 String songName = readPrefixedString(stream);
                 String songAuthor = readPrefixedString(stream);
                 String songOriginalAuthor = readPrefixedString(stream);
                 String songDescription = readPrefixedString(stream);
+
                 short songTempo = readShort(stream);
+
                 byte autoSaving = readByte(stream);
                 byte autoSavingDuration = readByte(stream);
                 byte timeSignature = readByte(stream);
+
                 int minutesSpent = readInt(stream);
                 int leftClicks = readInt(stream);
                 int rightClicks = readInt(stream);
                 int noteBlocksAdded = readInt(stream);
                 int noteBlocksRemoved = readInt(stream);
+
                 String midiSchematicFileName = readPrefixedString(stream);
+
                 byte loop = readByte(stream);
                 byte maxLoopCount = readByte(stream);
+
                 short loopStartTick = readShort(stream);
 
                 List<NBSNote> notes = new ArrayList<>();
 
-                short actualTick = Short.MAX_VALUE;
+                short actualTick = -1;
                 short lastActualTick = 0;
 
                 while (true) {
@@ -187,7 +194,7 @@ public class NBSSongLoader implements SongLoader {
 
                     actualTick += jumpsToNextTick;
 
-                    short actualLayer = Short.MAX_VALUE;
+                    short actualLayer = -1;
                     boolean first = true;
 
                     while (true) {
@@ -283,13 +290,16 @@ public class NBSSongLoader implements SongLoader {
     }
 
     private static short normalizeTick(short tempo, short tick) {
-        return (short)Math.round((double)tick * (20.0 / (double)tempo / 100.0));
+        double tempoTicks = ((double)tempo) / 100.0;
+        double result = ((double)tick) * (20.0 / tempoTicks);
+
+        return (short)Math.round(result);
     }
 
     private static String readPrefixedString(InputStream stream) throws IOException {
         int length = readInt(stream);
         if (length < 0) {
-            throw new IOException("Invalid data");
+            throw new IOException("Invalid string length prefix");
         }
         else if (length == 0) {
             return "";

@@ -10,6 +10,7 @@ import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
@@ -104,13 +105,17 @@ final class ZombiesTest {
                                     }
                                 }).withClickHandler(((ClickHandler)(owner, player, slot, clickType) -> {
                                     player.sendMessage(Component.text("Playing a song."));
-                                    List<SongPlayer.Note> notes = songLoader.getNotes(Key.key("phantazm:song.nyan_cat"));
+                                    List<SongPlayer.Note> notes = songLoader.getNotes(Key.key("phantazm:nyan_cat"));
                                     songPlayer.play(player, Sound.Emitter.self(), notes);
 
                                     player.closeInventory();
                                 }).filter(GuiItem.ClickType.LEFT_CLICK)).build()).build();
                 event.getPlayer().openInventory(gui);
             }
+        }).build());
+
+        global.addListener(EventListener.builder(PlayerTickEvent.class).ignoreCancelled(true).handler(event -> {
+            songPlayer.tick(System.currentTimeMillis());
         }).build());
     }
 }
