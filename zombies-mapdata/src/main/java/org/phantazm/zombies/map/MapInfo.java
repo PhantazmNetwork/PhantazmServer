@@ -19,7 +19,6 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
                       @NotNull List<RoundInfo> rounds,
                       @NotNull List<SpawnruleInfo> spawnrules,
                       @NotNull List<SpawnpointInfo> spawnpoints,
-                      @NotNull List<LuckyChestInfo> luckyChests,
                       @NotNull ConfigNode scoreboard) implements Keyed {
     /**
      * Constructs a new instances of this record.
@@ -32,18 +31,21 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
      * @param rounds      this map's rounds
      * @param spawnrules  this map's spawnrules
      * @param spawnpoints this map's spawnpoints
+     * @param scoreboard  this map's scoreboard info
      */
-    public MapInfo {
-        Objects.requireNonNull(settings, "settings");
-        Objects.requireNonNull(rooms, "rooms");
-        Objects.requireNonNull(doors, "doors");
-        Objects.requireNonNull(shops, "shops");
-        Objects.requireNonNull(windows, "windows");
-        Objects.requireNonNull(rounds, "rounds");
-        Objects.requireNonNull(spawnrules, "spawnrules");
-        Objects.requireNonNull(spawnpoints, "spawnpoints");
-        Objects.requireNonNull(luckyChests, "luckyChests");
-        Objects.requireNonNull(scoreboard, "scoreboard");
+    public MapInfo(@NotNull MapSettingsInfo settings, @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors,
+            @NotNull List<ShopInfo> shops, @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds,
+            @NotNull List<SpawnruleInfo> spawnrules, @NotNull List<SpawnpointInfo> spawnpoints,
+            @NotNull ConfigNode scoreboard) {
+        this.settings = Objects.requireNonNull(settings, "settings");
+        this.rooms = List.copyOf(rooms);
+        this.doors = List.copyOf(doors);
+        this.shops = List.copyOf(shops);
+        this.windows = List.copyOf(windows);
+        this.rounds = List.copyOf(rounds);
+        this.spawnrules = List.copyOf(spawnrules);
+        this.spawnpoints = List.copyOf(spawnpoints);
+        this.scoreboard = Objects.requireNonNull(scoreboard, "scoreboard");
     }
 
     @Override

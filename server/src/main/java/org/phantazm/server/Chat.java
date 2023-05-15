@@ -29,6 +29,8 @@ public final class Chat {
      */
     public static final String DEFAULT_CHAT_CHANNEL_NAME = "all";
 
+    public static final String SELF_CHAT_CHANNEL_NAME = "self";
+
     private Chat() {
         throw new UnsupportedOperationException();
     }
@@ -54,7 +56,7 @@ public final class Chat {
         };
 
         channels.put(DEFAULT_CHAT_CHANNEL_NAME, new InstanceChatChannel(viewProvider));
-        channels.put("self", new SelfChatChannel(viewProvider));
+        channels.put(SELF_CHAT_CHANNEL_NAME, new SelfChatChannel(viewProvider));
 
         Map<UUID, String> playerChannels = new HashMap<>();
         commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));
