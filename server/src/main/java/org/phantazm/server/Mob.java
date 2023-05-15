@@ -150,8 +150,6 @@ public final class Mob {
     }
 
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
-        LOGGER.info("Loading mob files...");
-
         Map<Key, MobModel> loadedModels = new HashMap<>();
         try {
             Files.createDirectories(mobPath);

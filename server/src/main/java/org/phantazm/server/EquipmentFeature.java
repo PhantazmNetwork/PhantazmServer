@@ -181,8 +181,6 @@ final class EquipmentFeature {
     }
 
     private static void registerElementClasses(@NotNull ContextManager contextManager) {
-        LOGGER.info("Registering Equipment element classes...");
-
         contextManager.registerElementClass(GunLevel.class);
         contextManager.registerElementClass(EntityInstanceAudienceProvider.class);
         contextManager.registerElementClass(PlayerAudienceProvider.class);
