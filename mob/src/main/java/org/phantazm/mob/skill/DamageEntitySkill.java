@@ -30,12 +30,13 @@ public class DamageEntitySkill implements Skill {
 
     @Override
     public void use(@NotNull PhantazmMob self) {
-        selector.selectTarget(self)
-                .ifPresent(livingEntity -> livingEntity.damage(DamageType.fromEntity(self.entity()), data.damage()));
+        selector.selectTarget(self).ifPresent(
+                livingEntity -> livingEntity.damage(DamageType.fromEntity(self.entity()), data.damage(),
+                        data.bypassArmor));
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selectorPath, float damage) {
+    public record Data(@NotNull @ChildPath("selector") String selectorPath, float damage, boolean bypassArmor) {
 
         public Data {
             Objects.requireNonNull(selectorPath, "selectorPath");

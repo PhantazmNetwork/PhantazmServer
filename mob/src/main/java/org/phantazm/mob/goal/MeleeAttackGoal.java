@@ -81,7 +81,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 Pos pos = self.getPosition();
 
                 double angle = pos.yaw() * (Math.PI / 180);
-                livingEntity.damage(DamageType.fromEntity(self), data.damageAmount);
+                livingEntity.damage(DamageType.fromEntity(self), data.damageAmount, data.bypassArmor);
                 livingEntity.takeKnockback(0.4F * data.knockbackStrength, Math.sin(angle), -Math.cos(angle));
 
                 lastHitSelector.setLastHit(livingEntity);
@@ -105,6 +105,7 @@ public class MeleeAttackGoal implements GoalCreator {
                        double range,
                        boolean swingHand,
                        float damageAmount,
+                       boolean bypassArmor,
                        float knockbackStrength,
                        @NotNull @ChildPath("skills") Collection<String> skillPaths,
                        @NotNull @ChildPath("last_hit_selector") String lastHitSelectorPath) {

@@ -95,7 +95,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 }
 
                 double angle = feetPos.yaw() * (Math.PI / 180);
-                hit.entity.damage(DamageType.fromPlayer(player), data.damage);
+                hit.entity.damage(DamageType.fromPlayer(player), data.damage, data.bypassArmor);
                 hit.entity.takeKnockback(0.4F * data.knockback, Math.sin(angle), -Math.cos(angle));
                 return true;
             }).orElse(false);
@@ -111,7 +111,9 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
     public record Data(@Description("The reach of this weapon") double reach,
                        @Description("The damage it does on a successful hit") float damage,
                        @Description(
-                               "The amount of knockback the weapon deals; 1 is the vanilla knockback from an unarmed hand") float knockback) {
+                               "The amount of knockback the weapon deals; 1 is the vanilla knockback from an unarmed " +
+                                       "hand") float knockback,
+                       @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
     }
 
     private record HitResult(LivingEntity entity, Vec pos) {

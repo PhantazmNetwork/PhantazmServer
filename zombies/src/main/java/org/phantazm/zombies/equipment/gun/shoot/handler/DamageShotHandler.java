@@ -24,7 +24,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * A {@link ShotHandler} that deals damage to targets.
+ * A {@link ShotHandler} that deals damage to targets. Respects the instakill flag {@link Flags#INSTA_KILL}. Raises
+ * {@link EntityDamageByGunEvent}s on a successful hit.
  */
 @Model("zombies.gun.shot_handler.damage")
 @Cache(false)
@@ -79,7 +80,14 @@ public class DamageShotHandler implements ShotHandler {
             EventDispatcher.call(event);
 
             if (!event.isCancelled()) {
-                targetEntity.damage(DamageType.fromEntity(attacker), damage);
+                DamageType damageType = DamageType.fromEntity(attacker);
+
+                switch (data.armorBehavior) {
+                    case ALWAYS_BYPASS -> targetEntity.damage(damageType, damage);
+                    case NEVER_BYPASS -> targetEntity.damage(damageType, damage, false);
+                    case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, damage, headshot);
+                    case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, damage, !headshot);
+                }
             }
         }
     }
@@ -96,8 +104,14 @@ public class DamageShotHandler implements ShotHandler {
      * @param headshotDamage The amount of damage to deal to headshots
      */
     @DataObject
-    public record Data(float damage, float headshotDamage) {
+    public record Data(float damage, float headshotDamage, @NotNull ArmorBehavior armorBehavior) {
 
     }
 
+    public enum ArmorBehavior {
+        ALWAYS_BYPASS,
+        NEVER_BYPASS,
+        BYPASS_ON_HEADSHOT,
+        BYPASS_ON_NON_HEADSHOT
+    }
 }

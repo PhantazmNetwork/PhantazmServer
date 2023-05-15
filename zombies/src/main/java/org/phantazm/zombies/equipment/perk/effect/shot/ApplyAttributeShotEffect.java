@@ -24,7 +24,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-@Description("An entity action that applies a temporary attribute modification to an entity.")
+@Description("""
+        An entity action that applies a temporary attribute modification to an entity when it is hit by the player's
+        weapon shots.
+        """)
 @Model("zombies.perk.effect.shot_entity.apply_attribute")
 @Cache(false)
 public class ApplyAttributeShotEffect implements Action<Entity>, Tickable {

@@ -1,17 +1,19 @@
 package org.phantazm.zombies.map.shop.display;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.document.Description;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.display.creator.PlayerDisplayCreator;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
+@Description("""
+        A shop display that maintains multiple, independent displays for each player. Each player will only see the shop
+        display that belongs to them.
+        """)
 @Model("zombies.map.shop.display.player")
 @Cache(false)
 public class PlayerDisplay implements ShopDisplay {
@@ -25,7 +27,7 @@ public class PlayerDisplay implements ShopDisplay {
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         this.playerDisplayCreator = Objects.requireNonNull(playerDisplayCreator, "playerDisplayCreator");
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
-        this.playerDisplays = new HashMap<>();
+        this.playerDisplays = new LinkedHashMap<>();
     }
 
     private ShopDisplay displayFor(ZombiesPlayer zombiesPlayer) {

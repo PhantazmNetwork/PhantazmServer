@@ -94,7 +94,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
     }
 
     private void doDamage(LivingEntity entity) {
-        entity.damage(DamageType.ON_FIRE, data.damage);
+        entity.damage(DamageType.ON_FIRE, data.damage, data.bypassArmor);
     }
 
     private void stopFire(Entity entity) {
@@ -106,6 +106,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
     @DataObject
     public record Data(@Description("The number of ticks the hit entity will be set on fire") int fireTicks,
                        @Description("The number of ticks between fire damage applications") int damageInterval,
-                       @Description("The amount of damage dealt on each application") float damage) {
+                       @Description("The amount of damage dealt on each application") float damage,
+                       @Description("Whether fire damage should bypass armor damage reduction") boolean bypassArmor) {
     }
 }

@@ -29,9 +29,7 @@ public class BleedEntitiesSkill implements Skill {
 
     @Override
     public void use(@NotNull PhantazmMob self) {
-        selector.selectTarget(self).ifPresent(livingEntity -> {
-            bleeding.add(new BleedContext(livingEntity, 0L));
-        });
+        selector.selectTarget(self).ifPresent(livingEntity -> bleeding.add(new BleedContext(livingEntity, 0L)));
     }
 
     @Override
@@ -52,7 +50,7 @@ public class BleedEntitiesSkill implements Skill {
             long ticksSinceStart = bleedContext.ticksSinceStart();
             bleedContext.setTicksSinceStart(ticksSinceStart + 1);
             if (ticksSinceStart % data.bleedInterval() == 0) {
-                livingEntity.damage(DamageType.fromEntity(self.entity()), data.bleedDamage());
+                livingEntity.damage(DamageType.fromEntity(self.entity()), data.bleedDamage(), data.bypassArmor);
                 contextIterator.remove();
             }
             if (ticksSinceStart >= data.bleedTime()) {
@@ -64,6 +62,7 @@ public class BleedEntitiesSkill implements Skill {
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selectorPath,
                        float bleedDamage,
+                       boolean bypassArmor,
                        long bleedInterval,
                        long bleedTime) {
 
