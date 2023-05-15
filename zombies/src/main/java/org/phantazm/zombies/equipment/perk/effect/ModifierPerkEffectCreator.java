@@ -24,6 +24,8 @@ import java.util.UUID;
         * `generic.max_health`
         * `generic.movement_speed`
         * `generic.knockback_resistance`
+        * `generic.armor`
+        * `generic.armor_toughness`
                 
         There are also several custom attributes defined by Phantazm Zombies:
                 
