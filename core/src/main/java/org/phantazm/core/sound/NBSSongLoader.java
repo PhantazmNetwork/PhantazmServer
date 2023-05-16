@@ -4,6 +4,7 @@ import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -124,7 +125,6 @@ public class NBSSongLoader implements SongLoader {
      * version 4.
      */
     private static class OpenNBSv5 {
-
         //intermediate data structure (instruments are known only after all notes are loaded, in meantime we store index)
         private record NBSNote(int delayTick, int instrumentIndex, float normalizedPitch) {
         }
@@ -197,6 +197,8 @@ public class NBSSongLoader implements SongLoader {
                     short actualLayer = -1;
                     boolean first = true;
 
+                    short normalizedActualTick = normalizeTick(songTempo, actualTick);
+
                     while (true) {
                         short jumpsToNextLayer = readShort(stream);
                         if (jumpsToNextLayer == 0) {
@@ -205,7 +207,7 @@ public class NBSSongLoader implements SongLoader {
 
                         actualLayer += jumpsToNextLayer;
 
-                        short delayTick = first ? normalizeTick(songTempo, (short)(actualTick - lastActualTick)) : 0;
+                        short delayTick = (short)(first ? normalizedActualTick - lastActualTick : 0);
                         byte noteBlockInstrument = readByte(stream);
                         if (noteBlockInstrument < 0) {
                             LOGGER.warn("Negative note index in {}", path);
@@ -217,11 +219,12 @@ public class NBSSongLoader implements SongLoader {
                         int noteBlockPanning = readUnsignedByte(stream);
                         short noteBlockPitch = readShort(stream);
 
-                        notes.add(new NBSNote(delayTick, noteBlockInstrument, normalizeKey(noteBlockKey)));
+                        notes.add(new NBSNote(delayTick, noteBlockInstrument,
+                                normalizeKey(noteBlockKey, noteBlockPitch)));
                         first = false;
                     }
 
-                    lastActualTick = actualTick;
+                    lastActualTick = normalizedActualTick;
                 }
 
                 for (int i = 0; i < layerCount; i++) {
@@ -246,9 +249,8 @@ public class NBSSongLoader implements SongLoader {
                                 instrumentName, path);
                         return Optional.empty();
                     }
-                    else {
-                        customInstrumentKeys[i] = Key.key(instrumentName);
-                    }
+
+                    customInstrumentKeys[i] = Key.key(instrumentName);
                 }
 
                 List<SongPlayer.Note> actualNotes = new ArrayList<>(notes.size());
@@ -271,7 +273,7 @@ public class NBSSongLoader implements SongLoader {
                     actualNotes.add(new SongPlayer.Note(sound, nbsNote.delayTick));
                 }
 
-                return Optional.of(actualNotes);
+                return Optional.of(List.copyOf(actualNotes));
             }
             catch (IOException e) {
                 LOGGER.warn("IOException loading song in {}: {}", path, e);
@@ -281,12 +283,13 @@ public class NBSSongLoader implements SongLoader {
         }
     }
 
-    private static float normalizeKey(int key) {
-        int normalized = MathUtils.clamp(key, MIN_KEY, MAX_KEY);
-        int uses = normalized - MIN_KEY;
+    private static float normalizeKey(int key, float detune) {
+        float normalized = MathUtils.clamp(key + detune, MIN_KEY, MAX_KEY);
+        float uses = normalized - MIN_KEY;
 
         double pow = Math.pow(2, (uses - 12) / 12D);
-        return (float)MathUtils.clamp(pow, 0, 2);
+        System.out.println(pow);
+        return (float)MathUtils.clamp(pow, 0.5, 2);
     }
 
     private static short normalizeTick(short tempo, short tick) {
@@ -302,7 +305,7 @@ public class NBSSongLoader implements SongLoader {
             throw new IOException("Invalid string length prefix");
         }
         else if (length == 0) {
-            return "";
+            return StringUtils.EMPTY;
         }
 
         return StandardCharsets.UTF_8.decode(ByteBuffer.wrap(readExact(stream, length))).toString();
