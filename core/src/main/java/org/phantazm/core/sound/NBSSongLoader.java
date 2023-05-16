@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +23,7 @@ import java.util.stream.Stream;
 
 public class NBSSongLoader implements SongLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(NBSSongLoader.class);
-
     private static final int MIN_KEY = 33;
-    private static final int MAX_KEY = 57;
 
     private static final DefaultInstruments[] DEFAULT_INSTRUMENT_VALUES = DefaultInstruments.values();
 
@@ -284,12 +281,8 @@ public class NBSSongLoader implements SongLoader {
     }
 
     private static float normalizeKey(int key, float detune) {
-        float normalized = MathUtils.clamp(key + detune, MIN_KEY, MAX_KEY);
-        float uses = normalized - MIN_KEY;
-
-        double pow = Math.pow(2, (uses - 12) / 12D);
-        System.out.println(pow);
-        return (float)MathUtils.clamp(pow, 0.5, 2);
+        float uses = (key + detune) - MIN_KEY;
+        return (float)Math.pow(2, (uses - 12) / 12D);
     }
 
     private static short normalizeTick(short tempo, short tick) {

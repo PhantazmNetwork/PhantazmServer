@@ -1,7 +1,7 @@
 package org.phantazm.commons;
 
 /**
- * Contains static functions related to mathematical operations and functions.
+ * Contains static functions related to mathematics.
  */
 public final class MathUtils {
     private static final double E_INVERSE = 1.0 / Math.E;
@@ -33,10 +33,6 @@ public final class MathUtils {
      * @return the clamped value
      */
     public static double clamp(double value, double min, double max) {
-        return Math.min(Math.max(value, min), max);
-    }
-
-    public static float clamp(float value, float min, float max) {
         return Math.min(Math.max(value, min), max);
     }
 
