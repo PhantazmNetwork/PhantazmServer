@@ -1,11 +1,11 @@
-import com.github.phantazmnetwork.gradle.task.CopyLibs
-import com.github.phantazmnetwork.gradle.task.SetupServer
+import org.phantazm.gradle.task.CopyLibs
+import org.phantazm.gradle.task.SetupServer
 
 plugins {
     java
 }
 
-group = "com.github.phantazmnetwork"
+group = "org.phantazm"
 version = "1.0-SNAPSHOT"
 
 java {
@@ -14,7 +14,46 @@ java {
 
 repositories {
     mavenCentral()
-    maven("https://dl.cloudsmith.io/public/steank-f1g/ethylene/maven/")
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steanky/ethylene/maven/")
+        }
+        filter {
+            includeModuleByRegex("com\\.github\\.steanky", "ethylene-.+")
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steanky/element/maven/")
+        }
+        filter {
+            includeModule("com.github.steanky", "element-core")
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steanky/vector/maven/")
+        }
+        filter {
+            includeModule("com.github.steanky", "vector-core")
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steanky/toolkit/maven/")
+        }
+        filter {
+            includeModuleByRegex("com\\.github\\.steanky", "toolkit-.+")
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven("https://dl.cloudsmith.io/public/steanky/proxima/maven/")
+        }
+        filter {
+            includeModule("com.github.steanky", "proxima-core")
+        }
+    }
 }
 
 val catalogs = extensions.getByType<VersionCatalogsExtension>()

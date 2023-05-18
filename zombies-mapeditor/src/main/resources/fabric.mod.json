@@ -1,0 +1,30 @@
+{
+    "schemaVersion": 1,
+    "id": "mapeditor",
+    "version": "${version}",
+    "name": "Phantazm Zombies Mapeditor",
+    "description": "A tool for creating Zombies maps.",
+    "authors": [
+        "Steank"
+    ],
+    "contact": {
+        "issues": "https://github.com/PhantazmNetwork/PhantazmServer/issues",
+        "sources": "https://github.com/PhantazmNetwork/PhantazmServer.git"
+    },
+    "license": "AGPL-3.0-or-later",
+    "icon": "assets/mapeditor/icon.png",
+    "environment": "client",
+    "entrypoints": {
+        "client": [
+            "org.phantazm.zombies.mapeditor.client.MapeditorClient"
+        ]
+    },
+    "depends": {
+        "fabricloader": ">=0.14.11",
+        "fabric-api": "*",
+        "minecraft": "~1.19",
+        "java": ">=17",
+        "libgui": "^6.0.1",
+        "renderer": "^1.0"
+    }
+}
