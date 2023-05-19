@@ -7,14 +7,14 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class PlayerRepairWindowEvent implements ZombiesPlayerEvent {
+public class ZombiesPlayerRepairWindowEvent implements ZombiesPlayerEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final Window window;
     private final int amount;
 
-    public PlayerRepairWindowEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, @NotNull Window window,
-            int amount) {
+    public ZombiesPlayerRepairWindowEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
+            @NotNull Window window, int amount) {
         this.player = Objects.requireNonNull(player, "player");
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
         this.window = Objects.requireNonNull(window, "window");

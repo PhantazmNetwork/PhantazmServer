@@ -7,14 +7,14 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class PlayerDeathEvent implements ZombiesPlayerEvent {
+public class ZombiesPlayerDeathEvent implements ZombiesPlayerEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final DamageType damageType;
 
     private boolean cancelled;
 
-    public PlayerDeathEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
+    public ZombiesPlayerDeathEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull DamageType damageType) {
         this.player = Objects.requireNonNull(player, "player");
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");

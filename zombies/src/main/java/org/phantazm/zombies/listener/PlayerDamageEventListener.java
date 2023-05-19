@@ -11,7 +11,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.event.PlayerDeathEvent;
+import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
@@ -47,8 +47,8 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isPresent()) {
-            PlayerDeathEvent deathEvent =
-                    new PlayerDeathEvent(playerOptional.get(), zombiesPlayer, event.getDamageType());
+            ZombiesPlayerDeathEvent deathEvent =
+                    new ZombiesPlayerDeathEvent(playerOptional.get(), zombiesPlayer, event.getDamageType());
             EventDispatcher.call(deathEvent);
 
             if (deathEvent.isCancelled()) {

@@ -13,7 +13,7 @@ import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
-import org.phantazm.zombies.event.PlayerRepairWindowEvent;
+import org.phantazm.zombies.event.ZombiesPlayerRepairWindowEvent;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.stage.StageKeys;
@@ -147,7 +147,7 @@ public class BasicWindowHandler implements WindowHandler {
                     if (repaired != 0) {
                         zombiesPlayer.getPlayer().ifPresent(player -> {
                             EventDispatcher.call(
-                                    new PlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired));
+                                    new ZombiesPlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired));
                         });
                     }
                 }
