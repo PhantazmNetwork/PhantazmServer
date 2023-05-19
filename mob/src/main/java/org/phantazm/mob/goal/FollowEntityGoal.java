@@ -62,11 +62,6 @@ public class FollowEntityGoal implements GoalCreator {
         }
 
         @Override
-        public void start() {
-
-        }
-
-        @Override
         public void tick(long time) {
             if (target != null && target.isRemoved()) {
                 target = null;
@@ -80,11 +75,6 @@ public class FollowEntityGoal implements GoalCreator {
             else {
                 ++ticksSinceTargetChosen;
             }
-        }
-
-        @Override
-        public void end() {
-
         }
 
         private void refreshTarget() {

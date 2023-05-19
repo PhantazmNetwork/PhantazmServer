@@ -3,12 +3,15 @@ package org.phantazm.zombies.listener;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.entity.damage.EntityDamage;
 import net.minestom.server.entity.damage.EntityProjectileDamage;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.event.PlayerDeathEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
@@ -16,6 +19,7 @@ import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerDamageEventListener extends ZombiesPlayerEventListener<EntityDamageEvent> {
@@ -40,6 +44,18 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         }
 
         event.setCancelled(true);
+
+        Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+        if (playerOptional.isPresent()) {
+            PlayerDeathEvent deathEvent =
+                    new PlayerDeathEvent(playerOptional.get(), zombiesPlayer, event.getDamageType());
+            EventDispatcher.call(deathEvent);
+
+            if (deathEvent.isCancelled()) {
+                return;
+            }
+        }
+
         zombiesPlayer.getPlayer().ifPresent(player -> player.setHealth(player.getMaxHealth()));
 
         Pos deathPosition = event.getEntity().getPosition();
