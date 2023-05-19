@@ -29,18 +29,21 @@ public class MobModel implements Keyed {
     private final ElementContext nodeContext;
     private final ConfigNode metaNode;
     private final Component displayName;
+    private final Component hologramDisplayName;
     private final Map<EquipmentSlot, ItemStack> equipment;
     private final Object2FloatMap<String> attributes;
 
     public MobModel(@NotNull Key key, @NotNull EntityType entityType, @NotNull Pathfinding.Factory factory,
             @NotNull ElementContext nodeContext, @NotNull ConfigNode metaNode, @Nullable Component displayName,
-            @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
+            @Nullable Component hologramDisplayName, @NotNull Map<EquipmentSlot, ItemStack> equipment,
+            @NotNull Object2FloatMap<String> attributes) {
         this.key = Objects.requireNonNull(key, "key");
         this.entityType = Objects.requireNonNull(entityType, "entityType");
         this.factory = Objects.requireNonNull(factory, "factory");
         this.nodeContext = Objects.requireNonNull(nodeContext, "nodeContext");
         this.metaNode = metaNode.immutableCopy();
         this.displayName = displayName;
+        this.hologramDisplayName = hologramDisplayName;
         this.equipment = Map.copyOf(Objects.requireNonNull(equipment, "equipment"));
         this.attributes = Object2FloatMaps.unmodifiable(Objects.requireNonNull(attributes, "attributes"));
     }
@@ -77,12 +80,17 @@ public class MobModel implements Keyed {
     }
 
     /**
-     * Gets the mob's display name, or null if it should not have one.
+     * Gets the mob's display name, or null if it should not have one. This is the name that is used to refer to the
+     * entity in chat messages.
      *
      * @return The mob's display name, or null if it should not have one
      */
     public @NotNull Optional<Component> getDisplayName() {
         return Optional.ofNullable(displayName);
+    }
+
+    public @NotNull Optional<Component> getHologramDisplayName() {
+        return Optional.ofNullable(hologramDisplayName);
     }
 
     /**
