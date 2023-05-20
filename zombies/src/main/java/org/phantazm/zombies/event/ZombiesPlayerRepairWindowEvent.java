@@ -13,12 +13,16 @@ public class ZombiesPlayerRepairWindowEvent implements ZombiesPlayerEvent {
     private final Window window;
     private final int amount;
 
+    private int goldGain;
+    private boolean cancelled;
+
     public ZombiesPlayerRepairWindowEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
-            @NotNull Window window, int amount) {
+            @NotNull Window window, int amount, int goldGain) {
         this.player = Objects.requireNonNull(player, "player");
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
         this.window = Objects.requireNonNull(window, "window");
         this.amount = amount;
+        this.goldGain = goldGain;
     }
 
     @Override
@@ -37,5 +41,21 @@ public class ZombiesPlayerRepairWindowEvent implements ZombiesPlayerEvent {
 
     public int getAmount() {
         return amount;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void setCancelled(boolean cancel) {
+        this.cancelled = cancel;
+    }
+
+    public int goldGain() {
+        return this.goldGain;
+    }
+
+    public void setGoldGain(int newGain) {
+        this.goldGain = newGain;
     }
 }

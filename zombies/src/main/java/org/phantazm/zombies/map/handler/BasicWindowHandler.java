@@ -122,18 +122,29 @@ public class BasicWindowHandler implements WindowHandler {
             long elapsedTicks = elapsedMS / MinecraftServer.TICK_MS;
 
             if (elapsedTicks >= repairInterval) {
+                repairOperation.lastRepairTime = time;
+
                 Window targetWindow = repairOperation.window;
                 if (!targetWindow.isFullyRepaired()) {
                     long timeElapsedSinceLastBroken = time - targetWindow.getLastBreakTime();
                     if (timeElapsedSinceLastBroken < UNREPAIRABLE_BREAK_DELAY) {
                         zombiesPlayer.sendMessage(Component.text("You can't repair windows while enemies are nearby!")
                                 .color(NamedTextColor.RED));
-                        repairOperation.lastRepairTime = time;
-                        return;
+                        continue;
                     }
 
                     int repaired = targetWindow.updateIndex(
                             targetWindow.getIndex() + zombiesPlayer.module().getMeta().getWindowRepairAmount());
+                    if (repaired == 0) {
+                        continue;
+                    }
+
+                    Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                    if (playerOptional.isEmpty()) {
+                        continue;
+                    }
+
+                    Player player = playerOptional.get();
 
                     int baseGold = repaired * coinsPerWindowBlock;
                     PlayerCoins coins = zombiesPlayer.module().getCoins();
@@ -142,17 +153,17 @@ public class BasicWindowHandler implements WindowHandler {
                             zombiesPlayer.module().compositeTransactionModifiers()
                                     .modifiers(ModifierSourceGroups.WINDOW_COIN_GAIN), baseGold));
 
-                    coins.applyTransaction(result);
+                    ZombiesPlayerRepairWindowEvent event =
+                            new ZombiesPlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired,
+                                    result.change());
 
-                    if (repaired != 0) {
-                        zombiesPlayer.getPlayer().ifPresent(player -> {
-                            EventDispatcher.call(
-                                    new ZombiesPlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired));
-                        });
+                    EventDispatcher.call(event);
+                    if (event.isCancelled()) {
+                        continue;
                     }
-                }
 
-                repairOperation.lastRepairTime = time;
+                    coins.applyTransaction(new TransactionResult(result.modifierNames(), event.goldGain()));
+                }
             }
         }
     }
