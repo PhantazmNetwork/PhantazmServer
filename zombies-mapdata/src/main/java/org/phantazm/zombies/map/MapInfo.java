@@ -38,13 +38,13 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
             @NotNull List<SpawnruleInfo> spawnrules, @NotNull List<SpawnpointInfo> spawnpoints,
             @NotNull ConfigNode scoreboard) {
         this.settings = Objects.requireNonNull(settings, "settings");
-        this.rooms = List.copyOf(rooms);
-        this.doors = List.copyOf(doors);
-        this.shops = List.copyOf(shops);
-        this.windows = List.copyOf(windows);
-        this.rounds = List.copyOf(rounds);
-        this.spawnrules = List.copyOf(spawnrules);
-        this.spawnpoints = List.copyOf(spawnpoints);
+        this.rooms = Objects.requireNonNull(rooms, "rooms");
+        this.doors = Objects.requireNonNull(doors, "doors");
+        this.shops = Objects.requireNonNull(shops, "shops");
+        this.windows = Objects.requireNonNull(windows, "windows");
+        this.rounds = Objects.requireNonNull(rounds, "rounds");
+        this.spawnrules = Objects.requireNonNull(spawnrules, "spawnrules");
+        this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
         this.scoreboard = Objects.requireNonNull(scoreboard, "scoreboard");
     }
 

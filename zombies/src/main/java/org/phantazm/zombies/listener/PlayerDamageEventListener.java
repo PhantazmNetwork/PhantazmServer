@@ -47,16 +47,17 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isPresent()) {
+            Player player = playerOptional.get();
             ZombiesPlayerDeathEvent deathEvent =
-                    new ZombiesPlayerDeathEvent(playerOptional.get(), zombiesPlayer, event.getDamageType());
+                    new ZombiesPlayerDeathEvent(player, zombiesPlayer, event.getDamageType());
             EventDispatcher.call(deathEvent);
 
             if (deathEvent.isCancelled()) {
                 return;
             }
-        }
 
-        zombiesPlayer.getPlayer().ifPresent(player -> player.setHealth(player.getMaxHealth()));
+            player.setHealth(player.getMaxHealth());
+        }
 
         Pos deathPosition = event.getEntity().getPosition();
         Component killer = getKiller(event);
