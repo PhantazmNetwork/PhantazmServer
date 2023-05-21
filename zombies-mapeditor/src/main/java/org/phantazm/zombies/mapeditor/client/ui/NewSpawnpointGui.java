@@ -51,8 +51,6 @@ public class NewSpawnpointGui extends NamedObjectGui {
         gridPanelRoot.add(toggleButtonLinkWindow, 0, 3, 10, 1);
         gridPanelRoot.add(linkDisplayLabel, 0, 4, 10, 1);
 
-        System.out.println(session.getSelection().volume());
-
         Vec3I mapOrigin = session.getMap().settings().origin();
 
         Vec3I linkTarget;

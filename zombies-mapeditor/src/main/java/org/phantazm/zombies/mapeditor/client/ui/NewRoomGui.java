@@ -1,6 +1,6 @@
 package org.phantazm.zombies.mapeditor.client.ui;
 
-import com.github.steanky.ethylene.core.collection.ArrayConfigList;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.vector.Bounds3I;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -32,7 +32,7 @@ public class NewRoomGui extends NamedObjectGui {
         Objects.requireNonNull(session, "session");
 
         MapInfo currentMap = session.getMap();
-        Bounds3I selected = session.getSelection();
+        Bounds3I selected = session.getSelection().shift(session.getMap().settings().origin().mul(-1));
 
         buttonAdd.setOnClick(() -> {
             String value = textFieldName.getText();
@@ -54,8 +54,7 @@ public class NewRoomGui extends NamedObjectGui {
             List<Bounds3I> bounds = new ArrayList<>(1);
             bounds.add(selected);
 
-            RoomInfo newRoom =
-                    new RoomInfo(roomKey, false, Component.text(roomKey.value()), bounds, new ArrayConfigList(0));
+            RoomInfo newRoom = new RoomInfo(roomKey, false, Component.text(roomKey.value()), bounds, ConfigList.of());
             session.setLastRoom(newRoom);
             currentMap.rooms().add(newRoom);
             session.refreshRooms();

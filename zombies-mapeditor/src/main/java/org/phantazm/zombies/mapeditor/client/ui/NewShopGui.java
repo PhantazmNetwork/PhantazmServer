@@ -28,7 +28,7 @@ public class NewShopGui extends NamedObjectGui {
         Objects.requireNonNull(session, "session");
 
         MapInfo currentMap = session.getMap();
-        Bounds3I selection = session.getSelection();
+        Bounds3I selection = session.getSelection().shift(currentMap.settings().origin().mul(-1));
         buttonAdd.setOnClick(() -> {
             String value = textFieldName.getText();
             if (value.isEmpty()) {
