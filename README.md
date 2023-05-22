@@ -39,7 +39,7 @@ Generally, you'll want to build from the `master` branch, unless you're testing 
 
 ## Usage
 
-You should use the latest Java 17 build to run Phantazm. The server supports Minecraft client versions 1.7-1.18.
+You should use the latest Java 17 build to run Phantazm. The server, without the proxy, runs on 1.19.3. With ViaVersion and ViaBackwards, it should support any version of Minecraft later than 1.7.
 
 ### For development
 
