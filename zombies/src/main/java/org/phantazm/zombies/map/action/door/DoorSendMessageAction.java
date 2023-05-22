@@ -12,6 +12,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Model("zombies.map.door.action.send_message")
 public class DoorSendMessageAction implements Action<Door> {
@@ -29,15 +30,15 @@ public class DoorSendMessageAction implements Action<Door> {
         for (Component component : data.messages) {
             if (data.broadcast) {
                 instance.sendMessage(component);
+                return;
+            }
+
+            Optional<ZombiesPlayer> interactorOptional = door.lastInteractor();
+            if (interactorOptional.isPresent()) {
+                interactorOptional.get().sendMessage(component);
             }
             else {
-                ZombiesPlayer interactor = door.lastInteractor();
-                if (interactor != null) {
-                    interactor.sendMessage(component);
-                }
-                else {
-                    instance.sendMessage(component);
-                }
+                instance.sendMessage(component);
             }
         }
     }
