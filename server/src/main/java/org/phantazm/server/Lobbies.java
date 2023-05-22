@@ -112,6 +112,7 @@ public final class Lobbies {
             LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(event.getPlayer().getUuid());
             if (joinRequest == null) {
                 LOGGER.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
+                event.getPlayer().kick("");
             }
             else {
                 joinRequest.onPlayerLoginComplete();
