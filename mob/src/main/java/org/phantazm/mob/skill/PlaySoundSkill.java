@@ -51,12 +51,10 @@ public class PlaySoundSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selectorPath,
-                       @NotNull Sound sound,
-                       boolean followAudience) {
+    public record Data(@NotNull @ChildPath("selector") String selector, @NotNull Sound sound, boolean followAudience) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(selector, "selector");
             Objects.requireNonNull(sound, "sound");
         }
 
