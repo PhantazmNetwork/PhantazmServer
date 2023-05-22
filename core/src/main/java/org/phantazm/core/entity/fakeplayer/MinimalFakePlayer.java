@@ -1,7 +1,8 @@
 package org.phantazm.core.entity.fakeplayer;
 
 import net.minestom.server.entity.*;
-import net.minestom.server.network.packet.server.play.PlayerInfoPacket;
+import net.minestom.server.network.packet.server.play.PlayerInfoRemovePacket;
+import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.timer.SchedulerManager;
 import net.minestom.server.utils.PacketUtils;
@@ -59,25 +60,21 @@ public class MinimalFakePlayer extends Entity {
                 .schedule();
     }
 
-    private @NotNull PlayerInfoPacket getAddPlayerPacket() {
-        List<PlayerInfoPacket.AddPlayer.Property> properties;
+    private @NotNull PlayerInfoUpdatePacket getAddPlayerPacket() {
+        List<PlayerInfoUpdatePacket.Property> properties;
         if (skin != null) {
-            PlayerInfoPacket.AddPlayer.Property skinProperty =
-                    new PlayerInfoPacket.AddPlayer.Property("textures", skin.textures(), skin.signature());
-            properties = List.of(skinProperty);
+            properties = List.of(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature()));
         }
         else {
             properties = List.of();
         }
 
-        PlayerInfoPacket.Entry entry =
-                new PlayerInfoPacket.AddPlayer(getUuid(), username, properties, GameMode.SURVIVAL, 0, null, null);
-        return new PlayerInfoPacket(PlayerInfoPacket.Action.ADD_PLAYER, entry);
+        return new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER,
+                new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false, 0, GameMode.SURVIVAL, null,
+                        null));
     }
 
-    private @NotNull PlayerInfoPacket getRemovePlayerPacket() {
-        return new PlayerInfoPacket(PlayerInfoPacket.Action.REMOVE_PLAYER,
-                new PlayerInfoPacket.RemovePlayer(getUuid()));
+    private @NotNull PlayerInfoRemovePacket getRemovePlayerPacket() {
+        return new PlayerInfoRemovePacket(getUuid());
     }
-
 }
