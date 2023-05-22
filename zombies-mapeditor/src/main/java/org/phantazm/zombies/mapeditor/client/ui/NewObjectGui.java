@@ -65,7 +65,7 @@ public class NewObjectGui extends SimplePanelGui {
                         new BlockPos.Mutable(x + origin.x(), y + origin.y(), z + origin.z()))).toString());
             });
 
-            currentMap.windows().add(new WindowInfo(selected, blockData));
+            currentMap.windows().add(new WindowInfo(selected.shift(currentMap.settings().origin().mul(-1)), blockData));
 
             session.refreshWindows();
             ScreenUtils.closeCurrentScreen();

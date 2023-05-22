@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.phantazm.commons.ConfigProcessors;
+import org.phantazm.commons.FileUtils;
 import org.phantazm.core.config.processor.ItemStackConfigProcessors;
 import org.phantazm.core.config.processor.MinestomConfigProcessors;
 import org.phantazm.mob.MobModel;
@@ -152,7 +153,7 @@ public final class Mob {
     private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
         Map<Key, MobModel> loadedModels = new HashMap<>();
         try {
-            Files.createDirectories(mobPath);
+            FileUtils.createDirectories(mobPath);
 
             try (Stream<Path> paths = Files.list(mobPath)) {
                 String ending = codec.getPreferredExtension();

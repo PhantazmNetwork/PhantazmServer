@@ -18,7 +18,6 @@ import java.util.function.Function;
 public final class Proxima {
     private static Pathfinder pathfinder;
     private static Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction;
-    private static InstanceSpaceHandler instanceSpaceHandler;
     private static Spawner spawner;
 
     private Proxima() {

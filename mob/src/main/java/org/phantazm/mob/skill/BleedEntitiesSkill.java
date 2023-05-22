@@ -60,14 +60,14 @@ public class BleedEntitiesSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selectorPath,
+    public record Data(@NotNull @ChildPath("selector") String selector,
                        float bleedDamage,
                        boolean bypassArmor,
                        long bleedInterval,
                        long bleedTime) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(selector, "selector");
         }
 
     }

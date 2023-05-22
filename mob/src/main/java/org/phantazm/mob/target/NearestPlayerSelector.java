@@ -17,7 +17,7 @@ public class NearestPlayerSelector extends FirstTargetSelector<Player> {
      * @param delegate The delegate {@link TargetSelector} to map
      */
     @FactoryMethod
-    public NearestPlayerSelector(@NotNull @Child("selector") TargetSelector<Iterable<Player>> delegate) {
+    public NearestPlayerSelector(@NotNull @Child("delegate") TargetSelector<Iterable<Player>> delegate) {
         super(delegate);
     }
 
@@ -32,10 +32,10 @@ public class NearestPlayerSelector extends FirstTargetSelector<Player> {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selectorPath) {
+    public record Data(@NotNull @ChildPath("delegate") String delegate) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(delegate, "delegate");
         }
 
     }

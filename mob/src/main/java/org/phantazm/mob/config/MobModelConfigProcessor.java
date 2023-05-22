@@ -77,7 +77,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         EntityType entityType = EntityType.fromNamespaceId(
                 NamespaceID.from(KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("entityType"))));
 
-        ElementContext context = contextManager.makeContext(element.getNodeOrThrow("settings"));
+        ElementContext context = contextManager.makeContext(element.getNodeOrThrow("pathfindingSettings"));
 
         Pathfinding.Factory factory = context.provide(HANDLER,
                 () -> new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F)));
@@ -93,6 +93,16 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             displayName = COMPONENT_PROCESSOR.dataFromElement(displayNameElement);
         }
 
+        Component hologramDisplayName;
+        ConfigElement hologramDisplayNameElement =
+                element.getElementOrDefault(ConfigPrimitive.NULL, "hologramDisplayName");
+        if (hologramDisplayNameElement.isNull()) {
+            hologramDisplayName = null;
+        }
+        else {
+            hologramDisplayName = COMPONENT_PROCESSOR.dataFromElement(hologramDisplayNameElement);
+        }
+
         ConfigNode equipmentNode = element.getNodeOrThrow("equipment");
         Map<EquipmentSlot, ItemStack> equipment = new HashMap<>(equipmentNode.size());
         for (Map.Entry<String, ConfigElement> entry : equipmentNode.entrySet()) {
@@ -105,7 +115,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
                 ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
 
         return new MobModel(key, entityType, factory, contextManager.makeContext(node), metaNode, displayName,
-                equipment, attributes);
+                hologramDisplayName, equipment, attributes);
     }
 
     @Override
@@ -119,6 +129,15 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         }
         else {
             displayNameElement = ConfigPrimitive.NULL;
+        }
+
+        Optional<Component> hologramDisplayName = model.getHologramDisplayName();
+        ConfigElement hologramDisplayNameElement;
+        if (hologramDisplayName.isPresent()) {
+            hologramDisplayNameElement = COMPONENT_PROCESSOR.elementFromData(hologramDisplayName.get());
+        }
+        else {
+            hologramDisplayNameElement = ConfigPrimitive.NULL;
         }
 
         ConfigNode equipmentNode = new LinkedConfigNode(model.getEquipment().entrySet().size());
@@ -137,6 +156,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         element.put("settings", ConfigNode.of());
         element.put("meta", model.getMetaNode());
         element.put("displayName", displayNameElement);
+        element.put("hologramDisplayName", hologramDisplayNameElement);
         element.put("equipment", equipmentNode);
         element.put("attributes", attributes);
         for (ConfigEntry entry : model.getContext().root().entryCollection()) {

@@ -14,6 +14,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FileUtils;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentCreator;
@@ -110,8 +111,8 @@ final class EquipmentFeature {
         Path guns = EQUIPMENT_PATH.resolve("guns");
         Path perks = EQUIPMENT_PATH.resolve("perks");
         try {
-            Files.createDirectories(guns);
-            Files.createDirectories(perks);
+            FileUtils.createDirectories(guns);
+            FileUtils.createDirectories(perks);
         }
         catch (IOException e) {
             LOGGER.warn("Failed to create a necessary equipment directory.", e);

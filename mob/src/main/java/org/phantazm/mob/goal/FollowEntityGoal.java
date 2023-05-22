@@ -62,11 +62,6 @@ public class FollowEntityGoal implements GoalCreator {
         }
 
         @Override
-        public void start() {
-
-        }
-
-        @Override
         public void tick(long time) {
             if (target != null && target.isRemoved()) {
                 target = null;
@@ -80,11 +75,6 @@ public class FollowEntityGoal implements GoalCreator {
             else {
                 ++ticksSinceTargetChosen;
             }
-        }
-
-        @Override
-        public void end() {
-
         }
 
         private void refreshTarget() {
@@ -103,10 +93,10 @@ public class FollowEntityGoal implements GoalCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selectorPath, long retargetInterval, double followRange) {
+    public record Data(@NotNull @ChildPath("selector") String selector, long retargetInterval, double followRange) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(selector, "selector");
         }
 
     }

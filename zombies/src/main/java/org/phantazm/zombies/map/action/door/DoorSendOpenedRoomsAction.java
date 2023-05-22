@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 @Model("zombies.map.door.action.send_opened_rooms")
@@ -42,9 +43,9 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
 
     @Override
     public void perform(@NotNull Door door) {
-        ZombiesPlayer lastInteract = door.lastInteractor();
-        if (lastInteract != null) {
-            lastInteract.module().getPlayerView().getUsername().whenComplete((username, err) -> {
+        Optional<ZombiesPlayer> lastInteractorOptional = door.lastInteractor();
+        if (lastInteractorOptional.isPresent()) {
+            lastInteractorOptional.get().module().getPlayerView().getUsername().whenComplete((username, err) -> {
                 if (err != null) {
                     LOGGER.warn("Error resolving display name of door-opening player", err);
                 }

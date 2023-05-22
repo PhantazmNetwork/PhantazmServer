@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class NBSSongLoader implements SongLoader {
     public void load() {
         Map<Key, List<SongPlayer.Note>> map = new HashMap<>();
         try {
-            Files.createDirectories(rootPath);
+            FileUtils.createDirectories(rootPath);
         }
         catch (IOException e) {
             LOGGER.warn("Error creating song directory");

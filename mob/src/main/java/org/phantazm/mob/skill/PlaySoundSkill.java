@@ -3,6 +3,7 @@ package org.phantazm.mob.skill;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.target.TargetSelector;
@@ -36,7 +37,10 @@ public class PlaySoundSkill implements Skill {
                 audience.playSound(data.sound(), Sound.Emitter.self());
             }
             else {
-                audience.playSound(data.sound());
+                Instance instance = self.entity().getInstance();
+                if (instance != null) {
+                    instance.playSound(data.sound, self.entity().getPosition());
+                }
             }
         });
     }
@@ -47,12 +51,10 @@ public class PlaySoundSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selectorPath,
-                       @NotNull Sound sound,
-                       boolean followAudience) {
+    public record Data(@NotNull @ChildPath("selector") String selector, @NotNull Sound sound, boolean followAudience) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(selector, "selector");
             Objects.requireNonNull(sound, "sound");
         }
 

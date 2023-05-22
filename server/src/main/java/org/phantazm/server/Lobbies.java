@@ -9,6 +9,7 @@ import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FileUtils;
 import org.phantazm.core.game.scene.BasicSceneStore;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.SceneProvider;
@@ -26,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +56,7 @@ public final class Lobbies {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
-        Files.createDirectories(lobbiesConfig.instancesPath());
+        FileUtils.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =
                 new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(), DynamicChunk::new);
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
@@ -112,6 +112,7 @@ public final class Lobbies {
             LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(event.getPlayer().getUuid());
             if (joinRequest == null) {
                 LOGGER.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
+                event.getPlayer().kick("");
             }
             else {
                 joinRequest.onPlayerLoginComplete();

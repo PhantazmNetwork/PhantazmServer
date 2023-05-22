@@ -35,4 +35,9 @@ public record PhantazmMob(@NotNull MobModel model,
     public int hashCode() {
         return entity.getUuid().hashCode();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof PhantazmMob mob) && mob.entity.getUuid().equals(entity.getUuid());
+    }
 }

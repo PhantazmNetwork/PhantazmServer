@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -213,8 +214,8 @@ public class Door extends BoundedBase {
         return doorInfo;
     }
 
-    public @Nullable ZombiesPlayer lastInteractor() {
-        return lastInteractor;
+    public @NotNull Optional<ZombiesPlayer> lastInteractor() {
+        return Optional.ofNullable(lastInteractor);
     }
 
     @Override

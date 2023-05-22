@@ -116,6 +116,11 @@ public class BasicMobSpawner implements MobSpawner {
             applier.apply(mob);
         }
 
+        model.getHologramDisplayName().ifPresent(name -> {
+            proximaEntity.setCustomName(name);
+            proximaEntity.setCustomNameVisible(true);
+        });
+
         this.mobStore.registerMob(mob);
         return mob;
     }
