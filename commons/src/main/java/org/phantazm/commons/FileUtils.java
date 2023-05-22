@@ -101,6 +101,22 @@ public final class FileUtils {
     }
 
     /**
+     * Creates any of the absent directories along the given {@link Path}. Will not throw a
+     * {@link FileAlreadyExistsException}.
+     *
+     * @param directory the directory or directories to create
+     * @throws IOException if an IO error occurs
+     */
+    public static void createDirectories(@NotNull Path directory) throws IOException {
+        try {
+            Files.createDirectories(directory);
+        }
+        catch (FileAlreadyExistsException ignored) {
+            //swallow this exception here (we could have a symlink to a directory)
+        }
+    }
+
+    /**
      * A {@link Consumer}-like interface that can throw an {@link IOException}.
      *
      * @param <TType> the type of object to accept

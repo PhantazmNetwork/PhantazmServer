@@ -3,6 +3,7 @@ package org.phantazm.zombies.map;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +21,7 @@ public abstract class FilesystemLoader<T extends Keyed> implements Loader<T> {
 
     @Override
     public @NotNull @Unmodifiable List<String> loadableData() throws IOException {
-        Files.createDirectories(root);
+        FileUtils.createDirectories(root);
 
         try (Stream<Path> fileStream = Files.list(root)) {
             return fileStream.map(path -> path.getFileName().toString()).toList();

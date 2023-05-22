@@ -117,7 +117,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
     @Override
     public void save(@NotNull MapInfo data) throws IOException {
         Path mapDirectory = root.resolve(data.settings().id().value());
-        Files.createDirectories(mapDirectory);
+        FileUtils.createDirectories(mapDirectory);
 
         MapSettingsInfo mapSettingsInfo = data.settings();
         Configuration.write(mapDirectory.resolve(mapInfoName), MapProcessors.mapInfo().elementFromData(mapSettingsInfo),
@@ -134,14 +134,14 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         FileUtils.deleteRecursivelyIfExists(paths.spawnpoints);
         FileUtils.deleteRecursivelyIfExists(paths.sidebar);
 
-        Files.createDirectories(paths.rooms);
-        Files.createDirectories(paths.doors);
-        Files.createDirectories(paths.shops);
-        Files.createDirectories(paths.windows);
-        Files.createDirectories(paths.rounds);
-        Files.createDirectories(paths.spawnrules);
-        Files.createDirectories(paths.spawnpoints);
-        Files.createDirectories(paths.sidebar);
+        FileUtils.createDirectories(paths.rooms);
+        FileUtils.createDirectories(paths.doors);
+        FileUtils.createDirectories(paths.shops);
+        FileUtils.createDirectories(paths.windows);
+        FileUtils.createDirectories(paths.rounds);
+        FileUtils.createDirectories(paths.spawnrules);
+        FileUtils.createDirectories(paths.spawnpoints);
+        FileUtils.createDirectories(paths.sidebar);
 
         String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension();
         for (RoomInfo room : data.rooms()) {
@@ -198,7 +198,10 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
 
     @Override
     public @NotNull @Unmodifiable List<String> loadableData() throws IOException {
-        Files.createDirectories(root);
+        if (!Files.exists(root)) {
+            FileUtils.createDirectories(root);
+        }
+
         try (Stream<Path> fileStream = Files.list(root)) {
             return fileStream.filter(Files::isDirectory).map(path -> path.getFileName().toString()).toList();
         }
