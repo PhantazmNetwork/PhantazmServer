@@ -50,9 +50,8 @@ public class BasicAliveStateActivable implements Activable {
         playerView.getPlayer().ifPresent(player -> {
             if ((time - lastHeal) / MinecraftServer.TICK_MS >= (int)player.getAttributeValue(Attributes.HEAL_TICKS)) {
                 player.setHealth(player.getHealth() + 1F);
+                lastHeal = time;
             }
-
-            lastHeal = time;
         });
     }
 
