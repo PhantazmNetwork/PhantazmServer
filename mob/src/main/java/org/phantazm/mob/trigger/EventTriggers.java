@@ -18,44 +18,45 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * {@link MobTrigger}s that should automatically be recognized by Phantazm.
+ * {@link EventTrigger}s that should automatically be recognized by Phantazm. All triggers of this type are initialized
+ * at arena startup.
  */
-public class MobTriggers {
+public class EventTriggers {
 
     /**
-     * A {@link MobTrigger} for when an {@link Entity} is damaged.
+     * A {@link EventTrigger} for when an {@link Entity} is damaged.
      */
-    public static final MobTrigger<EntityDamageEvent> DAMAGE_TRIGGER =
+    public static final EventTrigger<EntityDamageEvent> DAMAGE_TRIGGER =
             regularTrigger("damage", EntityDamageEvent.class);
     /**
-     * A {@link MobTrigger} for when an {@link Entity} is spawned.
+     * A {@link EventTrigger} for when an {@link Entity} is spawned.
      */
-    public static final MobTrigger<EntitySpawnEvent> SPAWN_TRIGGER = regularTrigger("spawn", EntitySpawnEvent.class);
+    public static final EventTrigger<EntitySpawnEvent> SPAWN_TRIGGER = regularTrigger("spawn", EntitySpawnEvent.class);
     /**
-     * A {@link MobTrigger} for when an {@link Entity} is killed.
+     * A {@link EventTrigger} for when an {@link Entity} is killed.
      */
-    public static final MobTrigger<EntityDeathEvent> DEATH_TRIGGER = regularTrigger("death", EntityDeathEvent.class);
+    public static final EventTrigger<EntityDeathEvent> DEATH_TRIGGER = regularTrigger("death", EntityDeathEvent.class);
     /**
-     * A {@link MobTrigger} for when a {@link Player} interacts with an {@link Entity}.
+     * A {@link EventTrigger} for when a {@link Player} interacts with an {@link Entity}.
      */
-    public static final MobTrigger<PlayerEntityInteractEvent> INTERACT_TRIGGER =
+    public static final EventTrigger<PlayerEntityInteractEvent> INTERACT_TRIGGER =
             trigger("interact", PlayerEntityInteractEvent.class, PlayerEntityInteractEvent::getTarget);
     /**
-     * A {@link Collection} of default {@link MobTrigger}s.
+     * A {@link Collection} of default {@link EventTrigger}s.
      */
-    public static final Collection<MobTrigger<?>> TRIGGERS =
+    public static final Collection<EventTrigger<?>> TRIGGERS =
             List.of(DAMAGE_TRIGGER, SPAWN_TRIGGER, DEATH_TRIGGER, INTERACT_TRIGGER);
 
-    private MobTriggers() {
+    private EventTriggers() {
         throw new UnsupportedOperationException();
     }
 
-    private static <TEvent extends Event> @NotNull MobTrigger<TEvent> trigger(@Subst("interact") @NotNull String name,
+    private static <TEvent extends Event> @NotNull EventTrigger<TEvent> trigger(@Subst("interact") @NotNull String name,
             @NotNull Class<TEvent> eventClass, @NotNull Function<TEvent, Entity> entityGetter) {
-        return new MobTrigger<>(Key.key(Namespaces.PHANTAZM, name), eventClass, entityGetter);
+        return new EventTrigger<>(Key.key(Namespaces.PHANTAZM, name), eventClass, entityGetter);
     }
 
-    private static <TEvent extends EntityEvent> @NotNull MobTrigger<TEvent> regularTrigger(
+    private static <TEvent extends EntityEvent> @NotNull EventTrigger<TEvent> regularTrigger(
             @Subst("damage") @NotNull String name, @NotNull Class<TEvent> eventClass) {
         return trigger(name, eventClass, EntityEvent::getEntity);
     }

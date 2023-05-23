@@ -36,8 +36,8 @@ import org.phantazm.core.time.TickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
-import org.phantazm.mob.trigger.MobTrigger;
-import org.phantazm.mob.trigger.MobTriggers;
+import org.phantazm.mob.trigger.EventTrigger;
+import org.phantazm.mob.trigger.EventTriggers;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.zombies.listener.*;
 import org.phantazm.zombies.map.*;
@@ -120,12 +120,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
         });
         phaser.arriveAndAwaitAdvance();
-    }
-
-    private static <T extends Event> void registerTrigger(@NotNull EventNode<? super T> node,
-            @NotNull MobStore mobStore, @NotNull MobTrigger<T> trigger) {
-        node.addListener(trigger.eventClass(),
-                event -> mobStore.useTrigger(trigger.entityGetter().apply(event), trigger.key()));
     }
 
     @Override
@@ -305,8 +299,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         node.addListener(PlayerStopSneakingEvent.class,
                 new PlayerStopSneakingListener(instance, zombiesPlayers, windowHandler));
 
-        for (MobTrigger<?> trigger : MobTriggers.TRIGGERS) {
-            registerTrigger(node, mobStore, trigger);
+        for (EventTrigger<?> trigger : EventTriggers.TRIGGERS) {
+            trigger.initialize(node, mobStore);
         }
 
         return node;
