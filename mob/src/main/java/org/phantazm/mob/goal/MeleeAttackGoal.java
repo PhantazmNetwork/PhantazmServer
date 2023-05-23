@@ -2,6 +2,7 @@ package org.phantazm.mob.goal;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
@@ -80,9 +81,12 @@ public class MeleeAttackGoal implements GoalCreator {
             if (target instanceof LivingEntity livingEntity) {
                 Pos pos = self.getPosition();
 
+                float damageAmount = self.getAttributeValue(Attribute.ATTACK_DAMAGE);
+                float knockbackStrength = self.getAttributeValue(Attribute.ATTACK_KNOCKBACK);
+
                 double angle = pos.yaw() * (Math.PI / 180);
-                livingEntity.damage(DamageType.fromEntity(self), data.damageAmount, data.bypassArmor);
-                livingEntity.takeKnockback(0.4F * data.knockbackStrength, Math.sin(angle), -Math.cos(angle));
+                livingEntity.damage(DamageType.fromEntity(self), damageAmount, data.bypassArmor);
+                livingEntity.takeKnockback(0.4F * knockbackStrength, Math.sin(angle), -Math.cos(angle));
 
                 lastHitSelector.setLastHit(livingEntity);
 
@@ -104,9 +108,7 @@ public class MeleeAttackGoal implements GoalCreator {
     public record Data(long cooldown,
                        double range,
                        boolean swingHand,
-                       float damageAmount,
                        boolean bypassArmor,
-                       float knockbackStrength,
                        @NotNull @ChildPath("skills") Collection<String> skillPaths,
                        @NotNull @ChildPath("last_hit_selector") String lastHitSelectorPath) {
 
