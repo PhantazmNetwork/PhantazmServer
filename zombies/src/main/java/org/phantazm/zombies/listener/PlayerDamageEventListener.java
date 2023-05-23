@@ -11,6 +11,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -68,6 +69,12 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
     }
 
     private Component getEntityName(@NotNull Entity entity) {
+        PhantazmMob mob = mapObjects.module().mobStore().getMob(entity.getUuid());
+        Optional<Component> displayNameOptional;
+        if (mob != null && (displayNameOptional = mob.model().getDisplayName()).isPresent()) {
+            return displayNameOptional.get();
+        }
+
         Component message = entity.getCustomName();
         if (message == null) {
             message = Component.translatable(entity.getEntityType().registry().translationKey());
@@ -78,6 +85,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
     private Component getKiller(@NotNull EntityDamageEvent event) {
         DamageType damageType = event.getDamageType();
+
         if (damageType instanceof EntityDamage entityDamage) {
             return getEntityName(entityDamage.getSource());
         }

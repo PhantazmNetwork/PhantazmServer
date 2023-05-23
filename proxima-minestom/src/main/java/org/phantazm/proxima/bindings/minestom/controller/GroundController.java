@@ -96,7 +96,8 @@ public class GroundController implements Controller {
         }
 
         if (entity.isOnGround()) {
-            PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, new Vec(speedX, 0, speedZ));
+            Vec deltaMove = new Vec(speedX, 0, speedZ);
+            PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, deltaMove);
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
             if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
@@ -107,6 +108,17 @@ public class GroundController implements Controller {
                     jumping = true;
                 }
                 else if (nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
+                    Instance instance = entity.getInstance();
+                    if (instance != null) {
+                        PhysicsResult canStep =
+                                CollisionUtils.handlePhysics(instance, entity.getChunk(), entity.getBoundingBox(),
+                                        entity.getPosition().add(0, nodeDiff + Vec.EPSILON, 0), deltaMove, null);
+
+                        if (canStep.hasCollision()) {
+                            return;
+                        }
+                    }
+
                     entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
                     return;
                 }
