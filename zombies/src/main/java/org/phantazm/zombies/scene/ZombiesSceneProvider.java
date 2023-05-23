@@ -39,6 +39,7 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.trigger.EventTrigger;
 import org.phantazm.mob.trigger.EventTriggers;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.listener.*;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.*;
@@ -201,6 +202,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         Wrapper<ZombiesScene> sceneWrapper = Wrapper.ofNull();
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
+            playerView.getPlayer().ifPresent(player -> {
+                player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.baseReviveTicks());
+            });
+
             return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings, instance, playerView,
                     mapObjects.module().modifierSource(), new BasicFlaggable(), childNode, mapObjects.module().random(),
                     mapObjects, mobStore, mapObjects.mobSpawner());
