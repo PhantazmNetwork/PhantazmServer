@@ -134,6 +134,7 @@ public final class Mob {
         contextManager.registerElementClass(DuplicateSelfSkill.class);
         contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
+        contextManager.registerElementClass(TimedSkill.class);
 
         //mob selectors
         contextManager.registerElementClass(EntitySelector.class);

@@ -210,8 +210,13 @@ public class BasicMobSpawner implements MobSpawner {
             }
 
             Key key = keyParser.parseKey(stringKey);
-            skills.put(key,
-                    context.provideCollection(TRIGGERS_PATH.append(stringKey), mobDependencyProvider, TRIGGER_HANDLER));
+
+            Collection<Skill> triggeredSkills =
+                    context.provideCollection(TRIGGERS_PATH.append(stringKey), mobDependencyProvider, TRIGGER_HANDLER);
+
+            if (!triggeredSkills.isEmpty()) {
+                skills.put(key, triggeredSkills);
+            }
         }
 
         return Map.copyOf(skills);

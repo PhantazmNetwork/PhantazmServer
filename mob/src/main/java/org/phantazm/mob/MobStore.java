@@ -1,5 +1,6 @@
 package org.phantazm.mob;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.entity.EntityDeathEvent;
@@ -7,10 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.mob.skill.Skill;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MobStore implements Tickable {
     private final Map<UUID, PhantazmMob> uuidToMob = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Pair<PhantazmMob, Collection<Skill>>> tickableSkills =
+            new ConcurrentHashMap<>();
 
     /**
      * Attempts to activate triggers for an {@link Entity}.
@@ -45,6 +45,7 @@ public class MobStore implements Tickable {
     public void onMobDeath(@NotNull EntityDeathEvent event) {
         UUID uuid = event.getEntity().getUuid();
         uuidToMob.remove(uuid);
+        tickableSkills.remove(uuid);
     }
 
     /**
@@ -61,6 +62,17 @@ public class MobStore implements Tickable {
         }
 
         uuidToMob.put(uuid, mob);
+
+        List<Skill> tickables = new ArrayList<>(3);
+        for (Collection<Skill> skills : mob.triggers().values()) {
+            for (Skill skill : skills) {
+                if (skill.needsTicking()) {
+                    tickables.add(skill);
+                }
+            }
+        }
+
+        tickableSkills.put(uuid, Pair.of(mob, List.copyOf(tickables)));
     }
 
     /**
@@ -85,11 +97,9 @@ public class MobStore implements Tickable {
 
     @Override
     public void tick(long time) {
-        for (PhantazmMob mob : uuidToMob.values()) {
-            for (Collection<Skill> triggerSkills : mob.triggers().values()) {
-                for (Skill skill : triggerSkills) {
-                    skill.tick(time, mob);
-                }
+        for (Pair<PhantazmMob, Collection<Skill>> tickables : tickableSkills.values()) {
+            for (Skill skill : tickables.right()) {
+                skill.tick(time, tickables.left());
             }
         }
     }

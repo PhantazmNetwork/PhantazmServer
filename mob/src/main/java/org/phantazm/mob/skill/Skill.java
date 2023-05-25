@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 
 public interface Skill {
-
     /**
      * Uses the skill.
      */
@@ -12,4 +11,7 @@ public interface Skill {
 
     void tick(long time, @NotNull PhantazmMob self);
 
+    default boolean needsTicking() {
+        return false;
+    }
 }

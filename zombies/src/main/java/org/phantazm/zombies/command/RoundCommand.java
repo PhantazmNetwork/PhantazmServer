@@ -41,12 +41,6 @@ public class RoundCommand extends Command {
         addConditionalSyntax((sender, commandString) -> sender instanceof Player, (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
-                StageTransition transition = scene.getStageTransition();
-                Stage current = transition.getCurrentStage();
-                if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
-                    transition.setCurrentStage(StageKeys.IN_GAME);
-                }
-
                 RoundHandler handler = scene.getMap().roundHandler();
                 int roundCount = handler.roundCount();
                 int roundIndex = context.get(roundArgument) - 1;
@@ -55,6 +49,12 @@ public class RoundCommand extends Command {
                     sender.sendMessage(
                             Component.text("Round " + (roundIndex + 1) + " is out of bounds!", NamedTextColor.RED));
                     return;
+                }
+
+                StageTransition transition = scene.getStageTransition();
+                Stage current = transition.getCurrentStage();
+                if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
+                    transition.setCurrentStage(StageKeys.IN_GAME);
                 }
 
                 handler.currentRound().ifPresent(round -> {
