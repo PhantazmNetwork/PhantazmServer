@@ -2,8 +2,13 @@ package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
+
+import java.util.UUID;
 
 @Description("""
         A timed meta skill that can activate another skill periodically after a delay, a set number of times, or
@@ -16,10 +21,17 @@ public class TimedSkill implements Skill {
     private final Data data;
     private final Skill delegate;
 
+    private final Tag<Long> lastActivationTag;
+
+    private long lastActivation = -1;
+
     @FactoryMethod
     public TimedSkill(@NotNull Data data, @NotNull @Child("delegate") Skill delegate) {
         this.data = data;
         this.delegate = delegate;
+
+        this.lastActivationTag =
+                data.fromSpawn ? Tag.Long("mob.skill.timed_" + UUID.randomUUID()).defaultValue(-1L) : null;
     }
 
     @Override
@@ -29,7 +41,29 @@ public class TimedSkill implements Skill {
 
     @Override
     public void tick(long time, @NotNull PhantazmMob self) {
+        if (data.fromSpawn) {
+            Entity entity = self.entity();
+            long lastActivationTime = entity.getTag(lastActivationTag);
+            if (lastActivationTime == -1) {
+                entity.setTag(lastActivationTag, lastActivationTime = time);
+            }
 
+            if ((time - lastActivationTime) / MinecraftServer.TICK_MS >= data.interval) {
+                entity.setTag(lastActivationTag, time);
+                delegate.use(self);
+            }
+
+            return;
+        }
+
+        if (lastActivation == -1) {
+            lastActivation = time;
+        }
+
+        if ((time - lastActivation) / MinecraftServer.TICK_MS >= data.interval) {
+            lastActivation = time;
+            delegate.use(self);
+        }
     }
 
     @Override

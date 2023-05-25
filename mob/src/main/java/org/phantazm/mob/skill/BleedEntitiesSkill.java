@@ -59,6 +59,11 @@ public class BleedEntitiesSkill implements Skill {
         }
     }
 
+    @Override
+    public boolean needsTicking() {
+        return true;
+    }
+
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selector,
                        float bleedDamage,

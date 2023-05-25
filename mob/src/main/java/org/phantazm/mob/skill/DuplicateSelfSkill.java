@@ -31,9 +31,4 @@ public class DuplicateSelfSkill implements Skill {
 
         spawner.spawn(instance, entity.getPosition(), self.model());
     }
-
-    @Override
-    public void tick(long time, @NotNull PhantazmMob self) {
-
-    }
 }

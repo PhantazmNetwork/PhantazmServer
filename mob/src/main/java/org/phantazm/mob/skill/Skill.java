@@ -9,7 +9,8 @@ public interface Skill {
      */
     void use(@NotNull PhantazmMob self);
 
-    void tick(long time, @NotNull PhantazmMob self);
+    default void tick(long time, @NotNull PhantazmMob self) {
+    }
 
     default boolean needsTicking() {
         return false;

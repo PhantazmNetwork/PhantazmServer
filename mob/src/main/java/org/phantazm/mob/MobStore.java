@@ -72,7 +72,9 @@ public class MobStore implements Tickable {
             }
         }
 
-        tickableSkills.put(uuid, Pair.of(mob, List.copyOf(tickables)));
+        if (!tickables.isEmpty()) {
+            tickableSkills.put(uuid, Pair.of(mob, List.copyOf(tickables)));
+        }
     }
 
     /**

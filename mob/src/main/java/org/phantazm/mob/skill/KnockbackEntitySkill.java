@@ -23,11 +23,6 @@ public class KnockbackEntitySkill implements Skill {
     }
 
     @Override
-    public void tick(long time, @NotNull PhantazmMob self) {
-
-    }
-
-    @Override
     public void use(@NotNull PhantazmMob self) {
         selector.selectTarget(self).ifPresent(livingEntity -> {
             Pos position = self.entity().getPosition();

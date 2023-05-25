@@ -24,11 +24,6 @@ public class DamageEntitySkill implements Skill {
     }
 
     @Override
-    public void tick(long time, @NotNull PhantazmMob self) {
-
-    }
-
-    @Override
     public void use(@NotNull PhantazmMob self) {
         selector.selectTarget(self).ifPresent(
                 livingEntity -> livingEntity.damage(DamageType.fromEntity(self.entity()), data.damage(),

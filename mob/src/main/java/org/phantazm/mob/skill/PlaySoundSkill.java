@@ -45,11 +45,6 @@ public class PlaySoundSkill implements Skill {
         });
     }
 
-    @Override
-    public void tick(long time, @NotNull PhantazmMob self) {
-
-    }
-
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selector, @NotNull Sound sound, boolean followAudience) {
 
