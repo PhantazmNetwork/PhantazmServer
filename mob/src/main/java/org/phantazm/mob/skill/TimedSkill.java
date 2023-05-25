@@ -22,6 +22,7 @@ public class TimedSkill implements Skill {
     private final Skill delegate;
 
     private final Tag<Long> lastActivationTag;
+    private final Tag<Integer> useCountTag;
 
     private long lastActivation = -1;
 
@@ -30,8 +31,9 @@ public class TimedSkill implements Skill {
         this.data = data;
         this.delegate = delegate;
 
-        this.lastActivationTag =
-                data.fromSpawn ? Tag.Long("mob.skill.timed_" + UUID.randomUUID()).defaultValue(-1L) : null;
+        UUID uuid = UUID.randomUUID();
+        this.lastActivationTag = data.fromSpawn ? Tag.Long("last_activation_" + uuid).defaultValue(-1L) : null;
+        this.useCountTag = data.repeat < 1 ? null : Tag.Integer("use_count_" + uuid);
     }
 
     @Override
@@ -41,6 +43,12 @@ public class TimedSkill implements Skill {
 
     @Override
     public void tick(long time, @NotNull PhantazmMob self) {
+        int lastUseCount = -1;
+        if (data.repeat == 0 ||
+                (data.repeat > 0 && (lastUseCount = self.entity().getTag(useCountTag)) >= data.repeat)) {
+            return;
+        }
+
         if (data.fromSpawn) {
             Entity entity = self.entity();
             long lastActivationTime = entity.getTag(lastActivationTag);
@@ -51,6 +59,9 @@ public class TimedSkill implements Skill {
             if ((time - lastActivationTime) / MinecraftServer.TICK_MS >= data.interval) {
                 entity.setTag(lastActivationTag, time);
                 delegate.use(self);
+                if (lastUseCount != -1) {
+                    self.entity().setTag(useCountTag, lastUseCount + 1);
+                }
             }
 
             return;
@@ -63,6 +74,9 @@ public class TimedSkill implements Skill {
         if ((time - lastActivation) / MinecraftServer.TICK_MS >= data.interval) {
             lastActivation = time;
             delegate.use(self);
+            if (lastUseCount != -1) {
+                self.entity().setTag(useCountTag, lastUseCount + 1);
+            }
         }
     }
 
