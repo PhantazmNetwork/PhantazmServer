@@ -6,6 +6,7 @@ import com.github.steanky.proxima.path.PathResult;
 import com.github.steanky.proxima.path.PathTarget;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.LivingEntity;
@@ -257,7 +258,7 @@ public class ProximaEntity extends LivingEntity {
 
     protected boolean withinDistance(@NotNull Node node) {
         Pos position = getPosition();
-        return node.x == position.blockX() && node.y == position.blockY() && node.z == position.blockZ();
+        return position.distanceSquared(new Vec(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5)) < 0.0625;
     }
 
     protected boolean moveAlongPath(long time) {
