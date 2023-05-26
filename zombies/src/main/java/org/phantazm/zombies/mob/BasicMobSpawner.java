@@ -61,8 +61,6 @@ public class BasicMobSpawner implements MobSpawner {
     private static final ElementPath GOAL_APPLIERS_PATH = ElementPath.of("goalAppliers");
     private static final ElementPath TRIGGERS_PATH = ElementPath.of("triggers");
 
-    private static final Method[] ENTITY_META_METHODS = EntityMeta.class.getMethods();
-
     private final Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
     private final Spawner proximaSpawner;
     private final KeyParser keyParser;
@@ -128,7 +126,7 @@ public class BasicMobSpawner implements MobSpawner {
     private void setEntityMeta(@NotNull ProximaEntity neuralEntity, @NotNull MobModel model) {
         EntityMeta meta = neuralEntity.getEntityMeta();
         ConfigNode metaNode = model.getMetaNode();
-        for (Method method : ENTITY_META_METHODS) {
+        for (Method method : meta.getClass().getMethods()) {
             if (!Modifier.isPublic(method.getModifiers()) || method.getReturnType() != void.class) {
                 continue;
             }
