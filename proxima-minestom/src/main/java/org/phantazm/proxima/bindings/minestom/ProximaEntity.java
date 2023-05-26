@@ -66,7 +66,21 @@ public class ProximaEntity extends LivingEntity {
     private void cancelPath() {
         this.destination = null;
         pathfinding.getNavigator().cancel();
-        resetPath(System.currentTimeMillis());
+
+        targetEntity = null;
+        destination = null;
+        currentPath = null;
+
+        current = null;
+        target = null;
+
+        recalculationDelay = 0;
+        lastPathfind = 0;
+        lastMoved = 0;
+
+        lastX = 0;
+        lastY = 0;
+        lastZ = 0;
     }
 
     public void setDestination(@Nullable PathTarget destination) {
@@ -191,7 +205,7 @@ public class ProximaEntity extends LivingEntity {
         }
 
         if (currentPath != null && current != null && moveAlongPath(time)) {
-            resetPath(time);
+            cancelPath();
         }
     }
 
@@ -284,15 +298,5 @@ public class ProximaEntity extends LivingEntity {
         }
 
         return true;
-    }
-
-    protected void resetPath(long time) {
-        current = null;
-        target = null;
-        lastPathfind = time;
-        lastMoved = time;
-        lastX = 0;
-        lastY = 0;
-        lastZ = 0;
     }
 }

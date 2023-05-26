@@ -1,6 +1,8 @@
 package org.phantazm.proxima.bindings.minestom.controller;
 
 import com.github.steanky.proxima.node.Node;
+import com.github.steanky.toolkit.collection.Wrapper;
+import com.github.steanky.vector.Vec3D;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.collision.CollisionUtils;
@@ -10,6 +12,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +33,8 @@ public class GroundController implements Controller {
 
     private double lastJumpVelocity = -1;
 
+    private int ticks;
+
     /**
      * Creates a new GroundController managing the provided entity, using the given step distance and walk speed.
      *
@@ -44,6 +49,8 @@ public class GroundController implements Controller {
     //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
     @Override
     public void advance(@NotNull Node current, @NotNull Node target, @Nullable Entity targetEntity) {
+        ticks++;
+
         Pos entityPos = entity.getPosition();
 
         double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
@@ -63,13 +70,64 @@ public class GroundController implements Controller {
         double vX = Math.cos(radians) * speed;
         double vZ = Math.sin(radians) * speed;
 
+        Instance instance = entity.getInstance();
+
+        if (instance != null) {
+            Wrapper<Integer> totalCount = Wrapper.of(0);
+            Wrapper<Integer> count = Wrapper.of(0);
+            Wrapper<Vec3D> sum = Wrapper.of(null);
+
+            instance.getEntityTracker().nearbyEntitiesUntil(entityPos, entity.getBoundingBox().width() / 2,
+                    EntityTracker.Target.LIVING_ENTITIES, candidate -> {
+                        if (candidate != entity) {
+                            totalCount.apply(i -> i + 1);
+
+                            if (candidate.getBoundingBox().intersectEntity(candidate.getPosition(), entity)) {
+                                count.apply(i -> i + 1);
+
+                                Pos pos = candidate.getPosition();
+                                if (sum.get() == null) {
+                                    sum.set(Vec3D.mutable(pos.x(), 0, pos.z()));
+                                }
+                                else {
+                                    sum.get().add(pos.x(), 0, pos.z());
+                                }
+                            }
+                        }
+
+                        return totalCount.get() >= 10;
+                    });
+
+            if (count.get() > 0) {
+                Vec3D average = sum.get();
+
+                //average is now the vector from the average entity position to the current entity
+                average.div(count.get()).sub(entityPos.x(), 0, entityPos.z());
+
+                double length = average.lengthSquared();
+                if (length < entity.getEntityType().width() * entity.getEntityType().width()) {
+                    double pZ = -vX;
+
+                    double scaleFactor = 1D / Math.max(0.3, length);
+
+                    if (ticks % 2 == 0) {
+                        entity.setVelocity(
+                                new Vec(vZ * scaleFactor * 20, entity.getVelocity().y(), pZ * scaleFactor * 20));
+                    }
+                    else {
+                        entity.setVelocity(
+                                new Vec(-vZ * scaleFactor * 20, entity.getVelocity().y(), -pZ * scaleFactor * 20));
+                    }
+                }
+            }
+        }
+
         //make sure speedX and speedZ cannot extend past the target
         double speedX = Math.copySign(Math.min(Math.abs(vX), Math.abs(dX)), dX);
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
 
         if (jumping) {
             if (entityPos.y() > exactTargetY + Vec.EPSILON) {
-                Instance instance = entity.getInstance();
                 Chunk chunk = entity.getChunk();
 
                 assert instance != null;
@@ -108,7 +166,6 @@ public class GroundController implements Controller {
                     jumping = true;
                 }
                 else if (nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
-                    Instance instance = entity.getInstance();
                     if (instance != null) {
                         PhysicsResult canStep =
                                 CollisionUtils.handlePhysics(instance, entity.getChunk(), entity.getBoundingBox(),

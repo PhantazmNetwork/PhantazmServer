@@ -55,6 +55,9 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             return List.of();
         }
 
+        List<? extends Spawnpoint> shuffledSpawnpoints = new ArrayList<>(spawnpoints);
+
+        Collections.shuffle(shuffledSpawnpoints, random);
         Collections.shuffle(spawnList, random);
 
         List<PhantazmMob> spawnedMobs = new ArrayList<>(spawnList.size());
@@ -65,9 +68,9 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             Key spawnType = spawnEntry.second();
 
             boolean spawned = false;
-            for (int j = 0; j < spawnpoints.size(); j++) {
-                Spawnpoint candidate = spawnpoints.get(candidateIndex++);
-                candidateIndex %= spawnpoints.size();
+            for (int j = 0; j < shuffledSpawnpoints.size(); j++) {
+                Spawnpoint candidate = shuffledSpawnpoints.get(candidateIndex++);
+                candidateIndex %= shuffledSpawnpoints.size();
 
                 if (candidate.canSpawn(model, spawnType, zombiesPlayers)) {
                     spawnedMobs.add(candidate.spawn(model));
