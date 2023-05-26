@@ -56,7 +56,7 @@ minestom-testing = { module = "org.phantazm.Minestom:testing", version.ref = "mi
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.7.0" }
 
-proxima-core = { module = "com.github.steanky:proxima-core", version = "0.3.4" }
+proxima-core = { module = "com.github.steanky:proxima-core", version = "0.3.5" }
 
 renderer = { module = "com.github.0x3C50:Renderer", version = "044558f035" }
 

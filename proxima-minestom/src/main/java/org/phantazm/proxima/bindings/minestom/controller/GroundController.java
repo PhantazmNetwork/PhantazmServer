@@ -73,15 +73,13 @@ public class GroundController implements Controller {
         Instance instance = entity.getInstance();
 
         if (instance != null) {
-            Wrapper<Integer> totalCount = Wrapper.of(0);
+            Wrapper<Integer> iterations = Wrapper.of(0);
             Wrapper<Integer> count = Wrapper.of(0);
             Wrapper<Vec3D> sum = Wrapper.of(null);
 
             instance.getEntityTracker().nearbyEntitiesUntil(entityPos, entity.getBoundingBox().width() / 2,
                     EntityTracker.Target.LIVING_ENTITIES, candidate -> {
                         if (candidate != entity) {
-                            totalCount.apply(i -> i + 1);
-
                             if (candidate.getBoundingBox().intersectEntity(candidate.getPosition(), entity)) {
                                 count.apply(i -> i + 1);
 
@@ -95,7 +93,7 @@ public class GroundController implements Controller {
                             }
                         }
 
-                        return totalCount.get() >= 10;
+                        return iterations.apply(i -> i + 1) >= 5;
                     });
 
             if (count.get() > 0) {
