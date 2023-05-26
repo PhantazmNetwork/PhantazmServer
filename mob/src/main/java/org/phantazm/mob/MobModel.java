@@ -28,20 +28,22 @@ public class MobModel implements Keyed {
     private final Pathfinding.Factory factory;
     private final ElementContext nodeContext;
     private final ConfigNode metaNode;
+    private final ConfigNode extraNode;
     private final Component displayName;
     private final Component hologramDisplayName;
     private final Map<EquipmentSlot, ItemStack> equipment;
     private final Object2FloatMap<String> attributes;
 
     public MobModel(@NotNull Key key, @NotNull EntityType entityType, @NotNull Pathfinding.Factory factory,
-            @NotNull ElementContext nodeContext, @NotNull ConfigNode metaNode, @Nullable Component displayName,
-            @Nullable Component hologramDisplayName, @NotNull Map<EquipmentSlot, ItemStack> equipment,
-            @NotNull Object2FloatMap<String> attributes) {
+            @NotNull ElementContext nodeContext, @NotNull ConfigNode metaNode, @NotNull ConfigNode extraNode,
+            @Nullable Component displayName, @Nullable Component hologramDisplayName,
+            @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
         this.key = Objects.requireNonNull(key, "key");
         this.entityType = Objects.requireNonNull(entityType, "entityType");
         this.factory = Objects.requireNonNull(factory, "factory");
         this.nodeContext = Objects.requireNonNull(nodeContext, "nodeContext");
         this.metaNode = metaNode.immutableCopy();
+        this.extraNode = extraNode.immutableCopy();
         this.displayName = displayName;
         this.hologramDisplayName = hologramDisplayName;
         this.equipment = Map.copyOf(Objects.requireNonNull(equipment, "equipment"));
@@ -77,6 +79,10 @@ public class MobModel implements Keyed {
 
     public @NotNull ConfigNode getMetaNode() {
         return metaNode;
+    }
+
+    public @NotNull ConfigNode getExtraNode() {
+        return extraNode;
     }
 
     /**

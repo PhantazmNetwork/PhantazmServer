@@ -62,7 +62,7 @@ public class DamageShotHandler implements ShotHandler {
             LivingEntity targetEntity = target.entity();
             PhantazmMob mob = mobStore.getMob(targetEntity.getUuid());
             boolean resistInstaKill =
-                    mob != null && mob.model().getMetaNode().getBooleanOrDefault(false, "resistInstaKill");
+                    mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, "resistInstaKill");
 
             if (hasInstakill && !resistInstaKill) {
                 EntityDamageByGunEvent event =

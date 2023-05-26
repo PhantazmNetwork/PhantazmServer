@@ -131,7 +131,6 @@ public final class Mob {
         //mob skills
         contextManager.registerElementClass(BleedEntitiesSkill.class);
         contextManager.registerElementClass(DamageEntitySkill.class);
-        contextManager.registerElementClass(DuplicateSelfSkill.class);
         contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
 

@@ -35,7 +35,7 @@ public class TimedSkill implements Skill {
 
         UUID uuid = UUID.randomUUID();
         this.lastActivationTag = data.fromSpawn ? Tag.Long("last_activation_" + uuid).defaultValue(-1L) : null;
-        this.useCountTag = data.repeat < 1 ? null : Tag.Integer("use_count_" + uuid);
+        this.useCountTag = data.repeat < 1 ? null : Tag.Integer("use_count_" + uuid).defaultValue(0);
         this.tickDelegate = delegate.needsTicking();
     }
 

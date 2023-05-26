@@ -82,7 +82,8 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Pathfinding.Factory factory = context.provide(HANDLER,
                 () -> new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F)));
 
-        ConfigNode metaNode = element.getNodeOrThrow("meta");
+        ConfigNode metaNode = element.getNodeOrDefault(ConfigNode::of, "meta");
+        ConfigNode extraNode = element.getNodeOrDefault(ConfigNode::of, "extra");
 
         Component displayName;
         ConfigElement displayNameElement = element.getElementOrDefault(() -> ConfigPrimitive.NULL, "displayName");
@@ -114,8 +115,8 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Object2FloatMap<String> attributes =
                 ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
 
-        return new MobModel(key, entityType, factory, contextManager.makeContext(node), metaNode, displayName,
-                hologramDisplayName, equipment, attributes);
+        return new MobModel(key, entityType, factory, contextManager.makeContext(node), metaNode, extraNode,
+                displayName, hologramDisplayName, equipment, attributes);
     }
 
     @Override
