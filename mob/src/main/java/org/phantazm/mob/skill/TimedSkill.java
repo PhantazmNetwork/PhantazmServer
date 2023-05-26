@@ -23,6 +23,7 @@ public class TimedSkill implements Skill {
 
     private final Tag<Long> lastActivationTag;
     private final Tag<Integer> useCountTag;
+    private final Tag<Boolean> startedTag;
 
     private final boolean tickDelegate;
 
@@ -36,16 +37,27 @@ public class TimedSkill implements Skill {
         UUID uuid = UUID.randomUUID();
         this.lastActivationTag = data.fromSpawn ? Tag.Long("last_activation_" + uuid).defaultValue(-1L) : null;
         this.useCountTag = data.repeat < 1 ? null : Tag.Integer("use_count_" + uuid).defaultValue(0);
+        this.startedTag = Tag.Boolean("started_" + uuid).defaultValue(!data.requiresActivation);
         this.tickDelegate = delegate.needsTicking();
     }
 
     @Override
     public void use(@NotNull PhantazmMob self) {
-        //no-op, this skill activates its delegate only on timer completion
+        if (data.requiresActivation) {
+            self.entity().setTag(startedTag, true);
+        }
     }
 
     @Override
     public void tick(long time, @NotNull PhantazmMob self) {
+        if (tickDelegate) {
+            delegate.tick(time, self);
+        }
+
+        if (!self.entity().getTag(startedTag)) {
+            return;
+        }
+
         int lastUseCount = -1;
         if (data.repeat == 0 ||
                 (data.repeat > 0 && (lastUseCount = self.entity().getTag(useCountTag)) >= data.repeat)) {
@@ -81,10 +93,6 @@ public class TimedSkill implements Skill {
                 self.entity().setTag(useCountTag, lastUseCount + 1);
             }
         }
-
-        if (tickDelegate) {
-            delegate.tick(time, self);
-        }
     }
 
     @Override
@@ -97,6 +105,8 @@ public class TimedSkill implements Skill {
             "will repeat infinitely") int repeat,
                        @Description("The duration of time between activations") long interval,
                        @Description("Whether to perform timing from entity spawn or globally") boolean fromSpawn,
+                       @Description(
+                               "Whether to start the timer immediately, or only on activation") boolean requiresActivation,
                        @Description("The skill to call when the timer activates") @ChildPath(
                                "delegate") String delegate) {
     }
