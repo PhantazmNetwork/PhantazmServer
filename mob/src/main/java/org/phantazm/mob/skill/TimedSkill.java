@@ -24,6 +24,8 @@ public class TimedSkill implements Skill {
     private final Tag<Long> lastActivationTag;
     private final Tag<Integer> useCountTag;
 
+    private final boolean tickDelegate;
+
     private long lastActivation = -1;
 
     @FactoryMethod
@@ -34,6 +36,7 @@ public class TimedSkill implements Skill {
         UUID uuid = UUID.randomUUID();
         this.lastActivationTag = data.fromSpawn ? Tag.Long("last_activation_" + uuid).defaultValue(-1L) : null;
         this.useCountTag = data.repeat < 1 ? null : Tag.Integer("use_count_" + uuid);
+        this.tickDelegate = delegate.needsTicking();
     }
 
     @Override
@@ -77,6 +80,10 @@ public class TimedSkill implements Skill {
             if (lastUseCount != -1) {
                 self.entity().setTag(useCountTag, lastUseCount + 1);
             }
+        }
+
+        if (tickDelegate) {
+            delegate.tick(time, self);
         }
     }
 
