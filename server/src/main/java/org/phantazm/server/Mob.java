@@ -135,7 +135,7 @@ public final class Mob {
         contextManager.registerElementClass(PlaySoundSkill.class);
 
         //mob meta skills
-        contextManager.registerElementClass(TimedSkill.class);
+        contextManager.registerElementClass(TimerSkill.class);
         contextManager.registerElementClass(RandomSkill.class);
         contextManager.registerElementClass(GroupSkill.class);
 

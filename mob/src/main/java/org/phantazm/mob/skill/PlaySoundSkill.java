@@ -3,6 +3,7 @@ package org.phantazm.mob.skill;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
@@ -17,7 +18,7 @@ import java.util.Objects;
 @Cache(false)
 public class PlaySoundSkill implements Skill {
     private final Data data;
-    private final TargetSelector<? extends Audience> selector;
+    private final TargetSelector<Object> selector;
 
     /**
      * Creates a {@link PlaySoundSkill}.
@@ -25,21 +26,38 @@ public class PlaySoundSkill implements Skill {
      * @param selector The {@link TargetSelector} used to select {@link Audience}s
      */
     @FactoryMethod
-    public PlaySoundSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<? extends Audience> selector) {
+    public PlaySoundSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<Object> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.selector = Objects.requireNonNull(selector, "selector");
     }
 
     @Override
     public void use(@NotNull PhantazmMob self) {
-        selector.selectTarget(self).ifPresent(audience -> {
-            if (data.followAudience()) {
-                audience.playSound(data.sound(), Sound.Emitter.self());
+        selector.selectTarget(self).ifPresent(object -> {
+            if (object instanceof Iterable<?> iterable) {
+                Iterable<Player> audienceIterable = (Iterable<Player>)iterable;
+                for (Player player : audienceIterable) {
+                    Instance instance = player.getInstance();
+                    if (instance != null) {
+                        if (data.followAudience) {
+                            instance.playSound(data.sound, player.getPosition());
+                        }
+                        else {
+                            instance.playSound(data.sound, self.entity().getPosition());
+                        }
+                    }
+                }
             }
             else {
-                Instance instance = self.entity().getInstance();
-                if (instance != null) {
-                    instance.playSound(data.sound, self.entity().getPosition());
+                Audience target = (Audience)object;
+                if (data.followAudience) {
+                    target.playSound(data.sound, Sound.Emitter.self());
+                }
+                else {
+                    Instance instance = self.entity().getInstance();
+                    if (instance != null) {
+                        instance.playSound(data.sound, Sound.Emitter.self());
+                    }
                 }
             }
         });

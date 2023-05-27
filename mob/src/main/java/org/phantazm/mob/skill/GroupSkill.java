@@ -20,7 +20,7 @@ public class GroupSkill implements Skill {
     private final boolean needsTicking;
 
     @FactoryMethod
-    public GroupSkill(@NotNull List<Skill> delegates) {
+    public GroupSkill(@NotNull @Child("delegates") List<Skill> delegates) {
         this.delegates = delegates;
 
         List<Skill> tickingDelegates = new ArrayList<>(delegates.size());

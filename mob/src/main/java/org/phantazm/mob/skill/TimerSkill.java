@@ -15,9 +15,9 @@ import java.util.UUID;
         infinitely. Time can either be measured on an "absolute" basis (in which case all entities using the skill
         share the same timer), or from the moment that the mob spawned.
         """)
-@Model("mob.skill.timed")
+@Model("mob.skill.timer")
 @Cache(false)
-public class TimedSkill implements Skill {
+public class TimerSkill implements Skill {
     private final Data data;
     private final Skill delegate;
 
@@ -30,13 +30,13 @@ public class TimedSkill implements Skill {
     private long lastActivation = -1;
 
     @FactoryMethod
-    public TimedSkill(@NotNull Data data, @NotNull @Child("delegate") Skill delegate) {
+    public TimerSkill(@NotNull Data data, @NotNull @Child("delegate") Skill delegate) {
         this.data = data;
         this.delegate = delegate;
 
         UUID uuid = UUID.randomUUID();
-        this.lastActivationTag = data.fromSpawn ? Tag.Long("last_activation_" + uuid).defaultValue(-1L) : null;
-        this.useCountTag = data.repeat < 1 ? null : Tag.Integer("use_count_" + uuid).defaultValue(0);
+        this.lastActivationTag = Tag.Long("last_activation_" + uuid).defaultValue(-1L);
+        this.useCountTag = Tag.Integer("use_count_" + uuid).defaultValue(0);
         this.startedTag = Tag.Boolean("started_" + uuid).defaultValue(!data.requiresActivation);
         this.tickDelegate = delegate.needsTicking();
     }
@@ -45,6 +45,14 @@ public class TimedSkill implements Skill {
     public void use(@NotNull PhantazmMob self) {
         if (data.requiresActivation) {
             self.entity().setTag(startedTag, true);
+        }
+
+        if (data.fromSpawn) {
+            self.entity().removeTag(lastActivationTag);
+            self.entity().removeTag(useCountTag);
+        }
+        else {
+            lastActivation = -1;
         }
     }
 
@@ -61,6 +69,10 @@ public class TimedSkill implements Skill {
         int lastUseCount = -1;
         if (data.repeat == 0 ||
                 (data.repeat > 0 && (lastUseCount = self.entity().getTag(useCountTag)) >= data.repeat)) {
+            if (data.requiresActivation) {
+                self.entity().setTag(startedTag, false);
+            }
+
             return;
         }
 
