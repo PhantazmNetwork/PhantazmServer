@@ -12,8 +12,9 @@ import java.util.UUID;
 
 @Description("""
         A timed meta skill that can activate another skill periodically after a delay, a set number of times, or
-        infinitely. Time can either be measured on an "absolute" basis (in which case all entities using the skill
-        share the same timer), or from the moment that the mob spawned.
+        infinitely. Time is measured from the moment that the mob spawned. The timer can be set to start as soon as the
+        mob spawns, or it can start when this skill is activated. If a timer is activated while it is already counting
+        down, it can be configured to restart.
         """)
 @Model("mob.skill.timer")
 @Cache(false)
@@ -26,8 +27,6 @@ public class TimerSkill implements Skill {
     private final Tag<Boolean> startedTag;
 
     private final boolean tickDelegate;
-
-    private long lastActivation = -1;
 
     @FactoryMethod
     public TimerSkill(@NotNull Data data, @NotNull @Child("delegate") Skill delegate) {
@@ -43,16 +42,14 @@ public class TimerSkill implements Skill {
 
     @Override
     public void use(@NotNull PhantazmMob self) {
+        Entity entity = self.entity();
         if (data.requiresActivation) {
-            self.entity().setTag(startedTag, true);
+            entity.setTag(startedTag, true);
         }
 
-        if (data.fromSpawn) {
-            self.entity().removeTag(lastActivationTag);
-            self.entity().removeTag(useCountTag);
-        }
-        else {
-            lastActivation = -1;
+        if (data.resetOnActivation || !entity.getTag(startedTag)) {
+            entity.removeTag(lastActivationTag);
+            entity.removeTag(useCountTag);
         }
     }
 
@@ -62,47 +59,35 @@ public class TimerSkill implements Skill {
             delegate.tick(time, self);
         }
 
-        if (!self.entity().getTag(startedTag)) {
+        Entity entity = self.entity();
+        if (!entity.getTag(startedTag)) {
             return;
         }
 
         int lastUseCount = -1;
-        if (data.repeat == 0 ||
-                (data.repeat > 0 && (lastUseCount = self.entity().getTag(useCountTag)) >= data.repeat)) {
-            if (data.requiresActivation) {
-                self.entity().setTag(startedTag, false);
-            }
-
+        if (data.repeat == 0 || (data.repeat > 0 && (lastUseCount = entity.getTag(useCountTag)) >= data.repeat)) {
+            entity.setTag(startedTag, false);
             return;
         }
 
-        if (data.fromSpawn) {
-            Entity entity = self.entity();
-            long lastActivationTime = entity.getTag(lastActivationTag);
-            if (lastActivationTime == -1) {
-                entity.setTag(lastActivationTag, lastActivationTime = time);
-            }
-
-            if ((time - lastActivationTime) / MinecraftServer.TICK_MS >= data.interval) {
-                entity.setTag(lastActivationTag, time);
-                delegate.use(self);
-                if (lastUseCount != -1) {
-                    self.entity().setTag(useCountTag, lastUseCount + 1);
-                }
-            }
-
-            return;
+        long lastActivationTime = entity.getTag(lastActivationTag);
+        if (lastActivationTime == -1) {
+            entity.setTag(lastActivationTag, lastActivationTime = time);
         }
 
-        if (lastActivation == -1) {
-            lastActivation = time;
-        }
-
-        if ((time - lastActivation) / MinecraftServer.TICK_MS >= data.interval) {
-            lastActivation = time;
+        if ((time - lastActivationTime) / MinecraftServer.TICK_MS >= data.interval) {
+            entity.setTag(lastActivationTag, time);
             delegate.use(self);
-            if (lastUseCount != -1) {
-                self.entity().setTag(useCountTag, lastUseCount + 1);
+            manageState(entity, lastUseCount);
+        }
+    }
+
+    private void manageState(Entity entity, int lastUseCount) {
+        if (lastUseCount != -1) {
+            entity.setTag(useCountTag, ++lastUseCount);
+
+            if (lastUseCount >= data.repeat) {
+                entity.setTag(startedTag, false);
             }
         }
     }
@@ -113,12 +98,17 @@ public class TimerSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@Description("The number of times this skill should repeat its action. A negative number " +
-            "will repeat infinitely") int repeat,
+    public record Data(@Description(
+            "The number of times this skill should repeat its action. A negative number will repeat " +
+                    "infinitely") int repeat,
+
                        @Description("The duration of time between activations") long interval,
-                       @Description("Whether to perform timing from entity spawn or globally") boolean fromSpawn,
+
+                       @Description("Whether the timer will start in an activated state") boolean requiresActivation,
+
                        @Description(
-                               "Whether to start the timer immediately, or only on activation") boolean requiresActivation,
+                               "Whether the timer should restart itself if it is activated while running") boolean resetOnActivation,
+
                        @Description("The skill to call when the timer activates") @ChildPath(
                                "delegate") String delegate) {
     }

@@ -159,7 +159,7 @@ public final class Mob {
         try {
             FileUtils.createDirectories(mobPath);
 
-            try (Stream<Path> paths = Files.list(mobPath)) {
+            try (Stream<Path> paths = Files.walk(mobPath)) {
                 String ending = codec.getPreferredExtension();
                 PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
                 paths.forEach(path -> {

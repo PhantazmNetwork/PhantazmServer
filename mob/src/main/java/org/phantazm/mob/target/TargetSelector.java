@@ -1,16 +1,10 @@
 package org.phantazm.mob.target;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.target.TargetSelectorInstance;
 import org.phantazm.mob.PhantazmMob;
 
 import java.util.Optional;
 
-/**
- * Creates {@link TargetSelectorInstance}s from an associated {@link PhantazmMob}
- *
- * @param <TTarget> The type of the target to select
- */
 public interface TargetSelector<TTarget> {
 
     /**
