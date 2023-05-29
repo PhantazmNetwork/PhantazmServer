@@ -1,16 +1,17 @@
 package org.phantazm.proxima.bindings.minestom.controller;
 
 import com.github.steanky.proxima.node.Node;
-import com.github.steanky.toolkit.collection.Wrapper;
 import com.github.steanky.vector.Vec3D;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
@@ -20,10 +21,12 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.MathUtils;
 
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class GroundController implements Controller {
     private final LivingEntity entity;
     private final double step;
+    private final TrackerPredicate trackerPredicate;
 
     private boolean jumping;
 
@@ -32,8 +35,6 @@ public class GroundController implements Controller {
     private double lastG = -1;
 
     private double lastJumpVelocity = -1;
-
-    private int ticks;
 
     /**
      * Creates a new GroundController managing the provided entity, using the given step distance and walk speed.
@@ -44,13 +45,78 @@ public class GroundController implements Controller {
     public GroundController(@NotNull LivingEntity entity, float step) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.step = step;
+        this.trackerPredicate = new TrackerPredicate();
     }
 
-    //this method's code is adapted from net.minestom.server.entity.pathfinding.Navigator#moveTowards(Point, double)
+    private class TrackerPredicate implements Predicate<LivingEntity> {
+        private Point entityPos;
+        private double vX;
+        private double vZ;
+
+        private int count;
+        private Vec3D sum;
+        private int iterations;
+
+        private TrackerPredicate() {
+        }
+
+        private void set(Point entityPos, double vX, double vZ) {
+            this.entityPos = entityPos;
+            this.vX = vX;
+            this.vZ = vZ;
+
+            this.count = 0;
+            this.sum = null;
+            this.iterations = 0;
+        }
+
+        @Override
+        public boolean test(LivingEntity candidate) {
+            if (candidate != entity && !(candidate instanceof Player) &&
+                    candidate.getBoundingBox().intersectEntity(candidate.getPosition(), entity)) {
+                count++;
+                iterations++;
+
+                Pos pos = candidate.getPosition();
+                if (sum == null) {
+                    sum = Vec3D.mutable(pos.x(), 0, pos.z());
+                }
+                else {
+                    sum.add(pos.x(), 0, pos.z());
+                }
+
+                double dx = pos.x() - entityPos.x();
+                double dz = pos.z() - entityPos.z();
+
+                double length = Math.sqrt(dx * dx + dz * dz);
+                double scaleFactor = 1D / Math.max(0.3, length);
+
+                Vec oldVelocity = entity.getVelocity();
+
+                if (length > 0.001) {
+                    candidate.setVelocity(new Vec(dx * scaleFactor, oldVelocity.y(), dz * scaleFactor));
+                }
+                else {
+                    double pZ = -vX;
+                    if (iterations % 2 == 0) {
+                        candidate.setVelocity(
+                                new Vec(vZ * scaleFactor * MinecraftServer.TICK_PER_SECOND, oldVelocity.y(),
+                                        pZ * scaleFactor * MinecraftServer.TICK_PER_SECOND));
+                    }
+                    else {
+                        candidate.setVelocity(
+                                new Vec(-vZ * scaleFactor * MinecraftServer.TICK_PER_SECOND, oldVelocity.y(),
+                                        -pZ * scaleFactor * MinecraftServer.TICK_PER_SECOND));
+                    }
+                }
+            }
+
+            return iterations >= 5;
+        }
+    }
+
     @Override
     public void advance(@NotNull Node current, @NotNull Node target, @Nullable Entity targetEntity) {
-        ticks++;
-
         Pos entityPos = entity.getPosition();
 
         double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
@@ -73,49 +139,21 @@ public class GroundController implements Controller {
         Instance instance = entity.getInstance();
 
         if (instance != null) {
-            Wrapper<Integer> iterations = Wrapper.of(0);
-            Wrapper<Integer> count = Wrapper.of(0);
-            Wrapper<Vec3D> sum = Wrapper.of(null);
+            this.trackerPredicate.set(entityPos, vX, vZ);
+            instance.getEntityTracker().nearbyEntitiesUntil(entityPos, entity.getBoundingBox().width(),
+                    EntityTracker.Target.LIVING_ENTITIES, trackerPredicate);
 
-            instance.getEntityTracker().nearbyEntitiesUntil(entityPos, entity.getBoundingBox().width() / 2,
-                    EntityTracker.Target.LIVING_ENTITIES, candidate -> {
-                        if (candidate != entity) {
-                            if (candidate.getBoundingBox().intersectEntity(candidate.getPosition(), entity)) {
-                                count.apply(i -> i + 1);
+            if (trackerPredicate.count > 0) {
+                Vec3D average = trackerPredicate.sum;
 
-                                Pos pos = candidate.getPosition();
-                                if (sum.get() == null) {
-                                    sum.set(Vec3D.mutable(pos.x(), 0, pos.z()));
-                                }
-                                else {
-                                    sum.get().add(pos.x(), 0, pos.z());
-                                }
-                            }
-                        }
-
-                        return iterations.apply(i -> i + 1) >= 5;
-                    });
-
-            if (count.get() > 0) {
-                Vec3D average = sum.get();
-
-                //average is now the vector from the average entity position to the current entity
-                average.div(count.get()).sub(entityPos.x(), 0, entityPos.z());
+                //average is now the vector from the average overlapping entity position to the current entity
+                average.div(trackerPredicate.count).sub(entityPos.x(), 0, entityPos.z());
 
                 double length = average.lengthSquared();
                 if (length < entity.getEntityType().width() * entity.getEntityType().width()) {
-                    double pZ = -vX;
-
                     double scaleFactor = 1D / Math.max(0.3, length);
-
-                    if (ticks % 2 == 0) {
-                        entity.setVelocity(
-                                new Vec(vZ * scaleFactor * 20, entity.getVelocity().y(), pZ * scaleFactor * 20));
-                    }
-                    else {
-                        entity.setVelocity(
-                                new Vec(-vZ * scaleFactor * 20, entity.getVelocity().y(), -pZ * scaleFactor * 20));
-                    }
+                    entity.setVelocity(new Vec(-average.x() * scaleFactor * MinecraftServer.TICK_PER_SECOND,
+                            entity.getVelocity().y(), -average.z() * scaleFactor * MinecraftServer.TICK_PER_SECOND));
                 }
             }
         }
@@ -170,6 +208,7 @@ public class GroundController implements Controller {
                                         entity.getPosition().add(0, nodeDiff + Vec.EPSILON, 0), deltaMove, null);
 
                         if (canStep.hasCollision()) {
+                            entity.refreshPosition(pos);
                             return;
                         }
                     }

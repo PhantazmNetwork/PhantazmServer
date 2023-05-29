@@ -85,8 +85,11 @@ public class MeleeAttackGoal implements GoalCreator {
                 float knockbackStrength = self.getAttributeValue(Attribute.ATTACK_KNOCKBACK);
 
                 double angle = pos.yaw() * (Math.PI / 180);
-                livingEntity.damage(DamageType.fromEntity(self), damageAmount, data.bypassArmor);
-                livingEntity.takeKnockback(0.4F * knockbackStrength, Math.sin(angle), -Math.cos(angle));
+                boolean damaged = livingEntity.damage(DamageType.fromEntity(self), damageAmount, data.bypassArmor);
+
+                if (damaged) {
+                    livingEntity.takeKnockback(0.4F * knockbackStrength, Math.sin(angle), -Math.cos(angle));
+                }
 
                 lastHitSelector.setLastHit(livingEntity);
 

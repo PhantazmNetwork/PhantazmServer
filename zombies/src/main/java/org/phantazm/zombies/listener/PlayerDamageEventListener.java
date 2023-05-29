@@ -12,6 +12,7 @@ import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -36,6 +37,11 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
         if (!zombiesPlayer.canTakeDamage()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (zombiesPlayer.getPlayer().map(player -> player.getTag(Tags.INVULNERABILITY_TAG)).orElse(false)) {
             event.setCancelled(true);
             return;
         }

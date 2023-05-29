@@ -7,4 +7,6 @@ public final class Tags {
     }
 
     public static final Tag<String> POWERUP_TAG = Tag.String("phantazm:powerup");
+
+    public static final Tag<Boolean> INVULNERABILITY_TAG = Tag.Boolean("phantazm:invulnerable").defaultValue(false);
 }

@@ -2,6 +2,7 @@ package org.phantazm.zombies.player;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -117,7 +118,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     }
 
     default boolean canBeTargeted() {
-        return isAlive();
+        return isAlive() && getPlayer().map(player -> {
+            GameMode mode = player.getGameMode();
+            return mode == GameMode.SURVIVAL || mode == GameMode.ADVENTURE;
+        }).orElse(false);
     }
 
     default boolean inStage(@NotNull Key stageKey) {

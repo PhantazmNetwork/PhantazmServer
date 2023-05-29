@@ -27,10 +27,7 @@ public class ZombiesPlayerValidator implements TargetValidator {
     public boolean valid(@NotNull Entity entity) {
         UUID uuid = entity.getUuid();
         ZombiesPlayer zombiesPlayer = mapObjects.get().module().playerMap().get(uuid);
-        if (zombiesPlayer != null) {
-            return zombiesPlayer.canBeTargeted();
-        }
 
-        return entity.isActive();
+        return zombiesPlayer != null && zombiesPlayer.canBeTargeted();
     }
 }
