@@ -36,6 +36,8 @@ public class GroundController implements Controller {
 
     private double lastJumpVelocity = -1;
 
+    private int ticks;
+
     /**
      * Creates a new GroundController managing the provided entity, using the given step distance and walk speed.
      *
@@ -137,8 +139,9 @@ public class GroundController implements Controller {
         double vZ = Math.sin(radians) * speed;
 
         Instance instance = entity.getInstance();
+        assert instance != null;
 
-        if (instance != null) {
+        if (ticks++ % 4 == 0) { //only do entity-entity collision every 4 ticks
             this.trackerPredicate.set(entityPos, vX, vZ);
             instance.getEntityTracker().nearbyEntitiesUntil(entityPos, entity.getBoundingBox().width(),
                     EntityTracker.Target.LIVING_ENTITIES, trackerPredicate);
@@ -149,11 +152,9 @@ public class GroundController implements Controller {
                 //average is now the vector from the average overlapping entity position to the current entity
                 average.div(trackerPredicate.count).sub(entityPos.x(), 0, entityPos.z());
 
-                double length = average.lengthSquared();
-                if (length < entity.getEntityType().width() * entity.getEntityType().width()) {
-                    double scaleFactor = 1D / Math.max(0.3, length);
-                    entity.setVelocity(new Vec(-average.x() * scaleFactor * MinecraftServer.TICK_PER_SECOND,
-                            entity.getVelocity().y(), -average.z() * scaleFactor * MinecraftServer.TICK_PER_SECOND));
+                if (average.lengthSquared() < entity.getEntityType().width() * entity.getEntityType().width()) {
+                    entity.setVelocity(new Vec(-average.x() * MinecraftServer.TICK_PER_SECOND, entity.getVelocity().y(),
+                            -average.z() * MinecraftServer.TICK_PER_SECOND));
                 }
             }
         }
@@ -165,8 +166,6 @@ public class GroundController implements Controller {
         if (jumping) {
             if (entityPos.y() > exactTargetY + Vec.EPSILON) {
                 Chunk chunk = entity.getChunk();
-
-                assert instance != null;
                 assert chunk != null;
 
                 PhysicsResult physics = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
@@ -202,15 +201,13 @@ public class GroundController implements Controller {
                     jumping = true;
                 }
                 else if (nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
-                    if (instance != null) {
-                        PhysicsResult canStep =
-                                CollisionUtils.handlePhysics(instance, entity.getChunk(), entity.getBoundingBox(),
-                                        entity.getPosition().add(0, nodeDiff + Vec.EPSILON, 0), deltaMove, null);
+                    PhysicsResult canStep =
+                            CollisionUtils.handlePhysics(instance, entity.getChunk(), entity.getBoundingBox(),
+                                    entity.getPosition().add(0, nodeDiff + Vec.EPSILON, 0), deltaMove, null);
 
-                        if (canStep.hasCollision()) {
-                            entity.refreshPosition(pos);
-                            return;
-                        }
+                    if (canStep.hasCollision()) {
+                        entity.refreshPosition(pos);
+                        return;
                     }
 
                     entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));

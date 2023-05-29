@@ -273,6 +273,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull BoundedTracker<Window> windowTracker, @NotNull PowerupHandler powerupHandler,
             @NotNull MobStore mobStore) {
         EventNode<Event> node = EventNode.all("phantazm_zombies_instance_{" + instance.getUniqueId() + "}");
+        MapSettingsInfo settings = mapInfo.settings();
 
         //entity events
         node.addListener(EntityDeathEvent.class,
@@ -282,7 +283,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         //player events
         node.addListener(EntityDamageEvent.class, new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects));
-        node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers));
+        node.addListener(PlayerHandAnimationEvent.class,
+                new PlayerLeftClickListener(instance, zombiesPlayers, mobStore, settings.punchDamage(),
+                        settings.punchRange()));
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers));

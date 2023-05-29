@@ -40,6 +40,8 @@ public record MapSettingsInfo(int mapDataVersion,
                               boolean perksLostOnDeath,
                               long baseReviveTicks,
                               int rollsPerChest,
+                              float punchDamage,
+                              float punchRange,
                               @NotNull List<Integer> milestoneRounds,
                               @NotNull Map<Key, List<Key>> defaultEquipment,
                               @NotNull Map<Key, EquipmentGroupInfo> equipmentGroups) {
@@ -104,6 +106,6 @@ public record MapSettingsInfo(int mapDataVersion,
         this(MAP_DATA_VERSION, id, List.of(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0),
                 Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false, false, 30, 5,
-                new ArrayList<>(0), new HashMap<>(0), new HashMap<>());
+                0, 4.5F, new ArrayList<>(0), new HashMap<>(0), new HashMap<>());
     }
 }

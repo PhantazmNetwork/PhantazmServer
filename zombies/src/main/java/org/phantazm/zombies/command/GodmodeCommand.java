@@ -4,10 +4,18 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
-import org.phantazm.zombies.Tags;
+import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene.ZombiesScene;
+
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
 
 public class GodmodeCommand extends Command {
-    public GodmodeCommand() {
+    public GodmodeCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
         super("godmode");
 
         setDefaultExecutor((sender, context) -> {
@@ -16,15 +24,19 @@ public class GodmodeCommand extends Command {
                 return;
             }
 
-            boolean godmode = player.getTag(Tags.INVULNERABILITY_TAG);
-            player.setTag(Tags.INVULNERABILITY_TAG, !godmode);
+            UUID uuid = player.getUuid();
+            sceneMapper.apply(uuid).ifPresent(scene -> {
+                ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
+                Flaggable flags = zombiesPlayer.module().flags();
 
-            if (godmode) {
-                sender.sendMessage("Disabled godmode.");
-            }
-            else {
-                sender.sendMessage("Enabled godmode.");
-            }
+                boolean res = flags.toggleFlag(Flags.GODMODE);
+                if (res) {
+                    player.sendMessage("Enabled godmode.");
+                }
+                else {
+                    player.sendMessage("Disabled godmode.");
+                }
+            });
         });
     }
 }

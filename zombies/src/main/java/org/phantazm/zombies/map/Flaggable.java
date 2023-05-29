@@ -10,12 +10,14 @@ public interface Flaggable {
 
     void clearFlag(@NotNull Key flag);
 
-    default void toggleFlag(@NotNull Key flag) {
+    default boolean toggleFlag(@NotNull Key flag) {
         if (hasFlag(flag)) {
             clearFlag(flag);
+            return false;
         }
         else {
             setFlag(flag);
+            return true;
         }
     }
 

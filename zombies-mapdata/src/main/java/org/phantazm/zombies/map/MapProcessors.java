@@ -292,6 +292,9 @@ public final class MapProcessors {
             boolean perksLostOnDeath = element.getBooleanOrThrow("perksLostOnDeath");
             long baseReviveTicks = element.getNumberOrThrow("baseReviveTicks").longValue();
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
+            float punchDamage = element.getNumberOrThrow("punchDamage").floatValue();
+            float punchRange = element.getNumberOrThrow("punchRange").floatValue();
+
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             Map<Key, List<Key>> defaultEquipment =
                     keyToListKeyMap.dataFromElement(element.getElementOrThrow("defaultEquipment"));
@@ -302,7 +305,7 @@ public final class MapProcessors {
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
                     corpseDeathTicks, healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks,
-                    rollsPerChest, milestoneRounds, defaultEquipment, equipmentGroups);
+                    rollsPerChest, punchDamage, punchRange, milestoneRounds, defaultEquipment, equipmentGroups);
         }
 
         @Override
