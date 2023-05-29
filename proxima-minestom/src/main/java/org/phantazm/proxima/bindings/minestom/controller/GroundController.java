@@ -194,29 +194,47 @@ public class GroundController implements Controller {
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
             if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
-                double nodeDiff = exactTargetY - (current.y + current.blockOffset);
-                if (nodeDiff > step) {
-                    entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(
-                            MinecraftServer.TICK_PER_SECOND));
-                    jumping = true;
-                }
-                else if (nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
-                    PhysicsResult canStep =
-                            CollisionUtils.handlePhysics(instance, entity.getChunk(), entity.getBoundingBox(),
-                                    entity.getPosition().add(0, nodeDiff + Vec.EPSILON, 0), deltaMove, null);
+                double currentTarget = current.y + current.blockOffset;
 
-                    if (canStep.hasCollision()) {
-                        entity.refreshPosition(pos);
-                        return;
-                    }
-
-                    entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
-                    return;
+                double nodeDiff = Double.NEGATIVE_INFINITY;
+                if (currentTarget - Vec.EPSILON > entityPos.y()) {
+                    nodeDiff = currentTarget - entityPos.y();
                 }
+
+                double targetDiff = exactTargetY - entityPos.y();
+                if (targetDiff > nodeDiff) {
+                    nodeDiff = targetDiff;
+                }
+
+                stepOrJump(nodeDiff, speedX, speedZ, instance, deltaMove, pos);
+                return;
             }
 
             entity.refreshPosition(pos);
         }
+    }
+
+    private void stepOrJump(double nodeDiff, double speedX, double speedZ, Instance instance, Vec deltaMove, Pos pos) {
+        if (nodeDiff > step) {
+            entity.setVelocity(
+                    new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
+            jumping = true;
+        }
+        else if (nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
+            stepUp(instance, deltaMove, nodeDiff, pos, speedX, speedZ);
+        }
+    }
+
+    private void stepUp(Instance instance, Vec deltaMove, double nodeDiff, Pos pos, double speedX, double speedZ) {
+        PhysicsResult canStep = CollisionUtils.handlePhysics(instance, entity.getChunk(), entity.getBoundingBox(),
+                entity.getPosition().add(0, nodeDiff + Vec.EPSILON, 0), deltaMove, null);
+
+        if (canStep.hasCollision()) {
+            entity.refreshPosition(pos);
+            return;
+        }
+
+        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
     }
 
     @Override
