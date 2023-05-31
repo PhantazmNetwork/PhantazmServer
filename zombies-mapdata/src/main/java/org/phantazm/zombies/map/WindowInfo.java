@@ -7,14 +7,12 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Defines a window.
  */
 public record WindowInfo(@NotNull Bounds3I frameRegion,
-                         @NotNull List<String> repairBlocks,
                          @NotNull Sound repairSound,
                          @NotNull Sound repairAllSound,
                          @NotNull Sound breakSound,
@@ -49,7 +47,6 @@ public record WindowInfo(@NotNull Bounds3I frameRegion,
      * Creates a new instance of this record.
      *
      * @param frameRegion    the region representing the repairable part of the window
-     * @param repairBlocks   the blocks used to repair the window when it is broken
      * @param repairSound    the sound played when a single block is repaired
      * @param repairAllSound the sound played when the window is fully repaired
      * @param breakSound     the sound played when one block is broken
@@ -57,7 +54,6 @@ public record WindowInfo(@NotNull Bounds3I frameRegion,
      */
     public WindowInfo {
         Objects.requireNonNull(frameRegion, "frameRegion");
-        Objects.requireNonNull(repairBlocks, "repairBlocks");
         Objects.requireNonNull(repairSound, "repairSound");
         Objects.requireNonNull(repairAllSound, "repairAllSound");
         Objects.requireNonNull(breakSound, "breakSound");
@@ -69,11 +65,10 @@ public record WindowInfo(@NotNull Bounds3I frameRegion,
     /**
      * Constructs a new instance of this record, using all the default sounds.
      *
-     * @param frameRegion  the region representing the repairable part of the window
-     * @param repairBlocks the blocks used to repair the window when it is broken
+     * @param frameRegion the region representing the repairable part of the window
      */
-    public WindowInfo(@NotNull Bounds3I frameRegion, @NotNull List<String> repairBlocks) {
-        this(frameRegion, repairBlocks, DEFAULT_REPAIR_SOUND, DEFAULT_REPAIR_ALL_SOUND, DEFAULT_BREAK_SOUND,
-                DEFAULT_BREAK_ALL_SOUND, new ArrayConfigList(0), new ArrayConfigList(0));
+    public WindowInfo(@NotNull Bounds3I frameRegion) {
+        this(frameRegion, DEFAULT_REPAIR_SOUND, DEFAULT_REPAIR_ALL_SOUND, DEFAULT_BREAK_SOUND, DEFAULT_BREAK_ALL_SOUND,
+                new ArrayConfigList(0), new ArrayConfigList(0));
     }
 }

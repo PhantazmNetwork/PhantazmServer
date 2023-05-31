@@ -6,17 +6,13 @@ import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.map.WindowInfo;
 import org.phantazm.zombies.mapeditor.client.EditorSession;
 import org.phantazm.zombies.mapeditor.client.TranslationKeys;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -59,13 +55,7 @@ public class NewObjectGui extends SimplePanelGui {
                 return;
             }
 
-            List<String> blockData = new ArrayList<>(selected.volume());
-            selected.forEach((x, y, z) -> {
-                blockData.add(NbtHelper.fromBlockState(playerEntity.world.getBlockState(
-                        new BlockPos.Mutable(x + origin.x(), y + origin.y(), z + origin.z()))).toString());
-            });
-
-            currentMap.windows().add(new WindowInfo(selected.shift(currentMap.settings().origin().mul(-1)), blockData));
+            currentMap.windows().add(new WindowInfo(selected.shift(origin.mul(-1))));
 
             session.refreshWindows();
             ScreenUtils.closeCurrentScreen();

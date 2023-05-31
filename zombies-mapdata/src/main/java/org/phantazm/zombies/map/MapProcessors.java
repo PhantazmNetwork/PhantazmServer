@@ -354,7 +354,6 @@ public final class MapProcessors {
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Bounds3I frameRegion =
                     VectorConfigProcessors.bounds3I().dataFromElement(element.getElementOrThrow("frameRegion"));
-            List<String> repairBlocks = stringList.dataFromElement(element.getElementOrThrow("repairBlocks"));
             Sound repairSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("repairSound"));
             Sound repairAllSound =
                     ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("repairAllSound"));
@@ -362,15 +361,14 @@ public final class MapProcessors {
             Sound breakAllSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("breakAllSound"));
             ConfigList repairActions = element.getListOrThrow("repairActions");
             ConfigList breakActions = element.getListOrThrow("breakActions");
-            return new WindowInfo(frameRegion, repairBlocks, repairSound, repairAllSound, breakSound, breakAllSound,
-                    repairActions, breakActions);
+            return new WindowInfo(frameRegion, repairSound, repairAllSound, breakSound, breakAllSound, repairActions,
+                    breakActions);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull WindowInfo windowData) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(8);
             node.put("frameRegion", VectorConfigProcessors.bounds3I().elementFromData(windowData.frameRegion()));
-            node.put("repairBlocks", stringList.elementFromData(windowData.repairBlocks()));
             node.put("repairSound", ConfigProcessors.sound().elementFromData(windowData.repairSound()));
             node.put("repairAllSound", ConfigProcessors.sound().elementFromData(windowData.repairAllSound()));
             node.put("breakSound", ConfigProcessors.sound().elementFromData(windowData.breakSound()));
