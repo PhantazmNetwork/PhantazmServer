@@ -163,10 +163,12 @@ public class GroundController implements Controller {
         double speedX = Math.copySign(Math.min(Math.abs(vX), Math.abs(dX)), dX);
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
 
+        Chunk chunk = entity.getChunk();
+        assert chunk != null;
+
         if (jumping) {
             if (entityPos.y() > exactTargetY + Vec.EPSILON) {
-                Chunk chunk = entity.getChunk();
-                assert chunk != null;
+
 
                 PhysicsResult physics = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
                         new Pos(entityPos.x(), exactTargetY + Vec.EPSILON, entityPos.z()), new Vec(speedX, 0, speedZ),
@@ -190,7 +192,10 @@ public class GroundController implements Controller {
 
         if (entity.isOnGround()) {
             Vec deltaMove = new Vec(speedX, 0, speedZ);
-            PhysicsResult physicsResult = CollisionUtils.handlePhysics(entity, deltaMove);
+            PhysicsResult physicsResult = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
+                    new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON, entityPos.z()), new Vec(speedX, 0, speedZ),
+                    null);
+
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
             if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
@@ -234,7 +239,7 @@ public class GroundController implements Controller {
             return;
         }
 
-        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
+        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff + Vec.EPSILON, speedZ));
     }
 
     @Override
