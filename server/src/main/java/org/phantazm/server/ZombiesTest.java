@@ -4,9 +4,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.attribute.Attribute;
-import net.minestom.server.attribute.AttributeModifier;
-import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
@@ -114,6 +111,11 @@ final class ZombiesTest {
                                     player.closeInventory();
                                 }).filter(GuiItem.ClickType.LEFT_CLICK)).build()).build();
                 event.getPlayer().openInventory(gui);
+            }
+            else if (event.getMessage().equals("test1")) {
+                event.getPlayer().playSound(
+                        Sound.sound(Key.key("minecraft:item.armor.equip_chain"), Sound.Source.HOSTILE, 10, 1.0F),
+                        Sound.Emitter.self());
             }
         }).build());
 

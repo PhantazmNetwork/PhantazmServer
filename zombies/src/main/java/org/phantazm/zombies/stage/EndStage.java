@@ -64,8 +64,7 @@ public class EndStage implements Stage {
 
     @Override
     public void start() {
-        instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F),
-                Sound.Emitter.self());
+        instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F));
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             PlayerStateSwitcher switcher = zombiesPlayer.module().getStateSwitcher();

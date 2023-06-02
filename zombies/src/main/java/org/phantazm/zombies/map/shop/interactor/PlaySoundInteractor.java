@@ -27,11 +27,10 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     @Override
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.broadcast) {
-            instance.playSound(data.sound, Sound.Emitter.self());
+            instance.playSound(data.sound);
         }
         else {
-            interaction.player().module().getPlayerView().getPlayer()
-                    .ifPresent(player -> player.playSound(data.sound, Sound.Emitter.self()));
+            interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> player.playSound(data.sound));
         }
     }
 
