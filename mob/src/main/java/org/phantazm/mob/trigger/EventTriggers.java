@@ -5,7 +5,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.entity.EntityDamageEvent;
-import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.event.entity.EntitySpawnEvent;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.EntityEvent;
@@ -32,10 +31,7 @@ public class EventTriggers {
      * A {@link EventTrigger} for when an {@link Entity} is spawned.
      */
     public static final EventTrigger<EntitySpawnEvent> SPAWN_TRIGGER = regularTrigger("spawn", EntitySpawnEvent.class);
-    /**
-     * A {@link EventTrigger} for when an {@link Entity} is killed.
-     */
-    public static final EventTrigger<EntityDeathEvent> DEATH_TRIGGER = regularTrigger("death", EntityDeathEvent.class);
+
     /**
      * A {@link EventTrigger} for when a {@link Player} interacts with an {@link Entity}.
      */
@@ -44,8 +40,7 @@ public class EventTriggers {
     /**
      * A {@link Collection} of default {@link EventTrigger}s.
      */
-    public static final Collection<EventTrigger<?>> TRIGGERS =
-            List.of(DAMAGE_TRIGGER, SPAWN_TRIGGER, DEATH_TRIGGER, INTERACT_TRIGGER);
+    public static final Collection<EventTrigger<?>> TRIGGERS = List.of(DAMAGE_TRIGGER, SPAWN_TRIGGER, INTERACT_TRIGGER);
 
     private EventTriggers() {
         throw new UnsupportedOperationException();

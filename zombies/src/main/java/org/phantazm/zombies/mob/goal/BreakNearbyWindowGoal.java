@@ -6,7 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
-import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
@@ -60,7 +60,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
             }
 
             long ticksSinceLastBreak = (time - lastBreakCheck) / MinecraftServer.TICK_MS;
-            Entity entity = self.entity();
+            LivingEntity entity = self.entity();
             if (ticksSinceLastBreak > data.breakTicks) {
                 BoundingBox boundingBox = entity.getBoundingBox();
 
@@ -75,6 +75,8 @@ public class BreakNearbyWindowGoal implements GoalCreator {
                     if (amount != 0) {
                         EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
                     }
+
+                    entity.swingMainHand();
                 });
 
                 lastBreakCheck = time;

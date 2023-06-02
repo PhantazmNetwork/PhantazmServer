@@ -5,6 +5,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.entity.EntityDeathEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.commons.Tickable;
 import org.phantazm.mob.skill.Skill;
 
@@ -15,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * A store of {@link PhantazmMob}s.
  */
 public class MobStore implements Tickable {
+    private static final Key DEATH_KEY = Key.key(Namespaces.PHANTAZM, "death");
+
     private final Map<UUID, PhantazmMob> uuidToMob = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Pair<PhantazmMob, Collection<Skill>>> tickableSkills =
             new ConcurrentHashMap<>();
@@ -44,7 +47,17 @@ public class MobStore implements Tickable {
      */
     public void onMobDeath(@NotNull EntityDeathEvent event) {
         UUID uuid = event.getEntity().getUuid();
-        uuidToMob.remove(uuid);
+
+        PhantazmMob mob = uuidToMob.remove(uuid);
+        if (mob != null) {
+            Collection<Skill> deathSkills = mob.triggers().get(DEATH_KEY);
+            if (deathSkills != null) {
+                for (Skill skill : deathSkills) {
+                    skill.use(mob);
+                }
+            }
+        }
+
         tickableSkills.remove(uuid);
     }
 
