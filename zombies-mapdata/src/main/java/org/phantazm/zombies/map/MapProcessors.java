@@ -342,6 +342,8 @@ public final class MapProcessors {
             node.putBoolean("perksLostOnDeath", mapConfig.perksLostOnDeath());
             node.putNumber("baseReviveTicks", mapConfig.baseReviveTicks());
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());
+            node.putNumber("punchDamage", mapConfig.punchDamage());
+            node.putNumber("punchRange", mapConfig.punchRange());
             node.put("milestoneRounds", integerList.elementFromData(mapConfig.milestoneRounds()));
             node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
             node.put("equipmentGroups", keyToEquipmentGroup.elementFromData(mapConfig.equipmentGroups()));

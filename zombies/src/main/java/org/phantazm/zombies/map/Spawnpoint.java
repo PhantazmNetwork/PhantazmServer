@@ -92,18 +92,12 @@ public class Spawnpoint {
     }
 
     /**
-     * Determines if this spawnpoint may spawn a {@link MobModel}.
+     * Check if this spawnpoint is capable of spawning any mobs.
      *
-     * @param model          the model to spawn
-     * @param spawnType      the spawntype, which must match the spawnrule's spawn type
-     * @param zombiesPlayers the players in the map
-     * @return true if the mob can spawn, false otherwise
+     * @param zombiesPlayers the zombies players in the game
+     * @return true if this spawnpoint can spawn at least one kind of mob; false otherwise
      */
-    public boolean canSpawn(@NotNull MobModel model, @NotNull Key spawnType,
-            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
-        Objects.requireNonNull(model, "model");
-        Objects.requireNonNull(spawnType, "spawnType");
-
+    public boolean canSpawnAny(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         if (linkedWindow != null) {
             Optional<Room> linkedRoom = linkedWindow.getLinkedRoom();
             if (linkedRoom.isEmpty()) {
@@ -124,13 +118,8 @@ public class Spawnpoint {
 
         Key spawnruleKey = spawnInfo.spawnRule();
         SpawnruleInfo spawnrule = spawnrules.apply(spawnruleKey);
-
         if (spawnrule == null) {
             LOGGER.warn("Unrecognized spawnrule " + spawnruleKey + " at " + spawnPoint + "; mob not allowed to spawn");
-            return false;
-        }
-
-        if (!spawnrule.spawnType().equals(spawnType)) {
             return false;
         }
 
@@ -151,7 +140,29 @@ public class Spawnpoint {
             }
         }
 
-        return inRange && (spawnrule.isBlacklist() != spawnrule.spawns().contains(model.key()));
+        return inRange;
+    }
+
+    /**
+     * Determines if this spawnpoint may spawn a {@link MobModel}.
+     *
+     * @param model          the model to spawn
+     * @param spawnType      the spawntype, which must match the spawnrule's spawn type
+     * @param zombiesPlayers the players in the map
+     * @return true if the mob can spawn, false otherwise
+     */
+    public boolean canSpawn(@NotNull MobModel model, @NotNull Key spawnType,
+            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+        if (!canSpawnAny(zombiesPlayers)) {
+            return false;
+        }
+
+        SpawnruleInfo spawnrule = spawnrules.apply(spawnInfo.spawnRule());
+        if (!spawnrule.spawnType().equals(spawnType)) {
+            return false;
+        }
+
+        return spawnrule.isBlacklist() != spawnrule.spawns().contains(model.key());
     }
 
     /**
@@ -164,5 +175,9 @@ public class Spawnpoint {
     public @NotNull PhantazmMob spawn(@NotNull MobModel model) {
         Objects.requireNonNull(model, "model");
         return mobSpawner.spawn(instance, spawnPoint, model);
+    }
+
+    public @NotNull SpawnpointInfo getSpawnInfo() {
+        return spawnInfo;
     }
 }

@@ -2,11 +2,14 @@ package org.phantazm.zombies.spawn;
 
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.VecUtils;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.map.SpawnInfo;
 import org.phantazm.zombies.map.Spawnpoint;
+import org.phantazm.zombies.map.SpawnpointInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,9 +58,40 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             return List.of();
         }
 
-        List<? extends Spawnpoint> shuffledSpawnpoints = new ArrayList<>(spawnpoints);
+        List<Spawnpoint> sortedSpawnpoints = new ArrayList<>(spawnpoints.size());
+        for (Spawnpoint spawnpoint : spawnpoints) {
+            if (spawnpoint.canSpawnAny(zombiesPlayers)) {
+                sortedSpawnpoints.add(spawnpoint);
+            }
+        }
 
-        Collections.shuffle(shuffledSpawnpoints, random);
+        sortedSpawnpoints.sort((first, second) -> {
+            SpawnpointInfo firstInfo = first.getSpawnInfo();
+            SpawnpointInfo secondInfo = second.getSpawnInfo();
+
+            double firstClosest = Double.POSITIVE_INFINITY;
+            double secondClosest = Double.POSITIVE_INFINITY;
+            for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+                Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                if (playerOptional.isPresent()) {
+                    Player player = playerOptional.get();
+
+                    double firstDistance = player.getDistance(VecUtils.toPoint(firstInfo.position()));
+                    double secondDistance = player.getDistance(VecUtils.toPoint(secondInfo.position()));
+
+                    if (firstDistance < firstClosest) {
+                        firstClosest = firstDistance;
+                    }
+
+                    if (secondDistance < secondClosest) {
+                        secondClosest = secondDistance;
+                    }
+                }
+            }
+
+            return Double.compare(firstClosest, secondClosest);
+        });
+
         Collections.shuffle(spawnList, random);
 
         List<PhantazmMob> spawnedMobs = new ArrayList<>(spawnList.size());
@@ -68,9 +102,9 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             Key spawnType = spawnEntry.second();
 
             boolean spawned = false;
-            for (int j = 0; j < shuffledSpawnpoints.size(); j++) {
-                Spawnpoint candidate = shuffledSpawnpoints.get(candidateIndex++);
-                candidateIndex %= shuffledSpawnpoints.size();
+            for (int j = 0; j < sortedSpawnpoints.size(); j++) {
+                Spawnpoint candidate = sortedSpawnpoints.get(candidateIndex++);
+                candidateIndex %= sortedSpawnpoints.size();
 
                 if (candidate.canSpawn(model, spawnType, zombiesPlayers)) {
                     spawnedMobs.add(candidate.spawn(model));
