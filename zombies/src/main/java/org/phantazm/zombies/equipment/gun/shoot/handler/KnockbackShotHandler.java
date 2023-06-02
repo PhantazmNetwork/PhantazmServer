@@ -41,13 +41,13 @@ public class KnockbackShotHandler implements ShotHandler {
         Pos attackerPos = attacker.getPosition();
         for (GunHit target : shot.regularTargets()) {
             Entity entity = target.entity();
-            entity.takeHorizontalKnockback(data.knockback, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
+            entity.takeKnockback(data.knockback, true, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
                     -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
         }
 
         for (GunHit target : shot.headshotTargets()) {
             Entity entity = target.entity();
-            entity.takeHorizontalKnockback(data.headshotKnockback, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
+            entity.takeKnockback(data.headshotKnockback, true, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
                     -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
         }
     }
