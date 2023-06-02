@@ -71,6 +71,7 @@ public class HologramVisual implements Supplier<PowerupVisual> {
                 long elapsed = (time - start) / MinecraftServer.TICK_MS;
                 if (elapsed > data.timeUntilBlink && !data.blinkFrames.isEmpty()) {
                     Frame currentFrame = data.blinkFrames.get(0);
+                    hologram.clear();
                     hologram.addAll(currentFrame.components());
 
                     this.blinking = true;
