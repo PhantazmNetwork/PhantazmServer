@@ -89,7 +89,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 }
             }
 
-            return Double.compare(firstClosest, secondClosest);
+            return -Double.compare(firstClosest, secondClosest);
         });
 
         Collections.shuffle(spawnList, random);
