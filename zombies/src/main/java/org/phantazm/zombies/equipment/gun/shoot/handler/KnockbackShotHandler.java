@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -39,16 +38,17 @@ public class KnockbackShotHandler implements ShotHandler {
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
             @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
-        Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
+        Pos attackerPos = attacker.getPosition();
         for (GunHit target : shot.regularTargets()) {
             Entity entity = target.entity();
-            Vec knockbackVec = target.location().sub(start).normalize().mul(data.knockback());
-            entity.setVelocity(entity.getVelocity().add(knockbackVec));
+            entity.takeHorizontalKnockback(data.knockback, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
+                    -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
         }
+
         for (GunHit target : shot.headshotTargets()) {
             Entity entity = target.entity();
-            Vec knockbackVec = target.location().sub(start).normalize().mul(data.headshotKnockback());
-            entity.setVelocity(entity.getVelocity().add(knockbackVec));
+            entity.takeHorizontalKnockback(data.headshotKnockback, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
+                    -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
         }
     }
 
@@ -64,7 +64,7 @@ public class KnockbackShotHandler implements ShotHandler {
      * @param headshotKnockback The knockback to apply to headshots
      */
     @DataObject
-    public record Data(double knockback, double headshotKnockback) {
+    public record Data(float knockback, float headshotKnockback) {
 
     }
 
