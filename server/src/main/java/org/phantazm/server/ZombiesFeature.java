@@ -238,7 +238,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlaySoundAction.class);
         contextManager.registerElementClass(ModifyWindowsAction.class);
         contextManager.registerElementClass(SendTitleAction.class);
-        contextManager.registerElementClass(PowerupSendMessageAction.class);
+        contextManager.registerElementClass(SendMessageAction.class);
+        contextManager.registerElementClass(AttributeModifierAction.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

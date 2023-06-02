@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
@@ -126,6 +127,16 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     default boolean inStage(@NotNull Key stageKey) {
         return getScene().getCurrentStage().key().equals(stageKey);
+    }
+
+    default @NotNull String getUsername() {
+        PlayerView view = module().getPlayerView();
+        try {
+            return view.getUsername().get();
+        }
+        catch (InterruptedException | ExecutionException e) {
+            return view.getUUID().toString();
+        }
     }
 
     interface Source {
