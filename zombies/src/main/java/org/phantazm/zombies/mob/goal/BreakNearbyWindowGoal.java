@@ -74,9 +74,8 @@ public class BreakNearbyWindowGoal implements GoalCreator {
                     int amount = window.updateIndex(targetIndex);
                     if (amount != 0) {
                         EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
+                        entity.swingMainHand();
                     }
-
-                    entity.swingMainHand();
                 });
 
                 lastBreakCheck = time;
