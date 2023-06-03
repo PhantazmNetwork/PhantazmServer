@@ -36,7 +36,7 @@ public class StaticVisualCreator implements PerkVisualCreator {
 
         @Override
         public @NotNull ItemStack computeItemStack() {
-            return data.item;
+            return data.stack;
         }
 
         @Override
@@ -61,6 +61,6 @@ public class StaticVisualCreator implements PerkVisualCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @Description("The item this visual will show") ItemStack item) {
+    public record Data(@NotNull @Description("The item this visual will show") ItemStack stack) {
     }
 }
