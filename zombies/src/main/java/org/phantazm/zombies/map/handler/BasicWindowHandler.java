@@ -62,13 +62,10 @@ public class BasicWindowHandler implements WindowHandler {
 
     @Override
     public void handleCrouchStateChange(@NotNull ZombiesPlayer zombiesPlayer, boolean crouching) {
-        if (!zombiesPlayer.inStage(StageKeys.IN_GAME)) {
-            return;
-        }
-
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
 
-        if (!crouching || playerOptional.isEmpty() || !zombiesPlayer.canRepairWindow()) {
+        if (!crouching || playerOptional.isEmpty() || !zombiesPlayer.canRepairWindow() ||
+                !zombiesPlayer.inStage(StageKeys.IN_GAME)) {
             repairOperationMap.remove(zombiesPlayer.getUUID());
             return;
         }
