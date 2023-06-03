@@ -204,7 +204,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
             playerView.getPlayer().ifPresent(player -> {
                 player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.healTicks());
-                player.getAttribute(Attributes.REVIVE_SPEED).setBaseValue(settings.baseReviveTicks());
+                player.getAttribute(Attributes.REVIVE_TICKS).setBaseValue(settings.baseReviveTicks());
             });
 
             return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings, instance, playerView,

@@ -30,10 +30,10 @@ import java.util.UUID;
         There are also several custom attributes defined by Phantazm Zombies:
                 
         * `phantazm.fire_rate`
-        * `phantazm.revive_speed`
+        * `phantazm.revive_ticks`
         * `phantazm.heal_rate`
                 
-        `phantazm.fire_rate` is itself a multiplier. Its base value is 1. `phantazm.revive_speed` is the number of ticks
+        `phantazm.fire_rate` is itself a multiplier. Its base value is 1. `phantazm.revive_ticks` is the number of ticks
         it takes to revive a player. It defaults to 30. `phantazm.heal_rate` is the number of ticks between every
         regeneration of a single hitpoint. It defaults to 20.
                 

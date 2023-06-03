@@ -19,7 +19,7 @@ public final class Attributes {
     /**
      * Revive speed, in ticks.
      */
-    public static final Attribute REVIVE_SPEED = new Attribute("phantazm.revive_speed", 30F, 2048F);
+    public static final Attribute REVIVE_TICKS = new Attribute("phantazm.revive_ticks", 30F, 2048F);
 
     /**
      * Number of ticks between each heal.
@@ -34,7 +34,7 @@ public final class Attributes {
     public static void registerAll() {
         HITBOX_EXPANSION.register();
         FIRE_RATE_MULTIPLIER.register();
-        REVIVE_SPEED.register();
+        REVIVE_TICKS.register();
         HEAL_TICKS.register();
         NIL.register();
     }
