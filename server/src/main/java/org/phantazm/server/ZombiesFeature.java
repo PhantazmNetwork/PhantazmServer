@@ -117,7 +117,7 @@ public final class ZombiesFeature {
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
-            ZombiesSceneProvider provider = new ZombiesSceneProvider(1, instanceSpaceFunction, entry.getValue(),
+            ZombiesSceneProvider provider = new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(),
                     MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
                     ZombiesFeature.mobSpawnerSource(), Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
                 DimensionType dimensionType = instance.getDimensionType();

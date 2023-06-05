@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Model("mob.goal.charge_at_entity")
-@Cache
+@Cache(false)
 public class ChargeAtEntityGoal implements GoalCreator {
     private final Data data;
     private final TargetSelector<? extends Entity> selector;

@@ -10,15 +10,16 @@ import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A {@link ProximaGoal} that makes a {@link PhantazmMob} follow {@link Entity}s
  */
 @Model("mob.goal.follow_entity")
-@Cache
+@Cache(false)
 public class FollowEntityGoal implements GoalCreator {
     private final Data data;
-    private final TargetSelector<? extends Entity> selector;
+    private final Supplier<TargetSelector<? extends Entity>> selector;
 
     /**
      * Creates a {@link FollowEntityGoal}.
@@ -26,14 +27,15 @@ public class FollowEntityGoal implements GoalCreator {
      * @param selector The {@link TargetSelector} used to select {@link Entity}s
      */
     @FactoryMethod
-    public FollowEntityGoal(@NotNull Data data, @NotNull @Child("selector") TargetSelector<? extends Entity> selector) {
+    public FollowEntityGoal(@NotNull Data data,
+            @NotNull @Child("selector") Supplier<TargetSelector<? extends Entity>> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.selector = Objects.requireNonNull(selector, "selector");
     }
 
     @Override
     public @NotNull ProximaGoal create(@NotNull PhantazmMob mob) {
-        return new Goal(data, selector, mob);
+        return new Goal(data, selector.get(), mob);
     }
 
     private static class Goal implements ProximaGoal {

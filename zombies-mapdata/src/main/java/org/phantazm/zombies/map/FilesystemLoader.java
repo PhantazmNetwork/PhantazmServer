@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.FileUtils;
 
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -23,8 +24,8 @@ public abstract class FilesystemLoader<T extends Keyed> implements Loader<T> {
     public @NotNull @Unmodifiable List<String> loadableData() throws IOException {
         FileUtils.createDirectories(root);
 
-        try (Stream<Path> fileStream = Files.list(root)) {
-            return fileStream.map(path -> path.getFileName().toString()).toList();
+        try (Stream<Path> fileStream = Files.walk(root, FileVisitOption.FOLLOW_LINKS).filter(Files::isRegularFile)) {
+            return fileStream.map(path -> root.relativize(path).toString()).toList();
         }
     }
 }

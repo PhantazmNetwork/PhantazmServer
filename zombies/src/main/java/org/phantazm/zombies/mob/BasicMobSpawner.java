@@ -45,7 +45,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -67,8 +66,6 @@ public class BasicMobSpawner implements MobSpawner {
     private final MobStore mobStore;
     private final DependencyProvider mobDependencyProvider;
 
-    private final Map<Key, Cache> cache;
-
     private record Cache(Map<Key, Collection<Skill>> triggers, Collection<GoalApplier> goalAppliers) {
     }
 
@@ -86,16 +83,13 @@ public class BasicMobSpawner implements MobSpawner {
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
 
         this.mobDependencyProvider = new ModuleDependencyProvider(keyParser, new Module(this, mobStore, mapObjects));
-        this.cache = new ConcurrentHashMap<>();
     }
 
     private Cache cacheFor(MobModel model) {
-        return cache.computeIfAbsent(model.key(), ignored -> {
-            ElementContext context = model.getContext();
-            Map<Key, Collection<Skill>> triggers = createTriggers(context);
-            Collection<GoalApplier> goalAppliers = createGoalAppliers(context);
-            return new Cache(triggers, goalAppliers);
-        });
+        ElementContext context = model.getContext();
+        Map<Key, Collection<Skill>> triggers = createTriggers(context);
+        Collection<GoalApplier> goalAppliers = createGoalAppliers(context);
+        return new Cache(triggers, goalAppliers);
     }
 
     @Override

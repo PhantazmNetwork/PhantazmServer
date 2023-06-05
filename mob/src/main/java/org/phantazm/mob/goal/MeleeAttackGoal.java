@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Model("mob.goal.melee_attack")
-@Cache
+@Cache(false)
 public class MeleeAttackGoal implements GoalCreator {
     private final Data data;
     private final Collection<Skill> skills;

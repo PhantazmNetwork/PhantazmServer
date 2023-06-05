@@ -9,7 +9,7 @@ public final class Attributes {
     /**
      * Expansion applied to the hitbox of entities. Used to make things easier (or harder) to hit with bullets.
      */
-    public static final Attribute HITBOX_EXPANSION = new Attribute("phantazm.hitbox_expand", 0.15F, 2048F);
+    public static final Attribute HITBOX_EXPANSION = new Attribute("phantazm.hitbox_expand", 0.25F, 2048F);
 
     /**
      * Multiplier applied to the fire rate when shooting guns.

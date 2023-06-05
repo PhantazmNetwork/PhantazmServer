@@ -13,7 +13,7 @@ import java.util.Objects;
  * A {@link ProximaGoal} that periodically uses a {@link Skill}.
  */
 @Model("mob.goal.use_skill")
-@Cache
+@Cache(false)
 public class UseSkillGoal implements GoalCreator {
     private final Data data;
     private final Skill skill;
