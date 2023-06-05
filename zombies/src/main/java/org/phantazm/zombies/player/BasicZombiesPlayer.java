@@ -2,7 +2,6 @@ package org.phantazm.zombies.player;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.inventory.InventoryObject;
@@ -53,12 +52,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         Optional<Player> playerOptional = getPlayer();
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-            module.getMeta().setCrouching(player.getPose() == Entity.Pose.SNEAKING);
-
             inventoryTick(player, time);
-        }
-        else {
-            module.getMeta().setCrouching(false);
         }
 
         module.getStateSwitcher().tick(time);

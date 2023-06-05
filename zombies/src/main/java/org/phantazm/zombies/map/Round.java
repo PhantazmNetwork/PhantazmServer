@@ -27,7 +27,6 @@ public class Round implements Tickable {
 
     private boolean isActive;
     private long waveStartTime;
-    private long time;
     private Wave currentWave;
     private int waveIndex;
     private int totalMobCount;
@@ -85,7 +84,7 @@ public class Round implements Tickable {
         return isActive;
     }
 
-    public void startRound() {
+    public void startRound(long time) {
         if (isActive) {
             return;
         }
@@ -153,8 +152,6 @@ public class Round implements Tickable {
 
     @Override
     public void tick(long time) {
-        this.time = time;
-
         if (isActive) {
             if (totalMobCount == 0) {
                 endRound();

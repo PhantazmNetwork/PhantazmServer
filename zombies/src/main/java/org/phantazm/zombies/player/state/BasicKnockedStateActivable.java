@@ -112,7 +112,7 @@ public class BasicKnockedStateActivable implements Activable {
     private void sendDyingStatus() {
         playerView.getPlayer().ifPresent(player -> {
             player.sendActionBar(Component.textOfChildren(Component.text("You are dying - "),
-                    tickFormatter.format(Math.max(reviveHandler.getTicksUntilRevive(), 0))));
+                    tickFormatter.format(Math.max(reviveHandler.getTicksUntilDeath(), 0))));
         });
     }
 

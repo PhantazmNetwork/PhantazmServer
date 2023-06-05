@@ -12,8 +12,6 @@ public class ZombiesPlayerMeta {
 
     private boolean inGame = false;
 
-    private boolean isCrouching = false;
-
     private boolean canRevive = false;
 
     private boolean isReviving = false;
@@ -36,14 +34,6 @@ public class ZombiesPlayerMeta {
 
     public void setInGame(boolean inGame) {
         this.inGame = inGame;
-    }
-
-    public boolean isCrouching() {
-        return isCrouching;
-    }
-
-    public void setCrouching(boolean crouching) {
-        isCrouching = crouching;
     }
 
     public boolean isCanRevive() {

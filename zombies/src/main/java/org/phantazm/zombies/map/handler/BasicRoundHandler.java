@@ -31,7 +31,7 @@ public class BasicRoundHandler implements RoundHandler {
             if (!currentRound.isActive()) {
                 if (++roundIndex < rounds.size()) {
                     currentRound = rounds.get(roundIndex);
-                    currentRound.startRound();
+                    currentRound.startRound(time);
                 }
                 else {
                     hasEnded = true;
@@ -59,12 +59,12 @@ public class BasicRoundHandler implements RoundHandler {
         Round newCurrent = rounds.get(roundIndex);
         if (newCurrent == currentRound) {
             currentRound.endRound();
-            currentRound.startRound();
+            currentRound.startRound(System.currentTimeMillis());
             return;
         }
 
         currentRound = newCurrent;
-        currentRound.startRound();
+        currentRound.startRound(System.currentTimeMillis());
     }
 
     @Override

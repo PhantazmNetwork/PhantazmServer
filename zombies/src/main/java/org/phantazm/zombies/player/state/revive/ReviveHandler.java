@@ -1,5 +1,6 @@
 package org.phantazm.zombies.player.state.revive;
 
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Activable;
@@ -57,6 +58,11 @@ public class ReviveHandler implements Activable {
             if (cachedDeathState == null) {
                 cachedDeathState = deathStateSupplier.get();
             }
+
+            if (reviver != null) {
+                reviver.module().getMeta().setReviving(false);
+            }
+
             reviver = null;
             return;
         }
@@ -64,6 +70,11 @@ public class ReviveHandler implements Activable {
             if (cachedDefaultState == null) {
                 cachedDefaultState = defaultStateSupplier.get();
             }
+
+            if (reviver != null) {
+                reviver.module().getMeta().setReviving(false);
+            }
+
             reviver = null;
             return;
         }
@@ -79,7 +90,8 @@ public class ReviveHandler implements Activable {
                 --ticksUntilDeath;
             }
         }
-        else if (!reviver.module().getMeta().isCanRevive() || !reviver.module().getMeta().isCrouching()) {
+        else if (!reviver.module().getMeta().isCanRevive() ||
+                !reviver.getPlayer().map(player -> player.getPose() == Entity.Pose.SNEAKING).orElse(true)) {
             reviver.module().getMeta().setReviving(false);
             reviver = null;
             ticksUntilRevive = -1;
@@ -91,6 +103,10 @@ public class ReviveHandler implements Activable {
 
     @Override
     public void end() {
+        if (reviver != null) {
+            reviver.module().getMeta().setReviving(false);
+        }
+
         reviver = null;
     }
 
