@@ -10,41 +10,46 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.play_sound")
 public class PlaySoundAction implements Supplier<PowerupAction> {
     private final Data data;
     private final Instance instance;
+    private final Random random;
 
     @FactoryMethod
-    public PlaySoundAction(@NotNull Data data, @NotNull Instance instance) {
+    public PlaySoundAction(@NotNull Data data, @NotNull Instance instance, @NotNull Random random) {
         this.data = Objects.requireNonNull(data, "data");
         this.instance = Objects.requireNonNull(instance, "instance");
+        this.random = Objects.requireNonNull(random, "random");
     }
 
     @Override
     public PowerupAction get() {
-        return new Action(data, instance);
+        return new Action(data, instance, random);
     }
 
     @DataObject
-    public record Data(Sound sound) {
+    public record Data(@NotNull Sound sound) {
 
     }
 
     private static class Action extends InstantAction {
         private final Data data;
         private final Instance instance;
+        private final Random random;
 
-        private Action(Data data, Instance instance) {
+        private Action(Data data, Instance instance, Random random) {
             this.data = data;
             this.instance = instance;
+            this.random = random;
         }
 
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
-            instance.playSound(data.sound, powerup.spawnLocation());
+            instance.playSound(Sound.sound(data.sound).seed(random.nextLong()).build(), powerup.spawnLocation());
         }
     }
 }
