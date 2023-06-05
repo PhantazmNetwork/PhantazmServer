@@ -51,11 +51,15 @@ public class StateShootTester implements ShootTester {
 
     @Override
     public boolean isFiring(@NotNull GunState state) {
-        return state.ticksSinceLastFire() < stats.shotInterval();
+        return state.ticksSinceLastFire() * fireRateFactor() < stats.shotInterval();
     }
 
     @Override
     public boolean isShooting(@NotNull GunState state) {
+        return state.ticksSinceLastShot() * fireRateFactor() < stats.shootSpeed();
+    }
+
+    private float fireRateFactor() {
         Optional<? extends Entity> shooter = this.entitySupplier.get();
 
         float factor = 1F;
@@ -63,7 +67,7 @@ public class StateShootTester implements ShootTester {
             factor = livingEntity.getAttributeValue(Attributes.FIRE_RATE_MULTIPLIER);
         }
 
-        return state.ticksSinceLastShot() * factor < stats.shootSpeed();
+        return factor;
     }
 
     /**
