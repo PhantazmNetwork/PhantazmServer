@@ -4,6 +4,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
@@ -43,6 +44,6 @@ public class EntityDamageByGunEventListener extends PhantazmMobEventListener<Ent
     }
 
     private boolean mobResistsInstakill(PhantazmMob mob) {
-        return mob.model().getExtraNode().getBooleanOrDefault(false, "resistInstaKill");
+        return mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL);
     }
 }

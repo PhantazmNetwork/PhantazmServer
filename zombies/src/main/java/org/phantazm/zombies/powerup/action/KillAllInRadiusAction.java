@@ -7,6 +7,8 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobStore;
+import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 
@@ -52,7 +54,9 @@ public class KillAllInRadiusAction implements Supplier<PowerupAction> {
             instance.getEntityTracker()
                     .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
                             entity -> {
-                                if (mobStore.hasMob(entity.getUuid())) {
+                                PhantazmMob mob = mobStore.getMob(entity.getUuid());
+                                if (!mob.model().getExtraNode()
+                                        .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
                                     entity.kill();
                                 }
                             });
