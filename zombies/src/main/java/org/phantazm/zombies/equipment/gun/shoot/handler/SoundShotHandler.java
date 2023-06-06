@@ -2,6 +2,7 @@ package org.phantazm.zombies.equipment.gun.shoot.handler;
 
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.sound.Sound;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -15,7 +16,7 @@ import java.util.*;
 /**
  * A {@link ShotHandler} that plays a {@link Sound}.
  */
-@Model("zombies.gun.shoot_handler.sound")
+@Model("zombies.gun.shot_handler.sound")
 @Cache(false)
 public class SoundShotHandler implements ShotHandler {
     private final Data data;
@@ -41,14 +42,16 @@ public class SoundShotHandler implements ShotHandler {
             Set<UUID> played = Collections.newSetFromMap(new IdentityHashMap<>(shot.regularTargets().size()));
             for (GunHit hit : shot.regularTargets()) {
                 if (played.add(hit.entity().getUuid())) {
-                    audience.playSound(data.sound(), data.atShooter ? attacker : hit.entity());
+                    Pos pos = data.atShooter ? attacker.getPosition() : hit.entity().getPosition();
+                    audience.playSound(data.sound(), pos.x(), pos.y(), pos.z());
                 }
             }
 
             played.clear();
             for (GunHit hit : shot.headshotTargets()) {
                 if (played.add(hit.entity().getUuid())) {
-                    audience.playSound(data.headshotSound(), data.atShooter ? attacker : hit.entity());
+                    Pos pos = data.atShooter ? attacker.getPosition() : hit.entity().getPosition();
+                    audience.playSound(data.headshotSound(), pos.x(), pos.y(), pos.z());
                 }
             }
         });

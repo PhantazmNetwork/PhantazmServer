@@ -68,6 +68,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
                 for (BlockIteration.Context context : contexts) {
                     if (!context.isValidEndpoint(blockLocation, block)) {
+                        block = null;
                         continue blockLoop;
                     }
                 }
@@ -78,6 +79,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
                     Vec intersection = intersectionOptional.get();
                     for (BlockIteration.Context context : contexts) {
                         if (!context.acceptRaytracedBlock(intersection, block)) {
+                            block = null;
                             continue blockLoop;
                         }
 

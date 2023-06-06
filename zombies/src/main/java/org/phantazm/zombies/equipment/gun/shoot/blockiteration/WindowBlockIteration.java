@@ -23,12 +23,12 @@ public class WindowBlockIteration implements BlockIteration {
         this.context = new Context() {
             @Override
             public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block) {
-                return true;
+                return mapObjects.windowTracker().atPoint(blockLocation).isEmpty();
             }
 
             @Override
             public boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block) {
-                return mapObjects.windowTracker().atPoint(intersection).isEmpty();
+                return true;
             }
         };
     }
