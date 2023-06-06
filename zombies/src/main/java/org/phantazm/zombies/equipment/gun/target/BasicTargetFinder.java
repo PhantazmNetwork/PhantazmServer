@@ -73,9 +73,10 @@ public class BasicTargetFinder implements TargetFinder {
                 });
             }
         }
+
         List<Pair<? extends LivingEntity, Vec>> adjustedLocations = targetLimiter.limitTargets(start, locations);
 
-        Collection<GunHit> targets = new ArrayList<>(locations.size());
+        Collection<GunHit> targets = new ArrayList<>(adjustedLocations.size());
         Collection<GunHit> headshots = new ArrayList<>(adjustedLocations.size());
         for (Pair<? extends LivingEntity, Vec> pair : adjustedLocations) {
             if (headshotTester.isHeadshot(shooter, pair.left(), pair.right())) {

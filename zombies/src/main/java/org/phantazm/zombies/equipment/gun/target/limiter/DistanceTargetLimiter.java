@@ -7,7 +7,6 @@ import com.github.steanky.element.core.annotation.Model;
 import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,15 +37,15 @@ public class DistanceTargetLimiter implements TargetLimiter {
     @Override
     public @NotNull List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Pos start,
             @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
-        List<Pair<? extends Entity, Vec>> targetsCopy = new ArrayList<>(targets);
-        Comparator<Pair<? extends Entity, Vec>> comparator =
+        List<Pair<? extends LivingEntity, Vec>> targetsCopy = new ArrayList<>(targets);
+        Comparator<Pair<? extends LivingEntity, Vec>> comparator =
                 Comparator.comparingDouble(pair -> start.distanceSquared(pair.value()));
         if (!data.prioritizeClosest()) {
             comparator = comparator.reversed();
         }
 
         targetsCopy.sort(comparator);
-        return targets.subList(0, Math.min(targets.size(), data.targetLimit()));
+        return targetsCopy.subList(0, Math.min(targets.size(), data.targetLimit()));
     }
 
     /**

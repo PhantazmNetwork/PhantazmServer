@@ -1,7 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.endpoint;
 
 import com.github.steanky.element.core.annotation.*;
-import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -88,8 +87,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
             }
 
             if (block != null) {
-                return RayUtils.rayTrace(new BoundingBox(1D, 1D, 1D), blockLocation.add(0.5, 0, 0.5), start)
-                        .orElse(null);
+                return RayUtils.rayTrace(block.registry().collisionShape(), blockLocation, start).orElse(null);
             }
 
             return null;
