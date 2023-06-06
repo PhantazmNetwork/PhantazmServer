@@ -21,6 +21,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
+import net.kyori.adventure.util.RGBLike;
+import net.minestom.server.color.Color;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.particle.Particle;
 import org.jetbrains.annotations.NotNull;
@@ -48,9 +50,10 @@ public final class Ethylene {
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(sound())
                         .withCustomSignature(style()).withCustomSignature(textColor()).withCustomSignature(vec3D())
-                        .withScalarSignature(key()).withScalarSignature(uuid()).withScalarSignature(component())
-                        .withScalarSignature(itemStack()).withScalarSignature(titlePartComponent())
-                        .withScalarSignature(namedTextColor()).withScalarSignature(particle())
+                        .withCustomSignature(rgbLike()).withScalarSignature(key()).withScalarSignature(uuid())
+                        .withScalarSignature(component()).withScalarSignature(itemStack())
+                        .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
+                        .withScalarSignature(particle())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
                         .withStandardTypeImplementations().ignoringLengths().build();
@@ -94,6 +97,17 @@ public final class Ethylene {
                             return textColors;
                         }, Map.entry("textColor", Token.ofClass(TextColor.class)),
                         Map.entry("textDecorations", Token.ofClass(TextDecoration[].class))).matchingNames().matchingTypeHints()
+                .build();
+    }
+
+    private static Signature<RGBLike> rgbLike() {
+        return Signature.builder(Token.ofClass(RGBLike.class), (ignored, args) -> {
+                            int r = args.get(0);
+                            int g = args.get(1);
+                            int b = args.get(2);
+                            return new Color(r, g, b);
+                        }, color -> List.of(color.red(), color.green(), color.blue()), Map.entry("r", Token.INTEGER),
+                        Map.entry("g", Token.INTEGER), Map.entry("b", Token.INTEGER)).matchingNames().matchingTypeHints()
                 .build();
     }
 
