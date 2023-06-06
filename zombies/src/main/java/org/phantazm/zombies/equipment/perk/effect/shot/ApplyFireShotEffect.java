@@ -34,7 +34,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
         this.data = Objects.requireNonNull(data, "data");
 
         UUID uuid = UUID.randomUUID();
-        this.lastDamageTime = Tag.Long("last_fire_damage_time" + uuid).defaultValue(-1L);
+        this.lastDamageTime = Tag.Long("last_fire_damage_time_" + uuid).defaultValue(-1L);
 
         this.activeEntities = new ConcurrentLinkedDeque<>();
     }

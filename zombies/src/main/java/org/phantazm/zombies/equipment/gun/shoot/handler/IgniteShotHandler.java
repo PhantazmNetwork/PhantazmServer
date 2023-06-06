@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Model("zombies.gun.shot_handler.ignite")
 @Cache
 public class IgniteShotHandler implements ShotHandler {
-
     private final Data data;
 
     private final Tag<Long> lastFireDamage;

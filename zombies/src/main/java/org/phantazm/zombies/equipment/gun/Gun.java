@@ -3,6 +3,7 @@ package org.phantazm.zombies.equipment.gun;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.Equipment;
@@ -11,6 +12,7 @@ import org.phantazm.core.inventory.CachedInventoryObject;
 import org.phantazm.zombies.equipment.gun.effect.GunEffect;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.visual.GunStackMapper;
+import org.phantazm.zombies.event.GunLoseAmmoEvent;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -70,11 +72,24 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
      * Use {@link #shoot()} to shoot a volley of shots, which should call this internally.
      */
     protected void fire() {
+        Optional<? extends Entity> entityOptional = entitySupplier.get();
+
+        int ammoLoss;
+        if (entityOptional.isPresent()) {
+            GunLoseAmmoEvent event = new GunLoseAmmoEvent(entityOptional.get(), this, 1);
+            EventDispatcher.call(event);
+            ammoLoss = event.getAmmoLost();
+        }
+        else {
+            ammoLoss = 1;
+        }
+
         modifyState(builder -> {
             builder.setTicksSinceLastFire(0L);
-            builder.setAmmo(builder.getAmmo() - 1);
-            builder.setClip(builder.getClip() - 1);
+            builder.setAmmo(builder.getAmmo() - ammoLoss);
+            builder.setClip(builder.getClip() - ammoLoss);
         });
+
         if (state.clip() == 0) {
             if (state.ammo() > 0) {
                 reload();
