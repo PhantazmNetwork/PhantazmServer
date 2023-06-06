@@ -302,6 +302,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener));
         node.addListener(PlayerUseItemOnBlockEvent.class,
                 new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener));
+        node.addListener(PlayerSwapItemEvent.class, new PlayerSwapItemListener(instance, zombiesPlayers));
 
         //sneaking/not sneaking
         node.addListener(PlayerStartSneakingEvent.class,
