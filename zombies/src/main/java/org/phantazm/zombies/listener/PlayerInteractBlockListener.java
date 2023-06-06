@@ -37,5 +37,8 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
             doorHandler.handleRightClick(zombiesPlayer, event.getBlockPosition());
             rightClickListener.onRightClick(zombiesPlayer, event.getPlayer().getHeldSlot());
         }
+
+        event.setCancelled(true);
+        event.setBlockingItemUse(true);
     }
 }

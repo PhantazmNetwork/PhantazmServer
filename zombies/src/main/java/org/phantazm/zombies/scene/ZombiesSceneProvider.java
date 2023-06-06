@@ -17,6 +17,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.entity.EntityDeathEvent;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
@@ -307,6 +308,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new PlayerStartSneakingListener(instance, zombiesPlayers, windowHandler));
         node.addListener(PlayerStopSneakingEvent.class,
                 new PlayerStopSneakingListener(instance, zombiesPlayers, windowHandler));
+
+        //inventory
+        node.addListener(InventoryPreClickEvent.class, new PlayerInventoryPreClickListener(instance, zombiesPlayers));
+        node.addListener(PlayerPreEatEvent.class, new PlayerEatItemEventListener(instance, zombiesPlayers));
 
         for (EventTrigger<?> trigger : EventTriggers.TRIGGERS) {
             trigger.initialize(node, mobStore);
