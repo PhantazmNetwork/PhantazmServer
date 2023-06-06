@@ -10,12 +10,10 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.map.action.Action;
 
-import java.time.Duration;
 import java.util.Deque;
 import java.util.Objects;
 import java.util.UUID;
@@ -48,7 +46,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
             return;
         }
 
-        livingEntity.setFireForDuration(Duration.of(data.fireTicks, TimeUnit.SERVER_TICK));
+        livingEntity.setFireForDuration(data.fireTicks);
 
         boolean alreadyActive = entity.getTag(lastDamageTime) != -1;
         entity.setTag(lastDamageTime, System.currentTimeMillis());
@@ -60,22 +58,20 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
 
     @Override
     public void tick(long time) {
-        activeEntities.removeIf(entity -> process(entity, time));
-    }
+        activeEntities.removeIf(entity -> {
+            if (entity.isRemoved() || entity.isDead() || !entity.isOnFire()) {
+                stopFire(entity);
+                return true;
+            }
 
-    private boolean process(LivingEntity entity, long time) {
-        if (entity.isRemoved() || entity.isDead() || !entity.isOnFire()) {
-            stopFire(entity);
-            return true;
-        }
+            long lastDamageTime = entity.getTag(this.lastDamageTime);
+            if ((time - lastDamageTime) / MinecraftServer.TICK_MS >= data.damageInterval) {
+                doDamage(entity);
+                entity.setTag(this.lastDamageTime, time);
+            }
 
-        long lastDamageTime = entity.getTag(this.lastDamageTime);
-        if ((time - lastDamageTime) / MinecraftServer.TICK_MS >= data.damageInterval) {
-            doDamage(entity);
-            entity.setTag(this.lastDamageTime, time);
-        }
-
-        return false;
+            return false;
+        });
     }
 
     private void doDamage(LivingEntity entity) {
