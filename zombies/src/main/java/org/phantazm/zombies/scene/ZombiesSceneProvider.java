@@ -41,6 +41,7 @@ import org.phantazm.mob.trigger.EventTrigger;
 import org.phantazm.mob.trigger.EventTriggers;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.event.EntityDamageByGunEvent;
 import org.phantazm.zombies.listener.*;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.*;
@@ -281,6 +282,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new PhantazmMobDeathListener(keyParser, instance, mobStore, roundHandler::currentRound, powerupHandler,
                         roomTracker, windowTracker));
         node.addListener(EntityDamageEvent.class, new PlayerDamageMobListener(instance, mobStore, zombiesPlayers));
+        node.addListener(EntityDamageByGunEvent.class,
+                new EntityDamageByGunEventListener(instance, mobStore, mapObjects, zombiesPlayers));
 
         //player events
         node.addListener(EntityDamageEvent.class, new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects));

@@ -62,7 +62,7 @@ public interface MapObjects {
 
         @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier();
 
-        @NotNull Flaggable flaggable();
+        @NotNull Flaggable flags();
 
         @NotNull TransactionModifierSource modifierSource();
 

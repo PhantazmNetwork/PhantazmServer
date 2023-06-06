@@ -13,8 +13,8 @@ public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableE
     private final Entity damagedEntity;
     private final Entity shooter;
     private final boolean isHeadshot;
-    private final boolean isInstakill;
-    private final float damage;
+    private boolean isInstakill;
+    private float damage;
 
     private boolean cancelled;
 
@@ -49,8 +49,16 @@ public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableE
         return isInstakill;
     }
 
+    public void setInstakill(boolean instakill) {
+        this.isInstakill = instakill;
+    }
+
     public float getDamage() {
         return damage;
+    }
+
+    public void setDamage(float damage) {
+        this.damage = damage;
     }
 
     @Override

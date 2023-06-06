@@ -51,7 +51,7 @@ public class GiveCoinsShotHandler implements ShotHandler {
             return;
         }
 
-        boolean isInstaKill = mapObjects.module().flaggable().hasFlag(Flags.INSTA_KILL);
+        boolean isInstaKill = mapObjects.module().flags().hasFlag(Flags.INSTA_KILL);
 
         PlayerCoins coins = player.module().getCoins();
 

@@ -17,7 +17,6 @@ import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
-import org.phantazm.zombies.map.objects.MapObjects;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -30,9 +29,7 @@ import java.util.UUID;
 @Model("zombies.gun.shot_handler.damage")
 @Cache(false)
 public class DamageShotHandler implements ShotHandler {
-
     private final Data data;
-    private final MapObjects mapObjects;
     private final MobStore mobStore;
 
     /**
@@ -41,9 +38,8 @@ public class DamageShotHandler implements ShotHandler {
      * @param data The {@link Data} to use
      */
     @FactoryMethod
-    public DamageShotHandler(@NotNull Data data, @NotNull MapObjects mapObjects, @NotNull MobStore mobStore) {
+    public DamageShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
@@ -56,38 +52,30 @@ public class DamageShotHandler implements ShotHandler {
 
     private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
             boolean headshot) {
-        boolean hasInstakill = mapObjects.module().flaggable().hasFlag(Flags.INSTA_KILL);
-
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
             PhantazmMob mob = mobStore.getMob(targetEntity.getUuid());
-            boolean resistInstaKill =
-                    mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, "resistInstaKill");
-
-            if (hasInstakill && !resistInstaKill) {
-                EntityDamageByGunEvent event =
-                        new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, true, damage);
-                EventDispatcher.call(event);
-                if (!event.isCancelled()) {
-                    targetEntity.kill();
-                }
-
-                continue;
-            }
 
             EntityDamageByGunEvent event =
                     new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damage);
             EventDispatcher.call(event);
 
-            if (!event.isCancelled()) {
-                DamageType damageType = DamageType.fromEntity(attacker);
+            if (event.isCancelled()) {
+                continue;
+            }
 
-                switch (data.armorBehavior) {
-                    case ALWAYS_BYPASS -> targetEntity.damage(damageType, damage);
-                    case NEVER_BYPASS -> targetEntity.damage(damageType, damage, false);
-                    case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, damage, headshot);
-                    case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, damage, !headshot);
-                }
+            if (event.isInstakill()) {
+                targetEntity.kill();
+                continue;
+            }
+
+            DamageType damageType = DamageType.fromEntity(attacker);
+
+            switch (data.armorBehavior) {
+                case ALWAYS_BYPASS -> targetEntity.damage(damageType, damage);
+                case NEVER_BYPASS -> targetEntity.damage(damageType, damage, false);
+                case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, damage, headshot);
+                case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, damage, !headshot);
             }
         }
     }

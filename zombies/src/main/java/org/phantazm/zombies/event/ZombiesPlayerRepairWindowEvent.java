@@ -1,13 +1,14 @@
 package org.phantazm.zombies.event;
 
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class ZombiesPlayerRepairWindowEvent implements ZombiesPlayerEvent {
+public class ZombiesPlayerRepairWindowEvent implements ZombiesPlayerEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final Window window;

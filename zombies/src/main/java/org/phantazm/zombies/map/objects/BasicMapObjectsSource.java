@@ -315,7 +315,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         }
 
         @Override
-        public @NotNull Flaggable flaggable() {
+        public @NotNull Flaggable flags() {
             return flaggable;
         }
 
