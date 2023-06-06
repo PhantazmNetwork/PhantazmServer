@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
-import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
@@ -18,10 +17,8 @@ import org.phantazm.zombies.map.action.Action;
 
 import java.time.Duration;
 import java.util.Deque;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Description("""
@@ -30,24 +27,16 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Model("zombies.perk.effect.shot_entity.apply_fire")
 @Cache(false)
 public class ApplyFireShotEffect implements Action<Entity>, Tickable {
-    private static final Map<Data, Pair<String, String>> NAMES = new ConcurrentHashMap<>();
-
     private final Data data;
-
-    private final Tag<Boolean> onFire;
-    private final Tag<Long> timeSinceLastDamage;
-
+    private final Tag<Long> lastDamageTime;
     private final Deque<LivingEntity> activeEntities;
 
     @FactoryMethod
     public ApplyFireShotEffect(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
 
-        Pair<String, String> stringPair =
-                NAMES.computeIfAbsent(data, key -> Pair.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
-
-        this.onFire = Tag.Boolean(stringPair.left()).defaultValue(false);
-        this.timeSinceLastDamage = Tag.Long(stringPair.right()).defaultValue(-1L);
+        UUID uuid = UUID.randomUUID();
+        this.lastDamageTime = Tag.Long("last_fire_damage_time" + uuid).defaultValue(-1L);
 
         this.activeEntities = new ConcurrentLinkedDeque<>();
     }
@@ -61,10 +50,10 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
 
         livingEntity.setFireForDuration(Duration.of(data.fireTicks, TimeUnit.SERVER_TICK));
 
-        boolean alreadyOnFire = entity.getTag(onFire);
-        entity.setTag(onFire, true);
+        boolean alreadyActive = entity.getTag(lastDamageTime) != -1;
+        entity.setTag(lastDamageTime, System.currentTimeMillis());
 
-        if (!alreadyOnFire) {
+        if (!alreadyActive) {
             activeEntities.add(livingEntity);
         }
     }
@@ -75,21 +64,15 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
     }
 
     private boolean process(LivingEntity entity, long time) {
-        if (entity.isRemoved() || entity.isDead()) {
+        if (entity.isRemoved() || entity.isDead() || !entity.isOnFire()) {
             stopFire(entity);
             return true;
         }
 
-        boolean onFire = entity.getTag(this.onFire);
-        if (!onFire || !entity.isOnFire()) {
-            stopFire(entity);
-            return true;
-        }
-
-        long lastDamageTime = entity.getTag(timeSinceLastDamage);
-        if (lastDamageTime == -1 || (time - lastDamageTime) / MinecraftServer.TICK_MS >= data.damageInterval) {
+        long lastDamageTime = entity.getTag(this.lastDamageTime);
+        if ((time - lastDamageTime) / MinecraftServer.TICK_MS >= data.damageInterval) {
             doDamage(entity);
-            entity.setTag(timeSinceLastDamage, time);
+            entity.setTag(this.lastDamageTime, time);
         }
 
         return false;
@@ -100,9 +83,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
     }
 
     private void stopFire(Entity entity) {
-        entity.setOnFire(false);
-        entity.removeTag(onFire);
-        entity.removeTag(timeSinceLastDamage);
+        entity.removeTag(lastDamageTime);
     }
 
     @DataObject

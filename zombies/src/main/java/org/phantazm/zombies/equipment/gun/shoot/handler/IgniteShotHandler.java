@@ -27,7 +27,6 @@ public class IgniteShotHandler implements ShotHandler {
 
     private final Data data;
 
-    private final Tag<Boolean> onFire;
     private final Tag<Long> lastFireDamage;
     private final Deque<LivingEntity> targets;
 
@@ -39,9 +38,9 @@ public class IgniteShotHandler implements ShotHandler {
     @FactoryMethod
     public IgniteShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
+
         UUID uuid = UUID.randomUUID();
-        this.onFire = Tag.Boolean("on_fire_" + uuid).defaultValue(false);
-        this.lastFireDamage = Tag.Long("on_fire_" + uuid).defaultValue(-1L);
+        this.lastFireDamage = Tag.Long("last_fire_damage_time" + uuid).defaultValue(-1L);
         this.targets = new ConcurrentLinkedDeque<>();
     }
 
@@ -56,8 +55,13 @@ public class IgniteShotHandler implements ShotHandler {
         for (GunHit target : hits) {
             LivingEntity entity = target.entity();
             entity.setFireForDuration(duration);
+
+            boolean alreadyActive = entity.getTag(lastFireDamage) != -1;
             entity.setTag(lastFireDamage, System.currentTimeMillis());
-            targets.add(entity);
+
+            if (!alreadyActive) {
+                targets.add(entity);
+            }
         }
     }
 
@@ -79,7 +83,6 @@ public class IgniteShotHandler implements ShotHandler {
     }
 
     private void remove(LivingEntity target) {
-        target.removeTag(onFire);
         target.removeTag(lastFireDamage);
     }
 
