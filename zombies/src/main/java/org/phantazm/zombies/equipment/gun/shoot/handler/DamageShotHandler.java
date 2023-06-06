@@ -30,7 +30,6 @@ import java.util.UUID;
 @Cache(false)
 public class DamageShotHandler implements ShotHandler {
     private final Data data;
-    private final MobStore mobStore;
 
     /**
      * Creates a new {@link DamageShotHandler} with the given {@link Data}.
@@ -40,7 +39,6 @@ public class DamageShotHandler implements ShotHandler {
     @FactoryMethod
     public DamageShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
@@ -54,7 +52,6 @@ public class DamageShotHandler implements ShotHandler {
             boolean headshot) {
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
-            PhantazmMob mob = mobStore.getMob(targetEntity.getUuid());
 
             EntityDamageByGunEvent event =
                     new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damage);
