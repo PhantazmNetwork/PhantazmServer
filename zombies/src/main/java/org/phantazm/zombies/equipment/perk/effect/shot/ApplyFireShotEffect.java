@@ -11,10 +11,12 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.map.action.Action;
 
+import java.time.Duration;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Objects;
@@ -32,7 +34,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
 
     private final Data data;
 
-    private final Tag<Long> timeTag;
+    private final Tag<Boolean> onFire;
     private final Tag<Long> timeSinceLastDamage;
 
     private final Deque<LivingEntity> activeEntities;
@@ -44,7 +46,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
         Pair<String, String> stringPair =
                 NAMES.computeIfAbsent(data, key -> Pair.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
 
-        this.timeTag = Tag.Long(stringPair.left()).defaultValue(-1L);
+        this.onFire = Tag.Boolean(stringPair.left()).defaultValue(false);
         this.timeSinceLastDamage = Tag.Long(stringPair.right()).defaultValue(-1L);
 
         this.activeEntities = new ConcurrentLinkedDeque<>();
@@ -57,10 +59,12 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
             return;
         }
 
-        long tag = entity.getTag(timeTag);
-        entity.setTag(timeTag, System.currentTimeMillis());
+        livingEntity.setFireForDuration(Duration.of(data.fireTicks, TimeUnit.SERVER_TICK));
 
-        if (tag == -1) {
+        boolean alreadyOnFire = entity.getTag(onFire);
+        entity.setTag(onFire, true);
+
+        if (!alreadyOnFire) {
             activeEntities.add(livingEntity);
         }
     }
@@ -76,19 +80,14 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
             return true;
         }
 
-        long lastApply = entity.getTag(timeTag);
-        if (lastApply == -1 || (time - lastApply) / MinecraftServer.TICK_MS >= data.fireTicks) {
-            //fire has expired, or never should have been applied in the first place
+        boolean onFire = entity.getTag(this.onFire);
+        if (!onFire || !entity.isOnFire()) {
             stopFire(entity);
             return true;
         }
 
         long lastDamageTime = entity.getTag(timeSinceLastDamage);
         if (lastDamageTime == -1 || (time - lastDamageTime) / MinecraftServer.TICK_MS >= data.damageInterval) {
-            if (!entity.isOnFire()) {
-                entity.setOnFire(true);
-            }
-
             doDamage(entity);
             entity.setTag(timeSinceLastDamage, time);
         }
@@ -102,7 +101,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
 
     private void stopFire(Entity entity) {
         entity.setOnFire(false);
-        entity.removeTag(timeTag);
+        entity.removeTag(onFire);
         entity.removeTag(timeSinceLastDamage);
     }
 
