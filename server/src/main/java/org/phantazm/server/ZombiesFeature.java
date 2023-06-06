@@ -254,6 +254,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(SendTitleAction.class);
         contextManager.registerElementClass(SendMessageAction.class);
         contextManager.registerElementClass(AttributeModifierAction.class);
+        contextManager.registerElementClass(PreventAmmoDrainAction.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }
