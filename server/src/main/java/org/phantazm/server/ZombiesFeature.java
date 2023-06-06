@@ -29,6 +29,8 @@ import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.item.AnimatedUpdatingItem;
 import org.phantazm.core.item.StaticUpdatingItem;
+import org.phantazm.core.particle.ParticleWrapper;
+import org.phantazm.core.particle.data.*;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
@@ -218,6 +220,17 @@ public final class ZombiesFeature {
         //UpdatingItem
         contextManager.registerElementClass(StaticUpdatingItem.class);
         contextManager.registerElementClass(AnimatedUpdatingItem.class);
+
+        //Particles
+        contextManager.registerElementClass(ParticleWrapper.class);
+        contextManager.registerElementClass(BlockParticleVariantData.class);
+        contextManager.registerElementClass(BlockPositionSource.class);
+        contextManager.registerElementClass(DustParticleVariantData.class);
+        contextManager.registerElementClass(ItemStackParticleVariantData.class);
+        contextManager.registerElementClass(NoParticleVariantData.class);
+        contextManager.registerElementClass(TransitionDustParticleVariantData.class);
+        contextManager.registerElementClass(VibrationParticleVariantData.class);
+
 
         //UpgradePath
         contextManager.registerElementClass(LinearUpgradePath.class);

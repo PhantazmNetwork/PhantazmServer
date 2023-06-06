@@ -203,6 +203,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(SpreadFirer.class);
         contextManager.registerElementClass(ChainShotHandler.class);
         contextManager.registerElementClass(DamageShotHandler.class);
+        contextManager.registerElementClass(ParticlePointShotHandler.class);
         contextManager.registerElementClass(GiveCoinsShotHandler.class);
         contextManager.registerElementClass(ExplosionShotHandler.class);
         contextManager.registerElementClass(GuardianBeamShotHandler.class);

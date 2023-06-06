@@ -1,7 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
 import com.github.steanky.element.core.annotation.*;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
@@ -11,23 +10,19 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
+import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 
 import java.util.Collection;
 import java.util.UUID;
 
-/**
- * A {@link ShotHandler} that creates a trail of particles.
- */
-@Model("zombies.gun.shot_handler.particle_trail")
+@Model("zombies.gun.shot_handler.particle_point")
 @Cache
-public class ParticleTrailShotHandler implements ShotHandler {
-    private final Data data;
+public class ParticlePointShotHandler implements ShotHandler {
     private final ParticleWrapper wrapper;
 
     @FactoryMethod
-    public ParticleTrailShotHandler(@NotNull Data data, @NotNull @Child("particle") ParticleWrapper wrapper) {
-        this.data = data;
+    public ParticlePointShotHandler(@NotNull @Child("particle") ParticleWrapper wrapper) {
         this.wrapper = wrapper;
     }
 
@@ -39,19 +34,22 @@ public class ParticleTrailShotHandler implements ShotHandler {
             return;
         }
 
-        ParticleWrapper.Data wrapperData = wrapper.data();
-
-        Pos start = shot.start();
-        Vec direction = Vec.fromPoint(shot.end().sub(start)).normalize();
-        for (int i = 0; i < data.trailCount(); i++) {
-            start = start.add(direction);
-
-            ServerPacket packet =
-                    ParticleCreator.createParticlePacket(wrapperData.particle(), wrapperData.distance(), start.x(),
-                            start.y(), start.z(), wrapperData.offsetX(), wrapperData.offsetY(), wrapperData.offsetZ(),
-                            wrapperData.data(), wrapperData.particleCount(), wrapper.variantData()::write);
-            instance.sendGroupedPacket(packet);
+        for (GunHit hit : shot.regularTargets()) {
+            spawnParticle(instance, hit.location());
         }
+
+        for (GunHit hit : shot.headshotTargets()) {
+            spawnParticle(instance, hit.location());
+        }
+    }
+
+    private void spawnParticle(Instance instance, Vec location) {
+        ParticleWrapper.Data data = wrapper.data();
+        ServerPacket packet =
+                ParticleCreator.createParticlePacket(data.particle(), data.distance(), location.x(), location.y(),
+                        location.z(), data.offsetX(), data.offsetY(), data.offsetZ(), data.data(), data.particleCount(),
+                        wrapper.variantData()::write);
+        instance.sendGroupedPacket(packet);
     }
 
     @Override
@@ -60,6 +58,6 @@ public class ParticleTrailShotHandler implements ShotHandler {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("particle") String particle, int trailCount) {
+    public record Data(@NotNull @ChildPath("particle") String particle) {
     }
 }

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-@Model("zombies.updating_item.static")
+@Model("item.updating.static")
 public class StaticUpdatingItem implements UpdatingItem {
     private final Data data;
 

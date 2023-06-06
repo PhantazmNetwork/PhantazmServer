@@ -36,5 +36,4 @@ public record GunShot(@NotNull Pos start,
         Objects.requireNonNull(regularTargets, "regularTargets");
         Objects.requireNonNull(headshotTargets, "headshotTargets");
     }
-
 }

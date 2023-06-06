@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Objects;
 
-@Model("zombies.updating_item.animated")
+@Model("item.updating.animated")
 @Cache(false)
 public class AnimatedUpdatingItem implements UpdatingItem {
     private final Data data;

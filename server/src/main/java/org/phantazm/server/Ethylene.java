@@ -22,6 +22,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.particle.Particle;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
@@ -43,12 +44,13 @@ public final class Ethylene {
 
     static void initialize(@NotNull KeyParser keyParser) {
         Ethylene.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(sound())
                         .withCustomSignature(style()).withCustomSignature(textColor()).withCustomSignature(vec3D())
                         .withScalarSignature(key()).withScalarSignature(uuid()).withScalarSignature(component())
                         .withScalarSignature(itemStack()).withScalarSignature(titlePartComponent())
-                        .withScalarSignature(namedTextColor())
+                        .withScalarSignature(namedTextColor()).withScalarSignature(particle())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
                         .withStandardTypeImplementations().ignoringLengths().build();
@@ -106,6 +108,12 @@ public final class Ethylene {
                 .build();
     }
 
+    private static ScalarSignature<Particle> particle() {
+        return ScalarSignature.of(Token.ofClass(Particle.class),
+                element -> Particle.fromNamespaceId(element.asString()),
+                particle -> particle == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(particle.key().toString()));
+    }
+
     @SuppressWarnings("UnstableApiUsage")
     private static ScalarSignature<ItemStack> itemStack() {
         return ScalarSignature.of(Token.ofClass(ItemStack.class), element -> {
@@ -113,7 +121,7 @@ public final class Ethylene {
                 return ItemStack.fromItemNBT((NBTCompound)new SNBTParser(new StringReader(element.asString())).parse());
             }
             catch (NBTException e) {
-                throw new RuntimeException(e);
+                return ItemStack.AIR;
             }
         }, itemStack -> itemStack == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));
     }
