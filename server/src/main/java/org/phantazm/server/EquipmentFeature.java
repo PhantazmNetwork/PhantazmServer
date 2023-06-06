@@ -274,7 +274,9 @@ final class EquipmentFeature {
 
             Map<Key, PerkLevelCreator> perkLevels = new HashMap<>(pair.right().size());
             for (ElementContext context : pair.right()) {
-                PerkLevelCreator perkLevelCreator = context.provide(provider, HANDLER, () -> null);
+                PerkLevelCreator perkLevelCreator = context.provide(provider, HANDLER.andThen(exception -> {
+                    LOGGER.warn("Erroring perk: " + data.name());
+                }), () -> null);
                 if (perkLevelCreator != null) {
                     perkLevels.put(perkLevelCreator.levelKey(), perkLevelCreator);
                 }

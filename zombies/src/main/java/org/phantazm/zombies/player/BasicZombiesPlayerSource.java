@@ -90,7 +90,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
         PlayerKills kills = new BasicPlayerKills();
 
-        InventoryProfile livingProfile = new BasicInventoryProfile(9);
+        InventoryProfile livingProfile = new BasicInventoryProfile(45);
 
         Map<Key, EquipmentGroupInfo> equipmentGroups = mapSettingsInfo.equipmentGroups();
 
@@ -123,7 +123,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         InventoryAccess livingInventoryAccess =
                 new InventoryAccess(livingProfile, Map.ofEntries(inventoryObjectGroupEntries));
-        InventoryAccess deadInventoryAccess = new InventoryAccess(new BasicInventoryProfile(9), Map.of());
+        InventoryAccess deadInventoryAccess = new InventoryAccess(new BasicInventoryProfile(45), Map.of());
 
         InventoryAccessRegistry accessRegistry = new BasicInventoryAccessRegistry(playerView);
         accessRegistry.registerAccess(InventoryKeys.ALIVE_ACCESS, livingInventoryAccess);

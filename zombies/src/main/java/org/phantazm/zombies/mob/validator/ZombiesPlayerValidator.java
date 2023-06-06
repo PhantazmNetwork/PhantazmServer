@@ -9,8 +9,6 @@ import org.phantazm.mob.validator.TargetValidator;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 @Model("zombies.mob.target_validator.zombies_player")
@@ -20,14 +18,14 @@ public class ZombiesPlayerValidator implements TargetValidator {
 
     @FactoryMethod
     public ZombiesPlayerValidator(@NotNull Supplier<? extends MapObjects> mapObjects) {
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.mapObjects = mapObjects;
     }
 
     @Override
     public boolean valid(@NotNull Entity entity) {
-        UUID uuid = entity.getUuid();
-        ZombiesPlayer zombiesPlayer = mapObjects.get().module().playerMap().get(uuid);
+        MapObjects mapObjects = this.mapObjects.get();
+        ZombiesPlayer player = mapObjects.module().playerMap().get(entity.getUuid());
 
-        return zombiesPlayer != null && zombiesPlayer.canBeTargeted();
+        return player != null && player.canBeTargeted();
     }
 }

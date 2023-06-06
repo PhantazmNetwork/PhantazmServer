@@ -8,6 +8,8 @@ import com.github.steanky.ethylene.mapper.signature.Signature;
 import com.github.steanky.ethylene.mapper.type.Token;
 import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.key.Key;
@@ -48,7 +50,8 @@ public final class Ethylene {
                         .withScalarSignature(itemStack()).withScalarSignature(titlePartComponent())
                         .withScalarSignature(namedTextColor())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
-                        .withStandardSignatures().withStandardTypeImplementations().ignoringLengths().build();
+                        .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
+                        .withStandardTypeImplementations().ignoringLengths().build();
 
         LOGGER.info("Ethylene initialized.");
     }

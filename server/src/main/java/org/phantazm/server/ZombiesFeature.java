@@ -56,6 +56,7 @@ import org.phantazm.zombies.map.shop.predicate.logic.XorPredicate;
 import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
 import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
@@ -284,6 +285,11 @@ public final class ZombiesFeature {
 
     public static @NotNull Optional<ZombiesScene> getPlayerScene(@NotNull UUID playerUUID) {
         return FeatureUtils.check(sceneRouter).getScene(playerUUID);
+    }
+
+    public static @NotNull Optional<ZombiesPlayer> getZombiesPlayer(@NotNull UUID playerUUID) {
+        return FeatureUtils.check(sceneRouter).getScene(playerUUID)
+                .map(scene -> scene.getZombiesPlayers().get(playerUUID));
     }
 
     public static @NotNull ZombiesSceneRouter zombiesSceneRouter() {

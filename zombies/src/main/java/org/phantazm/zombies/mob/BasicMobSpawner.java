@@ -66,9 +66,6 @@ public class BasicMobSpawner implements MobSpawner {
     private final MobStore mobStore;
     private final DependencyProvider mobDependencyProvider;
 
-    private record Cache(Map<Key, Collection<Skill>> triggers, Collection<GoalApplier> goalAppliers) {
-    }
-
     /**
      * Creates a new {@link BasicMobSpawner}.
      *
@@ -85,13 +82,6 @@ public class BasicMobSpawner implements MobSpawner {
         this.mobDependencyProvider = new ModuleDependencyProvider(keyParser, new Module(this, mobStore, mapObjects));
     }
 
-    private Cache cacheFor(MobModel model) {
-        ElementContext context = model.getContext();
-        Map<Key, Collection<Skill>> triggers = createTriggers(context);
-        Collection<GoalApplier> goalAppliers = createGoalAppliers(context);
-        return new Cache(triggers, goalAppliers);
-    }
-
     @Override
     public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobModel model) {
         ProximaEntity proximaEntity = proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory());
@@ -101,10 +91,12 @@ public class BasicMobSpawner implements MobSpawner {
         setAttributes(proximaEntity, model);
         setHealth(proximaEntity);
 
-        Cache cache = cacheFor(model);
+        ElementContext context = model.getContext();
+        Map<Key, Collection<Skill>> triggers = createTriggers(context);
+        Collection<GoalApplier> goalAppliers = createGoalAppliers(context);
 
-        PhantazmMob mob = new PhantazmMob(model, proximaEntity, cache.triggers);
-        for (GoalApplier applier : cache.goalAppliers) {
+        PhantazmMob mob = new PhantazmMob(model, proximaEntity, triggers);
+        for (GoalApplier applier : goalAppliers) {
             applier.apply(mob);
         }
 

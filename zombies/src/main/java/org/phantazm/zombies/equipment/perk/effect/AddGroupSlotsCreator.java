@@ -13,6 +13,7 @@ import org.phantazm.core.inventory.InventoryObjectGroup;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
+import java.util.Set;
 
 @Description("""
         An effect that adds some additional slots to specific equipment groups. Equipment groups for all players are
@@ -83,7 +84,8 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
 
     @DataObject
     public record Data(@NotNull @Description("The equipment group key") Key group,
-                       @NotNull @Description("The additional slots to add to this group") IntSet additionalSlots) {
+                       @NotNull @Description(
+                               "The additional slots to add to this group") Set<Integer> additionalSlots) {
 
     }
 }

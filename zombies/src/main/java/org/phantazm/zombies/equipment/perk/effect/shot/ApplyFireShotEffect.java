@@ -85,7 +85,10 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
 
         long lastDamageTime = entity.getTag(timeSinceLastDamage);
         if (lastDamageTime == -1 || (time - lastDamageTime) / MinecraftServer.TICK_MS >= data.damageInterval) {
-            entity.setOnFire(true);
+            if (!entity.isOnFire()) {
+                entity.setOnFire(true);
+            }
+
             doDamage(entity);
             entity.setTag(timeSinceLastDamage, time);
         }

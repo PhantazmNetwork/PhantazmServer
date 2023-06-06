@@ -3,6 +3,7 @@ package org.phantazm.zombies.equipment.gun.effect;
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.MathUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
@@ -41,10 +42,10 @@ public class ShootExpEffect implements GunEffect {
                         ? (float)state.ticksSinceLastShot() / stats.shootSpeed()
                         : 0F; // TODO: fix for fire speed
 
-            if (exp >= 0 && exp <= 1) {
-                playerView.getPlayer().ifPresent(player -> player.setExp(exp));
-            }
+            exp = (float)MathUtils.clamp(0, 1, exp);
 
+            float finalExp = exp;
+            playerView.getPlayer().ifPresent(player -> player.setExp(finalExp));
             currentlyActive = true;
         }
         else if (currentlyActive) {
