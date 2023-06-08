@@ -1,6 +1,7 @@
 package org.phantazm.core.entity.fakeplayer;
 
 import net.minestom.server.entity.*;
+import net.minestom.server.entity.metadata.PlayerMeta;
 import net.minestom.server.network.packet.server.play.PlayerInfoRemovePacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.PlayerConnection;
@@ -29,6 +30,17 @@ public class MinimalFakePlayer extends Entity {
         this.schedulerManager = Objects.requireNonNull(schedulerManager, "schedulerManager");
         this.username = Objects.requireNonNull(username, "username");
         this.skin = skin;
+
+        PlayerMeta meta = (PlayerMeta)getEntityMeta();
+        meta.setNotifyAboutChanges(false);
+        meta.setCapeEnabled(true);
+        meta.setJacketEnabled(true);
+        meta.setLeftSleeveEnabled(true);
+        meta.setRightSleeveEnabled(true);
+        meta.setLeftLegEnabled(true);
+        meta.setRightLegEnabled(true);
+        meta.setHatEnabled(true);
+        meta.setNotifyAboutChanges(true);
     }
 
     public void init() {
