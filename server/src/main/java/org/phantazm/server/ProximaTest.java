@@ -108,21 +108,21 @@ final class ProximaTest {
             }
         }).build());
 
-        global.addListener(PlayerSpawnEvent.class, event -> {
-            if (!event.isFirstSpawn()) {
-                return;
-            }
-
-            event.getPlayer().teleport(new Pos(0, 100, 0)).join();
-            event.getPlayer().setGameMode(GameMode.CREATIVE);
-            event.getPlayer().setFlying(true);
-            Pos start = event.getPlayer().getPosition().sub(0, 1, 0);
-
-            for (int i = 0; i < 100; i++) {
-                for (int j = 0; j < 100; j++) {
-                    event.getSpawnInstance().setBlock(start.add(i, 0, j), Block.GOLD_BLOCK);
-                }
-            }
-        });
+//        global.addListener(PlayerSpawnEvent.class, event -> {
+//            if (!event.isFirstSpawn()) {
+//                return;
+//            }
+//
+//            event.getPlayer().teleport(new Pos(0, 100, 0)).join();
+//            event.getPlayer().setGameMode(GameMode.CREATIVE);
+//            event.getPlayer().setFlying(true);
+//            Pos start = event.getPlayer().getPosition().sub(0, 1, 0);
+//
+//            for (int i = 0; i < 100; i++) {
+//                for (int j = 0; j < 100; j++) {
+//                    event.getSpawnInstance().setBlock(start.add(i, 0, j), Block.GOLD_BLOCK);
+//                }
+//            }
+//        });
     }
 }
