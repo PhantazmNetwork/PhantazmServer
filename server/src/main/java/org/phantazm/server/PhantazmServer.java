@@ -165,6 +165,8 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
             LobbiesConfig lobbiesConfig) throws Exception {
+        BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
+
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
 
         SongFeature.initialize(keyParser);
