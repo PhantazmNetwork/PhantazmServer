@@ -7,21 +7,32 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            -   uses: actions/checkout@v3
             -   name: Set up JDK 17
                 uses: actions/setup-java@v3
                 with:
                     java-version: '17'
                     cache: 'gradle'
                     distribution: 'adopt'
+            -   name: Checkout PhantazmServer
+                uses: actions/checkout@v3
             -   name: Set up server
                 run: ./gradlew :phantazm-server:setupServer
             -   name: Build & copy jar
                 run: ./gradlew :phantazm-server:copyJar
-            -   name: Zip files
+            -   name: Zip server files
                 run: |
                     cd ./run/server-1
                     tar -czf /tmp/server.tar.gz server.jar libs
+            -   name: Checkout Configuration
+                uses: actions/checkout@v3
+                with:
+                    repository: PhantazmNetwork/Configuration
+                    path: './config'
+                    ssh-key: ${{ secrets.CONFIGURATION_DEPLOY_KEY }}
+            -   name: Zip config files
+                run: |
+                    cd ./config
+                    tar -czf /tmp/config.tar.gz .
             -   name: Set up SSH
                 run: |
                     mkdir -p ~/.ssh/
@@ -41,6 +52,7 @@ jobs:
             -   name: Copy server files to remote
                 run: |
                     scp /tmp/server.tar.gz phantazm:/home/gh/server.tar.gz
+                    scp /tmp/config.tar.gz phantazm:/home/gh/config.tar.gz
             -   name: Restart server
                 uses: appleboy/ssh-action@master
                 with:
@@ -50,5 +62,6 @@ jobs:
                     script: |
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'stop' Enter
                         tar -xf /home/gh/server.tar.gz -C /home/prod/servers/prod/
+                        tar -xf /home/gh/config.tar.gz -C /home/prod/servers/prod/
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
 
