@@ -126,6 +126,8 @@ public class Powerup implements Tickable, Keyed {
             else {
                 anyActive = true;
             }
+
+            action.tick(time);
         }
 
         if (!anyActive) {

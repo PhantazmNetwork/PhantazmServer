@@ -64,6 +64,7 @@ import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
+import org.phantazm.zombies.powerup.action.BossBarTimerAction;
 import org.phantazm.zombies.powerup.visual.HologramVisual;
 import org.phantazm.zombies.powerup.visual.ItemVisual;
 import org.phantazm.zombies.scene.ZombiesScene;
@@ -242,6 +243,7 @@ public final class ZombiesFeature {
         //PowerupVisuals
         contextManager.registerElementClass(ItemVisual.class);
         contextManager.registerElementClass(HologramVisual.class);
+        contextManager.registerElementClass(BossBarTimerAction.class);
 
         //PowerupActions
         contextManager.registerElementClass(MapFlaggingAction.class);
