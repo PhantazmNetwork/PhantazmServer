@@ -78,12 +78,22 @@ public class TimerSkill implements Skill {
         if ((time - lastActivationTime) / MinecraftServer.TICK_MS >= data.interval) {
             entity.setTag(lastActivationTag, time);
             delegate.use(self);
-            manageState(entity, lastUseCount);
+            manageState(self, lastUseCount);
         }
     }
 
-    private void manageState(Entity entity, int lastUseCount) {
+    @Override
+    public void end(@NotNull PhantazmMob self) {
+        Entity entity = self.entity();
+
+        entity.removeTag(lastActivationTag);
+        entity.removeTag(useCountTag);
+        entity.removeTag(startedTag);
+    }
+
+    private void manageState(PhantazmMob self, int lastUseCount) {
         if (lastUseCount != -1) {
+            Entity entity = self.entity();
             entity.setTag(useCountTag, ++lastUseCount);
 
             if (lastUseCount >= data.repeat) {

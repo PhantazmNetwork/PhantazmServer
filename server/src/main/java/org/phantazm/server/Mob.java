@@ -133,12 +133,14 @@ public final class Mob {
         contextManager.registerElementClass(DamageEntitySkill.class);
         contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
+        contextManager.registerElementClass(AttributeModifyingSkill.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);
         contextManager.registerElementClass(RandomSkill.class);
         contextManager.registerElementClass(RandomTimerSkill.class);
         contextManager.registerElementClass(GroupSkill.class);
+        contextManager.registerElementClass(TemporalSkill.class);
 
         //mob selectors
         contextManager.registerElementClass(EntitySelector.class);
