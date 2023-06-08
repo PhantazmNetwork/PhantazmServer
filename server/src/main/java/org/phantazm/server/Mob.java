@@ -29,7 +29,10 @@ import org.phantazm.mob.goal.*;
 import org.phantazm.mob.skill.*;
 import org.phantazm.mob.target.*;
 import org.phantazm.mob.validator.AlwaysValid;
+import org.phantazm.mob.validator.AndValidator;
+import org.phantazm.mob.validator.OrValidator;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
+import org.phantazm.zombies.mob.validator.MobValidator;
 import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,12 +149,16 @@ public final class Mob {
         contextManager.registerElementClass(NearestPlayersSelector.class);
         contextManager.registerElementClass(LastHitEntitySelector.class);
         contextManager.registerElementClass(AllPlayersSelector.class);
+        contextManager.registerElementClass(NearestEntitiesSelector.class);
 
         //mob validators
         contextManager.registerElementClass(AlwaysValid.class);
+        contextManager.registerElementClass(AndValidator.class);
+        contextManager.registerElementClass(OrValidator.class);
 
         //zombies mob validators
         contextManager.registerElementClass(ZombiesPlayerValidator.class);
+        contextManager.registerElementClass(MobValidator.class);
 
         LOGGER.info("Registered Mob element classes.");
     }
