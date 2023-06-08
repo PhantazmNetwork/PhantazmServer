@@ -6,5 +6,5 @@ public final class Tags {
     private Tags() {
     }
 
-    public static final Tag<String> POWERUP_TAG = Tag.String("phantazm:powerup");
+    public static final Tag<String> POWERUP_TAG = Tag.String("powerup");
 }

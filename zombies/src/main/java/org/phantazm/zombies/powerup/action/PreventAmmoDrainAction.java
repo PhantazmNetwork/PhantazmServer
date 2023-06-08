@@ -15,29 +15,29 @@ import java.util.function.Supplier;
 @Model("zombies.powerup.action.prevent_ammo_drain")
 public class PreventAmmoDrainAction implements Supplier<PowerupAction> {
     private final Supplier<DeactivationPredicate> deactivationPredicate;
-    private final EventNode<Event> rootNode;
+    private final Supplier<? extends EventNode<Event>> eventNode;
 
     @FactoryMethod
     public PreventAmmoDrainAction(
             @NotNull @Child("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
-            @NotNull EventNode<Event> rootNode) {
+            @NotNull Supplier<? extends EventNode<Event>> eventNode) {
         this.deactivationPredicate = deactivationPredicate;
-        this.rootNode = rootNode;
+        this.eventNode = eventNode;
     }
 
     @Override
     public PowerupAction get() {
-        return new Action(deactivationPredicate.get(), rootNode);
+        return new Action(deactivationPredicate.get(), eventNode.get());
     }
 
     private static class Action extends PowerupActionBase {
         private final EventListener<GunLoseAmmoEvent> listener;
-        private final EventNode<Event> rootNode;
+        private final EventNode<Event> eventNode;
 
-        private Action(DeactivationPredicate deactivationPredicate, EventNode<Event> rootNode) {
+        private Action(DeactivationPredicate deactivationPredicate, EventNode<Event> eventNode) {
             super(deactivationPredicate);
             this.listener = EventListener.of(GunLoseAmmoEvent.class, this::gunLoseAmmo);
-            this.rootNode = rootNode;
+            this.eventNode = eventNode;
         }
 
         private void gunLoseAmmo(GunLoseAmmoEvent event) {
@@ -47,12 +47,12 @@ public class PreventAmmoDrainAction implements Supplier<PowerupAction> {
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             super.activate(powerup, player, time);
-            rootNode.addListener(this.listener);
+            eventNode.addListener(this.listener);
         }
 
         @Override
         public void deactivate(@NotNull ZombiesPlayer player) {
-            rootNode.removeListener(listener);
+            eventNode.removeListener(listener);
         }
     }
 

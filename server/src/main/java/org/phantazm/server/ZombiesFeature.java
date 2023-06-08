@@ -274,7 +274,6 @@ public final class ZombiesFeature {
                 }
 
                 data.put(id, feature);
-                LOGGER.info("Successfully loaded " + featureName + " " + id);
             }
             catch (IOException e) {
                 LOGGER.warn("Exception when loading " + featureName, e);
