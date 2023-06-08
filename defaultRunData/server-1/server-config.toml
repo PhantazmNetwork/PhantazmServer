@@ -10,5 +10,9 @@ description = "A Phantazm Server"
 
 [pathfinder]
 threads = 4
-cacheSize = 2048
-updateQueueCapacity = 1024
+asyncMode = false
+corePoolSize = 4
+maximumPoolSize = 4
+minimumRunnable = 4
+keepAliveTime = 2
+keepAliveTimeUnit = "MINUTES"
