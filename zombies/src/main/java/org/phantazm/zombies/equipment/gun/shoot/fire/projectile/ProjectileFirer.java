@@ -100,7 +100,7 @@ public class ProjectileFirer implements Firer {
                 neuralEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
                         new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
                 neuralEntity.setNoGravity(!data.hasGravity());
-                mobStore.registerMob(mob);
+                mobStore.onMobSpawn(mob);
 
                 firedShots.put(neuralEntity.getUuid(), new FiredShot(gun, state, entity, start, previousHits));
                 removalQueue.add(new AliveProjectile(new WeakReference<>(neuralEntity), System.currentTimeMillis()));

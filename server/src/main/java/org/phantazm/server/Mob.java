@@ -27,10 +27,7 @@ import org.phantazm.mob.MobModel;
 import org.phantazm.mob.config.MobModelConfigProcessor;
 import org.phantazm.mob.goal.*;
 import org.phantazm.mob.skill.*;
-import org.phantazm.mob.target.EntitySelector;
-import org.phantazm.mob.target.LastHitEntitySelector;
-import org.phantazm.mob.target.NearestPlayerSelector;
-import org.phantazm.mob.target.NearestPlayersSelector;
+import org.phantazm.mob.target.*;
 import org.phantazm.mob.validator.AlwaysValid;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
 import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
@@ -134,6 +131,7 @@ public final class Mob {
         contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
         contextManager.registerElementClass(AttributeModifyingSkill.class);
+        contextManager.registerElementClass(SendMessageSkill.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);
@@ -147,6 +145,7 @@ public final class Mob {
         contextManager.registerElementClass(NearestPlayerSelector.class);
         contextManager.registerElementClass(NearestPlayersSelector.class);
         contextManager.registerElementClass(LastHitEntitySelector.class);
+        contextManager.registerElementClass(AllPlayersSelector.class);
 
         //mob validators
         contextManager.registerElementClass(AlwaysValid.class);
