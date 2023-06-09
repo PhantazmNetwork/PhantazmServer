@@ -28,6 +28,7 @@ import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.config.lobby.LobbiesConfig;
+import org.phantazm.server.config.server.PathfinderConfig;
 import org.phantazm.server.config.server.ServerConfig;
 import org.phantazm.server.config.server.ServerInfoConfig;
 import org.phantazm.zombies.equipment.EquipmentData;
@@ -66,6 +67,7 @@ public final class PhantazmServer {
 
         ServerConfig serverConfig;
         LobbiesConfig lobbiesConfig;
+        PathfinderConfig pathfinderConfig;
         try {
             LOGGER.info("Loading server configuration data.");
             Config.initialize();
@@ -111,6 +113,7 @@ public final class PhantazmServer {
             }
 
             lobbiesConfig = handler.loadDataNow(Config.LOBBIES_CONFIG_KEY);
+            pathfinderConfig = handler.loadDataNow(Config.PATHFINDER_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         }
         catch (ConfigProcessException e) {
@@ -122,7 +125,7 @@ public final class PhantazmServer {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(node, serverConfig, lobbiesConfig);
+            initializeFeatures(node, serverConfig, pathfinderConfig, lobbiesConfig);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -164,7 +167,7 @@ public final class PhantazmServer {
     }
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
-            LobbiesConfig lobbiesConfig) throws Exception {
+            PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig) throws Exception {
         BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
 
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
@@ -186,7 +189,7 @@ public final class PhantazmServer {
         Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
         Messaging.initialize(global, serverConfig.serverInfoConfig().authType());
 
-        Proxima.initialize(global, contextManager, serverConfig.pathfinderConfig());
+        Proxima.initialize(global, contextManager, pathfinderConfig);
         ProximaTest.initialize(global, Proxima.getSpawner());
 
         Mob.initialize(contextManager, Path.of("./mobs/"), new YamlCodec());
