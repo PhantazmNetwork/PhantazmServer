@@ -54,9 +54,13 @@ jobs:
                     username: ${{ secrets.SSH_USER }}
                     script: |
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'stop' Enter
-                        tar -xf /home/prod/archive/server.tar.gz -C /home/prod/servers/prod/
                         rm -rf /home/prod/archive/config
+                        rm -rf /home/prod/archive/build
                         mkdir /home/prod/archive/config
+                        mkdir /home/prod/archive/build
                         git clone git@github.com-Configuration:PhantazmNetwork/Configuration.git /home/prod/archive/config
+                        tar -xf /home/prod/archive/server.tar.gz -C /home/prod/archive/build
+                        rsync -ac /home/prod/archive/build/ /home/prod/servers/prod
+                        rsync -ac --delete /home/prod/archive/build/libs/ /home/prod/servers/prod/libs
                         rsync -ac /home/prod/archive/config/ /home/prod/servers/prod
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
