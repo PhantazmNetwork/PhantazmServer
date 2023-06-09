@@ -7,14 +7,13 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            -   uses: actions/checkout@v3
             -   name: Set up JDK 17
                 uses: actions/setup-java@v3
                 with:
                     java-version: '17'
                     cache: 'gradle'
                     distribution: 'adopt'
-            -   name: Checkout PhantazmServer
-                uses: actions/checkout@v3
             -   name: Set up server
                 run: ./gradlew :phantazm-server:setupServer
             -   name: Build & copy jar
