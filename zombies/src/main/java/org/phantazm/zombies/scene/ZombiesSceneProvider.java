@@ -22,7 +22,6 @@ import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
@@ -59,7 +58,6 @@ import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.phantazm.zombies.stage.*;
 
 import java.util.*;
-import java.util.concurrent.Phaser;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -115,16 +113,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.doorHandlerSource = new BasicDoorHandlerSource();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    private static void awaitChunkLoad(Instance instance, Pos spawnPos) {
-        Phaser phaser = new Phaser(1);
-        ChunkUtils.forChunksInRange(spawnPos, MinecraftServer.getChunkViewDistance(), (chunkX, chunkZ) -> {
-            phaser.register();
-            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
-        });
-        phaser.arriveAndAwaitAdvance();
-    }
-
     @Override
     protected @NotNull Optional<ZombiesScene> chooseScene(@NotNull ZombiesJoinRequest request) {
         for (ZombiesScene scene : getScenes()) {
@@ -151,10 +139,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     @Override
     protected @NotNull ZombiesScene createScene(@NotNull ZombiesJoinRequest request) {
         MapSettingsInfo settings = mapInfo.settings();
-        Instance instance = instanceLoader.loadInstance(instanceManager, settings.instancePath());
-
         Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
-        awaitChunkLoad(instance, spawnPos);
+
+        Instance instance = instanceLoader.loadInstance(instanceManager, settings.instancePath(), spawnPos,
+                MinecraftServer.getChunkViewDistance());
+
         instance.setTime(settings.worldTime());
         instance.setTimeRate(0);
 

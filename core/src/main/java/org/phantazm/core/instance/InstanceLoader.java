@@ -1,5 +1,6 @@
 package org.phantazm.core.instance;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +21,6 @@ public interface InstanceLoader {
      * @return A new {@link Instance}
      */
     @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager,
-            @UnmodifiableView @NotNull List<String> subPaths);
+            @UnmodifiableView @NotNull List<String> subPaths, @NotNull Pos spawnPos, int chunkViewDistance);
 
 }

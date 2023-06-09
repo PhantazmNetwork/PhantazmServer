@@ -2,7 +2,6 @@ package org.phantazm.core.game.scene.lobby;
 
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.SceneProviderAbstract;
@@ -11,7 +10,6 @@ import org.phantazm.core.instance.InstanceLoader;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Phaser;
 
 /**
  * Basic implementation of a {@link LobbyProviderAbstract}.
@@ -59,16 +57,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     protected @NotNull Lobby createScene(@NotNull LobbyJoinRequest request) {
-        Instance instance = instanceLoader.loadInstance(instanceManager, lobbyPaths);
-
-        Phaser phaser = new Phaser(1);
-        ChunkUtils.forChunksInRange(instanceConfig.spawnPoint(), chunkViewDistance, (chunkX, chunkZ) -> {
-            phaser.register();
-            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
-        });
-
-        phaser.arriveAndAwaitAdvance();
-
+        Instance instance = instanceLoader.loadInstance(instanceManager, lobbyPaths, instanceConfig.spawnPoint(),
+                chunkViewDistance);
         return new Lobby(instance, instanceConfig, fallback);
     }
 
