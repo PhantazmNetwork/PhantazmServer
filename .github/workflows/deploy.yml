@@ -51,8 +51,8 @@ jobs:
                     SSH_USER: ${{ secrets.SSH_USER }}
             -   name: Copy server files to remote
                 run: |
-                    scp /tmp/server.tar.gz phantazm:/home/gh/server.tar.gz
-                    scp /tmp/config.tar.gz phantazm:/home/gh/config.tar.gz
+                    scp /tmp/server.tar.gz phantazm:/home/prod/archive/server.tar.gz
+                    scp /tmp/config.tar.gz phantazm:/home/prod/archive/config.tar.gz
             -   name: Restart server
                 uses: appleboy/ssh-action@master
                 with:
@@ -61,7 +61,7 @@ jobs:
                     username: ${{ secrets.SSH_USER }}
                     script: |
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'stop' Enter
-                        tar -xf /home/gh/server.tar.gz -C /home/prod/servers/prod/
-                        tar -xf /home/gh/config.tar.gz -C /home/prod/servers/prod/
+                        tar -xf /home/prod/archive/server.tar.gz -C /home/prod/servers/prod/
+                        tar -xf /home/prod/archive/config.tar.gz -C /home/prod/servers/prod/
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
 
