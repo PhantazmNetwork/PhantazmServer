@@ -59,4 +59,5 @@ jobs:
                         rsync -ac /home/prod/archive/config/ /home/prod/servers/prod
                         rsync -ac /home/prod/archive/persistent/ /home/prod/servers/prod
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'cd /home/prod/servers/prod' Enter
+                        tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'chmod +x ./start.sh' Enter
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
