@@ -15,17 +15,13 @@ jobs:
                     cache: 'gradle'
                     distribution: 'adopt'
             -   name: Set up server
-                run: ./gradlew :phantazm-server:setupServer
+                run: ./gradlew -PskipBuild=zombies-mapeditor :phantazm-server:setupServer
             -   name: Build & copy jar
-                run: ./gradlew :phantazm-server:copyJar
+                run: ./gradlew -PskipBuild=zombies-mapeditor :phantazm-server:copyJar
             -   name: Zip server files
                 run: |
                     cd ./run/server-1
                     tar -czf /tmp/server.tar.gz server.jar libs
-            -   name: Zip config files
-                run: |
-                    cd ./config
-                    tar -czf /tmp/config.tar.gz .
             -   name: Set up SSH
                 run: |
                     mkdir -p ~/.ssh/
