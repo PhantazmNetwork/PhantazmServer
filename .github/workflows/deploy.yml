@@ -23,12 +23,6 @@ jobs:
                 run: |
                     cd ./run/server-1
                     tar -czf /tmp/server.tar.gz server.jar libs
-            -   name: Checkout Configuration
-                uses: actions/checkout@v3
-                with:
-                    repository: PhantazmNetwork/Configuration
-                    path: './config'
-                    ssh-key: ${{ secrets.CONFIGURATION_DEPLOY_KEY }}
             -   name: Zip config files
                 run: |
                     cd ./config
@@ -52,7 +46,6 @@ jobs:
             -   name: Copy server files to remote
                 run: |
                     scp /tmp/server.tar.gz phantazm:/home/prod/archive/server.tar.gz
-                    scp /tmp/config.tar.gz phantazm:/home/prod/archive/config.tar.gz
             -   name: Restart server
                 uses: appleboy/ssh-action@master
                 with:
@@ -62,6 +55,8 @@ jobs:
                     script: |
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'stop' Enter
                         tar -xf /home/prod/archive/server.tar.gz -C /home/prod/servers/prod/
-                        tar -xf /home/prod/archive/config.tar.gz -C /home/prod/servers/prod/
+                        rm -rf /home/prod/archive/config
+                        mkdir /home/prod/archive/config
+                        git clone git@github.com-Configuration:PhantazmNetwork/Configuration.git /home/prod/archive/config
+                        rsync -ac /home/prod/archive/config/ /home/prod/servers/prod
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
-
