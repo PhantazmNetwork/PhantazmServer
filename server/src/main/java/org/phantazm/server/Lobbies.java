@@ -71,6 +71,13 @@ public final class Lobbies {
             throw new IllegalArgumentException("No main lobby config present");
         }
 
+        LOGGER.info("Preloading {} lobbies", lobbiesConfig.lobbies().size());
+        for (LobbyConfig lobbyConfig : lobbiesConfig.lobbies().values()) {
+            instanceLoader.preload(instanceManager, lobbyConfig.lobbyPaths(),
+                    lobbyConfig.instanceConfig().spawnPoint(), MinecraftServer.getChunkViewDistance());
+        }
+        LOGGER.info("Finished loading lobbies");
+
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
                 new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceManager,
                         instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig(),

@@ -1,6 +1,6 @@
 package org.phantazm.core.instance;
 
-import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
@@ -11,9 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Phaser;
 
@@ -21,6 +23,8 @@ import java.util.concurrent.Phaser;
  * Implements an {@link InstanceLoader} using the file system.
  */
 public abstract class FileSystemInstanceLoader implements InstanceLoader {
+
+    private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
 
     /**
      * The {@link ChunkSupplier} to be used by instances loaded from this InstanceLoader
@@ -42,21 +46,17 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
         this.instanceSources = new ConcurrentHashMap<>();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
+    // TODO: what if there are distinct spawnPos invocations?
     @Override
     public @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager,
-            @UnmodifiableView @NotNull List<String> subPaths, @NotNull Pos spawnPos, int chunkViewDistance) {
+            @UnmodifiableView @NotNull List<String> subPaths, @NotNull Point spawnPoint, int chunkViewDistance) {
         Path path = rootPath;
         for (String subPath : subPaths) {
             path = path.resolve(subPath);
         }
 
         InstanceContainer containerSource = instanceSources.computeIfAbsent(path, key -> {
-            InstanceContainer container = instanceManager.createInstanceContainer(createChunkLoader(key));
-            container.setChunkSupplier(chunkSupplier);
-
-            awaitChunkLoad(container, spawnPos, chunkViewDistance);
-            return container;
+            return createTemplateContainer(instanceManager, key, spawnPoint, chunkViewDistance);
         });
 
         InstanceContainer container = containerSource.copy();
@@ -66,9 +66,33 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
         return container;
     }
 
-    private void awaitChunkLoad(Instance instance, Pos spawnPos, int chunkViewDistance) {
+    @Override
+    public void preload(@NotNull InstanceManager instanceManager, @UnmodifiableView @NotNull List<String> subPaths,
+            @NotNull Point spawnPoint, int chunkViewDistance) {
+        Path path = rootPath;
+        for (String subPath : subPaths) {
+            path = path.resolve(subPath);
+        }
+
+        instanceSources.computeIfAbsent(path, key -> {
+            return createTemplateContainer(instanceManager, key, spawnPoint, chunkViewDistance);
+        });
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private InstanceContainer createTemplateContainer(InstanceManager instanceManager, Path path, Point spawnPoint,
+            int chunkViewDistance) {
+        InstanceContainer container = instanceManager.createInstanceContainer(createChunkLoader(path));
+        container.setChunkSupplier(chunkSupplier);
+
+        awaitChunkLoadSync(container, spawnPoint, chunkViewDistance);
+        return container;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private void awaitChunkLoadSync(Instance instance, Point spawnPoint, int chunkViewDistance) {
         Phaser phaser = new Phaser(1);
-        ChunkUtils.forChunksInRange(spawnPos, chunkViewDistance, (chunkX, chunkZ) -> {
+        ChunkUtils.forChunksInRange(spawnPoint, chunkViewDistance, (chunkX, chunkZ) -> {
             phaser.register();
             instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
         });

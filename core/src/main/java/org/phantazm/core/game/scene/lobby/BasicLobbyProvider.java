@@ -54,7 +54,6 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         this.chunkViewDistance = chunkViewDistance;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     protected @NotNull Lobby createScene(@NotNull LobbyJoinRequest request) {
         Instance instance = instanceLoader.loadInstance(instanceManager, lobbyPaths, instanceConfig.spawnPoint(),

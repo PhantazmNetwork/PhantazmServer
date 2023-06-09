@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.BasicClientBlockHandlerSource;
 import org.phantazm.core.InstanceClientBlockHandler;
+import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
@@ -115,6 +116,13 @@ public final class ZombiesFeature {
         ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
 
         InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(INSTANCES_FOLDER, DynamicChunk::new);
+
+        LOGGER.info("Preloading {} maps", maps.size());
+        for (MapInfo map : maps.values()) {
+            instanceLoader.preload(MinecraftServer.getInstanceManager(), map.settings().instancePath(),
+                    VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())), MinecraftServer.getChunkViewDistance());
+        }
+        LOGGER.info("Finished loading maps");
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();
