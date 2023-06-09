@@ -135,6 +135,7 @@ public final class Mob {
         contextManager.registerElementClass(PlaySoundSkill.class);
         contextManager.registerElementClass(AttributeModifyingSkill.class);
         contextManager.registerElementClass(SendMessageSkill.class);
+        contextManager.registerElementClass(JumpTowardsTargetSkill.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);
@@ -144,7 +145,7 @@ public final class Mob {
         contextManager.registerElementClass(TemporalSkill.class);
 
         //mob selectors
-        contextManager.registerElementClass(EntitySelector.class);
+        contextManager.registerElementClass(SelfSelector.class);
         contextManager.registerElementClass(NearestPlayerSelector.class);
         contextManager.registerElementClass(NearestPlayersSelector.class);
         contextManager.registerElementClass(LastHitEntitySelector.class);
