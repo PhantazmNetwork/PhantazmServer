@@ -67,10 +67,7 @@ public class EndStage implements Stage {
         instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F));
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            PlayerStateSwitcher switcher = zombiesPlayer.module().getStateSwitcher();
-            ZombiesPlayerState state = switcher.getState();
-
-            if (state.key().equals(ZombiesPlayerStateKeys.KNOCKED.key())) {
+            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.KNOCKED)) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.killed(null, null));
             }
         }
@@ -80,9 +77,16 @@ public class EndStage implements Stage {
     public void tick(long time) {
         remainingTicks.apply(ticks -> ticks - 1);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
-                    unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
-            sidebarUpdater.tick(time);
+            if (!zombiesPlayer.hasQuit()) {
+                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
+                sidebarUpdater.tick(time);
+            }
+
+            zombiesPlayer.getPlayer().ifPresent(player -> {
+                for (ZombiesPlayer otherPlayer : zombiesPlayers) {
+                    otherPlayer.module().getTabList().updateScore(player, zombiesPlayer.module().getKills().getKills());
+                }
+            });
         }
     }
 

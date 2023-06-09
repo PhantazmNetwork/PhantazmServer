@@ -32,5 +32,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new RoundCommand(sceneMapper));
         addSubcommand(new KillAllCommand(sceneMapper));
         addSubcommand(new GodmodeCommand(sceneMapper));
+        addSubcommand(new AmmoRefillCommand(sceneMapper));
     }
 }

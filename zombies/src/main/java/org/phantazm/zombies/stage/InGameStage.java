@@ -113,10 +113,18 @@ public class InGameStage implements Stage {
     public void tick(long time) {
         ticksSinceStart.apply(ticks -> ticks + 1);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> {
-                return sidebarUpdaterCreator.apply(zombiesPlayer);
+            if (!zombiesPlayer.hasQuit()) {
+                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> {
+                    return sidebarUpdaterCreator.apply(zombiesPlayer);
+                });
+                sidebarUpdater.tick(time);
+            }
+
+            zombiesPlayer.getPlayer().ifPresent(player -> {
+                for (ZombiesPlayer otherPlayer : zombiesPlayers) {
+                    otherPlayer.module().getTabList().updateScore(player, zombiesPlayer.module().getKills().getKills());
+                }
             });
-            sidebarUpdater.tick(time);
         }
     }
 

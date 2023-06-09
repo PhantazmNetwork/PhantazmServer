@@ -3,7 +3,6 @@ package org.phantazm.commons;
 /**
  * An interface which allows implementations to have periodic behavior.
  */
-@FunctionalInterface
 public interface Tickable {
     /**
      * Executes a "tick".
@@ -11,5 +10,6 @@ public interface Tickable {
      *
      * @param time the number of milliseconds that have elapsed
      */
-    void tick(long time);
+    default void tick(long time) {
+    }
 }

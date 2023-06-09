@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Depend;
 import com.github.steanky.element.core.annotation.Memoize;
 import com.github.steanky.element.core.dependency.DependencyModule;
 import net.minestom.server.scoreboard.Sidebar;
+import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
@@ -34,6 +35,7 @@ public class ZombiesPlayerModule implements DependencyModule {
     private final PlayerStateSwitcher stateSwitcher;
     private final Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions;
     private final Sidebar sidebar;
+    private final TabList tabList;
     private final TransactionModifierSource playerTransactionModifierSource;
     private final TransactionModifierSource compositeTransactionModifierSource;
     private final Flaggable flaggable;
@@ -43,7 +45,8 @@ public class ZombiesPlayerModule implements DependencyModule {
             @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
             @NotNull PlayerStateSwitcher stateSwitcher,
             @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
-            @NotNull Sidebar sidebar, @NotNull TransactionModifierSource mapTransactionModifierSource,
+            @NotNull Sidebar sidebar,
+            @NotNull TabList tabList, @NotNull TransactionModifierSource mapTransactionModifierSource,
             @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
@@ -55,6 +58,7 @@ public class ZombiesPlayerModule implements DependencyModule {
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
         this.stateFunctions = Map.copyOf(stateFunctions);
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
+        this.tabList = Objects.requireNonNull(tabList, "tabList");
         this.playerTransactionModifierSource =
                 Objects.requireNonNull(playerTransactionModifierSource, "playerTransactionModifierSource");
         this.compositeTransactionModifierSource =
@@ -100,6 +104,10 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     public @NotNull Sidebar getSidebar() {
         return sidebar;
+    }
+
+    public @NotNull TabList getTabList() {
+        return tabList;
     }
 
     @Depend("zombies.dependency.player.modifiers")

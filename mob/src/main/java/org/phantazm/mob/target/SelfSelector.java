@@ -12,11 +12,11 @@ import java.util.Optional;
 /**
  * A {@link TargetSelector} that selects itself.
  */
-@Model("mob.selector.entity")
+@Model("mob.selector.self")
 @Cache
-public class EntitySelector implements TargetSelector<Entity> {
+public class SelfSelector implements TargetSelector<Entity> {
     @FactoryMethod
-    public EntitySelector() {
+    public SelfSelector() {
 
     }
 

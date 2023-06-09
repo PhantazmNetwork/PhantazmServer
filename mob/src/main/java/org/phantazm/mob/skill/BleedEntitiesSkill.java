@@ -64,6 +64,21 @@ public class BleedEntitiesSkill implements Skill {
         return true;
     }
 
+    @Override
+    public void end(@NotNull PhantazmMob self) {
+        Iterator<BleedContext> contextIterator = bleeding.iterator();
+        if (!contextIterator.hasNext()) {
+            return;
+        }
+
+        while (contextIterator.hasNext()) {
+            BleedContext next = contextIterator.next();
+            if (next.target == self.entity()) {
+                contextIterator.remove();
+            }
+        }
+    }
+
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selector,
                        float bleedDamage,

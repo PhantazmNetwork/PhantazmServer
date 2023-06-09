@@ -86,9 +86,10 @@ public class CountdownStage implements Stage {
             instance.sendMessage(message);
         }
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
-                    unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
-            sidebarUpdater.tick(time);
+            if (!zombiesPlayer.hasQuit()) {
+                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
+                sidebarUpdater.tick(time);
+            }
         }
 
         ticksRemaining.apply(ticks -> ticks - 1);

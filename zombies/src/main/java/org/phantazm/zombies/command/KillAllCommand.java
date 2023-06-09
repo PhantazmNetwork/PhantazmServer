@@ -6,6 +6,7 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Objects;
@@ -27,6 +28,7 @@ public class KillAllCommand extends Command {
             UUID uuid = player.getUuid();
             sceneMapper.apply(uuid).flatMap(scene -> scene.getMap().roundHandler().currentRound()).ifPresent(round -> {
                 for (PhantazmMob mob : round.getSpawnedMobs()) {
+                    mob.entity().setTag(Tags.LAST_HIT_BY, uuid);
                     mob.entity().kill();
                 }
             });

@@ -14,6 +14,14 @@ import org.phantazm.mob.PhantazmMob;
  */
 public interface Skill {
     /**
+     * Called when a mob spawns with this skill.
+     *
+     * @param self the mob that spawned
+     */
+    default void init(@NotNull PhantazmMob self) {
+    }
+
+    /**
      * Makes the given mob use this skill.
      */
     void use(@NotNull PhantazmMob self);
@@ -25,6 +33,9 @@ public interface Skill {
      * @param self the current mob
      */
     default void tick(long time, @NotNull PhantazmMob self) {
+    }
+
+    default void end(@NotNull PhantazmMob self) {
     }
 
     /**

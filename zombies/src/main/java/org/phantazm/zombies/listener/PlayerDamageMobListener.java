@@ -6,6 +6,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Map;
@@ -27,13 +28,13 @@ public class PlayerDamageMobListener extends PhantazmMobEventListener<EntityDama
         if (!(event.getDamageType() instanceof EntityDamage entityDamage)) {
             return;
         }
-        ZombiesPlayer zombiesPlayer = zombiesPlayers.get(entityDamage.getSource().getUuid());
+
+        UUID uuid = entityDamage.getSource().getUuid();
+        ZombiesPlayer zombiesPlayer = zombiesPlayers.get(uuid);
         if (zombiesPlayer == null) {
             return;
         }
 
-        if (event.getDamage() >= event.getEntity().getHealth()) {
-            zombiesPlayer.module().getKills().onKill(mob);
-        }
+        mob.entity().setTag(Tags.LAST_HIT_BY, uuid);
     }
 }

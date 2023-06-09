@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MobStore implements Tickable {
     private static final Key DEATH_KEY = Key.key(Namespaces.PHANTAZM, "death");
+    private static final Key SPAWN_KEY = Key.key(Namespaces.PHANTAZM, "spawn");
 
     private final Map<UUID, PhantazmMob> uuidToMob = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Pair<PhantazmMob, Collection<Skill>>> tickableSkills =
@@ -66,7 +67,7 @@ public class MobStore implements Tickable {
      *
      * @param mob The {@link PhantazmMob} to register
      */
-    public void registerMob(@NotNull PhantazmMob mob) {
+    public void onMobSpawn(@NotNull PhantazmMob mob) {
         Objects.requireNonNull(mob, "mob");
 
         UUID uuid = mob.entity().getUuid();
@@ -87,6 +88,13 @@ public class MobStore implements Tickable {
 
         if (!tickables.isEmpty()) {
             tickableSkills.put(uuid, Pair.of(mob, List.copyOf(tickables)));
+        }
+
+        Collection<Skill> spawnSkills = mob.triggers().get(SPAWN_KEY);
+        if (spawnSkills != null) {
+            for (Skill skill : spawnSkills) {
+                skill.use(mob);
+            }
         }
     }
 

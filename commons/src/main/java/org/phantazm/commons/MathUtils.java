@@ -12,6 +12,10 @@ public final class MathUtils {
         throw new UnsupportedOperationException();
     }
 
+    public static long randomInterval(long min, long max) {
+        return (long)(Math.random() * (min - max)) + min;
+    }
+
     public static int ceilDiv(double dividend, double divisor) {
         return (int)Math.ceil(dividend / divisor);
     }

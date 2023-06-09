@@ -5,6 +5,8 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -50,7 +52,7 @@ public interface MapObjects {
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
                 @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler,
-                @NotNull SongPlayer songPlayer);
+                @NotNull Wrapper<EventNode<Event>> eventNode, @NotNull SongPlayer songPlayer);
     }
 
     interface Module {
@@ -79,6 +81,8 @@ public interface MapObjects {
         @NotNull Supplier<? extends PowerupHandler> powerupHandler();
 
         @NotNull Supplier<? extends WindowHandler> windowHandler();
+
+        @NotNull Supplier<? extends EventNode<Event>> eventNode();
 
         @NotNull MobStore mobStore();
 

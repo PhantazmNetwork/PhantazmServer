@@ -166,11 +166,12 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
         Wrapper<PowerupHandler> powerupHandlerWrapper = Wrapper.ofNull();
         Wrapper<WindowHandler> windowHandlerWrapper = Wrapper.ofNull();
+        Wrapper<EventNode<Event>> eventNodeWrapper = Wrapper.ofNull();
 
         SongPlayer songPlayer = new BasicSongPlayer();
         MapObjects mapObjects =
                 createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, powerupHandlerWrapper,
-                        windowHandlerWrapper, songPlayer);
+                        windowHandlerWrapper, eventNodeWrapper, songPlayer);
 
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
         roundHandlerWrapper.set(roundHandler);
@@ -193,6 +194,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         EventNode<Event> childNode =
                 createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
                         doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore);
+        eventNodeWrapper.set(childNode);
 
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         SidebarModule sidebarModule =
@@ -245,9 +247,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private MapObjects createMapObjects(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore,
-            Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler, SongPlayer songPlayer) {
+            Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler,
+            Wrapper<EventNode<Event>> eventNode, SongPlayer songPlayer) {
         return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, powerupHandler,
-                windowHandler, songPlayer);
+                windowHandler, eventNode, songPlayer);
     }
 
     private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,
@@ -280,7 +283,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         //entity events
         node.addListener(EntityDeathEvent.class,
                 new PhantazmMobDeathListener(keyParser, instance, mobStore, roundHandler::currentRound, powerupHandler,
-                        roomTracker, windowTracker));
+                        roomTracker, windowTracker, zombiesPlayers));
         node.addListener(EntityDamageEvent.class, new PlayerDamageMobListener(instance, mobStore, zombiesPlayers));
         node.addListener(EntityDamageByGunEvent.class,
                 new EntityDamageByGunEventListener(instance, mobStore, mapObjects, zombiesPlayers));
@@ -329,7 +332,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
             @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
-        Stage idle = new IdleStage(zombiesPlayers);
+        Stage idle = new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")));
 
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
         TickFormatter tickFormatter =

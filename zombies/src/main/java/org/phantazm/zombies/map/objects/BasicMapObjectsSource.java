@@ -14,6 +14,8 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +80,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
             @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler,
-            @NotNull SongPlayer songPlayer) {
+            @NotNull Wrapper<EventNode<Event>> eventNode, @NotNull SongPlayer songPlayer) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, playerMap.values());
@@ -98,7 +100,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Module module =
                 new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
                         slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
-                        mobStore, songPlayer);
+                        eventNode, mobStore, songPlayer);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -269,6 +271,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Supplier<? extends MapObjects> mapObjectsSupplier;
         private final Wrapper<PowerupHandler> powerupHandler;
         private final Wrapper<WindowHandler> windowHandler;
+        private final Wrapper<EventNode<Event>> eventNode;
         private final MobStore mobStore;
         private final SongPlayer songPlayer;
 
@@ -277,7 +280,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 TransactionModifierSource transactionModifierSource, SlotDistributor slotDistributor,
                 Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
                 Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
-                Wrapper<WindowHandler> windowHandler, MobStore mobStore, SongPlayer songPlayer) {
+                Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode, MobStore mobStore,
+                SongPlayer songPlayer) {
             this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
             this.instance = Objects.requireNonNull(instance, "instance");
             this.random = Objects.requireNonNull(random, "random");
@@ -290,6 +294,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier, "mapObjectsSupplier");
             this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
             this.windowHandler = Objects.requireNonNull(windowHandler, "windowHandler");
+            this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
             this.songPlayer = Objects.requireNonNull(songPlayer, "songPlayer");
         }
@@ -357,6 +362,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull Supplier<? extends WindowHandler> windowHandler() {
             return windowHandler;
+        }
+
+        @Override
+        public @NotNull Supplier<? extends EventNode<Event>> eventNode() {
+            return eventNode;
         }
 
         @Override

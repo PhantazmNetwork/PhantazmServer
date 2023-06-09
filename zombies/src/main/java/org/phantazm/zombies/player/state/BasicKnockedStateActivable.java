@@ -8,6 +8,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Sidebar;
+import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.player.PlayerView;
@@ -34,11 +35,13 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final Sidebar sidebar;
 
+    private final TabList tabList;
+
     private final ZombiesPlayerMeta meta;
 
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
             @NotNull PlayerView playerView, @NotNull ReviveHandler reviveHandler, @NotNull TickFormatter tickFormatter,
-            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar) {
+            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
@@ -46,6 +49,7 @@ public class BasicKnockedStateActivable implements Activable {
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
+        this.tabList = tabList;
     }
 
     @Override
@@ -58,6 +62,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0F);
             player.setGameMode(GameMode.SPECTATOR);
             sidebar.addViewer(player);
+            tabList.addViewer(player);
             context.getVehicle().addPassenger(player);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
@@ -91,6 +96,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
+            tabList.addViewer(player);
             context.getVehicle().remove();
             player.teleport(Pos.fromPoint(context.getKnockLocation()));
         });

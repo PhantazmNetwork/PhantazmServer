@@ -73,7 +73,7 @@ public class MeleeAttackGoal implements GoalCreator {
         public void start() {
             ProximaEntity self = mob.entity();
             Entity target = self.getTargetEntity();
-            if (target == null) {
+            if (target == null || self.isDead()) {
                 return;
             }
 

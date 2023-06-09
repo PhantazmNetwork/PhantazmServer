@@ -105,7 +105,14 @@ public class BasicMobSpawner implements MobSpawner {
             proximaEntity.setCustomNameVisible(true);
         });
 
-        this.mobStore.registerMob(mob);
+        this.mobStore.onMobSpawn(mob);
+
+        for (Collection<Skill> skills : mob.triggers().values()) {
+            for (Skill skill : skills) {
+                skill.init(mob);
+            }
+        }
+
         return mob;
     }
 

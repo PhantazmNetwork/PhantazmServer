@@ -9,26 +9,23 @@ import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
+import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
-import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Description("An effect that can perform arbitrary actions on entities shot by the player who has the effect.")
 @Model("zombies.perk.effect.shot")
 @Cache(false)
 public class ShotEffectCreator implements PerkEffectCreator {
     private final EventNode<Event> rootNode;
-    private final Collection<Action<Entity>> actions;
+    private final Collection<ShotEffect> actions;
 
     @FactoryMethod
     public ShotEffectCreator(@NotNull EventNode<Event> rootNode,
-            @NotNull @Child("action") Collection<Action<Entity>> actions) {
-        this.rootNode = Objects.requireNonNull(rootNode, "rootNode");
+            @NotNull @Child("action") Collection<ShotEffect> actions) {
+        this.rootNode = rootNode;
         this.actions = List.copyOf(actions);
     }
 
@@ -40,13 +37,13 @@ public class ShotEffectCreator implements PerkEffectCreator {
     private static class Effect implements PerkEffect {
         private final EventNode<Event> rootNode;
         private final ZombiesPlayer zombiesPlayer;
-        private final Collection<Action<Entity>> actions;
+        private final Collection<ShotEffect> actions;
 
         private final EventListener<EntityDamageByGunEvent> listener;
 
         private final Tickable[] tickableActions;
 
-        private Effect(EventNode<Event> rootNode, ZombiesPlayer zombiesPlayer, Collection<Action<Entity>> actions) {
+        private Effect(EventNode<Event> rootNode, ZombiesPlayer zombiesPlayer, Collection<ShotEffect> actions) {
             this.rootNode = rootNode;
             this.zombiesPlayer = zombiesPlayer;
             this.actions = actions;
@@ -94,8 +91,8 @@ public class ShotEffectCreator implements PerkEffectCreator {
 
             UUID uuid = player.getUuid();
             if (uuid.equals(zombiesPlayer.getUUID())) {
-                for (Action<Entity> action : actions) {
-                    action.perform(event.getEntity());
+                for (ShotEffect action : actions) {
+                    action.perform(event.getEntity(), zombiesPlayer);
                 }
             }
         }

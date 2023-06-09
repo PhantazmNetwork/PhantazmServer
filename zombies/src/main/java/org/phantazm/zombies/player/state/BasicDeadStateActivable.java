@@ -5,6 +5,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Sidebar;
+import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
@@ -21,16 +22,18 @@ public class BasicDeadStateActivable implements Activable {
     private final PlayerView playerView;
     private final ZombiesPlayerMeta meta;
     private final Sidebar sidebar;
+    private final TabList tabList;
 
     public BasicDeadStateActivable(@NotNull InventoryAccessRegistry accessRegistry,
             @NotNull DeadPlayerStateContext context, @NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar) {
+            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
+        this.tabList = Objects.requireNonNull(tabList, "tabList");
     }
 
     @Override
@@ -39,6 +42,7 @@ public class BasicDeadStateActivable implements Activable {
             player.setInvisible(true);
             player.setGameMode(GameMode.SPECTATOR);
             sidebar.addViewer(player);
+            tabList.addViewer(player);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             instance.sendMessage(buildDeathMessage(displayName));
@@ -57,6 +61,7 @@ public class BasicDeadStateActivable implements Activable {
             player.setInvisible(false);
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
+            tabList.addViewer(player);
         });
 
         accessRegistry.switchAccess(null);
