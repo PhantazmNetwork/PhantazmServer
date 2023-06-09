@@ -40,5 +40,7 @@ sequenceOf(
     if (!toSkip.contains(it)) {
         include(":phantazm-$it")
         project(":phantazm-$it").projectDir = file(it)
+    } else {
+        println("Skipping project module $it")
     }
 }

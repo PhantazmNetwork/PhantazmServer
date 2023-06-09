@@ -15,17 +15,13 @@ jobs:
                     cache: 'gradle'
                     distribution: 'adopt'
             -   name: Set up server
-                run: ./gradlew :phantazm-server:setupServer
+                run: ./gradlew -PskipBuild=zombies-mapeditor :phantazm-server:setupServer
             -   name: Build & copy jar
-                run: ./gradlew :phantazm-server:copyJar
+                run: ./gradlew -PskipBuild=zombies-mapeditor :phantazm-server:copyJar
             -   name: Zip server files
                 run: |
                     cd ./run/server-1
                     tar -czf /tmp/server.tar.gz server.jar libs
-            -   name: Zip config files
-                run: |
-                    cd ./config
-                    tar -czf /tmp/config.tar.gz .
             -   name: Set up SSH
                 run: |
                     mkdir -p ~/.ssh/
@@ -59,7 +55,9 @@ jobs:
                         mkdir /home/prod/archive/build
                         git clone git@github.com-Configuration:PhantazmNetwork/Configuration.git /home/prod/archive/config
                         tar -xf /home/prod/archive/server.tar.gz -C /home/prod/archive/build
-                        rsync -ac /home/prod/archive/build/ /home/prod/servers/prod
-                        rsync -ac --delete /home/prod/archive/build/libs/ /home/prod/servers/prod/libs
+                        rsync -ac --delete /home/prod/archive/build/ /home/prod/servers/prod
                         rsync -ac /home/prod/archive/config/ /home/prod/servers/prod
+                        rsync -ac /home/prod/archive/persistent/ /home/prod/servers/prod
+                        tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'cd /home/prod/servers/prod' Enter
+                        tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'chmod +x ./start.sh' Enter
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
