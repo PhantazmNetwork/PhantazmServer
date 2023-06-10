@@ -19,7 +19,7 @@ public class MobValidator implements TargetValidator {
     }
 
     @Override
-    public boolean valid(@NotNull Entity entity) {
+    public boolean valid(@NotNull Entity targeter, @NotNull Entity entity) {
         return mobStore.hasMob(entity.getUuid());
     }
 }

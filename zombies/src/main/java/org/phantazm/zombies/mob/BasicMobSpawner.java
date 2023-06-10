@@ -28,6 +28,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.ElementUtils;
+import org.phantazm.mob.BasicPhantazmMob;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
@@ -96,7 +97,7 @@ public class BasicMobSpawner implements MobSpawner {
         Map<Key, Collection<Skill>> triggers = createTriggers(context);
         Collection<GoalApplier> goalAppliers = createGoalAppliers(context);
 
-        PhantazmMob mob = new PhantazmMob(model, proximaEntity, triggers);
+        PhantazmMob mob = new BasicPhantazmMob(model, proximaEntity, triggers);
         for (GoalApplier applier : goalAppliers) {
             applier.apply(mob);
         }

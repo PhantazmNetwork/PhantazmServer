@@ -30,7 +30,7 @@ public class AllPlayersSelector implements TargetSelector<List<Player>> {
             if (players.size() > 0) {
                 List<Player> playerList = new ArrayList<>(players.size());
                 for (Player player : players) {
-                    if (targetValidator.valid(player)) {
+                    if (targetValidator.valid(self.entity(), player)) {
                         playerList.add(player);
                     }
                 }

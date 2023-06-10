@@ -27,7 +27,7 @@ public class ZombiesPlayerValidator implements TargetValidator {
     }
 
     @Override
-    public boolean valid(@NotNull Entity entity) {
+    public boolean valid(@NotNull Entity targeter, @NotNull Entity entity) {
         MapObjects mapObjects = this.mapObjects.get();
         ZombiesPlayer player = mapObjects.module().playerMap().get(entity.getUuid());
         if (player != null) {
