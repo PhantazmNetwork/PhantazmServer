@@ -136,6 +136,7 @@ public final class Mob {
         contextManager.registerElementClass(AttributeModifyingSkill.class);
         contextManager.registerElementClass(SendMessageSkill.class);
         contextManager.registerElementClass(JumpTowardsTargetSkill.class);
+        contextManager.registerElementClass(SpawnParticleSkill.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);

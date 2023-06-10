@@ -6,6 +6,7 @@ import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
 import com.github.steanky.ethylene.mapper.signature.Signature;
 import com.github.steanky.ethylene.mapper.type.Token;
+import com.github.steanky.vector.Bounds3D;
 import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -50,8 +51,8 @@ public final class Ethylene {
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(sound())
                         .withCustomSignature(style()).withCustomSignature(textColor()).withCustomSignature(vec3D())
-                        .withCustomSignature(rgbLike()).withScalarSignature(key()).withScalarSignature(uuid())
-                        .withScalarSignature(component()).withScalarSignature(itemStack())
+                        .withCustomSignature(bounds3D()).withCustomSignature(rgbLike()).withScalarSignature(key())
+                        .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
                         .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
                         .withScalarSignature(particle())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
@@ -83,6 +84,14 @@ public final class Ethylene {
                         }, sound -> List.of(sound.name(), sound.source(), sound.volume(), sound.pitch()),
                         Map.entry("name", Token.ofClass(Key.class)), Map.entry("source", Token.ofClass(Sound.Source.class)),
                         Map.entry("volume", Token.DOUBLE), Map.entry("pitch", Token.DOUBLE)).matchingNames().matchingTypeHints()
+                .build();
+    }
+
+    private static Signature<Bounds3D> bounds3D() {
+        return Signature.builder(Token.ofClass(Bounds3D.class), (ignored, args) -> {
+                            return Bounds3D.immutable(args.get(0), args.get(1));
+                        }, bounds -> List.of(bounds.immutableOrigin(), bounds.immutableLengths()),
+                        Map.entry("origin", Token.ofClass(Vec3D.class)), Map.entry("lengths", Token.ofClass(Vec3D.class)))
                 .build();
     }
 
