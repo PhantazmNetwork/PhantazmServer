@@ -81,7 +81,7 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
                 continue;
             }
 
-            if (room.isOpen()) {
+            if (room.isOpen() || room.getRoomInfo().isSpawn()) {
                 continue;
             }
 

@@ -40,6 +40,7 @@ import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.map.action.door.DoorPlaySoundAction;
 import org.phantazm.zombies.map.action.door.DoorSendMessageAction;
 import org.phantazm.zombies.map.action.door.DoorSendOpenedRoomsAction;
 import org.phantazm.zombies.map.action.room.SpawnMobsAction;
@@ -161,6 +162,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(DoorSendMessageAction.class);
         contextManager.registerElementClass(DoorSendOpenedRoomsAction.class);
         contextManager.registerElementClass(SelectPowerupZombieAction.class);
+        contextManager.registerElementClass(DoorPlaySoundAction.class);
 
         //ShopPredicate
         contextManager.registerElementClass(StaticCostPredicate.class);

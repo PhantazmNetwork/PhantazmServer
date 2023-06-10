@@ -148,6 +148,8 @@ public class Door extends BoundedBase {
             holograms.clear();
             holograms.trimToSize();
 
+            instance.playSound(doorInfo.openSound(), center.x(), center.y(), center.z());
+
             for (Action<Door> action : openActions) {
                 action.perform(this);
             }
