@@ -11,7 +11,8 @@ repositories {
             includeGroup("org.phantazm.Minestom")
             includeGroup("com.github.Minestom")
             includeGroup("com.github.MadMartian")
-            includeGroup("org.phantazm")
+            includeModule("org.phantazm", "MinestomDataGenerator")
+            includeModule("org.phantazm", "Minestom")
         }
     }
 }
