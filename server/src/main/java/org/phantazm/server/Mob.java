@@ -30,6 +30,7 @@ import org.phantazm.mob.skill.*;
 import org.phantazm.mob.target.*;
 import org.phantazm.mob.validator.AlwaysValid;
 import org.phantazm.mob.validator.AndValidator;
+import org.phantazm.mob.validator.NotSelfValidator;
 import org.phantazm.mob.validator.OrValidator;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
 import org.phantazm.zombies.mob.validator.MobValidator;
@@ -157,6 +158,7 @@ public final class Mob {
         contextManager.registerElementClass(AlwaysValid.class);
         contextManager.registerElementClass(AndValidator.class);
         contextManager.registerElementClass(OrValidator.class);
+        contextManager.registerElementClass(NotSelfValidator.class);
 
         //zombies mob validators
         contextManager.registerElementClass(ZombiesPlayerValidator.class);

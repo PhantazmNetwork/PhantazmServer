@@ -21,7 +21,7 @@ public class PhantazmMobProjectileCollisionFilter implements ProjectileCollision
     /**
      * Creates a new {@link PhantazmMobProjectileCollisionFilter}.
      *
-     * @param mobStore A {@link MobStore} to retrive {@link PhantazmMob}s from
+     * @param mobStore A {@link MobStore} to retrieve {@link PhantazmMob}s from
      */
     @FactoryMethod
     public PhantazmMobProjectileCollisionFilter(@NotNull MobStore mobStore) {

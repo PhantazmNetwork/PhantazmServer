@@ -17,9 +17,9 @@ public class AndValidator implements TargetValidator {
     }
 
     @Override
-    public boolean valid(@NotNull Entity entity) {
+    public boolean valid(@NotNull Entity targeter, @NotNull Entity entity) {
         for (TargetValidator validator : validators) {
-            if (!validator.valid(entity)) {
+            if (!validator.valid(targeter, entity)) {
                 return false;
             }
         }
