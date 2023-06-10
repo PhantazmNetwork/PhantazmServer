@@ -108,11 +108,11 @@ public class Spawnpoint {
             }
 
             Room room = linkedRoom.get();
-            if (!room.isOpen() && !room.getRoomInfo().isSpawn()) {
+            if (!room.isOpen()) {
                 return false;
             }
         }
-        else if (linkedRoom != null && !linkedRoom.isOpen() && !linkedRoom.getRoomInfo().isSpawn()) {
+        else if (linkedRoom != null && !linkedRoom.isOpen()) {
             return false;
         }
 

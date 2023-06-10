@@ -35,12 +35,12 @@ public class Room extends BoundedBase {
     }
 
     public boolean isOpen() {
-        return isOpen;
+        return isOpen || roomInfo.isSpawn();
     }
 
     public void open() {
         synchronized (sync) {
-            if (isOpen) {
+            if (isOpen()) {
                 return;
             }
 

@@ -120,6 +120,24 @@ public class Door extends BoundedBase {
         return isOpen;
     }
 
+    private void removeBlocksAndHolograms() {
+        for (Bounds3I region : regions) {
+            region.forEach((x, y, z) -> {
+                Block oldBlock = instance.getBlock(x, y, z);
+                blockMappings.put(x, y, z, oldBlock);
+                instance.setBlock(x, y, z, fillBlock);
+            });
+        }
+
+        for (Hologram hologram : holograms) {
+            hologram.clear();
+            hologram.trimToSize();
+        }
+
+        holograms.clear();
+        holograms.trimToSize();
+    }
+
     /**
      * Opens this door, removing its blocks. If the door is already open, this method will do nothing.
      */
@@ -132,21 +150,7 @@ public class Door extends BoundedBase {
             this.lastInteractor = interactor;
             isOpen = true;
 
-            for (Bounds3I region : regions) {
-                region.forEach((x, y, z) -> {
-                    Block oldBlock = instance.getBlock(x, y, z);
-                    blockMappings.put(x, y, z, oldBlock);
-                    instance.setBlock(x, y, z, fillBlock);
-                });
-            }
-
-            for (Hologram hologram : holograms) {
-                hologram.clear();
-                hologram.trimToSize();
-            }
-
-            holograms.clear();
-            holograms.trimToSize();
+            removeBlocksAndHolograms();
 
             instance.playSound(doorInfo.openSound(), center.x(), center.y(), center.z());
 
@@ -157,7 +161,35 @@ public class Door extends BoundedBase {
             for (Key key : doorInfo.opensTo()) {
                 Room room = mapObjects.get().roomMap().get(key);
                 if (room != null) {
+                    if (room.isOpen()) {
+                        continue;
+                    }
+
                     room.open();
+
+                    for (Door otherDoor : mapObjects.get().doorTracker().items()) {
+                        if (otherDoor == this) {
+                            continue;
+                        }
+
+                        boolean allOpen = true;
+                        for (Key otherRoomKey : doorInfo.opensTo()) {
+                            Room otherRoom = mapObjects.get().roomMap().get(otherRoomKey);
+                            if (otherRoom != null && !otherRoom.isOpen()) {
+                                allOpen = false;
+                                break;
+                            }
+                        }
+
+                        if (allOpen) {
+                            synchronized (otherDoor.sync) {
+                                if (!otherDoor.isOpen) {
+                                    otherDoor.isOpen = false;
+                                    removeBlocksAndHolograms();
+                                }
+                            }
+                        }
+                    }
                 }
                 else {
                     LOGGER.warn("Tried to open nonexistent room " + key);

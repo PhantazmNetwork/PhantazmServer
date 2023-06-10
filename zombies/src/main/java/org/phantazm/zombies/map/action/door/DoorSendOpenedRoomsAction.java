@@ -76,7 +76,7 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
                         return false;
                     }
 
-                    return !room.isOpen() && !room.getRoomInfo().isSpawn();
+                    return !room.isOpen();
                 }).toList();
 
         boolean appendedRoom = false;
