@@ -25,6 +25,7 @@ import org.phantazm.core.BasicClientBlockHandlerSource;
 import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
+import org.phantazm.core.equipment.NoUpgradePath;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
@@ -199,6 +200,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlayerDisplay.class);
         contextManager.registerElementClass(StaticItemDisplay.class);
         contextManager.registerElementClass(ConditionalDisplay.class);
+        contextManager.registerElementClass(FlagConditionalDisplay.class);
         contextManager.registerElementClass(IncrementalMetaDisplay.class);
         contextManager.registerElementClass(AnimatedItemDisplay.class);
         contextManager.registerElementClass(EmptyDisplay.class);
@@ -247,6 +249,7 @@ public final class ZombiesFeature {
 
         //UpgradePath
         contextManager.registerElementClass(LinearUpgradePath.class);
+        contextManager.registerElementClass(NoUpgradePath.class);
 
         //DeactivationPredicates
         contextManager.registerElementClass(TimedDeactivationPredicate.class);

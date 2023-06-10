@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Model("zombies.map.shop.interactor.conditional")
+@Cache(false)
 public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.Data> {
     private final List<ShopPredicate> predicates;
     private final List<ShopInteractor> successInteractors;
