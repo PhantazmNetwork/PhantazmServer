@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.fabric.loom)
 }
 
-version = "1.2.1-SNAPSHOT"
+version = "1.3.0+1.19.4"
 
 base {
     archivesName.set("phantazm-zombies-mapeditor")
@@ -30,11 +30,6 @@ repositories {
         }
     }
     maven("https://server.bbkr.space/artifactory/libs-release")
-    maven("https://ladysnake.jfrog.io/artifactory/mods")
-}
-
-loom {
-    clientOnlyMinecraftJar()
 }
 
 val fabricApiVersion: String by project
@@ -59,7 +54,6 @@ dependencies {
 
     include(libs.libgui)
     include(libs.renderer)
-    include(libs.satin)
 
     include(projects.phantazmCommons)
     include(projects.phantazmMessaging)

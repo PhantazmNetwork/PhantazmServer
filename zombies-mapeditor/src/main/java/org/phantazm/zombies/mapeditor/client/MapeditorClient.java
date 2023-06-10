@@ -4,9 +4,7 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.netty.buffer.Unpooled;
-import me.x150.MessageSubscription;
-import me.x150.renderer.event.Events;
-import me.x150.renderer.event.RenderEvent;
+import me.x150.renderer.event.RenderEvents;
 import me.x150.renderer.render.Renderer3d;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -27,8 +25,6 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -74,8 +70,9 @@ public class MapeditorClient implements ClientModInitializer {
         ConfigCodec codec = new YamlCodec();
         Path defaultMapDirectory = FabricLoader.getInstance().getConfigDir().resolve(MAPEDITOR_PATH);
 
-        ObjectRenderer renderer = new Renderer();
-        Events.manager.registerSubscribers(renderer);
+        Renderer renderer = new Renderer();
+        RenderEvents.WORLD.register(renderer::rendered);
+        RenderEvents.HUD.register(renderer::hudRender);
 
         EditorSession editorSession =
                 new BasicEditorSession(renderer, new FileSystemMapLoader(defaultMapDirectory, codec),
@@ -111,14 +108,12 @@ public class MapeditorClient implements ClientModInitializer {
                         if (player != null) {
                             Text message;
                             if (responsePacket.version() == MapSettingsInfo.MAP_DATA_VERSION) {
-                                message = MutableText.of(new LiteralTextContent(
-                                        "The mapeditor client is synchronized with the server's expected " +
-                                                "mapdata version.")).formatted(Formatting.GREEN);
+                                message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
+                                        .formatted(Formatting.GREEN);
                             }
                             else {
-                                message = MutableText.of(new LiteralTextContent("The mapeditor client is " +
-                                        "not synchronized with the server's expected mapdata version. Please update " +
-                                        "the mod to the correct version.")).formatted(Formatting.RED);
+                                message = Text.literal(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
+                                        .formatted(Formatting.RED);
                             }
                             player.sendMessage(message);
                         }
@@ -197,13 +192,11 @@ public class MapeditorClient implements ClientModInitializer {
         private RenderObject[] bakedObjects;
         private TextObject[] bakedText;
 
-        @MessageSubscription
-        void worldRender(@NotNull RenderEvent.World event) {
+        public void rendered(MatrixStack stack) {
             if (!enabled) {
                 return;
             }
 
-            MatrixStack stack = event.getMatrixStack();
             if (renderThroughWalls) {
                 Renderer3d.renderThroughWalls();
             }
@@ -245,8 +238,7 @@ public class MapeditorClient implements ClientModInitializer {
             Renderer3d.stopRenderThroughWalls();
         }
 
-        @MessageSubscription
-        void hudRender(@NotNull RenderEvent.Hud event) {
+        public void hudRender(MatrixStack stack) {
             if (!enabled) {
                 return;
             }
@@ -257,7 +249,6 @@ public class MapeditorClient implements ClientModInitializer {
                 bakeText();
             }
 
-            MatrixStack stack = event.getMatrixStack();
             for (ObjectRenderer.TextObject textObject : bakedText) {
                 renderer.draw(stack, textObject.text, textObject.x, textObject.y, textObject.color.getRGB());
             }

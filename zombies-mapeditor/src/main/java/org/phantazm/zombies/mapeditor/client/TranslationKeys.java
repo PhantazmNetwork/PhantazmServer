@@ -130,6 +130,12 @@ public final class TranslationKeys {
      */
     public static final String GUI_MAPEDITOR_COORDINATE_DISPLAY = "gui.mapeditor.coordinate_display";
 
+    public static final String CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED = "chat.mapeditor.mapdata_version_sync" +
+            ".synced";
+
+    public static final String CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED = "chat.mapeditor.mapdata_version_sync" +
+            ".not_synced";
+
     private TranslationKeys() {
         throw new UnsupportedOperationException();
     }
