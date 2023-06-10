@@ -11,6 +11,7 @@ import org.phantazm.zombies.map.objects.MapObjects;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.Supplier;
 
 public class BasicMobSpawnerSource implements MobSpawnerSource {
@@ -26,7 +27,7 @@ public class BasicMobSpawnerSource implements MobSpawnerSource {
     }
 
     @Override
-    public @NotNull MobSpawner make(@NotNull Supplier<? extends MapObjects> mapObjects, @NotNull MobStore mobStore) {
-        return new BasicMobSpawner(processorMap, proximaSpawner, keyParser, mapObjects, mobStore);
+    public @NotNull MobSpawner make(@NotNull Random random, @NotNull Supplier<? extends MapObjects> mapObjects, @NotNull MobStore mobStore) {
+        return new BasicMobSpawner(processorMap, proximaSpawner, keyParser, random, mapObjects, mobStore);
     }
 }

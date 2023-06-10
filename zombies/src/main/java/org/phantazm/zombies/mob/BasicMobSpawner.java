@@ -72,14 +72,15 @@ public class BasicMobSpawner implements MobSpawner {
      * @param proximaSpawner The {@link Spawner} to spawn backing {@link ProximaEntity}s
      */
     public BasicMobSpawner(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
-            @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser,
+            @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser, @NotNull Random random,
             @NotNull Supplier<? extends MapObjects> mapObjects, @NotNull MobStore mobStore) {
         this.processorMap = Map.copyOf(processorMap);
         this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
 
-        this.mobDependencyProvider = new ModuleDependencyProvider(keyParser, new Module(this, mobStore, mapObjects));
+        this.mobDependencyProvider = new ModuleDependencyProvider(keyParser, new Module(this, mobStore,
+                random, mapObjects));
     }
 
     @Override
@@ -222,12 +223,14 @@ public class BasicMobSpawner implements MobSpawner {
     public static class Module implements DependencyModule {
         private final MobSpawner spawner;
         private final MobStore mobStore;
+        private final Random random;
         private final Supplier<? extends MapObjects> mapObjects;
 
-        private Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore,
+        private Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull Random random,
                 @NotNull Supplier<? extends MapObjects> mapObjects) {
             this.spawner = Objects.requireNonNull(spawner, "spawner");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+            this.random = Objects.requireNonNull(random, "random");
             this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         }
 
@@ -237,6 +240,10 @@ public class BasicMobSpawner implements MobSpawner {
 
         public @NotNull MobStore getMobStore() {
             return mobStore;
+        }
+
+        public Random getRandom() {
+            return random;
         }
 
         public @NotNull Supplier<? extends MapObjects> mapObjects() {

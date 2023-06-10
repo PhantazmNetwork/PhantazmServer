@@ -95,7 +95,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                         mapSettingsInfo.pitch());
 
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
-        MobSpawner mobSpawner = mobSpawnerSource.make(mapObjectsWrapper, mobStore);
+        MobSpawner mobSpawner = mobSpawnerSource.make(random, mapObjectsWrapper, mobStore);
 
         Module module =
                 new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
