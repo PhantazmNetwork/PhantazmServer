@@ -83,7 +83,7 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
                 InventoryObject object = profile.getInventoryObject(slot);
 
                 InventoryObject defaultObject = defaultObject();
-                if (defaultObject != null && !object.equals(defaultObject)) {
+                if (!object.equals(defaultObject)) {
                     return false;
                 }
             }
