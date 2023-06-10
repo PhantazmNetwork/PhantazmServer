@@ -168,12 +168,12 @@ public class Door extends BoundedBase {
                     room.open();
 
                     for (Door otherDoor : mapObjects.get().doorTracker().items()) {
-                        if (otherDoor == this) {
+                        if (otherDoor == this || otherDoor.isOpen) {
                             continue;
                         }
 
                         boolean allOpen = true;
-                        for (Key otherRoomKey : doorInfo.opensTo()) {
+                        for (Key otherRoomKey : otherDoor.doorInfo.opensTo()) {
                             Room otherRoom = mapObjects.get().roomMap().get(otherRoomKey);
                             if (otherRoom != null && !otherRoom.isOpen()) {
                                 allOpen = false;
@@ -183,10 +183,8 @@ public class Door extends BoundedBase {
 
                         if (allOpen) {
                             synchronized (otherDoor.sync) {
-                                if (!otherDoor.isOpen) {
-                                    otherDoor.isOpen = false;
-                                    removeBlocksAndHolograms();
-                                }
+                                otherDoor.isOpen = false;
+                                otherDoor.removeBlocksAndHolograms();
                             }
                         }
                     }
