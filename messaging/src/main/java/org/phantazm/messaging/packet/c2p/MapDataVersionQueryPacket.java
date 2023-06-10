@@ -1,4 +1,4 @@
-package org.phantazm.messaging.packet.c2s;
+package org.phantazm.messaging.packet.c2p;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.messaging.packet.Packet;

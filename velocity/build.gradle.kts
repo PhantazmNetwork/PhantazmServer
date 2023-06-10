@@ -33,6 +33,7 @@ dependencies {
 
     addShade(projects.phantazmCommons)
     addShade(projects.phantazmMessaging)
+    addShade(projects.phantazmZombiesMapdata)
 }
 
 tasks.shadowJar {

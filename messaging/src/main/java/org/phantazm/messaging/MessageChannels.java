@@ -17,6 +17,8 @@ public final class MessageChannels {
      */
     public static final String CLIENT_TO_SERVER = "client2server";
 
+    public static final String CLIENT_TO_PROXY = "client2proxy";
+
     private MessageChannels() {
         throw new UnsupportedOperationException();
     }

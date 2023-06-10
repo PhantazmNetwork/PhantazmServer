@@ -40,8 +40,8 @@ import org.phantazm.commons.Namespaces;
 import org.phantazm.messaging.MessageChannels;
 import org.phantazm.messaging.packet.Packet;
 import org.phantazm.messaging.packet.PacketHandler;
-import org.phantazm.messaging.packet.c2s.MapDataVersionQueryPacket;
-import org.phantazm.messaging.packet.c2s.MapDataVersionResponsePacket;
+import org.phantazm.messaging.packet.c2p.MapDataVersionQueryPacket;
+import org.phantazm.messaging.packet.c2p.MapDataVersionResponsePacket;
 import org.phantazm.messaging.serialization.PacketSerializer;
 import org.phantazm.messaging.serialization.PacketSerializers;
 import org.phantazm.zombies.map.FileSystemMapLoader;
@@ -91,18 +91,18 @@ public class MapeditorClient implements ClientModInitializer {
                 new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
                         TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
-        PacketSerializer clientToServer = PacketSerializers.clientToServerSerializer(
+        PacketSerializer clientToProxy = PacketSerializers.clientToProxySerializer(
                 () -> new PacketByteBufDataWriter(new PacketByteBuf(Unpooled.buffer())),
                 data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));
-        Identifier clientToServerIdentifier = Identifier.of(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_SERVER);
-        if (clientToServerIdentifier != null) {
+        Identifier clientToProxyIdentifier = Identifier.of(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_PROXY);
+        if (clientToProxyIdentifier != null) {
             ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-                byte[] data = clientToServer.serializePacket(new MapDataVersionQueryPacket());
-                sender.sendPacket(new CustomPayloadC2SPacket(clientToServerIdentifier,
+                byte[] data = clientToProxy.serializePacket(new MapDataVersionQueryPacket());
+                sender.sendPacket(new CustomPayloadC2SPacket(clientToProxyIdentifier,
                         new PacketByteBuf(Unpooled.wrappedBuffer(data))));
             }));
 
-            PacketHandler<PacketSender> clientToServerHandler = new PacketHandler<>(clientToServer) {
+            PacketHandler<PacketSender> clientToProxyHandler = new PacketHandler<>(clientToProxy) {
                 @Override
                 protected void handlePacket(@NotNull PacketSender packetSender, @NotNull Packet packet) {
                     if (packet instanceof MapDataVersionResponsePacket responsePacket) {
@@ -127,12 +127,12 @@ public class MapeditorClient implements ClientModInitializer {
 
                 @Override
                 protected void sendToReceiver(@NotNull PacketSender packetSender, byte @NotNull [] data) {
-                    packetSender.sendPacket(clientToServerIdentifier, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
+                    packetSender.sendPacket(clientToProxyIdentifier, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
                 }
             };
-            ClientPlayNetworking.registerGlobalReceiver(clientToServerIdentifier,
+            ClientPlayNetworking.registerGlobalReceiver(clientToProxyIdentifier,
                     (client, handler, buf, responseSender) -> {
-                        clientToServerHandler.handleData(responseSender, buf.getWrittenBytes());
+                        clientToProxyHandler.handleData(responseSender, buf.getWrittenBytes());
                     });
         }
 

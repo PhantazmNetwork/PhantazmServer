@@ -11,6 +11,7 @@ import org.phantazm.commons.Namespaces;
 import org.phantazm.messaging.MessageChannels;
 import org.phantazm.velocity.listener.MaliciousPluginMessageBlocker;
 import org.phantazm.velocity.listener.ProtocolVersionForwarder;
+import org.phantazm.velocity.listener.ProxyMessagingHandler;
 
 /**
  * A velocity plugin used to communicate information to the Phantazm server.
@@ -38,12 +39,15 @@ public class PhantazmPlugin {
      */
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
-        ChannelIdentifier identifier =
+        ChannelIdentifier proxyToServer =
                 MinecraftChannelIdentifier.create(Namespaces.PHANTAZM, MessageChannels.PROXY_TO_SERVER);
-        server.getChannelRegistrar().register(identifier);
-        server.getEventManager().register(this, new MaliciousPluginMessageBlocker(identifier));
-
+        ChannelIdentifier clientToProxy = MinecraftChannelIdentifier.create(Namespaces.PHANTAZM,
+                MessageChannels.CLIENT_TO_PROXY);
+        server.getChannelRegistrar().register(proxyToServer);
+        server.getChannelRegistrar().register(clientToProxy);
+        server.getEventManager().register(this, new MaliciousPluginMessageBlocker(proxyToServer));
         server.getEventManager().register(this, new ProtocolVersionForwarder());
+        server.getEventManager().register(this, new ProxyMessagingHandler(clientToProxy));
     }
 
 }
