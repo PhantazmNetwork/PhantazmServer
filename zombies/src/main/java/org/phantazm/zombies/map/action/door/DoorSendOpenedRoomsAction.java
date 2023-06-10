@@ -70,20 +70,18 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
                 Component.text().style(data.openedRoomsFormatStyle).append(Component.text("opened "));
 
         Map<? super Key, ? extends Room> roomMap = mapObjects.get().roomMap();
-        List<Key> opensTo = door.doorInfo().opensTo();
+        List<Room> opensTo =
+                door.doorInfo().opensTo().stream().map(target -> (Room)roomMap.get(target)).filter(room -> {
+                    if (room == null) {
+                        return false;
+                    }
+
+                    return !room.isOpen() && !room.getRoomInfo().isSpawn();
+                }).toList();
 
         boolean appendedRoom = false;
         for (int i = 0; i < opensTo.size(); i++) {
-            Key target = opensTo.get(i);
-            Room room = roomMap.get(target);
-            if (room == null) {
-                LOGGER.warn("Cannot announce the opening of nonexistent room named " + target);
-                continue;
-            }
-
-            if (room.isOpen() || room.getRoomInfo().isSpawn()) {
-                continue;
-            }
+            Room room = opensTo.get(i);
 
             builder.append(room.getRoomInfo().displayName());
             appendedRoom = true;
