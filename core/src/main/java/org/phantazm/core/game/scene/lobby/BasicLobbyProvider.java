@@ -15,9 +15,6 @@ import java.util.Objects;
  * Basic implementation of a {@link LobbyProviderAbstract}.
  */
 public class BasicLobbyProvider extends LobbyProviderAbstract {
-
-    private final InstanceManager instanceManager;
-
     private final InstanceLoader instanceLoader;
 
     private final List<String> lobbyPaths;
@@ -26,38 +23,30 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
     private final InstanceConfig instanceConfig;
 
-    private final int chunkViewDistance;
-
     /**
      * Creates a basic implementation of a {@link SceneProviderAbstract}.
      *
      * @param newLobbyThreshold The weighting threshold for {@link Lobby}s. If no {@link Lobby}s are above
      *                          this threshold, a new lobby will be created.
      * @param maximumLobbies    The maximum {@link Lobby}s in the provider.
-     * @param instanceManager   An {@link InstanceManager} used to create {@link Instance}
      * @param instanceLoader    A {@link InstanceLoader} used to load {@link Instance}s
      * @param lobbyPaths        The paths that identify the {@link Lobby} for the {@link InstanceLoader}
      * @param fallback          A {@link SceneFallback} for the created {@link Lobby}s
      * @param instanceConfig    The {@link InstanceConfig} for the {@link Lobby}s
-     * @param chunkViewDistance The server's chunk view distance
      */
-    public BasicLobbyProvider(int maximumLobbies, int newLobbyThreshold, @NotNull InstanceManager instanceManager,
-            @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback,
-            @NotNull InstanceConfig instanceConfig, int chunkViewDistance) {
+    public BasicLobbyProvider(int maximumLobbies, int newLobbyThreshold, @NotNull InstanceLoader instanceLoader,
+            @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig) {
         super(maximumLobbies, newLobbyThreshold);
 
-        this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
         this.lobbyPaths = List.copyOf(Objects.requireNonNull(lobbyPaths, "lobbyPaths"));
         this.fallback = Objects.requireNonNull(fallback, "fallback");
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
-        this.chunkViewDistance = chunkViewDistance;
     }
 
     @Override
     protected @NotNull Lobby createScene(@NotNull LobbyJoinRequest request) {
-        Instance instance = instanceLoader.loadInstance(instanceManager, lobbyPaths, instanceConfig.spawnPoint(),
-                chunkViewDistance);
+        Instance instance = instanceLoader.loadInstance(lobbyPaths);
         return new Lobby(instance, instanceConfig, fallback);
     }
 

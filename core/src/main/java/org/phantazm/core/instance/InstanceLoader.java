@@ -1,14 +1,11 @@
 package org.phantazm.core.instance;
 
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.InstanceManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Loads usable {@link Instance}s.
@@ -18,14 +15,11 @@ public interface InstanceLoader {
     /**
      * Loads an {@link Instance}.
      *
-     * @param instanceManager The {@link InstanceManager} to register the {@link Instance} with
-     * @param subPaths        Paths used to identify the {@link Instance}
+     * @param subPaths Paths used to identify the {@link Instance}
      * @return A new {@link Instance}
      */
-    @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager,
-            @UnmodifiableView @NotNull List<String> subPaths, @NotNull Point spawnPos, int chunkViewDistance);
+    @NotNull Instance loadInstance(@UnmodifiableView @NotNull List<String> subPaths);
 
-    void preload(@NotNull InstanceManager instanceManager, @UnmodifiableView @NotNull List<String> subPaths,
-            @NotNull Point spawnPos, int chunkViewDistance);
+    void preload(@UnmodifiableView @NotNull List<String> subPaths, @NotNull Point spawnPos, int chunkViewDistance);
 
 }

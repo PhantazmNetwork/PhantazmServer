@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -141,8 +140,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         MapSettingsInfo settings = mapInfo.settings();
         Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
 
-        Instance instance = instanceLoader.loadInstance(instanceManager, settings.instancePath(), spawnPos,
-                MinecraftServer.getChunkViewDistance());
+        Instance instance = instanceLoader.loadInstance(settings.instancePath());
 
         instance.setTime(settings.worldTime());
         instance.setTimeRate(0);

@@ -115,14 +115,16 @@ public final class ZombiesFeature {
         ZombiesFeature.powerups = loadFeature("powerup", new FileSystemPowerupLoader(POWERUPS_FOLDER, codec));
         ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
 
-        InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(INSTANCES_FOLDER, DynamicChunk::new);
+        InstanceLoader instanceLoader =
+                new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,
+                        DynamicChunk::new);
 
-        LOGGER.info("Preloading {} maps", maps.size());
+        LOGGER.info("Preloading {} map instances", maps.size());
         for (MapInfo map : maps.values()) {
-            instanceLoader.preload(MinecraftServer.getInstanceManager(), map.settings().instancePath(),
-                    VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())), MinecraftServer.getChunkViewDistance());
+            instanceLoader.preload(map.settings().instancePath(),
+                    VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())),
+                    MinecraftServer.getChunkViewDistance());
         }
-        LOGGER.info("Finished loading maps");
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();

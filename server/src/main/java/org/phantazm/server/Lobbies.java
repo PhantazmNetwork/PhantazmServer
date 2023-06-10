@@ -58,7 +58,7 @@ public final class Lobbies {
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         FileUtils.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =
-                new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(), DynamicChunk::new);
+                new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new);
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
@@ -71,17 +71,15 @@ public final class Lobbies {
             throw new IllegalArgumentException("No main lobby config present");
         }
 
-        LOGGER.info("Preloading {} lobbies", lobbiesConfig.lobbies().size());
+        LOGGER.info("Preloading {} lobby instances", lobbiesConfig.lobbies().size());
         for (LobbyConfig lobbyConfig : lobbiesConfig.lobbies().values()) {
-            instanceLoader.preload(instanceManager, lobbyConfig.lobbyPaths(),
-                    lobbyConfig.instanceConfig().spawnPoint(), MinecraftServer.getChunkViewDistance());
+            instanceLoader.preload(lobbyConfig.lobbyPaths(), lobbyConfig.instanceConfig().spawnPoint(),
+                    MinecraftServer.getChunkViewDistance());
         }
-        LOGGER.info("Finished loading lobbies");
 
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
-                new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceManager,
-                        instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig(),
-                        MinecraftServer.getChunkViewDistance());
+                new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceLoader,
+                        mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig());
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         SceneFallback lobbyFallback = new LobbyRouterFallback(lobbyRouter, lobbiesConfig.mainLobbyName());
@@ -91,8 +89,8 @@ public final class Lobbies {
             if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
                 lobbyProviders.put(lobby.getKey(),
                         new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
-                                instanceManager, instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
-                                lobby.getValue().instanceConfig(), MinecraftServer.getChunkViewDistance()));
+                                instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
+                                lobby.getValue().instanceConfig()));
             }
         }
 

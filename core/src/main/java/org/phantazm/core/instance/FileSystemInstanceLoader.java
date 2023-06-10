@@ -11,11 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Phaser;
 
@@ -23,14 +21,13 @@ import java.util.concurrent.Phaser;
  * Implements an {@link InstanceLoader} using the file system.
  */
 public abstract class FileSystemInstanceLoader implements InstanceLoader {
-
-    private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
+    private final InstanceManager instanceManager;
+    private final Path rootPath;
 
     /**
      * The {@link ChunkSupplier} to be used by instances loaded from this InstanceLoader
      */
     protected final ChunkSupplier chunkSupplier;
-    private final Path rootPath;
 
     private final Map<Path, InstanceContainer> instanceSources;
 
@@ -40,7 +37,9 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
      * @param rootPath      The {@link Path} of the {@link Instance} directory
      * @param chunkSupplier The {@link ChunkSupplier} used to define the chunk implementation used
      */
-    public FileSystemInstanceLoader(@NotNull Path rootPath, @NotNull ChunkSupplier chunkSupplier) {
+    public FileSystemInstanceLoader(@NotNull InstanceManager instanceManager, @NotNull Path rootPath,
+            @NotNull ChunkSupplier chunkSupplier) {
+        this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.rootPath = Objects.requireNonNull(rootPath, "rootPath");
         this.chunkSupplier = Objects.requireNonNull(chunkSupplier, "chunkSupplier");
         this.instanceSources = new ConcurrentHashMap<>();
@@ -48,18 +47,18 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
 
     // TODO: what if there are distinct spawnPos invocations?
     @Override
-    public @NotNull Instance loadInstance(@NotNull InstanceManager instanceManager,
-            @UnmodifiableView @NotNull List<String> subPaths, @NotNull Point spawnPoint, int chunkViewDistance) {
+    public @NotNull Instance loadInstance(@UnmodifiableView @NotNull List<String> subPaths) {
         Path path = rootPath;
         for (String subPath : subPaths) {
             path = path.resolve(subPath);
         }
 
-        InstanceContainer containerSource = instanceSources.computeIfAbsent(path, key -> {
-            return createTemplateContainer(instanceManager, key, spawnPoint, chunkViewDistance);
-        });
+        InstanceContainer source = instanceSources.get(path);
+        if (source == null) {
+            throw new IllegalArgumentException("Instance at " + path + " has not been preloaded");
+        }
 
-        InstanceContainer container = containerSource.copy();
+        InstanceContainer container = source.copy();
         container.setChunkSupplier(chunkSupplier);
         instanceManager.registerInstance(container);
 
@@ -67,8 +66,8 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
     }
 
     @Override
-    public void preload(@NotNull InstanceManager instanceManager, @UnmodifiableView @NotNull List<String> subPaths,
-            @NotNull Point spawnPoint, int chunkViewDistance) {
+    public void preload(@UnmodifiableView @NotNull List<String> subPaths, @NotNull Point spawnPoint,
+            int chunkViewDistance) {
         Path path = rootPath;
         for (String subPath : subPaths) {
             path = path.resolve(subPath);
