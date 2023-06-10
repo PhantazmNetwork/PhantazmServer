@@ -190,7 +190,6 @@ public final class PhantazmServer {
         Messaging.initialize(global, serverConfig.serverInfoConfig().authType());
 
         Proxima.initialize(global, contextManager, pathfinderConfig);
-        ProximaTest.initialize(global, Proxima.getSpawner());
 
         Mob.initialize(contextManager, Path.of("./mobs/"), new YamlCodec());
         EquipmentFeature.initialize(keyParser, contextManager,
@@ -204,7 +203,6 @@ public final class PhantazmServer {
                         List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),
                                 new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
 
-        ZombiesTest.initialize(global, SongFeature.songLoader());
         ServerCommandFeature.initialize(commandManager);
     }
 

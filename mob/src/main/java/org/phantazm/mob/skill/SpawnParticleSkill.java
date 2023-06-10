@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Random;
 
 @Model("mob.skill.spawn_particle")
+@Cache(false)
 public class SpawnParticleSkill implements Skill {
 
     private final Random random;
@@ -34,12 +35,9 @@ public class SpawnParticleSkill implements Skill {
             return;
         }
 
-        double x =
-                self.entity().getPosition().x() + data.bounds().originX() + random.nextDouble(data.bounds().lengthX());
-        double y =
-                self.entity().getPosition().y() + data.bounds().originY() + random.nextDouble(data.bounds().lengthY());
-        double z =
-                self.entity().getPosition().z() + data.bounds().originZ() + random.nextDouble(data.bounds().lengthZ());
+        double x = self.entity().getPosition().x() + data.bounds().originX() + getOffset(data.bounds().lengthX());
+        double y = self.entity().getPosition().y() + data.bounds().originY() + getOffset(data.bounds().lengthY());
+        double z = self.entity().getPosition().z() + data.bounds().originZ() + getOffset(data.bounds().lengthZ());
 
         ParticleWrapper.Data wrapperData = particle.data();
         ServerPacket packet =
@@ -47,6 +45,14 @@ public class SpawnParticleSkill implements Skill {
                         wrapperData.offsetX(), wrapperData.offsetY(), wrapperData.offsetZ(), wrapperData.data(),
                         wrapperData.particleCount(), particle.variantData()::write);
         self.entity().getInstance().sendGroupedPacket(packet);
+    }
+
+    private double getOffset(double length) {
+        if (length <= 0) {
+            return 0;
+        }
+
+        return random.nextDouble(length);
     }
 
     @DataObject
