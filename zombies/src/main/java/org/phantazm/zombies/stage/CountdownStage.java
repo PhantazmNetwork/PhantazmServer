@@ -3,8 +3,10 @@ package org.phantazm.zombies.stage;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -83,11 +85,14 @@ public class CountdownStage implements Stage {
         if (alertTicks.contains((long)ticksRemaining.get())) {
             Component message = Component.textOfChildren(Component.text("The game starts in "),
                     tickFormatter.format(ticksRemaining.get()), Component.text("."));
+            instance.playSound(Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_HAT, Sound.Source.MASTER, 1.0F, 1.0F),
+                    Sound.Emitter.self());
             instance.sendMessage(message);
         }
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (!zombiesPlayer.hasQuit()) {
-                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
+                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
+                        unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
                 sidebarUpdater.tick(time);
             }
         }
