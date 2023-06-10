@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Model("zombies.sidebar.updater")
 public class SidebarUpdater implements Activable {
-    private static final int MAX_SIDEBAR_ROWS = 15;
+    public static final int MAX_SIDEBAR_ROWS = 15;
 
     private final Sidebar sidebar;
     private final List<SidebarSection> sections;
@@ -54,18 +54,17 @@ public class SidebarUpdater implements Activable {
             List<Optional<Component>> newLines = section.update(time);
 
             for (Optional<Component> line : newLines) {
-                if (0 <= index && index < MAX_SIDEBAR_ROWS) {
-                    int finalIndex = index;
-                    line.ifPresent(newLine -> {
-                        String lineId = lineId(finalIndex);
-                        sidebar.updateLineContent(lineId, newLine);
-                    });
-                }
-                else {
+                if (index < 0 || index >= MAX_SIDEBAR_ROWS) {
                     return;
                 }
 
-                index++;
+                int finalIndex = index;
+                line.ifPresent(newLine -> {
+                    String lineId = lineId(finalIndex);
+                    sidebar.updateLineContent(lineId, newLine);
+                });
+
+                ++index;
             }
         }
     }
@@ -97,7 +96,10 @@ public class SidebarUpdater implements Activable {
             int oldClampedSize = Math.min(totalSize, MAX_SIDEBAR_ROWS);
             int newClampedSize = Math.min(newTotalSize, MAX_SIDEBAR_ROWS);
             if (oldClampedSize < newClampedSize) {
-                for (int i = oldClampedSize; i < newClampedSize; i++) {
+                for (int i = 0; i < oldClampedSize; ++i) {
+                    sidebar.updateLineScore(lineId(i), newClampedSize - i);
+                }
+                for (int i = oldClampedSize; i < newClampedSize; ++i) {
                     sidebar.createLine(new Sidebar.ScoreboardLine(lineId(i), Component.empty(), newClampedSize - i));
                 }
             }

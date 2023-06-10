@@ -125,6 +125,7 @@ public final class Mob {
         contextManager.registerElementClass(ChargeAtEntityGoal.class);
         contextManager.registerElementClass(UseSkillGoal.class);
         contextManager.registerElementClass(MeleeAttackGoal.class);
+        contextManager.registerElementClass(PlayStepSoundGoal.class);
 
         //zombies mob goals
         contextManager.registerElementClass(BreakNearbyWindowGoal.class);
