@@ -32,7 +32,7 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
         List<ShopInteractor> interactors = success ? successInteractors : failureInteractors;
 
         for (ShopInteractor interactor : interactors) {
-            interactor.handleInteraction(interaction);
+            success &= interactor.handleInteraction(interaction);
         }
 
         return success;

@@ -52,6 +52,7 @@ import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
 import org.phantazm.zombies.map.shop.display.*;
 import org.phantazm.zombies.map.shop.display.creator.EquipmentUpgradeCostDisplayCreator;
 import org.phantazm.zombies.map.shop.display.creator.IncrementalMetaPlayerDisplayCreator;
+import org.phantazm.zombies.map.shop.display.creator.PlayerConditionalDisplayCreator;
 import org.phantazm.zombies.map.shop.display.creator.PlayerHologramDisplayCreator;
 import org.phantazm.zombies.map.shop.gui.InteractingClickHandler;
 import org.phantazm.zombies.map.shop.interactor.*;
@@ -64,6 +65,7 @@ import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.condition.EquipmentCondition;
 import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
 import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
@@ -153,7 +155,8 @@ public final class ZombiesFeature {
                         TaskSchedule.tick(1));
 
         commandManager.register(
-                new ZombiesCommand(sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene, sceneFallback));
+                new ZombiesCommand(sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene,
+                        sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
@@ -211,6 +214,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(EquipmentUpgradeCostDisplayCreator.class);
         contextManager.registerElementClass(IncrementalMetaPlayerDisplayCreator.class);
         contextManager.registerElementClass(PlayerHologramDisplayCreator.class);
+        contextManager.registerElementClass(PlayerConditionalDisplayCreator.class);
 
         //Sidebar
         contextManager.registerElementClass(SidebarUpdater.class);
@@ -277,6 +281,9 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(SendMessageAction.class);
         contextManager.registerElementClass(AttributeModifierAction.class);
         contextManager.registerElementClass(PreventAmmoDrainAction.class);
+
+        //Player conditions
+        contextManager.registerElementClass(EquipmentCondition.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }
