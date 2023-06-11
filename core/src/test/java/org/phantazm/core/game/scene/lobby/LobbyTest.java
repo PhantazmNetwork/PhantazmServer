@@ -28,7 +28,7 @@ public class LobbyTest {
     @Test
     public void testShutdown() {
         Instance instance = mock(Instance.class);
-        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS);
+        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME, InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
         PlayerView playerView = mock(PlayerView.class);
@@ -43,7 +43,7 @@ public class LobbyTest {
     @Test
     public void testJoin() {
         Instance instance = mock(Instance.class);
-        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS);
+        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME, InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
         Player player = mock(Player.class);

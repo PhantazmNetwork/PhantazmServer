@@ -178,11 +178,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new ZombiesMap(mapObjects, songPlayer, powerupHandler, roundHandler, shopHandler, windowHandler,
                         doorHandler, mobStore);
 
-        EventNode<Event> childNode =
-                createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
-                        doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore);
-        eventNodeWrapper.set(childNode);
-
         Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
         SidebarModule sidebarModule =
                 new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
@@ -190,6 +185,15 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         StageTransition stageTransition =
                 createStageTransition(instance, settings.introMessages(), mapObjects.module().random(),
                         zombiesPlayers.values(), spawnPos, roundHandler, ticksSinceStart, sidebarModule, shopHandler);
+
+        Map<UUID, PlayerView> players = new HashMap<>();
+        LeaveHandler leaveHandler = new LeaveHandler(stageTransition, players, zombiesPlayers);
+
+        EventNode<Event> childNode =
+                createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
+                        doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore,
+                        leaveHandler);
+        eventNodeWrapper.set(childNode);
 
         Wrapper<ZombiesScene> sceneWrapper = Wrapper.ofNull();
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
@@ -203,8 +207,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     mapObjects, mobStore, mapObjects.mobSpawner());
         };
 
-        ZombiesScene scene = new ZombiesScene(map, zombiesPlayers, instance, sceneFallback, settings, stageTransition,
-                playerCreator);
+        ZombiesScene scene =
+                new ZombiesScene(map, players, zombiesPlayers, instance, sceneFallback, settings, stageTransition,
+                        leaveHandler, playerCreator);
         sceneWrapper.set(scene);
 
         eventNode.addChild(childNode);
@@ -263,7 +268,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler,
             @NotNull DoorHandler doorHandler, @NotNull BoundedTracker<Room> roomTracker,
             @NotNull BoundedTracker<Window> windowTracker, @NotNull PowerupHandler powerupHandler,
-            @NotNull MobStore mobStore) {
+            @NotNull MobStore mobStore, @NotNull LeaveHandler leaveHandler) {
         EventNode<Event> node = EventNode.all("phantazm_zombies_instance_{" + instance.getUniqueId() + "}");
         MapSettingsInfo settings = mapInfo.settings();
 
@@ -282,7 +287,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         settings.punchRange()));
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
-        node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers));
+        node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers, leaveHandler));
 
         //various forms of clicking
         PlayerRightClickListener rightClickListener = new PlayerRightClickListener();

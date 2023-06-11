@@ -35,20 +35,23 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
     private final MapSettingsInfo mapSettingsInfo;
     private final StageTransition stageTransition;
+    private final LeaveHandler leaveHandler;
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
 
     private boolean joinable = true;
 
-    public ZombiesScene(@NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
+    public ZombiesScene(@NotNull ZombiesMap map, @NotNull Map<UUID, PlayerView> players, @NotNull Map<UUID,
+            ZombiesPlayer> zombiesPlayers,
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
-            @NotNull StageTransition stageTransition,
+            @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator) {
-        super(instance, fallback);
+        super(instance, players, fallback);
 
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
+        this.leaveHandler = Objects.requireNonNull(leaveHandler, "leaveHandler");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
     }
 
@@ -135,31 +138,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
-        for (UUID leaver : leavers) {
-            if (!players.containsKey(leaver)) {
-                return new RouteResult(false,
-                        Component.text("Not all players are within the scene.", NamedTextColor.RED));
-            }
-        }
-
-        for (UUID leaver : leavers) {
-            players.remove(leaver);
-
-            Stage stage = getCurrentStage();
-            ZombiesPlayer zombiesPlayer;
-            if (stage == null || !stage.hasPermanentPlayers()) {
-                zombiesPlayer = zombiesPlayers.remove(leaver);
-            }
-            else {
-                zombiesPlayer = zombiesPlayers.get(leaver);
-            }
-
-            if (zombiesPlayer != null) {
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
-            }
-        }
-
-        return RouteResult.SUCCESSFUL;
+        return leaveHandler.leave(leavers);
     }
 
     @Override

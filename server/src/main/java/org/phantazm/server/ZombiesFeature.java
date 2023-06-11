@@ -153,7 +153,7 @@ public final class ZombiesFeature {
                         TaskSchedule.tick(1));
 
         commandManager.register(
-                new ZombiesCommand(sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene));
+                new ZombiesCommand(sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene, sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {

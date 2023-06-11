@@ -5,6 +5,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.Command;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.scene.ZombiesRouteRequest;
@@ -19,13 +20,14 @@ import java.util.function.Function;
 public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser,
             @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
-            @NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
+            @NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper, @NotNull SceneFallback fallback) {
         super("zombies");
 
         Objects.requireNonNull(router, "router");
         Objects.requireNonNull(keyParser, "keyParser");
         Objects.requireNonNull(maps, "maps");
         Objects.requireNonNull(viewProvider, "viewProvider");
+        Objects.requireNonNull(fallback, "fallback");
 
         addSubcommand(new ZombiesJoinCommand(router, keyParser, maps, viewProvider));
         addSubcommand(new GiveCoinsCommand(sceneMapper));
@@ -34,5 +36,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new GodmodeCommand(sceneMapper));
         addSubcommand(new AmmoRefillCommand(sceneMapper));
         addSubcommand(new FlagToggleCommand(sceneMapper, keyParser));
+        addSubcommand(new QuitCommand(router, fallback, viewProvider));
     }
 }

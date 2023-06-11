@@ -1,5 +1,6 @@
 package org.phantazm.server;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -117,7 +118,7 @@ public final class Lobbies {
             LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(event.getPlayer().getUuid());
             if (joinRequest == null) {
                 LOGGER.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
-                event.getPlayer().kick("");
+                event.getPlayer().kick(Component.empty());
             }
             else {
                 joinRequest.onPlayerLoginComplete();

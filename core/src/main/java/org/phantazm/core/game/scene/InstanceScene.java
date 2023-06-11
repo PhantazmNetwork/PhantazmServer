@@ -17,13 +17,16 @@ import java.util.*;
 public abstract class InstanceScene<TRequest extends SceneJoinRequest> implements Scene<TRequest> {
     protected final Instance instance;
     protected final SceneFallback fallback;
-    protected final Map<UUID, PlayerView> players = new HashMap<>();
-    protected final Map<UUID, PlayerView> unmodifiablePlayers = Collections.unmodifiableMap(players);
+    protected final Map<UUID, PlayerView> players;
+    protected final Map<UUID, PlayerView> unmodifiablePlayers;
 
     private boolean shutdown = false;
 
-    public InstanceScene(@NotNull Instance instance, @NotNull SceneFallback fallback) {
+    public InstanceScene(@NotNull Instance instance, @NotNull Map<UUID, PlayerView> players,
+            @NotNull SceneFallback fallback) {
         this.instance = Objects.requireNonNull(instance, "instance");
+        this.players = Objects.requireNonNull(players, "players");
+        this.unmodifiablePlayers = Collections.unmodifiableMap(players);
         this.fallback = Objects.requireNonNull(fallback, "fallback");
     }
 
