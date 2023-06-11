@@ -185,8 +185,9 @@ public final class PhantazmServer {
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
+        PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider);
         Lobbies.initialize(global, viewProvider, lobbiesConfig);
-        Chat.initialize(global, viewProvider, MinecraftServer.getCommandManager());
+        Chat.initialize(global, viewProvider, PartyFeature.getParties(), MinecraftServer.getCommandManager());
         Messaging.initialize(global, serverConfig.serverInfoConfig().authType());
 
         Proxima.initialize(global, contextManager, pathfinderConfig);

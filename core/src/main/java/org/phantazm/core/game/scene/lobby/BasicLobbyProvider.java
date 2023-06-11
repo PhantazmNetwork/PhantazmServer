@@ -1,5 +1,11 @@
 package org.phantazm.core.game.scene.lobby;
 
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.event.item.ItemDropEvent;
+import net.minestom.server.event.player.PlayerPreEatEvent;
+import net.minestom.server.event.player.PlayerSwapItemEvent;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +53,16 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     @Override
     protected @NotNull Lobby createScene(@NotNull LobbyJoinRequest request) {
         Instance instance = instanceLoader.loadInstance(lobbyPaths);
+        instance.setTime(instanceConfig.time());
+        instance.setTimeRate(instanceConfig.timeRate());
+
+        EventNode<? super InstanceEvent> eventNode = instance.eventNode();
+        eventNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(PlayerPreEatEvent.class, event -> event.setCancelled(true));
+
+
         return new Lobby(instance, instanceConfig, fallback);
     }
 
