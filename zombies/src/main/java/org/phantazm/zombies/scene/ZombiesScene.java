@@ -124,7 +124,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 }
 
                 player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
-                player.setSkin(player.getSkin());
 
                 ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
                 zombiesPlayer.start();

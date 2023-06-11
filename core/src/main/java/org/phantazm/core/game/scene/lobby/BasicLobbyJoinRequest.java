@@ -37,10 +37,8 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
     public void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
         for (PlayerView playerView : players) {
             playerView.getPlayer().ifPresent(player -> {
-                player.setInstance(instance, instanceConfig.spawnPoint()).thenRun(() -> {
-                    player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
-                    player.setSkin(player.getSkin());
-                });
+                player.setInstance(instance, instanceConfig.spawnPoint());
+                player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
                 player.setGameMode(GameMode.ADVENTURE);
             });
         }
