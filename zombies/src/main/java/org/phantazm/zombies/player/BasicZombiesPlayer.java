@@ -63,7 +63,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         if (!isState(ZombiesPlayerStateKeys.QUIT)) {
             getPlayer().ifPresent(player -> {
                 player.getInventory().clear();
-                player.updateViewableRule();
+                player.setLevel(0);
+                player.setExp(0);
                 module.getSidebar().removeViewer(player);
                 module.getTabList().removeViewer(player);
             });
