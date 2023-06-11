@@ -123,6 +123,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     return;
                 }
 
+                player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
+
                 ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
                 zombiesPlayer.start();
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
@@ -215,6 +217,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     @Override
     public void forceShutdown() {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
+            zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
             zombiesPlayer.end();
         }
         super.forceShutdown();

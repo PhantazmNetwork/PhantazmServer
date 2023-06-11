@@ -42,6 +42,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
     @Override
     public void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
         event.setSpawningInstance(instance);
+        event.getPlayer().updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
         event.getPlayer().setRespawnPoint(instanceConfig.spawnPoint());
         event.getPlayer().setGameMode(GameMode.ADVENTURE);
     }
