@@ -40,6 +40,10 @@ public final class MathUtils {
         return Math.min(Math.max(value, min), max);
     }
 
+    public static float clamp(float value, float min, float max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
     /**
      * Computes the lambertW (product logarithm) for a given real value and branch.
      *
