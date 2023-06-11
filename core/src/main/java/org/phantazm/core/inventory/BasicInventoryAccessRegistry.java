@@ -92,26 +92,53 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     @Override
-    public void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object) {
-        Optional<InventoryAccess> accessOptional = getCurrentAccess();
-        if (accessOptional.isEmpty()) {
-            throw new IllegalArgumentException("No current access");
-        }
+    public void replaceObject(int slot, @NotNull InventoryObject newObject) {
+        InventoryAccess access = getAccess();
 
-        InventoryAccess access = accessOptional.get();
-        InventoryObjectGroup group = access.groups().get(groupKey);
-        if (group == null) {
-            throw new IllegalArgumentException("Group " + groupKey + " does not exist");
+        InventoryProfile profile = access.profile();
+        if (profile.hasInventoryObject(slot)) {
+            InventoryObject old = profile.removeInventoryObject(slot);
+            old.end();
         }
+        
+        profile.setInventoryObject(slot, newObject);
+        onAdd(slot, newObject);
+    }
+
+    @Override
+    public void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object) {
+        InventoryAccess access = getAccess();
+        InventoryObjectGroup group = getGroup(access, groupKey);
 
         int slot = group.pushInventoryObject(object);
-        object.start();
+        onAdd(slot, object);
+    }
 
+    private void onAdd(int slot, InventoryObject object) {
+        object.start();
         playerView.getPlayer().ifPresent(player -> {
             if (player.getHeldSlot() == slot && object instanceof Equipment equipment) {
                 equipment.setSelected(true);
             }
         });
+    }
+
+    private InventoryAccess getAccess() {
+        Optional<InventoryAccess> accessOptional = getCurrentAccess();
+        if (accessOptional.isEmpty()) {
+            throw new IllegalArgumentException("No current access");
+        }
+
+        return accessOptional.get();
+    }
+
+    private InventoryObjectGroup getGroup(InventoryAccess access, Key groupKey) {
+        InventoryObjectGroup group = access.groups().get(groupKey);
+        if (group == null) {
+            throw new IllegalArgumentException("Group " + groupKey + " does not exist");
+        }
+
+        return group;
     }
 
     private void applyTo(InventoryAccess newAccess) {
