@@ -62,6 +62,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
         for (Player player : connectionManager.getOnlinePlayers()) {
             if (player.getInstance() != event.getSpawningInstance()) {
                 player.sendPacket(event.getPlayer().getRemovePlayerToList());
+                event.getPlayer().sendPacket(player.getRemovePlayerToList());
             }
         }
     }

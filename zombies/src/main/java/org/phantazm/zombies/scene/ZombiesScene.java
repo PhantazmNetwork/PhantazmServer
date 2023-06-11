@@ -130,12 +130,14 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 if (player.getInstance() != instance) {
                     for (Player otherPlayer : instance.getPlayers()) {
                         otherPlayer.sendPacket(player.getAddPlayerToList());
+                        player.sendPacket(otherPlayer.getAddPlayerToList());
                     }
                 }
                 player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
                 for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
                     if (otherPlayer.getInstance() != instance) {
                         otherPlayer.sendPacket(player.getRemovePlayerToList());
+                        player.sendPacket(otherPlayer.getRemovePlayerToList());
                     }
                 }
 

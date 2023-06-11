@@ -45,6 +45,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
                 if (player.getInstance() != instance) {
                     for (Player otherPlayer : instance.getPlayers()) {
                         otherPlayer.sendPacket(player.getAddPlayerToList());
+                        player.sendPacket(otherPlayer.getAddPlayerToList());
                     }
                 }
 
@@ -55,6 +56,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
                 for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
                     if (otherPlayer.getInstance() != instance) {
                         otherPlayer.sendPacket(player.getRemovePlayerToList());
+                        player.sendPacket(otherPlayer.getRemovePlayerToList());
                     }
                 }
             });
