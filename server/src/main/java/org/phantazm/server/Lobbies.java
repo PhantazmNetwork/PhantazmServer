@@ -41,6 +41,8 @@ public final class Lobbies {
 
     private static LobbyRouter lobbyRouter;
 
+    private static SceneFallback fallback;
+
     private Lobbies() {
         throw new UnsupportedOperationException();
     }
@@ -83,8 +85,9 @@ public final class Lobbies {
                         mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig());
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
-        SceneFallback lobbyFallback = new LobbyRouterFallback(lobbyRouter, lobbiesConfig.mainLobbyName());
-        SceneFallback regularFallback = new CompositeFallback(List.of(lobbyFallback, finalFallback));
+        fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), Lobbies.getLobbyRouter(),
+                lobbiesConfig.mainLobbyName());
+        SceneFallback regularFallback = new CompositeFallback(List.of(fallback, finalFallback));
 
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
@@ -98,7 +101,8 @@ public final class Lobbies {
         Map<UUID, LoginLobbyJoinRequest> loginJoinRequests = new HashMap<>();
 
         node.addListener(PlayerLoginEvent.class, event -> {
-            LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
+            LoginLobbyJoinRequest joinRequest =
+                    new LoginLobbyJoinRequest(MinecraftServer.getConnectionManager(), event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
             RouteResult result = lobbyRouter.join(routeRequest);
@@ -132,5 +136,9 @@ public final class Lobbies {
 
     public static @NotNull LobbyRouter getLobbyRouter() {
         return FeatureUtils.check(lobbyRouter);
+    }
+
+    public static SceneFallback getFallback() {
+        return FeatureUtils.check(fallback);
     }
 }

@@ -3,6 +3,8 @@ package org.phantazm.core.game.scene.lobby;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.testing.Env;
+import net.minestom.testing.EnvTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.config.InstanceConfig;
@@ -21,12 +23,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@EnvTest
 public class LobbyTest {
 
     private static final UUID playerUUID = UUID.fromString("ade229bf-d062-46e8-99d8-97b667d5a127");
 
     @Test
-    public void testShutdown() {
+    public void testShutdown(Env env) {
         Instance instance = mock(Instance.class);
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME, InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
@@ -36,12 +39,13 @@ public class LobbyTest {
         lobby.forceShutdown();
         assertTrue(lobby.isShutdown());
 
-        RouteResult result = lobby.join(new BasicLobbyJoinRequest(Collections.singleton(playerView)));
+        RouteResult result = lobby.join(new BasicLobbyJoinRequest(env.process().connection(),
+                Collections.singleton(playerView)));
         assertFalse(result.success());
     }
 
     @Test
-    public void testJoin() {
+    public void testJoin(Env env) {
         Instance instance = mock(Instance.class);
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME, InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
@@ -70,7 +74,7 @@ public class LobbyTest {
 
         };
 
-        RouteResult result = lobby.join(new BasicLobbyJoinRequest(Collections.singleton(playerView)));
+        RouteResult result = lobby.join(new BasicLobbyJoinRequest(env.process().connection(), Collections.singleton(playerView)));
 
         assertTrue(result.success());
         verify(player).setInstance(eq(instance), eq(instanceConfig.spawnPoint()));

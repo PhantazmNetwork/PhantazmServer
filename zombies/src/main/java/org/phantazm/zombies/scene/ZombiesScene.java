@@ -7,6 +7,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
@@ -31,6 +32,7 @@ import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
+    private final ConnectionManager connectionManager;
     private final ZombiesMap map;
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
     private final MapSettingsInfo mapSettingsInfo;
@@ -40,13 +42,15 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private boolean joinable = true;
 
-    public ZombiesScene(@NotNull ZombiesMap map, @NotNull Map<UUID, PlayerView> players, @NotNull Map<UUID,
+    public ZombiesScene(@NotNull ConnectionManager connectionManager, @NotNull ZombiesMap map, @NotNull Map<UUID,
+            PlayerView> players,
+            @NotNull Map<UUID,
             ZombiesPlayer> zombiesPlayers,
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator) {
         super(instance, players, fallback);
-
+        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
@@ -123,7 +127,17 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     return;
                 }
 
+                if (player.getInstance() != instance) {
+                    for (Player otherPlayer : instance.getPlayers()) {
+                        otherPlayer.sendPacket(player.getAddPlayerToList());
+                    }
+                }
                 player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
+                for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
+                    if (otherPlayer.getInstance() != instance) {
+                        otherPlayer.sendPacket(player.getRemovePlayerToList());
+                    }
+                }
 
                 ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
                 zombiesPlayer.start();

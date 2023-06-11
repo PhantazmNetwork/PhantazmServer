@@ -14,6 +14,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
 import net.minestom.server.scoreboard.TeamManager;
@@ -109,7 +110,7 @@ public final class ZombiesFeature {
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
-            @NotNull KeyParser keyParser,
+            @NotNull KeyParser keyParser, @NotNull ConnectionManager connectionManager,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
             @NotNull SceneFallback sceneFallback) throws IOException {
@@ -137,14 +138,15 @@ public final class ZombiesFeature {
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
-            ZombiesSceneProvider provider = new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(),
-                    MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
-                    ZombiesFeature.mobSpawnerSource(), Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
-                DimensionType dimensionType = instance.getDimensionType();
-                return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
-                        dimensionType.getHeight());
-            }), contextManager, keyParser, ZombiesFeature.powerups(),
-                    new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
+            ZombiesSceneProvider provider =
+                    new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
+                            MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
+                            ZombiesFeature.mobSpawnerSource(), Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
+                                                    DimensionType dimensionType = instance.getDimensionType();
+                                                    return new InstanceClientBlockHandler(instance, globalEventNode,
+                                                            dimensionType.getMinY(), dimensionType.getHeight());
+                                                }), contextManager, keyParser, ZombiesFeature.powerups(),
+                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
             providers.put(entry.getKey(), provider);
         }
 
@@ -313,11 +315,13 @@ public final class ZombiesFeature {
         return Map.copyOf(data);
     }
 
-    public static @NotNull @Unmodifiable Map<Key, MapInfo> maps() {
+    public static @NotNull
+    @Unmodifiable Map<Key, MapInfo> maps() {
         return FeatureUtils.check(maps);
     }
 
-    public static @NotNull @Unmodifiable Map<Key, PowerupInfo> powerups() {
+    public static @NotNull
+    @Unmodifiable Map<Key, PowerupInfo> powerups() {
         return FeatureUtils.check(powerups);
     }
 

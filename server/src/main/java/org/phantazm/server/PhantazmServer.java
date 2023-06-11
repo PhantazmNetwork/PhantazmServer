@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
+import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.game.scene.lobby.LobbyRouterFallback;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
@@ -200,9 +201,9 @@ public final class PhantazmServer {
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
         ZombiesFeature.initialize(global, contextManager, Mob.getProcessorMap(), Proxima.getSpawner(), keyParser,
-                Proxima.instanceSettingsFunction(), viewProvider, commandManager, new CompositeFallback(
-                        List.of(new LobbyRouterFallback(Lobbies.getLobbyRouter(), lobbiesConfig.mainLobbyName()),
-                                new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
+                MinecraftServer.getConnectionManager(), Proxima.instanceSettingsFunction(), viewProvider,
+                commandManager, new CompositeFallback(List.of(Lobbies.getFallback(),
+                        new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))));
 
         ServerCommandFeature.initialize(commandManager);
     }
