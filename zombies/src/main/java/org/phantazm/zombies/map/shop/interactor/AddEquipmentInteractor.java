@@ -1,56 +1,42 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentHandler;
-import org.phantazm.core.equipment.Upgradable;
-import org.phantazm.core.equipment.UpgradePath;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.Objects;
-
 @Model("zombies.map.shop.interactor.add_equipment")
+@Cache
 public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteractor.Data> {
-    private final UpgradePath upgradePath;
-
     @FactoryMethod
-    public AddEquipmentInteractor(@NotNull Data data, @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
+    public AddEquipmentInteractor(@NotNull Data data) {
         super(data);
-        this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
     }
 
     @Override
-    public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        ZombiesPlayer player = interaction.player();
-        for (Equipment equipment : player.module().getEquipmentHandler().getEquipment(data.groupKey)) {
-            if (equipment.key().equals(data.equipmentKey) && equipment instanceof Upgradable upgradable) {
-                upgradePath.nextUpgrade(upgradable.currentLevel()).ifPresent(upgradeKey -> {
-                    if (upgradable.getSuggestedUpgrades().contains(upgradeKey)) {
-                        upgradable.setLevel(upgradeKey);
-                    }
-                });
-
-                return;
-            }
-        }
-
-        addEquipment(player);
+    public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
+        return addEquipment(interaction.player());
     }
 
-    private void addEquipment(ZombiesPlayer player) {
+    private boolean addEquipment(ZombiesPlayer player) {
         EquipmentHandler handler = player.module().getEquipmentHandler();
         if (handler.canAddEquipment(data.groupKey)) {
-            player.module().getEquipmentCreator().createEquipment(data.equipmentKey)
-                    .ifPresent(value -> handler.addEquipment(value, data.groupKey));
+            Wrapper<Boolean> wrapper = Wrapper.of(false);
+            player.module().getEquipmentCreator().createEquipment(data.equipmentKey).ifPresent(value -> {
+                wrapper.set(true);
+                handler.addEquipment(value, data.groupKey);
+            });
+
+            return wrapper.get();
         }
+
+        return false;
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentKey,
-                       @NotNull Key groupKey,
-                       @NotNull @ChildPath("upgrade_path") String upgradePath) {
+    public record Data(@NotNull Key equipmentKey, @NotNull Key groupKey) {
     }
 }

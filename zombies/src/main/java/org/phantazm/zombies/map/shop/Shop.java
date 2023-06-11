@@ -76,15 +76,15 @@ public class Shop extends BoundedBase implements Tickable {
     }
 
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        boolean interact = shopInfo.predicateEvaluation().evaluate(predicates, interaction);
-        List<ShopInteractor> interactorsToCall = interact ? successInteractors : failureInteractors;
+        boolean success = shopInfo.predicateEvaluation().evaluate(predicates, interaction);
+        List<ShopInteractor> interactorsToCall = success ? successInteractors : failureInteractors;
 
         for (ShopInteractor interactor : interactorsToCall) {
-            interactor.handleInteraction(interaction);
+            success &= interactor.handleInteraction(interaction);
         }
 
         for (ShopDisplay display : displays) {
-            display.update(this, interaction, interact);
+            display.update(this, interaction, success);
         }
     }
 

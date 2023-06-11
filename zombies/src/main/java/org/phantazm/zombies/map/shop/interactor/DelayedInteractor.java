@@ -22,11 +22,13 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     }
 
     @Override
-    public void handleInteraction(@NotNull PlayerInteraction interaction) {
+    public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (this.interaction == null || data.resetOnInteract) {
             this.startTime = System.currentTimeMillis();
             this.interaction = interaction;
         }
+
+        return true;
     }
 
     @Override

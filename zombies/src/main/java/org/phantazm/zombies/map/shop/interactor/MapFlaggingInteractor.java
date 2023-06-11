@@ -22,12 +22,14 @@ public class MapFlaggingInteractor extends InteractorBase<MapFlaggingInteractor.
     }
 
     @Override
-    public void handleInteraction(@NotNull PlayerInteraction interaction) {
+    public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         switch (data.action) {
             case SET -> flaggable.setFlag(data.flag);
             case CLEAR -> flaggable.clearFlag(data.flag);
             case TOGGLE -> flaggable.toggleFlag(data.flag);
         }
+
+        return true;
     }
 
     @DataObject

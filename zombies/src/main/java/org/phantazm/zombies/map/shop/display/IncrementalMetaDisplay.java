@@ -46,7 +46,6 @@ public class IncrementalMetaDisplay implements ShopDisplay {
     public void update(@NotNull Shop shop, @NotNull PlayerInteraction interaction, boolean interacted) {
         if (interacted && currentDisplay != null) {
             ShopDisplay oldDisplay = currentDisplay;
-            oldDisplay.destroy(shop);
 
             int nextDisplayIndex = displayIndex + 1;
             if (nextDisplayIndex < displays.size()) {
@@ -55,14 +54,15 @@ public class IncrementalMetaDisplay implements ShopDisplay {
             else if (data.cycle) {
                 displayIndex = 0;
             }
-            else {
-                destroy(shop);
-                return;
-            }
 
             if (!displays.isEmpty()) {
-                currentDisplay = displays.get(displayIndex);
-                currentDisplay.initialize(shop);
+                ShopDisplay newDisplay = displays.get(displayIndex);
+                currentDisplay = newDisplay;
+
+                if (newDisplay != oldDisplay) {
+                    oldDisplay.destroy(shop);
+                    newDisplay.initialize(shop);
+                }
             }
         }
     }

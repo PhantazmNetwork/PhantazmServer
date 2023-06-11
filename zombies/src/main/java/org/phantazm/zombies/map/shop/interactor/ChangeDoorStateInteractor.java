@@ -35,7 +35,7 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
     }
 
     @Override
-    public void handleInteraction(@NotNull PlayerInteraction interaction) {
+    public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (!searchedDoor) {
             searchedDoor = true;
 
@@ -46,28 +46,30 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
             }
             else {
                 LOGGER.warn("Failed to locate door at {}", data.doorPosition);
-                return;
+                return false;
             }
         }
 
         ZombiesPlayer player = interaction.player();
         if (door != null) {
             switch (data.type) {
-                case OPEN -> door.open(player);
-                case CLOSE -> door.close(player);
+                case OPEN -> {
+                    return door.open(player);
+                }
+                case CLOSE -> {
+                    return door.close(player);
+                }
                 case TOGGLE -> {
-                    if (door.isOpen()) {
-                        door.close(player);
-                    }
-                    else {
-                        door.open(player);
-                    }
+                    door.toggle(player);
+                    return true;
                 }
             }
         }
         else {
             LOGGER.warn("Tried to open nonexistent door at {}", data.doorPosition);
         }
+
+        return false;
     }
 
     @DataObject

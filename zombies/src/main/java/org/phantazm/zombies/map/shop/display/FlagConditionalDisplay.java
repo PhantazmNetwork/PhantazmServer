@@ -7,21 +7,23 @@ import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
+import java.util.List;
+
 @Model("zombies.map.shop.display.flag_conditional")
 @Cache(false)
 public class FlagConditionalDisplay implements ShopDisplay {
     private final Data data;
-    private final ShopDisplay success;
-    private final ShopDisplay failure;
+    private final List<ShopDisplay> success;
+    private final List<ShopDisplay> failure;
     private final Flaggable flags;
 
-    private ShopDisplay current;
+    private List<ShopDisplay> current;
     private Shop shop;
     private int ticks;
 
     @FactoryMethod
-    public FlagConditionalDisplay(@NotNull Data data, @NotNull @Child("success") ShopDisplay success,
-            @NotNull @Child("failure") ShopDisplay failure, @NotNull Flaggable flags) {
+    public FlagConditionalDisplay(@NotNull Data data, @NotNull @Child("success") List<ShopDisplay> success,
+            @NotNull @Child("failure") List<ShopDisplay> failure, @NotNull Flaggable flags) {
         this.data = data;
         this.success = success;
         this.failure = failure;
@@ -38,7 +40,9 @@ public class FlagConditionalDisplay implements ShopDisplay {
             current = failure;
         }
 
-        current.initialize(shop);
+        for (ShopDisplay display : current) {
+            display.initialize(shop);
+        }
     }
 
     @Override
@@ -47,7 +51,9 @@ public class FlagConditionalDisplay implements ShopDisplay {
             return;
         }
 
-        current.destroy(shop);
+        for (ShopDisplay display : current) {
+            display.destroy(shop);
+        }
     }
 
     @Override
@@ -56,7 +62,9 @@ public class FlagConditionalDisplay implements ShopDisplay {
             return;
         }
 
-        current.update(shop, interaction, interacted);
+        for (ShopDisplay display : current) {
+            display.update(shop, interaction, interacted);
+        }
     }
 
     @Override
@@ -66,9 +74,9 @@ public class FlagConditionalDisplay implements ShopDisplay {
         }
 
         if (ticks++ % 20 == 0) {
-            ShopDisplay oldCurrent = current;
+            List<ShopDisplay> oldCurrent = current;
 
-            ShopDisplay newCurrent;
+            List<ShopDisplay> newCurrent;
             if (flags.hasFlag(data.flag)) {
                 newCurrent = success;
             }
@@ -78,22 +86,28 @@ public class FlagConditionalDisplay implements ShopDisplay {
 
             if (newCurrent != oldCurrent) {
                 if (oldCurrent != null) {
-                    oldCurrent.destroy(shop);
+                    for (ShopDisplay display : oldCurrent) {
+                        display.destroy(shop);
+                    }
                 }
 
-                newCurrent.initialize(shop);
+                for (ShopDisplay display : newCurrent) {
+                    display.initialize(shop);
+                }
                 current = newCurrent;
             }
         }
 
         if (current != null) {
-            current.tick(time);
+            for (ShopDisplay display : current) {
+                display.tick(time);
+            }
         }
     }
 
     @DataObject
     public record Data(@NotNull Key flag,
-                       @NotNull @ChildPath("success") String success,
-                       @NotNull @ChildPath("failure") String failure) {
+                       @NotNull @ChildPath("success") List<String> success,
+                       @NotNull @ChildPath("failure") List<String> failure) {
     }
 }

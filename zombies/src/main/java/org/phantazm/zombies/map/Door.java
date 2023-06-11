@@ -140,11 +140,13 @@ public class Door extends BoundedBase {
 
     /**
      * Opens this door, removing its blocks. If the door is already open, this method will do nothing.
+     *
+     * @return true if the door opened as a consequence of calling this method
      */
-    public void open(@Nullable ZombiesPlayer interactor) {
+    public boolean open(@Nullable ZombiesPlayer interactor) {
         synchronized (sync) {
             if (isOpen) {
-                return;
+                return false;
             }
 
             this.lastInteractor = interactor;
@@ -193,6 +195,19 @@ public class Door extends BoundedBase {
                     LOGGER.warn("Tried to open nonexistent room " + key);
                 }
             }
+
+            return true;
+        }
+    }
+
+    public void toggle(@Nullable ZombiesPlayer interactor) {
+        synchronized (sync) {
+            if (isOpen) {
+                close(interactor);
+            }
+            else {
+                open(interactor);
+            }
         }
     }
 
@@ -212,11 +227,13 @@ public class Door extends BoundedBase {
 
     /**
      * Closes this door. Has no effect if the door is already closed.
+     *
+     * @return true if the door closed as a consequence of calling this method
      */
-    public void close(@Nullable ZombiesPlayer interactor) {
+    public boolean close(@Nullable ZombiesPlayer interactor) {
         synchronized (sync) {
             if (!isOpen) {
-                return;
+                return false;
             }
 
             this.lastInteractor = interactor;
@@ -229,6 +246,8 @@ public class Door extends BoundedBase {
             for (Action<Door> closeAction : closeActions) {
                 closeAction.perform(this);
             }
+
+            return true;
         }
     }
 
