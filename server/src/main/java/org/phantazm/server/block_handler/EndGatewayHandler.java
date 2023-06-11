@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 
-public class BannerHandler implements BlockHandler {
+public class EndGatewayHandler implements BlockHandler {
 
-    public static final NamespaceID NAMESPACE_ID = NamespaceID.from("minecraft:banner");
+    public static final NamespaceID NAMESPACE_ID = NamespaceID.from("minecraft:end_gateway");
 
     @Override
     public @NotNull NamespaceID getNamespaceId() {
@@ -19,6 +19,6 @@ public class BannerHandler implements BlockHandler {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
-        return List.of(Tag.Pattern("Patterns").list());
+        return List.of(Tag.Long("Age"));
     }
 }
