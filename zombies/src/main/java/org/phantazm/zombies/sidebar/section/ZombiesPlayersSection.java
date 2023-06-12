@@ -48,6 +48,6 @@ public class ZombiesPlayersSection implements SidebarSection {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("creator_path") String creatorPath) {
+    public record Data(@NotNull @ChildPath("creator_path") String creator) {
     }
 }
