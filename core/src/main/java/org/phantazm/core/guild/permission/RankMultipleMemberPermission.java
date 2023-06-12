@@ -15,7 +15,7 @@ public class RankMultipleMemberPermission<TMember extends GuildMember & Ranked> 
 
     @Override
     public boolean hasPermission(@NotNull TMember executor) {
-        return executor.rank() > minimumKickRank;
+        return executor.rank() >= minimumKickRank;
     }
 
     @Override

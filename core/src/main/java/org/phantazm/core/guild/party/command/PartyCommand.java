@@ -105,7 +105,7 @@ public class PartyCommand {
                     party.getMemberManager().addMember(newMember);
                     parties.put(player.getUuid(), party);
 
-                    party.getNotification().notifyJoin(sender, newMember, playerView);
+                    party.getNotification().notifyJoin(newMember);
                 }, () -> {
                     sender.sendMessage(
                             Component.text("Can't find anyone with the username " + name + "!", NamedTextColor.RED));
@@ -192,6 +192,7 @@ public class PartyCommand {
             PartyMember member = party.getMemberManager().getMember(player.getUuid());
             if (!party.getKickPermission().hasPermission(member)) {
                 sender.sendMessage(Component.text("You can't kick members!", NamedTextColor.RED));
+                return false;
             }
 
             return true;
@@ -228,13 +229,14 @@ public class PartyCommand {
                     }
 
                     party.getMemberManager().removeMember(playerView.getUUID());
+                    parties.remove(playerView.getUUID());
                     party.getNotification().notifyKick(kicker, toKick);
                 }, () -> {
                     sender.sendMessage(
                             Component.text("Can't find anyone with the username " + name + "!", NamedTextColor.RED));
                 });
             });
-        });
+        }, nameArgument);
 
         return command;
     }
