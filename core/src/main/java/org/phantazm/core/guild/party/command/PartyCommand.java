@@ -18,6 +18,7 @@ public class PartyCommand {
         command.addSubcommand(PartyJoinCommand.joinCommand(parties, viewProvider));
         command.addSubcommand(PartyLeaveCommand.leaveCommand(parties));
         command.addSubcommand(PartyKickCommand.kickCommand(parties, viewProvider));
+        command.addSubcommand(PartyInviteCommand.inviteCommand(parties, viewProvider));
 
         return command;
     }

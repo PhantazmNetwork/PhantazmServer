@@ -1,4 +1,4 @@
-package org.phantazm.core.guild.member;
+package org.phantazm.core.guild.party.command;
 
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.coordinate.Pos;
@@ -9,7 +9,6 @@ import net.minestom.testing.EnvTest;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyCreator;
-import org.phantazm.core.guild.party.command.PartyCommand;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.PlayerViewProvider;
 

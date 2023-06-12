@@ -7,7 +7,6 @@ import net.minestom.testing.Env;
 import net.minestom.testing.EnvTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -20,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -51,7 +51,7 @@ public class LobbyIntegrationTest {
         SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
         Player player = mock(Player.class);
-        when(player.setInstance(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(CompletableFuture.completedFuture(null));
+        when(player.setInstance(any(), any())).thenReturn(CompletableFuture.completedFuture(null));
         PlayerView playerView = new PlayerView() {
             @Override
             public @NotNull UUID getUUID() {

@@ -58,6 +58,10 @@ public class Party extends Guild<PartyMember> implements Tickable {
         return kickPermission;
     }
 
+    public @NotNull SingleMemberPermission<PartyMember> getInvitePermission() {
+        return invitePermission;
+    }
+
     public @NotNull Wrapper<PartyMember> getOwner() {
         return owner;
     }
