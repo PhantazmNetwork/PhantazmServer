@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Evaluation;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 
 import java.util.List;
@@ -36,6 +37,28 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
         }
 
         return success;
+    }
+
+    @Override
+    public void tick(long time) {
+        for (ShopInteractor interactor : successInteractors) {
+            interactor.tick(time);
+        }
+
+        for (ShopInteractor interactor : failureInteractors) {
+            interactor.tick(time);
+        }
+    }
+
+    @Override
+    public void initialize(@NotNull Shop shop) {
+        for (ShopInteractor interactor : successInteractors) {
+            interactor.initialize(shop);
+        }
+
+        for (ShopInteractor interactor : failureInteractors) {
+            interactor.initialize(shop);
+        }
     }
 
     @DataObject
