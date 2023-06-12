@@ -19,6 +19,10 @@ public class PartyLeaveCommand {
 
         Command command = new Command("leave");
         command.addConditionalSyntax((sender, commandString) -> {
+            if (commandString == null) {
+                return sender instanceof Player;
+            }
+
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return false;

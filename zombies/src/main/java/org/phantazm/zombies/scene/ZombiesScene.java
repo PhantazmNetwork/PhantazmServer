@@ -121,34 +121,38 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
         for (PlayerView view : newPlayers) {
-            view.getPlayer().ifPresent(player -> player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
-                if (throwable != null) {
-                    LOGGER.warn("Failed to send {} to an instance", player.getUuid(), throwable);
-                    return;
-                }
-
-                if (player.getInstance() != instance) {
-                    for (Player otherPlayer : instance.getPlayers()) {
-                        otherPlayer.sendPacket(player.getAddPlayerToList());
-                        player.sendPacket(otherPlayer.getAddPlayerToList());
+            view.getPlayer().ifPresent(player -> {
+                Instance oldInstance = player.getInstance();
+                player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Failed to send {} to an instance", player.getUuid(), throwable);
+                        return;
                     }
-                }
-                player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
-                for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-                    if (otherPlayer.getInstance() != instance) {
-                        otherPlayer.sendPacket(player.getRemovePlayerToList());
-                        player.sendPacket(otherPlayer.getRemovePlayerToList());
+
+                    if (oldInstance != instance) {
+                        for (Player otherPlayer : instance.getPlayers()) {
+                            otherPlayer.sendPacket(player.getAddPlayerToList());
+                            player.sendPacket(otherPlayer.getAddPlayerToList());
+                        }
                     }
-                }
+                    player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
+                    player.updateViewerRule();
+                    for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
+                        if (otherPlayer.getInstance() != instance) {
+                            otherPlayer.sendPacket(player.getRemovePlayerToList());
+                            player.sendPacket(otherPlayer.getRemovePlayerToList());
+                        }
+                    }
 
-                ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-                zombiesPlayer.start();
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                zombiesPlayers.put(view.getUUID(), zombiesPlayer);
-                players.put(view.getUUID(), view);
+                    ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+                    zombiesPlayer.start();
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                    zombiesPlayers.put(view.getUUID(), zombiesPlayer);
+                    players.put(view.getUUID(), view);
 
-                stage.onJoin(zombiesPlayer);
-            }));
+                    stage.onJoin(zombiesPlayer);
+                });
+            });
         }
 
         return RouteResult.SUCCESSFUL;

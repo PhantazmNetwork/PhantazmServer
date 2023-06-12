@@ -26,6 +26,10 @@ public class PartyJoinCommand {
 
         Argument<String> nameArgument = ArgumentType.Word("name");
         command.addConditionalSyntax((sender, commandString) -> {
+            if (commandString == null) {
+                return sender instanceof Player;
+            }
+
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return false;

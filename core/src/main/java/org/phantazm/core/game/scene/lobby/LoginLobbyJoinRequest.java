@@ -59,6 +59,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      */
     public void onPlayerLoginComplete() {
         event.getPlayer().updateViewableRule(otherPlayer -> otherPlayer.getInstance() == event.getSpawningInstance());
+        event.getPlayer().updateViewerRule();
         for (Player player : connectionManager.getOnlinePlayers()) {
             if (player.getInstance() != event.getSpawningInstance()) {
                 player.sendPacket(event.getPlayer().getRemovePlayerToList());

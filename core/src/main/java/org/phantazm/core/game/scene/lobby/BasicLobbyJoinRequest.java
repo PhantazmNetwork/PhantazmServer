@@ -51,6 +51,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
                 player.setInstance(instance, instanceConfig.spawnPoint()).thenRun(() -> {
                     player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
+                    player.updateViewerRule();
                 });
                 player.setGameMode(GameMode.ADVENTURE);
 

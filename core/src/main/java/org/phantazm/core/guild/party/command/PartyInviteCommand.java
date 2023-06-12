@@ -26,6 +26,10 @@ public class PartyInviteCommand {
 
         Command command = new Command("invite");
         command.addConditionalSyntax((sender, commandString) -> {
+            if (commandString == null) {
+                return sender instanceof Player;
+            }
+
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return false;
@@ -33,7 +37,7 @@ public class PartyInviteCommand {
 
             Party party = parties.get(player.getUuid());
             if (party == null) {
-                sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.GREEN));
+                sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
                 return false;
             }
 
