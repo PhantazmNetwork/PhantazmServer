@@ -49,6 +49,7 @@ import org.phantazm.zombies.map.action.door.DoorSendOpenedRoomsAction;
 import org.phantazm.zombies.map.action.room.SpawnMobsAction;
 import org.phantazm.zombies.map.action.round.AnnounceRoundAction;
 import org.phantazm.zombies.map.action.round.RevivePlayersAction;
+import org.phantazm.zombies.map.action.round.SelectBombedRoom;
 import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
 import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
 import org.phantazm.zombies.map.shop.display.*;
@@ -165,6 +166,7 @@ public final class ZombiesFeature {
         //Action<Room>, Action<Round>, Action<Door>, and Action<Wave>
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);
+        contextManager.registerElementClass(SelectBombedRoom.class);
         contextManager.registerElementClass(SpawnMobsAction.class);
         contextManager.registerElementClass(SpawnPowerupAction.class);
         contextManager.registerElementClass(DoorSendMessageAction.class);

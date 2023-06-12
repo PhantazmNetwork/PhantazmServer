@@ -4,6 +4,7 @@ import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -46,6 +47,8 @@ public interface MapObjects {
     @NotNull Map<? super Key, ? extends Room> roomMap();
 
     @NotNull MobSpawner mobSpawner();
+
+    @NotNull Point mapOrigin();
 
     interface Source {
         @NotNull MapObjects make(@NotNull Instance instance,

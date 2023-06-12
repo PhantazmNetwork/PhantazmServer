@@ -2,6 +2,7 @@ package org.phantazm.zombies.map.objects;
 
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.tracker.BoundedTracker;
@@ -28,11 +29,13 @@ public final class BasicMapObjects implements MapObjects {
     private final MobSpawner mobSpawner;
 
     private final Map<? super Key, ? extends Room> roomMap;
+    private final Point mapOrigin;
 
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull BoundedTracker<Window> windows,
             @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
             @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
-            @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Module module) {
+            @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
+            @NotNull Module module) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
 
@@ -52,6 +55,7 @@ public final class BasicMapObjects implements MapObjects {
         }
 
         this.roomMap = Map.copyOf(map);
+        this.mapOrigin = mapOrigin;
     }
 
     @Override
@@ -102,5 +106,10 @@ public final class BasicMapObjects implements MapObjects {
     @Override
     public @NotNull MobSpawner mobSpawner() {
         return mobSpawner;
+    }
+
+    @Override
+    public @NotNull Point mapOrigin() {
+        return mapOrigin;
     }
 }

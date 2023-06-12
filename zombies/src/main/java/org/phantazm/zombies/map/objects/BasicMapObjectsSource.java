@@ -129,7 +129,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         MapObjects mapObjects =
                 new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
-                        mobSpawner, module);
+                        mobSpawner, origin, module);
         mapObjectsWrapper.set(mapObjects);
 
         return mapObjects;
