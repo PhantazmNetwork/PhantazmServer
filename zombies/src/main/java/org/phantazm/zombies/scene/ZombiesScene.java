@@ -28,10 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
+    private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
     private final ConnectionManager connectionManager;
     private final ZombiesMap map;
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
@@ -120,40 +122,46 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
+        List<Instance> oldInstances = new ArrayList<>(newPlayers.size());
+        List<Player> teleportedPlayers = new ArrayList<>(newPlayers.size());
+        List<CompletableFuture<?>> futures = new ArrayList<>(newPlayers.size());
         for (PlayerView view : newPlayers) {
             view.getPlayer().ifPresent(player -> {
-                Instance oldInstance = player.getInstance();
-                player.setInstance(instance, pos).whenComplete((unused, throwable) -> {
-                    if (throwable != null) {
-                        LOGGER.warn("Failed to send {} to an instance", player.getUuid(), throwable);
-                        return;
-                    }
-
-                    if (oldInstance != instance) {
-                        for (Player otherPlayer : instance.getPlayers()) {
-                            otherPlayer.sendPacket(player.getAddPlayerToList());
-                            player.sendPacket(otherPlayer.getAddPlayerToList());
-                        }
-                    }
-                    player.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
-                    player.updateViewerRule();
-                    for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-                        if (otherPlayer.getInstance() != instance) {
-                            otherPlayer.sendPacket(player.getRemovePlayerToList());
-                            player.sendPacket(otherPlayer.getRemovePlayerToList());
-                        }
-                    }
-
-                    ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-                    zombiesPlayer.start();
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                    zombiesPlayers.put(view.getUUID(), zombiesPlayer);
-                    players.put(view.getUUID(), view);
-
-                    stage.onJoin(zombiesPlayer);
-                });
+                oldInstances.add(player.getInstance());
+                teleportedPlayers.add(player);
+                futures.add(player.setInstance(instance, pos));
             });
         }
+
+        CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenRun(() -> {
+            for (int i = 0; i < futures.size(); ++i) {
+                Instance oldInstance = oldInstances.get(i);
+                Player teleportedPlayer = teleportedPlayers.get(i);
+                CompletableFuture<?> future = futures.get(i);
+
+                if (future.isCompletedExceptionally()) {
+                    future.whenComplete((ignored, throwable) -> {
+                        LOGGER.warn("Failed to send {} to an instance", teleportedPlayer.getUuid(), throwable);
+                    });
+                    continue;
+                }
+
+                if (oldInstance != instance) {
+                    for (Player otherPlayer : instance.getPlayers()) {
+                        teleportedPlayer.sendPacket(otherPlayer.getAddPlayerToList());
+                        otherPlayer.sendPacket(teleportedPlayer.getAddPlayerToList());
+                    }
+                }
+                teleportedPlayer.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
+                teleportedPlayer.updateViewerRule();
+                for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
+                    if (otherPlayer.getInstance() != instance) {
+                        teleportedPlayer.sendPacket(otherPlayer.getRemovePlayerToList());
+                        otherPlayer.sendPacket(teleportedPlayer.getRemovePlayerToList());
+                    }
+                }
+            }
+        });
 
         return RouteResult.SUCCESSFUL;
     }
