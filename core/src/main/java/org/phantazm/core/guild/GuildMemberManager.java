@@ -34,7 +34,7 @@ public class GuildMemberManager<TMember extends GuildMember> {
         return getMember(memberUUID) != null;
     }
 
-    public @NotNull Map<? super UUID, TMember> getGuildMembers() {
+    public @NotNull Map<? super UUID, TMember> getMembers() {
         return immutableGuildMembers;
     }
 
