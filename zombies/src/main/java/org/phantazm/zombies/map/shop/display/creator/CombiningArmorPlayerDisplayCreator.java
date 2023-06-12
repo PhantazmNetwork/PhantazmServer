@@ -5,12 +5,15 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.vector.Vec3D;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.shop.Shop;
@@ -37,11 +40,14 @@ public class CombiningArmorPlayerDisplayCreator implements PlayerDisplayCreator 
 
     private static final TieredStack AIR = new TieredStack(ItemStack.AIR, -1);
 
-    public record TieredStack(ItemStack stack, int tier) {
+    public record TieredStack(@NotNull ItemStack stack, int tier) {
     }
 
     @DataObject
-    public record Data(boolean small, @NotNull Vec3D offset, @NotNull Map<EquipmentSlot, TieredStack> items) {
+    public record Data(@NotNull Direction face,
+                       boolean small,
+                       @NotNull Vec3D offset,
+                       @NotNull Map<EquipmentSlot, TieredStack> items) {
     }
 
     private static class Display implements ShopDisplay {
@@ -110,7 +116,8 @@ public class CombiningArmorPlayerDisplayCreator implements PlayerDisplayCreator 
             }
 
             armorStand.setInstance(shop.instance(),
-                    shop.center().add(data.offset.x(), data.offset.y(), data.offset.z()));
+                    Pos.fromPoint(shop.center().add(data.offset.x(), data.offset.y(), data.offset.z()))
+                            .withDirection(new Vec(data.face.normalX(), data.face.normalY(), data.face.normalZ())));
 
             this.armorStand = armorStand;
         }
