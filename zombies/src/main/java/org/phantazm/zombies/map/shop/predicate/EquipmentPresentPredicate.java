@@ -6,11 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.equipment.Equipment;
-import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
-
-import java.util.Collection;
 
 @Model("zombies.map.shop.equipment_predicate.present")
 @Cache(false)
@@ -27,18 +23,18 @@ public class EquipmentPresentPredicate extends PredicateBase<EquipmentPresentPre
     }
 
     private boolean isPresent(PlayerInteraction interaction) {
-        EquipmentHandler handler = interaction.player().module().getEquipmentHandler();
-        Collection<Equipment> equipmentCollection = handler.getEquipment(data.equipmentGroup);
-        for (Equipment equipment : equipmentCollection) {
-            if (equipment.key().equals(data.equipmentKey)) {
-                return true;
-            }
+        if (data.requireHeld) {
+            return interaction.player().getHeldEquipment().map(equipment -> equipment.key().equals(data.equipmentKey))
+                    .orElse(false);
         }
 
-        return false;
+        return interaction.player().module().getEquipmentHandler().hasEquipment(data.equipmentGroup, data.equipmentKey);
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentGroup, @NotNull Key equipmentKey, boolean requirePresent) {
+    public record Data(@NotNull Key equipmentGroup,
+                       @NotNull Key equipmentKey,
+                       boolean requirePresent,
+                       boolean requireHeld) {
     }
 }

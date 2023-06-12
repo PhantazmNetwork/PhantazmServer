@@ -142,11 +142,12 @@ public final class ZombiesFeature {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
                             MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
-                            ZombiesFeature.mobSpawnerSource(), Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
-                                                    DimensionType dimensionType = instance.getDimensionType();
-                                                    return new InstanceClientBlockHandler(instance, globalEventNode,
-                                                            dimensionType.getMinY(), dimensionType.getHeight());
-                                                }), contextManager, keyParser, ZombiesFeature.powerups(),
+                            ZombiesFeature.mobSpawnerSource(), Mob.getModels(),
+                            new BasicClientBlockHandlerSource(instance -> {
+                                DimensionType dimensionType = instance.getDimensionType();
+                                return new InstanceClientBlockHandler(instance, globalEventNode,
+                                        dimensionType.getMinY(), dimensionType.getHeight());
+                            }), contextManager, keyParser, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
             providers.put(entry.getKey(), provider);
         }
@@ -204,6 +205,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(AddEquipmentInteractor.class);
         contextManager.registerElementClass(ChangeDoorStateInteractor.class);
         contextManager.registerElementClass(DeductCoinsInteractor.class);
+        contextManager.registerElementClass(RefillAmmoInteractor.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
@@ -219,6 +221,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(IncrementalMetaPlayerDisplayCreator.class);
         contextManager.registerElementClass(PlayerHologramDisplayCreator.class);
         contextManager.registerElementClass(PlayerConditionalDisplayCreator.class);
+        contextManager.registerElementClass(InteractionPoint.class);
 
         //Sidebar
         contextManager.registerElementClass(SidebarUpdater.class);
@@ -317,13 +320,11 @@ public final class ZombiesFeature {
         return Map.copyOf(data);
     }
 
-    public static @NotNull
-    @Unmodifiable Map<Key, MapInfo> maps() {
+    public static @NotNull @Unmodifiable Map<Key, MapInfo> maps() {
         return FeatureUtils.check(maps);
     }
 
-    public static @NotNull
-    @Unmodifiable Map<Key, PowerupInfo> powerups() {
+    public static @NotNull @Unmodifiable Map<Key, PowerupInfo> powerups() {
         return FeatureUtils.check(powerups);
     }
 

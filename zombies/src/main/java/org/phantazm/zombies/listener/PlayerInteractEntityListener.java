@@ -29,8 +29,11 @@ public class PlayerInteractEntityListener extends ZombiesPlayerEventListener<Pla
     @Override
     public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerEntityInteractEvent event) {
         if (event.getHand() == Player.Hand.MAIN) {
-            shopHandler.handleInteraction(zombiesPlayer, event.getEntity().getPosition(),
-                    InteractionTypes.RIGHT_CLICK_ENTITY);
+            if (shopHandler.handleInteraction(zombiesPlayer, event.getTarget().getPosition(),
+                    InteractionTypes.RIGHT_CLICK_ENTITY)) {
+                return;
+            }
+
             rightClickListener.onRightClick(zombiesPlayer, event.getPlayer().getHeldSlot());
         }
     }
