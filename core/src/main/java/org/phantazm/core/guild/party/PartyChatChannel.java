@@ -39,4 +39,9 @@ public class PartyChatChannel extends BasicChatChannel {
 
         return Pair.of(party, null);
     }
+
+    @Override
+    public @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent) {
+        return Component.textOfChildren(Component.text("Party > "), super.formatMessage(chatEvent));
+    }
 }

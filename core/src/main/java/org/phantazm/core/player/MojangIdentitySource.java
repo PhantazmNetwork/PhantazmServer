@@ -81,7 +81,7 @@ public class MojangIdentitySource implements IdentitySource {
                 if (idElement != null && idElement.isJsonPrimitive()) {
                     JsonPrimitive idPrimitive = idElement.getAsJsonPrimitive();
                     if (idPrimitive.isString()) {
-                        return Optional.of(UUID.fromString(idPrimitive.getAsString()));
+                        return Optional.of(UUID.fromString(idPrimitive.getAsString().replaceFirst("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5")));
                     }
                 }
 

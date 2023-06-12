@@ -1,7 +1,6 @@
 package org.phantazm.core.guild.party.command;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
@@ -9,7 +8,6 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
-import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.HashMap;
@@ -21,6 +19,7 @@ public class PartyCommand {
     public static Command command(@NotNull Map<? super UUID, Party> parties, @NotNull PlayerViewProvider viewProvider) {
         Command command = new Command("party");
         command.addSubcommand(createCommand(parties, viewProvider));
+        command.addSubcommand(joinCommand(parties, viewProvider));
         command.addSubcommand(leaveCommand(parties));
 
         return command;
@@ -48,6 +47,8 @@ public class PartyCommand {
             Party party = new Party(members);
             party.addMember(new GuildMember(viewProvider.fromPlayer(player)));
             parties.put(player.getUuid(), party);
+
+            sender.sendMessage(Component.text("Ok"));
         });
 
         return command;
@@ -55,7 +56,7 @@ public class PartyCommand {
 
     private static Command joinCommand(@NotNull Map<? super UUID, Party> parties,
             @NotNull PlayerViewProvider viewProvider) {
-        Command command = new Command("create");
+        Command command = new Command("join");
 
         Argument<String> nameArgument = new ArgumentWord("name");
         command.addConditionalSyntax((sender, commandString) -> {
@@ -76,11 +77,16 @@ public class PartyCommand {
                 playerViewOptional.ifPresentOrElse(playerView -> {
                     Party party = parties.get(playerView.getUUID());
                     if (party == null) {
-                        sender.sendMessage(Component.text("not in party"));
+                        sender.sendMessage(Component.text("other player not in party"));
                         return;
                     }
 
                     Player player = (Player) sender;
+                    Party previousParty = parties.get(player.getUuid());
+                    if (previousParty != null) {
+                        previousParty.removeMember(player.getUuid());
+                    }
+
                     party.addMember(new GuildMember(viewProvider.fromPlayer(player)));
                     parties.put(player.getUuid(), party);
 

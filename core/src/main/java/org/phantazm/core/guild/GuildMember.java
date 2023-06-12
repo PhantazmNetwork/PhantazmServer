@@ -5,6 +5,7 @@ import org.phantazm.core.player.PlayerView;
 
 import java.util.Objects;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class GuildMember {
 
     private final PlayerView playerView;

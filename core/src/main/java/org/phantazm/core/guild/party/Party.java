@@ -1,5 +1,8 @@
 package org.phantazm.core.guild.party;
 
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +14,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
-public class Party extends Guild implements PacketGroupingAudience {
+public class Party extends Guild<GuildMember> implements PacketGroupingAudience {
     public Party(@NotNull Map<? super UUID, GuildMember> guildMembers) {
         super(guildMembers);
     }
