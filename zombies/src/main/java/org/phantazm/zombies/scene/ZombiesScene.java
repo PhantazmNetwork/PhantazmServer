@@ -123,11 +123,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
         List<Instance> oldInstances = new ArrayList<>(newPlayers.size());
+        List<PlayerView> teleportedViews = new ArrayList<>(newPlayers.size());
         List<Player> teleportedPlayers = new ArrayList<>(newPlayers.size());
         List<CompletableFuture<?>> futures = new ArrayList<>(newPlayers.size());
         for (PlayerView view : newPlayers) {
             view.getPlayer().ifPresent(player -> {
                 oldInstances.add(player.getInstance());
+                teleportedViews.add(view);
                 teleportedPlayers.add(player);
                 futures.add(player.setInstance(instance, pos));
             });
@@ -136,6 +138,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenRun(() -> {
             for (int i = 0; i < futures.size(); ++i) {
                 Instance oldInstance = oldInstances.get(i);
+                PlayerView view = teleportedViews.get(i);
                 Player teleportedPlayer = teleportedPlayers.get(i);
                 CompletableFuture<?> future = futures.get(i);
 
@@ -160,6 +163,14 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         otherPlayer.sendPacket(teleportedPlayer.getRemovePlayerToList());
                     }
                 }
+
+                ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+                zombiesPlayer.start();
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                zombiesPlayers.put(view.getUUID(), zombiesPlayer);
+                players.put(view.getUUID(), view);
+
+                stage.onJoin(zombiesPlayer);
             }
         });
 
