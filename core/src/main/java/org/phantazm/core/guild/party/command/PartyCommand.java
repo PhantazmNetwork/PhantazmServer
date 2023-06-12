@@ -168,7 +168,7 @@ public class PartyCommand {
                 return;
             }
 
-            for (PartyMember otherMember : party.getMemberManager().getGuildMembers().values()) {
+            for (PartyMember otherMember : party.getMemberManager().getMembers().values()) {
                 if (otherMember != member && permission.canExecute(member, otherMember)) {
                     otherMember.getPlayerView().getUsernameIfCached().ifPresent(username -> {
                         suggestion.addEntry(new SuggestionEntry(username));
