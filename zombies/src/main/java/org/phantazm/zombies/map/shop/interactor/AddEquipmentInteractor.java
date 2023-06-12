@@ -79,7 +79,7 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
                     InventoryAccessRegistry accessRegistry = handler.accessRegistry();
                     accessRegistry.getCurrentAccess().ifPresent(inventoryAccess -> {
                         InventoryObjectGroup targetGroup = inventoryAccess.groups().get(data.groupKey);
-                        if (targetGroup != null) {
+                        if (targetGroup != null && targetGroup.getSlots().contains(targetSlot)) {
                             createEquipment(zombiesPlayer).ifPresent(equipment -> {
                                 wrapper.set(true);
                                 accessRegistry.replaceObject(targetSlot, equipment);
