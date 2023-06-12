@@ -154,7 +154,7 @@ public final class ZombiesFeature {
 
         MinecraftServer.getSchedulerManager()
                 .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
-                        TaskSchedule.tick(1));
+                        TaskSchedule.nextTick());
 
         commandManager.register(
                 new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene,

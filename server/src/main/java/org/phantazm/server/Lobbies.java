@@ -131,7 +131,7 @@ public final class Lobbies {
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             lobbyRouter.tick(System.currentTimeMillis());
-        }, TaskSchedule.immediate(), TaskSchedule.tick(1));
+        }, TaskSchedule.immediate(), TaskSchedule.nextTick());
     }
 
     public static @NotNull LobbyRouter getLobbyRouter() {

@@ -14,6 +14,6 @@ public class RankSingleMemberPermission<TMember extends GuildMember & Ranked> im
 
     @Override
     public boolean hasPermission(@NotNull TMember member) {
-        return member.rank() > minimumExecutionRank;
+        return member.rank() >= minimumExecutionRank;
     }
 }

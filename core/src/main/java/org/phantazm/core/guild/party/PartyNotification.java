@@ -1,12 +1,13 @@
 package org.phantazm.core.guild.party;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.guild.invite.InvitationNotification;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.ArrayList;
@@ -14,11 +15,14 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-public class PartyNotification {
+public class PartyNotification implements InvitationNotification<PartyMember> {
 
     private final Audience audience;
 
-    public PartyNotification(@NotNull Collection<? extends PartyMember> partyMembers) {
+    private final Wrapper<PartyMember> owner;
+
+    public PartyNotification(@NotNull Collection<? extends PartyMember> partyMembers,
+            @NotNull Wrapper<PartyMember> owner) {
         Objects.requireNonNull(partyMembers, "partyMembers");
         this.audience = (ForwardingAudience)() -> {
             Collection<Audience> audiences = new ArrayList<>(partyMembers.size());
@@ -29,19 +33,73 @@ public class PartyNotification {
 
             return audiences;
         };
+        this.owner = Objects.requireNonNull(owner, "owner");
     }
 
-    public void notifyJoin(@NotNull CommandSender sender, @NotNull PartyMember newMember, @NotNull PlayerView target) {
+    @Override
+    public void notifyJoin(@NotNull PartyMember newMember) {
         newMember.getPlayerView().getDisplayName().thenAccept(displayName -> {
             ComponentLike message = Component.text().append(displayName, Component.text(" has joined the party."))
                     .color(NamedTextColor.GOLD);
             audience.sendMessage(message);
         });
 
-        target.getDisplayName().thenAccept(displayName -> {
-            sender.sendMessage(
-                    Component.text().append(Component.text("Joined "), displayName, Component.text("'s party."))
-                            .color(NamedTextColor.GREEN));
+        owner.get().getPlayerView().getDisplayName().thenAccept(displayName -> {
+            newMember.getPlayerView().getPlayer().ifPresent(player -> {
+                ComponentLike message =
+                        Component.text().append(Component.text("Joined "), displayName, Component.text("'s party."))
+                                .color(NamedTextColor.GREEN);
+                player.sendMessage(message);
+            });
+        });
+    }
+
+    @Override
+    public void notifyInvitation(@NotNull PartyMember inviter, @NotNull PlayerView invitee) {
+        CompletableFuture<? extends Component> inviterName = inviter.getPlayerView().getDisplayName();
+        CompletableFuture<? extends Component> inviteeName = invitee.getDisplayName();
+
+        CompletableFuture.allOf(inviterName, inviteeName).thenRun(() -> {
+            ComponentLike message = Component.text().append(inviterName.join(), Component.text(" has invited "),
+                    inviteeName.join(), Component.text(" to the party.")).color(NamedTextColor.GOLD);
+            audience.sendMessage(message);
+        });
+
+        if (inviter == owner.get()) {
+            inviterName.thenAccept(displayName -> {
+                invitee.getPlayer().ifPresent(player -> {
+                    ComponentLike message = Component.text().append(displayName, Component.text(" has invited you to " +
+                            "join their party.")).color(NamedTextColor.GOLD);
+                    player.sendMessage(message);
+                });
+            });
+        } else {
+            CompletableFuture<? extends Component> ownerName = owner.get().getPlayerView().getDisplayName();
+            CompletableFuture.allOf(ownerName, inviterName).thenRun(() -> {
+                invitee.getPlayer().ifPresent(player -> {
+                    ComponentLike message = Component.text().append(inviterName.join(), Component.text(" has invited " +
+                            "you to join "), ownerName.join(), Component.text("'s party.")).color(NamedTextColor.GOLD);
+                    player.sendMessage(message);
+                });
+            });
+        }
+    }
+
+    @Override
+    public void notifyExpiry(@NotNull PlayerView invitee) {
+        invitee.getDisplayName().thenAccept(displayName -> {
+            ComponentLike message = Component.text()
+                    .append(Component.text("The invitation to "), displayName, Component.text(" has expired."))
+                    .color(NamedTextColor.GOLD);
+            audience.sendMessage(message);
+        });
+
+        owner.get().getPlayerView().getDisplayName().thenAccept(displayName -> {
+            invitee.getPlayer().ifPresent(player -> {
+                ComponentLike message = Component.text().append(Component.text("The invitation to "), displayName,
+                        Component.text("'s party has expired.")).color(NamedTextColor.GOLD);
+                player.sendMessage(message);
+            });
         });
     }
 
