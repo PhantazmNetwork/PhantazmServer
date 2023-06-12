@@ -6,6 +6,7 @@ import net.minestom.server.command.builder.Command;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.scene.ZombiesRouteRequest;
@@ -18,7 +19,9 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public class ZombiesCommand extends Command {
-    public ZombiesCommand(@NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser,
+    public ZombiesCommand(@NotNull Map<? super UUID, ? extends Party> parties,
+            @NotNull Scene<ZombiesRouteRequest> router,
+            @NotNull KeyParser keyParser,
             @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
             @NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper, @NotNull SceneFallback fallback) {
         super("zombies");
@@ -29,7 +32,7 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(fallback, "fallback");
 
-        addSubcommand(new ZombiesJoinCommand(router, keyParser, maps, viewProvider));
+        addSubcommand(new ZombiesJoinCommand(parties, router, keyParser, maps, viewProvider));
         addSubcommand(new GiveCoinsCommand(sceneMapper));
         addSubcommand(new RoundCommand(sceneMapper));
         addSubcommand(new KillAllCommand(sceneMapper));

@@ -28,6 +28,7 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.item.AnimatedUpdatingItem;
@@ -113,7 +114,7 @@ public final class ZombiesFeature {
             @NotNull KeyParser keyParser, @NotNull ConnectionManager connectionManager,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
-            @NotNull SceneFallback sceneFallback) throws IOException {
+            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -157,7 +158,8 @@ public final class ZombiesFeature {
                         TaskSchedule.tick(1));
 
         commandManager.register(
-                new ZombiesCommand(sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene,
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
+                        ZombiesFeature::getPlayerScene,
                         sceneFallback));
     }
 
