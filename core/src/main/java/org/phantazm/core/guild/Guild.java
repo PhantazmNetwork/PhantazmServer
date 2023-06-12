@@ -1,36 +1,30 @@
 package org.phantazm.core.guild;
 
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class Guild<TMember extends GuildMember> {
 
-    private final Map<? super UUID, TMember> guildMembers;
+    private final GuildMemberManager<TMember> memberManager;
 
-    public Guild(@NotNull Map<? super UUID, TMember> guildMembers) {
-        this.guildMembers = Objects.requireNonNull(guildMembers, "guildMembers");
+    private final Function<? super PlayerView, ? extends TMember> memberCreator;
+
+    public Guild(@NotNull GuildMemberManager<TMember> memberManager,
+            @NotNull Function<? super PlayerView, ? extends TMember> memberCreator) {
+        this.memberManager = Objects.requireNonNull(memberManager, "memberManager");
+        this.memberCreator = Objects.requireNonNull(memberCreator, "memberCreator");
     }
 
-    public void addMember(@NotNull TMember guildMember) {
-        guildMembers.put(guildMember.getPlayerView().getUUID(), guildMember);
+    public @NotNull GuildMemberManager<TMember> getMemberManager() {
+        return memberManager;
     }
 
-    public void removeMember(@NotNull UUID memberUUID) {
-        guildMembers.remove(memberUUID);
-    }
-
-    public TMember getMember(@NotNull UUID memberUUID) {
-        return guildMembers.get(memberUUID);
-    }
-
-    public boolean hasMember(@NotNull UUID memberUUID) {
-        return getMember(memberUUID) != null;
-    }
-
-    public @NotNull Map<? super UUID, TMember> getGuildMembers() {
-        return guildMembers;
+    public @NotNull Function<? super PlayerView, ? extends TMember> getMemberCreator() {
+        return memberCreator;
     }
 }

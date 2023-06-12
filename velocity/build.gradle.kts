@@ -12,28 +12,21 @@ repositories {
     }
 }
 
-val shade: Configuration by configurations.creating
-configurations.implementation.get().extendsFrom(shade)
-
-fun ModuleDependency.exclude(provider: Provider<MinimalExternalModuleDependency>) {
-    val module = provider.get().module
-    exclude(module.group, module.name)
-}
-
-fun DependencyHandlerScope.addShade(dependency: ProjectDependency) {
-    shade(dependency) {
-        exclude(libs.fastutil)
-    }
+val shade: Configuration by configurations.creating {
+    isTransitive = false
 }
 
 dependencies {
     annotationProcessor(libs.velocity.api)
 
     implementation(libs.velocity.api)
+    implementation(projects.phantazmCommons)
+    implementation(projects.phantazmMessaging)
+    implementation(projects.phantazmZombiesMapdata)
 
-    addShade(projects.phantazmCommons)
-    addShade(projects.phantazmMessaging)
-    addShade(projects.phantazmZombiesMapdata)
+    shade(projects.phantazmCommons)
+    shade(projects.phantazmMessaging)
+    shade(projects.phantazmZombiesMapdata)
 }
 
 tasks.shadowJar {
@@ -41,7 +34,9 @@ tasks.shadowJar {
     configurations = listOf(shade)
 }
 
-tasks.jar.get().enabled = false
+tasks.jar {
+    enabled = false
+}
 
 tasks.register<Copy>("copyJar") {
     dependsOn(tasks.shadowJar)
