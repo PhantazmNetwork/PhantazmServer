@@ -4,12 +4,10 @@ import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.VecUtils;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.map.SpawnInfo;
 import org.phantazm.zombies.map.Spawnpoint;
-import org.phantazm.zombies.map.SpawnpointInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,9 +64,6 @@ public class BasicSpawnDistributor implements SpawnDistributor {
         }
 
         sortedSpawnpoints.sort((first, second) -> {
-            SpawnpointInfo firstInfo = first.getSpawnInfo();
-            SpawnpointInfo secondInfo = second.getSpawnInfo();
-
             double firstClosest = Double.POSITIVE_INFINITY;
             double secondClosest = Double.POSITIVE_INFINITY;
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
@@ -76,8 +71,8 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 if (playerOptional.isPresent()) {
                     Player player = playerOptional.get();
 
-                    double firstDistance = player.getDistance(VecUtils.toPoint(firstInfo.position()));
-                    double secondDistance = player.getDistance(VecUtils.toPoint(secondInfo.position()));
+                    double firstDistance = player.getDistance(first.spawnPoint());
+                    double secondDistance = player.getDistance(second.spawnPoint());
 
                     if (firstDistance < firstClosest) {
                         firstClosest = firstDistance;
