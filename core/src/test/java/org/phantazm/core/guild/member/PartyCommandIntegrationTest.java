@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.guild.party.Party;
+import org.phantazm.core.guild.party.PartyCreator;
 import org.phantazm.core.guild.party.command.PartyCommand;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
@@ -30,6 +31,8 @@ public class PartyCommandIntegrationTest {
 
     private IdentitySource identitySource;
 
+    private PartyCreator partyCreator;
+
     @BeforeEach
     public void setup() {
         parties = new HashMap<>();
@@ -44,14 +47,14 @@ public class PartyCommandIntegrationTest {
                 return CompletableFuture.completedFuture(Optional.empty());
             }
         };
-
+        partyCreator = new PartyCreator(1, 1, 0);
     }
 
     @SuppressWarnings("UnstableApiUsage")
     @Test
     public void testCreateCreatesParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        Command command = PartyCommand.command(parties, viewProvider);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
@@ -65,7 +68,7 @@ public class PartyCommandIntegrationTest {
     @Test
     public void testNotInPartyAfterLeaving(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        Command command = PartyCommand.command(parties, viewProvider);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
@@ -75,14 +78,14 @@ public class PartyCommandIntegrationTest {
         env.process().command().execute(player, "party leave");
 
         assertFalse(parties.containsKey(player.getUuid()));
-        assertFalse(party.hasMember(player.getUuid()));
+        assertFalse(party.getMemberManager().hasMember(player.getUuid()));
     }
 
     @SuppressWarnings("UnstableApiUsage")
     @Test
     public void testNotInPartyAfterJoiningOtherPlayerNotInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        Command command = PartyCommand.command(parties, viewProvider);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -100,7 +103,7 @@ public class PartyCommandIntegrationTest {
     @Test
     public void testInPartyAfterJoiningOtherPlayerInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        Command command = PartyCommand.command(parties, viewProvider);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -113,7 +116,7 @@ public class PartyCommandIntegrationTest {
         env.process().command().execute(secondPlayer, "party join first");
 
         assertEquals(party, parties.get(secondPlayer.getUuid()));
-        assertTrue(party.hasMember(secondPlayer.getUuid()));
+        assertTrue(party.getMemberManager().hasMember(secondPlayer.getUuid()));
     }
 
 }

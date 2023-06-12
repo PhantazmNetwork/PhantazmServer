@@ -37,7 +37,7 @@ public class PartyChatChannel extends BasicChatChannel {
                     true));
         }
 
-        return Pair.of(party, null);
+        return Pair.of(party.getAudience(), null);
     }
 
     @Override

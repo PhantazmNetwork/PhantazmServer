@@ -63,8 +63,18 @@ public class LobbyTest {
             }
 
             @Override
+            public @NotNull Optional<String> getUsernameIfCached() {
+                return Optional.of(playerUUID.toString());
+            }
+
+            @Override
             public @NotNull CompletableFuture<Component> getDisplayName() {
                 return CompletableFuture.completedFuture(Component.empty());
+            }
+
+            @Override
+            public @NotNull Optional<? extends Component> getDisplayNameIfCached() {
+                return Optional.of(Component.empty());
             }
 
             @Override
