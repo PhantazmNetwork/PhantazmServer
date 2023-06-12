@@ -48,7 +48,6 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
     @Override
     public void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
         event.setSpawningInstance(instance);
-        event.getPlayer().updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
         event.getPlayer().setRespawnPoint(instanceConfig.spawnPoint());
         event.getPlayer().setGameMode(GameMode.ADVENTURE);
     }
@@ -59,6 +58,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      * has spawned for the first time.
      */
     public void onPlayerLoginComplete() {
+        event.getPlayer().updateViewableRule(otherPlayer -> otherPlayer.getInstance() == event.getSpawningInstance());
         for (Player player : connectionManager.getOnlinePlayers()) {
             if (player.getInstance() != event.getSpawningInstance()) {
                 player.sendPacket(event.getPlayer().getRemovePlayerToList());
