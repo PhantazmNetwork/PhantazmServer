@@ -52,10 +52,7 @@ import org.phantazm.zombies.map.action.round.RevivePlayersAction;
 import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
 import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
 import org.phantazm.zombies.map.shop.display.*;
-import org.phantazm.zombies.map.shop.display.creator.EquipmentUpgradeCostDisplayCreator;
-import org.phantazm.zombies.map.shop.display.creator.IncrementalMetaPlayerDisplayCreator;
-import org.phantazm.zombies.map.shop.display.creator.PlayerConditionalDisplayCreator;
-import org.phantazm.zombies.map.shop.display.creator.PlayerHologramDisplayCreator;
+import org.phantazm.zombies.map.shop.display.creator.*;
 import org.phantazm.zombies.map.shop.gui.InteractingClickHandler;
 import org.phantazm.zombies.map.shop.interactor.*;
 import org.phantazm.zombies.map.shop.predicate.*;
@@ -114,7 +111,8 @@ public final class ZombiesFeature {
             @NotNull KeyParser keyParser, @NotNull ConnectionManager connectionManager,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
-            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties) throws IOException {
+            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties)
+            throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -159,8 +157,7 @@ public final class ZombiesFeature {
                         TaskSchedule.tick(1));
 
         commandManager.register(
-                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
-                        ZombiesFeature::getPlayerScene,
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene,
                         sceneFallback));
     }
 
@@ -222,6 +219,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlayerHologramDisplayCreator.class);
         contextManager.registerElementClass(PlayerConditionalDisplayCreator.class);
         contextManager.registerElementClass(InteractionPoint.class);
+        contextManager.registerElementClass(CombiningArmorPlayerDisplayCreator.class);
 
         //Sidebar
         contextManager.registerElementClass(SidebarUpdater.class);
