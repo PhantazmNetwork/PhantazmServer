@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 public class InvitationManager<TMember extends GuildMember> implements Tickable {
 
-    private final Object2LongMap<UUID> latestInviteTime = new Object2LongArrayMap<>();
+    private final Object2LongMap<UUID> latestInviteTimes = new Object2LongArrayMap<>();
 
     private final Queue<Invitation> invitations = new LinkedList<>();
 
@@ -45,8 +45,8 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
                 break;
             }
 
-            if (latestInviteTime.getLong(invitation.invitee().getUUID()) == invitation.expirationTime()) {
-                latestInviteTime.removeLong(invitation.invitee().getUUID());
+            if (latestInviteTimes.getLong(invitation.invitee().getUUID()) == invitation.expirationTime()) {
+                latestInviteTimes.removeLong(invitation.invitee().getUUID());
             }
             notification.notifyExpiry(invitation.invitee());
         }
@@ -55,31 +55,34 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
     public void invite(@NotNull TMember inviter, @NotNull PlayerView invitee) {
         long expirationTime = ticks + invitationDuration;
         invitations.add(new Invitation(invitee, expirationTime));
-        latestInviteTime.put(invitee.getUUID(), expirationTime);
-
+        latestInviteTimes.put(invitee.getUUID(), expirationTime);
         notification.notifyInvitation(inviter, invitee);
     }
 
     public boolean hasInvitation(@NotNull UUID candidate) {
-        return latestInviteTime.containsKey(candidate);
+        return latestInviteTimes.containsKey(candidate);
     }
 
     public void acceptInvitation(@NotNull PlayerView invitee) {
-        Iterator<Invitation> iterator = invitations.iterator();
-        boolean anyInvites = false;
-        while (iterator.hasNext()) {
-            Invitation next = iterator.next();
-            if (next.invitee().getUUID().equals(invitee.getUUID())) {
-                iterator.remove();
-                anyInvites = true;
-            }
-        }
-
-        if (!anyInvites) {
+        if (!latestInviteTimes.containsKey(invitee.getUUID())) {
             throw new IllegalStateException("Player was not invited");
         }
 
-        latestInviteTime.removeLong(invitee.getUUID());
+        long latestTime = latestInviteTimes.getLong(invitee.getUUID());
+
+        Iterator<Invitation> iterator = invitations.iterator();
+        while (iterator.hasNext()) {
+            Invitation next = iterator.next();
+            if (next.expirationTime() > latestTime) {
+                break;
+            }
+
+            if (next.invitee().getUUID().equals(invitee.getUUID())) {
+                iterator.remove();
+            }
+        }
+
+        latestInviteTimes.removeLong(invitee.getUUID());
         TMember newMember = playerCreator.apply(invitee);
         memberManager.addMember(newMember);
         notification.notifyJoin(newMember);
