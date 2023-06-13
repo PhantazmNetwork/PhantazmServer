@@ -256,7 +256,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     @Override
     public void forceShutdown() {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-            zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
             zombiesPlayer.end();
         }
         super.forceShutdown();

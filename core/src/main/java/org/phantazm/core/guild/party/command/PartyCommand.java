@@ -13,7 +13,7 @@ public class PartyCommand {
 
     public static Command command(@NotNull Map<? super UUID, Party> parties, @NotNull PlayerViewProvider viewProvider,
             @NotNull PartyCreator partyCreator) {
-        Command command = new Command("party");
+        Command command = new Command("party", "p");
         command.addSubcommand(PartyCreateCommand.createCommand(parties, viewProvider, partyCreator));
         command.addSubcommand(PartyJoinCommand.joinCommand(parties, viewProvider));
         command.addSubcommand(PartyLeaveCommand.leaveCommand(parties));

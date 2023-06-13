@@ -5,6 +5,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.invite.InvitationNotification;
@@ -60,25 +61,35 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
         CompletableFuture<? extends Component> inviteeName = invitee.getDisplayName();
 
         CompletableFuture.allOf(inviterName, inviteeName).thenRun(() -> {
-            ComponentLike message = Component.text().append(inviterName.join(), Component.text(" has invited "),
-                    inviteeName.join(), Component.text(" to the party.")).color(NamedTextColor.GOLD);
+            ComponentLike message = Component.text()
+                    .append(inviterName.join(), Component.text(" has invited "), inviteeName.join(),
+                            Component.text(" to the party.")).color(NamedTextColor.GOLD);
             audience.sendMessage(message);
         });
 
         if (inviter == owner.get()) {
             inviterName.thenAccept(displayName -> {
                 invitee.getPlayer().ifPresent(player -> {
-                    ComponentLike message = Component.text().append(displayName, Component.text(" has invited you to " +
-                            "join their party.")).color(NamedTextColor.GOLD);
+                    ComponentLike message = Component.text()
+                            .append(displayName, Component.text(" has invited you to join their party. Click "),
+                                    Component.text("here", NamedTextColor.GOLD)
+                                            .clickEvent(ClickEvent.runCommand("/party join " + player.getUsername())),
+                                    Component.text(" to join!")).color(NamedTextColor.GOLD);
                     player.sendMessage(message);
                 });
             });
-        } else {
-            CompletableFuture<? extends Component> ownerName = owner.get().getPlayerView().getDisplayName();
-            CompletableFuture.allOf(ownerName, inviterName).thenRun(() -> {
+        }
+        else {
+            CompletableFuture<String> ownerName = owner.get().getPlayerView().getUsername();
+            CompletableFuture<? extends Component> ownerDisplayName = owner.get().getPlayerView().getDisplayName();
+            CompletableFuture.allOf(ownerName, ownerDisplayName, inviterName).thenRun(() -> {
                 invitee.getPlayer().ifPresent(player -> {
-                    ComponentLike message = Component.text().append(inviterName.join(), Component.text(" has invited " +
-                            "you to join "), ownerName.join(), Component.text("'s party.")).color(NamedTextColor.GOLD);
+                    ComponentLike message = Component.text()
+                            .append(inviterName.join(), Component.text(" has invited you to join "),
+                                    ownerDisplayName.join(), Component.text("'s party. Click "),
+                                    Component.text("here", NamedTextColor.GOLD)
+                                            .clickEvent(ClickEvent.runCommand("/party join " + ownerName.join())),
+                                    Component.text(" to join!")).color(NamedTextColor.GOLD);
                     player.sendMessage(message);
                 });
             });
