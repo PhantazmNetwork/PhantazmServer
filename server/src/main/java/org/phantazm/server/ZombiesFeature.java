@@ -173,6 +173,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(DoorSendOpenedRoomsAction.class);
         contextManager.registerElementClass(SelectPowerupZombieAction.class);
         contextManager.registerElementClass(DoorPlaySoundAction.class);
+        contextManager.registerElementClass(org.phantazm.zombies.map.action.round.PlaySoundAction.class);
 
         //ShopPredicate
         contextManager.registerElementClass(StaticCostPredicate.class);
