@@ -94,10 +94,6 @@ public class EndStage implements Stage {
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {
             sidebarUpdater.end();
         }
-
-        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            zombiesPlayer.end();
-        }
     }
 
     @Override
