@@ -147,7 +147,8 @@ public final class ZombiesFeature {
                                 return new InstanceClientBlockHandler(instance, globalEventNode,
                                         dimensionType.getMinY(), dimensionType.getHeight());
                             }), contextManager, keyParser, ZombiesFeature.powerups(),
-                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
+                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
+                                    Mob.getModels()));
             providers.put(entry.getKey(), provider);
         }
 

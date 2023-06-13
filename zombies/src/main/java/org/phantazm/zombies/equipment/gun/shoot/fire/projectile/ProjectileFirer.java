@@ -1,6 +1,7 @@
 package org.phantazm.zombies.equipment.gun.shoot.fire.projectile;
 
 import com.github.steanky.element.core.annotation.*;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -30,6 +31,7 @@ import org.phantazm.zombies.equipment.gun.target.TargetFinder;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -43,6 +45,7 @@ public class ProjectileFirer implements Firer {
     private final Map<UUID, FiredShot> firedShots = new HashMap<>();
     private final Data data;
     private final Supplier<Optional<? extends Entity>> entitySupplier;
+    private final Function<? super Key, ? extends MobModel> modelFunction;
     private final UUID shooterUUID;
     private final ShotEndpointSelector endSelector;
     private final TargetFinder targetFinder;
@@ -66,13 +69,15 @@ public class ProjectileFirer implements Firer {
      */
     @FactoryMethod
     public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-            @NotNull UUID shooterUUID, @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
+            @NotNull Function<? super Key, ? extends MobModel> modelFunction, @NotNull UUID shooterUUID,
+            @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
             @NotNull @Child("target_finder") TargetFinder targetFinder,
             @NotNull @Child("collision_filter") ProjectileCollisionFilter collisionFilter,
             @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers, @NotNull MobStore mobStore,
             @NotNull MobSpawner spawner, @NotNull EventNode<Event> node) {
         this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
+        this.modelFunction = modelFunction;
         this.shooterUUID = Objects.requireNonNull(shooterUUID, "shooterUUID");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
@@ -95,15 +100,19 @@ public class ProjectileFirer implements Firer {
             }
 
             endSelector.getEnd(start).ifPresent(end -> {
-                PhantazmMob mob = spawner.spawn(instance, start, data.model());
-                ProximaEntity neuralEntity = mob.entity();
-                neuralEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
-                        new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
-                neuralEntity.setNoGravity(!data.hasGravity());
-                mobStore.onMobSpawn(mob);
+                MobModel model = modelFunction.apply(data.projectileMob);
+                if (model != null) {
+                    PhantazmMob mob = spawner.spawn(instance, start, model);
+                    ProximaEntity neuralEntity = mob.entity();
+                    neuralEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
+                            new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
+                    neuralEntity.setNoGravity(!data.hasGravity());
+                    mobStore.onMobSpawn(mob);
 
-                firedShots.put(neuralEntity.getUuid(), new FiredShot(gun, state, entity, start, previousHits));
-                removalQueue.add(new AliveProjectile(new WeakReference<>(neuralEntity), System.currentTimeMillis()));
+                    firedShots.put(neuralEntity.getUuid(), new FiredShot(gun, state, entity, start, previousHits));
+                    removalQueue.add(
+                            new AliveProjectile(new WeakReference<>(neuralEntity), System.currentTimeMillis()));
+                }
             });
         });
     }
@@ -219,7 +228,7 @@ public class ProjectileFirer implements Firer {
                        @NotNull @ChildPath("target_finder") String targetFinder,
                        @NotNull @ChildPath("collision_filter") String collisionFilter,
                        @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlers,
-                       @NotNull MobModel model,
+                       @NotNull Key projectileMob,
                        double power,
                        double spread,
                        boolean hasGravity,

@@ -80,8 +80,8 @@ public class BasicMobSpawner implements MobSpawner {
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
 
-        this.mobDependencyProvider = new ModuleDependencyProvider(keyParser, new Module(this, mobStore,
-                random, mapObjects));
+        this.mobDependencyProvider =
+                new ModuleDependencyProvider(keyParser, new Module(this, mobStore, random, mapObjects));
     }
 
     @Override
@@ -216,6 +216,10 @@ public class BasicMobSpawner implements MobSpawner {
     }
 
     private Collection<GoalApplier> createGoalAppliers(ElementContext context) {
+        if (!context.root().asNode().containsKey("goalAppliers")) {
+            return List.of();
+        }
+
         return context.provideCollection(GOAL_APPLIERS_PATH, mobDependencyProvider, GOAL_HANDLER);
     }
 
