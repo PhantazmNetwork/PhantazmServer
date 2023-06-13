@@ -2,6 +2,7 @@
 serverIP = "0.0.0.0"
 port = 25567
 optifineEnabled = true
+whitelist = false
 authType = "BUNGEE"
 proxySecret = "default"
 
