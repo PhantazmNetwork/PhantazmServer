@@ -26,11 +26,11 @@ public class StaticIntersectionFinder implements IntersectionFinder {
     @Override
     public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start) {
         BoundingBox boundingBox = entity.getBoundingBox();
-        double centerX = (boundingBox.minX() + boundingBox.maxX()) / 2;
-        double centerY = (boundingBox.minY() + boundingBox.maxY()) / 2;
-        double centerZ = (boundingBox.minZ() + boundingBox.maxZ()) / 2;
+        Pos position = entity.getPosition();
 
-        return Optional.of(new Vec(centerX, centerY, centerZ));
+        double halfWidth = boundingBox.width() / 2;
+        double halfHeight = boundingBox.height() / 2;
+        return Optional.of(new Vec(position.x() + halfWidth, position.y() + halfHeight, position.z() + halfWidth));
     }
 
 }
