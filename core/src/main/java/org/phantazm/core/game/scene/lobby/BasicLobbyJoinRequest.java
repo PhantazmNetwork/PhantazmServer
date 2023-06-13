@@ -44,14 +44,12 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
     @Override
     public void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
-        List<Instance> oldInstances = new ArrayList<>(players.size());
         List<Player> teleportedPlayers = new ArrayList<>(players.size());
         List<CompletableFuture<?>> futures = new ArrayList<>(players.size());
         for (PlayerView view : players) {
             view.getPlayer().ifPresent(player -> {
                 player.setGameMode(GameMode.ADVENTURE);
 
-                oldInstances.add(player.getInstance());
                 teleportedPlayers.add(player);
                 futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
             });
@@ -59,21 +57,19 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
         CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenRun(() -> {
             for (int i = 0; i < futures.size(); ++i) {
-                Instance oldInstance = oldInstances.get(i);
                 Player teleportedPlayer = teleportedPlayers.get(i);
 
-                if (oldInstance != instance) {
-                    for (Player otherPlayer : instance.getPlayers()) {
-                        teleportedPlayer.sendPacket(otherPlayer.getAddPlayerToList());
-                        otherPlayer.sendPacket(teleportedPlayer.getAddPlayerToList());
-                    }
-                }
-                teleportedPlayer.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
-                teleportedPlayer.updateViewerRule();
                 for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
                     if (otherPlayer.getInstance() != instance) {
+                        otherPlayer.removeViewer(teleportedPlayer);
                         teleportedPlayer.sendPacket(otherPlayer.getRemovePlayerToList());
+                        teleportedPlayer.removeViewer(otherPlayer);
                         otherPlayer.sendPacket(teleportedPlayer.getRemovePlayerToList());
+                    } else {
+                        teleportedPlayer.sendPacket(otherPlayer.getAddPlayerToList());
+                        otherPlayer.addViewer(teleportedPlayer);
+                        otherPlayer.sendPacket(teleportedPlayer.getAddPlayerToList());
+                        teleportedPlayer.addViewer(otherPlayer);
                     }
                 }
             }

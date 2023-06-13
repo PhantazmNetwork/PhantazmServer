@@ -63,7 +63,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
     @Override
     public void start() {
-        //TODO: entity.hasPhysics = false;
+        entity.setHasPhysics(false);
         if (entity.getEntityMeta() instanceof ProjectileMeta projectileMeta) {
             projectileMeta.setShooter(shooter);
         }
@@ -126,7 +126,8 @@ public class ProjectileMovementGoal implements ProximaGoal {
             return false;
         }
         if (previousPos.samePoint(currentPos)) {
-            return instance.getBlock(previousPos).isSolid();
+            Block block = instance.getBlock(previousPos);
+            return block.isSolid() && !block.compare(Block.BARRIER);
         }
 
         Chunk chunk = null;
@@ -147,7 +148,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 block = instance.getBlock(previousPos);
                 blockPos = previousPos;
             }
-            if (block.isSolid()) {
+            if (block.isSolid() && !block.compare(Block.BARRIER)) {
                 final ProjectileCollideWithBlockEvent event =
                         new ProjectileCollideWithBlockEvent(entity, previousPos, block);
                 EventDispatcher.call(event);

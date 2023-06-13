@@ -126,13 +126,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
-        List<Instance> oldInstances = new ArrayList<>(newPlayers.size());
         List<PlayerView> teleportedViews = new ArrayList<>(newPlayers.size());
         List<Player> teleportedPlayers = new ArrayList<>(newPlayers.size());
         List<CompletableFuture<?>> futures = new ArrayList<>(newPlayers.size());
         for (PlayerView view : newPlayers) {
             view.getPlayer().ifPresent(player -> {
-                oldInstances.add(player.getInstance());
                 teleportedViews.add(view);
                 teleportedPlayers.add(player);
                 futures.add(player.setInstance(instance, pos));
@@ -141,7 +139,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenRun(() -> {
             for (int i = 0; i < futures.size(); ++i) {
-                Instance oldInstance = oldInstances.get(i);
                 PlayerView view = teleportedViews.get(i);
                 Player teleportedPlayer = teleportedPlayers.get(i);
                 CompletableFuture<?> future = futures.get(i);
@@ -153,18 +150,17 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     continue;
                 }
 
-                if (oldInstance != instance) {
-                    for (Player otherPlayer : instance.getPlayers()) {
-                        teleportedPlayer.sendPacket(otherPlayer.getAddPlayerToList());
-                        otherPlayer.sendPacket(teleportedPlayer.getAddPlayerToList());
-                    }
-                }
-                teleportedPlayer.updateViewableRule(otherPlayer -> otherPlayer.getInstance() == instance);
-                teleportedPlayer.updateViewerRule();
                 for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
                     if (otherPlayer.getInstance() != instance) {
+                        otherPlayer.removeViewer(teleportedPlayer);
                         teleportedPlayer.sendPacket(otherPlayer.getRemovePlayerToList());
+                        teleportedPlayer.removeViewer(otherPlayer);
                         otherPlayer.sendPacket(teleportedPlayer.getRemovePlayerToList());
+                    } else {
+                        teleportedPlayer.sendPacket(otherPlayer.getAddPlayerToList());
+                        otherPlayer.addViewer(teleportedPlayer);
+                        otherPlayer.sendPacket(teleportedPlayer.getAddPlayerToList());
+                        teleportedPlayer.addViewer(otherPlayer);
                     }
                 }
 

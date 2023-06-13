@@ -58,12 +58,12 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      * has spawned for the first time.
      */
     public void onPlayerLoginComplete() {
-        event.getPlayer().updateViewableRule(otherPlayer -> otherPlayer.getInstance() == event.getSpawningInstance());
-        event.getPlayer().updateViewerRule();
-        for (Player player : connectionManager.getOnlinePlayers()) {
-            if (player.getInstance() != event.getSpawningInstance()) {
-                player.sendPacket(event.getPlayer().getRemovePlayerToList());
-                event.getPlayer().sendPacket(player.getRemovePlayerToList());
+        for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
+            if (otherPlayer.getInstance() != event.getSpawningInstance()) {
+                otherPlayer.removeViewer(event.getPlayer());
+                event.getPlayer().sendPacket(otherPlayer.getRemovePlayerToList());
+                event.getPlayer().removeViewer(otherPlayer);
+                otherPlayer.sendPacket(event.getPlayer().getRemovePlayerToList());
             }
         }
     }
