@@ -33,8 +33,7 @@ public class BasicTickTaskScheduler implements TickTaskScheduler {
 
             @Override
             public void tick(long time) {
-                long elapsedTime = startTime - time;
-                if (elapsedTime >= millis) {
+                if (time - startTime >= millis) {
                     tickableTasks.add(tickableTask);
                     finished = true;
                 }
