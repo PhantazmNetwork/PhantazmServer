@@ -10,4 +10,6 @@ public class Flags {
     public static final Key INSTA_KILL = Key.key(Namespaces.PHANTAZM, "zombies.map.flag.insta_kill");
 
     public static final Key GODMODE = Key.key(Namespaces.PHANTAZM, "zombies.player.flag.godmode");
+
+    public static final Key BOMBED_ROOM = Key.key(Namespaces.PHANTAZM, "zombies.map.room.flag.bombed");
 }

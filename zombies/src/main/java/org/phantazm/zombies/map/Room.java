@@ -17,6 +17,7 @@ public class Room extends BoundedBase {
     private volatile boolean isOpen;
 
     private final Object sync;
+    private final Flaggable flaggable;
 
     /**
      * Constructs a new instance of this class.
@@ -28,6 +29,7 @@ public class Room extends BoundedBase {
         this.openActions = List.copyOf(openActions);
         this.roomInfo = Objects.requireNonNull(roomInfo, "roomInfo");
         this.sync = new Object();
+        this.flaggable = new BasicFlaggable();
     }
 
     public @NotNull RoomInfo getRoomInfo() {
@@ -49,5 +51,9 @@ public class Room extends BoundedBase {
                 action.perform(this);
             }
         }
+    }
+
+    public @NotNull Flaggable flags() {
+        return flaggable;
     }
 }
