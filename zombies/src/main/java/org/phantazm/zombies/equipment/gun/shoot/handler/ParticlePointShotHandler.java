@@ -1,11 +1,8 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
 import com.github.steanky.element.core.annotation.*;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.ServerPacket;
-import net.minestom.server.particle.ParticleCreator;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -35,21 +32,12 @@ public class ParticlePointShotHandler implements ShotHandler {
         }
 
         for (GunHit hit : shot.regularTargets()) {
-            spawnParticle(instance, hit.location());
+            wrapper.sendTo(instance, hit.location());
         }
 
         for (GunHit hit : shot.headshotTargets()) {
-            spawnParticle(instance, hit.location());
+            wrapper.sendTo(instance, hit.location());
         }
-    }
-
-    private void spawnParticle(Instance instance, Vec location) {
-        ParticleWrapper.Data data = wrapper.data();
-        ServerPacket packet =
-                ParticleCreator.createParticlePacket(data.particle(), data.distance(), location.x(), location.y(),
-                        location.z(), data.offsetX(), data.offsetY(), data.offsetZ(), data.data(), data.particleCount(),
-                        wrapper.variantData()::write);
-        instance.sendGroupedPacket(packet);
     }
 
     @Override

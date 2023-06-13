@@ -2,8 +2,7 @@ package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.vector.Bounds3D;
-import net.minestom.server.network.packet.server.ServerPacket;
-import net.minestom.server.particle.ParticleCreator;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.mob.PhantazmMob;
@@ -39,12 +38,10 @@ public class SpawnParticleSkill implements Skill {
         double y = self.entity().getPosition().y() + data.bounds().originY() + getOffset(data.bounds().lengthY());
         double z = self.entity().getPosition().z() + data.bounds().originZ() + getOffset(data.bounds().lengthZ());
 
-        ParticleWrapper.Data wrapperData = particle.data();
-        ServerPacket packet =
-                ParticleCreator.createParticlePacket(wrapperData.particle(), wrapperData.distance(), x, y, z,
-                        wrapperData.offsetX(), wrapperData.offsetY(), wrapperData.offsetZ(), wrapperData.data(),
-                        wrapperData.particleCount(), particle.variantData()::write);
-        self.entity().getInstance().sendGroupedPacket(packet);
+        Instance instance = self.entity().getInstance();
+        if (instance != null) {
+            particle.sendTo(instance, x, y, z);
+        }
     }
 
     private double getOffset(double length) {

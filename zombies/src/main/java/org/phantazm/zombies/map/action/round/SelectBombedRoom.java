@@ -1,6 +1,5 @@
 package org.phantazm.zombies.map.action.round;
 
-import com.extollit.temporal.Duration;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
@@ -16,8 +15,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.ServerPacket;
-import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
@@ -116,14 +113,7 @@ public class SelectBombedRoom implements Action<Round> {
                 }
 
                 Vec3D randomPoint = randomPoint(objects.mapOrigin(), room);
-
-                ParticleWrapper.Data wrapperData = particle.data();
-                ServerPacket packet =
-                        ParticleCreator.createParticlePacket(wrapperData.particle(), wrapperData.distance(),
-                                randomPoint.x(), randomPoint.y(), randomPoint.z(), wrapperData.offsetX(),
-                                wrapperData.offsetY(), wrapperData.offsetZ(), wrapperData.data(),
-                                wrapperData.particleCount(), particle.variantData()::write);
-                instance.sendGroupedPacket(packet);
+                particle.sendTo(instance, randomPoint.x(), randomPoint.y(), randomPoint.z());
 
                 if (++ticks % 4 == 0) {
                     for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
