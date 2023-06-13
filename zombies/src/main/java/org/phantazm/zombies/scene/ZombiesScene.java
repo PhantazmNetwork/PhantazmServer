@@ -34,6 +34,7 @@ import java.util.function.Function;
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
     private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
+    private final UUID uuid;
     private final ConnectionManager connectionManager;
     private final ZombiesMap map;
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
@@ -44,14 +45,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private boolean joinable = true;
 
-    public ZombiesScene(@NotNull ConnectionManager connectionManager, @NotNull ZombiesMap map, @NotNull Map<UUID,
-            PlayerView> players,
-            @NotNull Map<UUID,
-            ZombiesPlayer> zombiesPlayers,
+    public ZombiesScene(@NotNull UUID uuid, @NotNull ConnectionManager connectionManager, @NotNull ZombiesMap map,
+            @NotNull Map<UUID, PlayerView> players, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator) {
         super(instance, players, fallback);
+        this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
@@ -75,6 +75,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     public boolean isComplete() {
         return stageTransition.isComplete();
+    }
+
+    public @NotNull UUID getUuid() {
+        return uuid;
     }
 
     public @NotNull ZombiesMap getMap() {

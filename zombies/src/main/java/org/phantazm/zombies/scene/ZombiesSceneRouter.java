@@ -11,7 +11,7 @@ import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
 
-public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
+public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest>, SceneContainer<ZombiesScene> {
     private final Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders;
     private final Map<UUID, ZombiesScene> playerSceneMap = new HashMap<>();
 
@@ -81,6 +81,14 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
             return new RouteResult(false, Component.text("The router is not joinable."));
         }
 
+        if (routeRequest.targetMap() != null) {
+            return joinGame(routeRequest);
+        }
+
+        return rejoinGame(routeRequest);
+    }
+
+    private RouteResult joinGame(ZombiesRouteRequest routeRequest) {
         SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider = sceneProviders.get(routeRequest.targetMap());
         if (sceneProvider == null) {
             return new RouteResult(false, Component.text("No games exist with key " + routeRequest.targetMap() + "."));
@@ -106,6 +114,17 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
         }
 
         return new RouteResult(false, Component.text("No games are joinable."));
+    }
+
+    // TODO: optimize
+    private RouteResult rejoinGame(ZombiesRouteRequest routeRequest) {
+        for (ZombiesScene scene : getScenes()) {
+            if (!scene.getUuid().equals(routeRequest.targetGame())) {
+                return scene.join(routeRequest.joinRequest());
+            }
+        }
+
+        return new RouteResult(false, Component.text("Not a valid game."));
     }
 
     @Override
@@ -169,5 +188,15 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest> {
     @Override
     public void setJoinable(boolean joinable) {
         this.joinable = joinable;
+    }
+
+    @Override
+    public @NotNull Collection<ZombiesScene> getScenes() {
+        Collection<ZombiesScene> scenes = new ArrayList<>();
+        for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
+            scenes.addAll(sceneProvider.getScenes());
+        }
+
+        return scenes;
     }
 }

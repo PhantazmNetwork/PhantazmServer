@@ -11,6 +11,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.scene.ZombiesRouteRequest;
 import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene.ZombiesSceneRouter;
 
 import java.util.Map;
 import java.util.Objects;
@@ -20,7 +21,7 @@ import java.util.function.Function;
 
 public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull Scene<ZombiesRouteRequest> router,
+            @NotNull ZombiesSceneRouter router,
             @NotNull KeyParser keyParser,
             @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
             @NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper, @NotNull SceneFallback fallback) {
@@ -40,5 +41,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new AmmoRefillCommand(sceneMapper));
         addSubcommand(new FlagToggleCommand(sceneMapper, keyParser));
         addSubcommand(new QuitCommand(router, fallback, viewProvider));
+        addSubcommand(new ZombiesRejoinCommand(router, viewProvider, parties));
     }
 }

@@ -24,9 +24,8 @@ import java.util.*;
 
 public class ZombiesJoinCommand extends Command {
     public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull Scene<ZombiesRouteRequest> router,
-            @NotNull KeyParser keyParser,
-            @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider) {
+            @NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
+            @NotNull PlayerViewProvider viewProvider) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
@@ -68,15 +67,15 @@ public class ZombiesJoinCommand extends Command {
             Party party = parties.get(player.getUuid());
             if (party == null) {
                 playerViews = Collections.singleton(viewProvider.fromPlayer(player));
-            } else {
+            }
+            else {
                 playerViews = new ArrayList<>(party.getMemberManager().getMembers().size());
                 for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
                     playerViews.add(guildMember.getPlayerView());
                 }
             }
 
-            RouteResult result = router.join(new ZombiesRouteRequest(mapKey,
-                    () -> playerViews));
+            RouteResult result = router.join(ZombiesRouteRequest.joinGame(mapKey, () -> playerViews));
             result.message().ifPresent(sender::sendMessage);
         }, mapKeyArgument);
     }
