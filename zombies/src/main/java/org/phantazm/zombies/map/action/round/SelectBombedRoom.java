@@ -19,6 +19,7 @@ import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
@@ -39,7 +40,7 @@ import java.util.function.Supplier;
 @Model("zombies.map.round.action.select_bombed")
 @Cache(false)
 public class SelectBombedRoom implements Action<Round> {
-    private static final Potion NAUSEA = new Potion(PotionEffect.NAUSEA, (byte)3, 10);
+    private static final Potion NAUSEA = new Potion(PotionEffect.NAUSEA, (byte)3, 360000);
 
     private final Data data;
     private final Supplier<? extends MapObjects> supplier;
@@ -165,6 +166,12 @@ public class SelectBombedRoom implements Action<Round> {
                     .addModifier(modifier.modifier);
         }
 
+        for (TimedPotion potion : player.getActiveEffects()) {
+            if (potion.getPotion() == NAUSEA) {
+                return;
+            }
+        }
+
         player.addEffect(NAUSEA);
     }
 
@@ -173,6 +180,8 @@ public class SelectBombedRoom implements Action<Round> {
             player.getAttribute(Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute), Attributes.NIL))
                     .removeModifier(modifier.modifier.getId());
         }
+
+        player.removeEffect(PotionEffect.NAUSEA);
     }
 
     private Vec3D randomPoint(Point origin, Room room) {
