@@ -7,7 +7,7 @@ import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
-import org.phantazm.zombies.player.state.context.NoContext;
+import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageTransition;
 
@@ -51,7 +51,7 @@ public class LeaveHandler {
                 zombiesPlayer = zombiesPlayers.get(leaver);
 
                 if (zombiesPlayer != null) {
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, NoContext.INSTANCE);
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
                 }
             }
         }
