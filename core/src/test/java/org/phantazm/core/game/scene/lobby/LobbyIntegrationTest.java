@@ -31,23 +31,25 @@ public class LobbyIntegrationTest {
     @Test
     public void testShutdown(Env env) {
         Instance instance = env.createFlatInstance();
-        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME, InstanceConfig.DEFAULT_TIME_RATE);
+        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
+                InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
         PlayerView playerView = mock(PlayerView.class);
 
-        lobby.forceShutdown();
+        lobby.shutdown();
         assertTrue(lobby.isShutdown());
 
-        RouteResult result = lobby.join(new BasicLobbyJoinRequest(env.process().connection(),
-                Collections.singleton(playerView)));
+        RouteResult result =
+                lobby.join(new BasicLobbyJoinRequest(env.process().connection(), Collections.singleton(playerView)));
         assertFalse(result.success());
     }
 
     @Test
     public void testJoin(Env env) {
         Instance instance = mock(Instance.class);
-        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME, InstanceConfig.DEFAULT_TIME_RATE);
+        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
+                InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
         Player player = mock(Player.class);
@@ -85,7 +87,8 @@ public class LobbyIntegrationTest {
 
         };
 
-        RouteResult result = lobby.join(new BasicLobbyJoinRequest(env.process().connection(), Collections.singleton(playerView)));
+        RouteResult result =
+                lobby.join(new BasicLobbyJoinRequest(env.process().connection(), Collections.singleton(playerView)));
 
         assertTrue(result.success());
         verify(player).setInstance(eq(instance), eq(instanceConfig.spawnPoint()));

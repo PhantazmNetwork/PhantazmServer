@@ -176,7 +176,7 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest>, SceneCont
     }
 
     @Override
-    public void forceShutdown() {
+    public void shutdown() {
         this.shutdown = true;
     }
 

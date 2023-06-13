@@ -258,18 +258,18 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     }
 
     @Override
-    public void forceShutdown() {
+    public void shutdown() {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             zombiesPlayer.end();
         }
-        super.forceShutdown();
+        super.shutdown();
     }
 
     @Override
     public void tick(long time) {
         super.tick(time);
         if (!isShutdown() && stageTransition.isComplete()) {
-            forceShutdown();
+            shutdown();
             return;
         }
 

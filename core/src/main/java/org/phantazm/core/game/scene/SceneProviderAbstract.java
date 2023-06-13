@@ -45,7 +45,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
     @Override
     public void forceShutdown() {
         for (TScene scene : scenes) {
-            scene.forceShutdown();
+            scene.shutdown();
         }
 
         scenes.clear();

@@ -60,7 +60,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     }
 
     @Override
-    public void forceShutdown() {
+    public void shutdown() {
         for (PlayerView player : players.values()) {
             player.getPlayer().ifPresent(unused -> fallback.fallback(player));
         }

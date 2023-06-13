@@ -25,8 +25,8 @@ public class LobbyRouterIntegrationTest {
         Scene<LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
         router.setJoinable(false);
-        LobbyRouteRequest request = new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(env.process()
-                .connection(), List.of()));
+        LobbyRouteRequest request =
+                new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(env.process().connection(), List.of()));
 
         assertFalse(router.join(request).success());
     }
@@ -39,9 +39,9 @@ public class LobbyRouterIntegrationTest {
                 Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>)mock(SceneProvider.class));
         Scene<LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
-        router.forceShutdown();
-        LobbyRouteRequest request = new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(env.process()
-                .connection(), List.of()));
+        router.shutdown();
+        LobbyRouteRequest request =
+                new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(env.process().connection(), List.of()));
 
         assertFalse(router.join(request).success());
     }
@@ -54,8 +54,8 @@ public class LobbyRouterIntegrationTest {
                 Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>)mock(SceneProvider.class));
         Scene<LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
-        LobbyRouteRequest request = new LobbyRouteRequest("notMain", new BasicLobbyJoinRequest(env.process()
-                .connection(), List.of()));
+        LobbyRouteRequest request =
+                new LobbyRouteRequest("notMain", new BasicLobbyJoinRequest(env.process().connection(), List.of()));
 
         assertFalse(router.join(request).success());
     }
