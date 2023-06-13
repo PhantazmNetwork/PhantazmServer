@@ -83,8 +83,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     public ZombiesSceneProvider(int maximumScenes,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull MapInfo mapInfo, @NotNull ConnectionManager connectionManager,
-            @NotNull InstanceManager instanceManager,
-            @NotNull InstanceLoader instanceLoader,
+            @NotNull InstanceManager instanceManager, @NotNull InstanceLoader instanceLoader,
             @NotNull SceneFallback sceneFallback, @NotNull EventNode<Event> eventNode,
             @NotNull MobSpawnerSource mobSpawnerSource, @NotNull Map<Key, MobModel> mobModels,
             @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull ContextManager contextManager,
@@ -213,8 +212,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         };
 
         ZombiesScene scene =
-                new ZombiesScene(connectionManager, map, players, zombiesPlayers, instance, sceneFallback, settings,
-                        stageTransition, leaveHandler, playerCreator);
+                new ZombiesScene(UUID.randomUUID(), connectionManager, map, players, zombiesPlayers, instance,
+                        sceneFallback, settings, stageTransition, leaveHandler, playerCreator);
         sceneWrapper.set(scene);
 
         eventNode.addChild(childNode);
