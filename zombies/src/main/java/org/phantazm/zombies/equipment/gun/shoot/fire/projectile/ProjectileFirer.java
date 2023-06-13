@@ -5,7 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityProjectile;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
@@ -93,8 +92,8 @@ public class ProjectileFirer implements Firer {
     @Override
     public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
             @NotNull Collection<UUID> previousHits) {
-        entitySupplier.get().ifPresent(entity -> {
-            Instance instance = entity.getInstance();
+        entitySupplier.get().ifPresent(shooter -> {
+            Instance instance = shooter.getInstance();
             if (instance == null) {
                 return;
             }
@@ -103,15 +102,14 @@ public class ProjectileFirer implements Firer {
                 MobModel model = modelFunction.apply(data.projectileMob);
                 if (model != null) {
                     PhantazmMob mob = spawner.spawn(instance, start, model);
-                    ProximaEntity neuralEntity = mob.entity();
-                    neuralEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
-                            new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
-                    neuralEntity.setNoGravity(!data.hasGravity());
-                    mobStore.onMobSpawn(mob);
+                    ProximaEntity proximaEntity = mob.entity();
+                    proximaEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
+                            new ProjectileMovementGoal(proximaEntity, shooter, end, data.power(), data.spread()))));
+                    proximaEntity.setNoGravity(!data.hasGravity());
 
-                    firedShots.put(neuralEntity.getUuid(), new FiredShot(gun, state, entity, start, previousHits));
+                    firedShots.put(proximaEntity.getUuid(), new FiredShot(gun, state, shooter, start, previousHits));
                     removalQueue.add(
-                            new AliveProjectile(new WeakReference<>(neuralEntity), System.currentTimeMillis()));
+                            new AliveProjectile(new WeakReference<>(proximaEntity), System.currentTimeMillis()));
                 }
             });
         });
@@ -157,16 +155,12 @@ public class ProjectileFirer implements Firer {
      * @param event The associated {@link ProjectileCollideWithBlockEvent}
      */
     public void onProjectileCollision(@NotNull ProjectileCollideWithBlockEvent event) {
-        if (!(event.getEntity() instanceof EntityProjectile projectile)) {
-            return;
-        }
-
-        FiredShot firedShot = firedShots.get(projectile.getUuid());
+        FiredShot firedShot = firedShots.get(event.getEntity().getUuid());
         if (firedShot == null) {
             return;
         }
 
-        onProjectileCollision(firedShot, projectile, event.getCollisionPosition());
+        onProjectileCollision(firedShot, event.getEntity(), event.getCollisionPosition());
     }
 
     /**
@@ -175,17 +169,16 @@ public class ProjectileFirer implements Firer {
      * @param event The associated {@link ProjectileCollideWithEntityEvent}
      */
     public void onProjectileCollision(@NotNull ProjectileCollideWithEntityEvent event) {
-        if (!(event.getEntity() instanceof EntityProjectile projectile &&
-                collisionFilter.shouldExplode(event.getTarget()))) {
+        if (!(collisionFilter.shouldExplode(event.getTarget()))) {
             return;
         }
 
-        FiredShot firedShot = firedShots.get(projectile.getUuid());
+        FiredShot firedShot = firedShots.get(event.getEntity().getUuid());
         if (firedShot == null) {
             return;
         }
 
-        onProjectileCollision(firedShot, projectile, event.getCollisionPosition());
+        onProjectileCollision(firedShot, event.getEntity(), event.getCollisionPosition());
     }
 
     private void onProjectileCollision(@NotNull FiredShot firedShot, @NotNull Entity projectile,
