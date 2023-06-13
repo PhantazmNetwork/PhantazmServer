@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.action.round;
 
+import com.extollit.temporal.Duration;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
@@ -20,10 +21,8 @@ import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
-import net.minestom.server.timer.ExecutionType;
-import net.minestom.server.timer.Task;
-import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.TickableTask;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.Flags;
@@ -50,10 +49,6 @@ public class SelectBombedRoom implements Action<Round> {
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     private final List<TargetedAttribute> modifiers;
-
-    private Task tickTask;
-    private boolean flagSet;
-    private int ticks;
 
     @FactoryMethod
     public SelectBombedRoom(@NotNull Data data, @NotNull Supplier<? extends MapObjects> supplier,
@@ -86,78 +81,85 @@ public class SelectBombedRoom implements Action<Round> {
             return;
         }
 
-        Room chosenRoom = candidateRooms.get(random.nextInt(candidateRooms.size()));
-        String serialized = MiniMessage.miniMessage().serialize(chosenRoom.getRoomInfo().displayName());
+        Room room = candidateRooms.get(random.nextInt(candidateRooms.size()));
+        String serialized = MiniMessage.miniMessage().serialize(room.getRoomInfo().displayName());
         Component warningMessage =
                 MiniMessage.miniMessage().deserialize(String.format(data.warningFormatMessage, serialized));
 
         instance.sendMessage(warningMessage);
 
         int startRoundIndex = objects.module().roundHandlerSupplier().get().currentRoundIndex();
-        this.tickTask = MinecraftServer.getSchedulerManager()
-                .scheduleTask(() -> tickBombedRoom(startRoundIndex, objects.mapOrigin(), chosenRoom, objects),
-                        TaskSchedule.tick(Math.max(1, data.gracePeriod)), TaskSchedule.tick(1), ExecutionType.SYNC);
-    }
+        objects.taskScheduler().scheduleTaskAfter(new TickableTask() {
+            private boolean flagSet;
+            private int ticks;
+            private boolean finished;
 
-    private void tickBombedRoom(int startRoundIndex, Point origin, Room room, MapObjects mapObjects) {
-        if (!flagSet) {
-            room.flags().setFlag(Flags.BOMBED_ROOM);
-            flagSet = true;
-        }
+            @Override
+            public boolean isFinished() {
+                return finished;
+            }
 
-        RoundHandler roundHandler = mapObjects.module().roundHandlerSupplier().get();
-        int roundsElapsed = roundHandler.currentRoundIndex() - startRoundIndex;
-        if (roundsElapsed >= data.duration) {
-            room.flags().clearFlag(Flags.BOMBED_ROOM);
-            tickTask.cancel();
-            tickTask = null;
-            flagSet = false;
-            return;
-        }
-
-        Vec3D randomPoint = randomPoint(origin, room);
-
-        ParticleWrapper.Data wrapperData = particle.data();
-        ServerPacket packet =
-                ParticleCreator.createParticlePacket(wrapperData.particle(), wrapperData.distance(), randomPoint.x(),
-                        randomPoint.y(), randomPoint.z(), wrapperData.offsetX(), wrapperData.offsetY(),
-                        wrapperData.offsetZ(), wrapperData.data(), wrapperData.particleCount(),
-                        particle.variantData()::write);
-        instance.sendGroupedPacket(packet);
-
-        if (++ticks % 4 == 0) {
-            for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                if (!zombiesPlayer.isAlive()) {
-                    continue;
+            @Override
+            public void tick(long time) {
+                if (!flagSet) {
+                    room.flags().setFlag(Flags.BOMBED_ROOM);
+                    flagSet = true;
                 }
 
-                zombiesPlayer.getPlayer().ifPresent(player -> {
-                    Optional<Room> roomOptional = mapObjects.roomTracker().atPoint(player.getPosition());
-                    if (roomOptional.isPresent()) {
-                        Room currentRoom = roomOptional.get();
-                        if (currentRoom == room) {
-                            applyModifiers(player);
+                RoundHandler roundHandler = objects.module().roundHandlerSupplier().get();
+                int roundsElapsed = roundHandler.currentRoundIndex() - startRoundIndex;
+                if (roundsElapsed >= data.duration) {
+                    room.flags().clearFlag(Flags.BOMBED_ROOM);
+                    flagSet = false;
+                    finished = true;
+                    return;
+                }
 
-                            if (ticks % 40 == 0) {
-                                player.sendMessage(data.inAreaMessage);
-                            }
+                Vec3D randomPoint = randomPoint(objects.mapOrigin(), room);
 
-                            player.damage(DamageType.VOID, data.damage, true);
+                ParticleWrapper.Data wrapperData = particle.data();
+                ServerPacket packet =
+                        ParticleCreator.createParticlePacket(wrapperData.particle(), wrapperData.distance(),
+                                randomPoint.x(), randomPoint.y(), randomPoint.z(), wrapperData.offsetX(),
+                                wrapperData.offsetY(), wrapperData.offsetZ(), wrapperData.data(),
+                                wrapperData.particleCount(), particle.variantData()::write);
+                instance.sendGroupedPacket(packet);
 
-                            if (ticks % 8 == 0) {
-                                player.playSound(data.inAreaSound, room.center());
-                            }
+                if (++ticks % 4 == 0) {
+                    for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                        if (!zombiesPlayer.isAlive()) {
+                            continue;
                         }
-                        else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
-                            removeModifiers(player);
-                        }
+
+                        zombiesPlayer.getPlayer().ifPresent(player -> {
+                            Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
+                            if (roomOptional.isPresent()) {
+                                Room currentRoom = roomOptional.get();
+                                if (currentRoom == room) {
+                                    applyModifiers(player);
+
+                                    if (ticks % 40 == 0) {
+                                        player.sendMessage(data.inAreaMessage);
+                                    }
+
+                                    player.damage(DamageType.VOID, data.damage, true);
+
+                                    if (ticks % 8 == 0) {
+                                        player.playSound(data.inAreaSound, room.center());
+                                    }
+                                }
+                                else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
+                                    removeModifiers(player);
+                                }
+                            }
+                            else {
+                                removeModifiers(player);
+                            }
+                        });
                     }
-                    else {
-                        removeModifiers(player);
-                    }
-                });
+                }
             }
-        }
+        }, (long)data.gracePeriod * MinecraftServer.TICK_MS);
     }
 
     private void applyModifiers(Player player) {
