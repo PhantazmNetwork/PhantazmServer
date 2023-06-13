@@ -12,7 +12,6 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.goal.CollectionGoalGroup;
 import org.phantazm.mob.goal.ProjectileMovementGoal;
@@ -51,8 +50,6 @@ public class ProjectileFirer implements Firer {
     private final ProjectileCollisionFilter collisionFilter;
     private final Collection<ShotHandler> shotHandlers;
 
-    private final MobStore mobStore;
-
     private final MobSpawner spawner;
 
     /**
@@ -72,8 +69,8 @@ public class ProjectileFirer implements Firer {
             @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
             @NotNull @Child("target_finder") TargetFinder targetFinder,
             @NotNull @Child("collision_filter") ProjectileCollisionFilter collisionFilter,
-            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers, @NotNull MobStore mobStore,
-            @NotNull MobSpawner spawner, @NotNull EventNode<Event> node) {
+            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers, @NotNull MobSpawner spawner,
+            @NotNull EventNode<Event> node) {
         this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.modelFunction = modelFunction;
@@ -82,7 +79,6 @@ public class ProjectileFirer implements Firer {
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
         this.collisionFilter = Objects.requireNonNull(collisionFilter, "collisionFilter");
         this.shotHandlers = List.copyOf(shotHandlers);
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.spawner = Objects.requireNonNull(spawner, "spawner");
 
         node.addListener(ProjectileCollideWithBlockEvent.class, this::onProjectileCollision);
