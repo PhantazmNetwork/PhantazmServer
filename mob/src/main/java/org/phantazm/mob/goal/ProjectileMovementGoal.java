@@ -1,5 +1,6 @@
 package org.phantazm.mob.goal;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -28,6 +29,7 @@ import java.util.stream.Stream;
 
 public class ProjectileMovementGoal implements ProximaGoal {
     private static final int COLLISION_TICK_THRESHOLD = 3;
+    private static final double MAGIC = 0.007499999832361937D; //what is this? nobody knows...
 
     private final Entity entity;
 
@@ -86,13 +88,16 @@ public class ProjectileMovementGoal implements ProximaGoal {
         dx /= length;
         dy /= length;
         dz /= length;
-        Random random = ThreadLocalRandom.current();
-        double spread = this.spread * 0.007499999832361937D;
-        dx += random.nextGaussian() * spread;
-        dy += random.nextGaussian() * spread;
-        dz += random.nextGaussian() * spread;
 
-        final double mul = 20 * power;
+        if (this.spread != 0) {
+            Random random = ThreadLocalRandom.current();
+            double spread = this.spread * MAGIC;
+            dx += random.nextGaussian() * spread;
+            dy += random.nextGaussian() * spread;
+            dz += random.nextGaussian() * spread;
+        }
+
+        final double mul = MinecraftServer.TICK_PER_SECOND * power;
         entity.setVelocity(new Vec(dx * mul, dy * mul, dz * mul));
         entity.setView((float)Math.toDegrees(Math.atan2(dx, dz)),
                 (float)Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
