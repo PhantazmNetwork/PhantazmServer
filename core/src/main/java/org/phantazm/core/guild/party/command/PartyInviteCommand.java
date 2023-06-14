@@ -17,7 +17,11 @@ import java.util.UUID;
 
 public class PartyInviteCommand {
 
-    public static Command inviteCommand(@NotNull Map<? super UUID, ? extends Party> parties,
+    private PartyInviteCommand() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static @NotNull Command inviteCommand(@NotNull Map<? super UUID, ? extends Party> parties,
             @NotNull PlayerViewProvider viewProvider) {
         Objects.requireNonNull(parties, "parties");
         Objects.requireNonNull(viewProvider, "viewProvider");

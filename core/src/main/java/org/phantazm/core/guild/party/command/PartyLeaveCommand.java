@@ -12,7 +12,11 @@ import java.util.*;
 
 public class PartyLeaveCommand {
 
-    public static Command leaveCommand(@NotNull Map<? super UUID, ? extends Party> parties, @NotNull Random random) {
+    private PartyLeaveCommand() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static @NotNull Command leaveCommand(@NotNull Map<? super UUID, ? extends Party> parties, @NotNull Random random) {
         Objects.requireNonNull(parties, "parties");
         Objects.requireNonNull(random, "random");
 

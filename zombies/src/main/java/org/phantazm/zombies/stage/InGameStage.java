@@ -169,8 +169,8 @@ public class InGameStage implements Stage {
                 continue;
             }
 
-            zombiesPlayer.sendMessage(Component.text("==========================================",
-                    Style.style(NamedTextColor.GREEN, TextDecoration.STRIKETHROUGH)));
+            zombiesPlayer.sendMessage(Component.text("==========================================", NamedTextColor.GREEN,
+                    TextDecoration.STRIKETHROUGH));
 
             zombiesPlayer.sendMessage(
                     Component.text("Zombies", NamedTextColor.YELLOW).append(Component.text(" - ", NamedTextColor.WHITE))
@@ -190,7 +190,7 @@ public class InGameStage implements Stage {
             zombiesPlayer.sendMessage(Component.empty());
 
             zombiesPlayer.sendMessage(Component.text("==========================================",
-                    Style.style(NamedTextColor.GREEN, TextDecoration.STRIKETHROUGH)));
+                    NamedTextColor.GREEN, TextDecoration.STRIKETHROUGH));
         }
 
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {

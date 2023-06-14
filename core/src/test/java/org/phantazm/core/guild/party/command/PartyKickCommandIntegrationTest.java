@@ -22,7 +22,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testCanKickWithSufficientRankAndGreaterRankThanTarget(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
+        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -45,7 +45,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testCannotKickWithoutSufficientRankAndGreaterRankThanTarget(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 2, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
+        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -68,7 +68,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testCannotKickWithSufficientRankAndEqualRankToTarget(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 2, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
+        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -92,7 +92,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testCannotKickSelf(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 2, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
+        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);

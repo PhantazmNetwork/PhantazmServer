@@ -19,7 +19,11 @@ import java.util.UUID;
 
 public class PartyKickCommand {
 
-    public static Command kickCommand(@NotNull Map<? super UUID, ? extends Party> parties,
+    private PartyKickCommand() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static @NotNull Command kickCommand(@NotNull Map<? super UUID, ? extends Party> parties,
             @NotNull PlayerViewProvider viewProvider) {
         Objects.requireNonNull(parties, "parties");
         Objects.requireNonNull(viewProvider, "viewProvider");

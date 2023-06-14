@@ -24,7 +24,7 @@ public class PartyLeaveCommandIntegrationTest extends AbstractPartyCommandIntegr
     public void testNotInPartyAfterLeavingAndOwnerIsNullNoOtherMembers(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
+        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
@@ -43,7 +43,7 @@ public class PartyLeaveCommandIntegrationTest extends AbstractPartyCommandIntegr
     public void testOwnerIsNotNullAfterLeavingWithOtherMembers(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
+        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);

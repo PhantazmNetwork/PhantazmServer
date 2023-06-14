@@ -12,7 +12,11 @@ import java.util.UUID;
 
 public class PartyCommand {
 
-    public static Command command(@NotNull Map<? super UUID, Party> parties, @NotNull PlayerViewProvider viewProvider,
+    private PartyCommand() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static @NotNull Command partyCommand(@NotNull Map<? super UUID, Party> parties, @NotNull PlayerViewProvider viewProvider,
             @NotNull PartyCreator partyCreator, @NotNull Random random) {
         Command command = new Command("party", "p");
         command.addSubcommand(PartyCreateCommand.createCommand(parties, viewProvider, partyCreator));
@@ -20,6 +24,7 @@ public class PartyCommand {
         command.addSubcommand(PartyLeaveCommand.leaveCommand(parties, random));
         command.addSubcommand(PartyKickCommand.kickCommand(parties, viewProvider));
         command.addSubcommand(PartyInviteCommand.inviteCommand(parties, viewProvider));
+        command.addSubcommand(PartyListCommand.listCommand(parties));
 
         return command;
     }
