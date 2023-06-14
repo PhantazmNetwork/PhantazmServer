@@ -19,6 +19,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.ElementUtils;
@@ -80,7 +81,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
             @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler,
-            @NotNull Wrapper<EventNode<Event>> eventNode, @NotNull SongPlayer songPlayer) {
+            @NotNull Wrapper<EventNode<Event>> eventNode, @NotNull SongPlayer songPlayer,
+            @NotNull TickTaskScheduler tickTaskScheduler) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, playerMap.values());
@@ -129,7 +131,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         MapObjects mapObjects =
                 new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
-                        mobSpawner, origin, module);
+                        mobSpawner, origin, module, tickTaskScheduler);
         mapObjectsWrapper.set(mapObjects);
 
         return mapObjects;

@@ -5,7 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.spawner.MobSpawner;
@@ -36,7 +35,7 @@ public final class BasicMapObjects implements MapObjects {
             @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
             @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
             @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
-            @NotNull Module module) {
+            @NotNull Module module, @NotNull TickTaskScheduler taskScheduler) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
 
@@ -57,7 +56,7 @@ public final class BasicMapObjects implements MapObjects {
 
         this.roomMap = Map.copyOf(map);
         this.mapOrigin = mapOrigin;
-        this.taskScheduler = new BasicTickTaskScheduler();
+        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
     }
 
     @Override
@@ -118,10 +117,5 @@ public final class BasicMapObjects implements MapObjects {
     @Override
     public @NotNull TickTaskScheduler taskScheduler() {
         return taskScheduler;
-    }
-
-    @Override
-    public void tick(long time) {
-        taskScheduler.tick(time);
     }
 }

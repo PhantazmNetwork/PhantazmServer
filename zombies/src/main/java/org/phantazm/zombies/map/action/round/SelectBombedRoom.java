@@ -96,6 +96,15 @@ public class SelectBombedRoom implements Action<Round> {
             }
 
             @Override
+            public void end() {
+                for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                    zombiesPlayer.getPlayer().ifPresent(player -> {
+                        removeModifiers(player);
+                    });
+                }
+            }
+
+            @Override
             public void tick(long time) {
                 if (!flagSet) {
                     room.flags().setFlag(Flags.BOMBED_ROOM);
@@ -108,6 +117,22 @@ public class SelectBombedRoom implements Action<Round> {
                     room.flags().clearFlag(Flags.BOMBED_ROOM);
                     flagSet = false;
                     finished = true;
+
+                    for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                        zombiesPlayer.getPlayer().ifPresent(player -> {
+                            Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
+                            if (roomOptional.isPresent()) {
+                                Room currentRoom = roomOptional.get();
+                                if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
+                                    removeModifiers(player);
+                                }
+                            }
+                            else {
+                                removeModifiers(player);
+                            }
+                        });
+                    }
+
                     return;
                 }
 

@@ -42,6 +42,15 @@ public class BasicTickTaskScheduler implements TickTaskScheduler {
     }
 
     @Override
+    public void end() {
+        for (TickableTask tickableTask : tickableTasks) {
+            tickableTask.end();
+        }
+
+        tickableTasks.clear();
+    }
+
+    @Override
     public void tick(long time) {
         Iterator<TickableTask> taskIterator = tickableTasks.iterator();
         while (taskIterator.hasNext()) {

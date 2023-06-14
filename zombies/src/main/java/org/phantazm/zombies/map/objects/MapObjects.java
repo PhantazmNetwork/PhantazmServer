@@ -12,7 +12,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.TickTaskScheduler;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.tracker.BoundedTracker;
@@ -29,7 +28,7 @@ import org.phantazm.zombies.powerup.PowerupHandler;
 import java.util.*;
 import java.util.function.Supplier;
 
-public interface MapObjects extends Tickable {
+public interface MapObjects {
     @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
 
     @Unmodifiable @NotNull List<Round> rounds();
@@ -59,7 +58,8 @@ public interface MapObjects extends Tickable {
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
                 @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler,
-                @NotNull Wrapper<EventNode<Event>> eventNode, @NotNull SongPlayer songPlayer);
+                @NotNull Wrapper<EventNode<Event>> eventNode, @NotNull SongPlayer songPlayer,
+                @NotNull TickTaskScheduler tickTaskScheduler);
     }
 
     interface Module {

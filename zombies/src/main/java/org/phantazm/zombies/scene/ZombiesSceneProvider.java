@@ -23,6 +23,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.BasicTickTaskScheduler;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.SceneProviderAbstract;
@@ -154,6 +156,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
 
         MobStore mobStore = new MobStore();
+        TickTaskScheduler tickTaskScheduler = new BasicTickTaskScheduler();
 
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
         Wrapper<PowerupHandler> powerupHandlerWrapper = Wrapper.ofNull();
@@ -163,7 +166,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         SongPlayer songPlayer = new BasicSongPlayer();
         MapObjects mapObjects =
                 createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, powerupHandlerWrapper,
-                        windowHandlerWrapper, eventNodeWrapper, songPlayer);
+                        windowHandlerWrapper, eventNodeWrapper, songPlayer, tickTaskScheduler);
 
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
         roundHandlerWrapper.set(roundHandler);
@@ -214,7 +217,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesScene scene =
                 new ZombiesScene(UUID.randomUUID(), connectionManager, map, players, zombiesPlayers, instance,
-                        sceneFallback, settings, stageTransition, leaveHandler, playerCreator);
+                        sceneFallback, settings, stageTransition, leaveHandler, playerCreator, tickTaskScheduler);
         sceneWrapper.set(scene);
 
         eventNode.addChild(childNode);
@@ -245,9 +248,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private MapObjects createMapObjects(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
             Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore,
             Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler,
-            Wrapper<EventNode<Event>> eventNode, SongPlayer songPlayer) {
+            Wrapper<EventNode<Event>> eventNode, SongPlayer songPlayer, TickTaskScheduler tickTaskScheduler) {
         return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, powerupHandler,
-                windowHandler, eventNode, songPlayer);
+                windowHandler, eventNode, songPlayer, tickTaskScheduler);
     }
 
     private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,

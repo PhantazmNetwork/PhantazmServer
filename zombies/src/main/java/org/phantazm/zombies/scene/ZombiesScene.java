@@ -12,6 +12,7 @@ import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -42,6 +43,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final StageTransition stageTransition;
     private final LeaveHandler leaveHandler;
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
+    private final TickTaskScheduler taskScheduler;
 
     private boolean joinable = true;
 
@@ -49,7 +51,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull Map<UUID, PlayerView> players, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
-            @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator) {
+            @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
+            @NotNull TickTaskScheduler taskScheduler) {
         super(instance, players, fallback);
         this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
@@ -59,6 +62,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
         this.leaveHandler = Objects.requireNonNull(leaveHandler, "leaveHandler");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
+        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
     }
 
     public @NotNull Map<UUID, ZombiesPlayer> getZombiesPlayers() {
@@ -256,6 +260,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public void shutdown() {
+        taskScheduler.end();
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             zombiesPlayer.end();
         }
@@ -272,6 +277,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         map.tick(time);
         stageTransition.tick(time);
+        taskScheduler.tick(time);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             zombiesPlayer.tick(time);
         }
