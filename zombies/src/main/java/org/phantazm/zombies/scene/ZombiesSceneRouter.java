@@ -119,7 +119,7 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest>, SceneCont
     // TODO: optimize
     private RouteResult rejoinGame(ZombiesRouteRequest routeRequest) {
         for (ZombiesScene scene : getScenes()) {
-            if (!scene.getUuid().equals(routeRequest.targetGame())) {
+            if (scene.getUuid().equals(routeRequest.targetGame())) {
                 return scene.join(routeRequest.joinRequest());
             }
         }
