@@ -23,12 +23,15 @@ import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.Window;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDeathEvent> {
@@ -43,11 +46,13 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
     private final BoundedTracker<Room> roomTracker;
     private final BoundedTracker<Window> windowTracker;
+    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     public PhantazmMobDeathListener(@NotNull KeyParser keyParser, @NotNull Instance instance,
             @NotNull MobStore mobStore, @NotNull Supplier<? extends Optional<Round>> roundSupplier,
             @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
-            @NotNull BoundedTracker<Window> windowTracker) {
+            @NotNull BoundedTracker<Window> windowTracker,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         super(instance, mobStore);
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.roundSupplier = Objects.requireNonNull(roundSupplier, "roundSupplier");
@@ -55,6 +60,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
         this.roomTracker = Objects.requireNonNull(roomTracker, "roomTracker");
         this.windowTracker = Objects.requireNonNull(windowTracker, "windowTracker");
+        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
     }
 
     @Override
@@ -64,6 +70,13 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         });
 
         trySpawnPowerup(event.getEntity());
+
+        UUID killer = mob.entity().getTag(Tags.LAST_HIT_BY);
+        if (killer != null) {
+            ZombiesPlayer player = playerMap.get(killer);
+            player.module().getKills().onKill(mob);
+        }
+
         getMobStore().onMobDeath(event);
     }
 

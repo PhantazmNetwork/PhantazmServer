@@ -9,11 +9,15 @@ import java.util.Objects;
 /**
  * Config for a single {@link Instance}.
  */
-public record InstanceConfig(@NotNull Pos spawnPoint) {
+public record InstanceConfig(@NotNull Pos spawnPoint, long time, int timeRate) {
     /**
      * The default spawn point {@link Pos}.
      */
     public static final Pos DEFAULT_POS = Pos.ZERO;
+
+    public static final long DEFAULT_TIME = 0;
+
+    public static final int DEFAULT_TIME_RATE = 0;
 
     /**
      * Creates config regarding a single {@link Instance}.

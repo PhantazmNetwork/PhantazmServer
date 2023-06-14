@@ -37,16 +37,10 @@ public class ReviveHandler implements Activable {
 
     public @NotNull Optional<ZombiesPlayerState> getSuggestedState() {
         if (cachedDeathState != null) {
-            ZombiesPlayerState state = cachedDeathState;
-            this.cachedDeathState = null;
-
-            return Optional.of(state);
+            return Optional.of(cachedDeathState);
         }
         if (cachedDefaultState != null) {
-            ZombiesPlayerState state = cachedDefaultState;
-            this.cachedDefaultState = null;
-
-            return Optional.of(state);
+            return Optional.of(cachedDefaultState);
         }
 
         return Optional.empty();

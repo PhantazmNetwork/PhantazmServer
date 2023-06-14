@@ -12,7 +12,8 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
-import org.phantazm.zombies.map.action.Action;
+import org.phantazm.zombies.Tags;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Deque;
 import java.util.Objects;
@@ -24,10 +25,13 @@ import java.util.concurrent.ConcurrentLinkedDeque;
         """)
 @Model("zombies.perk.effect.shot_entity.apply_fire")
 @Cache(false)
-public class ApplyFireShotEffect implements Action<Entity>, Tickable {
+public class ApplyFireShotEffect implements ShotEffect, Tickable {
     private final Data data;
     private final Tag<Long> lastDamageTime;
-    private final Deque<LivingEntity> activeEntities;
+    private final Deque<DamageTarget> activeEntities;
+
+    private record DamageTarget(UUID damager, LivingEntity target) {
+    }
 
     @FactoryMethod
     public ApplyFireShotEffect(@NotNull Data data) {
@@ -40,7 +44,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
     }
 
     @Override
-    public void perform(@NotNull Entity entity) {
+    public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
         if (!(entity instanceof LivingEntity livingEntity)) {
             //can't set non-LivingEntity on fire as they have no health
             return;
@@ -52,13 +56,15 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
         entity.setTag(lastDamageTime, System.currentTimeMillis());
 
         if (!alreadyActive) {
-            activeEntities.add(livingEntity);
+            activeEntities.add(new DamageTarget(zombiesPlayer.getUUID(), livingEntity));
         }
     }
 
     @Override
     public void tick(long time) {
-        activeEntities.removeIf(entity -> {
+        activeEntities.removeIf(target -> {
+            LivingEntity entity = target.target;
+
             if (entity.isRemoved() || entity.isDead() || !entity.isOnFire()) {
                 stopFire(entity);
                 return true;
@@ -66,7 +72,7 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
 
             long lastDamageTime = entity.getTag(this.lastDamageTime);
             if ((time - lastDamageTime) / MinecraftServer.TICK_MS >= data.damageInterval) {
-                doDamage(entity);
+                doDamage(entity, target.damager);
                 entity.setTag(this.lastDamageTime, time);
             }
 
@@ -74,8 +80,11 @@ public class ApplyFireShotEffect implements Action<Entity>, Tickable {
         });
     }
 
-    private void doDamage(LivingEntity entity) {
-        entity.damage(DamageType.ON_FIRE, data.damage, data.bypassArmor);
+    private void doDamage(LivingEntity entity, UUID damager) {
+        DamageType damageType = new DamageType(DamageType.ON_FIRE.getIdentifier());
+        damageType.setTag(Tags.LAST_HIT_BY, damager);
+
+        entity.damage(damageType, data.damage, data.bypassArmor);
     }
 
     private void stopFire(Entity entity) {

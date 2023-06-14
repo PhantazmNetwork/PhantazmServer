@@ -28,5 +28,7 @@
     "gui.mapeditor.link_window": "Link to a window?",
     "gui.mapeditor.explicit_window_link": "Linking to window at %d, %d, %d",
     "gui.mapeditor.nearest_window_link": "Linking to nearest window.",
-    "gui.mapeditor.coordinate_display": "Map coordinates: %d, %d, %d"
+    "gui.mapeditor.coordinate_display": "Map coordinates: %d, %d, %d",
+    "chat.mapeditor.mapdata_version_sync.synced": "The mapeditor client is synchronized with the server's expected mapdata version.",
+    "chat.mapeditor.mapdata_version_sync.not_synced": "The mapeditor client is not synchronized with the server's expected mapdata version. Please update the mod to the correct version."
 }

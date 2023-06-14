@@ -32,13 +32,20 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
 
     @Override
     public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerBlockInteractEvent event) {
-        if (event.getHand() == Player.Hand.MAIN) {
-            shopHandler.handleInteraction(zombiesPlayer, event.getBlockPosition(), InteractionTypes.RIGHT_CLICK_BLOCK);
-            doorHandler.handleRightClick(zombiesPlayer, event.getBlockPosition());
-            rightClickListener.onRightClick(zombiesPlayer, event.getPlayer().getHeldSlot());
-        }
-
         event.setCancelled(true);
         event.setBlockingItemUse(true);
+
+        if (event.getHand() == Player.Hand.MAIN) {
+            if (shopHandler.handleInteraction(zombiesPlayer, event.getBlockPosition(),
+                    InteractionTypes.RIGHT_CLICK_BLOCK)) {
+                return;
+            }
+
+            if (doorHandler.handleRightClick(zombiesPlayer, event.getBlockPosition())) {
+                return;
+            }
+
+            rightClickListener.onRightClick(zombiesPlayer, event.getPlayer().getHeldSlot());
+        }
     }
 }

@@ -1,9 +1,11 @@
 package org.phantazm.core.game.scene.lobby;
 
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
@@ -19,6 +21,8 @@ import java.util.Objects;
  */
 public class LoginLobbyJoinRequest implements LobbyJoinRequest {
 
+    private final ConnectionManager connectionManager;
+
     private final PlayerLoginEvent event;
 
     private final PlayerViewProvider viewProvider;
@@ -29,7 +33,9 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      * @param event        The {@link PlayerLoginEvent} associated with the new player
      * @param viewProvider The {@link PlayerViewProvider} for the server
      */
-    public LoginLobbyJoinRequest(@NotNull PlayerLoginEvent event, @NotNull PlayerViewProvider viewProvider) {
+    public LoginLobbyJoinRequest(@NotNull ConnectionManager connectionManager, @NotNull PlayerLoginEvent event,
+            @NotNull PlayerViewProvider viewProvider) {
+        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.event = Objects.requireNonNull(event, "event");
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
     }
@@ -52,6 +58,14 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      * has spawned for the first time.
      */
     public void onPlayerLoginComplete() {
+        for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
+            if (otherPlayer.getInstance() != event.getSpawningInstance()) {
+                otherPlayer.removeViewer(event.getPlayer());
+                event.getPlayer().sendPacket(otherPlayer.getRemovePlayerToList());
+                event.getPlayer().removeViewer(otherPlayer);
+                otherPlayer.sendPacket(event.getPlayer().getRemovePlayerToList());
+            }
+        }
     }
 
 }

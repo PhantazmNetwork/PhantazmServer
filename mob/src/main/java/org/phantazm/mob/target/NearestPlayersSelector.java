@@ -13,7 +13,7 @@ import java.util.Optional;
  */
 @Model("mob.selector.nearest_players")
 @Cache(false)
-public class NearestPlayersSelector extends NearestEntitiesSelector<Player> {
+public class NearestPlayersSelector extends NearestEntitiesSelectorAbstract<Player> {
 
     /**
      * Creates a {@link NearestPlayersSelector}.

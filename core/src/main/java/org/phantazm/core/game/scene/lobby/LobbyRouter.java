@@ -151,7 +151,7 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
     }
 
     @Override
-    public void forceShutdown() {
+    public void shutdown() {
         for (SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider : lobbyProviders.values()) {
             lobbyProvider.forceShutdown();
         }

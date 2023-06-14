@@ -30,6 +30,8 @@ public class BasicPerkLevel implements PerkLevel {
         for (PerkEffect effect : effects) {
             effect.start();
         }
+
+        equipment.start();
     }
 
     @Override
@@ -46,6 +48,8 @@ public class BasicPerkLevel implements PerkLevel {
         for (PerkEffect effect : effects) {
             effect.end();
         }
+
+        equipment.end();
     }
 
     @Override

@@ -16,6 +16,7 @@ import java.util.Objects;
 public record ServerInfoConfig(@NotNull String serverIP,
                                int port,
                                boolean optifineEnabled,
+                               boolean whitelist,
                                @NotNull AuthType authType,
                                @NotNull String proxySecret) {
     /**
@@ -34,6 +35,11 @@ public record ServerInfoConfig(@NotNull String serverIP,
     public static final boolean DEFAULT_OPTIFINE_ENABLED = true;
 
     /**
+     * Whether this server should whitelist players, by default.
+     */
+    public static final boolean DEFAULT_WHITELIST = false;
+
+    /**
      * The default authentication type.
      */
     public static final AuthType DEFAULT_AUTH_TYPE = AuthType.MOJANG;
@@ -48,8 +54,8 @@ public record ServerInfoConfig(@NotNull String serverIP,
      * The default ServerInfoConfig instance.
      */
     public static final ServerInfoConfig DEFAULT =
-            new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT, DEFAULT_OPTIFINE_ENABLED, DEFAULT_AUTH_TYPE,
-                    DEFAULT_PROXY_SECRET);
+            new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT, DEFAULT_OPTIFINE_ENABLED, DEFAULT_WHITELIST,
+                    DEFAULT_AUTH_TYPE, DEFAULT_PROXY_SECRET);
 
     /**
      * Creates config regarding server settings.

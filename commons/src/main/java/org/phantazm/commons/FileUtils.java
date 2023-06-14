@@ -72,6 +72,14 @@ public final class FileUtils {
         }
     }
 
+    public static void createFileIfNotExists(@NotNull Path file) throws IOException {
+        try {
+            Files.createFile(file);
+        }
+        catch (FileAlreadyExistsException ignored) {
+        }
+    }
+
     /**
      * Recursively deletes all files in the given directory, if it exists.
      *

@@ -2,17 +2,9 @@
 serverIP = "0.0.0.0"
 port = 25567
 optifineEnabled = true
+whitelist = false
 authType = "BUNGEE"
 proxySecret = "default"
 
 [pingList]
 description = "A Phantazm Server"
-
-[pathfinder]
-threads = 4
-asyncMode = false
-corePoolSize = 4
-maximumPoolSize = 4
-minimumRunnable = 4
-keepAliveTime = 2
-keepAliveTimeUnit = "MINUTES"

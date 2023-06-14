@@ -24,6 +24,7 @@ public class GroupSkill implements Skill {
         this.delegates = delegates;
 
         List<Skill> tickingDelegates = new ArrayList<>(delegates.size());
+
         for (Skill skill : delegates) {
             if (skill.needsTicking()) {
                 tickingDelegates.add(skill);
@@ -32,6 +33,13 @@ public class GroupSkill implements Skill {
 
         this.tickingDelegates = List.copyOf(tickingDelegates);
         this.needsTicking = !tickingDelegates.isEmpty();
+    }
+
+    @Override
+    public void init(@NotNull PhantazmMob self) {
+        for (Skill delegate : delegates) {
+            delegate.init(self);
+        }
     }
 
     @Override
@@ -45,6 +53,13 @@ public class GroupSkill implements Skill {
     public void tick(long time, @NotNull PhantazmMob self) {
         for (Skill skill : tickingDelegates) {
             skill.tick(time, self);
+        }
+    }
+
+    @Override
+    public void end(@NotNull PhantazmMob self) {
+        for (Skill skill : delegates) {
+            skill.end(self);
         }
     }
 

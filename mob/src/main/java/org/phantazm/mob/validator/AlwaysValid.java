@@ -14,7 +14,7 @@ public class AlwaysValid implements TargetValidator {
     }
 
     @Override
-    public boolean valid(@NotNull Entity entity) {
+    public boolean valid(@NotNull Entity targeter, @NotNull Entity entity) {
         return true;
     }
 }

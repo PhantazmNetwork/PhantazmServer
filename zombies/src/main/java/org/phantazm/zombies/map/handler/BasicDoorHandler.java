@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.handler;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -31,11 +32,12 @@ public class BasicDoorHandler implements DoorHandler {
     }
 
     @Override
-    public void handleRightClick(@NotNull ZombiesPlayer player, @NotNull Point clicked) {
+    public boolean handleRightClick(@NotNull ZombiesPlayer player, @NotNull Point clicked) {
         if (!player.inStage(StageKeys.IN_GAME)) {
-            return;
+            return false;
         }
 
+        Wrapper<Boolean> handled = Wrapper.of(false);
         doorTracker.atPoint(clicked).ifPresent(door -> {
             Optional<Player> playerOptional = player.getPlayer();
             if (playerOptional.isEmpty()) {
@@ -75,7 +77,11 @@ public class BasicDoorHandler implements DoorHandler {
                 else {
                     door.failOpen(player);
                 }
+
+                handled.set(true);
             }
         });
+
+        return handled.get();
     }
 }

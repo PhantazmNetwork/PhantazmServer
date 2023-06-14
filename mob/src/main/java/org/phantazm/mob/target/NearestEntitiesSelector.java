@@ -1,95 +1,27 @@
 package org.phantazm.mob.target;
 
+import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.validator.TargetValidator;
 
-import java.util.*;
+import java.util.Optional;
 
-/**
- * A {@link TargetSelector} that selects nearby {@link Entity}s.
- *
- * @param <TTarget>> A mapped type of the target {@link Entity}
- */
-public abstract class NearestEntitiesSelector<TTarget extends Entity> implements TargetSelector<Iterable<TTarget>> {
-    private final double range;
-    private final int targetLimit;
-    private final TargetValidator targetValidator;
+@Model("mob.selector.nearest_entities")
+@Cache(false)
+public class NearestEntitiesSelector extends NearestEntitiesSelectorAbstract<Entity> {
 
-    /**
-     * Creates a {@link NearestEntitiesSelector}.
-     *
-     * @param range       The euclidean distance range of the selector
-     * @param targetLimit The maximum number of targets to select
-     */
-    public NearestEntitiesSelector(double range, int targetLimit, @NotNull TargetValidator targetValidator) {
-        this.range = range;
-        this.targetLimit = targetLimit;
-        this.targetValidator = Objects.requireNonNull(targetValidator, "targetValidator");
+    @FactoryMethod
+    public NearestEntitiesSelector(@NotNull Data data, @NotNull @Child("validator") TargetValidator targetValidator) {
+        super(data.range, data.targetLimit, targetValidator);
     }
 
     @Override
-    public @NotNull Optional<Iterable<TTarget>> selectTarget(@NotNull PhantazmMob self) {
-        Entity entity = self.entity();
-        Instance instance = entity.getInstance();
-        if (instance == null) {
-            return Optional.empty();
-        }
-
-        Collection<Entity> entities = instance.getNearbyEntities(entity.getPosition(), range);
-        Map<UUID, TTarget> targetMap = new HashMap<>(entities.size());
-        List<Entity> potentialTargets = new ArrayList<>(entities.size());
-        for (Entity nearby : entities) {
-            Optional<TTarget> targetOptional = mapTarget(nearby);
-            if (targetOptional.isEmpty()) {
-                continue;
-            }
-
-            TTarget target = targetOptional.get();
-            if (!targetValidator.valid(target)) {
-                continue;
-            }
-
-            targetMap.put(nearby.getUuid(), targetOptional.get());
-            potentialTargets.add(nearby);
-        }
-
-        potentialTargets.sort(Comparator.comparingDouble(e -> e.getDistanceSquared(entity)));
-
-        int targetCount = Math.min(potentialTargets.size(), targetLimit);
-        Collection<TTarget> targets = new ArrayList<>(targetCount);
-        for (int i = 0; i < targetCount; i++) {
-            targets.add(targetMap.get(potentialTargets.get(i).getUuid()));
-        }
-
-        return Optional.of(targets);
+    protected @NotNull Optional<Entity> mapTarget(@NotNull Entity entity) {
+        return Optional.of(entity);
     }
 
-    /**
-     * Gets the euclidean distance range of the selector.
-     *
-     * @return The euclidean distance range of the selector
-     */
-    public double getRange() {
-        return range;
+    @DataObject
+    public record Data(double range, int targetLimit, @NotNull @ChildPath("validator") String targetValidator) {
     }
-
-    /**
-     * Gets the maximum number of targets to select.
-     *
-     * @return The maximum number of targets to select
-     */
-    public int getTargetLimit() {
-        return targetLimit;
-    }
-
-    /**
-     * Maps a {@link Entity} to a target.
-     *
-     * @param entity The {@link Entity} to map
-     * @return The mapped target
-     */
-    protected abstract @NotNull Optional<TTarget> mapTarget(@NotNull Entity entity);
 }

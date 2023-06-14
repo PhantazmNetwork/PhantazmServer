@@ -15,7 +15,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.zombies.map.action.Action;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Deque;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
         """)
 @Model("zombies.perk.effect.shot_entity.apply_attribute")
 @Cache(false)
-public class ApplyAttributeShotEffect implements Action<Entity>, Tickable {
+public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     private static final Map<Data, String> NAMES = new ConcurrentHashMap<>();
 
     private final Data data;
@@ -56,7 +56,7 @@ public class ApplyAttributeShotEffect implements Action<Entity>, Tickable {
     }
 
     @Override
-    public void perform(@NotNull Entity entity) {
+    public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
         if (!(entity instanceof LivingEntity livingEntity)) {
             return;
         }

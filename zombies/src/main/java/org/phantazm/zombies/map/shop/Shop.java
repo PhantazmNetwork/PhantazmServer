@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Shop extends BoundedBase implements Tickable {
+    private final Point mapOrigin;
     private final Instance instance;
     private final ShopInfo shopInfo;
 
@@ -28,6 +29,7 @@ public class Shop extends BoundedBase implements Tickable {
             @NotNull List<ShopInteractor> failureInteractors, @NotNull List<ShopDisplay> displays) {
         super(mapOrigin, shopInfo.trigger());
 
+        this.mapOrigin = mapOrigin;
         this.instance = Objects.requireNonNull(instance, "instance");
         this.shopInfo = Objects.requireNonNull(shopInfo, "shopInfo");
 
@@ -35,6 +37,10 @@ public class Shop extends BoundedBase implements Tickable {
         this.successInteractors = List.copyOf(successInteractors);
         this.failureInteractors = List.copyOf(failureInteractors);
         this.displays = List.copyOf(displays);
+    }
+
+    public @NotNull Point mapOrigin() {
+        return mapOrigin;
     }
 
     public @NotNull @Unmodifiable List<ShopPredicate> predicates() {
@@ -76,15 +82,15 @@ public class Shop extends BoundedBase implements Tickable {
     }
 
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        boolean interact = shopInfo.predicateEvaluation().evaluate(predicates, interaction);
-        List<ShopInteractor> interactorsToCall = interact ? successInteractors : failureInteractors;
+        boolean success = shopInfo.predicateEvaluation().evaluate(predicates, interaction);
+        List<ShopInteractor> interactorsToCall = success ? successInteractors : failureInteractors;
 
         for (ShopInteractor interactor : interactorsToCall) {
-            interactor.handleInteraction(interaction);
+            success &= interactor.handleInteraction(interaction);
         }
 
         for (ShopDisplay display : displays) {
-            display.update(this, interaction, interact);
+            display.update(this, interaction, success);
         }
     }
 

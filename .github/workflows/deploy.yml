@@ -15,10 +15,10 @@ jobs:
                     cache: 'gradle'
                     distribution: 'adopt'
             -   name: Set up server
-                run: ./gradlew :phantazm-server:setupServer
+                run: ./gradlew -PskipBuild=zombies-mapeditor :phantazm-server:setupServer
             -   name: Build & copy jar
-                run: ./gradlew :phantazm-server:copyJar
-            -   name: Zip files
+                run: ./gradlew -PskipBuild=zombies-mapeditor :phantazm-server:copyJar
+            -   name: Zip server files
                 run: |
                     cd ./run/server-1
                     tar -czf /tmp/server.tar.gz server.jar libs
@@ -40,7 +40,7 @@ jobs:
                     SSH_USER: ${{ secrets.SSH_USER }}
             -   name: Copy server files to remote
                 run: |
-                    scp /tmp/server.tar.gz phantazm:/home/gh/server.tar.gz
+                    scp /tmp/server.tar.gz phantazm:/home/prod/archive/server.tar.gz
             -   name: Restart server
                 uses: appleboy/ssh-action@master
                 with:
@@ -49,6 +49,15 @@ jobs:
                     username: ${{ secrets.SSH_USER }}
                     script: |
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'stop' Enter
-                        tar -xf /home/gh/server.tar.gz -C /home/prod/servers/prod/
+                        rm -rf /home/prod/archive/config
+                        rm -rf /home/prod/archive/build
+                        mkdir /home/prod/archive/config
+                        mkdir /home/prod/archive/build
+                        git clone git@github.com-Configuration:PhantazmNetwork/Configuration.git /home/prod/archive/config
+                        tar -xf /home/prod/archive/server.tar.gz -C /home/prod/archive/build
+                        rsync -ac --delete /home/prod/archive/build/ /home/prod/servers/prod
+                        rsync -ac /home/prod/archive/config/ /home/prod/servers/prod
+                        rsync -ac /home/prod/archive/persistent/ /home/prod/servers/prod
+                        tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'cd /home/prod/servers/prod' Enter
+                        tmux -S /home/prod/tmux_sockets/prod send-keys -t prod 'chmod +x ./start.sh' Enter
                         tmux -S /home/prod/tmux_sockets/prod send-keys -t prod './start.sh' Enter
-

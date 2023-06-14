@@ -10,7 +10,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 public interface DoorHandler {
     @NotNull BoundedTracker<Door> doorTracker();
 
-    void handleRightClick(@NotNull ZombiesPlayer player, @NotNull Point clicked);
+    boolean handleRightClick(@NotNull ZombiesPlayer player, @NotNull Point clicked);
 
     interface Source {
         @NotNull DoorHandler make(@NotNull BoundedTracker<Door> doorTracker, @NotNull BoundedTracker<Room> roomTracker);

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
+import org.phantazm.zombies.equipment.gun.GunUtils;
 import org.phantazm.zombies.equipment.gun.reload.ReloadTester;
 
 import java.util.Objects;
@@ -60,14 +61,8 @@ public class StateShootTester implements ShootTester {
     }
 
     private float fireRateFactor() {
-        Optional<? extends Entity> shooter = this.entitySupplier.get();
+        return this.entitySupplier.get().map(GunUtils::fireRateFactor).orElse(1F);
 
-        float factor = 1F;
-        if (shooter.isPresent() && shooter.get() instanceof LivingEntity livingEntity) {
-            factor = livingEntity.getAttributeValue(Attributes.FIRE_RATE_MULTIPLIER);
-        }
-
-        return factor;
     }
 
     /**

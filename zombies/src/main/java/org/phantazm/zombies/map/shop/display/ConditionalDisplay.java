@@ -25,6 +25,7 @@ public class ConditionalDisplay implements ShopDisplay {
 
     @Override
     public void initialize(@NotNull Shop shop) {
+        List<ShopDisplay> activeDisplays = this.activeDisplays;
         if (activeDisplays != null) {
             for (ShopDisplay display : activeDisplays) {
                 display.initialize(shop);
@@ -34,18 +35,20 @@ public class ConditionalDisplay implements ShopDisplay {
 
     @Override
     public void destroy(@NotNull Shop shop) {
+        List<ShopDisplay> activeDisplays = this.activeDisplays;
         if (activeDisplays != null) {
             for (ShopDisplay display : activeDisplays) {
                 display.destroy(shop);
             }
 
-            activeDisplays = null;
+            this.activeDisplays = null;
         }
     }
 
     @Override
     public void update(@NotNull Shop shop, @NotNull PlayerInteraction interaction, boolean interacted) {
         List<ShopDisplay> newDisplays = interacted ? successDisplays : failureDisplays;
+        List<ShopDisplay> activeDisplays = this.activeDisplays;
         if (newDisplays == activeDisplays) {
             for (ShopDisplay display : newDisplays) {
                 display.update(shop, interaction, interacted);
@@ -54,19 +57,22 @@ public class ConditionalDisplay implements ShopDisplay {
             return;
         }
 
-        for (ShopDisplay display : activeDisplays) {
-            display.destroy(shop);
+        if (activeDisplays != null) {
+            for (ShopDisplay display : activeDisplays) {
+                display.destroy(shop);
+            }
         }
 
         for (ShopDisplay display : newDisplays) {
             display.initialize(shop);
         }
 
-        activeDisplays = newDisplays;
+        this.activeDisplays = newDisplays;
     }
 
     @Override
     public void tick(long time) {
+        List<ShopDisplay> activeDisplays = this.activeDisplays;
         if (activeDisplays != null) {
             for (ShopDisplay shopDisplay : activeDisplays) {
                 shopDisplay.tick(time);

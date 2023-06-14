@@ -23,6 +23,8 @@ pluginManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+val toSkip = gradle.startParameter.projectProperties.getOrDefault("skipBuild", "").split(",")
+
 sequenceOf(
     "core",
     "commons",
@@ -33,8 +35,12 @@ sequenceOf(
     "velocity",
     "zombies",
     "zombies-mapdata",
-    "zombies-mapeditor" //disable to speed up compilation (also if Loom decides to randomly error)
+    "zombies-mapeditor"
 ).forEach {
-    include(":phantazm-$it")
-    project(":phantazm-$it").projectDir = file(it)
+    if (!toSkip.contains(it)) {
+        include(":phantazm-$it")
+        project(":phantazm-$it").projectDir = file(it)
+    } else {
+        println("Skipping project module $it")
+    }
 }

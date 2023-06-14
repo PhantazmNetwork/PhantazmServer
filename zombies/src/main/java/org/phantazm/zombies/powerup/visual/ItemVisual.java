@@ -1,5 +1,6 @@
 package org.phantazm.zombies.powerup.visual;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -16,6 +17,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.visual.item")
+@Cache(false)
 public class ItemVisual implements Supplier<PowerupVisual> {
     private final Data data;
     private final Instance instance;

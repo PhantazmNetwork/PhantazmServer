@@ -7,8 +7,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.state.PlayerStateSwitcher;
-import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
@@ -67,10 +65,7 @@ public class EndStage implements Stage {
         instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F));
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            PlayerStateSwitcher switcher = zombiesPlayer.module().getStateSwitcher();
-            ZombiesPlayerState state = switcher.getState();
-
-            if (state.key().equals(ZombiesPlayerStateKeys.KNOCKED.key())) {
+            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.KNOCKED)) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.killed(null, null));
             }
         }
@@ -80,9 +75,17 @@ public class EndStage implements Stage {
     public void tick(long time) {
         remainingTicks.apply(ticks -> ticks - 1);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
-                    unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
-            sidebarUpdater.tick(time);
+            if (!zombiesPlayer.hasQuit()) {
+                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
+                        unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
+                sidebarUpdater.tick(time);
+            }
+
+            zombiesPlayer.getPlayer().ifPresent(player -> {
+                for (ZombiesPlayer otherPlayer : zombiesPlayers) {
+                    otherPlayer.module().getTabList().updateScore(player, zombiesPlayer.module().getKills().getKills());
+                }
+            });
         }
     }
 

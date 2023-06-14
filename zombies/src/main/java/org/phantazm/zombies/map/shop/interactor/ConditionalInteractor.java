@@ -4,12 +4,14 @@ import com.github.steanky.element.core.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Evaluation;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 
 import java.util.List;
 import java.util.Objects;
 
 @Model("zombies.map.shop.interactor.conditional")
+@Cache(false)
 public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.Data> {
     private final List<ShopPredicate> predicates;
     private final List<ShopInteractor> successInteractors;
@@ -26,12 +28,36 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
     }
 
     @Override
-    public void handleInteraction(@NotNull PlayerInteraction interaction) {
-        List<ShopInteractor> interactors =
-                data.evaluation.evaluate(predicates, interaction) ? successInteractors : failureInteractors;
+    public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
+        boolean success = data.evaluation.evaluate(predicates, interaction);
+        List<ShopInteractor> interactors = success ? successInteractors : failureInteractors;
 
         for (ShopInteractor interactor : interactors) {
-            interactor.handleInteraction(interaction);
+            success &= interactor.handleInteraction(interaction);
+        }
+
+        return success;
+    }
+
+    @Override
+    public void tick(long time) {
+        for (ShopInteractor interactor : successInteractors) {
+            interactor.tick(time);
+        }
+
+        for (ShopInteractor interactor : failureInteractors) {
+            interactor.tick(time);
+        }
+    }
+
+    @Override
+    public void initialize(@NotNull Shop shop) {
+        for (ShopInteractor interactor : successInteractors) {
+            interactor.initialize(shop);
+        }
+
+        for (ShopInteractor interactor : failureInteractors) {
+            interactor.initialize(shop);
         }
     }
 

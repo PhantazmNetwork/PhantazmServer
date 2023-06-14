@@ -10,7 +10,7 @@ import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 public interface ShopHandler extends Tickable {
-    void handleInteraction(@NotNull ZombiesPlayer player, @NotNull Point clicked, @NotNull Key interactionType);
+    boolean handleInteraction(@NotNull ZombiesPlayer player, @NotNull Point clicked, @NotNull Key interactionType);
 
     @NotNull @UnmodifiableView BoundedTracker<Shop> tracker();
 

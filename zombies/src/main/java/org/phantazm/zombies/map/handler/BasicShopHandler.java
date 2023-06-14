@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.handler;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
@@ -25,13 +26,19 @@ public class BasicShopHandler implements ShopHandler {
         }
     }
 
-    public void handleInteraction(@NotNull ZombiesPlayer player, @NotNull Point clicked, @NotNull Key interactionType) {
+    public boolean handleInteraction(@NotNull ZombiesPlayer player, @NotNull Point clicked,
+            @NotNull Key interactionType) {
         if (!player.inStage(StageKeys.IN_GAME)) {
-            return;
+            return false;
         }
 
-        shopTracker.atPoint(clicked)
-                .ifPresent(shop -> shop.handleInteraction(new BasicPlayerInteraction(player, interactionType)));
+        Wrapper<Boolean> result = Wrapper.of(false);
+        shopTracker.atPoint(clicked).ifPresent(shop -> {
+            shop.handleInteraction(new BasicPlayerInteraction(player, interactionType));
+            result.set(true);
+        });
+
+        return result.get();
     }
 
     @Override

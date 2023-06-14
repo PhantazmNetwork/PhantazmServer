@@ -2,17 +2,17 @@ package org.phantazm.zombies.map.objects;
 
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.BasicTickTaskScheduler;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.shop.Shop;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public final class BasicMapObjects implements MapObjects {
     private final List<Spawnpoint> spawnpoints;
@@ -28,11 +28,15 @@ public final class BasicMapObjects implements MapObjects {
     private final MobSpawner mobSpawner;
 
     private final Map<? super Key, ? extends Room> roomMap;
+    private final Point mapOrigin;
+
+    private final TickTaskScheduler taskScheduler;
 
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull BoundedTracker<Window> windows,
             @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
             @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
-            @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Module module) {
+            @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
+            @NotNull Module module) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
 
@@ -52,6 +56,8 @@ public final class BasicMapObjects implements MapObjects {
         }
 
         this.roomMap = Map.copyOf(map);
+        this.mapOrigin = mapOrigin;
+        this.taskScheduler = new BasicTickTaskScheduler();
     }
 
     @Override
@@ -102,5 +108,20 @@ public final class BasicMapObjects implements MapObjects {
     @Override
     public @NotNull MobSpawner mobSpawner() {
         return mobSpawner;
+    }
+
+    @Override
+    public @NotNull Point mapOrigin() {
+        return mapOrigin;
+    }
+
+    @Override
+    public @NotNull TickTaskScheduler taskScheduler() {
+        return taskScheduler;
+    }
+
+    @Override
+    public void tick(long time) {
+        taskScheduler.tick(time);
     }
 }

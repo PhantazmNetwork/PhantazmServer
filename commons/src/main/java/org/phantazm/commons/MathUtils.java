@@ -12,6 +12,10 @@ public final class MathUtils {
         throw new UnsupportedOperationException();
     }
 
+    public static long randomInterval(long min, long max) {
+        return (long)(Math.random() * (min - max)) + min;
+    }
+
     public static int ceilDiv(double dividend, double divisor) {
         return (int)Math.ceil(dividend / divisor);
     }
@@ -33,6 +37,10 @@ public final class MathUtils {
      * @return the clamped value
      */
     public static double clamp(double value, double min, double max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    public static float clamp(float value, float min, float max) {
         return Math.min(Math.max(value, min), max);
     }
 

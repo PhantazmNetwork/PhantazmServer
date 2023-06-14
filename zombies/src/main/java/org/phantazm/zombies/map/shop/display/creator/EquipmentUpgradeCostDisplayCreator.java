@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-@Model("zombies.map.shop.display.creator.equipment_cost")
+@Model("zombies.map.shop.display.player.equipment_cost")
 @Cache(false)
 public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator {
     private final Data data;

@@ -3,6 +3,7 @@ package org.phantazm.core.instance;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.utils.chunk.ChunkSupplier;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,8 +20,9 @@ public class AnvilFileSystemInstanceLoader extends FileSystemInstanceLoader {
      * @param rootPath      The {@link Path} of the {@link Instance} directory
      * @param chunkSupplier the {@link ChunkSupplier} used to create chunks
      */
-    public AnvilFileSystemInstanceLoader(@NotNull Path rootPath, @NotNull ChunkSupplier chunkSupplier) {
-        super(rootPath, chunkSupplier);
+    public AnvilFileSystemInstanceLoader(@NotNull InstanceManager instanceManager, @NotNull Path rootPath,
+            @NotNull ChunkSupplier chunkSupplier) {
+        super(instanceManager, rootPath, chunkSupplier);
     }
 
     @Override

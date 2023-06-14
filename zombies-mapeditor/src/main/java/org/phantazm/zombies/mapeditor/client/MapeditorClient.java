@@ -4,9 +4,7 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import io.netty.buffer.Unpooled;
-import me.x150.MessageSubscription;
-import me.x150.renderer.event.Events;
-import me.x150.renderer.event.RenderEvent;
+import me.x150.renderer.event.RenderEvents;
 import me.x150.renderer.render.Renderer3d;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -27,8 +25,6 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -40,8 +36,8 @@ import org.phantazm.commons.Namespaces;
 import org.phantazm.messaging.MessageChannels;
 import org.phantazm.messaging.packet.Packet;
 import org.phantazm.messaging.packet.PacketHandler;
-import org.phantazm.messaging.packet.c2s.MapDataVersionQueryPacket;
-import org.phantazm.messaging.packet.c2s.MapDataVersionResponsePacket;
+import org.phantazm.messaging.packet.c2p.MapDataVersionQueryPacket;
+import org.phantazm.messaging.packet.c2p.MapDataVersionResponsePacket;
 import org.phantazm.messaging.serialization.PacketSerializer;
 import org.phantazm.messaging.serialization.PacketSerializers;
 import org.phantazm.zombies.map.FileSystemMapLoader;
@@ -74,8 +70,9 @@ public class MapeditorClient implements ClientModInitializer {
         ConfigCodec codec = new YamlCodec();
         Path defaultMapDirectory = FabricLoader.getInstance().getConfigDir().resolve(MAPEDITOR_PATH);
 
-        ObjectRenderer renderer = new Renderer();
-        Events.manager.registerSubscribers(renderer);
+        Renderer renderer = new Renderer();
+        RenderEvents.WORLD.register(renderer::rendered);
+        RenderEvents.HUD.register(renderer::hudRender);
 
         EditorSession editorSession =
                 new BasicEditorSession(renderer, new FileSystemMapLoader(defaultMapDirectory, codec),
@@ -91,18 +88,18 @@ public class MapeditorClient implements ClientModInitializer {
                 new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
                         TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
-        PacketSerializer clientToServer = PacketSerializers.clientToServerSerializer(
+        PacketSerializer clientToProxy = PacketSerializers.clientToProxySerializer(
                 () -> new PacketByteBufDataWriter(new PacketByteBuf(Unpooled.buffer())),
                 data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));
-        Identifier clientToServerIdentifier = Identifier.of(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_SERVER);
-        if (clientToServerIdentifier != null) {
+        Identifier clientToProxyIdentifier = Identifier.of(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_PROXY);
+        if (clientToProxyIdentifier != null) {
             ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-                byte[] data = clientToServer.serializePacket(new MapDataVersionQueryPacket());
-                sender.sendPacket(new CustomPayloadC2SPacket(clientToServerIdentifier,
+                byte[] data = clientToProxy.serializePacket(new MapDataVersionQueryPacket());
+                sender.sendPacket(new CustomPayloadC2SPacket(clientToProxyIdentifier,
                         new PacketByteBuf(Unpooled.wrappedBuffer(data))));
             }));
 
-            PacketHandler<PacketSender> clientToServerHandler = new PacketHandler<>(clientToServer) {
+            PacketHandler<PacketSender> clientToProxyHandler = new PacketHandler<>(clientToProxy) {
                 @Override
                 protected void handlePacket(@NotNull PacketSender packetSender, @NotNull Packet packet) {
                     if (packet instanceof MapDataVersionResponsePacket responsePacket) {
@@ -111,14 +108,12 @@ public class MapeditorClient implements ClientModInitializer {
                         if (player != null) {
                             Text message;
                             if (responsePacket.version() == MapSettingsInfo.MAP_DATA_VERSION) {
-                                message = MutableText.of(new LiteralTextContent(
-                                        "The mapeditor client is synchronized with the server's expected " +
-                                                "mapdata version.")).formatted(Formatting.GREEN);
+                                message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
+                                        .formatted(Formatting.GREEN);
                             }
                             else {
-                                message = MutableText.of(new LiteralTextContent("The mapeditor client is " +
-                                        "not synchronized with the server's expected mapdata version. Please update " +
-                                        "the mod to the correct version.")).formatted(Formatting.RED);
+                                message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
+                                        .formatted(Formatting.RED);
                             }
                             player.sendMessage(message);
                         }
@@ -127,12 +122,12 @@ public class MapeditorClient implements ClientModInitializer {
 
                 @Override
                 protected void sendToReceiver(@NotNull PacketSender packetSender, byte @NotNull [] data) {
-                    packetSender.sendPacket(clientToServerIdentifier, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
+                    packetSender.sendPacket(clientToProxyIdentifier, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
                 }
             };
-            ClientPlayNetworking.registerGlobalReceiver(clientToServerIdentifier,
+            ClientPlayNetworking.registerGlobalReceiver(clientToProxyIdentifier,
                     (client, handler, buf, responseSender) -> {
-                        clientToServerHandler.handleData(responseSender, buf.getWrittenBytes());
+                        clientToProxyHandler.handleData(responseSender, buf.getWrittenBytes());
                     });
         }
 
@@ -197,13 +192,11 @@ public class MapeditorClient implements ClientModInitializer {
         private RenderObject[] bakedObjects;
         private TextObject[] bakedText;
 
-        @MessageSubscription
-        void worldRender(@NotNull RenderEvent.World event) {
+        public void rendered(MatrixStack stack) {
             if (!enabled) {
                 return;
             }
 
-            MatrixStack stack = event.getMatrixStack();
             if (renderThroughWalls) {
                 Renderer3d.renderThroughWalls();
             }
@@ -245,8 +238,7 @@ public class MapeditorClient implements ClientModInitializer {
             Renderer3d.stopRenderThroughWalls();
         }
 
-        @MessageSubscription
-        void hudRender(@NotNull RenderEvent.Hud event) {
+        public void hudRender(MatrixStack stack) {
             if (!enabled) {
                 return;
             }
@@ -257,7 +249,6 @@ public class MapeditorClient implements ClientModInitializer {
                 bakeText();
             }
 
-            MatrixStack stack = event.getMatrixStack();
             for (ObjectRenderer.TextObject textObject : bakedText) {
                 renderer.draw(stack, textObject.text, textObject.x, textObject.y, textObject.color.getRGB());
             }

@@ -12,7 +12,9 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
 import net.minestom.server.scoreboard.Sidebar;
+import net.minestom.server.scoreboard.TabList;
 import net.minestom.server.scoreboard.Team;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +31,7 @@ import org.phantazm.core.inventory.*;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.BasicPlayerCoins;
@@ -48,6 +51,7 @@ import org.phantazm.zombies.player.state.*;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.context.NoContext;
+import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
@@ -68,11 +72,14 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     private final Team corpseTeam;
 
+    private final Map<Key, MobModel> mobModelMap;
+
     public BasicZombiesPlayerSource(
             @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
-            @NotNull Team corpseTeam) {
+            @NotNull Team corpseTeam, @NotNull Map<Key, MobModel> mobModelMap) {
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
         this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
+        this.mobModelMap = Objects.requireNonNull(mobModelMap, "mobModelMap");
     }
 
     @SuppressWarnings("unchecked")
@@ -134,21 +141,23 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
         ZombiesEquipmentModule equipmentModule =
                 new ZombiesEquipmentModule(zombiesPlayers, playerView, mobSpawner, mobStore, eventNode, random,
-                        mapObjects, zombiesPlayerWrapper);
+                        mapObjects, zombiesPlayerWrapper, mobModelMap::get);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 
         Sidebar sidebar = new Sidebar(
                 Component.text(StringUtils.center("ZOMBIES", 16), NamedTextColor.YELLOW, TextDecoration.BOLD));
+        TabList tabList = new TabList(UUID.randomUUID().toString(), ScoreboardObjectivePacket.Type.INTEGER);
 
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE"), ZombiesPlayerStateKeys.ALIVE.key(),
-                    List.of(new BasicAliveStateActivable(accessRegistry, playerView, meta, sidebar)));
+                    List.of(new BasicAliveStateActivable(accessRegistry, playerView, meta, sidebar, tabList)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
                 (context, activables) -> {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
                     combinedActivables.add(
-                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta, sidebar));
+                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta, sidebar,
+                                    tabList));
                     return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
@@ -185,17 +194,18 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
-                            meta, sidebar), corpse.asKnockActivable(reviveHandler), new Activable() {
+                            meta, sidebar, tabList), corpse.asKnockActivable(reviveHandler), new Activable() {
                         @Override
                         public void start() {
                             meta.setCorpse(corpse);
                         }
                     }));
         };
-        Function<NoContext, ZombiesPlayerState> quitStateCreator = unused -> {
+        Function<QuitPlayerStateContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
-                    List.of(new BasicQuitStateActivable(instance, playerView, meta, sidebar)));
+                    List.of(new BasicQuitStateActivable(instance, zombiesPlayers.values(), playerView, meta, sidebar,
+                            tabList)));
         };
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
@@ -206,7 +216,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         ZombiesPlayerModule module =
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
-                        accessRegistry, stateSwitcher, stateFunctions, sidebar, mapTransactionModifierSource,
+                        accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
                         playerTransactionModifierSource, flaggable);
 
         ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module);

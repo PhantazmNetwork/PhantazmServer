@@ -12,14 +12,11 @@ import org.phantazm.commons.Namespaces;
 import org.phantazm.messaging.MessageChannels;
 import org.phantazm.messaging.packet.Packet;
 import org.phantazm.messaging.packet.PacketHandler;
-import org.phantazm.messaging.packet.c2s.MapDataVersionQueryPacket;
-import org.phantazm.messaging.packet.c2s.MapDataVersionResponsePacket;
 import org.phantazm.messaging.serialization.PacketSerializer;
 import org.phantazm.messaging.serialization.PacketSerializers;
 import org.phantazm.server.config.server.AuthType;
 import org.phantazm.server.packet.BinaryDataReader;
 import org.phantazm.server.packet.BinaryDataWriter;
-import org.phantazm.zombies.map.MapSettingsInfo;
 
 import java.util.Map;
 
@@ -41,9 +38,7 @@ public final class Messaging {
                 Map.of(MessageChannels.CLIENT_TO_SERVER, new PacketHandler<>(clientToServer) {
                     @Override
                     protected void handlePacket(@NotNull Player player, @NotNull Packet packet) {
-                        if (packet instanceof MapDataVersionQueryPacket) {
-                            output(player, new MapDataVersionResponsePacket(MapSettingsInfo.MAP_DATA_VERSION));
-                        }
+
                     }
 
                     @Override

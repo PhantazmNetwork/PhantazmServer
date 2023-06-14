@@ -24,7 +24,7 @@ public class Round implements Tickable {
     private final SpawnDistributor spawnDistributor;
     private final List<Spawnpoint> spawnpoints;
     private final List<PhantazmMob> spawnedMobs;
-
+    
     private boolean isActive;
     private long waveStartTime;
     private Wave currentWave;

@@ -4,5 +4,5 @@ import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 public interface TargetValidator {
-    boolean valid(@NotNull Entity entity);
+    boolean valid(@NotNull Entity targeter, @NotNull Entity entity);
 }

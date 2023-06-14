@@ -27,12 +27,13 @@ import org.phantazm.mob.MobModel;
 import org.phantazm.mob.config.MobModelConfigProcessor;
 import org.phantazm.mob.goal.*;
 import org.phantazm.mob.skill.*;
-import org.phantazm.mob.target.EntitySelector;
-import org.phantazm.mob.target.LastHitEntitySelector;
-import org.phantazm.mob.target.NearestPlayerSelector;
-import org.phantazm.mob.target.NearestPlayersSelector;
+import org.phantazm.mob.target.*;
 import org.phantazm.mob.validator.AlwaysValid;
+import org.phantazm.mob.validator.AndValidator;
+import org.phantazm.mob.validator.NotSelfValidator;
+import org.phantazm.mob.validator.OrValidator;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
+import org.phantazm.zombies.mob.validator.MobValidator;
 import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,6 +125,7 @@ public final class Mob {
         contextManager.registerElementClass(ChargeAtEntityGoal.class);
         contextManager.registerElementClass(UseSkillGoal.class);
         contextManager.registerElementClass(MeleeAttackGoal.class);
+        contextManager.registerElementClass(PlayStepSoundGoal.class);
 
         //zombies mob goals
         contextManager.registerElementClass(BreakNearbyWindowGoal.class);
@@ -133,24 +135,35 @@ public final class Mob {
         contextManager.registerElementClass(DamageEntitySkill.class);
         contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
+        contextManager.registerElementClass(AttributeModifyingSkill.class);
+        contextManager.registerElementClass(SendMessageSkill.class);
+        contextManager.registerElementClass(JumpTowardsTargetSkill.class);
+        contextManager.registerElementClass(SpawnParticleSkill.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);
         contextManager.registerElementClass(RandomSkill.class);
         contextManager.registerElementClass(RandomTimerSkill.class);
         contextManager.registerElementClass(GroupSkill.class);
+        contextManager.registerElementClass(TemporalSkill.class);
 
         //mob selectors
-        contextManager.registerElementClass(EntitySelector.class);
+        contextManager.registerElementClass(SelfSelector.class);
         contextManager.registerElementClass(NearestPlayerSelector.class);
         contextManager.registerElementClass(NearestPlayersSelector.class);
         contextManager.registerElementClass(LastHitEntitySelector.class);
+        contextManager.registerElementClass(AllPlayersSelector.class);
+        contextManager.registerElementClass(NearestEntitiesSelector.class);
 
         //mob validators
         contextManager.registerElementClass(AlwaysValid.class);
+        contextManager.registerElementClass(AndValidator.class);
+        contextManager.registerElementClass(OrValidator.class);
+        contextManager.registerElementClass(NotSelfValidator.class);
 
         //zombies mob validators
         contextManager.registerElementClass(ZombiesPlayerValidator.class);
+        contextManager.registerElementClass(MobValidator.class);
 
         LOGGER.info("Registered Mob element classes.");
     }

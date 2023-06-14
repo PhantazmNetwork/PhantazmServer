@@ -6,6 +6,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.MathUtils;
 import org.phantazm.mob.PhantazmMob;
 
 import java.util.UUID;
@@ -38,7 +39,8 @@ public class RandomTimerSkill implements Skill {
         this.lastActivationTag = Tag.Long("last_activation_" + uuid).defaultValue(-1L);
         this.useCountTag = Tag.Integer("use_count_" + uuid).defaultValue(0);
         this.startedTag = Tag.Boolean("started_" + uuid).defaultValue(!data.requiresActivation);
-        this.intervalTag = Tag.Long("interval_" + uuid).defaultValue(data.requiresActivation ? -1L : randomInterval());
+        this.intervalTag = Tag.Long("interval_" + uuid).defaultValue(
+                data.requiresActivation ? -1L : MathUtils.randomInterval(data.minInterval, data.maxInterval));
         this.tickDelegate = delegate.needsTicking();
     }
 
@@ -47,7 +49,7 @@ public class RandomTimerSkill implements Skill {
         Entity entity = self.entity();
         if (data.requiresActivation) {
             entity.setTag(startedTag, true);
-            entity.setTag(intervalTag, randomInterval());
+            entity.setTag(intervalTag, MathUtils.randomInterval(data.minInterval, data.maxInterval));
         }
 
         if (data.resetOnActivation || !entity.getTag(startedTag)) {
@@ -85,19 +87,26 @@ public class RandomTimerSkill implements Skill {
 
         if ((time - lastActivationTime) / MinecraftServer.TICK_MS >= actualInterval) {
             entity.setTag(lastActivationTag, time);
-            entity.setTag(intervalTag, randomInterval());
+            entity.setTag(intervalTag, MathUtils.randomInterval(data.minInterval, data.maxInterval));
 
             delegate.use(self);
-            manageState(entity, lastUseCount);
+            manageState(self, lastUseCount);
         }
     }
 
-    private long randomInterval() {
-        return (long)(Math.random() * (data.minInterval - data.maxInterval)) + data.minInterval;
+    @Override
+    public void end(@NotNull PhantazmMob self) {
+        Entity entity = self.entity();
+
+        entity.removeTag(lastActivationTag);
+        entity.removeTag(useCountTag);
+        entity.removeTag(startedTag);
+        entity.removeTag(intervalTag);
     }
 
-    private void manageState(Entity entity, int lastUseCount) {
+    private void manageState(PhantazmMob self, int lastUseCount) {
         if (lastUseCount != -1) {
+            Entity entity = self.entity();
             entity.setTag(useCountTag, ++lastUseCount);
 
             if (lastUseCount >= data.repeat) {

@@ -67,7 +67,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     /**
      * Shuts down the scene and breaks its current lifecycle.
      */
-    void forceShutdown();
+    void shutdown();
 
     /**
      * Checks whether the scene is considered joinable.

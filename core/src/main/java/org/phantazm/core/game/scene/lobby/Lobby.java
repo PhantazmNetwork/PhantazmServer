@@ -11,10 +11,7 @@ import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents a lobby. Most basic scene which contains {@link Player}s.
@@ -32,7 +29,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param fallback       A fallback for the lobby
      */
     public Lobby(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig, @NotNull SceneFallback fallback) {
-        super(instance, fallback);
+        super(instance, new HashMap<>(), fallback);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
     }
 

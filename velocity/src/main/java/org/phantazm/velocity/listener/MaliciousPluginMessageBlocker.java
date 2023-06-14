@@ -20,10 +20,10 @@ public class MaliciousPluginMessageBlocker {
     /**
      * Creates a {@link MaliciousPluginMessageBlocker}.
      *
-     * @param proxyIdentifier The {@link ChannelIdentifier} for the plugin's proxy channel
+     * @param channelIdentifier The {@link ChannelIdentifier} for the plugin's proxy2server channel
      */
-    public MaliciousPluginMessageBlocker(@NotNull ChannelIdentifier proxyIdentifier) {
-        this.proxyIdentifier = Objects.requireNonNull(proxyIdentifier, "proxyIdentifier");
+    public MaliciousPluginMessageBlocker(@NotNull ChannelIdentifier channelIdentifier) {
+        this.proxyIdentifier = Objects.requireNonNull(channelIdentifier, "channelIdentifier");
     }
 
     /**

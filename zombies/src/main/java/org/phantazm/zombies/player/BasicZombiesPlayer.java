@@ -9,6 +9,7 @@ import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
+import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.List;
@@ -60,8 +61,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public void end() {
-        if (!isState(ZombiesPlayerStateKeys.QUIT)) {
-            getPlayer().ifPresent(player -> player.getInventory().clear());
+        if (!hasQuit()) {
+            setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(false));
         }
         module.getStateSwitcher().end();
     }

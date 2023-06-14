@@ -13,17 +13,19 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.guild.GuildMember;
+import org.phantazm.core.guild.party.Party;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.scene.ZombiesRouteRequest;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ZombiesJoinCommand extends Command {
-    public ZombiesJoinCommand(@NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser,
-            @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider) {
+    public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> parties,
+            @NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
+            @NotNull PlayerViewProvider viewProvider) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
@@ -60,8 +62,20 @@ public class ZombiesJoinCommand extends Command {
                 return;
             }
 
-            RouteResult result = router.join(new ZombiesRouteRequest(mapKey,
-                    () -> Collections.singleton(viewProvider.fromPlayer((Player)sender))));
+            Player player = (Player)sender;
+            Collection<PlayerView> playerViews;
+            Party party = parties.get(player.getUuid());
+            if (party == null) {
+                playerViews = Collections.singleton(viewProvider.fromPlayer(player));
+            }
+            else {
+                playerViews = new ArrayList<>(party.getMemberManager().getMembers().size());
+                for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
+                    playerViews.add(guildMember.getPlayerView());
+                }
+            }
+
+            RouteResult result = router.join(ZombiesRouteRequest.joinGame(mapKey, () -> playerViews));
             result.message().ifPresent(sender::sendMessage);
         }, mapKeyArgument);
     }

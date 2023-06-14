@@ -13,6 +13,8 @@ import org.phantazm.core.chat.ChatChannel;
 import org.phantazm.core.chat.InstanceChatChannel;
 import org.phantazm.core.chat.SelfChatChannel;
 import org.phantazm.core.chat.command.ChatCommand;
+import org.phantazm.core.guild.party.Party;
+import org.phantazm.core.guild.party.PartyChatChannel;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 
@@ -42,7 +44,8 @@ public final class Chat {
      * @param viewProvider   A {@link PlayerViewProvider} to create {@link PlayerView}s
      * @param commandManager The {@link CommandManager} to register chat commands to
      */
-    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
+    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider, @NotNull Map<?
+            super UUID, ? extends Party> parties,
             @NotNull CommandManager commandManager) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
@@ -56,7 +59,8 @@ public final class Chat {
         };
 
         channels.put(DEFAULT_CHAT_CHANNEL_NAME, new InstanceChatChannel(viewProvider));
-        channels.put(SELF_CHAT_CHANNEL_NAME, new SelfChatChannel(viewProvider));
+        channels.put(SelfChatChannel.CHANNEL_NAME, new SelfChatChannel(viewProvider));
+        channels.put(PartyChatChannel.CHANNEL_NAME, new PartyChatChannel(parties, viewProvider));
 
         Map<UUID, String> playerChannels = new HashMap<>();
         commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));

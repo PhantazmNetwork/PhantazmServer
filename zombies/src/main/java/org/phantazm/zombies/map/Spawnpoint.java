@@ -50,7 +50,8 @@ public class Spawnpoint {
         this.spawnInfo = Objects.requireNonNull(spawnInfo, "spawnInfo");
 
         Vec3I spawnPosition = spawnInfo.position();
-        this.spawnPoint = Pos.fromPoint(mapOrigin.add(spawnPosition.x(), spawnPosition.y(), spawnPosition.z()));
+        this.spawnPoint =
+                Pos.fromPoint(mapOrigin.add(spawnPosition.x() + 0.5, spawnPosition.y(), spawnPosition.z() + 0.5));
         this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
@@ -70,8 +71,7 @@ public class Spawnpoint {
                 }
             }
             else {
-                Optional<Window> linkedWindow =
-                        windowTracker.closestInRangeToBounds(spawnPoint.add(0.5, 0, 0.5), 1, 1, 10);
+                Optional<Window> linkedWindow = windowTracker.closestInRangeToBounds(spawnPoint, 1, 1, 10);
                 if (linkedWindow.isEmpty()) {
                     LOGGER.warn("No window to link to found within 10 blocks of spawnpoint at ~" + spawnPoint);
                     this.linkedWindow = null;
@@ -91,6 +91,10 @@ public class Spawnpoint {
         }
     }
 
+    public @NotNull Point spawnPoint() {
+        return spawnPoint;
+    }
+
     /**
      * Check if this spawnpoint is capable of spawning any mobs.
      *
@@ -108,11 +112,11 @@ public class Spawnpoint {
             }
 
             Room room = linkedRoom.get();
-            if (!room.isOpen() && !room.getRoomInfo().isSpawn()) {
+            if (!room.isOpen()) {
                 return false;
             }
         }
-        else if (linkedRoom != null && !linkedRoom.isOpen() && !linkedRoom.getRoomInfo().isSpawn()) {
+        else if (linkedRoom != null && !linkedRoom.isOpen()) {
             return false;
         }
 
@@ -133,7 +137,7 @@ public class Spawnpoint {
 
             Optional<Player> playerOptional = module.getPlayerView().getPlayer();
             if (playerOptional.isPresent()) {
-                if (playerOptional.get().getPosition().distanceSquared(spawnPoint.add(0.5, 0, 0.5)) < slaSquared) {
+                if (playerOptional.get().getPosition().distanceSquared(spawnPoint) < slaSquared) {
                     inRange = true;
                     break;
                 }

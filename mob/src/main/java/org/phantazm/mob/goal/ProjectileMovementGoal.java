@@ -1,5 +1,6 @@
 package org.phantazm.mob.goal;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ProjectileMovementGoal implements ProximaGoal {
+    private static final int COLLISION_TICK_THRESHOLD = 3;
+    private static final double MAGIC = 0.007499999832361937D; //what is this? nobody knows...
 
     private final Entity entity;
 
@@ -63,7 +66,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
     @Override
     public void start() {
-        //TODO: entity.hasPhysics = false;
+        entity.setHasPhysics(false);
         if (entity.getEntityMeta() instanceof ProjectileMeta projectileMeta) {
             projectileMeta.setShooter(shooter);
         }
@@ -85,13 +88,16 @@ public class ProjectileMovementGoal implements ProximaGoal {
         dx /= length;
         dy /= length;
         dz /= length;
-        Random random = ThreadLocalRandom.current();
-        double spread = this.spread * 0.007499999832361937D;
-        dx += random.nextGaussian() * spread;
-        dy += random.nextGaussian() * spread;
-        dz += random.nextGaussian() * spread;
 
-        final double mul = 20 * power;
+        if (this.spread != 0) {
+            Random random = ThreadLocalRandom.current();
+            double spread = this.spread * MAGIC;
+            dx += random.nextGaussian() * spread;
+            dy += random.nextGaussian() * spread;
+            dz += random.nextGaussian() * spread;
+        }
+
+        final double mul = MinecraftServer.TICK_PER_SECOND * power;
         entity.setVelocity(new Vec(dx * mul, dy * mul, dz * mul));
         entity.setView((float)Math.toDegrees(Math.atan2(dx, dz)),
                 (float)Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
@@ -125,8 +131,13 @@ public class ProjectileMovementGoal implements ProximaGoal {
         if (instance == null) {
             return false;
         }
+        final long aliveTicks = entity.getAliveTicks();
         if (previousPos.samePoint(currentPos)) {
-            return instance.getBlock(previousPos).isSolid();
+            Block block = instance.getBlock(previousPos);
+            return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= COLLISION_TICK_THRESHOLD &&
+                    block.registry().collisionShape().intersectBox(
+                            previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
+                            entity.getBoundingBox());
         }
 
         Chunk chunk = null;
@@ -137,7 +148,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
         final Vec dir = currentPos.sub(previousPos).asVec();
         final int parts = (int)Math.ceil(dir.length() / part);
         final Pos direction = dir.normalize().mul(part).asPosition();
-        final long aliveTicks = entity.getAliveTicks();
+
         Block block = null;
         Point blockPos = null;
         for (int i = 0; i < parts; ++i) {
@@ -147,7 +158,11 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 block = instance.getBlock(previousPos);
                 blockPos = previousPos;
             }
-            if (block.isSolid()) {
+            if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= COLLISION_TICK_THRESHOLD &&
+                    block.registry().collisionShape()
+                            .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
+                                    entity.getBoundingBox())) {
+
                 final ProjectileCollideWithBlockEvent event =
                         new ProjectileCollideWithBlockEvent(entity, previousPos, block);
                 EventDispatcher.call(event);
@@ -165,9 +180,10 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 return false; // should never happen
             }
             Point finalPreviousPos = previousPos;
-            Stream<LivingEntity> victimsStream =
-                    entities.stream().filter(entity -> bb.intersectEntity(finalPreviousPos, entity));
-            if (aliveTicks < 3) {
+            Stream<LivingEntity> victimsStream = entities.stream()
+                    .filter(entity -> bb.intersectEntity(finalPreviousPos, entity) && entity != this.entity);
+
+            if (aliveTicks < COLLISION_TICK_THRESHOLD) {
                 victimsStream = victimsStream.filter(entity -> entity != shooter);
             }
             final Optional<LivingEntity> victimOptional = victimsStream.findAny();
