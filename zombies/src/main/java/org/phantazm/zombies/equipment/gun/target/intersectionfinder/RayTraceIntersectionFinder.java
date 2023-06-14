@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -27,7 +28,8 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
     }
 
     @Override
-    public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start) {
+    public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start, @NotNull Point end,
+            double distanceLimitSquared) {
         float expand;
         if (entity instanceof LivingEntity livingEntity) {
             expand = livingEntity.getAttributeValue(Attributes.HITBOX_EXPANSION);
@@ -37,7 +39,15 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
         }
 
         BoundingBox boundingBox = entity.getBoundingBox().expand(expand, expand, expand);
-        return RayUtils.rayTrace(boundingBox, entity.getPosition(), start);
+        Optional<Vec> hitOptional = RayUtils.rayTrace(boundingBox, entity.getPosition(), start);
+        if (hitOptional.isPresent()) {
+            Vec hit = hitOptional.get();
+            if (start.distanceSquared(hit) > distanceLimitSquared) {
+                return Optional.empty();
+            }
+        }
+
+        return hitOptional;
     }
 
 }

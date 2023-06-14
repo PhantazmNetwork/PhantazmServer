@@ -66,6 +66,11 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
             if (!profile.hasInventoryObject(slot)) {
                 return false;
             }
+
+            InventoryObject object = profile.getInventoryObject(slot);
+            if (object.equals(defaultObject())) {
+                return false;
+            }
         }
 
         return true;
@@ -75,7 +80,12 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
     public boolean isEmpty() {
         for (int slot : slots) {
             if (profile.hasInventoryObject(slot)) {
-                return false;
+                InventoryObject object = profile.getInventoryObject(slot);
+
+                InventoryObject defaultObject = defaultObject();
+                if (!object.equals(defaultObject)) {
+                    return false;
+                }
             }
         }
 

@@ -120,33 +120,41 @@ public class Door extends BoundedBase {
         return isOpen;
     }
 
+    private void removeBlocksAndHolograms() {
+        for (Bounds3I region : regions) {
+            region.forEach((x, y, z) -> {
+                Block oldBlock = instance.getBlock(x, y, z);
+                blockMappings.put(x, y, z, oldBlock);
+                instance.setBlock(x, y, z, fillBlock);
+            });
+        }
+
+        for (Hologram hologram : holograms) {
+            hologram.clear();
+            hologram.trimToSize();
+        }
+
+        holograms.clear();
+        holograms.trimToSize();
+    }
+
     /**
      * Opens this door, removing its blocks. If the door is already open, this method will do nothing.
+     *
+     * @return true if the door opened as a consequence of calling this method
      */
-    public void open(@Nullable ZombiesPlayer interactor) {
+    public boolean open(@Nullable ZombiesPlayer interactor) {
         synchronized (sync) {
             if (isOpen) {
-                return;
+                return false;
             }
 
             this.lastInteractor = interactor;
             isOpen = true;
 
-            for (Bounds3I region : regions) {
-                region.forEach((x, y, z) -> {
-                    Block oldBlock = instance.getBlock(x, y, z);
-                    blockMappings.put(x, y, z, oldBlock);
-                    instance.setBlock(x, y, z, fillBlock);
-                });
-            }
+            removeBlocksAndHolograms();
 
-            for (Hologram hologram : holograms) {
-                hologram.clear();
-                hologram.trimToSize();
-            }
-
-            holograms.clear();
-            holograms.trimToSize();
+            instance.playSound(doorInfo.openSound(), center.x(), center.y(), center.z());
 
             for (Action<Door> action : openActions) {
                 action.perform(this);
@@ -155,11 +163,50 @@ public class Door extends BoundedBase {
             for (Key key : doorInfo.opensTo()) {
                 Room room = mapObjects.get().roomMap().get(key);
                 if (room != null) {
+                    if (room.isOpen()) {
+                        continue;
+                    }
+
                     room.open();
+
+                    for (Door otherDoor : mapObjects.get().doorTracker().items()) {
+                        if (otherDoor == this || otherDoor.isOpen) {
+                            continue;
+                        }
+
+                        boolean allOpen = true;
+                        for (Key otherRoomKey : otherDoor.doorInfo.opensTo()) {
+                            Room otherRoom = mapObjects.get().roomMap().get(otherRoomKey);
+                            if (otherRoom != null && !otherRoom.isOpen()) {
+                                allOpen = false;
+                                break;
+                            }
+                        }
+
+                        if (allOpen) {
+                            synchronized (otherDoor.sync) {
+                                otherDoor.isOpen = false;
+                                otherDoor.removeBlocksAndHolograms();
+                            }
+                        }
+                    }
                 }
                 else {
                     LOGGER.warn("Tried to open nonexistent room " + key);
                 }
+            }
+
+            return true;
+        }
+    }
+
+    public void toggle(@Nullable ZombiesPlayer interactor) {
+        synchronized (sync) {
+            if (isOpen) {
+                close(interactor);
+            }
+            else {
+                open(interactor);
             }
         }
     }
@@ -180,11 +227,13 @@ public class Door extends BoundedBase {
 
     /**
      * Closes this door. Has no effect if the door is already closed.
+     *
+     * @return true if the door closed as a consequence of calling this method
      */
-    public void close(@Nullable ZombiesPlayer interactor) {
+    public boolean close(@Nullable ZombiesPlayer interactor) {
         synchronized (sync) {
             if (!isOpen) {
-                return;
+                return false;
             }
 
             this.lastInteractor = interactor;
@@ -197,6 +246,8 @@ public class Door extends BoundedBase {
             for (Action<Door> closeAction : closeActions) {
                 closeAction.perform(this);
             }
+
+            return true;
         }
     }
 

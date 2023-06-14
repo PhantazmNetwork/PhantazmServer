@@ -7,8 +7,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.state.PlayerStateSwitcher;
-import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
@@ -78,7 +76,8 @@ public class EndStage implements Stage {
         remainingTicks.apply(ticks -> ticks - 1);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (!zombiesPlayer.hasQuit()) {
-                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
+                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
+                        unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
                 sidebarUpdater.tick(time);
             }
 

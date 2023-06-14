@@ -1,5 +1,6 @@
 package org.phantazm.server;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -40,6 +41,8 @@ public final class Lobbies {
 
     private static LobbyRouter lobbyRouter;
 
+    private static SceneFallback fallback;
+
     private Lobbies() {
         throw new UnsupportedOperationException();
     }
@@ -58,7 +61,7 @@ public final class Lobbies {
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         FileUtils.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =
-                new AnvilFileSystemInstanceLoader(lobbiesConfig.instancesPath(), DynamicChunk::new);
+                new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new);
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
@@ -71,28 +74,35 @@ public final class Lobbies {
             throw new IllegalArgumentException("No main lobby config present");
         }
 
+        LOGGER.info("Preloading {} lobby instances", lobbiesConfig.lobbies().size());
+        for (LobbyConfig lobbyConfig : lobbiesConfig.lobbies().values()) {
+            instanceLoader.preload(lobbyConfig.lobbyPaths(), lobbyConfig.instanceConfig().spawnPoint(),
+                    MinecraftServer.getChunkViewDistance());
+        }
+
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
-                new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceManager,
-                        instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig(),
-                        MinecraftServer.getChunkViewDistance());
+                new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceLoader,
+                        mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig());
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
-        SceneFallback lobbyFallback = new LobbyRouterFallback(lobbyRouter, lobbiesConfig.mainLobbyName());
-        SceneFallback regularFallback = new CompositeFallback(List.of(lobbyFallback, finalFallback));
+        fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), Lobbies.getLobbyRouter(),
+                lobbiesConfig.mainLobbyName());
+        SceneFallback regularFallback = new CompositeFallback(List.of(fallback, finalFallback));
 
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
                 lobbyProviders.put(lobby.getKey(),
                         new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
-                                instanceManager, instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
-                                lobby.getValue().instanceConfig(), MinecraftServer.getChunkViewDistance()));
+                                instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
+                                lobby.getValue().instanceConfig()));
             }
         }
 
         Map<UUID, LoginLobbyJoinRequest> loginJoinRequests = new HashMap<>();
 
         node.addListener(PlayerLoginEvent.class, event -> {
-            LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
+            LoginLobbyJoinRequest joinRequest =
+                    new LoginLobbyJoinRequest(MinecraftServer.getConnectionManager(), event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
             RouteResult result = lobbyRouter.join(routeRequest);
@@ -112,7 +122,7 @@ public final class Lobbies {
             LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(event.getPlayer().getUuid());
             if (joinRequest == null) {
                 LOGGER.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
-                event.getPlayer().kick("");
+                event.getPlayer().kick(Component.empty());
             }
             else {
                 joinRequest.onPlayerLoginComplete();
@@ -121,10 +131,14 @@ public final class Lobbies {
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             lobbyRouter.tick(System.currentTimeMillis());
-        }, TaskSchedule.immediate(), TaskSchedule.tick(1));
+        }, TaskSchedule.immediate(), TaskSchedule.nextTick());
     }
 
     public static @NotNull LobbyRouter getLobbyRouter() {
         return FeatureUtils.check(lobbyRouter);
+    }
+
+    public static SceneFallback getFallback() {
+        return FeatureUtils.check(fallback);
     }
 }

@@ -1,10 +1,10 @@
 package org.phantazm.zombies.equipment.gun.shoot.fire.projectile;
 
 import com.github.steanky.element.core.annotation.*;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityProjectile;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
@@ -12,7 +12,6 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.goal.CollectionGoalGroup;
 import org.phantazm.mob.goal.ProjectileMovementGoal;
@@ -30,6 +29,7 @@ import org.phantazm.zombies.equipment.gun.target.TargetFinder;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -43,13 +43,12 @@ public class ProjectileFirer implements Firer {
     private final Map<UUID, FiredShot> firedShots = new HashMap<>();
     private final Data data;
     private final Supplier<Optional<? extends Entity>> entitySupplier;
+    private final Function<? super Key, ? extends MobModel> modelFunction;
     private final UUID shooterUUID;
     private final ShotEndpointSelector endSelector;
     private final TargetFinder targetFinder;
     private final ProjectileCollisionFilter collisionFilter;
     private final Collection<ShotHandler> shotHandlers;
-
-    private final MobStore mobStore;
 
     private final MobSpawner spawner;
 
@@ -66,19 +65,20 @@ public class ProjectileFirer implements Firer {
      */
     @FactoryMethod
     public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-            @NotNull UUID shooterUUID, @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
+            @NotNull Function<? super Key, ? extends MobModel> modelFunction, @NotNull UUID shooterUUID,
+            @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
             @NotNull @Child("target_finder") TargetFinder targetFinder,
             @NotNull @Child("collision_filter") ProjectileCollisionFilter collisionFilter,
-            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers, @NotNull MobStore mobStore,
-            @NotNull MobSpawner spawner, @NotNull EventNode<Event> node) {
+            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers, @NotNull MobSpawner spawner,
+            @NotNull EventNode<Event> node) {
         this.data = Objects.requireNonNull(data, "data");
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
+        this.modelFunction = modelFunction;
         this.shooterUUID = Objects.requireNonNull(shooterUUID, "shooterUUID");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
         this.collisionFilter = Objects.requireNonNull(collisionFilter, "collisionFilter");
         this.shotHandlers = List.copyOf(shotHandlers);
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.spawner = Objects.requireNonNull(spawner, "spawner");
 
         node.addListener(ProjectileCollideWithBlockEvent.class, this::onProjectileCollision);
@@ -88,22 +88,25 @@ public class ProjectileFirer implements Firer {
     @Override
     public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
             @NotNull Collection<UUID> previousHits) {
-        entitySupplier.get().ifPresent(entity -> {
-            Instance instance = entity.getInstance();
+        entitySupplier.get().ifPresent(shooter -> {
+            Instance instance = shooter.getInstance();
             if (instance == null) {
                 return;
             }
 
             endSelector.getEnd(start).ifPresent(end -> {
-                PhantazmMob mob = spawner.spawn(instance, start, data.model());
-                ProximaEntity neuralEntity = mob.entity();
-                neuralEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
-                        new ProjectileMovementGoal(neuralEntity, entity, end, data.power(), data.spread()))));
-                neuralEntity.setNoGravity(!data.hasGravity());
-                mobStore.onMobSpawn(mob);
+                MobModel model = modelFunction.apply(data.projectileMob);
+                if (model != null) {
+                    PhantazmMob mob = spawner.spawn(instance, start, model);
+                    ProximaEntity proximaEntity = mob.entity();
+                    proximaEntity.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
+                            new ProjectileMovementGoal(proximaEntity, shooter, end, data.power(), data.spread()))));
+                    proximaEntity.setNoGravity(!data.hasGravity());
 
-                firedShots.put(neuralEntity.getUuid(), new FiredShot(gun, state, entity, start, previousHits));
-                removalQueue.add(new AliveProjectile(new WeakReference<>(neuralEntity), System.currentTimeMillis()));
+                    firedShots.put(proximaEntity.getUuid(), new FiredShot(gun, state, shooter, start, previousHits));
+                    removalQueue.add(
+                            new AliveProjectile(new WeakReference<>(proximaEntity), System.currentTimeMillis()));
+                }
             });
         });
     }
@@ -148,16 +151,12 @@ public class ProjectileFirer implements Firer {
      * @param event The associated {@link ProjectileCollideWithBlockEvent}
      */
     public void onProjectileCollision(@NotNull ProjectileCollideWithBlockEvent event) {
-        if (!(event.getEntity() instanceof EntityProjectile projectile)) {
-            return;
-        }
-
-        FiredShot firedShot = firedShots.get(projectile.getUuid());
+        FiredShot firedShot = firedShots.get(event.getEntity().getUuid());
         if (firedShot == null) {
             return;
         }
 
-        onProjectileCollision(firedShot, projectile, event.getCollisionPosition());
+        onProjectileCollision(firedShot, event.getEntity(), event.getCollisionPosition());
     }
 
     /**
@@ -166,17 +165,16 @@ public class ProjectileFirer implements Firer {
      * @param event The associated {@link ProjectileCollideWithEntityEvent}
      */
     public void onProjectileCollision(@NotNull ProjectileCollideWithEntityEvent event) {
-        if (!(event.getEntity() instanceof EntityProjectile projectile &&
-                collisionFilter.shouldExplode(event.getTarget()))) {
+        if (!(collisionFilter.shouldExplode(event.getTarget()))) {
             return;
         }
 
-        FiredShot firedShot = firedShots.get(projectile.getUuid());
+        FiredShot firedShot = firedShots.get(event.getEntity().getUuid());
         if (firedShot == null) {
             return;
         }
 
-        onProjectileCollision(firedShot, projectile, event.getCollisionPosition());
+        onProjectileCollision(firedShot, event.getEntity(), event.getCollisionPosition());
     }
 
     private void onProjectileCollision(@NotNull FiredShot firedShot, @NotNull Entity projectile,
@@ -184,12 +182,17 @@ public class ProjectileFirer implements Firer {
         if (firedShot.shooter().getUuid().equals(shooterUUID)) {
             TargetFinder.Result target = targetFinder.findTarget(firedShot.shooter(), firedShot.start(), collision,
                     firedShot.previousHits());
+
+            target.regular().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));
+            target.headshot().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));
+
             for (GunHit hit : target.regular()) {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
             for (GunHit hit : target.headshot()) {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
+
             for (ShotHandler shotHandler : shotHandlers) {
                 GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
                 shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
@@ -219,7 +222,7 @@ public class ProjectileFirer implements Firer {
                        @NotNull @ChildPath("target_finder") String targetFinder,
                        @NotNull @ChildPath("collision_filter") String collisionFilter,
                        @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlers,
-                       @NotNull MobModel model,
+                       @NotNull Key projectileMob,
                        double power,
                        double spread,
                        boolean hasGravity,

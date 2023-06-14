@@ -16,6 +16,8 @@ import org.phantazm.core.player.PlayerViewProvider;
  */
 public class SelfChatChannel extends BasicChatChannel {
 
+    public static final String CHANNEL_NAME = "self";
+
     /**
      * Creates a {@link SelfChatChannel}.
      *

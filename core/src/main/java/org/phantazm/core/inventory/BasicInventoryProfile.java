@@ -2,6 +2,7 @@ package org.phantazm.core.inventory;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -61,5 +62,10 @@ public class BasicInventoryProfile implements InventoryProfile {
     @Override
     public int getSlotCount() {
         return objects.length;
+    }
+
+    @Override
+    public @NotNull Iterable<? extends InventoryObject> objects() {
+        return Arrays.stream(objects).filter(Objects::nonNull).toList();
     }
 }

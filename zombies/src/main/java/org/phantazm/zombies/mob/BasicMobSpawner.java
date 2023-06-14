@@ -28,6 +28,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.ElementUtils;
+import org.phantazm.mob.BasicPhantazmMob;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
@@ -72,14 +73,15 @@ public class BasicMobSpawner implements MobSpawner {
      * @param proximaSpawner The {@link Spawner} to spawn backing {@link ProximaEntity}s
      */
     public BasicMobSpawner(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
-            @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser,
+            @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser, @NotNull Random random,
             @NotNull Supplier<? extends MapObjects> mapObjects, @NotNull MobStore mobStore) {
         this.processorMap = Map.copyOf(processorMap);
         this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
 
-        this.mobDependencyProvider = new ModuleDependencyProvider(keyParser, new Module(this, mobStore, mapObjects));
+        this.mobDependencyProvider =
+                new ModuleDependencyProvider(keyParser, new Module(this, mobStore, random, mapObjects));
     }
 
     @Override
@@ -95,7 +97,7 @@ public class BasicMobSpawner implements MobSpawner {
         Map<Key, Collection<Skill>> triggers = createTriggers(context);
         Collection<GoalApplier> goalAppliers = createGoalAppliers(context);
 
-        PhantazmMob mob = new PhantazmMob(model, proximaEntity, triggers);
+        PhantazmMob mob = new BasicPhantazmMob(model, proximaEntity, triggers);
         for (GoalApplier applier : goalAppliers) {
             applier.apply(mob);
         }
@@ -214,6 +216,10 @@ public class BasicMobSpawner implements MobSpawner {
     }
 
     private Collection<GoalApplier> createGoalAppliers(ElementContext context) {
+        if (!context.root().asNode().containsKey("goalAppliers")) {
+            return List.of();
+        }
+
         return context.provideCollection(GOAL_APPLIERS_PATH, mobDependencyProvider, GOAL_HANDLER);
     }
 
@@ -222,12 +228,14 @@ public class BasicMobSpawner implements MobSpawner {
     public static class Module implements DependencyModule {
         private final MobSpawner spawner;
         private final MobStore mobStore;
+        private final Random random;
         private final Supplier<? extends MapObjects> mapObjects;
 
-        private Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore,
+        private Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull Random random,
                 @NotNull Supplier<? extends MapObjects> mapObjects) {
             this.spawner = Objects.requireNonNull(spawner, "spawner");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+            this.random = Objects.requireNonNull(random, "random");
             this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
         }
 
@@ -237,6 +245,10 @@ public class BasicMobSpawner implements MobSpawner {
 
         public @NotNull MobStore getMobStore() {
             return mobStore;
+        }
+
+        public Random getRandom() {
+            return random;
         }
 
         public @NotNull Supplier<? extends MapObjects> mapObjects() {

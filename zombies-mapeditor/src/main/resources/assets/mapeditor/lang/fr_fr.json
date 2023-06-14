@@ -24,5 +24,11 @@
     "gui.mapeditor.no_map": "Pas de plan",
     "gui.mapeditor.delete_map_query": "Supprimer le plan?",
     "gui.mapeditor.overwrite_map_query": "Le chargement annulera tous les modifications et plans non sauvés. Continuer?",
-    "gui.mapeditor.display_settings": "Montrer les paramètres"
+    "gui.mapeditor.display_settings": "Montrer les paramètres",
+    "gui.mapeditor.link_window": "Reliez à une fenêtre?",
+    "gui.mapeditor.explicit_window_link": "Reliant à la fenêtre à %d, %d, %d",
+    "gui.mapeditor.nearest_window_link": "Reliant à la fenêtre le plus proche.",
+    "gui.mapeditor.coordinate_display": "Coordonnées de plan: %d, %d, %d",
+    "chat.mapeditor.mapdata_version_sync.synced": "Le client mapeditor est synchronisé avec la version de mapdata attendue du serveur.",
+    "chat.mapeditor.mapdata_version_sync.not_synced": "Le client mapeditor n'est pas synchronisé avec la version de mapdata attendue du serveur. Veuillez mettre à jour le mod vers la bonne version."
 }

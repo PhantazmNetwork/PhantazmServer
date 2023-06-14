@@ -1,5 +1,6 @@
 package org.phantazm.core.equipment;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,27 @@ public class EquipmentHandler {
         }
 
         accessRegistry.pushObject(groupKey, equipment);
+    }
+
+    public boolean hasEquipment(@NotNull Key equipmentGroup, @NotNull Key equipmentKey) {
+        Wrapper<Boolean> result = Wrapper.of(false);
+        accessRegistry.getCurrentAccess().ifPresent(access -> {
+            InventoryObjectGroup group = access.groups().get(equipmentGroup);
+            if (group != null) {
+                InventoryProfile profile = group.getProfile();
+                for (int slot : group.getSlots()) {
+                    if (profile.hasInventoryObject(slot)) {
+                        InventoryObject object = profile.getInventoryObject(slot);
+                        if (object instanceof Equipment equipment && equipment.key().equals(equipmentKey)) {
+                            result.set(true);
+                            return;
+                        }
+                    }
+                }
+            }
+        });
+
+        return result.get();
     }
 
     public boolean canAddEquipment(@NotNull Key groupKey) {

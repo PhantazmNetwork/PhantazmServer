@@ -104,7 +104,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
             hologramDisplayName = COMPONENT_PROCESSOR.dataFromElement(hologramDisplayNameElement);
         }
 
-        ConfigNode equipmentNode = element.getNodeOrThrow("equipment");
+        ConfigNode equipmentNode = element.getNodeOrDefault(ConfigNode::of, "equipment");
         Map<EquipmentSlot, ItemStack> equipment = new HashMap<>(equipmentNode.size());
         for (Map.Entry<String, ConfigElement> entry : equipmentNode.entrySet()) {
             EquipmentSlot equipmentSlot =
@@ -113,7 +113,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         }
 
         Object2FloatMap<String> attributes =
-                ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrThrow("attributes"));
+                ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrDefault(ConfigNode::of, "attributes"));
 
         return new MobModel(key, entityType, factory, contextManager.makeContext(node), metaNode, extraNode,
                 displayName, hologramDisplayName, equipment, attributes);

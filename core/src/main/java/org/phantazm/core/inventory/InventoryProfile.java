@@ -47,4 +47,6 @@ public interface InventoryProfile {
      * @return The number of slots this profile holds
      */
     int getSlotCount();
+
+    @NotNull Iterable<? extends InventoryObject> objects();
 }

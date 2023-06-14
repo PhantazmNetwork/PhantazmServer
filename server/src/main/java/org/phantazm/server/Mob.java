@@ -30,6 +30,7 @@ import org.phantazm.mob.skill.*;
 import org.phantazm.mob.target.*;
 import org.phantazm.mob.validator.AlwaysValid;
 import org.phantazm.mob.validator.AndValidator;
+import org.phantazm.mob.validator.NotSelfValidator;
 import org.phantazm.mob.validator.OrValidator;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
 import org.phantazm.zombies.mob.validator.MobValidator;
@@ -124,6 +125,7 @@ public final class Mob {
         contextManager.registerElementClass(ChargeAtEntityGoal.class);
         contextManager.registerElementClass(UseSkillGoal.class);
         contextManager.registerElementClass(MeleeAttackGoal.class);
+        contextManager.registerElementClass(PlayStepSoundGoal.class);
 
         //zombies mob goals
         contextManager.registerElementClass(BreakNearbyWindowGoal.class);
@@ -136,6 +138,7 @@ public final class Mob {
         contextManager.registerElementClass(AttributeModifyingSkill.class);
         contextManager.registerElementClass(SendMessageSkill.class);
         contextManager.registerElementClass(JumpTowardsTargetSkill.class);
+        contextManager.registerElementClass(SpawnParticleSkill.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);
@@ -156,6 +159,7 @@ public final class Mob {
         contextManager.registerElementClass(AlwaysValid.class);
         contextManager.registerElementClass(AndValidator.class);
         contextManager.registerElementClass(OrValidator.class);
+        contextManager.registerElementClass(NotSelfValidator.class);
 
         //zombies mob validators
         contextManager.registerElementClass(ZombiesPlayerValidator.class);

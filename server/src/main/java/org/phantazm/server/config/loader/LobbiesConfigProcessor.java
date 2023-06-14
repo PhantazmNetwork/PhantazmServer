@@ -48,7 +48,11 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 double z = spawnPoint.getNumberOrThrow("z").doubleValue();
                 float yaw = spawnPoint.getNumberOrThrow("yaw").floatValue();
                 float pitch = spawnPoint.getNumberOrThrow("pitch").floatValue();
-                InstanceConfig instanceConfig = new InstanceConfig(new Pos(x, y, z, yaw, pitch));
+
+                long time = instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME, "time").longValue();
+                int timeRate =
+                        instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME_RATE, "timeRate").intValue();
+                InstanceConfig instanceConfig = new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate);
 
                 ConfigList lobbyPathsList = lobby.getValue().getListOrThrow("lobbyPaths");
                 List<String> lobbyPaths = new ArrayList<>(lobbyPathsList.size());

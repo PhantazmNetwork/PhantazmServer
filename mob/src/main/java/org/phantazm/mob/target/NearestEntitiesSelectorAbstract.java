@@ -36,7 +36,7 @@ public abstract class NearestEntitiesSelectorAbstract<TTarget extends Entity>
         Entity entity = self.entity();
         Instance instance = entity.getInstance();
         if (instance == null) {
-            return Optional.empty();
+            return Optional.of(Collections.emptyList());
         }
 
         Collection<Entity> entities = instance.getNearbyEntities(entity.getPosition(), range);
@@ -49,7 +49,7 @@ public abstract class NearestEntitiesSelectorAbstract<TTarget extends Entity>
             }
 
             TTarget target = targetOptional.get();
-            if (!targetValidator.valid(target)) {
+            if (!targetValidator.valid(entity, target)) {
                 continue;
             }
 

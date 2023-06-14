@@ -17,13 +17,15 @@ public class PlayerFlaggingInteractor extends InteractorBase<PlayerFlaggingInter
     }
 
     @Override
-    public void handleInteraction(@NotNull PlayerInteraction interaction) {
+    public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         Flaggable flags = interaction.player().flags();
         switch (data.action) {
             case SET -> flags.setFlag(data.flag);
             case CLEAR -> flags.clearFlag(data.flag);
             case TOGGLE -> flags.toggleFlag(data.flag);
         }
+
+        return true;
     }
 
     @DataObject

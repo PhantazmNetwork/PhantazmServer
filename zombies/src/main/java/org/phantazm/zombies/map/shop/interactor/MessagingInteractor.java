@@ -23,13 +23,15 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     }
 
     @Override
-    public void handleInteraction(@NotNull PlayerInteraction interaction) {
+    public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.broadcast) {
             sendMessages(instance);
         }
         else {
             interaction.player().module().getPlayerView().getPlayer().ifPresent(this::sendMessages);
         }
+
+        return true;
     }
 
     private void sendMessages(Audience audience) {

@@ -5,8 +5,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.ServerPacket;
-import net.minestom.server.particle.ParticleCreator;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -39,18 +37,11 @@ public class ParticleTrailShotHandler implements ShotHandler {
             return;
         }
 
-        ParticleWrapper.Data wrapperData = wrapper.data();
-
         Pos start = shot.start();
         Vec direction = Vec.fromPoint(shot.end().sub(start)).normalize();
         for (int i = 0; i < data.trailCount(); i++) {
             start = start.add(direction);
-
-            ServerPacket packet =
-                    ParticleCreator.createParticlePacket(wrapperData.particle(), wrapperData.distance(), start.x(),
-                            start.y(), start.z(), wrapperData.offsetX(), wrapperData.offsetY(), wrapperData.offsetZ(),
-                            wrapperData.data(), wrapperData.particleCount(), wrapper.variantData()::write);
-            instance.sendGroupedPacket(packet);
+            wrapper.sendTo(instance, start);
         }
     }
 

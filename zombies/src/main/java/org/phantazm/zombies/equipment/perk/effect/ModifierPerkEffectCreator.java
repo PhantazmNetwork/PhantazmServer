@@ -85,7 +85,13 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
 
         @Override
         public void end() {
-            zombiesPlayer.getPlayer().ifPresent(player -> player.getAttribute(attribute).removeModifier(uuid));
+            zombiesPlayer.getPlayer().ifPresent(player -> {
+                player.getAttribute(attribute).removeModifier(uuid);
+
+                if (attribute.key().equals(Attribute.MAX_HEALTH.key())) {
+                    player.setHealth(Math.min(player.getHealth(), player.getMaxHealth()));
+                }
+            });
         }
     }
 

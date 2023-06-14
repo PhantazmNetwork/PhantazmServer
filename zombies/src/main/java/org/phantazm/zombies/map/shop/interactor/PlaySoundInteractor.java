@@ -25,13 +25,15 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     }
 
     @Override
-    public void handleInteraction(@NotNull PlayerInteraction interaction) {
+    public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.broadcast) {
             instance.playSound(data.sound);
         }
         else {
             interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> player.playSound(data.sound));
         }
+
+        return true;
     }
 
     @DataObject

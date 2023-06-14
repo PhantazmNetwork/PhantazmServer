@@ -8,23 +8,22 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Model("zombies.sidebar.line_updater.joined_players")
 @Cache(false)
 public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
 
-    private final Collection<ZombiesPlayer> zombiesPlayers;
+    private final Collection<? extends ZombiesPlayer> zombiesPlayers;
 
     private final int maxPlayers;
 
     private int currentPlayers = -1;
 
     @FactoryMethod
-    public JoinedPlayersSidebarLineUpdater(@NotNull Collection<ZombiesPlayer> zombiesPlayers, int maxPlayers) {
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+    public JoinedPlayersSidebarLineUpdater(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+            int maxPlayers) {
+        this.zombiesPlayers = zombiesPlayers.values();
         this.maxPlayers = maxPlayers;
     }
 

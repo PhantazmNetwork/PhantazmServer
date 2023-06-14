@@ -9,8 +9,6 @@ import org.phantazm.zombies.map.shop.Shop;
 @Model("zombies.map.shop.display.empty")
 @Cache
 public class EmptyDisplay implements ShopDisplay {
-    public static final EmptyDisplay INSTANCE = new EmptyDisplay();
-
     @FactoryMethod
     public EmptyDisplay() {
     }

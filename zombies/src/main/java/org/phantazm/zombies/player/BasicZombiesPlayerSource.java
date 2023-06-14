@@ -31,6 +31,7 @@ import org.phantazm.core.inventory.*;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.BasicPlayerCoins;
@@ -50,6 +51,7 @@ import org.phantazm.zombies.player.state.*;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.context.NoContext;
+import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
@@ -70,11 +72,14 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     private final Team corpseTeam;
 
+    private final Map<Key, MobModel> mobModelMap;
+
     public BasicZombiesPlayerSource(
             @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
-            @NotNull Team corpseTeam) {
+            @NotNull Team corpseTeam, @NotNull Map<Key, MobModel> mobModelMap) {
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
         this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
+        this.mobModelMap = Objects.requireNonNull(mobModelMap, "mobModelMap");
     }
 
     @SuppressWarnings("unchecked")
@@ -136,7 +141,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
         ZombiesEquipmentModule equipmentModule =
                 new ZombiesEquipmentModule(zombiesPlayers, playerView, mobSpawner, mobStore, eventNode, random,
-                        mapObjects, zombiesPlayerWrapper);
+                        mapObjects, zombiesPlayerWrapper, mobModelMap::get);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 
         Sidebar sidebar = new Sidebar(
@@ -196,7 +201,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         }
                     }));
         };
-        Function<NoContext, ZombiesPlayerState> quitStateCreator = unused -> {
+        Function<QuitPlayerStateContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
                     List.of(new BasicQuitStateActivable(instance, zombiesPlayers.values(), playerView, meta, sidebar,

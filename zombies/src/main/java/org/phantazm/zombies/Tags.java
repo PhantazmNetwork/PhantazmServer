@@ -11,4 +11,6 @@ public final class Tags {
     public static final Tag<String> POWERUP_TAG = Tag.String("powerup");
 
     public static final Tag<UUID> LAST_HIT_BY = Tag.UUID("last_hit");
+
+    public static final Tag<Integer> ARMOR_TIER = Tag.Integer("armor_tier").defaultValue(-1);
 }

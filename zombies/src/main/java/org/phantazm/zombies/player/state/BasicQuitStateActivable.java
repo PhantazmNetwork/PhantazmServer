@@ -38,9 +38,11 @@ public class BasicQuitStateActivable implements Activable {
     @Override
     public void start() {
         playerView.getPlayer().ifPresent(player -> {
+            player.getInventory().clear();
+            player.setLevel(0);
+            player.setExp(0);
             sidebar.removeViewer(player);
             tabList.removeViewer(player);
-            player.getInventory().clear();
         });
         playerView.getDisplayName()
                 .thenAccept(displayName -> instance.sendMessage(displayName.append(Component.text(" quit."))));
@@ -49,8 +51,4 @@ public class BasicQuitStateActivable implements Activable {
         meta.setCanTriggerSLA(false);
     }
 
-    @Override
-    public void end() {
-        meta.setInGame(true);
-    }
 }

@@ -14,6 +14,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
 import net.minestom.server.scoreboard.TeamManager;
@@ -23,8 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.BasicClientBlockHandlerSource;
 import org.phantazm.core.InstanceClientBlockHandler;
+import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
+import org.phantazm.core.equipment.NoUpgradePath;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.item.AnimatedUpdatingItem;
@@ -39,15 +43,17 @@ import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.map.action.door.DoorPlaySoundAction;
 import org.phantazm.zombies.map.action.door.DoorSendMessageAction;
 import org.phantazm.zombies.map.action.door.DoorSendOpenedRoomsAction;
 import org.phantazm.zombies.map.action.room.SpawnMobsAction;
 import org.phantazm.zombies.map.action.round.AnnounceRoundAction;
 import org.phantazm.zombies.map.action.round.RevivePlayersAction;
+import org.phantazm.zombies.map.action.round.SelectBombedRoom;
 import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
 import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
 import org.phantazm.zombies.map.shop.display.*;
-import org.phantazm.zombies.map.shop.display.creator.EquipmentUpgradeCostDisplayCreator;
+import org.phantazm.zombies.map.shop.display.creator.*;
 import org.phantazm.zombies.map.shop.gui.InteractingClickHandler;
 import org.phantazm.zombies.map.shop.interactor.*;
 import org.phantazm.zombies.map.shop.predicate.*;
@@ -59,6 +65,7 @@ import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.condition.EquipmentCondition;
 import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
 import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
@@ -102,10 +109,11 @@ public final class ZombiesFeature {
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
-            @NotNull KeyParser keyParser,
+            @NotNull KeyParser keyParser, @NotNull ConnectionManager connectionManager,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
-            @NotNull SceneFallback sceneFallback) throws IOException {
+            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties)
+            throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -114,21 +122,33 @@ public final class ZombiesFeature {
         ZombiesFeature.powerups = loadFeature("powerup", new FileSystemPowerupLoader(POWERUPS_FOLDER, codec));
         ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
 
-        InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(INSTANCES_FOLDER, DynamicChunk::new);
+        InstanceLoader instanceLoader =
+                new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,
+                        DynamicChunk::new);
+
+        LOGGER.info("Preloading {} map instances", maps.size());
+        for (MapInfo map : maps.values()) {
+            instanceLoader.preload(map.settings().instancePath(),
+                    VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())),
+                    MinecraftServer.getChunkViewDistance());
+        }
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
-            ZombiesSceneProvider provider = new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(),
-                    MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
-                    ZombiesFeature.mobSpawnerSource(), Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
-                DimensionType dimensionType = instance.getDimensionType();
-                return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
-                        dimensionType.getHeight());
-            }), contextManager, keyParser, ZombiesFeature.powerups(),
-                    new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam));
+            ZombiesSceneProvider provider =
+                    new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
+                            MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
+                            ZombiesFeature.mobSpawnerSource(), Mob.getModels(),
+                            new BasicClientBlockHandlerSource(instance -> {
+                                DimensionType dimensionType = instance.getDimensionType();
+                                return new InstanceClientBlockHandler(instance, globalEventNode,
+                                        dimensionType.getMinY(), dimensionType.getHeight());
+                            }), contextManager, keyParser, ZombiesFeature.powerups(),
+                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
+                                    Mob.getModels()));
             providers.put(entry.getKey(), provider);
         }
 
@@ -136,21 +156,25 @@ public final class ZombiesFeature {
 
         MinecraftServer.getSchedulerManager()
                 .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
-                        TaskSchedule.tick(1));
+                        TaskSchedule.nextTick());
 
         commandManager.register(
-                new ZombiesCommand(sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene));
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene,
+                        sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
         //Action<Room>, Action<Round>, Action<Door>, and Action<Wave>
         contextManager.registerElementClass(AnnounceRoundAction.class);
         contextManager.registerElementClass(RevivePlayersAction.class);
+        contextManager.registerElementClass(SelectBombedRoom.class);
         contextManager.registerElementClass(SpawnMobsAction.class);
         contextManager.registerElementClass(SpawnPowerupAction.class);
         contextManager.registerElementClass(DoorSendMessageAction.class);
         contextManager.registerElementClass(DoorSendOpenedRoomsAction.class);
         contextManager.registerElementClass(SelectPowerupZombieAction.class);
+        contextManager.registerElementClass(DoorPlaySoundAction.class);
+        contextManager.registerElementClass(org.phantazm.zombies.map.action.round.PlaySoundAction.class);
 
         //ShopPredicate
         contextManager.registerElementClass(StaticCostPredicate.class);
@@ -168,6 +192,7 @@ public final class ZombiesFeature {
 
         contextManager.registerElementClass(EquipmentCostPredicate.class);
         contextManager.registerElementClass(EquipmentSpacePredicate.class);
+        contextManager.registerElementClass(EquipmentPresentPredicate.class);
 
         //ShopInteractor
         contextManager.registerElementClass(MapFlaggingInteractor.class);
@@ -181,17 +206,27 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(AddEquipmentInteractor.class);
         contextManager.registerElementClass(ChangeDoorStateInteractor.class);
         contextManager.registerElementClass(DeductCoinsInteractor.class);
+        contextManager.registerElementClass(RefillAmmoInteractor.class);
+        contextManager.registerElementClass(UpdateBlockPropertiesInteractor.class);
+        contextManager.registerElementClass(SubstitutedTitleInteractor.class);
+        contextManager.registerElementClass(TitleInteractor.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
         contextManager.registerElementClass(PlayerDisplay.class);
         contextManager.registerElementClass(StaticItemDisplay.class);
         contextManager.registerElementClass(ConditionalDisplay.class);
+        contextManager.registerElementClass(FlagConditionalDisplay.class);
         contextManager.registerElementClass(IncrementalMetaDisplay.class);
         contextManager.registerElementClass(AnimatedItemDisplay.class);
         contextManager.registerElementClass(EmptyDisplay.class);
 
         contextManager.registerElementClass(EquipmentUpgradeCostDisplayCreator.class);
+        contextManager.registerElementClass(IncrementalMetaPlayerDisplayCreator.class);
+        contextManager.registerElementClass(PlayerHologramDisplayCreator.class);
+        contextManager.registerElementClass(PlayerConditionalDisplayCreator.class);
+        contextManager.registerElementClass(InteractionPoint.class);
+        contextManager.registerElementClass(CombiningArmorPlayerDisplayCreator.class);
 
         //Sidebar
         contextManager.registerElementClass(SidebarUpdater.class);
@@ -235,6 +270,7 @@ public final class ZombiesFeature {
 
         //UpgradePath
         contextManager.registerElementClass(LinearUpgradePath.class);
+        contextManager.registerElementClass(NoUpgradePath.class);
 
         //DeactivationPredicates
         contextManager.registerElementClass(TimedDeactivationPredicate.class);
@@ -257,6 +293,9 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(SendMessageAction.class);
         contextManager.registerElementClass(AttributeModifierAction.class);
         contextManager.registerElementClass(PreventAmmoDrainAction.class);
+
+        //Player conditions
+        contextManager.registerElementClass(EquipmentCondition.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

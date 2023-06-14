@@ -8,7 +8,7 @@ public class BasicPlayerKills implements PlayerKills {
 
     @Override
     public void onKill(@NotNull PhantazmMob mob) {
-        kills++;
+        ++kills;
     }
 
     @Override
