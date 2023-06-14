@@ -46,6 +46,7 @@ import org.phantazm.zombies.equipment.gun.target.headshot.StaticHeadshotTester;
 import org.phantazm.zombies.equipment.gun.target.intersectionfinder.RayTraceIntersectionFinder;
 import org.phantazm.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
 import org.phantazm.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
+import org.phantazm.zombies.equipment.gun.target.limiter.NoTargetLimiter;
 import org.phantazm.zombies.equipment.gun.target.tester.PhantazmMobTargetTester;
 import org.phantazm.zombies.equipment.gun.visual.ClipStackMapper;
 import org.phantazm.zombies.equipment.gun.visual.ReloadStackMapper;
@@ -223,6 +224,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(RayTraceIntersectionFinder.class);
         contextManager.registerElementClass(StaticIntersectionFinder.class);
         contextManager.registerElementClass(DistanceTargetLimiter.class);
+        contextManager.registerElementClass(NoTargetLimiter.class);
         contextManager.registerElementClass(PhantazmMobTargetTester.class);
         contextManager.registerElementClass(BasicTargetFinder.class);
         contextManager.registerElementClass(ClipStackMapper.class);
