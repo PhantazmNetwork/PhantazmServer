@@ -64,19 +64,19 @@ public class BreakNearbyWindowGoal implements GoalCreator {
             if (ticksSinceLastBreak > data.breakTicks) {
                 BoundingBox boundingBox = entity.getBoundingBox();
 
-                windowTracker.closestInRangeToBounds(entity.getPosition(), boundingBox.width(), boundingBox.height(),
-                        data.breakRadius).ifPresent(window -> {
-                    window.setLastBreakTime(time);
+                windowTracker.closestInRangeToBounds(entity.getPosition(), boundingBox.width(), 0.5, data.breakRadius)
+                        .ifPresent(window -> {
+                            window.setLastBreakTime(time);
 
-                    int index = window.getIndex();
-                    int targetIndex = index - data.breakCount;
+                            int index = window.getIndex();
+                            int targetIndex = index - data.breakCount;
 
-                    int amount = window.updateIndex(targetIndex);
-                    if (amount != 0) {
-                        EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
-                        entity.swingMainHand();
-                    }
-                });
+                            int amount = window.updateIndex(targetIndex);
+                            if (amount != 0) {
+                                EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
+                                entity.swingMainHand();
+                            }
+                        });
 
                 lastBreakCheck = time;
             }

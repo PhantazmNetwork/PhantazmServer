@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
@@ -133,10 +132,6 @@ public class SelectBombedRoom implements Action<Round> {
                                     }
 
                                     player.damage(DamageType.VOID, data.damage, true);
-
-                                    if (ticks % 8 == 0) {
-                                        player.playSound(data.inAreaSound, room.center());
-                                    }
                                 }
                                 else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
                                     removeModifiers(player);
@@ -212,7 +207,6 @@ public class SelectBombedRoom implements Action<Round> {
     @DataObject
     public record Data(@NotNull String warningFormatMessage,
                        @NotNull Component inAreaMessage,
-                       @NotNull Sound inAreaSound,
                        float damage,
                        int gracePeriod,
                        int duration,
