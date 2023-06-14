@@ -31,6 +31,7 @@ import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.sound.BasicSongPlayer;
 import org.phantazm.core.sound.SongPlayer;
+import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.DurationTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
@@ -341,7 +342,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         MapSettingsInfo settings = mapInfo.settings();
         Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
                 settings.defaultEquipment(), settings.equipmentGroups().keySet(),
-                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler);
+                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler, new AnalogTickFormatter(
+                new AnalogTickFormatter.Data(NamedTextColor.WHITE, NamedTextColor.WHITE, false)));
         Stage end = new EndStage(instance, zombiesPlayers, 200L,
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")));
         return new StageTransition(idle, countdown, inGame, end);
