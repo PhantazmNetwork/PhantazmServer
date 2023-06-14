@@ -85,8 +85,7 @@ public class CountdownStage implements Stage {
         if (alertTicks.contains((long)ticksRemaining.get())) {
             Component message = Component.textOfChildren(Component.text("The game starts in "),
                     tickFormatter.format(ticksRemaining.get()), Component.text("."));
-            instance.playSound(Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_HAT, Sound.Source.MASTER, 1.0F, 1.0F),
-                    Sound.Emitter.self());
+            instance.playSound(Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_HAT, Sound.Source.MASTER, 1.0F, 1.0F));
             instance.sendMessage(message);
         }
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
