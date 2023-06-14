@@ -153,7 +153,7 @@ public class InGameStage implements Stage {
         }
 
         Component finalTime = tickFormatter.format((endTime - startTime) / MinecraftServer.TICK_MS);
-        int bestRound = roundHandler.currentRoundIndex() + 1;
+        int bestRound = Math.min(roundHandler.currentRoundIndex() + 1, roundHandler.roundCount());
 
         if (anyAlive) {
             instance.sendTitlePart(TitlePart.TITLE, Component.text("You Win!", NamedTextColor.GREEN));
