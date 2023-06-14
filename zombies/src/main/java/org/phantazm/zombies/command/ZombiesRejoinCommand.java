@@ -36,7 +36,7 @@ public class ZombiesRejoinCommand extends Command {
 
             UUID uuid = player.getUuid();
             for (ZombiesScene scene : router.getScenes()) {
-                if (!scene.getPlayers().containsKey(uuid)) {
+                if (!scene.getZombiesPlayers().containsKey(uuid)) {
                     continue;
                 }
 
