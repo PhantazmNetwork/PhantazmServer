@@ -51,8 +51,4 @@ public class BasicQuitStateActivable implements Activable {
         meta.setCanTriggerSLA(false);
     }
 
-    @Override
-    public void end() {
-        meta.setInGame(true);
-    }
 }
