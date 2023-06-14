@@ -25,6 +25,7 @@ import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.stage.Stage;
 
 import java.util.Map;
 import java.util.Optional;
@@ -126,7 +127,12 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     }
 
     default boolean inStage(@NotNull Key stageKey) {
-        return getScene().getCurrentStage().key().equals(stageKey);
+        Stage currentStage = getScene().getCurrentStage();
+        if (currentStage == null) {
+            return false;
+        }
+
+        return currentStage.key().equals(stageKey);
     }
 
     default @NotNull String getUsername() {
