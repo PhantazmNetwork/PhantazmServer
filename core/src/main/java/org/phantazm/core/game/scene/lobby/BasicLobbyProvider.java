@@ -3,8 +3,9 @@ package org.phantazm.core.game.scene.lobby;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
-import net.minestom.server.event.player.PlayerPreEatEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
+import net.minestom.server.event.item.PickupExperienceEvent;
+import net.minestom.server.event.item.PickupItemEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
@@ -61,7 +62,15 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         eventNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
         eventNode.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
         eventNode.addListener(PlayerPreEatEvent.class, event -> event.setCancelled(true));
-
+        eventNode.addListener(PickupItemEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(PickupExperienceEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(PrePlayerStartDiggingEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true));
+        eventNode.addListener(PlayerBlockInteractEvent.class, event -> {
+            event.setCancelled(true);
+            event.setBlockingItemUse(true);
+        });
+        eventNode.addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true));
 
         return new Lobby(instance, instanceConfig, fallback);
     }

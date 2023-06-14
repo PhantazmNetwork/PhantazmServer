@@ -112,7 +112,7 @@ public class MapeditorClient implements ClientModInitializer {
                                         .formatted(Formatting.GREEN);
                             }
                             else {
-                                message = Text.literal(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
+                                message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
                                         .formatted(Formatting.RED);
                             }
                             player.sendMessage(message);

@@ -17,7 +17,7 @@ public class PartyAudience implements PacketGroupingAudience {
 
     @Override
     public @NotNull Collection<@NotNull Player> getPlayers() {
-        Collection<Player> players = new ArrayList<>();
+        Collection<Player> players = new ArrayList<>(guildMembers.size());
         for (GuildMember member : guildMembers) {
             member.getPlayerView().getPlayer().ifPresent(players::add);
         }

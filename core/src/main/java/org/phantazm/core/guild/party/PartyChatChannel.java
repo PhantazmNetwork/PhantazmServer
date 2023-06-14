@@ -33,8 +33,8 @@ public class PartyChatChannel extends BasicChatChannel {
     protected @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player) {
         Party party = parties.get(player.getUuid());
         if (party == null) {
-            return Pair.of(null, ObjectBooleanPair.of(Component.text("You are not in a party", NamedTextColor.RED),
-                    true));
+            return Pair.of(null,
+                    ObjectBooleanPair.of(Component.text("You are not in a party", NamedTextColor.RED), true));
         }
 
         return Pair.of(party.getAudience(), null);
@@ -42,6 +42,7 @@ public class PartyChatChannel extends BasicChatChannel {
 
     @Override
     public @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent) {
-        return Component.textOfChildren(Component.text("Party > "), super.formatMessage(chatEvent));
+        return Component.textOfChildren(Component.text("Party", NamedTextColor.BLUE),
+                Component.text(" > ", NamedTextColor.DARK_GRAY), super.formatMessage(chatEvent));
     }
 }

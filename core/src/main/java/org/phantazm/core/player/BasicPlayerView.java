@@ -118,7 +118,7 @@ class BasicPlayerView implements PlayerView {
 
     @Override
     public @NotNull CompletableFuture<? extends Component> getDisplayName() {
-        Optional<? extends Component> cached = getDisplayNameIfCached();
+        Optional<? extends Component> cached = getPlayer().map(Player::getDisplayName);
         if (cached.isPresent()) {
             return CompletableFuture.completedFuture(cached.get());
         }
@@ -128,7 +128,7 @@ class BasicPlayerView implements PlayerView {
 
     @Override
     public @NotNull Optional<? extends Component> getDisplayNameIfCached() {
-        return getPlayer().map(Player::getDisplayName);
+        return getPlayer().map(Player::getDisplayName).or(() -> getUsernameIfCached().map(Component::text));
     }
 
     @Override
