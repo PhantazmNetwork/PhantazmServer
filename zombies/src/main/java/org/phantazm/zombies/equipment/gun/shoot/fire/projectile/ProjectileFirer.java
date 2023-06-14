@@ -183,16 +183,22 @@ public class ProjectileFirer implements Firer {
             TargetFinder.Result target = targetFinder.findTarget(firedShot.shooter(), firedShot.start(), collision,
                     firedShot.previousHits());
 
+            target.regular().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));
+            target.headshot().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));
+
             for (GunHit hit : target.regular()) {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
             for (GunHit hit : target.headshot()) {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
-            for (ShotHandler shotHandler : shotHandlers) {
-                GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
-                shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
-                        shot);
+
+            if (!target.regular().isEmpty() || !target.headshot().isEmpty()) {
+                for (ShotHandler shotHandler : shotHandlers) {
+                    GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
+                    shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(),
+                            firedShot.previousHits(), shot);
+                }
             }
         }
 
