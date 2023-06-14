@@ -36,6 +36,7 @@ public class GodmodeCommand extends Command {
                 }
                 else {
                     player.setAllowFlying(false);
+                    player.setFlying(false);
                     player.sendMessage("Disabled godmode.");
                 }
             });
