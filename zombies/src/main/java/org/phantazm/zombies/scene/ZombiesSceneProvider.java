@@ -20,7 +20,6 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicTickTaskScheduler;
@@ -69,7 +68,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final IdentityHashMap<ZombiesScene, SceneContext> contexts;
     private final MapInfo mapInfo;
     private final ConnectionManager connectionManager;
-    private final InstanceManager instanceManager;
     private final InstanceLoader instanceLoader;
     private final SceneFallback sceneFallback;
     private final EventNode<Event> eventNode;
@@ -86,18 +84,16 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     public ZombiesSceneProvider(int maximumScenes,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull MapInfo mapInfo, @NotNull ConnectionManager connectionManager,
-            @NotNull InstanceManager instanceManager, @NotNull InstanceLoader instanceLoader,
-            @NotNull SceneFallback sceneFallback, @NotNull EventNode<Event> eventNode,
-            @NotNull MobSpawnerSource mobSpawnerSource, @NotNull Map<Key, MobModel> mobModels,
-            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull ContextManager contextManager,
-            @NotNull KeyParser keyParser, @NotNull Map<Key, PowerupInfo> powerups,
-            @NotNull ZombiesPlayer.Source zombiesPlayerSource) {
+            @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
+            @NotNull EventNode<Event> eventNode, @NotNull MobSpawnerSource mobSpawnerSource,
+            @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
+            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
+            @NotNull Map<Key, PowerupInfo> powerups, @NotNull ZombiesPlayer.Source zombiesPlayerSource) {
         super(maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.contexts = new IdentityHashMap<>(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
-        this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
         this.sceneFallback = Objects.requireNonNull(sceneFallback, "sceneFallback");
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");

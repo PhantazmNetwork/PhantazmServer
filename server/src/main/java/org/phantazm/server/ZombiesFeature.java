@@ -140,13 +140,12 @@ public final class ZombiesFeature {
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
-                            MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
-                            ZombiesFeature.mobSpawnerSource(), Mob.getModels(),
-                            new BasicClientBlockHandlerSource(instance -> {
-                                DimensionType dimensionType = instance.getDimensionType();
-                                return new InstanceClientBlockHandler(instance, globalEventNode,
-                                        dimensionType.getMinY(), dimensionType.getHeight());
-                            }), contextManager, keyParser, ZombiesFeature.powerups(),
+                            instanceLoader, sceneFallback, globalEventNode, ZombiesFeature.mobSpawnerSource(),
+                            Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
+                        DimensionType dimensionType = instance.getDimensionType();
+                        return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
+                                dimensionType.getHeight());
+                    }), contextManager, keyParser, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
                                     Mob.getModels()));
             providers.put(entry.getKey(), provider);
