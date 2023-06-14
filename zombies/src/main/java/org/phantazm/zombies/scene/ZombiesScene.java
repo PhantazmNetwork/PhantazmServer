@@ -137,14 +137,14 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             });
         }
 
-        CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenRun(() -> {
-            for (int i = 0; i < futures.size(); ++i) {
+        CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).whenComplete((ignored, error) -> {
+            for (int i = 0; i < futures.size(); i++) {
                 PlayerView view = teleportedViews.get(i);
                 Player teleportedPlayer = teleportedPlayers.get(i);
                 CompletableFuture<?> future = futures.get(i);
 
                 if (future.isCompletedExceptionally()) {
-                    future.whenComplete((ignored, throwable) -> {
+                    future.whenComplete((ignored1, throwable) -> {
                         LOGGER.warn("Failed to send {} to an instance", teleportedPlayer.getUuid(), throwable);
                     });
                     continue;
@@ -156,7 +156,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         teleportedPlayer.sendPacket(otherPlayer.getRemovePlayerToList());
                         teleportedPlayer.removeViewer(otherPlayer);
                         otherPlayer.sendPacket(teleportedPlayer.getRemovePlayerToList());
-                    } else {
+                    }
+                    else {
                         teleportedPlayer.sendPacket(otherPlayer.getAddPlayerToList());
                         otherPlayer.addViewer(teleportedPlayer);
                         otherPlayer.sendPacket(teleportedPlayer.getAddPlayerToList());
@@ -172,7 +173,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
                 stage.onJoin(zombiesPlayer);
             }
-        });
+        }).join();
 
         return RouteResult.SUCCESSFUL;
     }
