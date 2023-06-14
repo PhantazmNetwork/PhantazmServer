@@ -168,6 +168,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
             Point finalPreviousPos = previousPos;
             Stream<LivingEntity> victimsStream = entities.stream()
                     .filter(entity -> bb.intersectEntity(finalPreviousPos, entity) && entity != this.entity);
+
             if (aliveTicks < 3) {
                 victimsStream = victimsStream.filter(entity -> entity != shooter);
             }

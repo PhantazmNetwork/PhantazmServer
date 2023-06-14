@@ -63,13 +63,11 @@ public class BasicTargetFinder implements TargetFinder {
         Collection<LivingEntity> nearbyEntities = entityFinder.findEntities(instance, start, end);
         List<Pair<? extends LivingEntity, Vec>> locations = new ArrayList<>(nearbyEntities.size());
 
-        double distanceLimit = start.distanceSquared(end);
+        double distanceLimitSquared = start.distanceSquared(end);
         for (LivingEntity entity : nearbyEntities) {
             if (targetTester.useTarget(entity, previousHits)) {
-                intersectionFinder.getHitLocation(entity, start).ifPresent(intersection -> {
-                    if (start.distanceSquared(intersection) < distanceLimit) {
-                        locations.add(Pair.of(entity, intersection));
-                    }
+                intersectionFinder.getHitLocation(entity, start, end, distanceLimitSquared).ifPresent(intersection -> {
+                    locations.add(Pair.of(entity, intersection));
                 });
             }
         }

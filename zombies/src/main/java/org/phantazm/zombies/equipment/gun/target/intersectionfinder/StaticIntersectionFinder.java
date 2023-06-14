@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -24,7 +25,8 @@ public class StaticIntersectionFinder implements IntersectionFinder {
     }
 
     @Override
-    public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start) {
+    public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start, @NotNull Point end,
+            double distanceLimitSquared) {
         BoundingBox boundingBox = entity.getBoundingBox();
         Pos position = entity.getPosition();
 

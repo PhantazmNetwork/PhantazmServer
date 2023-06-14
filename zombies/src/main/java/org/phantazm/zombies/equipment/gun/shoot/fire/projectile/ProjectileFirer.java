@@ -182,6 +182,7 @@ public class ProjectileFirer implements Firer {
         if (firedShot.shooter().getUuid().equals(shooterUUID)) {
             TargetFinder.Result target = targetFinder.findTarget(firedShot.shooter(), firedShot.start(), collision,
                     firedShot.previousHits());
+
             for (GunHit hit : target.regular()) {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
