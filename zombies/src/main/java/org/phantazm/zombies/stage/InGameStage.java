@@ -165,6 +165,10 @@ public class InGameStage implements Stage {
         }
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            if (zombiesPlayer.hasQuit()) {
+                continue;
+            }
+
             zombiesPlayer.sendMessage(Component.text("==========================================",
                     Style.style(NamedTextColor.GREEN, TextDecoration.STRIKETHROUGH)));
 

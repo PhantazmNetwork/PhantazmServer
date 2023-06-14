@@ -11,6 +11,8 @@ import org.phantazm.core.guild.party.PartyCreator;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.PlayerViewProvider;
 
+import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegrationTest {
@@ -20,7 +22,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testCanKickWithSufficientRankAndGreaterRankThanTarget(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -29,6 +31,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
         Party party = parties.get(firstPlayer.getUuid());
         Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
         secondPlayer.setUsernameField("second");
+        env.process().command().execute(firstPlayer, "party invite second");
         env.process().command().execute(secondPlayer, "party join first");
 
         env.process().command().execute(firstPlayer, "party kick second");
@@ -42,7 +45,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testCannotKickWithoutSufficientRankAndGreaterRankThanTarget(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 2, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -51,6 +54,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
         Party party = parties.get(firstPlayer.getUuid());
         Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
         secondPlayer.setUsernameField("second");
+        env.process().command().execute(firstPlayer, "party invite second");
         env.process().command().execute(secondPlayer, "party join first");
 
         env.process().command().execute(firstPlayer, "party kick second");
@@ -64,7 +68,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testCannotKickWithSufficientRankAndEqualRankToTarget(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 2, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -73,6 +77,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
         Party party = parties.get(firstPlayer.getUuid());
         Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
         secondPlayer.setUsernameField("second");
+        env.process().command().execute(firstPlayer, "party invite second");
         env.process().command().execute(secondPlayer, "party join first");
         party.getMemberManager().getMember(secondPlayer.getUuid()).setRank(1);
 
@@ -87,7 +92,7 @@ public class PartyKickCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testCannotKickSelf(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 2, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);

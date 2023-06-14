@@ -12,6 +12,8 @@ import org.phantazm.core.guild.party.PartyCreator;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.PlayerViewProvider;
 
+import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @EnvTest
@@ -22,7 +24,7 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
     public void testNotInPartyAfterJoiningOtherPlayerNotInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -38,10 +40,10 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
 
     @SuppressWarnings({"UnstableApiUsage", "JUnitMalformedDeclaration"})
     @Test
-    public void testInPartyAfterJoiningOtherPlayerInParty(Env env) {
+    public void testNotInPartyWithoutInviteAndJoiningOtherPlayerInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.command(parties, viewProvider, partyCreator);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -50,6 +52,29 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
         Party party = parties.get(firstPlayer.getUuid());
         Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
         secondPlayer.setUsernameField("second");
+
+        env.process().command().execute(secondPlayer, "party join first");
+
+        assertFalse(parties.containsKey(secondPlayer.getUuid()));
+        assertFalse(party.getMemberManager().hasMember(secondPlayer.getUuid()));
+    }
+
+    @SuppressWarnings({"UnstableApiUsage", "JUnitMalformedDeclaration"})
+    @Test
+    public void testInPartyAfterInviteAndJoiningOtherPlayerInParty(Env env) {
+        PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
+        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
+        Command command = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
+        env.process().command().register(command);
+        Instance instance = env.createFlatInstance();
+        Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
+        firstPlayer.setUsernameField("first");
+        env.process().command().execute(firstPlayer, "party create");
+        Party party = parties.get(firstPlayer.getUuid());
+        Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
+        secondPlayer.setUsernameField("second");
+        party.getInvitationManager().invite(party.getMemberManager().getMember(firstPlayer.getUuid()),
+                viewProvider.fromPlayer(secondPlayer));
 
         env.process().command().execute(secondPlayer, "party join first");
 

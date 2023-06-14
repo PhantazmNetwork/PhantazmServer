@@ -73,7 +73,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
                     }
                 }
             }
-        });
+        }).join();
     }
 
 }

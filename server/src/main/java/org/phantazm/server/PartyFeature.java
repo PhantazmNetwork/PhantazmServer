@@ -12,6 +12,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 public class PartyFeature {
@@ -21,7 +22,7 @@ public class PartyFeature {
     public static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
             @NotNull SchedulerManager schedulerManager) {
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command partyCommand = PartyCommand.command(parties, viewProvider, partyCreator);
+        Command partyCommand = PartyCommand.command(parties, viewProvider, partyCreator, new Random());
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {

@@ -56,6 +56,11 @@ public class PartyJoinCommand {
                     }
 
                     Player player = (Player)sender;
+                    if (!party.getInvitationManager().hasInvitation(player.getUuid())) {
+                        sender.sendMessage(Component.text("You don't have an invite to the party.", NamedTextColor.RED));
+                        return;
+                    }
+
                     Party previousParty = parties.get(player.getUuid());
                     if (previousParty != null) {
                         previousParty.getMemberManager().removeMember(player.getUuid());
