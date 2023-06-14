@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ProjectileMovementGoal implements ProximaGoal {
+    private static final int COLLISION_TICK_THRESHOLD = 3;
 
     private final Entity entity;
 
@@ -125,9 +126,13 @@ public class ProjectileMovementGoal implements ProximaGoal {
         if (instance == null) {
             return false;
         }
+        final long aliveTicks = entity.getAliveTicks();
         if (previousPos.samePoint(currentPos)) {
             Block block = instance.getBlock(previousPos);
-            return block.isSolid() && !block.compare(Block.BARRIER);
+            return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= COLLISION_TICK_THRESHOLD &&
+                    block.registry().collisionShape().intersectBox(
+                            previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
+                            entity.getBoundingBox());
         }
 
         Chunk chunk = null;
@@ -138,7 +143,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
         final Vec dir = currentPos.sub(previousPos).asVec();
         final int parts = (int)Math.ceil(dir.length() / part);
         final Pos direction = dir.normalize().mul(part).asPosition();
-        final long aliveTicks = entity.getAliveTicks();
+
         Block block = null;
         Point blockPos = null;
         for (int i = 0; i < parts; ++i) {
@@ -148,7 +153,11 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 block = instance.getBlock(previousPos);
                 blockPos = previousPos;
             }
-            if (block.isSolid() && !block.compare(Block.BARRIER)) {
+            if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= COLLISION_TICK_THRESHOLD &&
+                    block.registry().collisionShape()
+                            .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
+                                    entity.getBoundingBox())) {
+
                 final ProjectileCollideWithBlockEvent event =
                         new ProjectileCollideWithBlockEvent(entity, previousPos, block);
                 EventDispatcher.call(event);
@@ -169,7 +178,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
             Stream<LivingEntity> victimsStream = entities.stream()
                     .filter(entity -> bb.intersectEntity(finalPreviousPos, entity) && entity != this.entity);
 
-            if (aliveTicks < 3) {
+            if (aliveTicks < COLLISION_TICK_THRESHOLD) {
                 victimsStream = victimsStream.filter(entity -> entity != shooter);
             }
             final Optional<LivingEntity> victimOptional = victimsStream.findAny();
