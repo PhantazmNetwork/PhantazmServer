@@ -13,7 +13,6 @@ import net.minestom.server.event.instance.InstanceChunkUnloadEvent;
 import net.minestom.server.event.instance.InstanceUnregisterEvent;
 import net.minestom.server.event.instance.PreBlockChangeEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
-import net.minestom.server.event.player.PlayerChunkLoadEvent;
 import net.minestom.server.event.player.PrePlayerStartDiggingEvent;
 import net.minestom.server.event.player.PreSendChunkEvent;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -42,7 +40,8 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
     private Instance instance;
 
-    private final Long2ObjectMap<Data> clientBlocks;
+    private final Long2ObjectMap<Data> clientData;
+
     private final int chunkFloor;
     private final int chunkHeight;
 
@@ -60,7 +59,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
             int chunkHeight) {
         //weakref necessary as instance field will be captured by the expiration predicate
         this.instance = Objects.requireNonNull(instance, "instance");
-        this.clientBlocks = new Long2ObjectOpenHashMap<>();
+        this.clientData = new Long2ObjectOpenHashMap<>();
         this.chunkFloor = chunkFloor;
         this.chunkHeight = chunkHeight;
 
@@ -70,7 +69,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                 instanceEvent -> instanceEvent.getInstance().getUniqueId().equals(uuid));
 
         childNode.addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
-        childNode.addListener(PlayerChunkLoadEvent.class, this::onPlayerChunkLoad);
         childNode.addListener(PreBlockChangeEvent.class, this::onPreBlockChange);
         childNode.addListener(PlayerBlockBreakEvent.class, this::onPlayerBlockBreak);
         childNode.addListener(PrePlayerStartDiggingEvent.class, this::onPrePlayerStartDigging);
@@ -96,12 +94,13 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         int cz = serverChunk.getChunkZ();
 
         long index = ChunkUtils.getChunkIndex(cx, cz);
-        synchronized (clientBlocks) {
-            Data data = clientBlocks.get(index);
+        synchronized (clientData) {
+            Data data = clientData.get(index);
+
             if (data == null) {
                 data = new Data(new HashVec3I2ObjectMap<>(0, chunkFloor, 0, Chunk.CHUNK_SIZE_X, chunkHeight,
-                        Chunk.CHUNK_SIZE_Z), serverChunk.copy(instance, cx, cz));
-                clientBlocks.put(index, data);
+                        Chunk.CHUNK_SIZE_Z));
+                clientData.put(index, data);
             }
 
             PositionedBlock block = data.blocks.get(x, y, z);
@@ -112,11 +111,12 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                 block.block = type;
             }
 
-            data.chunk.setBlock(x, y, z, type);
+            data.dirty = true;
             serverChunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), type));
         }
     }
 
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     @Override
     public void clearClientBlocks() {
         Instance instance = this.instance;
@@ -124,16 +124,19 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
             return;
         }
 
-        synchronized (clientBlocks) {
-            for (Long2ObjectMap.Entry<Data> entry : clientBlocks.long2ObjectEntrySet()) {
+        synchronized (clientData) {
+            for (Long2ObjectMap.Entry<Data> entry : clientData.long2ObjectEntrySet()) {
                 long index = entry.getLongKey();
                 int x = ChunkUtils.getChunkCoordX(index);
                 int z = ChunkUtils.getChunkCoordZ(index);
 
-                Chunk serverChunk = instance.getChunkAt(x, z);
-                Vec3I2ObjectMap<PositionedBlock> blocks = entry.getValue().blocks;
+                Chunk serverChunk = instance.getChunk(x, z);
+                if (serverChunk == null) {
+                    continue;
+                }
 
-                if (serverChunk != null) {
+                Vec3I2ObjectMap<PositionedBlock> blocks = entry.getValue().blocks;
+                synchronized (serverChunk) {
                     for (PositionedBlock block : blocks.values()) {
                         Block serverBlock = serverChunk.getBlock(block.x, block.y, block.z);
                         serverChunk.sendPacketToViewers(
@@ -144,7 +147,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                 blocks.clear();
             }
 
-            clientBlocks.clear();
+            clientData.clear();
         }
     }
 
@@ -158,46 +161,81 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         int cx = ChunkUtils.getChunkCoordinate(x);
         int cz = ChunkUtils.getChunkCoordinate(z);
         long index = ChunkUtils.getChunkIndex(cx, cz);
-        synchronized (clientBlocks) {
-            Data data = clientBlocks.get(index);
+        synchronized (clientData) {
+            Data data = clientData.get(index);
+            if (data == null) {
+                return;
+            }
 
-            if (data != null) {
-                Vec3I2ObjectMap<PositionedBlock> blocks = data.blocks;
+            if (data.blocks.remove(x, y, z) != null) {
+                Chunk serverChunk = instance.getChunk(cx, cz);
 
-                if (blocks.remove(x, y, z) != null) {
-                    Chunk chunk = instance.getChunk(cx, cz);
-
-                    if (chunk != null) {
-                        Block serverBlock = chunk.getBlock(x, y, z);
-
-                        //make sure player gets the actual block
-                        chunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
-                        data.chunk.setBlock(x, y, z, serverBlock);
-                    }
-
-                    if (blocks.isEmpty()) {
-                        clientBlocks.remove(index);
-                    }
+                if (serverChunk == null) {
+                    clientData.remove(index);
+                    return;
                 }
+
+                Block serverBlock = serverChunk.getBlock(x, y, z);
+
+                //make sure player gets the actual block
+                serverChunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
+
+                if (data.blocks.isEmpty()) {
+                    clientData.remove(index);
+                }
+
+                data.dirty = true;
             }
         }
     }
 
-    private record Data(Vec3I2ObjectMap<PositionedBlock> blocks, Chunk chunk) {
+    private static class Data {
+        private final Vec3I2ObjectMap<PositionedBlock> blocks;
+        private DynamicChunk chunk;
+        private boolean dirty;
+
+        public Data(Vec3I2ObjectMap<PositionedBlock> blocks) {
+            this.blocks = blocks;
+        }
     }
 
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private void onPreSendChunk(PreSendChunkEvent event) {
-        Chunk chunk = event.chunk();
+        Instance instance = this.instance;
+        if (instance == null) {
+            return;
+        }
 
-        int cx = chunk.getChunkX();
-        int cz = chunk.getChunkZ();
+        DynamicChunk serverChunk = event.chunk();
+
+        int cx = serverChunk.getChunkX();
+        int cz = serverChunk.getChunkZ();
         long index = ChunkUtils.getChunkIndex(cx, cz);
 
-        synchronized (clientBlocks) {
-            Data data = clientBlocks.get(index);
+        synchronized (clientData) {
+            Data data = clientData.get(index);
 
-            if (data != null && data.chunk instanceof DynamicChunk dynamicChunk) {
-                event.setChunk(dynamicChunk);
+            if (data != null) {
+                DynamicChunk copy = data.chunk;
+
+                boolean updateCopyBlocks = false;
+                synchronized (serverChunk) {
+                    if (copy == null || copy.getLastChangeTime() != serverChunk.getLastChangeTime() || data.dirty) {
+                        copy = serverChunk.copy(instance, cx, cz);
+                        data.chunk = copy;
+                        updateCopyBlocks = true;
+                    }
+                }
+
+                if (updateCopyBlocks) {
+                    for (PositionedBlock positionedBlock : data.blocks.values()) {
+                        copy.setBlock(positionedBlock.x, positionedBlock.y, positionedBlock.z, positionedBlock.block);
+                    }
+
+                    data.dirty = false;
+                }
+
+                event.setChunk(copy);
             }
         }
     }
@@ -209,8 +247,8 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         int cz = chunk.getChunkZ();
         long index = ChunkUtils.getChunkIndex(cx, cz);
 
-        synchronized (clientBlocks) {
-            clientBlocks.remove(index);
+        synchronized (clientData) {
+            clientData.remove(index);
         }
     }
 
@@ -225,16 +263,16 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
         this.instance = null;
 
-        synchronized (clientBlocks) {
-            this.clientBlocks.clear();
+        synchronized (clientData) {
+            this.clientData.clear();
         }
     }
 
     private void onPrePlayerStartDigging(PrePlayerStartDiggingEvent event) {
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
-        synchronized (clientBlocks) {
-            Data data = clientBlocks.get(index);
+        synchronized (clientData) {
+            Data data = clientData.get(index);
 
             if (data != null) {
                 PositionedBlock block =
@@ -254,14 +292,14 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     private void onPlayerBlockBreak(PlayerBlockBreakEvent event) {
         Point blockPosition = event.getBlockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
-        synchronized (clientBlocks) {
-            Data data = clientBlocks.get(index);
+        synchronized (clientData) {
+            Data data = clientData.get(index);
 
             if (data != null) {
                 //remove the client block; no need to send something else as it will be updated soon
                 if (data.blocks.remove(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ()) !=
                         null && data.blocks.isEmpty()) {
-                    clientBlocks.remove(index);
+                    clientData.remove(index);
                 }
             }
         }
@@ -270,42 +308,15 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
     private void onPreBlockChange(PreBlockChangeEvent event) {
         Point blockPosition = event.blockPosition();
         long index = ChunkUtils.getChunkIndex(blockPosition);
-        synchronized (clientBlocks) {
-            Data data = clientBlocks.get(index);
+        synchronized (clientData) {
+            Data data = clientData.get(index);
 
             if (data != null) {
-                Vec3I2ObjectMap<PositionedBlock> blocks = data.blocks;
-
-                if (blocks.containsKey(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ())) {
+                if (data.blocks.containsKey(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ())) {
                     //allow the server to update the block, but don't tell the client
                     event.setSyncClient(false);
                 }
             }
-        }
-    }
-
-    private void onPlayerChunkLoad(PlayerChunkLoadEvent event) {
-        int cx = event.getChunkX();
-        int cz = event.getChunkZ();
-
-        BlockChangePacket[] packets = null;
-        long index = ChunkUtils.getChunkIndex(cx, cz);
-        synchronized (clientBlocks) {
-            Data data = clientBlocks.get(index);
-
-            if (data != null) {
-                Vec3I2ObjectMap<PositionedBlock> blocks = data.blocks;
-                Iterator<PositionedBlock> blockIterator = blocks.values().iterator();
-                packets = new BlockChangePacket[blocks.size()];
-                for (int i = 0; i < packets.length; i++) {
-                    PositionedBlock block = blockIterator.next();
-                    packets[i] = new BlockChangePacket(new Vec(block.x, block.y, block.z), block.block);
-                }
-            }
-        }
-
-        if (packets != null) {
-            event.getPlayer().sendPackets(packets);
         }
     }
 
