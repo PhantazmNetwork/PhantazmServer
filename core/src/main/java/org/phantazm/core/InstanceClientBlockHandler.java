@@ -18,6 +18,7 @@ import net.minestom.server.event.player.PrePlayerStartDiggingEvent;
 import net.minestom.server.event.player.PreSendChunkEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.listener.PlayerDiggingListener;
@@ -195,8 +196,8 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         synchronized (clientBlocks) {
             Data data = clientBlocks.get(index);
 
-            if (data != null) {
-                event.setChunk(data.chunk);
+            if (data != null && data.chunk instanceof DynamicChunk dynamicChunk) {
+                event.setChunk(dynamicChunk);
             }
         }
     }
