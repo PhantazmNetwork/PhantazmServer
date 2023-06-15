@@ -56,7 +56,8 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
 
         @Override
         public void tick(long time) {
-            if (startTime < 0) {
+            BossBar bossBar = this.bossBar;
+            if (startTime < 0 || bossBar == null) {
                 return;
             }
 
@@ -68,14 +69,18 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             this.startTime = System.currentTimeMillis();
 
-            this.bossBar = BossBar.bossBar(data.name, 1.0F, data.color, data.overlay);
-            instance.showBossBar(this.bossBar);
+            BossBar bossBar = BossBar.bossBar(data.name, 1.0F, data.color, data.overlay);
+            instance.showBossBar(bossBar);
+
+            this.bossBar = bossBar;
         }
 
         @Override
         public void deactivate(@NotNull ZombiesPlayer player) {
+            BossBar bossBar = this.bossBar;
             if (bossBar != null) {
-                instance.hideBossBar(bossBar);
+                MinecraftServer.getBossBarManager().destroyBossBar(bossBar);
+                this.bossBar = null;
             }
         }
 
