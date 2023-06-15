@@ -24,6 +24,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class GroundController implements Controller {
+    private static final double ENTITY_COLLISION_FACTOR = 10;
+
     private final LivingEntity entity;
     private final double step;
     private final TrackerPredicate trackerPredicate;
@@ -101,14 +103,12 @@ public class GroundController implements Controller {
                 else {
                     double pZ = -vX;
                     if (iterations % 2 == 0) {
-                        candidate.setVelocity(
-                                new Vec(vZ * scaleFactor * MinecraftServer.TICK_PER_SECOND, oldVelocity.y(),
-                                        pZ * scaleFactor * MinecraftServer.TICK_PER_SECOND));
+                        candidate.setVelocity(new Vec(vZ * scaleFactor * ENTITY_COLLISION_FACTOR, oldVelocity.y(),
+                                pZ * scaleFactor * ENTITY_COLLISION_FACTOR));
                     }
                     else {
-                        candidate.setVelocity(
-                                new Vec(-vZ * scaleFactor * MinecraftServer.TICK_PER_SECOND, oldVelocity.y(),
-                                        -pZ * scaleFactor * MinecraftServer.TICK_PER_SECOND));
+                        candidate.setVelocity(new Vec(-vZ * scaleFactor * ENTITY_COLLISION_FACTOR, oldVelocity.y(),
+                                -pZ * scaleFactor * ENTITY_COLLISION_FACTOR));
                     }
                 }
             }
