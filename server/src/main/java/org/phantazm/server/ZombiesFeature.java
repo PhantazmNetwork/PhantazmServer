@@ -27,7 +27,9 @@ import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
+import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.game.scene.lobby.Lobby;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
@@ -151,7 +153,7 @@ public final class ZombiesFeature {
             providers.put(entry.getKey(), provider);
         }
 
-        ZombiesFeature.sceneRouter = new ZombiesSceneRouter(providers);
+        ZombiesFeature.sceneRouter = new ZombiesSceneRouter(UUID.randomUUID(), providers);
 
         MinecraftServer.getSchedulerManager()
                 .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
@@ -159,7 +161,17 @@ public final class ZombiesFeature {
 
         commandManager.register(
                 new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene,
-                        sceneFallback));
+                        uuid -> {
+                            if (Lobbies.getLobbyRouter().getScene(uuid).isPresent()) {
+                                return Optional.of(Lobbies.getLobbyRouter());
+                            }
+
+                            if (ZombiesFeature.getPlayerScene(uuid).isPresent()) {
+                                return Optional.of(sceneRouter);
+                            }
+
+                            return Optional.empty();
+                        }, sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {

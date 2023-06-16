@@ -39,6 +39,8 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
      */
     @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers();
 
+    @NotNull UUID getUUID();
+
     /**
      * Gets the number of players that are considered "ingame" in the scene.
      * This count may differ from the number of entries in

@@ -28,8 +28,9 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param instanceConfig The {@link InstanceConfig} used for the lobby's {@link Instance}
      * @param fallback       A fallback for the lobby
      */
-    public Lobby(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig, @NotNull SceneFallback fallback) {
-        super(instance, new HashMap<>(), fallback);
+    public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
+            @NotNull SceneFallback fallback) {
+        super(uuid, instance, new HashMap<>(), fallback);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
     }
 

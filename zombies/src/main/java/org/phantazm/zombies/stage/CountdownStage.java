@@ -28,6 +28,8 @@ public class CountdownStage implements Stage {
 
     private final Wrapper<Long> ticksRemaining;
 
+    private final long initialTicks;
+
     private final LongList alertTicks;
 
     private final TickFormatter tickFormatter;
@@ -43,6 +45,7 @@ public class CountdownStage implements Stage {
         this.messages = List.copyOf(messages);
         this.random = Objects.requireNonNull(random, "random");
         this.ticksRemaining = Objects.requireNonNull(ticksRemaining, "ticksRemaining");
+        this.initialTicks = ticksRemaining.get();
         this.alertTicks = Objects.requireNonNull(alertTicks, "alertTicks");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
@@ -76,8 +79,21 @@ public class CountdownStage implements Stage {
     }
 
     @Override
+    public void onLeave(@NotNull ZombiesPlayer zombiesPlayer) {
+        SidebarUpdater updater = sidebarUpdaters.remove(zombiesPlayer.getUUID());
+        if (updater != null) {
+            updater.end();
+        }
+    }
+
+    @Override
     public boolean hasPermanentPlayers() {
         return false;
+    }
+
+    @Override
+    public void start() {
+        ticksRemaining.set(initialTicks);
     }
 
     @Override

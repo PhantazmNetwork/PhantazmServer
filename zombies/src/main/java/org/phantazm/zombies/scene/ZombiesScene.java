@@ -35,7 +35,6 @@ import java.util.function.Function;
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
     private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
-    private final UUID uuid;
     private final ConnectionManager connectionManager;
     private final ZombiesMap map;
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
@@ -53,8 +52,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler) {
-        super(instance, players, fallback);
-        this.uuid = Objects.requireNonNull(uuid, "uuid");
+        super(uuid, instance, players, fallback);
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
@@ -81,10 +79,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         return stageTransition.isComplete();
     }
 
-    public @NotNull UUID getUuid() {
-        return uuid;
-    }
-
     public @NotNull ZombiesMap getMap() {
         return map;
     }
@@ -100,7 +94,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         for (PlayerView player : joinRequest.getPlayers()) {
             ZombiesPlayer zombiesPlayer = zombiesPlayers.get(player.getUUID());
             if (zombiesPlayer != null) {
-                oldPlayers.add(zombiesPlayer);
+                if (zombiesPlayer.hasQuit()) {
+                    oldPlayers.add(zombiesPlayer);
+                }
             }
             else {
                 newPlayers.add(player);
@@ -124,20 +120,41 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             return protocolResult;
         }
 
-        for (ZombiesPlayer zombiesPlayer : oldPlayers) {
-            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
-        }
-
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
-        List<PlayerView> teleportedViews = new ArrayList<>(newPlayers.size());
-        List<Player> teleportedPlayers = new ArrayList<>(newPlayers.size());
-        List<CompletableFuture<?>> futures = new ArrayList<>(newPlayers.size());
+        List<PlayerView> teleportedViews = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+        List<Player> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+        List<CompletableFuture<?>> futures = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+        List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+        for (ZombiesPlayer zombiesPlayer : oldPlayers) {
+            zombiesPlayer.getPlayer().ifPresent(player -> {
+                teleportedViews.add(zombiesPlayer.module().getPlayerView());
+                teleportedPlayers.add(player);
+                if (player.getInstance() == instance) {
+                    futures.add(player.teleport(pos));
+                } else {
+                    futures.add(player.setInstance(instance, pos));
+                }
+                runnables.add(() -> {
+                   zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
+                });
+            });
+        }
         for (PlayerView view : newPlayers) {
             view.getPlayer().ifPresent(player -> {
                 teleportedViews.add(view);
                 teleportedPlayers.add(player);
-                futures.add(player.setInstance(instance, pos));
+                if (player.getInstance() == instance) {
+                    futures.add(player.teleport(pos));
+                } else {
+                    futures.add(player.setInstance(instance, pos));
+                }
+                runnables.add(() -> {
+                    ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+                    zombiesPlayer.start();
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                    zombiesPlayers.put(view.getUUID(), zombiesPlayer);
+                });
             });
         }
 
@@ -146,6 +163,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 PlayerView view = teleportedViews.get(i);
                 Player teleportedPlayer = teleportedPlayers.get(i);
                 CompletableFuture<?> future = futures.get(i);
+                Runnable runnable = runnables.get(i);
 
                 if (future.isCompletedExceptionally()) {
                     future.whenComplete((ignored1, throwable) -> {
@@ -169,13 +187,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     }
                 }
 
-                ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-                zombiesPlayer.start();
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                zombiesPlayers.put(view.getUUID(), zombiesPlayer);
-                players.put(view.getUUID(), view);
+                runnable.run();
 
-                stage.onJoin(zombiesPlayer);
+                players.put(view.getUUID(), view);
+                stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
             }
         }).join();
 

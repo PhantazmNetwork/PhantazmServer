@@ -6,6 +6,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.SceneProvider;
+import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
@@ -13,7 +14,8 @@ import java.util.*;
 /**
  * {@link Scene} router for {@link Lobby}s.
  */
-public class LobbyRouter implements Scene<LobbyRouteRequest> {
+public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
+    private final UUID uuid;
 
     private final Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders;
 
@@ -66,8 +68,25 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
      *
      * @param lobbyProviders The {@link SceneProvider}s for lobbies mapped based on lobby name.
      */
-    public LobbyRouter(@NotNull Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders) {
+    public LobbyRouter(@NotNull UUID uuid,
+            @NotNull Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders) {
+        this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.lobbyProviders = Objects.requireNonNull(lobbyProviders, "lobbyProviders");
+    }
+
+    @Override
+    public @NotNull Collection<Lobby> getScenes() {
+        Collection<Lobby> scenes = new ArrayList<>();
+        for (SceneProvider<Lobby, LobbyJoinRequest> sceneProvider : lobbyProviders.values()) {
+            scenes.addAll(sceneProvider.getScenes());
+        }
+
+        return scenes;
+    }
+
+    @Override
+    public @NotNull Optional<Lobby> getScene(@NotNull UUID uuid) {
+        return Optional.ofNullable(playerLobbyMap.get(uuid));
     }
 
     @Override
@@ -115,16 +134,31 @@ public class LobbyRouter implements Scene<LobbyRouteRequest> {
             }
         }
 
+        boolean success = true;
         for (UUID uuid : leavers) {
-            playerLobbyMap.get(uuid).leave(List.of(uuid));
+            RouteResult subResult = playerLobbyMap.get(uuid).leave(List.of(uuid));
+            if (subResult.success()) {
+                playerLobbyMap.remove(uuid);
+            } else {
+                success = false;
+            }
         }
 
-        return RouteResult.SUCCESSFUL;
+        if (success) {
+            return RouteResult.SUCCESSFUL;
+        }
+
+        return new RouteResult(false, Optional.of(Component.text("Failed to remove a player from a lobby.")));
     }
 
     @Override
     public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
         return unmodifiablePlayers;
+    }
+
+    @Override
+    public @NotNull UUID getUUID() {
+        return uuid;
     }
 
     @Override

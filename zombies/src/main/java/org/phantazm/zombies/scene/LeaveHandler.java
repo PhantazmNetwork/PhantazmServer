@@ -23,7 +23,8 @@ public class LeaveHandler {
 
     private final Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers;
 
-    public LeaveHandler(@NotNull StageTransition stageTransition, @NotNull Map<? super UUID, ? extends PlayerView> players,
+    public LeaveHandler(@NotNull StageTransition stageTransition,
+            @NotNull Map<? super UUID, ? extends PlayerView> players,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
         this.players = Objects.requireNonNull(players, "players");
@@ -42,17 +43,18 @@ public class LeaveHandler {
             players.remove(leaver);
 
             Stage stage = stageTransition.getCurrentStage();
-            ZombiesPlayer zombiesPlayer;
+
+            ZombiesPlayer zombiesPlayer = zombiesPlayers.get(leaver);
+            if (stage != null) {
+                stage.onLeave(zombiesPlayer);
+            }
+
             if (stage == null || !stage.hasPermanentPlayers()) {
-                zombiesPlayer = zombiesPlayers.remove(leaver);
+                zombiesPlayers.remove(leaver);
                 zombiesPlayer.end();
             }
-            else {
-                zombiesPlayer = zombiesPlayers.get(leaver);
-
-                if (zombiesPlayer != null) {
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
-                }
+            else if (zombiesPlayer != null) {
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
             }
         }
 

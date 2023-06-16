@@ -56,6 +56,11 @@ public class EndStage implements Stage {
     }
 
     @Override
+    public void onLeave(@NotNull ZombiesPlayer zombiesPlayer) {
+
+    }
+
+    @Override
     public boolean hasPermanentPlayers() {
         return true;
     }

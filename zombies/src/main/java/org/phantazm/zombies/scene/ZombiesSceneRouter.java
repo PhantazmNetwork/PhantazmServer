@@ -7,11 +7,13 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.SceneProvider;
+import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
 
-public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest>, SceneContainer<ZombiesScene> {
+public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRouteRequest> {
+    private final UUID uuid;
     private final Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders;
     private final Map<UUID, ZombiesScene> playerSceneMap = new HashMap<>();
 
@@ -56,11 +58,13 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest>, SceneCont
     private boolean shutdown = false;
     private boolean joinable = true;
 
-    public ZombiesSceneRouter(
+    public ZombiesSceneRouter(@NotNull UUID uuid,
             @NotNull Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders) {
+        this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.sceneProviders = Objects.requireNonNull(sceneProviders, "sceneProviders");
     }
 
+    @Override
     public @NotNull Optional<ZombiesScene> getScene(@NotNull UUID uuid) {
         return Optional.ofNullable(playerSceneMap.get(uuid));
     }
@@ -96,32 +100,37 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest>, SceneCont
 
         ZombiesJoinRequest joinRequest = routeRequest.joinRequest();
         Optional<ZombiesScene> sceneOptional = sceneProvider.provideScene(joinRequest);
-        if (sceneOptional.isPresent()) {
-            ZombiesScene scene = sceneOptional.get();
-            RouteResult result = scene.join(joinRequest);
-            if (result.success()) {
-                for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
-                    ZombiesScene oldScene = playerSceneMap.get(playerView.getUUID());
-                    if (oldScene != null && oldScene != scene) {
-                        oldScene.leave(Collections.singleton(playerView.getUUID()));
-                    }
-
-                    playerSceneMap.put(playerView.getUUID(), scene);
-                }
-            }
-
-            return result;
+        if (sceneOptional.isEmpty()) {
+            return new RouteResult(false, Component.text("No games are joinable."));
         }
 
-        return new RouteResult(false, Component.text("No games are joinable."));
+        ZombiesScene scene = sceneOptional.get();
+        RouteResult result = scene.join(joinRequest);
+        if (result.success()) {
+            for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
+                playerSceneMap.put(playerView.getUUID(), scene);
+            }
+        }
+
+        return result;
+
     }
 
     // TODO: optimize
     private RouteResult rejoinGame(ZombiesRouteRequest routeRequest) {
         for (ZombiesScene scene : getScenes()) {
-            if (scene.getUuid().equals(routeRequest.targetGame())) {
-                return scene.join(routeRequest.joinRequest());
+            if (!scene.getUUID().equals(routeRequest.targetGame())) {
+                continue;
             }
+
+            RouteResult result = scene.join(routeRequest.joinRequest());
+            if (result.success()) {
+                for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
+                    playerSceneMap.put(playerView.getUUID(), scene);
+                }
+            }
+
+            return result;
         }
 
         return new RouteResult(false, Component.text("Not a valid game."));
@@ -135,16 +144,32 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest>, SceneCont
             }
         }
 
+        boolean success = true;
         for (UUID uuid : leavers) {
-            playerSceneMap.get(uuid).leave(Collections.singleton(uuid));
+            RouteResult subResult = playerSceneMap.get(uuid).leave(Collections.singleton(uuid));
+            if (subResult.success()) {
+                playerSceneMap.remove(uuid);
+            }
+            else {
+                success = false;
+            }
         }
 
-        return RouteResult.SUCCESSFUL;
+        if (success) {
+            return RouteResult.SUCCESSFUL;
+        }
+
+        return new RouteResult(false, Optional.of(Component.text("Failed to remove a player from a game.")));
     }
 
     @Override
     public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
         return unmodifiablePlayers;
+    }
+
+    @Override
+    public @NotNull UUID getUUID() {
+        return uuid;
     }
 
     @Override

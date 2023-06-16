@@ -5,10 +5,14 @@ import org.phantazm.core.game.scene.SceneJoinRequest;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
 
 public interface ZombiesJoinRequest extends SceneJoinRequest {
 
     @NotNull Collection<PlayerView> getPlayers();
+
+    @NotNull Set<UUID> excludedScenes();
 
     @Override
     default int getRequestWeight() {
