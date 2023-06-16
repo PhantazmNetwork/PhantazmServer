@@ -34,7 +34,7 @@ public class LobbyIntegrationTest {
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
                 InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
-        Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
+        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback);
         PlayerView playerView = mock(PlayerView.class);
 
         lobby.shutdown();
@@ -51,7 +51,7 @@ public class LobbyIntegrationTest {
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
                 InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
-        Lobby lobby = new Lobby(instance, instanceConfig, sceneFallback);
+        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback);
         Player player = mock(Player.class);
         when(player.setInstance(any(), any())).thenReturn(CompletableFuture.completedFuture(null));
         PlayerView playerView = new PlayerView() {

@@ -9,22 +9,28 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouteResult;
+import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.zombies.scene.ZombiesJoinRequest;
 import org.phantazm.zombies.scene.ZombiesRouteRequest;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class ZombiesRejoinCommand extends Command {
-    public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router, @NotNull PlayerViewProvider viewProvider,
-            @NotNull Map<? super UUID, ? extends Party> parties) {
+    public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router,
+            @NotNull Function<? super UUID, Optional<SceneRouter<? extends Scene<?>, ?>>> globalRouterMapper,
+            @NotNull PlayerViewProvider viewProvider, @NotNull Map<? super UUID, ? extends Party> parties) {
         super("rejoin");
 
         Objects.requireNonNull(router, "router");
+        Objects.requireNonNull(globalRouterMapper, "globalSceneMapper");
         Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(parties, "parties");
 
@@ -40,7 +46,8 @@ public class ZombiesRejoinCommand extends Command {
                     continue;
                 }
 
-                SuggestionEntry entry = new SuggestionEntry(scene.getUuid().toString(), scene.getMapSettingsInfo().displayName());
+                SuggestionEntry entry =
+                        new SuggestionEntry(scene.getUUID().toString(), scene.getMapSettingsInfo().displayName());
                 suggestion.addEntry(entry);
             }
         }));
@@ -57,7 +64,7 @@ public class ZombiesRejoinCommand extends Command {
 
             boolean anyMatch = false;
             for (ZombiesScene scene : router.getScenes()) {
-                if (scene.getUuid().equals(targetGame)) {
+                if (scene.getUUID().equals(targetGame)) {
                     anyMatch = true;
                     break;
                 }
@@ -81,7 +88,24 @@ public class ZombiesRejoinCommand extends Command {
                 }
             }
 
-            RouteResult result = router.join(ZombiesRouteRequest.rejoinGame(targetGame, () -> playerViews));
+            Set<UUID> excluded = new HashSet<>();
+            for (PlayerView playerView : playerViews) {
+                globalRouterMapper.apply(playerView.getUUID()).ifPresent(oldRouter -> {
+                    oldRouter.getScene(playerView.getUUID()).map(Scene::getUUID).ifPresent(excluded::add);
+                    oldRouter.leave(Collections.singleton(playerView.getUUID()));
+                });
+            }
+            RouteResult result = router.join(ZombiesRouteRequest.rejoinGame(targetGame, new ZombiesJoinRequest() {
+                @Override
+                public @NotNull Collection<PlayerView> getPlayers() {
+                    return playerViews;
+                }
+
+                @Override
+                public @NotNull Set<UUID> excludedScenes() {
+                    return excluded;
+                }
+            }));
             result.message().ifPresent(sender::sendMessage);
         }, targetGameArgument);
     }

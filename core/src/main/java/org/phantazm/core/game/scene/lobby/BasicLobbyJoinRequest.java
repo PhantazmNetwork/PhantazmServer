@@ -51,7 +51,11 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
                 player.setGameMode(GameMode.ADVENTURE);
 
                 teleportedPlayers.add(player);
-                futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
+                if (player.getInstance() == instance) {
+                    futures.add(player.teleport(instanceConfig.spawnPoint()));
+                } else {
+                    futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
+                }
             });
         }
 

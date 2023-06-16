@@ -15,6 +15,7 @@ import java.util.*;
  * @param <TRequest>
  */
 public abstract class InstanceScene<TRequest extends SceneJoinRequest> implements Scene<TRequest> {
+    private final UUID uuid;
     protected final Instance instance;
     protected final SceneFallback fallback;
     protected final Map<UUID, PlayerView> players;
@@ -22,8 +23,9 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
 
     private boolean shutdown = false;
 
-    public InstanceScene(@NotNull Instance instance, @NotNull Map<UUID, PlayerView> players,
+    public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull Map<UUID, PlayerView> players,
             @NotNull SceneFallback fallback) {
+        this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.players = Objects.requireNonNull(players, "players");
         this.unmodifiablePlayers = Collections.unmodifiableMap(players);
@@ -33,6 +35,11 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     @Override
     public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
         return unmodifiablePlayers;
+    }
+
+    @Override
+    public @NotNull UUID getUUID() {
+        return uuid;
     }
 
     @Override

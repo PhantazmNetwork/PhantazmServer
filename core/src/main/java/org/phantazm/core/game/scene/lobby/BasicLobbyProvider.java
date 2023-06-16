@@ -17,6 +17,7 @@ import org.phantazm.core.instance.InstanceLoader;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Basic implementation of a {@link LobbyProviderAbstract}.
@@ -72,7 +73,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         });
         eventNode.addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true));
 
-        return new Lobby(instance, instanceConfig, fallback);
+        return new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback);
     }
 
     @Override

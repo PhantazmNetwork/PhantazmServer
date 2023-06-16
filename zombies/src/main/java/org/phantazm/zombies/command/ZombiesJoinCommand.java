@@ -13,27 +13,33 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.scene.ZombiesJoinRequest;
 import org.phantazm.zombies.scene.ZombiesRouteRequest;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class ZombiesJoinCommand extends Command {
-    public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-            @NotNull PlayerViewProvider viewProvider) {
+    public ZombiesJoinCommand(@NotNull Scene<ZombiesRouteRequest> router,
+            @NotNull Function<? super UUID, Optional<SceneRouter<? extends Scene<?>, ?>>> globalRouterMapper,
+            @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
+            @NotNull Map<? super UUID, ? extends Party> parties) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
 
         Objects.requireNonNull(router, "router");
+        Objects.requireNonNull(globalRouterMapper, "globalRouterMapper");
         Objects.requireNonNull(keyParser, "keyParser");
         Objects.requireNonNull(maps, "maps");
         Objects.requireNonNull(viewProvider, "viewProvider");
+        Objects.requireNonNull(parties, "parties");
 
         mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
             for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
@@ -75,7 +81,24 @@ public class ZombiesJoinCommand extends Command {
                 }
             }
 
-            RouteResult result = router.join(ZombiesRouteRequest.joinGame(mapKey, () -> playerViews));
+            Set<UUID> excluded = new HashSet<>();
+            for (PlayerView playerView : playerViews) {
+                globalRouterMapper.apply(playerView.getUUID()).ifPresent(oldRouter -> {
+                    oldRouter.getScene(playerView.getUUID()).map(Scene::getUUID).ifPresent(excluded::add);
+                    oldRouter.leave(Collections.singleton(playerView.getUUID()));
+                });
+            }
+            RouteResult result = router.join(ZombiesRouteRequest.joinGame(mapKey, new ZombiesJoinRequest() {
+                @Override
+                public @NotNull Collection<PlayerView> getPlayers() {
+                    return playerViews;
+                }
+
+                @Override
+                public @NotNull Set<UUID> excludedScenes() {
+                    return excluded;
+                }
+            }));
             result.message().ifPresent(sender::sendMessage);
         }, mapKeyArgument);
     }

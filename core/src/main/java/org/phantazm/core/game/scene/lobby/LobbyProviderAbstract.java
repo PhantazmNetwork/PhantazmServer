@@ -3,6 +3,7 @@ package org.phantazm.core.game.scene.lobby;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneProviderAbstract;
+import org.phantazm.core.player.PlayerView;
 
 import java.util.Optional;
 
@@ -31,7 +32,14 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
         Lobby maximumLobby = null;
         int maximumWeighting = Integer.MIN_VALUE;
 
+        sceneLoop:
         for (Lobby lobby : getScenes()) {
+            for (PlayerView playerView : request.getPlayers()) {
+                if (lobby.getPlayers().containsKey(playerView.getUUID())) {
+                    continue sceneLoop;
+                }
+            }
+
             int joinWeight = lobby.getJoinWeight(request);
 
             if (joinWeight > maximumWeighting) {

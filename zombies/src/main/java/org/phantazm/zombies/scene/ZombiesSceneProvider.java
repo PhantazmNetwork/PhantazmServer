@@ -117,8 +117,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     @Override
     protected @NotNull Optional<ZombiesScene> chooseScene(@NotNull ZombiesJoinRequest request) {
+        sceneLoop:
         for (ZombiesScene scene : getScenes()) {
-            if (scene.isComplete() || !scene.isJoinable() || scene.isShutdown()) {
+            if (request.excludedScenes().contains(scene.getUUID()) || scene.isComplete() || !scene.isJoinable() || scene.isShutdown()) {
                 continue;
             }
 
@@ -130,9 +131,17 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             int maxPlayers = scene.getMapSettingsInfo().maxPlayers();
             int currentPlayerCount = scene.getZombiesPlayers().size();
 
-            if (currentPlayerCount + request.getPlayers().size() <= maxPlayers) {
-                return Optional.of(scene);
+            if (currentPlayerCount + request.getPlayers().size() > maxPlayers) {
+                continue;
             }
+
+            for (PlayerView view : request.getPlayers()) {
+                if (scene.getPlayers().containsKey(view.getUUID())) {
+                    continue sceneLoop;
+                }
+            }
+
+            return Optional.of(scene);
         }
 
         return Optional.empty();

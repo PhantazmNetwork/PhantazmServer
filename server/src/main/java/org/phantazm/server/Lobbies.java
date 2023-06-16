@@ -66,7 +66,7 @@ public final class Lobbies {
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
                 new HashMap<>(lobbiesConfig.lobbies().size());
-        lobbyRouter = new LobbyRouter(lobbyProviders);
+        lobbyRouter = new LobbyRouter(UUID.randomUUID(), lobbyProviders);
         sceneStore.addScene(SceneKeys.LOBBY_ROUTER, lobbyRouter);
 
         LobbyConfig mainLobbyConfig = lobbiesConfig.lobbies().get(lobbiesConfig.mainLobbyName());

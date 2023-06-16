@@ -35,7 +35,6 @@ import java.util.function.Function;
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
     private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
-    private final UUID uuid;
     private final ConnectionManager connectionManager;
     private final ZombiesMap map;
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
@@ -53,8 +52,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler) {
-        super(instance, players, fallback);
-        this.uuid = Objects.requireNonNull(uuid, "uuid");
+        super(uuid, instance, players, fallback);
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
@@ -79,10 +77,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     public boolean isComplete() {
         return stageTransition.isComplete();
-    }
-
-    public @NotNull UUID getUuid() {
-        return uuid;
     }
 
     public @NotNull ZombiesMap getMap() {
@@ -136,7 +130,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             zombiesPlayer.getPlayer().ifPresent(player -> {
                 teleportedViews.add(zombiesPlayer.module().getPlayerView());
                 teleportedPlayers.add(player);
-                futures.add(player.setInstance(instance, pos));
+                if (player.getInstance() == instance) {
+                    futures.add(player.teleport(pos));
+                } else {
+                    futures.add(player.setInstance(instance, pos));
+                }
                 runnables.add(() -> {
                    zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
                 });
@@ -146,7 +144,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             view.getPlayer().ifPresent(player -> {
                 teleportedViews.add(view);
                 teleportedPlayers.add(player);
-                futures.add(player.setInstance(instance, pos));
+                if (player.getInstance() == instance) {
+                    futures.add(player.teleport(pos));
+                } else {
+                    futures.add(player.setInstance(instance, pos));
+                }
                 runnables.add(() -> {
                     ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
                     zombiesPlayer.start();
