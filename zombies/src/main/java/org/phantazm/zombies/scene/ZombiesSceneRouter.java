@@ -96,32 +96,37 @@ public class ZombiesSceneRouter implements Scene<ZombiesRouteRequest>, SceneCont
 
         ZombiesJoinRequest joinRequest = routeRequest.joinRequest();
         Optional<ZombiesScene> sceneOptional = sceneProvider.provideScene(joinRequest);
-        if (sceneOptional.isPresent()) {
-            ZombiesScene scene = sceneOptional.get();
-            RouteResult result = scene.join(joinRequest);
-            if (result.success()) {
-                for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
-                    ZombiesScene oldScene = playerSceneMap.get(playerView.getUUID());
-                    if (oldScene != null && oldScene != scene) {
-                        oldScene.leave(Collections.singleton(playerView.getUUID()));
-                    }
-
-                    playerSceneMap.put(playerView.getUUID(), scene);
-                }
-            }
-
-            return result;
+        if (sceneOptional.isEmpty()) {
+            return new RouteResult(false, Component.text("No games are joinable."));
         }
 
-        return new RouteResult(false, Component.text("No games are joinable."));
+        ZombiesScene scene = sceneOptional.get();
+        RouteResult result = scene.join(joinRequest);
+        if (result.success()) {
+            for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
+                playerSceneMap.put(playerView.getUUID(), scene);
+            }
+        }
+
+        return result;
+
     }
 
     // TODO: optimize
     private RouteResult rejoinGame(ZombiesRouteRequest routeRequest) {
         for (ZombiesScene scene : getScenes()) {
-            if (scene.getUuid().equals(routeRequest.targetGame())) {
-                return scene.join(routeRequest.joinRequest());
+            if (!scene.getUuid().equals(routeRequest.targetGame())) {
+                continue;
             }
+
+            RouteResult result = scene.join(routeRequest.joinRequest());
+            if (result.success()) {
+                for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
+                    playerSceneMap.put(playerView.getUUID(), scene);
+                }
+            }
+
+            return result;
         }
 
         return new RouteResult(false, Component.text("Not a valid game."));
