@@ -60,6 +60,7 @@ public class PartyLeaveCommandIntegrationTest extends AbstractPartyCommandIntegr
         assertFalse(parties.containsKey(firstPlayer.getUuid()));
         assertFalse(party.getMemberManager().hasMember(firstPlayer.getUuid()));
         assertNotNull(party.getOwner().get());
+        assertNotEquals(firstPlayer.getUuid(), party.getOwner().get().getPlayerView().getUUID());
     }
 
 }

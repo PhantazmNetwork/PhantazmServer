@@ -44,7 +44,6 @@ public class PartyLeaveCommand {
             PartyMember oldMember = party.getMemberManager().removeMember(uuid);
 
             party.getNotification().notifyLeave(oldMember);
-            sender.sendMessage(Component.text("Left the party.", NamedTextColor.GREEN));
 
             if (party.getOwner().get().getPlayerView().getUUID().equals(uuid)) {
                 if (party.getMemberManager().getMembers().isEmpty()) {
@@ -52,7 +51,7 @@ public class PartyLeaveCommand {
                 } else {
                     int memberIndex = random.nextInt(party.getMemberManager().getMembers().size());
                     Iterator<PartyMember> memberIterator = party.getMemberManager().getMembers().values().iterator();
-                    PartyMember newOwner = null;
+                    PartyMember newOwner = memberIterator.next();
                     for (int i = 0; i < memberIndex; ++i) {
                         newOwner = memberIterator.next();
                     }
