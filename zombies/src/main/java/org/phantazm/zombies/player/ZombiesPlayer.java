@@ -136,11 +136,6 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
             return false;
         }
 
-        ZombiesPlayerMeta meta = module().getMeta();
-        if (meta.isReviving()) {
-            return false;
-        }
-
         return getPlayer().filter(value -> value.getPose() == Entity.Pose.SNEAKING).isPresent();
     }
 
