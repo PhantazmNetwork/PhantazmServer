@@ -132,11 +132,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 teleportedPlayers.add(player);
                 if (player.getInstance() == instance) {
                     futures.add(player.teleport(pos));
-                } else {
+                }
+                else {
                     futures.add(player.setInstance(instance, pos));
                 }
                 runnables.add(() -> {
-                   zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
                 });
             });
         }
@@ -146,7 +147,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 teleportedPlayers.add(player);
                 if (player.getInstance() == instance) {
                     futures.add(player.teleport(pos));
-                } else {
+                }
+                else {
                     futures.add(player.setInstance(instance, pos));
                 }
                 runnables.add(() -> {
@@ -199,6 +201,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+        for (UUID uuid : leavers) {
+            ZombiesPlayer zombiesPlayer = zombiesPlayers.get(uuid);
+            if (zombiesPlayer != null) {
+                zombiesPlayer.end();
+            }
+        }
+
         return leaveHandler.leave(leavers);
     }
 

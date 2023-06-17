@@ -22,6 +22,7 @@ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.commons.Activable;
+import org.phantazm.commons.CancellableState;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
@@ -61,6 +62,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -201,11 +203,11 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         }
                     }));
         };
+        Map<UUID, CancellableState> stateMap = new ConcurrentHashMap<>();
         Function<QuitPlayerStateContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
-                    List.of(new BasicQuitStateActivable(instance, playerView, sidebar,
-                            tabList)));
+                    List.of(new BasicQuitStateActivable(instance, playerView, sidebar, tabList, stateMap)));
         };
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
@@ -219,7 +221,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
                         playerTransactionModifierSource, flaggable);
 
-        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module);
+        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, stateMap);
         zombiesPlayerWrapper.set(zombiesPlayer);
         return zombiesPlayer;
     }
