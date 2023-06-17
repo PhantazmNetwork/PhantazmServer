@@ -9,7 +9,9 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.gui.SlotDistributor;
@@ -57,9 +59,9 @@ public interface MapObjects {
         @NotNull MapObjects make(@NotNull Instance instance,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
                 @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
-                @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler,
-                @NotNull Wrapper<EventNode<Event>> eventNode, @NotNull SongPlayer songPlayer,
-                @NotNull TickTaskScheduler tickTaskScheduler);
+                @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
+                @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
+                @NotNull SongPlayer songPlayer, @NotNull TickTaskScheduler tickTaskScheduler);
     }
 
     interface Module {

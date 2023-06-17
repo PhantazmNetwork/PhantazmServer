@@ -18,7 +18,9 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.ClientBlockHandlerSource;
@@ -80,12 +82,13 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     public @NotNull MapObjects make(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
-            @NotNull Wrapper<PowerupHandler> powerupHandler, @NotNull Wrapper<WindowHandler> windowHandler,
-            @NotNull Wrapper<EventNode<Event>> eventNode, @NotNull SongPlayer songPlayer,
-            @NotNull TickTaskScheduler tickTaskScheduler) {
+            @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
+            @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
+            @NotNull SongPlayer songPlayer, @NotNull TickTaskScheduler tickTaskScheduler) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
-        SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobModels::get, random, playerMap.values());
+        SpawnDistributor spawnDistributor =
+                new BasicSpawnDistributor(mobModels::get, random, playerMap.values(), mobNoPushTeam);
 
         Flaggable flaggable = new BasicFlaggable();
         TransactionModifierSource transactionModifierSource = new BasicTransactionModifierSource();

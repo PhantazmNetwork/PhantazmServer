@@ -21,6 +21,7 @@ import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.TickTaskScheduler;
@@ -73,6 +74,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final EventNode<Event> eventNode;
     private final ContextManager contextManager;
     private final KeyParser keyParser;
+    private final Team mobNoPushTeam;
 
     private final MapObjects.Source mapObjectSource;
     private final ZombiesPlayer.Source zombiesPlayerSource;
@@ -87,7 +89,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> eventNode, @NotNull MobSpawnerSource mobSpawnerSource,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser,
+            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull Team mobNoPushTeam,
             @NotNull Map<Key, PowerupInfo> powerups, @NotNull ZombiesPlayer.Source zombiesPlayerSource) {
         super(maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
@@ -102,6 +104,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Objects.requireNonNull(powerups, "powerups");
 
         MapSettingsInfo settingsInfo = mapInfo.settings();
+        this.mobNoPushTeam = settingsInfo.mobPlayerCollisions() ? null : mobNoPushTeam;
 
         this.mapObjectSource = new BasicMapObjectsSource(mapInfo, contextManager, mobSpawnerSource, mobModels,
                 clientBlockHandlerSource, keyParser);
@@ -119,7 +122,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     protected @NotNull Optional<ZombiesScene> chooseScene(@NotNull ZombiesJoinRequest request) {
         sceneLoop:
         for (ZombiesScene scene : getScenes()) {
-            if (request.excludedScenes().contains(scene.getUUID()) || scene.isComplete() || !scene.isJoinable() || scene.isShutdown()) {
+            if (request.excludedScenes().contains(scene.getUUID()) || scene.isComplete() || !scene.isJoinable() ||
+                    scene.isShutdown()) {
                 continue;
             }
 
@@ -169,9 +173,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Wrapper<EventNode<Event>> eventNodeWrapper = Wrapper.ofNull();
 
         SongPlayer songPlayer = new BasicSongPlayer();
-        MapObjects mapObjects =
-                createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, powerupHandlerWrapper,
-                        windowHandlerWrapper, eventNodeWrapper, songPlayer, tickTaskScheduler);
+        MapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, mobNoPushTeam,
+                powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper, songPlayer, tickTaskScheduler);
 
         RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
         roundHandlerWrapper.set(roundHandler);
@@ -251,11 +254,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     private MapObjects createMapObjects(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-            Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore,
+            Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore, Team mobNoPushTeam,
             Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler,
             Wrapper<EventNode<Event>> eventNode, SongPlayer songPlayer, TickTaskScheduler tickTaskScheduler) {
-        return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, powerupHandler,
-                windowHandler, eventNode, songPlayer, tickTaskScheduler);
+        return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, mobNoPushTeam,
+                powerupHandler, windowHandler, eventNode, songPlayer, tickTaskScheduler);
     }
 
     private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,

@@ -294,6 +294,7 @@ public final class MapProcessors {
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             float punchDamage = element.getNumberOrThrow("punchDamage").floatValue();
             float punchRange = element.getNumberOrThrow("punchRange").floatValue();
+            boolean mobPlayerCollisions = element.getBooleanOrThrow("mobPlayerCollisions");
 
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             Map<Key, List<Key>> defaultEquipment =
@@ -305,7 +306,8 @@ public final class MapProcessors {
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
                     corpseDeathTicks, healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks,
-                    rollsPerChest, punchDamage, punchRange, milestoneRounds, defaultEquipment, equipmentGroups);
+                    rollsPerChest, punchDamage, punchRange, mobPlayerCollisions, milestoneRounds, defaultEquipment,
+                    equipmentGroups);
         }
 
         @Override
@@ -344,6 +346,7 @@ public final class MapProcessors {
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());
             node.putNumber("punchDamage", mapConfig.punchDamage());
             node.putNumber("punchRange", mapConfig.punchRange());
+            node.putBoolean("mobPlayerCollisions", mapConfig.mobPlayerCollisions());
             node.put("milestoneRounds", integerList.elementFromData(mapConfig.milestoneRounds()));
             node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
             node.put("equipmentGroups", keyToEquipmentGroup.elementFromData(mapConfig.equipmentGroups()));

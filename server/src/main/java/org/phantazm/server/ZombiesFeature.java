@@ -139,6 +139,9 @@ public final class ZombiesFeature {
         TeamManager teamManager = MinecraftServer.getTeamManager();
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
+        // https://bugs.mojang.com/browse/MC-87984
+        Team mobNoPushTeam =
+                teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS).build();
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
@@ -147,7 +150,7 @@ public final class ZombiesFeature {
                         DimensionType dimensionType = instance.getDimensionType();
                         return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
                                 dimensionType.getHeight());
-                    }), contextManager, keyParser, ZombiesFeature.powerups(),
+                    }), contextManager, keyParser, mobNoPushTeam, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
                                     Mob.getModels()));
             providers.put(entry.getKey(), provider);
