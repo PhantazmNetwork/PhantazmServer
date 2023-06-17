@@ -49,7 +49,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     void registerCancellable(@NotNull CancellableState cancellable);
 
-    void removeCancellable(@NotNull String id);
+    void removeCancellable(@NotNull UUID id);
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();

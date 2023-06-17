@@ -41,7 +41,7 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
         private final Instance instance;
         private final DeactivationPredicate predicate;
         private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
-        private final String name;
+        private final UUID id;
 
         private long startTime = -1;
         private BossBar bossBar;
@@ -61,7 +61,7 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
                 }
             };
             this.playerMap = playerMap;
-            this.name = UUID.randomUUID().toString();
+            this.id = UUID.randomUUID();
         }
 
         @Override
@@ -85,12 +85,8 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
             this.bossBar = bossBar;
 
             for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                zombiesPlayer.registerCancellable(CancellableState.named(name, () -> {
-                }, () -> {
-                    zombiesPlayer.getPlayer().ifPresent(actualPlayer -> {
-                        actualPlayer.hideBossBar(bossBar);
-                    });
-                }));
+                zombiesPlayer.registerCancellable(CancellableState.named(id, () -> {
+                }, () -> zombiesPlayer.getPlayer().ifPresent(actualPlayer -> actualPlayer.hideBossBar(bossBar))));
             }
         }
 
@@ -98,7 +94,10 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
         public void deactivate(@NotNull ZombiesPlayer player) {
             BossBar bossBar = this.bossBar;
             if (bossBar != null) {
-                MinecraftServer.getBossBarManager().destroyBossBar(bossBar);
+                for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                    zombiesPlayer.removeCancellable(id);
+                }
+
                 this.bossBar = null;
             }
         }

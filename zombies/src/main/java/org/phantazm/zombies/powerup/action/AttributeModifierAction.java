@@ -63,7 +63,7 @@ public class AttributeModifierAction implements Supplier<PowerupAction> {
         }
 
         private void applyAttribute(ZombiesPlayer player) {
-            player.registerCancellable(CancellableState.named(attributeName, () -> {
+            player.registerCancellable(CancellableState.named(attributeUID, () -> {
                 player.getPlayer().ifPresent(p -> {
                     p.getAttribute(attribute).addModifier(
                             new AttributeModifier(attributeUID, attributeName, data.amount, data.attributeOperation));
@@ -76,7 +76,7 @@ public class AttributeModifierAction implements Supplier<PowerupAction> {
         }
 
         private void removeAttribute(ZombiesPlayer player) {
-            player.removeCancellable(attributeName);
+            player.removeCancellable(attributeUID);
         }
 
         @Override

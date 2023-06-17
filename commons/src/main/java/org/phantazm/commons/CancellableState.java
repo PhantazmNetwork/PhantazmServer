@@ -3,15 +3,16 @@ package org.phantazm.commons;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public interface CancellableState {
     void start();
 
     void end();
 
-    @NotNull String id();
+    @NotNull UUID id();
 
-    static @NotNull CancellableState named(@NotNull String id, @NotNull Runnable start, @NotNull Runnable end) {
+    static @NotNull CancellableState named(@NotNull UUID id, @NotNull Runnable start, @NotNull Runnable end) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(start, "start");
         Objects.requireNonNull(end, "end");
@@ -28,7 +29,7 @@ public interface CancellableState {
             }
 
             @Override
-            public @NotNull String id() {
+            public @NotNull UUID id() {
                 return id;
             }
         };

@@ -22,7 +22,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final ZombiesScene scene;
     private final ZombiesPlayerModule module;
     private final TickTaskScheduler scheduler;
-    private final Map<String, CancellableState> cancellables;
+    private final Map<UUID, CancellableState> cancellables;
 
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module) {
         this.scene = Objects.requireNonNull(scene, "scene");
@@ -64,7 +64,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     @Override
-    public void removeCancellable(@NotNull String id) {
+    public void removeCancellable(@NotNull UUID id) {
         cancellables.remove(id);
     }
 
