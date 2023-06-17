@@ -19,18 +19,14 @@ public class BasicQuitStateActivable implements Activable {
 
     private final PlayerView playerView;
 
-    private final ZombiesPlayerMeta meta;
-
     private final Sidebar sidebar;
 
     private final TabList tabList;
 
-    public BasicQuitStateActivable(@NotNull Instance instance,
-            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull PlayerView playerView,
-            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+    public BasicQuitStateActivable(@NotNull Instance instance, @NotNull PlayerView playerView, @NotNull Sidebar sidebar,
+            @NotNull TabList tabList) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
     }

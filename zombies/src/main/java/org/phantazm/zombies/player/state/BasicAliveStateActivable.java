@@ -16,17 +16,14 @@ import java.util.Objects;
 public class BasicAliveStateActivable implements Activable {
     private final InventoryAccessRegistry accessRegistry;
     private final PlayerView playerView;
-    private final ZombiesPlayerMeta meta;
     private final Sidebar sidebar;
     private final TabList tabList;
 
     private long lastHeal;
 
-    public BasicAliveStateActivable(@NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
-            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+    public BasicAliveStateActivable(@NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
     }

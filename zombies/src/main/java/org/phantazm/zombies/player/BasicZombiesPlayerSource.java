@@ -150,13 +150,13 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE"), ZombiesPlayerStateKeys.ALIVE.key(),
-                    List.of(new BasicAliveStateActivable(accessRegistry, playerView, meta, sidebar, tabList)));
+                    List.of(new BasicAliveStateActivable(accessRegistry, playerView, sidebar, tabList)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
                 (context, activables) -> {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
                     combinedActivables.add(
-                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta, sidebar,
+                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, sidebar,
                                     tabList));
                     return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
@@ -194,7 +194,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
-                            meta, sidebar, tabList), corpse.asKnockActivable(reviveHandler), new Activable() {
+                            sidebar, tabList), corpse.asKnockActivable(reviveHandler), new Activable() {
                         @Override
                         public void start() {
                             meta.setCorpse(corpse);
@@ -204,7 +204,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Function<QuitPlayerStateContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
-                    List.of(new BasicQuitStateActivable(instance, zombiesPlayers.values(), playerView, meta, sidebar,
+                    List.of(new BasicQuitStateActivable(instance, playerView, sidebar,
                             tabList)));
         };
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();

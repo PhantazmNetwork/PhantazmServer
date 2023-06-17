@@ -14,7 +14,6 @@ import org.phantazm.commons.Activable;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.ZombiesPlayerMeta;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
@@ -37,17 +36,14 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final TabList tabList;
 
-    private final ZombiesPlayerMeta meta;
-
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
             @NotNull PlayerView playerView, @NotNull ReviveHandler reviveHandler, @NotNull TickFormatter tickFormatter,
-            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+            @NotNull Sidebar sidebar, @NotNull TabList tabList) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.reviveHandler = Objects.requireNonNull(reviveHandler, "reviveHandler");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
-        this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = tabList;
     }
@@ -72,15 +68,20 @@ public class BasicKnockedStateActivable implements Activable {
 
     @Override
     public void tick(long time) {
-        reviveHandler.getReviver().ifPresentOrElse(reviver -> {
-            Wrapper<Component> knockedDisplayName = Wrapper.ofNull(), reviverDisplayName = Wrapper.ofNull();
-            CompletableFuture<Void> knockedFuture = playerView.getDisplayName().thenAccept(knockedDisplayName::set);
-            CompletableFuture<Void> reviverFuture =
-                    reviver.module().getPlayerView().getDisplayName().thenAccept(reviverDisplayName::set);
-            CompletableFuture.allOf(knockedFuture, reviverFuture).thenAccept(v -> {
-                sendReviveStatus(reviver, knockedDisplayName.get(), reviverDisplayName.get());
+        if (reviveHandler.isReviving()) {
+            reviveHandler.getReviver().ifPresent(reviver -> {
+                Wrapper<Component> knockedDisplayName = Wrapper.ofNull(), reviverDisplayName = Wrapper.ofNull();
+                CompletableFuture<Void> knockedFuture = playerView.getDisplayName().thenAccept(knockedDisplayName::set);
+                CompletableFuture<Void> reviverFuture =
+                        reviver.module().getPlayerView().getDisplayName().thenAccept(reviverDisplayName::set);
+                CompletableFuture.allOf(knockedFuture, reviverFuture).thenAccept(v -> {
+                    sendReviveStatus(reviver, knockedDisplayName.get(), reviverDisplayName.get());
+                });
             });
-        }, this::sendDyingStatus);
+        }
+        else {
+            sendDyingStatus();
+        }
     }
 
     @Override
@@ -92,6 +93,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.setFlyingSpeed(Attribute.FLYING_SPEED.defaultValue());
             player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
             player.setGameMode(GameMode.ADVENTURE);
+            player.sendActionBar(Component.empty());
             sidebar.addViewer(player);
             tabList.addViewer(player);
             context.getVehicle().remove();
@@ -102,13 +104,15 @@ public class BasicKnockedStateActivable implements Activable {
     private void sendReviveStatus(@NotNull ZombiesPlayer reviver, @NotNull Component knockedDisplayName,
             @NotNull Component reviverDisplayName) {
         reviver.module().getPlayerView().getPlayer().ifPresent(reviverPlayer -> {
-            reviverPlayer.sendActionBar(
+            Component message =
                     Component.textOfChildren(Component.text("Reviving "), knockedDisplayName, Component.text(" - "),
-                            tickFormatter.format(reviveHandler.getTicksUntilRevive())));
+                            tickFormatter.format(reviveHandler.getTicksUntilRevive()));
+            reviverPlayer.sendActionBar(message);
         });
         playerView.getPlayer().ifPresent(player -> {
-            player.sendActionBar(Component.textOfChildren(reviverDisplayName, Component.text(" is reviving you - "),
-                    tickFormatter.format(reviveHandler.getTicksUntilRevive())));
+            Component message = Component.textOfChildren(reviverDisplayName, Component.text(" is reviving you - "),
+                    tickFormatter.format(reviveHandler.getTicksUntilRevive()));
+            player.sendActionBar(message);
         });
     }
 
