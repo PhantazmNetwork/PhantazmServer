@@ -215,6 +215,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(PotionShotHandler.class);
         contextManager.registerElementClass(SlowDownShotHandler.class);
         contextManager.registerElementClass(SoundShotHandler.class);
+        contextManager.registerElementClass(ZombiesPlayerMapStatsShotHandler.class);
         contextManager.registerElementClass(StateShootTester.class);
         contextManager.registerElementClass(AroundEndFinder.class);
         contextManager.registerElementClass(BetweenPointsFinder.class);

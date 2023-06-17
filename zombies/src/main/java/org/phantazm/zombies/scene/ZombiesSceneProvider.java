@@ -59,6 +59,7 @@ import org.phantazm.zombies.sidebar.ElementSidebarUpdaterCreator;
 import org.phantazm.zombies.sidebar.SidebarModule;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.phantazm.zombies.stage.*;
+import org.phantazm.zombies.stats.ZombiesDatabase;
 
 import java.util.*;
 import java.util.function.Function;
@@ -75,6 +76,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final ContextManager contextManager;
     private final KeyParser keyParser;
     private final Team mobNoPushTeam;
+    private final ZombiesDatabase database;
 
     private final MapObjects.Source mapObjectSource;
     private final ZombiesPlayer.Source zombiesPlayerSource;
@@ -90,7 +92,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull EventNode<Event> eventNode, @NotNull MobSpawnerSource mobSpawnerSource,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull Team mobNoPushTeam,
-            @NotNull Map<Key, PowerupInfo> powerups, @NotNull ZombiesPlayer.Source zombiesPlayerSource) {
+            @NotNull ZombiesDatabase database, @NotNull Map<Key, PowerupInfo> powerups,
+            @NotNull ZombiesPlayer.Source zombiesPlayerSource) {
         super(maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.contexts = new IdentityHashMap<>(maximumScenes);
@@ -101,6 +104,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        this.database = Objects.requireNonNull(database, "database");
         Objects.requireNonNull(powerups, "powerups");
 
         MapSettingsInfo settingsInfo = mapInfo.settings();
@@ -176,7 +180,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         MapObjects mapObjects = createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, mobNoPushTeam,
                 powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper, songPlayer, tickTaskScheduler);
 
-        RoundHandler roundHandler = new BasicRoundHandler(mapObjects.rounds());
+        RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds());
         roundHandlerWrapper.set(roundHandler);
 
         PowerupHandler powerupHandler =
@@ -225,7 +229,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesScene scene =
                 new ZombiesScene(UUID.randomUUID(), connectionManager, map, players, zombiesPlayers, instance,
-                        sceneFallback, settings, stageTransition, leaveHandler, playerCreator, tickTaskScheduler);
+                        sceneFallback, settings, stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database);
         sceneWrapper.set(scene);
 
         eventNode.addChild(childNode);

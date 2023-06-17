@@ -96,6 +96,7 @@ public class InGameStage implements Stage {
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             zombiesPlayer.module().getMeta().setInGame(true);
+            zombiesPlayer.module().getStats().setGamesPlayed(zombiesPlayer.module().getStats().getGamesPlayed() + 1);
             zombiesPlayer.getPlayer().ifPresent(player -> {
                 player.teleport(spawnPos);
             });
@@ -165,6 +166,10 @@ public class InGameStage implements Stage {
             instance.sendTitlePart(TitlePart.TITLE, Component.text("You Win!", NamedTextColor.GREEN));
             instance.sendTitlePart(TitlePart.SUBTITLE, Component.text("You made it to Round ", NamedTextColor.GRAY)
                     .append(Component.text(bestRound, NamedTextColor.WHITE)).append(Component.text("!")));
+
+            for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+                zombiesPlayer.module().getStats().setWins(zombiesPlayer.module().getStats().getWins() + 1);
+            }
         }
         else {
             instance.sendTitlePart(TitlePart.TITLE, Component.text("You lost...", NamedTextColor.RED));

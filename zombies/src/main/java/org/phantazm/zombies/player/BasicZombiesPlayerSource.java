@@ -57,6 +57,8 @@ import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.stats.BasicZombiesPlayerMapStats;
+import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,9 +97,11 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
 
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
+        ZombiesPlayerMapStats stats =
+                BasicZombiesPlayerMapStats.createBasicStats(playerView.getUUID(), mapSettingsInfo.id());
 
         PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
-        PlayerKills kills = new BasicPlayerKills();
+        PlayerKills kills = new BasicPlayerKills(stats);
 
         InventoryProfile livingProfile = new BasicInventoryProfile(45);
 
@@ -142,7 +146,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
         ZombiesEquipmentModule equipmentModule =
-                new ZombiesEquipmentModule(zombiesPlayers, playerView, mobSpawner, mobStore, eventNode, random,
+                new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, mobSpawner, mobStore, eventNode, random,
                         mapObjects, zombiesPlayerWrapper, mobModelMap::get);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 
@@ -209,7 +213,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     ZombiesPlayerStateKeys.QUIT.key(),
                     List.of(new BasicQuitStateActivable(instance, playerView, sidebar, tabList, stateMap)));
         };
-        PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
+        PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(stats);
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
                 Map.of(ZombiesPlayerStateKeys.ALIVE, aliveStateCreator, ZombiesPlayerStateKeys.DEAD,
                         (Function<DeadPlayerStateContext, ZombiesPlayerState>)context -> deadStateCreator.apply(context,
@@ -219,7 +223,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         ZombiesPlayerModule module =
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
-                        playerTransactionModifierSource, flaggable);
+                        playerTransactionModifierSource, flaggable, stats);
 
         ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, stateMap);
         zombiesPlayerWrapper.set(zombiesPlayer);

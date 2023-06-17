@@ -14,6 +14,7 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
 
 import java.util.*;
 import java.util.function.Function;
@@ -25,6 +26,7 @@ import java.util.function.Supplier;
 public class ZombiesEquipmentModule implements DependencyModule {
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
     private final PlayerView playerView;
+    private final ZombiesPlayerMapStats mapStats;
     private final MobSpawner mobSpawner;
     private final MobStore mobStore;
     private final EventNode<Event> eventNode;
@@ -34,12 +36,13 @@ public class ZombiesEquipmentModule implements DependencyModule {
     private final Function<? super Key, ? extends MobModel> mobModelFunction;
 
     public ZombiesEquipmentModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull PlayerView playerView, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
-            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-            @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier,
+            @NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats mapStats, @NotNull MobSpawner mobSpawner,
+            @NotNull MobStore mobStore, @NotNull EventNode<Event> eventNode, @NotNull Random random,
+            @NotNull MapObjects mapObjects, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier,
             @NotNull Function<? super Key, ? extends MobModel> mobModelFunction) {
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.mapStats = Objects.requireNonNull(mapStats, "mapStats");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
@@ -55,6 +58,10 @@ public class ZombiesEquipmentModule implements DependencyModule {
 
     public @NotNull PlayerView getPlayerView() {
         return playerView;
+    }
+
+    public @NotNull ZombiesPlayerMapStats getMapStats() {
+        return mapStats;
     }
 
     public @NotNull Supplier<Optional<? extends Entity>> getPlayerSupplier() {

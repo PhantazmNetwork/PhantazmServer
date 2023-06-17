@@ -22,6 +22,8 @@ dependencies {
     implementation(libs.ethylene.json)
     implementation(libs.element.core)
     implementation(libs.ethylene.mapper)
+
+    runtimeOnly(libs.sqlite)
 }
 
 tasks.getByName<CopyLibs>("copyLibs") {

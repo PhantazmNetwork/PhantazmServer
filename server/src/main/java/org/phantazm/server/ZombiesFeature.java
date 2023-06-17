@@ -5,6 +5,8 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -27,9 +29,7 @@ import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
-import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
-import org.phantazm.core.game.scene.lobby.Lobby;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
@@ -89,12 +89,20 @@ import org.phantazm.zombies.sidebar.lineupdater.creator.ZombieKillsUpdaterCreato
 import org.phantazm.zombies.sidebar.section.CollectionSidebarSection;
 import org.phantazm.zombies.sidebar.section.ZombiesPlayerSection;
 import org.phantazm.zombies.sidebar.section.ZombiesPlayersSection;
+import org.phantazm.zombies.stats.HikariZombiesDatabase;
+import org.phantazm.zombies.stats.OracleZombiesDatabase;
+import org.phantazm.zombies.stats.SqliteZombiesDatabase;
+import org.phantazm.zombies.stats.ZombiesDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public final class ZombiesFeature {
@@ -108,6 +116,7 @@ public final class ZombiesFeature {
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
+    private static HikariZombiesDatabase database;
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
@@ -142,6 +151,13 @@ public final class ZombiesFeature {
         // https://bugs.mojang.com/browse/MC-87984
         Team mobNoPushTeam =
                 teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS).build();
+        Executor databaseExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        HikariConfig config = new HikariConfig("./zombies.hikari.properties");
+        HikariDataSource dataSource = new HikariDataSource(config);
+        database = switch (dataSource.getDataSourceClassName()) {
+            case "org.sqlite.SQLiteDataSource" -> new SqliteZombiesDatabase(databaseExecutor, dataSource);
+            default -> throw new RuntimeException("Unknown data source " + dataSource.getDataSourceClassName());
+        };
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
@@ -150,7 +166,7 @@ public final class ZombiesFeature {
                         DimensionType dimensionType = instance.getDimensionType();
                         return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
                                 dimensionType.getHeight());
-                    }), contextManager, keyParser, mobNoPushTeam, ZombiesFeature.powerups(),
+                    }), contextManager, keyParser, mobNoPushTeam, database, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
                                     Mob.getModels()));
             providers.put(entry.getKey(), provider);
@@ -363,5 +379,9 @@ public final class ZombiesFeature {
 
     public static @NotNull ZombiesSceneRouter zombiesSceneRouter() {
         return FeatureUtils.check(sceneRouter);
+    }
+
+    public static @NotNull HikariZombiesDatabase getDatabase() {
+        return database;
     }
 }

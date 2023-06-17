@@ -59,6 +59,8 @@ public final class PhantazmServer {
     public static final Path BANS_FILE = Path.of("./bans.txt");
     public static final Path WHITELIST_FILE = Path.of("./whitelist.txt");
 
+    private static LoginValidator loginValidator;
+
     /**
      * Starting point for the server.
      *
@@ -126,7 +128,7 @@ public final class PhantazmServer {
             return;
         }
 
-        LoginValidator loginValidator =
+        loginValidator =
                 new BasicLoginValidator(serverConfig.serverInfoConfig().whitelist(), WHITELIST_FILE, BANS_FILE);
 
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
@@ -145,8 +147,6 @@ public final class PhantazmServer {
             if (!MinecraftServer.isStopping()) {
                 shutdown("interrupt");
             }
-
-            loginValidator.flush();
         }));
 
         MinecraftServer.setBrandName(BRAND_NAME);
@@ -162,6 +162,10 @@ public final class PhantazmServer {
 
     public static void shutdown(@Nullable String reason) {
         LOGGER.info("Shutting down server. Reason: " + reason);
+
+        ZombiesFeature.getDatabase().close();
+        loginValidator.flush();
+
         MinecraftServer.stopCleanly();
     }
 

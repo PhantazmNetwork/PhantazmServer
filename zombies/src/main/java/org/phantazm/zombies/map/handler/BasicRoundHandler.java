@@ -2,12 +2,12 @@ package org.phantazm.zombies.map.handler;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Round;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class BasicRoundHandler implements RoundHandler {
+    private final Collection<? extends ZombiesPlayer> zombiesPlayers;
     private final List<Round> rounds;
 
     private Round currentRound;
@@ -15,7 +15,8 @@ public class BasicRoundHandler implements RoundHandler {
 
     private boolean hasEnded;
 
-    public BasicRoundHandler(@NotNull List<Round> rounds) {
+    public BasicRoundHandler(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull List<Round> rounds) {
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.rounds = Objects.requireNonNull(rounds, "rounds");
 
         if (rounds.isEmpty()) {
@@ -29,6 +30,11 @@ public class BasicRoundHandler implements RoundHandler {
             currentRound.tick(time);
 
             if (!currentRound.isActive()) {
+                for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+                    zombiesPlayer.module().getStats()
+                            .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
+                }
+
                 if (++roundIndex < rounds.size()) {
                     currentRound = rounds.get(roundIndex);
                     currentRound.startRound(time);

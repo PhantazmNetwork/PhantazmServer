@@ -1,8 +1,14 @@
 package org.phantazm.zombies.kill;
 
+import net.kyori.adventure.key.Key;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.stats.BasicZombiesPlayerMapStats;
+import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -13,7 +19,9 @@ public class BasicPlayerKillsTest {
 
     @BeforeEach
     public void setup() {
-        kills = new BasicPlayerKills();
+        ZombiesPlayerMapStats mapStats = BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(),
+                Key.key(Namespaces.PHANTAZM, "test_map"));
+        kills = new BasicPlayerKills(mapStats);
     }
 
     @Test
