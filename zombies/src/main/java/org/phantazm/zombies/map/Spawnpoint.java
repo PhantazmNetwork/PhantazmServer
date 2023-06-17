@@ -130,12 +130,11 @@ public class Spawnpoint {
         double slaSquared = spawnrule.slaSquared();
         boolean inRange = false;
         for (ZombiesPlayer player : zombiesPlayers) {
-            ZombiesPlayerModule module = player.module();
-            if (!(module.getMeta().canTriggerSLA())) {
+            if (!player.canTriggerSLA()) {
                 continue;
             }
 
-            Optional<Player> playerOptional = module.getPlayerView().getPlayer();
+            Optional<Player> playerOptional = player.getPlayer();
             if (playerOptional.isPresent()) {
                 if (playerOptional.get().getPosition().distanceSquared(spawnPoint) < slaSquared) {
                     inRange = true;

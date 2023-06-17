@@ -49,10 +49,6 @@ public class BasicDeadStateActivable implements Activable {
         });
 
         accessRegistry.switchAccess(InventoryKeys.DEAD_ACCESS);
-
-        meta.setInGame(true);
-        meta.setCanRevive(false);
-        meta.setCanTriggerSLA(false);
     }
 
     @Override

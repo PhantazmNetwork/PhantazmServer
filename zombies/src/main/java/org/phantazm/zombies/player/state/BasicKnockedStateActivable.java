@@ -68,9 +68,6 @@ public class BasicKnockedStateActivable implements Activable {
         playerView.getDisplayName().thenAccept(displayName -> {
             instance.sendMessage(buildDeathMessage(displayName));
         });
-        meta.setInGame(true);
-        meta.setCanRevive(false);
-        meta.setCanTriggerSLA(false);
     }
 
     @Override

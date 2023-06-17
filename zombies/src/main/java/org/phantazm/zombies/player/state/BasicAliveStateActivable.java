@@ -43,10 +43,6 @@ public class BasicAliveStateActivable implements Activable {
         });
 
         accessRegistry.switchAccess(InventoryKeys.ALIVE_ACCESS);
-
-        meta.setInGame(true);
-        meta.setCanRevive(true);
-        meta.setCanTriggerSLA(true);
     }
 
     @Override

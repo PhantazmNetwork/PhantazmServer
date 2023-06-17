@@ -120,7 +120,7 @@ public class SelectBombedRoom implements Action<Round> {
 
                     for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
                         zombiesPlayer.getPlayer().ifPresent(player -> {
-                            if (!zombiesPlayer.isAlive()) {
+                            if (!zombiesPlayer.canDoGenericActions()) {
                                 removeModifiers(player);
                             }
                             else {
@@ -146,7 +146,7 @@ public class SelectBombedRoom implements Action<Round> {
 
                 if (++ticks % 4 == 0) {
                     for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                        if (!zombiesPlayer.isAlive()) {
+                        if (!zombiesPlayer.canDoGenericActions()) {
                             continue;
                         }
 

@@ -46,9 +46,6 @@ public class BasicQuitStateActivable implements Activable {
         });
         playerView.getDisplayName()
                 .thenAccept(displayName -> instance.sendMessage(displayName.append(Component.text(" quit."))));
-        meta.setInGame(false);
-        meta.setCanRevive(false);
-        meta.setCanTriggerSLA(false);
     }
 
 }

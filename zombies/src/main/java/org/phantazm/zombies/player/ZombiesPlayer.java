@@ -2,6 +2,7 @@ package org.phantazm.zombies.player;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -104,26 +105,51 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     }
 
     default boolean canPickupPowerup(@NotNull Powerup powerup) {
-        return isAlive();
+        return canDoGenericActions();
     }
 
     default boolean canOpenDoor(@NotNull Door door) {
-        return isAlive();
+        return canDoGenericActions();
     }
 
     default boolean canRepairWindow() {
-        return isAlive();
+        return canDoGenericActions();
     }
 
     default boolean canTakeDamage() {
-        return isAlive();
+        return canDoGenericActions();
     }
 
     default boolean canBeTargeted() {
-        return isAlive() && getPlayer().map(player -> {
+        return canDoGenericActions() && getPlayer().map(player -> {
             GameMode mode = player.getGameMode();
             return mode == GameMode.SURVIVAL || mode == GameMode.ADVENTURE;
         }).orElse(false);
+    }
+
+    default boolean canDoGenericActions() {
+        return isAlive() && isInGame();
+    }
+
+    default boolean canRevive() {
+        if (!canDoGenericActions()) {
+            return false;
+        }
+
+        ZombiesPlayerMeta meta = module().getMeta();
+        if (meta.isReviving()) {
+            return false;
+        }
+
+        return getPlayer().filter(value -> value.getPose() == Entity.Pose.SNEAKING).isPresent();
+    }
+
+    default boolean canTriggerSLA() {
+        return canDoGenericActions();
+    }
+
+    default boolean isInGame() {
+        return module().getMeta().isInGame();
     }
 
     default boolean inStage(@NotNull Key stageKey) {

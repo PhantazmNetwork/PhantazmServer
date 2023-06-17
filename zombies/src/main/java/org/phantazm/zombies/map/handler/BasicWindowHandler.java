@@ -110,7 +110,7 @@ public class BasicWindowHandler implements WindowHandler {
         while (repairOperationIterator.hasNext()) {
             RepairOperation repairOperation = repairOperationIterator.next();
             ZombiesPlayer zombiesPlayer = repairOperation.zombiesPlayer;
-            if (!zombiesPlayer.isAlive()) {
+            if (!zombiesPlayer.canRepairWindow()) {
                 repairOperationIterator.remove();
                 continue;
             }

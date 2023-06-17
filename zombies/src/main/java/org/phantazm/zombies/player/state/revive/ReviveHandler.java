@@ -84,8 +84,7 @@ public class ReviveHandler implements Activable {
                 --ticksUntilDeath;
             }
         }
-        else if (!reviver.module().getMeta().isCanRevive() ||
-                !reviver.getPlayer().map(player -> player.getPose() == Entity.Pose.SNEAKING).orElse(true)) {
+        else if (!reviver.canRevive()) {
             reviver.module().getMeta().setReviving(false);
             reviver = null;
             ticksUntilRevive = -1;

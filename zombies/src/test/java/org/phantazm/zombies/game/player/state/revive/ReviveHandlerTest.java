@@ -95,7 +95,6 @@ public class ReviveHandlerTest {
                 new ReviveHandler(() -> aliveState, () -> deathState, () -> reviver, initialDeathTime);
 
         reviveHandler.tick(0L);
-        when(meta.isCanRevive()).thenReturn(false);
         reviveHandler.tick(0L);
 
         assertFalse(reviveHandler.isReviving());

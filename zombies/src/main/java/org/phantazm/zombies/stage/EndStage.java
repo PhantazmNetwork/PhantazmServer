@@ -52,7 +52,7 @@ public class EndStage implements Stage {
 
     @Override
     public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
-
+        zombiesPlayer.module().getMeta().setInGame(false);
     }
 
     @Override
@@ -70,6 +70,8 @@ public class EndStage implements Stage {
         instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F));
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            zombiesPlayer.module().getMeta().setInGame(false);
+
             if (zombiesPlayer.isState(ZombiesPlayerStateKeys.KNOCKED)) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.killed(null, null));
             }

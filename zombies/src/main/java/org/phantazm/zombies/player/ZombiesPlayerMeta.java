@@ -12,11 +12,7 @@ public class ZombiesPlayerMeta {
 
     private boolean inGame = false;
 
-    private boolean canRevive = false;
-
     private boolean isReviving = false;
-
-    private boolean canTriggerSLA = true;
 
     private int windowRepairAmount = 1;
 
@@ -36,28 +32,12 @@ public class ZombiesPlayerMeta {
         this.inGame = inGame;
     }
 
-    public boolean isCanRevive() {
-        return canRevive;
-    }
-
-    public void setCanRevive(boolean canRevive) {
-        this.canRevive = canRevive;
-    }
-
     public boolean isReviving() {
         return isReviving;
     }
 
     public void setReviving(boolean reviving) {
         isReviving = reviving;
-    }
-
-    public boolean canTriggerSLA() {
-        return canTriggerSLA;
-    }
-
-    public void setCanTriggerSLA(boolean canTriggerSLA) {
-        this.canTriggerSLA = canTriggerSLA;
     }
 
     public int getWindowRepairAmount() {

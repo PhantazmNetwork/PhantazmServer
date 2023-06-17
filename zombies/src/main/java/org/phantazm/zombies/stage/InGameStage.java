@@ -77,7 +77,7 @@ public class InGameStage implements Stage {
 
     @Override
     public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
-
+        zombiesPlayer.module().getMeta().setInGame(true);
     }
 
     @Override
@@ -95,6 +95,7 @@ public class InGameStage implements Stage {
         this.startTime = System.currentTimeMillis();
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            zombiesPlayer.module().getMeta().setInGame(true);
             zombiesPlayer.getPlayer().ifPresent(player -> {
                 player.teleport(spawnPos);
             });
