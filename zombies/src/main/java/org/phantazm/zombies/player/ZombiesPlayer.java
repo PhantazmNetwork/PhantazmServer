@@ -10,6 +10,8 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
+import org.phantazm.commons.CancellableState;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
@@ -42,6 +44,12 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     long getReviveTime();
 
     @NotNull ZombiesScene getScene();
+
+    @NotNull TickTaskScheduler scheduler();
+
+    void registerCancellable(@NotNull CancellableState cancellable);
+
+    void removeCancellable(@NotNull String id);
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();
