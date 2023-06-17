@@ -24,6 +24,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.color.Color;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.particle.Particle;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +55,7 @@ public final class Ethylene {
                         .withCustomSignature(bounds3D()).withCustomSignature(rgbLike()).withScalarSignature(key())
                         .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
                         .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
-                        .withScalarSignature(particle())
+                        .withScalarSignature(particle()).withScalarSignature(block())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
                         .withStandardTypeImplementations().ignoringLengths().build();
@@ -147,6 +148,12 @@ public final class Ethylene {
                 return ItemStack.AIR;
             }
         }, itemStack -> itemStack == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));
+    }
+
+    private static ScalarSignature<Block> block() {
+        return ScalarSignature.of(Token.ofClass(Block.class), element -> {
+            return Objects.requireNonNullElse(Block.fromNamespaceId(element.asString()), Block.AIR);
+        }, block -> block == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(block.name()));
     }
 
     private static ScalarSignature<TitlePart<Component>> titlePartComponent() {
