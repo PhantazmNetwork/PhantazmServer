@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -29,19 +28,15 @@ public abstract class HikariZombiesDatabase implements Closeable, ZombiesDatabas
     }
 
     @Override
-    public void synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats) {
-        CompletableFuture.runAsync(() -> {
+    public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats) {
+        return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 synchronizeZombiesPlayerMapStatsInternal(connection, stats);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-        }, executor).whenComplete((ignored, throwable) -> {
-            if (throwable != null) {
-                LOGGER.warn("Exception while querying database", throwable);
-            }
-        });
+        }, executor).whenComplete(this::logException);
     }
 
     @Override
@@ -53,11 +48,13 @@ public abstract class HikariZombiesDatabase implements Closeable, ZombiesDatabas
             catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-        }, executor).whenComplete((ignored, throwable) -> {
-            if (throwable != null) {
-                LOGGER.warn("Exception while querying database", throwable);
-            }
-        });
+        }, executor).whenComplete(this::logException);
+    }
+
+    private <T> void logException(T ignored, Throwable throwable) {
+        if (throwable != null) {
+            LOGGER.warn("Exception while querying database", throwable);
+        }
     }
 
     protected abstract void synchronizeZombiesPlayerMapStatsInternal(@NotNull Connection connection,

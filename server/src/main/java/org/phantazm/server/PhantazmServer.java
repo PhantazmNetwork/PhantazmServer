@@ -163,7 +163,7 @@ public final class PhantazmServer {
     public static void shutdown(@Nullable String reason) {
         LOGGER.info("Shutting down server. Reason: " + reason);
 
-        ZombiesFeature.getDatabase().close();
+        ZombiesFeature.end();
         loginValidator.flush();
 
         MinecraftServer.stopCleanly();

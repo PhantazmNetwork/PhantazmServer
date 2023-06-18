@@ -99,7 +99,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public final class ZombiesFeature {
@@ -113,6 +115,7 @@ public final class ZombiesFeature {
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
+    private static ExecutorService databaseExecutor;
     private static HikariZombiesDatabase database;
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
@@ -148,7 +151,7 @@ public final class ZombiesFeature {
         // https://bugs.mojang.com/browse/MC-87984
         Team mobNoPushTeam =
                 teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS).build();
-        Executor databaseExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        databaseExecutor = Executors.newSingleThreadExecutor();
         HikariConfig config = new HikariConfig("./zombies.hikari.properties");
         HikariDataSource dataSource = new HikariDataSource(config);
         database = switch (dataSource.getDataSourceClassName()) {
@@ -379,7 +382,31 @@ public final class ZombiesFeature {
         return FeatureUtils.check(sceneRouter);
     }
 
-    public static @NotNull HikariZombiesDatabase getDatabase() {
-        return database;
+    public static void end() {
+        if (database != null) {
+            FeatureUtils.check(database).close();
+        }
+
+        if (databaseExecutor != null) {
+            FeatureUtils.check(databaseExecutor).shutdown();
+
+            try {
+                LOGGER.info(
+                        "Shutting down database executor. Please allow for one minute before shutdown " + "completes.");
+                if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
+                    databaseExecutor.shutdownNow();
+
+                    LOGGER.warn(
+                            "Not all database tasks completed. Please allow for one minute for tasks to be canceled.");
+                    if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
+                        LOGGER.warn("Database tasks failed to cancel.");
+                    }
+                }
+            }
+            catch (InterruptedException e) {
+                databaseExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }
