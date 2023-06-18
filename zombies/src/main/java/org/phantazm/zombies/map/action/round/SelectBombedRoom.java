@@ -146,7 +146,7 @@ public class SelectBombedRoom implements Action<Round> {
 
                 if (++ticks % 4 == 0) {
                     for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                        if (!zombiesPlayer.canDoGenericActions()) {
+                        if (!zombiesPlayer.canDoGenericActions() || zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
                             continue;
                         }
 
