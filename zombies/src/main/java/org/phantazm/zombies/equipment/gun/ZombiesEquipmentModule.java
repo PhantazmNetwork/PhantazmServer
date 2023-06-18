@@ -14,7 +14,7 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.*;
 import java.util.function.Function;

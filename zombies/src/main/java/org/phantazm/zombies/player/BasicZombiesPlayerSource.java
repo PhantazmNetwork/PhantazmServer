@@ -57,8 +57,8 @@ import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
-import org.phantazm.zombies.stats.BasicZombiesPlayerMapStats;
-import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

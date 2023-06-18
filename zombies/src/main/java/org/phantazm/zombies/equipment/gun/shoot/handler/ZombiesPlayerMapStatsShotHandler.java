@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
-import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.Collection;
 import java.util.Objects;

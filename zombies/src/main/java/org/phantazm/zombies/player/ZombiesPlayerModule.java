@@ -17,7 +17,7 @@ import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
-import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.Map;
 import java.util.Objects;

@@ -6,8 +6,8 @@ plugins {
 dependencies {
     api(projects.phantazmCore)
     api(projects.phantazmMob)
+    api(projects.phantazmStats)
     api(projects.phantazmZombiesMapdata)
-    api(libs.hikariCP)
 }
 
 elementAutodoc {

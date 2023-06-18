@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.TitlePart;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,7 @@ import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerModule;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
-import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.*;
 import java.util.function.Function;

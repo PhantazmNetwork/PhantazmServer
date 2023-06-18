@@ -59,7 +59,7 @@ import org.phantazm.zombies.sidebar.ElementSidebarUpdaterCreator;
 import org.phantazm.zombies.sidebar.SidebarModule;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.phantazm.zombies.stage.*;
-import org.phantazm.zombies.stats.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesDatabase;
 
 import java.util.*;
 import java.util.function.Function;

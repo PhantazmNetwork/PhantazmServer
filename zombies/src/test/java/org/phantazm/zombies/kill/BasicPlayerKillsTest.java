@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.mob.PhantazmMob;
-import org.phantazm.zombies.stats.BasicZombiesPlayerMapStats;
-import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.UUID;
 

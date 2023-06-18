@@ -40,6 +40,7 @@ import org.phantazm.core.particle.data.*;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.stats.zombies.*;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.FileSystemMapLoader;
@@ -89,16 +90,12 @@ import org.phantazm.zombies.sidebar.lineupdater.creator.ZombieKillsUpdaterCreato
 import org.phantazm.zombies.sidebar.section.CollectionSidebarSection;
 import org.phantazm.zombies.sidebar.section.ZombiesPlayerSection;
 import org.phantazm.zombies.sidebar.section.ZombiesPlayersSection;
-import org.phantazm.zombies.stats.HikariZombiesDatabase;
-import org.phantazm.zombies.stats.MariaDBZombiesDatabase;
-import org.phantazm.zombies.stats.SqliteZombiesDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -154,11 +151,8 @@ public final class ZombiesFeature {
         databaseExecutor = Executors.newSingleThreadExecutor();
         HikariConfig config = new HikariConfig("./zombies.hikari.properties");
         HikariDataSource dataSource = new HikariDataSource(config);
-        database = switch (dataSource.getDataSourceClassName()) {
-            case "org.sqlite.SQLiteDataSource" -> new SqliteZombiesDatabase(databaseExecutor, dataSource);
-            case "org.mariadb.jdbc.MariaDbDataSource" -> new MariaDBZombiesDatabase(databaseExecutor, dataSource);
-            default -> throw new RuntimeException("Unknown data source " + dataSource.getDataSourceClassName());
-        };
+        ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
+        database = new HikariZombiesDatabase(databaseExecutor, dataSource, sqlFetcher);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,

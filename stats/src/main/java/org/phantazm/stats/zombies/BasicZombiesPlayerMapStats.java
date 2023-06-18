@@ -1,4 +1,4 @@
-package org.phantazm.zombies.stats;
+package org.phantazm.stats.zombies;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;

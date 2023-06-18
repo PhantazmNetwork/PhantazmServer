@@ -1,4 +1,4 @@
-package org.phantazm.zombies.stats;
+package org.phantazm.stats.zombies;
 
 import com.zaxxer.hikari.HikariDataSource;
 import net.kyori.adventure.key.Key;
@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public abstract class HikariZombiesDatabase implements Closeable, ZombiesDatabase {
+public class HikariZombiesDatabase implements Closeable, ZombiesDatabase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HikariZombiesDatabase.class);
 
@@ -22,16 +22,20 @@ public abstract class HikariZombiesDatabase implements Closeable, ZombiesDatabas
 
     private final HikariDataSource dataSource;
 
-    public HikariZombiesDatabase(@NotNull Executor executor, @NotNull HikariDataSource dataSource) {
+    private final ZombiesSQLFetcher sqlFetcher;
+
+    public HikariZombiesDatabase(@NotNull Executor executor, @NotNull HikariDataSource dataSource,
+            @NotNull ZombiesSQLFetcher sqlFetcher) {
         this.executor = Objects.requireNonNull(executor, "executor");
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
+        this.sqlFetcher = Objects.requireNonNull(sqlFetcher, "sqlFetcher");
     }
 
     @Override
     public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                synchronizeZombiesPlayerMapStatsInternal(connection, stats);
+                sqlFetcher.synchronizeZombiesPlayerMapStats(connection, stats);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -43,7 +47,7 @@ public abstract class HikariZombiesDatabase implements Closeable, ZombiesDatabas
     public CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                return getBestTimesInternal(connection, mapKey);
+                return sqlFetcher.getBestTimes(connection, mapKey);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -56,12 +60,6 @@ public abstract class HikariZombiesDatabase implements Closeable, ZombiesDatabas
             LOGGER.warn("Exception while querying database", throwable);
         }
     }
-
-    protected abstract void synchronizeZombiesPlayerMapStatsInternal(@NotNull Connection connection,
-            @NotNull ZombiesPlayerMapStats stats) throws SQLException;
-
-    protected abstract @NotNull List<BestTime> getBestTimesInternal(@NotNull Connection connection, @NotNull Key mapKey)
-            throws SQLException;
 
     @Override
     public void close() {

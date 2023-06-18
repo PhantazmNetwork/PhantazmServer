@@ -2,7 +2,7 @@ package org.phantazm.zombies.kill;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
-import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.Objects;
 

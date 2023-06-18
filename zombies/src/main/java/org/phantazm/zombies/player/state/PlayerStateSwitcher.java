@@ -2,7 +2,7 @@ package org.phantazm.zombies.player.state;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
-import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.Objects;
 
