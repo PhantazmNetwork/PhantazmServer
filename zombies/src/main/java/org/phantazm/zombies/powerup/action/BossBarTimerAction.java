@@ -98,6 +98,7 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
                     zombiesPlayer.removeCancellable(id);
                 }
 
+                MinecraftServer.getBossBarManager().destroyBossBar(bossBar);
                 this.bossBar = null;
             }
         }
