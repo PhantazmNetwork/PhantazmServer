@@ -64,7 +64,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public void removeCancellable(@NotNull UUID id) {
-        stateMap.remove(id);
+        CancellableState state = stateMap.remove(id);
+
+        if (state != null) {
+            state.end();
+        }
     }
 
     @Override
