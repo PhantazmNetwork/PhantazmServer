@@ -198,20 +198,19 @@ public class GroundController implements Controller {
 
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-            if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
-                double currentTarget = current.y + current.blockOffset;
-
-                double nodeDiff = Double.NEGATIVE_INFINITY;
+            double currentTarget = current.y + current.blockOffset;
+            if ((entityPos.y() < exactTargetY || entityPos.y() < currentTarget) && physicsResult.hasCollision()) {
+                double actualDiff = Double.NEGATIVE_INFINITY;
                 if (currentTarget - Vec.EPSILON > entityPos.y()) {
-                    nodeDiff = currentTarget - entityPos.y();
+                    actualDiff = currentTarget - entityPos.y();
                 }
 
                 double targetDiff = exactTargetY - entityPos.y();
-                if (targetDiff > nodeDiff) {
-                    nodeDiff = targetDiff;
+                if (targetDiff > actualDiff) {
+                    actualDiff = targetDiff;
                 }
 
-                stepOrJump(nodeDiff, speedX, speedZ, instance, deltaMove, pos);
+                stepOrJump(actualDiff, speedX, speedZ, instance, deltaMove, pos);
                 return;
             }
 
