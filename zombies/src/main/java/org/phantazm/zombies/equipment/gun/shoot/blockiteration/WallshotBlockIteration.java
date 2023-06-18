@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A {@link BlockIteration} method that employs a technique called "wallshooting".
@@ -61,6 +62,6 @@ public class WallshotBlockIteration implements BlockIteration {
     }
 
     @DataObject
-    public record Data(@NotNull Collection<Key> passableBlocks) {
+    public record Data(@NotNull Set<Key> passableBlocks) {
     }
 }
