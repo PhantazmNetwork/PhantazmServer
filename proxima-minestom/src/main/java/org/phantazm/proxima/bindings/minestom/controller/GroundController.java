@@ -31,6 +31,7 @@ public class GroundController implements Controller {
     private final TrackerPredicate trackerPredicate;
 
     private boolean jumping;
+    private double jumpTargetHeight;
 
     private double lastH = -1;
     private double lastB = -1;
@@ -167,12 +168,10 @@ public class GroundController implements Controller {
         assert chunk != null;
 
         if (jumping) {
-            if (entityPos.y() > exactTargetY + Vec.EPSILON) {
-
-
+            if (entityPos.y() > jumpTargetHeight + Vec.EPSILON) {
                 PhysicsResult physics = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
-                        new Pos(entityPos.x(), exactTargetY + Vec.EPSILON, entityPos.z()), new Vec(speedX, 0, speedZ),
-                        null);
+                        new Pos(entityPos.x(), jumpTargetHeight + Vec.EPSILON, entityPos.z()),
+                        new Vec(speedX, 0, speedZ), null);
 
                 if (!physics.hasCollision()) {
                     entity.refreshPosition(physics.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
@@ -199,15 +198,18 @@ public class GroundController implements Controller {
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
             double currentTarget = current.y + current.blockOffset;
-            if ((entityPos.y() < exactTargetY || entityPos.y() < currentTarget) && physicsResult.hasCollision()) {
+            if ((entityPos.y() < exactTargetY - Vec.EPSILON || entityPos.y() < currentTarget - Vec.EPSILON) &&
+                    physicsResult.hasCollision()) {
                 double actualDiff = Double.NEGATIVE_INFINITY;
                 if (currentTarget - Vec.EPSILON > entityPos.y()) {
                     actualDiff = currentTarget - entityPos.y();
+                    jumpTargetHeight = currentTarget;
                 }
 
                 double targetDiff = exactTargetY - entityPos.y();
                 if (targetDiff > actualDiff) {
                     actualDiff = targetDiff;
+                    jumpTargetHeight = exactTargetY;
                 }
 
                 stepOrJump(actualDiff, speedX, speedZ, instance, deltaMove, pos);
