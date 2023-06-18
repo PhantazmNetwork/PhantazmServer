@@ -289,7 +289,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     public void shutdown() {
         taskScheduler.end();
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-            database.synchronize(zombiesPlayer.module().getStats());
+            database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
             zombiesPlayer.end();
         }
         super.shutdown();

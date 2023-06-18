@@ -90,16 +90,13 @@ import org.phantazm.zombies.sidebar.section.CollectionSidebarSection;
 import org.phantazm.zombies.sidebar.section.ZombiesPlayerSection;
 import org.phantazm.zombies.sidebar.section.ZombiesPlayersSection;
 import org.phantazm.zombies.stats.HikariZombiesDatabase;
-import org.phantazm.zombies.stats.OracleZombiesDatabase;
+import org.phantazm.zombies.stats.MariaDBZombiesDatabase;
 import org.phantazm.zombies.stats.SqliteZombiesDatabase;
-import org.phantazm.zombies.stats.ZombiesDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -156,6 +153,7 @@ public final class ZombiesFeature {
         HikariDataSource dataSource = new HikariDataSource(config);
         database = switch (dataSource.getDataSourceClassName()) {
             case "org.sqlite.SQLiteDataSource" -> new SqliteZombiesDatabase(databaseExecutor, dataSource);
+            case "org.mariadb.jdbc.MariaDbDataSource" -> new MariaDBZombiesDatabase(databaseExecutor, dataSource);
             default -> throw new RuntimeException("Unknown data source " + dataSource.getDataSourceClassName());
         };
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {

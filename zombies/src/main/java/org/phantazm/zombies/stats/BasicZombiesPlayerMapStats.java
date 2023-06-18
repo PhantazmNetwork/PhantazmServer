@@ -2,8 +2,10 @@ package org.phantazm.zombies.stats;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
@@ -15,6 +17,8 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     private int gamesPlayed;
 
     private int wins;
+
+    private Long bestTime;
 
     private int roundsSurvived;
 
@@ -30,12 +34,14 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
 
     private int headshots;
 
-    public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins,
-            int roundsSurvived, int kills, int knocks, int deaths, int revives, int regularShots, int headshots) {
+    public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey,
+            int gamesPlayed, int wins, @Nullable Long bestTime, int roundsSurvived, int kills, int knocks, int deaths, int revives,
+            int regularShots, int headshots) {
         this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
         this.mapKey = Objects.requireNonNull(mapKey, "mapKey");
         this.gamesPlayed = gamesPlayed;
         this.wins = wins;
+        this.bestTime = bestTime;
         this.roundsSurvived = roundsSurvived;
         this.kills = kills;
         this.knocks = knocks;
@@ -46,7 +52,7 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     public static ZombiesPlayerMapStats createBasicStats(@NotNull UUID playerUUID, @NotNull Key mapKey) {
-        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null,0, 0, 0, 0, 0, 0, 0);
     }
 
     @Override
@@ -77,6 +83,16 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     @Override
     public void setWins(int wins) {
         this.wins = wins;
+    }
+
+    @Override
+    public @NotNull Optional<Long> getBestTime() {
+        return Optional.ofNullable(bestTime);
+    }
+
+    @Override
+    public void setBestTime(@Nullable Long bestTime) {
+        this.bestTime = bestTime;
     }
 
     @Override

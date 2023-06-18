@@ -1,6 +1,7 @@
 package org.phantazm.zombies.stats;
 
 import com.zaxxer.hikari.HikariDataSource;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -26,23 +29,42 @@ public abstract class HikariZombiesDatabase implements Closeable, ZombiesDatabas
     }
 
     @Override
-    public void synchronize(@NotNull ZombiesPlayerMapStats stats) {
+    public void synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats) {
         CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                synchronizeInternal(connection, stats);
+                synchronizeZombiesPlayerMapStatsInternal(connection, stats);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, executor).whenComplete((ignored, throwable) -> {
             if (throwable != null) {
-                LOGGER.warn("Exception while synchronizing Zombies database", throwable);
+                LOGGER.warn("Exception while querying database", throwable);
             }
         });
     }
 
-    protected abstract void synchronizeInternal(@NotNull Connection connection,
+    @Override
+    public CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                return getBestTimesInternal(connection, mapKey);
+            }
+            catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }, executor).whenComplete((ignored, throwable) -> {
+            if (throwable != null) {
+                LOGGER.warn("Exception while querying database", throwable);
+            }
+        });
+    }
+
+    protected abstract void synchronizeZombiesPlayerMapStatsInternal(@NotNull Connection connection,
             @NotNull ZombiesPlayerMapStats stats) throws SQLException;
+
+    protected abstract @NotNull List<BestTime> getBestTimesInternal(@NotNull Connection connection, @NotNull Key mapKey)
+            throws SQLException;
 
     @Override
     public void close() {

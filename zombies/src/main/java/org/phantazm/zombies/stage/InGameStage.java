@@ -18,6 +18,7 @@ import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerModule;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
+import org.phantazm.zombies.stats.ZombiesPlayerMapStats;
 
 import java.util.*;
 import java.util.function.Function;
@@ -34,8 +35,6 @@ public class InGameStage implements Stage {
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final ShopHandler shopHandler;
     private final TickFormatter tickFormatter;
-
-    private long startTime;
 
     public InGameStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
@@ -92,8 +91,6 @@ public class InGameStage implements Stage {
 
     @Override
     public void start() {
-        this.startTime = System.currentTimeMillis();
-
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             zombiesPlayer.module().getMeta().setInGame(true);
             zombiesPlayer.module().getStats().setGamesPlayed(zombiesPlayer.module().getStats().getGamesPlayed() + 1);
@@ -149,8 +146,6 @@ public class InGameStage implements Stage {
 
     @Override
     public void end() {
-        long endTime = System.currentTimeMillis();
-
         boolean anyAlive = false;
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (zombiesPlayer.isAlive()) {
@@ -159,7 +154,7 @@ public class InGameStage implements Stage {
             }
         }
 
-        Component finalTime = tickFormatter.format((endTime - startTime) / MinecraftServer.TICK_MS);
+        Component finalTime = tickFormatter.format(ticksSinceStart.get());
         int bestRound = Math.min(roundHandler.currentRoundIndex() + 1, roundHandler.roundCount());
 
         if (anyAlive) {
@@ -168,7 +163,13 @@ public class InGameStage implements Stage {
                     .append(Component.text(bestRound, NamedTextColor.WHITE)).append(Component.text("!")));
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                zombiesPlayer.module().getStats().setWins(zombiesPlayer.module().getStats().getWins() + 1);
+                ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
+                stats.setWins(stats.getWins() + 1);
+                stats.getBestTime().ifPresentOrElse(prevBest -> {
+                    if (ticksSinceStart.get() < prevBest) {
+                        stats.setBestTime(ticksSinceStart.get());
+                    }
+                }, () -> stats.setBestTime(ticksSinceStart.get()));
             }
         }
         else {

@@ -2,7 +2,9 @@ package org.phantazm.zombies.stats;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ZombiesPlayerMapStats {
@@ -18,6 +20,10 @@ public interface ZombiesPlayerMapStats {
     int getWins();
 
     void setWins(int wins);
+
+    @NotNull Optional<Long> getBestTime();
+
+    void setBestTime(@Nullable Long bestTime);
 
     int getRoundsSurvived();
 

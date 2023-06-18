@@ -50,6 +50,8 @@ junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", vers
 
 libgui = { module = "io.github.cottonmc:LibGui", version = "7.1.0+1.19.4" }
 
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.0.10" }
+
 minecraft = { module = "com.mojang:minecraft", version = "1.19.4" }
 
 minestom = { module = "org.phantazm.Minestom:Minestom", version.ref = "minestom" }

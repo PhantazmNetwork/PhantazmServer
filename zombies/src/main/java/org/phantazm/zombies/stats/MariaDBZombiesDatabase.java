@@ -10,19 +10,19 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
-public class SqliteZombiesDatabase extends HikariZombiesDatabase {
-    public SqliteZombiesDatabase(@NotNull Executor executor, @NotNull HikariDataSource dataSource) {
+public class MariaDBZombiesDatabase extends HikariZombiesDatabase {
+    public MariaDBZombiesDatabase(@NotNull Executor executor, @NotNull HikariDataSource dataSource) {
         super(executor, dataSource);
     }
 
     @Override
-    protected void synchronizeZombiesPlayerMapStatsInternal(@NotNull Connection connection,
-            @NotNull ZombiesPlayerMapStats stats) throws SQLException {
+    protected void synchronizeZombiesPlayerMapStatsInternal(@NotNull Connection connection, @NotNull ZombiesPlayerMapStats stats) throws
+                                                                                                             SQLException {
         PreparedStatement statement = connection.prepareStatement("""
                 INSERT INTO zombies_player_map_stats (player_uuid, map_key, games_played, wins, best_time, rounds_survived, kills, knocks, deaths, revives, regular_shots, headshots)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT (player_uuid, map_key) DO UPDATE
-                SET games_played = games_played + ?,
+                ON DUPLICATE KEY UPDATE
+                games_played = games_played + ?,
                 wins = wins + ?,
                 best_time = CASE WHEN ? IS NULL THEN best_time ELSE ? END,
                 rounds_survived = rounds_survived + ?,
@@ -73,7 +73,7 @@ public class SqliteZombiesDatabase extends HikariZombiesDatabase {
     protected @NotNull List<BestTime> getBestTimesInternal(@NotNull Connection connection, @NotNull Key mapKey)
             throws SQLException {
         PreparedStatement statement = connection.prepareStatement("""
-                SELECT player_uuid
+                SELECT player_uuid, best_time
                 FROM zombies_player_map_stats
                 WHERE map_key = ?
                 AND best_time IS NOT NULL

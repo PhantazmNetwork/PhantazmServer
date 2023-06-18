@@ -23,6 +23,7 @@ dependencies {
     implementation(libs.element.core)
     implementation(libs.ethylene.mapper)
 
+    runtimeOnly(libs.mariadb)
     runtimeOnly(libs.sqlite)
 }
 
