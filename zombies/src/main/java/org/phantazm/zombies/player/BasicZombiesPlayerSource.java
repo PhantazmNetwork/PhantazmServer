@@ -22,7 +22,9 @@ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.commons.Activable;
+import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.CancellableState;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
@@ -204,10 +206,12 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     }));
         };
         Map<UUID, CancellableState> stateMap = new ConcurrentHashMap<>();
+        TickTaskScheduler taskScheduler = new BasicTickTaskScheduler();
         Function<QuitPlayerStateContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
-                    List.of(new BasicQuitStateActivable(instance, playerView, sidebar, tabList, stateMap)));
+                    List.of(new BasicQuitStateActivable(instance, playerView, sidebar, tabList, stateMap,
+                            taskScheduler)));
         };
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
@@ -221,7 +225,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
                         playerTransactionModifierSource, flaggable);
 
-        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, stateMap);
+        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, stateMap, taskScheduler);
         zombiesPlayerWrapper.set(zombiesPlayer);
         return zombiesPlayer;
     }

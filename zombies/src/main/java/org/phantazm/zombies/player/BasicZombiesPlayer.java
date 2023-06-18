@@ -4,7 +4,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.CancellableState;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.inventory.InventoryObject;
@@ -20,14 +19,14 @@ import java.util.*;
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final ZombiesScene scene;
     private final ZombiesPlayerModule module;
-    private final TickTaskScheduler scheduler;
+    private final TickTaskScheduler taskScheduler;
     private final Map<UUID, CancellableState> stateMap;
 
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
-            @NotNull Map<UUID, CancellableState> stateMap) {
+            @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler taskScheduler) {
         this.scene = Objects.requireNonNull(scene, "scene");
         this.module = Objects.requireNonNull(module, "module");
-        this.scheduler = new BasicTickTaskScheduler();
+        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
         this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
     }
 
@@ -49,7 +48,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public @NotNull TickTaskScheduler scheduler() {
-        return scheduler;
+        return taskScheduler;
     }
 
     @Override
@@ -82,7 +81,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         }
 
         module.getStateSwitcher().tick(time);
-        scheduler.tick(time);
+        taskScheduler.tick(time);
     }
 
     @Override
@@ -91,7 +90,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(false));
         }
         module.getStateSwitcher().end();
-        scheduler.end();
     }
 
     private void inventoryTick(Player player, long time) {

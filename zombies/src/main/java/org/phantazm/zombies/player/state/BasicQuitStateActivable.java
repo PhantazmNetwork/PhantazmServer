@@ -7,6 +7,7 @@ import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.commons.CancellableState;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Map;
@@ -14,24 +15,22 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class BasicQuitStateActivable implements Activable {
-
     private final Instance instance;
-
     private final PlayerView playerView;
-
     private final Sidebar sidebar;
-
     private final TabList tabList;
-
     private final Map<UUID, CancellableState> stateMap;
+    private final TickTaskScheduler scheduler;
 
     public BasicQuitStateActivable(@NotNull Instance instance, @NotNull PlayerView playerView, @NotNull Sidebar sidebar,
-            @NotNull TabList tabList, @NotNull Map<UUID, CancellableState> stateMap) {
+            @NotNull TabList tabList, @NotNull Map<UUID, CancellableState> stateMap,
+            @NotNull TickTaskScheduler scheduler) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
         this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
+        this.scheduler = Objects.requireNonNull(scheduler, "scheduler");
     }
 
     @Override
@@ -50,7 +49,7 @@ public class BasicQuitStateActivable implements Activable {
             state.end();
         }
 
+        scheduler.end();
         stateMap.clear();
     }
-
 }
