@@ -22,6 +22,7 @@ public class BasicTickTaskScheduler implements TickTaskScheduler {
 
     @Override
     public void scheduleTaskAfter(@NotNull TickableTask tickableTask, long millis) {
+        Objects.requireNonNull(tickableTask, "tickableTask");
         long startTime = System.currentTimeMillis();
         tickableTasks.add(new TickableTask() {
             private boolean finished;
