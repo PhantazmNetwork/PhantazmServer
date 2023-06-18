@@ -49,7 +49,9 @@ When running locally-hosted development builds, you can launch the server in "un
 
 When launching Phantazm through IntelliJ (such as by using the `Run server` or `Run server + Velocity` run configurations), `unsafe` mode is **enabled**, so you don't have to do anything extra.
 
-**Warning**: Make sure your locally-hosted development server & proxy are not visible from the Internet if you're launching in unsafe mode!
+**Warning**: Make sure your locally-hosted development server & proxy are not visible from the Internet if you're launching in unsafe mode! Check your system (or gateway) firewall.
+
+When debugging things, it's sometimes very useful to use breakpoints to analyze state and execute code line-by-line. Doing this on a Minecraft server works, but is tricky with a vanilla client due to the read timeout delay. As such, it is recommended to use a mod, like [this one](https://www.curseforge.com/minecraft/mc-mods/timeoutout-fabric), to increase this value to whatever you want. This will prevent your client from disconnecting itself due to a nonresponsive server.
 
 ### For production
 
@@ -82,7 +84,7 @@ This setup will generate the required binaries to run the server. Dependency art
 
 After running, Phantazm will generate two files, named `lobbies-config.toml` and `server-config.toml`, in the same directory as the `server.jar` file. You can use these to set up basic server parameters, such as the IP address and port to bind to. 
 
-Details and tutorials for how to configure more complicated aspects of Phantazm are included in the [wiki](https://github.com/PhantazmNetwork/PhantazmServer/wiki).
+Details and tutorials for how to configure more complicated aspects of Phantazm are included in the [wiki](https://github.com/PhantazmNetwork/PhantazmServer/wiki). **These are currently out-of-date, pending a more stable codebase.**
 
 ## Maintainers
 
