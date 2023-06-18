@@ -19,15 +19,15 @@ import java.util.*;
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final ZombiesScene scene;
     private final ZombiesPlayerModule module;
-    private final TickTaskScheduler taskScheduler;
     private final Map<UUID, CancellableState> stateMap;
+    private final TickTaskScheduler taskScheduler;
 
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
             @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler taskScheduler) {
         this.scene = Objects.requireNonNull(scene, "scene");
         this.module = Objects.requireNonNull(module, "module");
-        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
         this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
+        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
     }
 
     @Override
