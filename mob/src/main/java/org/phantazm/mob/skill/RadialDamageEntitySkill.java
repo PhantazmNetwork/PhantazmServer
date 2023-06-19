@@ -22,6 +22,7 @@ public class RadialDamageEntitySkill implements Skill {
         this.selector = Objects.requireNonNull(selector, "selector");
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void use(@NotNull PhantazmMob self) {
         selector.selectTarget(self).ifPresent(object -> {
@@ -29,19 +30,20 @@ public class RadialDamageEntitySkill implements Skill {
             if (object instanceof Iterable<?> iterable) {
                 Iterable<LivingEntity> entityIterable = (Iterable<LivingEntity>)iterable;
                 for (LivingEntity entity : entityIterable) {
-                    double damage = calculateDamage(entity.getDistanceSquared(selfEntity));
+                    double damage = calculateDamage(entity.getDistance(selfEntity));
                     entity.damage(DamageType.fromEntity(selfEntity), (float)damage, data.bypassArmor);
                 }
             }
             else if (object instanceof LivingEntity living) {
-                double damage = calculateDamage(living.getDistanceSquared(selfEntity));
+                double damage = calculateDamage(living.getDistance(selfEntity));
                 living.damage(DamageType.fromEntity(selfEntity), (float)damage, data.bypassArmor);
             }
         });
     }
 
-    private double calculateDamage(double distanceToEntitySquared) {
-        return Math.sqrt(Math.max(-distanceToEntitySquared + (data.range * data.range), 0));
+    private double calculateDamage(double distanceToEntity) {
+        return ((data.damage * Math.sqrt(data.range)) / data.range) *
+                (Math.sqrt(Math.max(0, -distanceToEntity + data.range)));
     }
 
     @DataObject
