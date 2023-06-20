@@ -3,6 +3,7 @@ package org.phantazm.zombies.game.player.state.revive;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerMeta;
 import org.phantazm.zombies.player.ZombiesPlayerModule;
@@ -29,6 +30,7 @@ public class ReviveHandlerTest {
         meta = mock(ZombiesPlayerMeta.class);
         ZombiesPlayerModule module = mock(ZombiesPlayerModule.class);
         when(module.getMeta()).thenReturn(meta);
+        when(module.getStats()).thenReturn(mock(ZombiesPlayerMapStats.class));
         reviver = mock(ZombiesPlayer.class);
         when(reviver.module()).thenReturn(module);
     }
