@@ -20,11 +20,13 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
             @NotNull ZombiesPlayerMapStats mapStats) {
         using(connection).insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),
                         field("games_played"), field("wins"), field("best_time"), field("rounds_survived"), field("kills"),
-                        field("knocks"), field("deaths"), field("revives"), field("regular_shots"), field("headshots"))
+                        field("knocks"), field("deaths"), field("revives"), field("shots"), field("regular_hits"),
+                        field("headshot_hits"))
                 .values(mapStats.getPlayerUUID().toString(), mapStats.getMapKey().asString(), mapStats.getGamesPlayed(),
                         mapStats.getWins(), mapStats.getBestTime().orElse(null), mapStats.getRoundsSurvived(),
                         mapStats.getKills(), mapStats.getKnocks(), mapStats.getDeaths(), mapStats.getRevives(),
-                        mapStats.getRegularShots(), mapStats.getHeadshots()).onDuplicateKeyUpdate()
+                        mapStats.getShots(), mapStats.getRegularHits(), mapStats.getHeadshotHits())
+                .onDuplicateKeyUpdate()
                 .set(field("games_played"), field("games_played", SQLDataType.INTEGER).plus(mapStats.getGamesPlayed()))
                 .set(field("wins"), field("wins", SQLDataType.INTEGER).plus(mapStats.getGamesPlayed()))
                 .set(field("best_time"), mapStats.getBestTime().isPresent()
@@ -35,10 +37,10 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
                 .set(field("knocks"), field("knocks", SQLDataType.INTEGER).plus(mapStats.getKnocks()))
                 .set(field("deaths"), field("deaths", SQLDataType.INTEGER).plus(mapStats.getDeaths()))
                 .set(field("revives"), field("revives", SQLDataType.INTEGER).plus(mapStats.getRevives()))
-                .set(field("regular_shots"),
-                        field("regular_shots", SQLDataType.INTEGER).plus(mapStats.getRegularShots()))
-                .set(field("headshots"), field("headshots", SQLDataType.INTEGER).plus(mapStats.getHeadshots()))
-                .execute();
+                .set(field("shots"), field("shots", SQLDataType.INTEGER).plus(mapStats.getShots()))
+                .set(field("regular_hits"), field("regular_hits", SQLDataType.INTEGER).plus(mapStats.getRegularHits()))
+                .set(field("headshot_hits"),
+                        field("headshot_hits", SQLDataType.INTEGER).plus(mapStats.getHeadshotHits())).execute();
     }
 
     @Override

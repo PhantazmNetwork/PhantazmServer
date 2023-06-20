@@ -19,6 +19,7 @@ import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
+import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
@@ -52,6 +53,8 @@ public class ProjectileFirer implements Firer {
 
     private final MobSpawner spawner;
 
+    private final EventNode<Event> node;
+
     /**
      * Creates a new {@link ProjectileFirer}.
      *
@@ -80,6 +83,7 @@ public class ProjectileFirer implements Firer {
         this.collisionFilter = Objects.requireNonNull(collisionFilter, "collisionFilter");
         this.shotHandlers = List.copyOf(shotHandlers);
         this.spawner = Objects.requireNonNull(spawner, "spawner");
+        this.node = Objects.requireNonNull(node, "node");
 
         node.addListener(ProjectileCollideWithBlockEvent.class, this::onProjectileCollision);
         node.addListener(ProjectileCollideWithEntityEvent.class, this::onProjectileCollision);
@@ -193,8 +197,9 @@ public class ProjectileFirer implements Firer {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
 
+            GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
+            node.call(new GunShootEvent(firedShot.gun, shot));
             for (ShotHandler shotHandler : shotHandlers) {
-                GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
                 shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
                         shot);
             }

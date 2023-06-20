@@ -30,13 +30,15 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
 
     private int revives;
 
-    private int regularShots;
+    private int shots;
 
-    private int headshots;
+    private int regularHits;
+
+    private int headshotHits;
 
     public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey,
             int gamesPlayed, int wins, @Nullable Long bestTime, int roundsSurvived, int kills, int knocks, int deaths, int revives,
-            int regularShots, int headshots) {
+            int shots, int regularHits, int headshotHits) {
         this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
         this.mapKey = Objects.requireNonNull(mapKey, "mapKey");
         this.gamesPlayed = gamesPlayed;
@@ -47,12 +49,13 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
         this.knocks = knocks;
         this.deaths = deaths;
         this.revives = revives;
-        this.regularShots = regularShots;
-        this.headshots = headshots;
+        this.shots = shots;
+        this.regularHits = regularHits;
+        this.headshotHits = headshotHits;
     }
 
     public static ZombiesPlayerMapStats createBasicStats(@NotNull UUID playerUUID, @NotNull Key mapKey) {
-        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null,0, 0, 0, 0, 0, 0, 0);
+        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null,0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     @Override
@@ -146,22 +149,32 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     @Override
-    public int getRegularShots() {
-        return regularShots;
+    public int getShots() {
+        return shots;
     }
 
     @Override
-    public void setRegularShots(int regularShots) {
-        this.regularShots = regularShots;
+    public void setShots(int shots) {
+        this.shots = shots;
     }
 
     @Override
-    public int getHeadshots() {
-        return headshots;
+    public int getRegularHits() {
+        return regularHits;
     }
 
     @Override
-    public void setHeadshots(int headshots) {
-        this.headshots = headshots;
+    public void setRegularHits(int regularShots) {
+        this.regularHits = regularShots;
+    }
+
+    @Override
+    public int getHeadshotHits() {
+        return headshotHits;
+    }
+
+    @Override
+    public void setHeadshotHits(int headshots) {
+        this.headshotHits = headshots;
     }
 }

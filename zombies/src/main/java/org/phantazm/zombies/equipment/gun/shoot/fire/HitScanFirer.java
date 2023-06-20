@@ -4,9 +4,12 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
+import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
@@ -26,6 +29,7 @@ public class HitScanFirer implements Firer {
     private final ShotEndpointSelector endSelector;
     private final TargetFinder targetFinder;
     private final Collection<ShotHandler> shotHandlers;
+    private final EventNode<Event> eventNode;
 
     /**
      * Creates a {@link HitScanFirer}.
@@ -39,11 +43,13 @@ public class HitScanFirer implements Firer {
     public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
             @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
             @NotNull @Child("target_finder") TargetFinder targetFinder,
-            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers) {
+            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers,
+            @NotNull EventNode<Event> eventNode) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
         this.shotHandlers = List.copyOf(shotHandlers);
+        this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
     }
 
     @Override
@@ -63,9 +69,11 @@ public class HitScanFirer implements Firer {
             for (GunHit hit : target.headshot()) {
                 previousHits.add(hit.entity().getUuid());
             }
+
+            GunShot shot = new GunShot(start, end, target.regular(), target.headshot());
+            eventNode.call(new GunShootEvent(gun, shot));
             for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(gun, state, player, previousHits,
-                        new GunShot(start, end, target.regular(), target.headshot()));
+                shotHandler.handle(gun, state, player, previousHits, shot);
             }
         });
     }
