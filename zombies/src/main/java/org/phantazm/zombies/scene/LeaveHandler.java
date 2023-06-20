@@ -54,9 +54,10 @@ public class LeaveHandler {
                 stage.onLeave(zombiesPlayer);
             }
 
+            zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
+
             if (stage == null || !stage.hasPermanentPlayers()) {
                 zombiesPlayers.remove(pair.left());
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
                 zombiesPlayer.end();
             }
         }
