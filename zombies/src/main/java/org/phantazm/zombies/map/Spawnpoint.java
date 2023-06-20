@@ -12,7 +12,6 @@ import org.phantazm.mob.MobModel;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.ZombiesPlayerModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,10 +84,18 @@ public class Spawnpoint {
             this.linkedWindow = null;
         }
 
-        this.linkedRoom = roomTracker.atPoint(spawnPoint).orElse(null);
+        Room linkedRoom = roomTracker.atPoint(spawnPoint).orElse(null);
         if (linkedRoom == null && linkedWindow == null) {
-            LOGGER.warn("No linked room or window found for spawnpoint at ~" + spawnPoint);
+            Optional<Room> room = roomTracker.closestInRangeToBounds(spawnPoint, 1, 1, 10);
+            if (room.isEmpty()) {
+                LOGGER.warn("No linked room or window found for spawnpoint at ~" + spawnPoint);
+            }
+            else {
+                linkedRoom = room.get();
+            }
         }
+
+        this.linkedRoom = linkedRoom;
     }
 
     public @NotNull Point spawnPoint() {
