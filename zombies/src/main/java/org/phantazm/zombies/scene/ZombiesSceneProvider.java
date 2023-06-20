@@ -204,8 +204,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 createStageTransition(instance, settings.introMessages(), mapObjects.module().random(),
                         zombiesPlayers.values(), spawnPos, roundHandler, ticksSinceStart, sidebarModule, shopHandler);
 
-        Map<UUID, PlayerView> players = new HashMap<>();
-        LeaveHandler leaveHandler = new LeaveHandler(stageTransition, players, zombiesPlayers);
+        LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
 
         EventNode<Event> childNode =
                 createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
@@ -226,9 +225,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         };
 
         ZombiesScene scene =
-                new ZombiesScene(UUID.randomUUID(), connectionManager, map, players, zombiesPlayers, instance,
-                        sceneFallback, settings, stageTransition, leaveHandler, playerCreator, tickTaskScheduler,
-                        database, childNode);
+                new ZombiesScene(UUID.randomUUID(), connectionManager, map, zombiesPlayers, instance, sceneFallback,
+                        settings, stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode);
         sceneWrapper.set(scene);
         rootNode.addChild(childNode);
 

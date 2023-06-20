@@ -14,6 +14,7 @@ import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.RouteResult;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
@@ -52,13 +54,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private boolean joinable = true;
 
     public ZombiesScene(@NotNull UUID uuid, @NotNull ConnectionManager connectionManager, @NotNull ZombiesMap map,
-            @NotNull Map<UUID, PlayerView> players, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
-            @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
+            @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
+            @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
             @NotNull EventNode<Event> sceneNode) {
-        super(uuid, instance, players, fallback);
+        super(uuid, instance, fallback);
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
@@ -203,7 +205,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
                 runnable.run();
 
-                players.put(view.getUUID(), view);
                 stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
             }
         }).join();
@@ -214,6 +215,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         return leaveHandler.leave(leavers);
+    }
+
+    @Override
+    public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
+        return zombiesPlayers.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().module().getPlayerView()));
     }
 
     @Override
@@ -293,7 +300,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
             zombiesPlayer.end();
+
+            PlayerView playerView = zombiesPlayer.module().getPlayerView();
+            fallback.fallback(playerView);
         }
+
         super.shutdown();
     }
 

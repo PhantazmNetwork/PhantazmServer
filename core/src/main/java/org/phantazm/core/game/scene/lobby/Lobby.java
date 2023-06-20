@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.RouteResult;
@@ -18,6 +19,7 @@ import java.util.*;
  */
 public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private final InstanceConfig instanceConfig;
+    private final Map<UUID, PlayerView> players;
 
     private boolean joinable = true;
 
@@ -30,8 +32,9 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      */
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
             @NotNull SceneFallback fallback) {
-        super(uuid, instance, new HashMap<>(), fallback);
+        super(uuid, instance, fallback);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
+        this.players = new HashMap<>();
     }
 
     @Override
@@ -84,6 +87,11 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         return RouteResult.SUCCESSFUL;
+    }
+
+    @Override
+    public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
+        return players;
     }
 
     @Override

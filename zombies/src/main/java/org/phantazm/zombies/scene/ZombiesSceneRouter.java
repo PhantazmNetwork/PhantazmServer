@@ -1,59 +1,21 @@
 package org.phantazm.zombies.scene;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.game.scene.RouteResult;
-import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRouteRequest> {
     private final UUID uuid;
     private final Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders;
-    private final Map<UUID, ZombiesScene> playerSceneMap = new HashMap<>();
-
-    private final Map<UUID, PlayerView> unmodifiablePlayers = new AbstractMap<>() {
-
-        @Override
-        public boolean containsKey(Object key) {
-            if (!(key instanceof UUID uuid)) {
-                return false;
-            }
-
-            return playerSceneMap.containsKey(uuid);
-        }
-
-        @Override
-        public PlayerView get(Object key) {
-            if (!(key instanceof UUID uuid)) {
-                return null;
-            }
-
-            ZombiesScene scene = playerSceneMap.get(uuid);
-            if (scene == null) {
-                return null;
-            }
-
-            return scene.getPlayers().get(uuid);
-        }
-
-        @NotNull
-        @Override
-        public Set<Entry<UUID, PlayerView>> entrySet() {
-            Set<Entry<UUID, PlayerView>> entrySet = new HashSet<>();
-            for (ZombiesScene scene : playerSceneMap.values()) {
-                entrySet.addAll(scene.getPlayers().entrySet());
-            }
-
-            return Collections.unmodifiableSet(entrySet);
-        }
-
-    };
 
     private boolean shutdown = false;
     private boolean joinable = true;
@@ -66,7 +28,15 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
 
     @Override
     public @NotNull Optional<ZombiesScene> getScene(@NotNull UUID uuid) {
-        return Optional.ofNullable(playerSceneMap.get(uuid));
+        for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
+            for (ZombiesScene scene : sceneProvider.getScenes()) {
+                if (scene.getZombiesPlayers().containsKey(uuid)) {
+                    return Optional.of(scene);
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -100,19 +70,8 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
 
         ZombiesJoinRequest joinRequest = routeRequest.joinRequest();
         Optional<ZombiesScene> sceneOptional = sceneProvider.provideScene(joinRequest);
-        if (sceneOptional.isEmpty()) {
-            return new RouteResult(false, Component.text("No games are joinable."));
-        }
-
-        ZombiesScene scene = sceneOptional.get();
-        RouteResult result = scene.join(joinRequest);
-        if (result.success()) {
-            for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
-                playerSceneMap.put(playerView.getUUID(), scene);
-            }
-        }
-
-        return result;
+        return sceneOptional.map(scene -> scene.join(joinRequest))
+                .orElseGet(() -> new RouteResult(false, Component.text("No games are joinable.")));
 
     }
 
@@ -123,14 +82,7 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
                 continue;
             }
 
-            RouteResult result = scene.join(routeRequest.joinRequest());
-            if (result.success()) {
-                for (PlayerView playerView : routeRequest.joinRequest().getPlayers()) {
-                    playerSceneMap.put(playerView.getUUID(), scene);
-                }
-            }
-
-            return result;
+            return scene.join(routeRequest.joinRequest());
         }
 
         return new RouteResult(false, Component.text("Not a valid game."));
@@ -138,19 +90,21 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
 
     @Override
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+        List<Pair<ZombiesScene, UUID>> scenes = new ArrayList<>();
         for (UUID uuid : leavers) {
-            if (!playerSceneMap.containsKey(uuid)) {
+            Optional<ZombiesScene> sceneOptional = getScene(uuid);
+            if (sceneOptional.isEmpty()) {
                 return new RouteResult(false, Component.text(uuid + " is not part of a game in the Zombies router."));
             }
+
+            scenes.add(Pair.of(sceneOptional.get(), uuid));
         }
 
         boolean success = true;
-        for (UUID uuid : leavers) {
-            RouteResult subResult = playerSceneMap.get(uuid).leave(Collections.singleton(uuid));
-            if (subResult.success()) {
-                playerSceneMap.remove(uuid);
-            }
-            else {
+        for (Pair<ZombiesScene, UUID> pair : scenes) {
+            RouteResult subResult = pair.left().leave(Collections.singleton(pair.right()));
+
+            if (!subResult.success()) {
                 success = false;
             }
         }
@@ -164,7 +118,14 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
 
     @Override
     public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
-        return unmodifiablePlayers;
+        /*
+        Why are we still here? Just to suffer? Every night, I can feel my leg... and my arm... even my fingers. The body
+        I've lost… the comrades I've lost... won't stop hurting... It's like they're all still there. You feel it, too,
+        don't you?
+        */
+        return sceneProviders.entrySet().stream().flatMap(keyEntry -> keyEntry.getValue().getScenes().stream())
+                .flatMap(scene -> scene.getPlayers().entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
