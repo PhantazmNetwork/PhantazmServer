@@ -5,6 +5,7 @@ import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
 import com.github.steanky.ethylene.mapper.signature.Signature;
+import com.github.steanky.ethylene.mapper.signature.SignatureParameter;
 import com.github.steanky.ethylene.mapper.type.Token;
 import com.github.steanky.vector.Bounds3D;
 import com.github.steanky.vector.Vec3D;
@@ -65,16 +66,19 @@ public final class Ethylene {
 
     private static Signature<Vec3I> vec3I() {
         return Signature.builder(Token.ofClass(Vec3I.class),
-                (ignored, args) -> Vec3I.immutable(args.get(0), args.get(1), args.get(2)),
-                vec -> List.of(vec.x(), vec.y(), vec.z()), Map.entry("x", Token.INTEGER), Map.entry("y", Token.INTEGER),
-                Map.entry("z", Token.INTEGER)).matchingNames().matchingTypeHints().build();
+                        (ignored, args) -> Vec3I.immutable(args.get(0), args.get(1), args.get(2)),
+                        vec -> List.of(vec.x(), vec.y(), vec.z()), Map.entry("x", SignatureParameter.parameter(Token.INTEGER)),
+                        Map.entry("y", SignatureParameter.parameter(Token.INTEGER)),
+                        Map.entry("z", SignatureParameter.parameter(Token.INTEGER))).matchingNames().matchingTypeHints()
+                .build();
     }
 
     private static Signature<Vec3D> vec3D() {
         return Signature.builder(Token.ofClass(Vec3D.class),
                 (ignored, args) -> Vec3D.immutable(args.get(0), args.get(1), args.get(2)),
-                vec -> List.of(vec.x(), vec.y(), vec.z()), Map.entry("x", Token.DOUBLE), Map.entry("y", Token.DOUBLE),
-                Map.entry("z", Token.DOUBLE)).matchingNames().matchingTypeHints().build();
+                vec -> List.of(vec.x(), vec.y(), vec.z()), Map.entry("x", SignatureParameter.parameter(Token.DOUBLE)),
+                Map.entry("y", SignatureParameter.parameter(Token.DOUBLE)),
+                Map.entry("z", SignatureParameter.parameter(Token.DOUBLE))).matchingNames().matchingTypeHints().build();
     }
 
     private static Signature<Sound> sound() {
@@ -83,8 +87,10 @@ public final class Ethylene {
                             double pitch = args.get(3);
                             return Sound.sound((Key)args.get(0), (Sound.Source)args.get(1), (float)volume, (float)pitch);
                         }, sound -> List.of(sound.name(), sound.source(), sound.volume(), sound.pitch()),
-                        Map.entry("name", Token.ofClass(Key.class)), Map.entry("source", Token.ofClass(Sound.Source.class)),
-                        Map.entry("volume", Token.DOUBLE), Map.entry("pitch", Token.DOUBLE)).matchingNames().matchingTypeHints()
+                        Map.entry("name", SignatureParameter.parameter(Token.ofClass(Key.class))),
+                        Map.entry("source", SignatureParameter.parameter(Token.ofClass(Sound.Source.class))),
+                        Map.entry("volume", SignatureParameter.parameter(Token.DOUBLE)),
+                        Map.entry("pitch", SignatureParameter.parameter(Token.DOUBLE))).matchingNames().matchingTypeHints()
                 .build();
     }
 
@@ -92,8 +98,9 @@ public final class Ethylene {
         return Signature.builder(Token.ofClass(Bounds3D.class), (ignored, args) -> {
                             return Bounds3D.immutable(args.get(0), args.get(1));
                         }, bounds -> List.of(bounds.immutableOrigin(), bounds.immutableLengths()),
-                        Map.entry("origin", Token.ofClass(Vec3D.class)), Map.entry("lengths", Token.ofClass(Vec3D.class)))
-                .build();
+                        Map.entry("origin", SignatureParameter.parameter(Token.ofClass(Vec3D.class))),
+                        Map.entry("lengths", SignatureParameter.parameter(Token.ofClass(Vec3D.class)))).matchingNames()
+                .matchingTypeHints().build();
     }
 
     private static Signature<Style> style() {
@@ -105,9 +112,9 @@ public final class Ethylene {
                             Collection<Object> textColors = new ArrayList<>(1);
                             textColors.add(style.color());
                             return textColors;
-                        }, Map.entry("textColor", Token.ofClass(TextColor.class)),
-                        Map.entry("textDecorations", Token.ofClass(TextDecoration[].class))).matchingNames().matchingTypeHints()
-                .build();
+                        }, Map.entry("textColor", SignatureParameter.parameter(Token.ofClass(TextColor.class))),
+                        Map.entry("textDecorations", SignatureParameter.parameter(Token.ofClass(TextDecoration[].class))))
+                .matchingNames().matchingTypeHints().build();
     }
 
     private static Signature<RGBLike> rgbLike() {
@@ -116,8 +123,10 @@ public final class Ethylene {
                             int g = args.get(1);
                             int b = args.get(2);
                             return new Color(r, g, b);
-                        }, color -> List.of(color.red(), color.green(), color.blue()), Map.entry("r", Token.INTEGER),
-                        Map.entry("g", Token.INTEGER), Map.entry("b", Token.INTEGER)).matchingNames().matchingTypeHints()
+                        }, color -> List.of(color.red(), color.green(), color.blue()),
+                        Map.entry("r", SignatureParameter.parameter(Token.INTEGER)),
+                        Map.entry("g", SignatureParameter.parameter(Token.INTEGER)),
+                        Map.entry("b", SignatureParameter.parameter(Token.INTEGER))).matchingNames().matchingTypeHints()
                 .build();
     }
 
@@ -127,8 +136,10 @@ public final class Ethylene {
                             int g = args.get(1);
                             int b = args.get(2);
                             return TextColor.color(r, g, b);
-                        }, textColor -> List.of(textColor.red(), textColor.green(), textColor.blue()), Map.entry("r", Token.INTEGER),
-                        Map.entry("g", Token.INTEGER), Map.entry("b", Token.INTEGER)).matchingNames().matchingTypeHints()
+                        }, textColor -> List.of(textColor.red(), textColor.green(), textColor.blue()),
+                        Map.entry("r", SignatureParameter.parameter(Token.INTEGER)),
+                        Map.entry("g", SignatureParameter.parameter(Token.INTEGER)),
+                        Map.entry("b", SignatureParameter.parameter(Token.INTEGER))).matchingNames().matchingTypeHints()
                 .build();
     }
 
