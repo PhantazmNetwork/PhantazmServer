@@ -20,7 +20,8 @@ public class AmmoRefillCommand extends Command {
     public AmmoRefillCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
         super("ammo_refill");
 
-        setDefaultExecutor((sender, context) -> {
+        setCondition((sender, commandString) -> sender.hasPermission(Permissions.PLAYTEST));
+        addConditionalSyntax(getCondition(), (sender, context) -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return;

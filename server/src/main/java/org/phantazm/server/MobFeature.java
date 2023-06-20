@@ -50,14 +50,14 @@ import java.util.stream.Stream;
 /**
  * Main entrypoint for PhantazmMob related features.
  */
-public final class Mob {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Mob.class);
+public final class MobFeature {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
     private static ConfigProcessor<MobModel> MODEL_PROCESSOR;
     private static Map<Key, MobModel> models;
     private static Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
 
-    private Mob() {
+    private MobFeature() {
         throw new UnsupportedOperationException();
     }
 
@@ -111,7 +111,7 @@ public final class Mob {
         processorMap.put(BooleanObjectPair.of(false, Entity.Pose.class.getName()),
                 ConfigProcessor.enumProcessor(Entity.Pose.class));
 
-        Mob.processorMap = Map.copyOf(processorMap);
+        MobFeature.processorMap = Map.copyOf(processorMap);
 
         loadModels(mobPath, codec);
     }

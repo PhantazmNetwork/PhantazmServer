@@ -36,14 +36,14 @@ import java.util.UUID;
 /**
  * Main entrypoint for lobby-related features.
  */
-public final class Lobbies {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Lobbies.class);
+public final class LobbyFeature {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LobbyFeature.class);
 
     private static LobbyRouter lobbyRouter;
 
     private static SceneFallback fallback;
 
-    private Lobbies() {
+    private LobbyFeature() {
         throw new UnsupportedOperationException();
     }
 
@@ -85,7 +85,7 @@ public final class Lobbies {
                         mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig());
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
-        fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), Lobbies.getLobbyRouter(),
+        fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), LobbyFeature.getLobbyRouter(),
                 lobbiesConfig.mainLobbyName());
         SceneFallback regularFallback = new CompositeFallback(List.of(fallback, finalFallback));
 

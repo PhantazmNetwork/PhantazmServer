@@ -20,7 +20,8 @@ public class FlagToggleCommand extends Command {
             @NotNull KeyParser keyParser) {
         super("toggle_flag");
 
-        addConditionalSyntax((sender, commandString) -> sender instanceof Player, (sender, context) -> {
+        setCondition((sender, commandString) -> sender.hasPermission(Permissions.PLAYTEST));
+        addConditionalSyntax(getCondition(), (sender, context) -> {
             Player player = (Player)sender;
             UUID uuid = player.getUuid();
 

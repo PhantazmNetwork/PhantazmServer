@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * Initializes features related to Element.
  */
-public final class Element {
+public final class ElementFeature {
     private static ContextManager contextManager;
 
     static void initialize(@NotNull MappingProcessorSource mappingProcessorSource, @NotNull KeyParser keyParser) {

@@ -5,11 +5,13 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.server.player.LoginValidator;
 
 public class WhitelistCommand extends Command {
+    public static final Permission PERMISSION = new Permission("admin.whitelist");
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
 
     public WhitelistCommand(@NotNull IdentitySource identitySource, @NotNull LoginValidator loginValidator,
@@ -24,7 +26,8 @@ public class WhitelistCommand extends Command {
         private Add(@NotNull IdentitySource identitySource, @NotNull LoginValidator loginValidator) {
             super("add");
 
-            addSyntax((sender, context) -> {
+            setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
+            addConditionalSyntax(getCondition(), (sender, context) -> {
                 String name = context.get(PLAYER_ARGUMENT);
                 identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                     uuidOptional.ifPresent(uuid -> {
@@ -46,7 +49,8 @@ public class WhitelistCommand extends Command {
                 boolean whitelist) {
             super("remove");
 
-            addSyntax((sender, context) -> {
+            setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
+            addConditionalSyntax(getCondition(), (sender, context) -> {
                 String name = context.get(PLAYER_ARGUMENT);
                 identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                     uuidOptional.ifPresent(uuid -> {

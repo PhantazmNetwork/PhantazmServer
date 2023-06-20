@@ -25,7 +25,7 @@ import java.util.UUID;
 /**
  * Entrypoint for chat-related features.
  */
-public final class Chat {
+public final class ChatFeature {
     /**
      * The default {@link ChatChannel} name for players.
      */
@@ -33,7 +33,7 @@ public final class Chat {
 
     public static final String SELF_CHAT_CHANNEL_NAME = "self";
 
-    private Chat() {
+    private ChatFeature() {
         throw new UnsupportedOperationException();
     }
 
@@ -44,9 +44,8 @@ public final class Chat {
      * @param viewProvider   A {@link PlayerViewProvider} to create {@link PlayerView}s
      * @param commandManager The {@link CommandManager} to register chat commands to
      */
-    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider, @NotNull Map<?
-            super UUID, ? extends Party> parties,
-            @NotNull CommandManager commandManager) {
+    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
+            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull CommandManager commandManager) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {

@@ -18,7 +18,8 @@ public class GodmodeCommand extends Command {
     public GodmodeCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
         super("godmode");
 
-        setDefaultExecutor((sender, context) -> {
+        setCondition((sender, commandString) -> sender.hasPermission(Permissions.PLAYTEST));
+        addConditionalSyntax(getCondition(), (sender, context) -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return;

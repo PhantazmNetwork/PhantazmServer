@@ -28,6 +28,7 @@ import net.minestom.server.color.Color;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.particle.Particle;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
@@ -41,14 +42,14 @@ import java.util.*;
 /**
  * Initializes features related to Ethylene.
  */
-public final class Ethylene {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Mob.class);
+public final class EthyleneFeature {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
     private static MappingProcessorSource mappingProcessorSource;
     private static KeyParser keyParser;
 
     static void initialize(@NotNull KeyParser keyParser) {
-        Ethylene.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        EthyleneFeature.keyParser = Objects.requireNonNull(keyParser, "keyParser");
 
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(sound())
@@ -56,7 +57,7 @@ public final class Ethylene {
                         .withCustomSignature(bounds3D()).withCustomSignature(rgbLike()).withScalarSignature(key())
                         .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
                         .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
-                        .withScalarSignature(particle()).withScalarSignature(block())
+                        .withScalarSignature(particle()).withScalarSignature(block()).withScalarSignature(permission())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
                         .withStandardTypeImplementations().ignoringLengths().build();
@@ -141,6 +142,13 @@ public final class Ethylene {
                         Map.entry("g", SignatureParameter.parameter(Token.INTEGER)),
                         Map.entry("b", SignatureParameter.parameter(Token.INTEGER))).matchingNames().matchingTypeHints()
                 .build();
+    }
+
+    private static ScalarSignature<Permission> permission() {
+        return ScalarSignature.of(Token.ofClass(Permission.class), element -> new Permission(element.asString()),
+                permission -> permission == null
+                              ? ConfigPrimitive.NULL
+                              : ConfigPrimitive.of(permission.getPermissionName()));
     }
 
     private static ScalarSignature<Particle> particle() {

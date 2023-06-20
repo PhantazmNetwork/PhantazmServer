@@ -19,6 +19,9 @@ public class PartyFeature {
 
     private static final Map<? super UUID, Party> parties = new HashMap<>();
 
+    private PartyFeature() {
+    }
+
     public static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
             @NotNull SchedulerManager schedulerManager) {
         PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);

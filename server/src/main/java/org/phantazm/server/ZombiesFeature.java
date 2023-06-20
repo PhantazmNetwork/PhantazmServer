@@ -147,7 +147,8 @@ public final class ZombiesFeature {
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
         // https://bugs.mojang.com/browse/MC-87984
         Team mobNoPushTeam =
-                teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS).build();
+                teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS)
+                        .build();
         databaseExecutor = Executors.newSingleThreadExecutor();
         HikariConfig config = new HikariConfig("./zombies.hikari.properties");
         HikariDataSource dataSource = new HikariDataSource(config);
@@ -157,13 +158,13 @@ public final class ZombiesFeature {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
                             instanceLoader, sceneFallback, globalEventNode, ZombiesFeature.mobSpawnerSource(),
-                            Mob.getModels(), new BasicClientBlockHandlerSource(instance -> {
+                            MobFeature.getModels(), new BasicClientBlockHandlerSource(instance -> {
                         DimensionType dimensionType = instance.getDimensionType();
                         return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
                                 dimensionType.getHeight());
                     }), contextManager, keyParser, mobNoPushTeam, database, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
-                                    Mob.getModels()));
+                                    MobFeature.getModels()));
             providers.put(entry.getKey(), provider);
         }
 
@@ -176,8 +177,8 @@ public final class ZombiesFeature {
         commandManager.register(
                 new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene,
                         uuid -> {
-                            if (Lobbies.getLobbyRouter().getScene(uuid).isPresent()) {
-                                return Optional.of(Lobbies.getLobbyRouter());
+                            if (LobbyFeature.getLobbyRouter().getScene(uuid).isPresent()) {
+                                return Optional.of(LobbyFeature.getLobbyRouter());
                             }
 
                             if (ZombiesFeature.getPlayerScene(uuid).isPresent()) {

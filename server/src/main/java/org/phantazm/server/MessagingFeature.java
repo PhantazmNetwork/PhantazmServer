@@ -23,9 +23,9 @@ import java.util.Map;
 /**
  * Main entrypoint for plugin messaging. This is used to communicate with the proxy and players.
  */
-public final class Messaging {
+public final class MessagingFeature {
 
-    private Messaging() {
+    private MessagingFeature() {
         throw new UnsupportedOperationException();
     }
 

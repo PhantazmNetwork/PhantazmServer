@@ -15,12 +15,12 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-public final class Proxima {
+public final class ProximaFeature {
     private static Pathfinder pathfinder;
     private static Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction;
     private static Spawner spawner;
 
-    private Proxima() {
+    private ProximaFeature() {
         throw new UnsupportedOperationException();
     }
 

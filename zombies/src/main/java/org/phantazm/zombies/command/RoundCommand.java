@@ -38,7 +38,8 @@ public class RoundCommand extends Command {
                     });
                 });
 
-        addConditionalSyntax((sender, commandString) -> sender instanceof Player, (sender, context) -> {
+        setCondition((sender, commandString) -> sender.hasPermission(Permissions.PLAYTEST));
+        addConditionalSyntax(getCondition(), (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 RoundHandler handler = scene.getMap().roundHandler();

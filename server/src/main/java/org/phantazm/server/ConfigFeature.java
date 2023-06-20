@@ -18,7 +18,7 @@ import java.nio.file.Path;
 /**
  * Entrypoint for configuration-related features.
  */
-public final class Config {
+public final class ConfigFeature {
     /**
      * The location of the server configuration file.
      */
@@ -51,7 +51,7 @@ public final class Config {
 
     private static ConfigHandler handler;
 
-    private Config() {
+    private ConfigFeature() {
         throw new UnsupportedOperationException();
     }
 
