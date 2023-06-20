@@ -164,8 +164,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                 (context, activables) -> {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
                     combinedActivables.add(
-                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, sidebar,
-                                    tabList));
+                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, sidebar, tabList,
+                                    stats));
                     return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
@@ -202,7 +202,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
-                            sidebar, tabList), corpse.asKnockActivable(reviveHandler), new Activable() {
+                            sidebar, tabList, stats), corpse.asKnockActivable(reviveHandler), new Activable() {
                         @Override
                         public void start() {
                             meta.setCorpse(corpse);
@@ -217,13 +217,14 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     List.of(new BasicQuitStateActivable(instance, playerView, sidebar, tabList, stateMap,
                             taskScheduler)));
         };
-        PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher(stats);
+
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
                 Map.of(ZombiesPlayerStateKeys.ALIVE, aliveStateCreator, ZombiesPlayerStateKeys.DEAD,
                         (Function<DeadPlayerStateContext, ZombiesPlayerState>)context -> deadStateCreator.apply(context,
                                 List.of()), ZombiesPlayerStateKeys.KNOCKED, knockedStateCreator,
                         ZombiesPlayerStateKeys.QUIT, quitStateCreator);
 
+        PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
         ZombiesPlayerModule module =
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,

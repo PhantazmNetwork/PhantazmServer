@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
@@ -36,16 +37,19 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final TabList tabList;
 
+    private final ZombiesPlayerMapStats stats;
+
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
             @NotNull PlayerView playerView, @NotNull ReviveHandler reviveHandler, @NotNull TickFormatter tickFormatter,
-            @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+            @NotNull Sidebar sidebar, @NotNull TabList tabList, @NotNull ZombiesPlayerMapStats stats) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.reviveHandler = Objects.requireNonNull(reviveHandler, "reviveHandler");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.tabList = tabList;
+        this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.stats = Objects.requireNonNull(stats, "stats");
     }
 
     @Override
@@ -64,6 +68,8 @@ public class BasicKnockedStateActivable implements Activable {
         playerView.getDisplayName().thenAccept(displayName -> {
             instance.sendMessage(buildDeathMessage(displayName));
         });
+
+        stats.setKnocks(stats.getKnocks() + 1);
     }
 
     @Override
@@ -91,7 +97,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.setFlying(false);
             player.setAllowFlying(false);
             player.setFlyingSpeed(Attribute.FLYING_SPEED.defaultValue());
-            player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
+            player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(Attribute.MOVEMENT_SPEED.defaultValue());
             player.setGameMode(GameMode.ADVENTURE);
             player.sendActionBar(Component.empty());
             sidebar.addViewer(player);

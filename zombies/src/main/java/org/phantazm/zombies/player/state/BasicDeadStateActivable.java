@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.zombies.player.ZombiesPlayerMeta;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 
 import java.util.Objects;
@@ -22,16 +22,18 @@ public class BasicDeadStateActivable implements Activable {
     private final PlayerView playerView;
     private final Sidebar sidebar;
     private final TabList tabList;
+    private final ZombiesPlayerMapStats stats;
 
     public BasicDeadStateActivable(@NotNull InventoryAccessRegistry accessRegistry,
             @NotNull DeadPlayerStateContext context, @NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+            @NotNull Sidebar sidebar, @NotNull TabList tabList, @NotNull ZombiesPlayerMapStats stats) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.stats = Objects.requireNonNull(stats, "stats");
     }
 
     @Override
@@ -46,6 +48,7 @@ public class BasicDeadStateActivable implements Activable {
             instance.sendMessage(buildDeathMessage(displayName));
         });
 
+        stats.setDeaths(stats.getDeaths() + 1);
         accessRegistry.switchAccess(InventoryKeys.DEAD_ACCESS);
     }
 
