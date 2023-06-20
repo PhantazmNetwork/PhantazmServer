@@ -4,9 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.event.Event;
 import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -74,16 +72,6 @@ public class HitScanFirer implements Firer {
                 shotHandler.handle(gun, state, entity, previousHits, shot);
             }
         });
-    }
-
-    @Override
-    public void addExtraShotHandler(ShotHandler shotHandler) {
-
-    }
-
-    @Override
-    public void removeExtraShotHandler(ShotHandler shotHandler) {
-
     }
 
     @Override

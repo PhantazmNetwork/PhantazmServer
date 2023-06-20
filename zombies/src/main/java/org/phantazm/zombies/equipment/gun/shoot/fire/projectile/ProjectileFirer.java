@@ -114,16 +114,6 @@ public class ProjectileFirer implements Firer {
     }
 
     @Override
-    public void addExtraShotHandler(ShotHandler shotHandler) {
-
-    }
-
-    @Override
-    public void removeExtraShotHandler(ShotHandler shotHandler) {
-
-    }
-
-    @Override
     public void tick(@NotNull GunState state, long time) {
         for (AliveProjectile aliveProjectile = removalQueue.peek();
                 aliveProjectile != null && (time - aliveProjectile.time()) / 50 > data.maxAliveTime();
