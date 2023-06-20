@@ -46,8 +46,6 @@ public class FilePermissionHandler implements PermissionHandler {
 
     @Override
     public void applyPermissions(@NotNull UUID uuid, @NotNull CommandSender sender) {
-        applyTo(sender, ALL_GROUP);
-
         Set<String> groups = permissionData.groups().get(uuid);
         if (groups != null) {
             for (String group : groups) {
