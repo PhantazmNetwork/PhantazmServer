@@ -6,6 +6,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.player.GameProfile;
@@ -45,6 +47,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
     private final TickTaskScheduler taskScheduler;
     private final ZombiesDatabase database;
+    private final EventNode<Event> sceneNode;
 
     private boolean joinable = true;
 
@@ -53,7 +56,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
-            @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database) {
+            @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
+            @NotNull EventNode<Event> sceneNode) {
         super(uuid, instance, players, fallback);
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.map = Objects.requireNonNull(map, "map");
@@ -64,6 +68,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
         this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
         this.database = Objects.requireNonNull(database, "database");
+        this.sceneNode = Objects.requireNonNull(sceneNode, "sceneNode");
+    }
+
+    public @NotNull EventNode<Event> getSceneNode() {
+        return sceneNode;
     }
 
     public @NotNull Map<UUID, ZombiesPlayer> getZombiesPlayers() {

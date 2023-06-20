@@ -67,12 +67,11 @@ import java.util.function.Supplier;
 
 public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, ZombiesJoinRequest> {
     private final Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction;
-    private final IdentityHashMap<ZombiesScene, SceneContext> contexts;
     private final MapInfo mapInfo;
     private final ConnectionManager connectionManager;
     private final InstanceLoader instanceLoader;
     private final SceneFallback sceneFallback;
-    private final EventNode<Event> eventNode;
+    private final EventNode<Event> rootNode;
     private final ContextManager contextManager;
     private final KeyParser keyParser;
     private final Team mobNoPushTeam;
@@ -89,19 +88,18 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull MapInfo mapInfo, @NotNull ConnectionManager connectionManager,
             @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
-            @NotNull EventNode<Event> eventNode, @NotNull MobSpawnerSource mobSpawnerSource,
+            @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull Team mobNoPushTeam,
             @NotNull ZombiesDatabase database, @NotNull Map<Key, PowerupInfo> powerups,
             @NotNull ZombiesPlayer.Source zombiesPlayerSource) {
         super(maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
-        this.contexts = new IdentityHashMap<>(maximumScenes);
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
         this.sceneFallback = Objects.requireNonNull(sceneFallback, "sceneFallback");
-        this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
+        this.rootNode = Objects.requireNonNull(rootNode, "eventNode");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.database = Objects.requireNonNull(database, "database");
@@ -229,11 +227,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         ZombiesScene scene =
                 new ZombiesScene(UUID.randomUUID(), connectionManager, map, players, zombiesPlayers, instance,
-                        sceneFallback, settings, stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database);
+                        sceneFallback, settings, stageTransition, leaveHandler, playerCreator, tickTaskScheduler,
+                        database, childNode);
         sceneWrapper.set(scene);
-
-        eventNode.addChild(childNode);
-        contexts.put(scene, new SceneContext(childNode));
+        rootNode.addChild(childNode);
 
         InstanceSpawner.InstanceSettings instanceSettings = instanceSpaceFunction.apply(instance);
         instanceSettings.spaceHandler().space().setOverrideFunction((x, y, z) -> {
@@ -249,12 +246,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     @Override
     protected void cleanupScene(@NotNull ZombiesScene scene) {
-        SceneContext context = contexts.remove(scene);
-        if (context == null) {
-            return;
-        }
-
-        eventNode.removeChild(context.node());
+        rootNode.removeChild(scene.getSceneNode());
     }
 
     private MapObjects createMapObjects(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
@@ -368,13 +360,5 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull SidebarModule sidebarModule, @NotNull ElementPath scoreboardSubNode) {
         ElementContext context = contextManager.makeContext(mapInfo.scoreboard());
         return new ElementSidebarUpdaterCreator(sidebarModule, context, keyParser, scoreboardSubNode);
-    }
-
-    private record SceneContext(@NotNull EventNode<?> node) {
-
-        public SceneContext {
-            Objects.requireNonNull(node, "node");
-        }
-
     }
 }
