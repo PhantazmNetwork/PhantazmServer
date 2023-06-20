@@ -17,6 +17,7 @@ import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.Map;
 import java.util.Objects;
@@ -39,6 +40,7 @@ public class ZombiesPlayerModule implements DependencyModule {
     private final TransactionModifierSource playerTransactionModifierSource;
     private final TransactionModifierSource compositeTransactionModifierSource;
     private final Flaggable flaggable;
+    private final ZombiesPlayerMapStats stats;
 
     public ZombiesPlayerModule(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
             @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
@@ -47,7 +49,8 @@ public class ZombiesPlayerModule implements DependencyModule {
             @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
             @NotNull Sidebar sidebar,
             @NotNull TabList tabList, @NotNull TransactionModifierSource mapTransactionModifierSource,
-            @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable) {
+            @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable,
+            @NotNull ZombiesPlayerMapStats stats) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -64,6 +67,7 @@ public class ZombiesPlayerModule implements DependencyModule {
         this.compositeTransactionModifierSource =
                 TransactionModifierSource.compositeView(mapTransactionModifierSource, playerTransactionModifierSource);
         this.flaggable = Objects.requireNonNull(flaggable, "flags");
+        this.stats = Objects.requireNonNull(stats, "stats");
     }
 
     public @NotNull ZombiesPlayerMeta getMeta() {
@@ -122,5 +126,9 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     public @NotNull Flaggable flags() {
         return flaggable;
+    }
+
+    public @NotNull ZombiesPlayerMapStats getStats() {
+        return stats;
     }
 }

@@ -24,6 +24,7 @@ import org.phantazm.zombies.equipment.gun.*;
 import org.phantazm.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import org.phantazm.zombies.equipment.gun.audience.PlayerAudienceProvider;
 import org.phantazm.zombies.equipment.gun.effect.*;
+import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
 import org.phantazm.zombies.equipment.gun.reload.StateReloadTester;
 import org.phantazm.zombies.equipment.gun.reload.actionbar.GradientActionBarChooser;
 import org.phantazm.zombies.equipment.gun.reload.actionbar.StaticActionBarChooser;
@@ -354,6 +355,15 @@ final class EquipmentFeature {
 
                 GunModel model = new GunModel(rootLevel, levels);
                 Gun gun = new Gun(equipmentKey, equipmentModule.getPlayerView()::getPlayer, model);
+                equipmentModule.getEventNode().addListener(GunShootEvent.class, event -> {
+                    if (event.gun() != gun) {
+                        return;
+                    }
+
+                    equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
+                    equipmentModule.getMapStats().setRegularHits(equipmentModule.getMapStats().getRegularHits() + event.shot().regularTargets().size());
+                    equipmentModule.getMapStats().setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + event.shot().headshotTargets().size());
+                });
 
                 return Optional.of(gun);
             }

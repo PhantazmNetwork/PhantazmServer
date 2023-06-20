@@ -4,5 +4,5 @@ plugins {
 
 dependencies {
     api(libs.proxima.core)
-    implementation(projects.phantazmCore)
+    api(projects.phantazmCore)
 }

@@ -25,6 +25,7 @@ import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.NoContext;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageTransition;
+import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final LeaveHandler leaveHandler;
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
     private final TickTaskScheduler taskScheduler;
+    private final ZombiesDatabase database;
 
     private boolean joinable = true;
 
@@ -51,7 +53,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
-            @NotNull TickTaskScheduler taskScheduler) {
+            @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database) {
         super(uuid, instance, players, fallback);
         this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.map = Objects.requireNonNull(map, "map");
@@ -61,6 +63,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.leaveHandler = Objects.requireNonNull(leaveHandler, "leaveHandler");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
         this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
+        this.database = Objects.requireNonNull(database, "database");
     }
 
     public @NotNull Map<UUID, ZombiesPlayer> getZombiesPlayers() {
@@ -279,6 +282,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     public void shutdown() {
         taskScheduler.end();
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
+            database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
             zombiesPlayer.end();
         }
         super.shutdown();

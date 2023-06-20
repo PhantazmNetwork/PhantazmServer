@@ -5,6 +5,8 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -27,9 +29,7 @@ import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
-import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
-import org.phantazm.core.game.scene.lobby.Lobby;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
@@ -40,6 +40,7 @@ import org.phantazm.core.particle.data.*;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.stats.zombies.*;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.FileSystemMapLoader;
@@ -95,6 +96,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public final class ZombiesFeature {
@@ -108,6 +112,8 @@ public final class ZombiesFeature {
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
+    private static ExecutorService databaseExecutor;
+    private static HikariZombiesDatabase database;
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
@@ -142,6 +148,11 @@ public final class ZombiesFeature {
         // https://bugs.mojang.com/browse/MC-87984
         Team mobNoPushTeam =
                 teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS).build();
+        databaseExecutor = Executors.newSingleThreadExecutor();
+        HikariConfig config = new HikariConfig("./zombies.hikari.properties");
+        HikariDataSource dataSource = new HikariDataSource(config);
+        ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
+        database = new HikariZombiesDatabase(databaseExecutor, dataSource, sqlFetcher);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
@@ -150,7 +161,7 @@ public final class ZombiesFeature {
                         DimensionType dimensionType = instance.getDimensionType();
                         return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
                                 dimensionType.getHeight());
-                    }), contextManager, keyParser, mobNoPushTeam, ZombiesFeature.powerups(),
+                    }), contextManager, keyParser, mobNoPushTeam, database, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
                                     Mob.getModels()));
             providers.put(entry.getKey(), provider);
@@ -363,5 +374,33 @@ public final class ZombiesFeature {
 
     public static @NotNull ZombiesSceneRouter zombiesSceneRouter() {
         return FeatureUtils.check(sceneRouter);
+    }
+
+    public static void end() {
+        if (database != null) {
+            FeatureUtils.check(database).close();
+        }
+
+        if (databaseExecutor != null) {
+            FeatureUtils.check(databaseExecutor).shutdown();
+
+            try {
+                LOGGER.info(
+                        "Shutting down database executor. Please allow for one minute before shutdown " + "completes.");
+                if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
+                    databaseExecutor.shutdownNow();
+
+                    LOGGER.warn(
+                            "Not all database tasks completed. Please allow for one minute for tasks to be canceled.");
+                    if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
+                        LOGGER.warn("Database tasks failed to cancel.");
+                    }
+                }
+            }
+            catch (InterruptedException e) {
+                databaseExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }

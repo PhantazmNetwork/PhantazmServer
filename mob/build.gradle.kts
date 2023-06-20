@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     api(projects.phantazmProximaMinestom)
-    implementation(projects.phantazmCore)
-    implementation(projects.phantazmCommons)
-    implementation(libs.adventure.text.minimessage)
+    api(projects.phantazmCore)
+    api(projects.phantazmCommons)
 }

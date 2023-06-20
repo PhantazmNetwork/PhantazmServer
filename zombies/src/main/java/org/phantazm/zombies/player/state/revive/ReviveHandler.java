@@ -66,6 +66,7 @@ public class ReviveHandler implements Activable {
             }
 
             if (reviver != null) {
+                reviver.module().getStats().setRevives(reviver.module().getStats().getRevives() + 1);
                 clearReviverState();
             }
 

@@ -4,9 +4,13 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
+import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
@@ -49,23 +53,25 @@ public class HitScanFirer implements Firer {
     @Override
     public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
             @NotNull Collection<UUID> previousHits) {
-        entitySupplier.get().ifPresent(player -> {
+        entitySupplier.get().ifPresent(entity -> {
             Optional<Point> endOptional = endSelector.getEnd(start);
             if (endOptional.isEmpty()) {
                 return;
             }
             Point end = endOptional.get();
 
-            TargetFinder.Result target = targetFinder.findTarget(player, start, end, previousHits);
+            TargetFinder.Result target = targetFinder.findTarget(entity, start, end, previousHits);
             for (GunHit hit : target.regular()) {
                 previousHits.add(hit.entity().getUuid());
             }
             for (GunHit hit : target.headshot()) {
                 previousHits.add(hit.entity().getUuid());
             }
+
+            GunShot shot = new GunShot(start, end, target.regular(), target.headshot());
+            EventDispatcher.call(new GunShootEvent(gun, shot, entity));
             for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(gun, state, player, previousHits,
-                        new GunShot(start, end, target.regular(), target.headshot()));
+                shotHandler.handle(gun, state, entity, previousHits, shot);
             }
         });
     }
