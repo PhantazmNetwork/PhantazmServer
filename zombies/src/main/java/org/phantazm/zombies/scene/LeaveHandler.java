@@ -13,6 +13,7 @@ import org.phantazm.zombies.stage.StageTransition;
 
 import java.util.*;
 
+
 public class LeaveHandler {
     private final StageTransition stageTransition;
 
@@ -24,6 +25,14 @@ public class LeaveHandler {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }
 
+    /**
+     * Handles updating internal state when a player leaves mid-game; not necessary to call at the end of a game as it
+     * will get destroyed regardless. Does not transfer players to another scene; this ONLY updates internal state and
+     * reports whether or the operation was "successful" (if there were players removed from the internal state).
+     *
+     * @param leavers the players who are leaving
+     * @return a {@link RouteResult} representing the operation
+     */
     public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
         List<Pair<UUID, ZombiesPlayer>> leavingPlayers = new ArrayList<>();
 
