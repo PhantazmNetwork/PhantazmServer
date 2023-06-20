@@ -1,5 +1,6 @@
 package org.phantazm.zombies.scene;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
@@ -10,9 +11,7 @@ import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageTransition;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class LeaveHandler {
     private final StageTransition stageTransition;
@@ -25,37 +24,36 @@ public class LeaveHandler {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }
 
-    public RouteResult leave(@NotNull Iterable<UUID> leavers) {
+    public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+        List<Pair<UUID, ZombiesPlayer>> leavingPlayers = new ArrayList<>();
+
+        boolean failure = false;
         for (UUID leaver : leavers) {
-            if (!zombiesPlayers.containsKey(leaver)) {
-                return new RouteResult(false,
-                        Component.text("Not all players are within the scene.", NamedTextColor.RED));
-            }
-        }
-
-        for (UUID leaver : leavers) {
-            zombiesPlayers.remove(leaver);
-
-            Stage stage = stageTransition.getCurrentStage();
-
             ZombiesPlayer zombiesPlayer = zombiesPlayers.get(leaver);
             if (zombiesPlayer == null) {
+                failure = true;
                 continue;
             }
 
+            leavingPlayers.add(Pair.of(leaver, zombiesPlayer));
+        }
+
+        Stage stage = stageTransition.getCurrentStage();
+        for (Pair<UUID, ZombiesPlayer> pair : leavingPlayers) {
+            ZombiesPlayer zombiesPlayer = pair.right();
             if (stage != null) {
                 stage.onLeave(zombiesPlayer);
             }
 
             if (stage == null || !stage.hasPermanentPlayers()) {
-                zombiesPlayers.remove(leaver);
+                zombiesPlayers.remove(pair.left());
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
                 zombiesPlayer.end();
             }
-
-            zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
         }
 
-        return RouteResult.SUCCESSFUL;
+        return failure ? new RouteResult(false,
+                Component.text("Not all players are within the scene.", NamedTextColor.RED)) : RouteResult.SUCCESSFUL;
     }
 
 }

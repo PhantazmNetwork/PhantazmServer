@@ -300,9 +300,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
             zombiesPlayer.end();
-
-            PlayerView playerView = zombiesPlayer.module().getPlayerView();
-            fallback.fallback(playerView);
+            
+            fallback.fallback(zombiesPlayer.module().getPlayerView());
         }
 
         super.shutdown();
