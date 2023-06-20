@@ -16,8 +16,7 @@ public class QuitCommand extends Command {
             @NotNull PlayerViewProvider viewProvider) {
         super("quit");
 
-        setCondition((sender, commandString) -> sender.hasPermission(Permissions.PLAYTEST));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             Player player = (Player)sender;
             RouteResult result = router.leave(Collections.singleton(player.getUuid()));
             if (result.success()) {
