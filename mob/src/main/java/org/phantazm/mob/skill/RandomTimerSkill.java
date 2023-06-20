@@ -2,6 +2,9 @@ package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
@@ -123,17 +126,32 @@ public class RandomTimerSkill implements Skill {
     @DataObject
     public record Data(@Description(
             "The number of times this skill should repeat its action. A negative number will repeat " +
-                    "infinitely") int repeat,
+                    "infinitely. Defaults to -1.") int repeat,
 
                        @Description("The minimum activation interval") long minInterval,
                        @Description("The maximum activation interval") long maxInterval,
 
-                       @Description("Whether the timer will start in an activated state") boolean requiresActivation,
+                       @Description(
+                               "Whether the timer will start in an activated state. Defaults to false.") boolean requiresActivation,
 
                        @Description(
-                               "Whether the timer should restart itself if it is activated while running") boolean resetOnActivation,
+                               "Whether the timer should restart itself if it is activated while running. Defaults to false.") boolean resetOnActivation,
 
                        @Description("The skill to call when the timer activates") @ChildPath(
                                "delegate") String delegate) {
+        @Default("repeat")
+        public static @NotNull ConfigElement repeatDefault() {
+            return ConfigPrimitive.of(-1);
+        }
+
+        @Default("requiresActivation")
+        public static @NotNull ConfigElement requiresActivationDefault() {
+            return ConfigPrimitive.of(false);
+        }
+
+        @Default("resetOnActivation")
+        public static @NotNull ConfigElement resetOnActivationDefault() {
+            return ConfigPrimitive.of(false);
+        }
     }
 }
