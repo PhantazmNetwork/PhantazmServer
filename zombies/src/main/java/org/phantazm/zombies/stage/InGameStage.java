@@ -180,6 +180,18 @@ public class InGameStage implements Stage {
                 continue;
             }
 
+            ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
+
+            int totalShots = stats.getShots();
+            int gunAccuracy = totalShots <= 0
+                              ? 100
+                              : (int)Math.rint(((double)(stats.getRegularHits() + stats.getHeadshotHits()) /
+                                      (double)totalShots) * 100);
+
+            int headshotAccuracy = totalShots <= 0
+                                   ? 100
+                                   : (int)Math.rint(((double)(stats.getHeadshotHits()) / (double)totalShots) * 100);
+
             zombiesPlayer.sendMessage(Component.text("==========================================", NamedTextColor.GREEN,
                     TextDecoration.STRIKETHROUGH));
 
@@ -191,6 +203,17 @@ public class InGameStage implements Stage {
                             .append(Component.text(")", NamedTextColor.GRAY)));
 
             zombiesPlayer.sendMessage(Component.empty());
+            zombiesPlayer.sendMessage(Component.text("Easy Difficulty", NamedTextColor.DARK_GREEN));
+            zombiesPlayer.sendMessage(Component.empty());
+
+            zombiesPlayer.sendMessage(
+                    Component.text("Times Knocked Down", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
+                            .append(Component.text(" - ", NamedTextColor.GRAY))
+                            .append(Component.text(stats.getKnocks(), NamedTextColor.GREEN)));
+
+            zombiesPlayer.sendMessage(Component.text("Deaths", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
+                    .append(Component.text(" - ", NamedTextColor.GRAY))
+                    .append(Component.text(stats.getDeaths(), NamedTextColor.GREEN)));
 
             zombiesPlayer.sendMessage(
                     Component.text("Zombie Kills", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
@@ -198,10 +221,27 @@ public class InGameStage implements Stage {
                             .append(Component.text(zombiesPlayer.module().getKills().getKills(),
                                     NamedTextColor.GREEN)));
 
+            zombiesPlayer.sendMessage(
+                    Component.text("Players Revived", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
+                            .append(Component.text(" - ", NamedTextColor.GRAY))
+                            .append(Component.text(stats.getRevives(), NamedTextColor.GREEN)));
+
+            zombiesPlayer.sendMessage(
+                    Component.text("Gun Accuracy", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
+                            .append(Component.text(" - ", NamedTextColor.GRAY))
+                            .append(Component.text(gunAccuracy, NamedTextColor.GREEN).append(Component.text("%"))));
+
+            zombiesPlayer.sendMessage(
+                    Component.text("Headshot Accuracy", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
+                            .append(Component.text(" - ", NamedTextColor.GRAY))
+                            .append(Component.text(headshotAccuracy, NamedTextColor.GREEN)
+                                    .append(Component.text("%"))));
+
+
             zombiesPlayer.sendMessage(Component.empty());
 
-            zombiesPlayer.sendMessage(Component.text("==========================================",
-                    NamedTextColor.GREEN, TextDecoration.STRIKETHROUGH));
+            zombiesPlayer.sendMessage(Component.text("==========================================", NamedTextColor.GREEN,
+                    TextDecoration.STRIKETHROUGH));
         }
 
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {
