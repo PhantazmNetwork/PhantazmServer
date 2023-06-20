@@ -356,6 +356,10 @@ final class EquipmentFeature {
                 GunModel model = new GunModel(rootLevel, levels);
                 Gun gun = new Gun(equipmentKey, equipmentModule.getPlayerView()::getPlayer, model);
                 equipmentModule.getEventNode().addListener(GunShootEvent.class, event -> {
+                    if (event.gun() != gun) {
+                        return;
+                    }
+
                     equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
                     equipmentModule.getMapStats().setRegularHits(equipmentModule.getMapStats().getRegularHits() + event.shot().regularTargets().size());
                     equipmentModule.getMapStats().setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + event.shot().headshotTargets().size());

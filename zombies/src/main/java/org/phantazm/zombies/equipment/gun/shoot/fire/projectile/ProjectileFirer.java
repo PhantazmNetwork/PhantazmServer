@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
@@ -53,8 +54,6 @@ public class ProjectileFirer implements Firer {
 
     private final MobSpawner spawner;
 
-    private final EventNode<Event> node;
-
     /**
      * Creates a new {@link ProjectileFirer}.
      *
@@ -83,7 +82,6 @@ public class ProjectileFirer implements Firer {
         this.collisionFilter = Objects.requireNonNull(collisionFilter, "collisionFilter");
         this.shotHandlers = List.copyOf(shotHandlers);
         this.spawner = Objects.requireNonNull(spawner, "spawner");
-        this.node = Objects.requireNonNull(node, "node");
 
         node.addListener(ProjectileCollideWithBlockEvent.class, this::onProjectileCollision);
         node.addListener(ProjectileCollideWithEntityEvent.class, this::onProjectileCollision);
@@ -198,7 +196,7 @@ public class ProjectileFirer implements Firer {
             }
 
             GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
-            node.call(new GunShootEvent(firedShot.gun, shot));
+            EventDispatcher.call(new GunShootEvent(firedShot.gun, shot, firedShot.shooter()));
             for (ShotHandler shotHandler : shotHandlers) {
                 shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
                         shot);

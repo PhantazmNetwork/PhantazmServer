@@ -55,7 +55,7 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     public static ZombiesPlayerMapStats createBasicStats(@NotNull UUID playerUUID, @NotNull Key mapKey) {
-        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null,0, 0, 0, 0, 0, 0, 0, 0);
+        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     @Override

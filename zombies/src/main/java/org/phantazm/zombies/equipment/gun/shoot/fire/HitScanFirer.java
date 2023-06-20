@@ -5,6 +5,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -29,7 +30,6 @@ public class HitScanFirer implements Firer {
     private final ShotEndpointSelector endSelector;
     private final TargetFinder targetFinder;
     private final Collection<ShotHandler> shotHandlers;
-    private final EventNode<Event> eventNode;
 
     /**
      * Creates a {@link HitScanFirer}.
@@ -43,26 +43,24 @@ public class HitScanFirer implements Firer {
     public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
             @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
             @NotNull @Child("target_finder") TargetFinder targetFinder,
-            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers,
-            @NotNull EventNode<Event> eventNode) {
+            @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
         this.endSelector = Objects.requireNonNull(endSelector, "endSelector");
         this.targetFinder = Objects.requireNonNull(targetFinder, "targetFinder");
         this.shotHandlers = List.copyOf(shotHandlers);
-        this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
     }
 
     @Override
     public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
             @NotNull Collection<UUID> previousHits) {
-        entitySupplier.get().ifPresent(player -> {
+        entitySupplier.get().ifPresent(entity -> {
             Optional<Point> endOptional = endSelector.getEnd(start);
             if (endOptional.isEmpty()) {
                 return;
             }
             Point end = endOptional.get();
 
-            TargetFinder.Result target = targetFinder.findTarget(player, start, end, previousHits);
+            TargetFinder.Result target = targetFinder.findTarget(entity, start, end, previousHits);
             for (GunHit hit : target.regular()) {
                 previousHits.add(hit.entity().getUuid());
             }
@@ -71,9 +69,9 @@ public class HitScanFirer implements Firer {
             }
 
             GunShot shot = new GunShot(start, end, target.regular(), target.headshot());
-            eventNode.call(new GunShootEvent(gun, shot));
+            EventDispatcher.call(new GunShootEvent(gun, shot, entity));
             for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(gun, state, player, previousHits, shot);
+                shotHandler.handle(gun, state, entity, previousHits, shot);
             }
         });
     }
