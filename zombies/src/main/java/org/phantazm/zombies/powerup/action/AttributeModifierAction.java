@@ -72,7 +72,7 @@ public class AttributeModifierAction implements Supplier<PowerupAction> {
                 player.getPlayer().ifPresent(p -> {
                     p.getAttribute(attribute).removeModifier(attributeUID);
                 });
-            }));
+            }), true);
         }
 
         private void removeAttribute(ZombiesPlayer player) {

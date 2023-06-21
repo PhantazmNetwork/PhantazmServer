@@ -62,7 +62,7 @@ public class EndStage implements Stage {
 
     @Override
     public boolean hasPermanentPlayers() {
-        return true;
+        return false;
     }
 
     @Override

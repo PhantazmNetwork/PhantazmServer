@@ -86,7 +86,7 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
 
             for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
                 zombiesPlayer.registerCancellable(CancellableState.named(id, () -> {
-                }, () -> zombiesPlayer.getPlayer().ifPresent(actualPlayer -> actualPlayer.hideBossBar(bossBar))));
+                }, () -> zombiesPlayer.getPlayer().ifPresent(actualPlayer -> actualPlayer.hideBossBar(bossBar))), true);
             }
         }
 
