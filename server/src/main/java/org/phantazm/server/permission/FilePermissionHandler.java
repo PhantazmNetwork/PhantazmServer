@@ -5,7 +5,9 @@ import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FileUtils;
@@ -74,6 +76,7 @@ public class FilePermissionHandler implements PermissionHandler {
     @Override
     public void reload() {
         this.permissionData = load(permissionsFile, configCodec, permissionDataConfigProcessor);
+        synchronizeAll();
     }
 
     @Override
@@ -83,6 +86,8 @@ public class FilePermissionHandler implements PermissionHandler {
 
         permissionData.groupPermissions().computeIfAbsent(group, ignored -> new CopyOnWriteArraySet<>())
                 .add(permission);
+
+        synchronizeAll();
     }
 
     @Override
@@ -98,6 +103,8 @@ public class FilePermissionHandler implements PermissionHandler {
             if (permissions.isEmpty()) {
                 groupPermissions.remove(group);
             }
+
+            synchronizeAll();
         }
     }
 
@@ -107,6 +114,11 @@ public class FilePermissionHandler implements PermissionHandler {
         Objects.requireNonNull(group, "group");
 
         permissionData.groups().computeIfAbsent(uuid, ignored -> new CopyOnWriteArraySet<>()).add(group);
+
+        Player player = MinecraftServer.getConnectionManager().getPlayer(uuid);
+        if (player != null) {
+            synchronize(player);
+        }
     }
 
     @Override
@@ -121,6 +133,28 @@ public class FilePermissionHandler implements PermissionHandler {
 
             if (groups.isEmpty()) {
                 playerGroups.remove(uuid);
+            }
+
+            Player player = MinecraftServer.getConnectionManager().getPlayer(uuid);
+            if (player != null) {
+                synchronize(player);
+            }
+        }
+    }
+
+    private void synchronizeAll() {
+        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            synchronize(player);
+        }
+    }
+
+    private void synchronize(Player player) {
+        Set<String> permissionGroups = permissionData.groups().get(player.getUuid());
+        player.getAllPermissions().clear();
+
+        if (permissionGroups != null) {
+            for (String group : permissionGroups) {
+                applyTo(player, group);
             }
         }
     }
