@@ -50,6 +50,10 @@ public class Utils {
         else {
             //player list packets have already been send by the player during init
             for (Player newPlayer : newInstance.getEntityTracker().entities(EntityTracker.Target.PLAYERS)) {
+                if (newPlayer == player) {
+                    continue;
+                }
+
                 newPlayer.addViewer(player);
                 player.addViewer(newPlayer);
             }
