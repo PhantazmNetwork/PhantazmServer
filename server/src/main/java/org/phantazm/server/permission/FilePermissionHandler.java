@@ -157,6 +157,8 @@ public class FilePermissionHandler implements PermissionHandler {
                 applyTo(player, group);
             }
         }
+
+        player.sendPacket(MinecraftServer.getCommandManager().createDeclareCommandsPacket(player));
     }
 
     private void applyTo(CommandSender sender, String groupName) {
