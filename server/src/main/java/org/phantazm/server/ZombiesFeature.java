@@ -113,7 +113,8 @@ public final class ZombiesFeature {
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
     private static ExecutorService databaseExecutor;
-    private static HikariZombiesDatabase database;
+    private static HikariDataSource dataSource;
+    private static ZombiesDatabase database;
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
@@ -151,9 +152,9 @@ public final class ZombiesFeature {
                         .build();
         databaseExecutor = Executors.newSingleThreadExecutor();
         HikariConfig config = new HikariConfig("./zombies.hikari.properties");
-        HikariDataSource dataSource = new HikariDataSource(config);
+        dataSource = new HikariDataSource(config);
         ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
-        database = new HikariZombiesDatabase(databaseExecutor, dataSource, sqlFetcher);
+        database = new SQLZombiesDatabase(databaseExecutor, dataSource, sqlFetcher);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
@@ -377,13 +378,17 @@ public final class ZombiesFeature {
         return FeatureUtils.check(sceneRouter);
     }
 
+    public static @NotNull ZombiesDatabase getDatabase() {
+        return FeatureUtils.check(database);
+    }
+
     public static void end() {
-        if (database != null) {
-            FeatureUtils.check(database).close();
+        if (dataSource != null) {
+            dataSource.close();
         }
 
         if (databaseExecutor != null) {
-            FeatureUtils.check(databaseExecutor).shutdown();
+            databaseExecutor.shutdown();
 
             try {
                 LOGGER.info(

@@ -1,12 +1,11 @@
 package org.phantazm.stats.zombies;
 
-import com.zaxxer.hikari.HikariDataSource;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -14,17 +13,17 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public class HikariZombiesDatabase implements Closeable, ZombiesDatabase {
+public class SQLZombiesDatabase implements ZombiesDatabase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HikariZombiesDatabase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLZombiesDatabase.class);
 
     private final Executor executor;
 
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
 
     private final ZombiesSQLFetcher sqlFetcher;
 
-    public HikariZombiesDatabase(@NotNull Executor executor, @NotNull HikariDataSource dataSource,
+    public SQLZombiesDatabase(@NotNull Executor executor, @NotNull DataSource dataSource,
             @NotNull ZombiesSQLFetcher sqlFetcher) {
         this.executor = Objects.requireNonNull(executor, "executor");
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
@@ -61,8 +60,4 @@ public class HikariZombiesDatabase implements Closeable, ZombiesDatabase {
         }
     }
 
-    @Override
-    public void close() {
-        dataSource.close();
-    }
 }
