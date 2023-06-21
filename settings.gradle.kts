@@ -7,7 +7,7 @@ if (localSettings.exists()) {
     apply(localSettings)
 }
 
-includeBuild("./phantazm-minestom")
+includeBuild("./minestom")
 pluginManagement {
     repositories {
         //necessary for phantazm-zombies-mapeditor module which contains a Fabric mod
