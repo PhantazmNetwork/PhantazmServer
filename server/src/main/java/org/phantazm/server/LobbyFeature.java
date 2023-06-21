@@ -101,8 +101,7 @@ public final class LobbyFeature {
         Map<UUID, LoginLobbyJoinRequest> loginJoinRequests = new HashMap<>();
 
         node.addListener(PlayerLoginEvent.class, event -> {
-            LoginLobbyJoinRequest joinRequest =
-                    new LoginLobbyJoinRequest(MinecraftServer.getConnectionManager(), event, playerViewProvider);
+            LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
             RouteResult result = lobbyRouter.join(routeRequest);
@@ -123,9 +122,6 @@ public final class LobbyFeature {
             if (joinRequest == null) {
                 LOGGER.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
                 event.getPlayer().kick(Component.empty());
-            }
-            else {
-                joinRequest.onPlayerLoginComplete();
             }
         });
 

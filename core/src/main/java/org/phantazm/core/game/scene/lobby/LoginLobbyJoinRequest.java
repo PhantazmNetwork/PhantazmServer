@@ -22,8 +22,6 @@ import java.util.Objects;
  */
 public class LoginLobbyJoinRequest implements LobbyJoinRequest {
 
-    private final ConnectionManager connectionManager;
-
     private final PlayerLoginEvent event;
 
     private final PlayerViewProvider viewProvider;
@@ -34,9 +32,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      * @param event        The {@link PlayerLoginEvent} associated with the new player
      * @param viewProvider The {@link PlayerViewProvider} for the server
      */
-    public LoginLobbyJoinRequest(@NotNull ConnectionManager connectionManager, @NotNull PlayerLoginEvent event,
-            @NotNull PlayerViewProvider viewProvider) {
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
+    public LoginLobbyJoinRequest(@NotNull PlayerLoginEvent event, @NotNull PlayerViewProvider viewProvider) {
         this.event = Objects.requireNonNull(event, "event");
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
     }
@@ -51,14 +47,5 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
         event.setSpawningInstance(instance);
         event.getPlayer().setRespawnPoint(instanceConfig.spawnPoint());
         event.getPlayer().setGameMode(GameMode.ADVENTURE);
-    }
-
-    /**
-     * Handles when the player's login is complete.
-     * This should be fired from a handler to a {@link PlayerSpawnEvent}, as this occurs when a player
-     * has spawned for the first time.
-     */
-    public void onPlayerLoginComplete() {
-        Utils.handleInstanceTransfer(null, event.getPlayer());
     }
 }
