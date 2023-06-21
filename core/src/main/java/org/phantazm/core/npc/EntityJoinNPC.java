@@ -70,8 +70,8 @@ public class EntityJoinNPC implements NPC {
     @DataObject
     public record Data(@NotNull EntityType entityType,
                        @NotNull Pos location,
-                       @NotNull @ChildPath("interactor") String interactor,
-                       @NotNull Component displayName) {
+                       @NotNull Component displayName,
+                       @NotNull @ChildPath("interactor") String interactor) {
         @Default("displayName")
         public static @NotNull ConfigElement displayNameDefault() {
             return ConfigPrimitive.of("");
