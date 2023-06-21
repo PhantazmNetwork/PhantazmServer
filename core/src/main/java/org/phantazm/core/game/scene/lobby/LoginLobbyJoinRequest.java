@@ -65,6 +65,12 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
                 event.getPlayer().removeViewer(otherPlayer);
                 otherPlayer.sendPacket(event.getPlayer().getRemovePlayerToList());
             }
+            else {
+                event.getPlayer().sendPacket(otherPlayer.getAddPlayerToList());
+                otherPlayer.addViewer(event.getPlayer());
+                otherPlayer.sendPacket(event.getPlayer().getAddPlayerToList());
+                event.getPlayer().addViewer(otherPlayer);
+            }
         }
     }
 
