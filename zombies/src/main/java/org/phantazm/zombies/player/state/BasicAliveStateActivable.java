@@ -9,7 +9,6 @@ import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.zombies.player.ZombiesPlayerMeta;
 
 import java.util.Objects;
 
@@ -21,7 +20,8 @@ public class BasicAliveStateActivable implements Activable {
 
     private long lastHeal;
 
-    public BasicAliveStateActivable(@NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+    public BasicAliveStateActivable(@NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
+            @NotNull Sidebar sidebar, @NotNull TabList tabList) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
