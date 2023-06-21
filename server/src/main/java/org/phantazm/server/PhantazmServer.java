@@ -196,13 +196,14 @@ public final class PhantazmServer {
         ContextManager contextManager = ElementFeature.getContextManager();
 
         TickFormatterFeature.initialize(contextManager);
+        NPCFeature.initialize(contextManager);
 
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
         PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
                 MinecraftServer.getSchedulerManager());
-        LobbyFeature.initialize(global, viewProvider, lobbiesConfig);
+        LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
         ChatFeature.initialize(global, viewProvider, PartyFeature.getParties(), MinecraftServer.getCommandManager());
         MessagingFeature.initialize(global, serverConfig.serverInfoConfig().authType());
 

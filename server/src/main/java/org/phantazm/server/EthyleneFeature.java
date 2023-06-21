@@ -25,6 +25,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.color.Color;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.particle.Particle;
@@ -54,15 +56,29 @@ public final class EthyleneFeature {
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(sound())
                         .withCustomSignature(style()).withCustomSignature(textColor()).withCustomSignature(vec3D())
-                        .withCustomSignature(bounds3D()).withCustomSignature(rgbLike()).withScalarSignature(key())
-                        .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
-                        .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
-                        .withScalarSignature(particle()).withScalarSignature(block()).withScalarSignature(permission())
+                        .withCustomSignature(pos()).withCustomSignature(bounds3D()).withCustomSignature(rgbLike())
+                        .withScalarSignature(key()).withScalarSignature(uuid()).withScalarSignature(component())
+                        .withScalarSignature(itemStack()).withScalarSignature(titlePartComponent())
+                        .withScalarSignature(namedTextColor()).withScalarSignature(particle())
+                        .withScalarSignature(block()).withScalarSignature(permission())
+                        .withScalarSignature(entityType())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
                         .withStandardTypeImplementations().ignoringLengths().build();
 
         LOGGER.info("Ethylene initialized.");
+    }
+
+    private static Signature<Pos> pos() {
+        return Signature.builder(Token.ofClass(Pos.class),
+                        (ignored, args) -> new Pos(args.get(0), args.get(1), args.get(2), args.get(3), args.get(4)),
+                        pos -> List.of(pos.x(), pos.y(), pos.z(), pos.yaw(), pos.pitch()),
+                        Map.entry("x", SignatureParameter.parameter(Token.DOUBLE)),
+                        Map.entry("y", SignatureParameter.parameter(Token.DOUBLE)),
+                        Map.entry("z", SignatureParameter.parameter(Token.DOUBLE)),
+                        Map.entry("yaw", SignatureParameter.parameter(Token.FLOAT)),
+                        Map.entry("pitch", SignatureParameter.parameter(Token.FLOAT))).matchingNames().matchingTypeHints()
+                .build();
     }
 
     private static Signature<Vec3I> vec3I() {
@@ -167,6 +183,14 @@ public final class EthyleneFeature {
                 return ItemStack.AIR;
             }
         }, itemStack -> itemStack == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));
+    }
+
+    private static ScalarSignature<EntityType> entityType() {
+        return ScalarSignature.of(Token.ofClass(EntityType.class), element -> {
+            return EntityType.fromNamespaceId(element.asString());
+        }, entityType -> entityType == null
+                         ? ConfigPrimitive.NULL
+                         : ConfigPrimitive.of(entityType.namespace().asString()));
     }
 
     private static ScalarSignature<Block> block() {

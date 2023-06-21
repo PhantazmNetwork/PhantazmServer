@@ -10,9 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -34,7 +36,8 @@ public class LobbyIntegrationTest {
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
                 InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
-        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback);
+        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
+                new NPCHandler(List.of(), instance));
         PlayerView playerView = mock(PlayerView.class);
 
         lobby.shutdown();
@@ -51,7 +54,8 @@ public class LobbyIntegrationTest {
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
                 InstanceConfig.DEFAULT_TIME_RATE);
         SceneFallback sceneFallback = (ignored) -> true;
-        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback);
+        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
+                new NPCHandler(List.of(), instance));
         Player player = mock(Player.class);
         when(player.setInstance(any(), any())).thenReturn(CompletableFuture.completedFuture(null));
         PlayerView playerView = new PlayerView() {

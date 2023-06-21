@@ -10,6 +10,7 @@ import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
@@ -20,6 +21,7 @@ import java.util.*;
 public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private final InstanceConfig instanceConfig;
     private final Map<UUID, PlayerView> players;
+    private final NPCHandler npcHandler;
 
     private boolean joinable = true;
 
@@ -31,10 +33,13 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param fallback       A fallback for the lobby
      */
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
-            @NotNull SceneFallback fallback) {
+            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler) {
         super(uuid, instance, fallback);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.players = new HashMap<>();
+        this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");
+
+        this.npcHandler.spawnAll();
     }
 
     @Override
@@ -102,5 +107,9 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public void setJoinable(boolean joinable) {
         this.joinable = joinable;
+    }
+
+    public void cleanup() {
+        this.npcHandler.end();
     }
 }

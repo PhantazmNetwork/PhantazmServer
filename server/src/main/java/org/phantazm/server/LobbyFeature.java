@@ -1,5 +1,6 @@
 package org.phantazm.server;
 
+import com.github.steanky.element.core.context.ContextManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
@@ -55,7 +56,7 @@ public final class LobbyFeature {
      * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
-            @NotNull LobbiesConfig lobbiesConfig) throws IOException {
+            @NotNull LobbiesConfig lobbiesConfig, @NotNull ContextManager contextManager) throws IOException {
         SceneStore sceneStore = new BasicSceneStore();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
@@ -82,7 +83,8 @@ public final class LobbyFeature {
 
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
                 new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceLoader,
-                        mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig());
+                        mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig(), contextManager,
+                        mainLobbyConfig.npcs());
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), LobbyFeature.getLobbyRouter(),
@@ -94,7 +96,7 @@ public final class LobbyFeature {
                 lobbyProviders.put(lobby.getKey(),
                         new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
                                 instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
-                                lobby.getValue().instanceConfig()));
+                                lobby.getValue().instanceConfig(), contextManager, mainLobbyConfig.npcs()));
             }
         }
 
