@@ -10,7 +10,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
     private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
-    private final ConnectionManager connectionManager;
     private final ZombiesMap map;
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
     private final MapSettingsInfo mapSettingsInfo;
@@ -55,15 +53,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     private boolean joinable = true;
 
-    public ZombiesScene(@NotNull UUID uuid, @NotNull ConnectionManager connectionManager, @NotNull ZombiesMap map,
-            @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers, @NotNull Instance instance,
-            @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
+    public ZombiesScene(@NotNull UUID uuid, @NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
+            @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
             @NotNull EventNode<Event> sceneNode) {
         super(uuid, instance, fallback);
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
@@ -286,9 +282,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         taskScheduler.end();
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
-            zombiesPlayer.end();
 
-            fallback.fallback(zombiesPlayer.module().getPlayerView());
+            if (!zombiesPlayer.hasQuit()) {
+                fallback.fallback(zombiesPlayer.module().getPlayerView());
+            }
+
+            zombiesPlayer.end();
         }
 
         super.shutdown();
@@ -306,6 +305,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         stageTransition.tick(time);
         taskScheduler.tick(time);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
+            if (zombiesPlayer.hasQuit()) {
+                continue;
+            }
+
             zombiesPlayer.tick(time);
         }
     }

@@ -20,7 +20,6 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicTickTaskScheduler;
@@ -68,7 +67,6 @@ import java.util.function.Supplier;
 public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, ZombiesJoinRequest> {
     private final Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction;
     private final MapInfo mapInfo;
-    private final ConnectionManager connectionManager;
     private final InstanceLoader instanceLoader;
     private final SceneFallback sceneFallback;
     private final EventNode<Event> rootNode;
@@ -86,8 +84,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     public ZombiesSceneProvider(int maximumScenes,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-            @NotNull MapInfo mapInfo, @NotNull ConnectionManager connectionManager,
-            @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
+            @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull Team mobNoPushTeam,
@@ -96,7 +93,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         super(maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
         this.sceneFallback = Objects.requireNonNull(sceneFallback, "sceneFallback");
         this.rootNode = Objects.requireNonNull(rootNode, "eventNode");
@@ -224,9 +220,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     mapObjects, mobStore, mapObjects.mobSpawner());
         };
 
-        ZombiesScene scene =
-                new ZombiesScene(UUID.randomUUID(), connectionManager, map, zombiesPlayers, instance, sceneFallback,
-                        settings, stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode);
+        ZombiesScene scene = new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
+                stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode);
         sceneWrapper.set(scene);
         rootNode.addChild(childNode);
 

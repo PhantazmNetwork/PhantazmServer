@@ -16,7 +16,6 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
 import net.minestom.server.scoreboard.TeamManager;
@@ -118,7 +117,7 @@ public final class ZombiesFeature {
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
-            @NotNull KeyParser keyParser, @NotNull ConnectionManager connectionManager,
+            @NotNull KeyParser keyParser,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
             @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties)
@@ -157,13 +156,13 @@ public final class ZombiesFeature {
         database = new SQLZombiesDatabase(databaseExecutor, dataSource, sqlFetcher);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
-                    new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
-                            instanceLoader, sceneFallback, globalEventNode, ZombiesFeature.mobSpawnerSource(),
-                            MobFeature.getModels(), new BasicClientBlockHandlerSource(instance -> {
-                        DimensionType dimensionType = instance.getDimensionType();
-                        return new InstanceClientBlockHandler(instance, globalEventNode, dimensionType.getMinY(),
-                                dimensionType.getHeight());
-                    }), contextManager, keyParser, mobNoPushTeam, database, ZombiesFeature.powerups(),
+                    new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback,
+                            globalEventNode, ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(),
+                            new BasicClientBlockHandlerSource(instance -> {
+                                DimensionType dimensionType = instance.getDimensionType();
+                                return new InstanceClientBlockHandler(instance, globalEventNode,
+                                        dimensionType.getMinY(), dimensionType.getHeight());
+                            }), contextManager, keyParser, mobNoPushTeam, database, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
                                     MobFeature.getModels()));
             providers.put(entry.getKey(), provider);

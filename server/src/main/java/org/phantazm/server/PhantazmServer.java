@@ -217,8 +217,8 @@ public final class PhantazmServer {
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
         ZombiesFeature.initialize(global, contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
-                keyParser, MinecraftServer.getConnectionManager(), ProximaFeature.instanceSettingsFunction(),
-                viewProvider, commandManager, new CompositeFallback(List.of(LobbyFeature.getFallback(),
+                keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, commandManager,
+                new CompositeFallback(List.of(LobbyFeature.getFallback(),
                         new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))),
                 PartyFeature.getParties());
 
