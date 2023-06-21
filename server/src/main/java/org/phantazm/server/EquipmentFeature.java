@@ -361,8 +361,12 @@ final class EquipmentFeature {
                     }
 
                     equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
-                    equipmentModule.getMapStats().setRegularHits(equipmentModule.getMapStats().getRegularHits() + event.shot().regularTargets().size());
-                    equipmentModule.getMapStats().setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + event.shot().headshotTargets().size());
+
+                    if (!event.shot().headshotTargets().isEmpty()) {
+                        equipmentModule.getMapStats().setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
+                    } else if (!event.shot().regularTargets().isEmpty()) {
+                        equipmentModule.getMapStats().setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
+                    }
                 });
 
                 return Optional.of(gun);

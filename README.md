@@ -26,7 +26,7 @@ This project started out of a perceived lack of PvE-focused Minecraft servers. W
 ## Install
 
 To build Phantazm binaries from source, run the following commands: \
-`git clone https://github.com/PhantazmNetwork/PhantazmServer.git` \
+`git clone --recurse-submodules https://github.com/PhantazmNetwork/PhantazmServer.git` \
 `cd PhantazmServer` \
 `./gradlew build`
 
