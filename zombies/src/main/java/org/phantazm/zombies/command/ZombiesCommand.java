@@ -35,7 +35,7 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(fallback, "fallback");
 
         addSubcommand(new ZombiesJoinCommand(router, globalRouterMapper, keyParser, maps, viewProvider, parties));
-        addSubcommand(new GiveCoinsCommand(sceneMapper));
+        addSubcommand(new CoinsCommand(sceneMapper));
         addSubcommand(new RoundCommand(sceneMapper));
         addSubcommand(new KillAllCommand(sceneMapper));
         addSubcommand(new GodmodeCommand(sceneMapper));

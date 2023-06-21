@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.map.Flaggable;
@@ -15,10 +16,12 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public class GodmodeCommand extends Command {
+    public static final Permission PERMISSION = new Permission("zombies.playtest.godmode");
+
     public GodmodeCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
         super("godmode");
 
-        setCondition((sender, commandString) -> sender.hasPermission(Permissions.PLAYTEST));
+        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
         addConditionalSyntax(getCondition(), (sender, context) -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));

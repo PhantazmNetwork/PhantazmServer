@@ -20,17 +20,23 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class FilePermissionHandler implements PermissionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilePermissionHandler.class);
 
-    private final ConfigProcessor<PermissionData> permissionDataConfigProcessor;
-    private final ConfigCodec configCodec;
     private final Path permissionsFile;
-    private final PermissionData permissionData;
+    private final ConfigCodec configCodec;
+    private final ConfigProcessor<PermissionData> permissionDataConfigProcessor;
+
+    private PermissionData permissionData;
 
     public FilePermissionHandler(@NotNull MappingProcessorSource mappingProcessorSource,
             @NotNull ConfigCodec configCodec, @NotNull Path permissionsFile) {
         this.permissionsFile = Objects.requireNonNull(permissionsFile, "permissionsFile");
-        this.permissionDataConfigProcessor = mappingProcessorSource.processorFor(Token.ofClass(PermissionData.class));
         this.configCodec = Objects.requireNonNull(configCodec, "configCodec");
 
+        this.permissionDataConfigProcessor = mappingProcessorSource.processorFor(Token.ofClass(PermissionData.class));
+        this.permissionData = load(permissionsFile, configCodec, permissionDataConfigProcessor);
+    }
+
+    private static PermissionData load(Path permissionsFile, ConfigCodec configCodec,
+            ConfigProcessor<PermissionData> permissionDataConfigProcessor) {
         PermissionData permissionData;
         try {
             FileUtils.createFileIfNotExists(permissionsFile);
@@ -41,7 +47,7 @@ public class FilePermissionHandler implements PermissionHandler {
             permissionData = new PermissionData(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
         }
 
-        this.permissionData = permissionData;
+        return permissionData;
     }
 
     @Override
@@ -63,6 +69,11 @@ public class FilePermissionHandler implements PermissionHandler {
         catch (Throwable e) {
             LOGGER.warn("Exception writing permissions file", e);
         }
+    }
+
+    @Override
+    public void reload() {
+        this.permissionData = load(permissionsFile, configCodec, permissionDataConfigProcessor);
     }
 
     @Override

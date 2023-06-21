@@ -11,6 +11,8 @@ public interface PermissionHandler {
 
     void flush();
 
+    void reload();
+
     void addGroupPermission(@NotNull String group, @NotNull Permission permission);
 
     void removeGroupPermission(@NotNull String group, @NotNull Permission permission);

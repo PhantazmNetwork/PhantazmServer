@@ -6,6 +6,7 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.scene.ZombiesScene;
 
@@ -14,13 +15,15 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public class FlagToggleCommand extends Command {
+    public static final Permission PERMISSION = new Permission("zombies.playtest.flag_toggle");
+
     private static final ArgumentString FLAG_ARGUMENT = ArgumentType.String("flag");
 
     public FlagToggleCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper,
             @NotNull KeyParser keyParser) {
         super("toggle_flag");
 
-        setCondition((sender, commandString) -> sender.hasPermission(Permissions.PLAYTEST));
+        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
         addConditionalSyntax(getCondition(), (sender, context) -> {
             Player player = (Player)sender;
             UUID uuid = player.getUuid();

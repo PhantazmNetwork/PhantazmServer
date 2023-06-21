@@ -5,6 +5,7 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentEnum;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionResult;
@@ -16,7 +17,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class GiveCoinsCommand extends Command {
+public class CoinsCommand extends Command {
+    public static final Permission PERMISSION = new Permission("zombies.playtest.coins");
+
     public enum CoinAction {
         GIVE,
         TAKE,
@@ -27,11 +30,11 @@ public class GiveCoinsCommand extends Command {
             ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
     private static final Argument<Integer> COIN_AMOUNT_ARGUMENT = ArgumentType.Integer("amount");
 
-    public GiveCoinsCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
+    public CoinsCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
         super("coins");
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
-        setCondition((sender, commandString) -> sender.hasPermission(Permissions.PLAYTEST));
+        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
         addConditionalSyntax(getCondition(), (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
