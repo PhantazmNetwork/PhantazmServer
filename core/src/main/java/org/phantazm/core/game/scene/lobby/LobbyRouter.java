@@ -78,7 +78,6 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
         Optional<Lobby> lobbyOptional = lobbyProvider.provideScene(joinRequest);
         return lobbyOptional.map(lobby -> lobby.join(joinRequest))
                 .orElseGet(() -> new RouteResult(false, Component.text("No lobbies are joinable.")));
-
     }
 
     @Override

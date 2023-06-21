@@ -9,6 +9,7 @@ import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
+import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 
@@ -58,20 +59,6 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      * has spawned for the first time.
      */
     public void onPlayerLoginComplete() {
-        for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-            if (otherPlayer.getInstance() != event.getSpawningInstance()) {
-                otherPlayer.removeViewer(event.getPlayer());
-                event.getPlayer().sendPacket(otherPlayer.getRemovePlayerToList());
-                event.getPlayer().removeViewer(otherPlayer);
-                otherPlayer.sendPacket(event.getPlayer().getRemovePlayerToList());
-            }
-            else {
-                event.getPlayer().sendPacket(otherPlayer.getAddPlayerToList());
-                otherPlayer.addViewer(event.getPlayer());
-                otherPlayer.sendPacket(event.getPlayer().getAddPlayerToList());
-                event.getPlayer().addViewer(otherPlayer);
-            }
-        }
+        Utils.handleInstanceTransfer(null, event.getPlayer());
     }
-
 }

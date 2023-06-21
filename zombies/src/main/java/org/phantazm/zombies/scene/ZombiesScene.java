@@ -1,6 +1,7 @@
 package org.phantazm.zombies.scene;
 
 import com.github.steanky.vector.Vec3I;
+import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.RouteResult;
+import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -136,14 +138,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
-        List<PlayerView> teleportedViews = new ArrayList<>(oldPlayers.size() + newPlayers.size());
-        List<Player> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+        List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
         List<CompletableFuture<?>> futures = new ArrayList<>(oldPlayers.size() + newPlayers.size());
         List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
         for (ZombiesPlayer zombiesPlayer : oldPlayers) {
             zombiesPlayer.getPlayer().ifPresent(player -> {
-                teleportedViews.add(zombiesPlayer.module().getPlayerView());
-                teleportedPlayers.add(player);
+                teleportedPlayers.add(Pair.of(player, player.getInstance()));
                 if (player.getInstance() == instance) {
                     futures.add(player.teleport(pos));
                 }
@@ -157,8 +157,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
         for (PlayerView view : newPlayers) {
             view.getPlayer().ifPresent(player -> {
-                teleportedViews.add(view);
-                teleportedPlayers.add(player);
+                teleportedPlayers.add(Pair.of(player, player.getInstance()));
                 if (player.getInstance() == instance) {
                     futures.add(player.teleport(pos));
                 }
@@ -176,8 +175,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).whenComplete((ignored, error) -> {
             for (int i = 0; i < futures.size(); i++) {
-                PlayerView view = teleportedViews.get(i);
-                Player teleportedPlayer = teleportedPlayers.get(i);
+                Pair<Player, Instance> pair = teleportedPlayers.get(i);
+                Player teleportedPlayer = pair.first();
+                Instance oldInstance = pair.second();
+
                 CompletableFuture<?> future = futures.get(i);
                 Runnable runnable = runnables.get(i);
 
@@ -188,23 +189,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     continue;
                 }
 
-                for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-                    if (otherPlayer.getInstance() != instance) {
-                        otherPlayer.removeViewer(teleportedPlayer);
-                        teleportedPlayer.sendPacket(otherPlayer.getRemovePlayerToList());
-                        teleportedPlayer.removeViewer(otherPlayer);
-                        otherPlayer.sendPacket(teleportedPlayer.getRemovePlayerToList());
-                    }
-                    else {
-                        teleportedPlayer.sendPacket(otherPlayer.getAddPlayerToList());
-                        otherPlayer.addViewer(teleportedPlayer);
-                        otherPlayer.sendPacket(teleportedPlayer.getAddPlayerToList());
-                        teleportedPlayer.addViewer(otherPlayer);
-                    }
-                }
+                Utils.handleInstanceTransfer(oldInstance, teleportedPlayer);
 
                 runnable.run();
-
                 stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
             }
         }).join();
@@ -300,7 +287,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
             zombiesPlayer.end();
-            
+
             fallback.fallback(zombiesPlayer.module().getPlayerView());
         }
 

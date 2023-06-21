@@ -61,10 +61,10 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         for (Pair<PlayerView, Player> player : joiners) {
-            joinRequest.handleJoin(instance, instanceConfig);
             players.put(player.first().getUUID(), player.first());
         }
 
+        joinRequest.handleJoin(instance, instanceConfig);
         return RouteResult.SUCCESSFUL;
     }
 
