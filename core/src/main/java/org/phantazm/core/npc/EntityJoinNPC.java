@@ -1,6 +1,10 @@
 package org.phantazm.core.npc;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -39,8 +43,13 @@ public class EntityJoinNPC implements NPC {
         }
 
         npc = new Entity(data.entityType);
-        npc.setInstance(instance, data.location).join();
 
+        if (!data.displayName.equals(Component.empty())) {
+            npc.getEntityMeta().setCustomName(data.displayName);
+            npc.getEntityMeta().setCustomNameVisible(true);
+        }
+
+        npc.setInstance(instance, data.location).join();
         this.npc = npc;
     }
 
@@ -61,6 +70,11 @@ public class EntityJoinNPC implements NPC {
     @DataObject
     public record Data(@NotNull EntityType entityType,
                        @NotNull Pos location,
-                       @NotNull @ChildPath("interactor") String interactor) {
+                       @NotNull @ChildPath("interactor") String interactor,
+                       @NotNull Component displayName) {
+        @Default("displayName")
+        public static @NotNull ConfigElement displayNameDefault() {
+            return ConfigPrimitive.of("");
+        }
     }
 }
