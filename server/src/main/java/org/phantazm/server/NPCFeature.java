@@ -4,6 +4,7 @@ import com.github.steanky.element.core.context.ContextManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.npc.AnimationTicker;
 import org.phantazm.core.npc.EntityNPC;
+import org.phantazm.core.npc.NoTicker;
 import org.phantazm.core.npc.settings.BasicEntitySettings;
 import org.phantazm.core.npc.supplier.MobEntitySupplier;
 import org.phantazm.core.npc.join.CommandInteractor;
@@ -22,5 +23,6 @@ public class NPCFeature {
         contextManager.registerElementClass(BasicEntitySettings.class);
         contextManager.registerElementClass(AnimationTicker.class);
         contextManager.registerElementClass(AnimationTicker.Frame.class);
+        contextManager.registerElementClass(NoTicker.class);
     }
 }
