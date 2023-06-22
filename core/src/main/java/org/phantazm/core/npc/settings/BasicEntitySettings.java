@@ -1,4 +1,4 @@
-package org.phantazm.core.npc;
+package org.phantazm.core.npc.settings;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
@@ -9,38 +9,35 @@ import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.EntityMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
-@Model("npc.entity.supplier.mob")
+@Model("npc.entity.settings")
 @Cache
-public class MobEntitySupplier implements Supplier<Entity> {
+public class BasicEntitySettings implements Consumer<Entity> {
     private final Data data;
 
     @FactoryMethod
-    public MobEntitySupplier(@NotNull Data data) {
+    public BasicEntitySettings(@NotNull Data data) {
         this.data = data;
     }
 
     @Override
-    public Entity get() {
-        Entity entity = new Entity(data.entityType);
+    public void accept(Entity entity) {
+        EntityMeta meta = entity.getEntityMeta();
+
         if (!data.displayName.equals(Component.empty())) {
-            EntityMeta meta = entity.getEntityMeta();
             meta.setCustomNameVisible(true);
             meta.setCustomName(data.displayName);
         }
-
-        return entity;
     }
 
     @DataObject
-    public record Data(@NotNull EntityType entityType, @NotNull Component displayName) {
+    public record Data(@NotNull Component displayName) {
         @Default("displayName")
-        public static @NotNull ConfigElement defaultDisplayName() {
+        public static ConfigElement defaultDisplayName() {
             return ConfigPrimitive.of("");
         }
     }

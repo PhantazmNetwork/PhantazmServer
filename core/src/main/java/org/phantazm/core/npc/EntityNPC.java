@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.npc.join.Interactor;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Model("npc.entity")
@@ -17,15 +18,18 @@ import java.util.function.Supplier;
 public class EntityNPC implements NPC {
     private final Data data;
     private final Supplier<? extends Entity> entity;
+    private final Consumer<? super Entity> settings;
     private final Interactor interactor;
 
     private Entity npc;
 
     @FactoryMethod
     public EntityNPC(@NotNull Data data, @NotNull @Child("entity") Supplier<? extends Entity> entity,
+            @NotNull @Child("settings") Consumer<? super Entity> settings,
             @NotNull @Child("interactor") Interactor interactor) {
         this.data = data;
         this.entity = entity;
+        this.settings = settings;
         this.interactor = interactor;
     }
 
@@ -42,6 +46,8 @@ public class EntityNPC implements NPC {
         }
 
         npc = entity.get();
+        settings.accept(npc);
+
         npc.setInstance(instance, data.location).join();
         this.npc = npc;
     }
@@ -63,6 +69,7 @@ public class EntityNPC implements NPC {
     @DataObject
     public record Data(@NotNull Pos location,
                        @NotNull @ChildPath("entity") String entity,
+                       @NotNull @ChildPath("settings") String settings,
                        @NotNull @ChildPath("interactor") String interactor) {
     }
 }
