@@ -28,9 +28,10 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
                         mapStats.getShots(), mapStats.getRegularHits(), mapStats.getHeadshotHits())
                 .onDuplicateKeyUpdate()
                 .set(field("games_played"), field("games_played", SQLDataType.INTEGER).plus(mapStats.getGamesPlayed()))
-                .set(field("wins"), field("wins", SQLDataType.INTEGER).plus(mapStats.getGamesPlayed()))
+                .set(field("wins"), field("wins", SQLDataType.INTEGER).plus(mapStats.getWins()))
                 .set(field("best_time"), mapStats.getBestTime().isPresent()
-                                         ? least(field("best_time"), mapStats.getBestTime().get())
+                                         ? when(field("best_time").isNotNull(), least(field("best_time"),
+                        mapStats.getBestTime().get())).otherwise(inline(null, SQLDataType.INTEGER))
                                          : field("best_time", SQLDataType.BIGINT)).set(field("rounds_survived"),
                         field("rounds_survived", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
                 .set(field("kills"), field("kills", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
