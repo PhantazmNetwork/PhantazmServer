@@ -1,9 +1,11 @@
 package org.phantazm.core.game.scene;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.ServerPacket;
+import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -34,8 +36,10 @@ public class Utils {
             player.sendPacket(newInstancePlayer.getAddPlayerToList());
             newInstancePlayer.sendPacket(playerAdd);
 
-            player.updateNewViewer(newInstancePlayer);
-            newInstancePlayer.updateNewViewer(player);
+            MinecraftServer.getSchedulerManager().buildTask(() -> {
+                player.updateNewViewer(newInstancePlayer);
+                newInstancePlayer.updateNewViewer(player);
+            }).delay(20, TimeUnit.SERVER_TICK).schedule();
         }
     }
 }
