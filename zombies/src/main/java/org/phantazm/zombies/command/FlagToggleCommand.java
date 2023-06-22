@@ -1,5 +1,6 @@
 package org.phantazm.zombies.command;
 
+import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.Command;
@@ -7,6 +8,7 @@ import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.scene.ZombiesScene;
 
@@ -29,6 +31,7 @@ public class FlagToggleCommand extends Command {
             UUID uuid = player.getUuid();
 
             sceneMapper.apply(uuid).ifPresent(scene -> {
+                @Subst(Constants.NAMESPACE_OR_KEY)
                 String flag = context.get(FLAG_ARGUMENT);
 
                 if (keyParser.isValidKey(flag)) {
