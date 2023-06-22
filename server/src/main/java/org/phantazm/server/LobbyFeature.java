@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.DynamicChunk;
@@ -29,10 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Main entrypoint for lobby-related features.
@@ -125,6 +123,12 @@ public final class LobbyFeature {
                 LOGGER.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
                 event.getPlayer().kick(Component.empty());
             }
+        });
+
+        node.addListener(PlayerDisconnectEvent.class, event -> {
+            lobbyRouter.getScene(event.getPlayer().getUuid()).ifPresent(ignored -> {
+                lobbyRouter.leave(Collections.singleton(event.getPlayer().getUuid()));
+            });
         });
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
