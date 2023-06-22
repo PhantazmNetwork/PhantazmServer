@@ -1,13 +1,8 @@
 package org.phantazm.core.npc;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.mapper.annotation.Default;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -15,18 +10,22 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.npc.join.Interactor;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Model("npc.entity")
 @Cache(false)
-public class EntityJoinNPC implements NPC {
+public class EntityNPC implements NPC {
     private final Data data;
+    private final Supplier<? extends Entity> entity;
     private final Interactor interactor;
 
     private Entity npc;
 
     @FactoryMethod
-    public EntityJoinNPC(@NotNull Data data, @NotNull @Child("interactor") Interactor interactor) {
+    public EntityNPC(@NotNull Data data, @NotNull @Child("entity") Supplier<? extends Entity> entity,
+            @NotNull @Child("interactor") Interactor interactor) {
         this.data = data;
+        this.entity = entity;
         this.interactor = interactor;
     }
 
@@ -42,13 +41,7 @@ public class EntityJoinNPC implements NPC {
             npc.remove();
         }
 
-        npc = new Entity(data.entityType);
-
-        if (!data.displayName.equals(Component.empty())) {
-            npc.getEntityMeta().setCustomName(data.displayName);
-            npc.getEntityMeta().setCustomNameVisible(true);
-        }
-
+        npc = entity.get();
         npc.setInstance(instance, data.location).join();
         this.npc = npc;
     }
@@ -62,19 +55,14 @@ public class EntityJoinNPC implements NPC {
     }
 
     @Override
-    public @Nullable UUID entityUUID() {
+    public @Nullable UUID uuid() {
         Entity npc = this.npc;
         return npc == null ? null : npc.getUuid();
     }
 
     @DataObject
-    public record Data(@NotNull EntityType entityType,
-                       @NotNull Pos location,
-                       @NotNull Component displayName,
+    public record Data(@NotNull Pos location,
+                       @NotNull @ChildPath("entity") String entity,
                        @NotNull @ChildPath("interactor") String interactor) {
-        @Default("displayName")
-        public static @NotNull ConfigElement displayNameDefault() {
-            return ConfigPrimitive.of("");
-        }
     }
 }

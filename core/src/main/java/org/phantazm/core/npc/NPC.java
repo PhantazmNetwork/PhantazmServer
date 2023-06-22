@@ -15,5 +15,5 @@ public interface NPC extends Tickable {
 
     void despawn();
 
-    @Nullable UUID entityUUID();
+    @Nullable UUID uuid();
 }

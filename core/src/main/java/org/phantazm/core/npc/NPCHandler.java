@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public class NPCHandler {
     private final Instance instance;
@@ -23,8 +22,7 @@ public class NPCHandler {
         this.npcs = List.copyOf(npcs);
         this.instanceEventNode = instance.eventNode();
 
-        UUID uuid = instance.getUniqueId();
-        this.handlerNode = EventNode.event("proxima_cache_synchronize_{" + uuid + "}",
+        this.handlerNode = EventNode.event("npc_handler_{" + instance.getUniqueId() + "}",
                 EventFilter.from(InstanceEvent.class, Instance.class, InstanceEvent::getInstance), event -> true);
 
         handlerNode.addListener(PlayerEntityInteractEvent.class, this::entityInteractEvent);
@@ -38,7 +36,7 @@ public class NPCHandler {
 
         Entity entity = event.getTarget();
         for (NPC npc : npcs) {
-            if (entity.getUuid().equals(npc.entityUUID())) {
+            if (entity.getUuid().equals(npc.uuid())) {
                 npc.handleInteraction(event.getPlayer());
             }
         }
