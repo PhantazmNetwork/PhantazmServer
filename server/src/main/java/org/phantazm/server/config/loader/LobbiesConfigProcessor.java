@@ -52,11 +52,11 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 long time = instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME, "time").longValue();
                 int timeRate =
                         instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME_RATE, "timeRate").intValue();
-                int chunkLoadDistance =
-                        instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_CHUNK_LOAD_DISTANCE,
-                                "chunkLoadDistance").intValue();
+                int chunkLoadRange =
+                        instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_CHUNK_LOAD_RANGE, "chunkLoadRange")
+                                .intValue();
                 InstanceConfig instanceConfig =
-                        new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate, chunkLoadDistance);
+                        new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate, chunkLoadRange);
 
                 ConfigList lobbyPathsList = lobby.getValue().getListOrThrow("lobbyPaths");
                 List<String> lobbyPaths = new ArrayList<>(lobbyPathsList.size());
@@ -95,6 +95,8 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
             ConfigNode instanceConfigNode = new LinkedConfigNode(1);
             instanceConfigNode.put("spawnPoint", spawnPointNode);
+            instanceConfigNode.putNumber("time", lobby.getValue().instanceConfig().time());
+            instanceConfigNode.putNumber("timeRate", lobby.getValue().instanceConfig().timeRate());
 
             ConfigList lobbyPathsList = new ArrayConfigList(lobby.getValue().lobbyPaths().size());
             for (String subPath : lobby.getValue().lobbyPaths()) {

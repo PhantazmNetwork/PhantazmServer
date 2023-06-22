@@ -19,7 +19,7 @@ public record InstanceConfig(@NotNull Pos spawnPoint, long time, int timeRate, i
 
     public static final int DEFAULT_TIME_RATE = 0;
 
-    public static final int DEFAULT_CHUNK_LOAD_DISTANCE = 10;
+    public static final int DEFAULT_CHUNK_LOAD_RANGE = 10;
 
     /**
      * Creates config regarding a single {@link Instance}.
