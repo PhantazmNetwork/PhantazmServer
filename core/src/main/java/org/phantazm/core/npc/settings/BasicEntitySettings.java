@@ -32,13 +32,26 @@ public class BasicEntitySettings implements Consumer<Entity> {
             meta.setCustomNameVisible(true);
             meta.setCustomName(data.displayName);
         }
+
+        meta.setOnFire(data.onFire);
+        meta.setPose(data.pose);
     }
 
     @DataObject
-    public record Data(@NotNull Component displayName) {
+    public record Data(@NotNull Component displayName, boolean onFire, @NotNull Entity.Pose pose) {
         @Default("displayName")
         public static ConfigElement defaultDisplayName() {
             return ConfigPrimitive.of("");
+        }
+
+        @Default("onFire")
+        public static ConfigElement defaultOnFire() {
+            return ConfigPrimitive.of(false);
+        }
+
+        @Default("pose")
+        public static ConfigElement defaultPose() {
+            return ConfigPrimitive.of("STANDING");
         }
     }
 }
