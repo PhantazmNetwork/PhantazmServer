@@ -7,11 +7,12 @@ import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Tickable;
 
 import java.util.List;
 import java.util.Objects;
 
-public class NPCHandler {
+public class NPCHandler implements Tickable {
     private final Instance instance;
     private final List<NPC> npcs;
     private final EventNode<InstanceEvent> instanceEventNode;
@@ -54,5 +55,12 @@ public class NPCHandler {
         }
 
         instanceEventNode.removeChild(handlerNode);
+    }
+
+    @Override
+    public void tick(long time) {
+        for (NPC npc : npcs) {
+            npc.tick(time);
+        }
     }
 }

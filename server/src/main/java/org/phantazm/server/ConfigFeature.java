@@ -1,6 +1,7 @@
 package org.phantazm.server;
 
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
+import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
@@ -26,7 +27,7 @@ public final class ConfigFeature {
     /**
      * The location of the lobbies configuration file.
      */
-    public static final Path LOBBIES_CONFIG_PATH = Path.of("./lobbies-config.toml");
+    public static final Path LOBBIES_CONFIG_PATH = Path.of("./lobbies-config.yml");
 
     /**
      * The location of the pathfinder configuration file.
@@ -68,7 +69,7 @@ public final class ConfigFeature {
 
         handler.registerLoader(LOBBIES_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new LobbiesConfigProcessor(), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH,
-                        codec));
+                        new YamlCodec()));
 
         handler.registerLoader(PATHFINDER_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new PathfinderConfigProcessor(), PathfinderConfig.DEFAULT,

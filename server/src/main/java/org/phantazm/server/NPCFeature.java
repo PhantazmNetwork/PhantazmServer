@@ -2,6 +2,7 @@ package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.npc.AnimationTicker;
 import org.phantazm.core.npc.EntityNPC;
 import org.phantazm.core.npc.settings.BasicEntitySettings;
 import org.phantazm.core.npc.supplier.MobEntitySupplier;
@@ -19,5 +20,7 @@ public class NPCFeature {
         contextManager.registerElementClass(MobEntitySupplier.class);
         contextManager.registerElementClass(PlayerEntitySupplier.class);
         contextManager.registerElementClass(BasicEntitySettings.class);
+        contextManager.registerElementClass(AnimationTicker.class);
+        contextManager.registerElementClass(AnimationTicker.Frame.class);
     }
 }

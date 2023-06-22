@@ -24,8 +24,8 @@ public class PlayerEntitySupplier implements Supplier<Entity> {
 
     @Override
     public Entity get() {
-        PlayerSkin playerSkin = PlayerSkin.fromUuid(data.skinUUID.replace("-", ""));
-        return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName, playerSkin);
+        return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName,
+                PlayerSkin.fromUuid(data.skinUUID.replace("-", "")));
     }
 
     @DataObject

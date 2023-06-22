@@ -19,6 +19,7 @@ public class EntityNPC implements NPC {
     private final Data data;
     private final Supplier<? extends Entity> entity;
     private final Consumer<? super Entity> settings;
+    private final EntityTicker ticker;
     private final Interactor interactor;
 
     private Entity npc;
@@ -26,10 +27,11 @@ public class EntityNPC implements NPC {
     @FactoryMethod
     public EntityNPC(@NotNull Data data, @NotNull @Child("entity") Supplier<? extends Entity> entity,
             @NotNull @Child("settings") Consumer<? super Entity> settings,
-            @NotNull @Child("interactor") Interactor interactor) {
+            @NotNull @Child("ticker") EntityTicker ticker, @NotNull @Child("interactor") Interactor interactor) {
         this.data = data;
         this.entity = entity;
         this.settings = settings;
+        this.ticker = ticker;
         this.interactor = interactor;
     }
 
@@ -66,10 +68,20 @@ public class EntityNPC implements NPC {
         return npc == null ? null : npc.getUuid();
     }
 
+    @Override
+    public void tick(long time) {
+        Entity npc = this.npc;
+        if (npc != null) {
+            ticker.accept(time, npc);
+        }
+    }
+
     @DataObject
     public record Data(@NotNull Pos location,
                        @NotNull @ChildPath("entity") String entity,
                        @NotNull @ChildPath("settings") String settings,
+                       @NotNull @ChildPath("ticker") String ticker,
                        @NotNull @ChildPath("interactor") String interactor) {
+        
     }
 }
