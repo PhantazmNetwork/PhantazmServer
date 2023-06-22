@@ -260,6 +260,7 @@ public final class MapProcessors {
             }
 
             Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            int chunkLoadRange = element.getNumberOrDefault(10, "chunkLoadRange").intValue();
             List<String> instancePath =
                     ConfigProcessor.STRING.listProcessor().dataFromElement(element.getListOrThrow("instancePath"));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("origin"));
@@ -301,7 +302,7 @@ public final class MapProcessors {
                     keyToListKeyMap.dataFromElement(element.getElementOrThrow("defaultEquipment"));
             Map<Key, EquipmentGroupInfo> equipmentGroups =
                     keyToEquipmentGroup.dataFromElement(element.getElementOrThrow("equipmentGroups"));
-            return new MapSettingsInfo(mapDataVersion, id, instancePath, origin, minimumProtocolVersion,
+            return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
@@ -314,6 +315,7 @@ public final class MapProcessors {
         public @NotNull ConfigElement elementFromData(MapSettingsInfo mapConfig) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(29);
             node.putNumber("mapDataVersion", mapConfig.mapDataVersion());
+            node.putNumber("chunkLoadRange", mapConfig.chunkLoadRange());
             node.put("id", ConfigProcessors.key().elementFromData(mapConfig.id()));
             node.put("instancePath", ConfigProcessor.STRING.listProcessor().elementFromData(mapConfig.instancePath()));
             node.put("origin", VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));

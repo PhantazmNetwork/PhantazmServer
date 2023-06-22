@@ -78,7 +78,7 @@ public final class LobbyFeature {
         LOGGER.info("Preloading {} lobby instances", lobbiesConfig.lobbies().size());
         for (LobbyConfig lobbyConfig : lobbiesConfig.lobbies().values()) {
             instanceLoader.preload(lobbyConfig.lobbyPaths(), lobbyConfig.instanceConfig().spawnPoint(),
-                    MinecraftServer.getChunkViewDistance());
+                    lobbyConfig.instanceConfig().chunkLoadDistance());
         }
 
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =

@@ -52,7 +52,11 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 long time = instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME, "time").longValue();
                 int timeRate =
                         instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME_RATE, "timeRate").intValue();
-                InstanceConfig instanceConfig = new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate);
+                int chunkLoadDistance =
+                        instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_CHUNK_LOAD_DISTANCE,
+                                "chunkLoadDistance").intValue();
+                InstanceConfig instanceConfig =
+                        new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate, chunkLoadDistance);
 
                 ConfigList lobbyPathsList = lobby.getValue().getListOrThrow("lobbyPaths");
                 List<String> lobbyPaths = new ArrayList<>(lobbyPathsList.size());

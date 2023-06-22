@@ -34,7 +34,7 @@ public class LobbyIntegrationTest {
     public void testShutdown(Env env) {
         Instance instance = env.createFlatInstance();
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
-                InstanceConfig.DEFAULT_TIME_RATE);
+                InstanceConfig.DEFAULT_TIME_RATE, InstanceConfig.DEFAULT_CHUNK_LOAD_DISTANCE);
         SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
                 new NPCHandler(List.of(), instance));
@@ -52,7 +52,7 @@ public class LobbyIntegrationTest {
     public void testJoin(Env env) {
         Instance instance = mock(Instance.class);
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
-                InstanceConfig.DEFAULT_TIME_RATE);
+                InstanceConfig.DEFAULT_TIME_RATE, InstanceConfig.DEFAULT_CHUNK_LOAD_DISTANCE);
         SceneFallback sceneFallback = (ignored) -> true;
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
                 new NPCHandler(List.of(), instance));

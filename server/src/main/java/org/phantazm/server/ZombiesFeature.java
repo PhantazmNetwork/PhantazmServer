@@ -138,7 +138,7 @@ public final class ZombiesFeature {
         for (MapInfo map : maps.values()) {
             instanceLoader.preload(map.settings().instancePath(),
                     VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())),
-                    MinecraftServer.getChunkViewDistance());
+                    map.settings().chunkLoadRange());
         }
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
