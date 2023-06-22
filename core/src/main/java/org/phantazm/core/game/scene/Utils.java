@@ -19,6 +19,9 @@ public class Utils {
      */
     public static void handleInstanceTransfer(@NotNull Instance oldInstance, @NotNull Player player) {
         Instance newInstance = Objects.requireNonNull(player.getInstance(), "player instance");
+        if (newInstance == oldInstance) {
+            return;
+        }
 
         ServerPacket playerRemove = player.getRemovePlayerToList();
         ServerPacket playerAdd = player.getAddPlayerToList();
