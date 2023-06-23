@@ -207,12 +207,12 @@ public final class PhantazmServer {
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
         Function<UUID, Optional<? extends Scene<?>>> sceneMapper = uuid -> {
-            Optional<Lobby> lobbyOptional = LobbyFeature.getLobbyRouter().getScene(uuid);
+            Optional<Lobby> lobbyOptional = LobbyFeature.getLobbyRouter().getCurrentScene(uuid);
             if (lobbyOptional.isPresent()) {
                 return lobbyOptional;
             }
 
-            return ZombiesFeature.zombiesSceneRouter().getScene(uuid);
+            return ZombiesFeature.zombiesSceneRouter().getCurrentScene(uuid);
         };
         CommandFeature.initialize(MinecraftServer.getCommandManager(), sceneMapper, viewProvider);
 

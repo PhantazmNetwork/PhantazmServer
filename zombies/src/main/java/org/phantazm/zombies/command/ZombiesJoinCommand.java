@@ -45,12 +45,16 @@ public class ZombiesJoinCommand extends Command {
             }
         });
         addConditionalSyntax((sender, commandString) -> {
-            if (sender instanceof Player) {
-                return true;
+            if (commandString == null) {
+                return sender instanceof Player;
             }
 
-            sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
-            return false;
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                return false;
+            }
+
+            return true;
         }, (sender, context) -> {
             @Subst("test_map")
             String mapKeyString = context.get(mapKeyArgument);

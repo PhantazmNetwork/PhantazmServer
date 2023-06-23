@@ -40,16 +40,21 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
     }
 
     @Override
-    public @NotNull Optional<Lobby> getScene(@NotNull UUID uuid) {
+    public @NotNull Optional<Lobby> getCurrentScene(@NotNull UUID playerUUID) {
         for (SceneProvider<Lobby, LobbyJoinRequest> sceneProvider : lobbyProviders.values()) {
             for (Lobby lobby : sceneProvider.getScenes()) {
-                if (lobby.getPlayers().containsKey(uuid)) {
+                if (lobby.getPlayers().containsKey(playerUUID)) {
                     return Optional.of(lobby);
                 }
             }
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public @NotNull Collection<Lobby> getScenesContainingPlayer(@NotNull UUID playerUUID) {
+        return getCurrentScene(playerUUID).map(Collections::singleton).orElse(Collections.emptySet());
     }
 
     @Override

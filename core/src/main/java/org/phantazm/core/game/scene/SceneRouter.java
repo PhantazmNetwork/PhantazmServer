@@ -13,7 +13,9 @@ public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoin
 
     @NotNull Collection<TScene> getScenes();
 
-    @NotNull Optional<TScene> getScene(@NotNull UUID playerUUID);
+    @NotNull Optional<TScene> getCurrentScene(@NotNull UUID playerUUID);
+
+    @NotNull Collection<TScene> getScenesContainingPlayer(@NotNull UUID playerUUID);
 
     /**
      * Whether the scene is currently shutdown.

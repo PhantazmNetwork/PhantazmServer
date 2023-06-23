@@ -22,24 +22,23 @@ public class ZombiesRejoinCommand extends Command {
         Objects.requireNonNull(router, "router");
 
         Argument<UUID> targetGameArgument = ArgumentType.UUID("target-game");
-        targetGameArgument.setSuggestionCallback(((sender, context, suggestion) -> {
+        targetGameArgument.setSuggestionCallback((sender, context, suggestion) -> {
             if (!(sender instanceof Player player)) {
                 return;
             }
 
-            UUID uuid = player.getUuid();
-            for (ZombiesScene scene : router.getScenes()) {
-                if (!scene.getZombiesPlayers().containsKey(uuid)) {
-                    continue;
-                }
-
+            for (ZombiesScene scene : router.getScenesContainingPlayer(player.getUuid())) {
                 SuggestionEntry entry =
                         new SuggestionEntry(scene.getUUID().toString(), scene.getMapSettingsInfo().displayName());
                 suggestion.addEntry(entry);
             }
-        }));
+        });
 
         addConditionalSyntax((sender, commandString) -> {
+            if (commandString == null) {
+                return sender instanceof Player;
+            }
+
             if (!(sender instanceof Player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return false;

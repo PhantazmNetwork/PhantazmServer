@@ -30,7 +30,6 @@ import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
-import org.phantazm.core.game.scene.lobby.Lobby;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
@@ -356,11 +355,11 @@ public final class ZombiesFeature {
     }
 
     public static @NotNull Optional<ZombiesScene> getPlayerScene(@NotNull UUID playerUUID) {
-        return FeatureUtils.check(sceneRouter).getScene(playerUUID);
+        return FeatureUtils.check(sceneRouter).getCurrentScene(playerUUID);
     }
 
     public static @NotNull Optional<ZombiesPlayer> getZombiesPlayer(@NotNull UUID playerUUID) {
-        return FeatureUtils.check(sceneRouter).getScene(playerUUID)
+        return FeatureUtils.check(sceneRouter).getCurrentScene(playerUUID)
                 .map(scene -> scene.getZombiesPlayers().get(playerUUID));
     }
 

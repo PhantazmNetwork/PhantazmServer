@@ -1,14 +1,11 @@
 package org.phantazm.zombies.scene;
 
-import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneRouter;
-import org.phantazm.core.game.scene.TransferResult;
-import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.*;
 
@@ -23,7 +20,7 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     }
 
     @Override
-    public @NotNull Optional<ZombiesScene> getScene(@NotNull UUID uuid) {
+    public @NotNull Optional<ZombiesScene> getCurrentScene(@NotNull UUID uuid) {
         for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
             for (ZombiesScene scene : sceneProvider.getScenes()) {
                 if (!scene.getZombiesPlayers().get(uuid).hasQuit()) {
@@ -33,6 +30,20 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public @NotNull Collection<ZombiesScene> getScenesContainingPlayer(@NotNull UUID playerUUID) {
+        Collection<ZombiesScene> scenes = new ArrayList<>();
+        for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
+            for (ZombiesScene scene : sceneProvider.getScenes()) {
+                if (scene.getZombiesPlayers().containsKey(playerUUID)) {
+                    scenes.add(scene);
+                }
+            }
+        }
+
+        return scenes;
     }
 
     @Override
@@ -68,7 +79,6 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
                 .orElseGet(() -> RouteResult.failure(Component.text("No games are joinable.")));
     }
 
-    // TODO: optimize
     private RouteResult<ZombiesScene> rejoinGame(ZombiesRouteRequest routeRequest) {
         for (ZombiesScene scene : getScenes()) {
             if (scene.getUUID().equals(routeRequest.targetGame())) {

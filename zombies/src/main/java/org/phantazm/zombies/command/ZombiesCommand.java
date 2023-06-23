@@ -5,7 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.Command;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.Scene;
-import org.phantazm.core.game.scene.command.QuitCommand;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerViewProvider;
@@ -35,12 +34,12 @@ public class ZombiesCommand extends Command {
 
         ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(parties, viewProvider, router, sceneMapper);
         addSubcommand(new ZombiesJoinCommand(keyParser, maps, joinHelper));
-        addSubcommand(new CoinsCommand(router::getScene));
-        addSubcommand(new RoundCommand(router::getScene));
-        addSubcommand(new KillAllCommand(router::getScene));
-        addSubcommand(new GodmodeCommand(router::getScene));
-        addSubcommand(new AmmoRefillCommand(router::getScene));
-        addSubcommand(new FlagToggleCommand(router::getScene, keyParser));
+        addSubcommand(new CoinsCommand(router::getCurrentScene));
+        addSubcommand(new RoundCommand(router::getCurrentScene));
+        addSubcommand(new KillAllCommand(router::getCurrentScene));
+        addSubcommand(new GodmodeCommand(router::getCurrentScene));
+        addSubcommand(new AmmoRefillCommand(router::getCurrentScene));
+        addSubcommand(new FlagToggleCommand(router::getCurrentScene, keyParser));
         addSubcommand(new ZombiesRejoinCommand(router, joinHelper));
     }
 }

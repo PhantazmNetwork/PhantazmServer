@@ -138,7 +138,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             }
 
             for (PlayerView view : request.getPlayers()) {
-                if (scene.getPlayers().containsKey(view.getUUID())) {
+                if (scene.getZombiesPlayers().containsKey(view.getUUID())) {
                     continue sceneLoop;
                 }
             }
