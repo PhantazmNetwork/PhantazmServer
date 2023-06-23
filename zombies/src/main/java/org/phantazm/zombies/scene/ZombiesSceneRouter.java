@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneRouter;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.*;
 
@@ -15,7 +16,8 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     private boolean shutdown = false;
     private boolean joinable = true;
 
-    public ZombiesSceneRouter(@NotNull Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders) {
+    public ZombiesSceneRouter(
+            @NotNull Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders) {
         this.sceneProviders = Objects.requireNonNull(sceneProviders, "sceneProviders");
     }
 
@@ -23,7 +25,9 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     public @NotNull Optional<ZombiesScene> getCurrentScene(@NotNull UUID uuid) {
         for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
             for (ZombiesScene scene : sceneProvider.getScenes()) {
-                if (!scene.getZombiesPlayers().get(uuid).hasQuit()) {
+                ZombiesPlayer player = scene.getZombiesPlayers().get(uuid);
+
+                if (player != null && !player.hasQuit()) {
                     return Optional.of(scene);
                 }
             }

@@ -13,6 +13,7 @@ import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ZombiesRejoinCommand extends Command {
@@ -27,7 +28,12 @@ public class ZombiesRejoinCommand extends Command {
                 return;
             }
 
+            Optional<ZombiesScene> currentScene = router.getCurrentScene(player.getUuid());
             for (ZombiesScene scene : router.getScenesContainingPlayer(player.getUuid())) {
+                if (currentScene.isPresent() && currentScene.get() == scene) {
+                    continue;
+                }
+
                 SuggestionEntry entry =
                         new SuggestionEntry(scene.getUUID().toString(), scene.getMapSettingsInfo().displayName());
                 suggestion.addEntry(entry);
@@ -48,8 +54,14 @@ public class ZombiesRejoinCommand extends Command {
         }, (sender, context) -> {
             UUID targetGame = context.get(targetGameArgument);
 
+            Optional<ZombiesScene> currentScene = router.getCurrentScene(sender.identity().uuid());
+
             boolean anyMatch = false;
-            for (ZombiesScene scene : router.getScenes()) {
+            for (ZombiesScene scene : router.getScenesContainingPlayer(sender.identity().uuid())) {
+                if (currentScene.isPresent() && currentScene.get() == scene) {
+                    continue;
+                }
+
                 if (scene.getUUID().equals(targetGame)) {
                     anyMatch = true;
                     break;
@@ -61,7 +73,7 @@ public class ZombiesRejoinCommand extends Command {
                 return;
             }
 
-            joinHelper.rejoinGame(((Player) sender), targetGame);
+            joinHelper.rejoinGame(((Player)sender), targetGame);
         }, targetGameArgument);
     }
 }
