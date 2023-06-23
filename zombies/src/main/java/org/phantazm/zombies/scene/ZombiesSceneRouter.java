@@ -25,7 +25,7 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     public @NotNull Optional<ZombiesScene> getScene(@NotNull UUID uuid) {
         for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
             for (ZombiesScene scene : sceneProvider.getScenes()) {
-                if (scene.getZombiesPlayers().containsKey(uuid)) {
+                if (scene.getPlayers().containsKey(uuid)) {
                     return Optional.of(scene);
                 }
             }
