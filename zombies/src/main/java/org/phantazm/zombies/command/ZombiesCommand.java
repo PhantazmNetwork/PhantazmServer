@@ -10,6 +10,7 @@ import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.scene.ZombiesJoinHelper;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
 
 import java.util.Map;
@@ -32,7 +33,8 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(fallback, "fallback");
 
-        addSubcommand(new ZombiesJoinCommand(router, sceneMapper, keyParser, maps, viewProvider, parties));
+        ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(parties, viewProvider, router, sceneMapper);
+        addSubcommand(new ZombiesJoinCommand(keyParser, maps, joinHelper));
         addSubcommand(new CoinsCommand(router::getScene));
         addSubcommand(new RoundCommand(router::getScene));
         addSubcommand(new KillAllCommand(router::getScene));
@@ -40,6 +42,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new AmmoRefillCommand(router::getScene));
         addSubcommand(new FlagToggleCommand(router::getScene, keyParser));
         addSubcommand(new QuitCommand(sceneMapper, fallback, viewProvider));
-        addSubcommand(new ZombiesRejoinCommand(router, sceneMapper, viewProvider, parties));
+        addSubcommand(new ZombiesRejoinCommand(router, joinHelper));
     }
 }
