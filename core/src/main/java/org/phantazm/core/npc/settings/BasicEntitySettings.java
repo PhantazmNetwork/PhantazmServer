@@ -39,6 +39,8 @@ public class BasicEntitySettings implements Consumer<Entity> {
             meta.setCustomName(data.displayName);
         }
 
+        meta.setHasNoGravity(!data.hasGravity);
+        entity.setHasPhysics(data.hasPhysics);
         meta.setOnFire(data.onFire);
         meta.setPose(data.pose);
         meta.setInvisible(data.invisible);
@@ -57,6 +59,8 @@ public class BasicEntitySettings implements Consumer<Entity> {
 
     @DataObject
     public record Data(@NotNull Component displayName,
+                       boolean hasGravity,
+                       boolean hasPhysics,
                        boolean onFire,
                        boolean invisible,
                        boolean small,
@@ -66,6 +70,16 @@ public class BasicEntitySettings implements Consumer<Entity> {
         @Default("displayName")
         public static ConfigElement defaultDisplayName() {
             return ConfigPrimitive.of("");
+        }
+
+        @Default("hasGravity")
+        public static ConfigElement defaultHasGravity() {
+            return ConfigPrimitive.of(false);
+        }
+
+        @Default("hasPhysics")
+        public static ConfigElement defaultHasPhysics() {
+            return ConfigPrimitive.of(false);
         }
 
         @Default("onFire")
