@@ -85,6 +85,10 @@ public class AttributeModifierAction implements Supplier<PowerupAction> {
 
             if (data.global) {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                    if (zombiesPlayer.hasQuit()) {
+                        continue;
+                    }
+
                     applyAttribute(zombiesPlayer);
                 }
             }
@@ -97,6 +101,10 @@ public class AttributeModifierAction implements Supplier<PowerupAction> {
         public void deactivate(@NotNull ZombiesPlayer player) {
             if (data.global) {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                    if (zombiesPlayer.hasQuit()) {
+                        continue;
+                    }
+
                     removeAttribute(zombiesPlayer);
                 }
             }
