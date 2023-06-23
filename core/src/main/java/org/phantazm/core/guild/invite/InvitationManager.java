@@ -41,11 +41,7 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
         ++ticks;
 
         Invitation invitation = invitations.peek();
-        while (invitation != null) {
-            if (invitation.expirationTime() > ticks) {
-                break;
-            }
-
+        while (invitation != null && invitation.expirationTime <= ticks) {
             if (latestInviteTimes.getLong(invitation.invitee().getUUID()) == invitation.expirationTime()) {
                 latestInviteTimes.removeLong(invitation.invitee().getUUID());
             }
