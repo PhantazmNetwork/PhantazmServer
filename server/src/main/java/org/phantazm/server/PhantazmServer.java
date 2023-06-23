@@ -22,8 +22,10 @@ import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
+import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
+import org.phantazm.core.game.scene.lobby.Lobby;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
@@ -44,7 +46,10 @@ import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * Launches the server, and provides some useful static constants.
@@ -201,6 +206,16 @@ public final class PhantazmServer {
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
+        Function<UUID, Optional<? extends Scene<?>>> sceneMapper = uuid -> {
+            Optional<Lobby> lobbyOptional = LobbyFeature.getLobbyRouter().getScene(uuid);
+            if (lobbyOptional.isPresent()) {
+                return lobbyOptional;
+            }
+
+            return ZombiesFeature.zombiesSceneRouter().getScene(uuid);
+        };
+        CommandFeature.initialize(MinecraftServer.getCommandManager(), sceneMapper, viewProvider);
+
         PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
                 MinecraftServer.getSchedulerManager());
         LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
@@ -221,7 +236,7 @@ public final class PhantazmServer {
                 keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, commandManager,
                 new CompositeFallback(List.of(LobbyFeature.getFallback(),
                         new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))),
-                PartyFeature.getParties());
+                PartyFeature.getParties(), sceneMapper);
 
         ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
                 mappingProcessorSource, codec);

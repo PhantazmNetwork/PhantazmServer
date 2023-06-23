@@ -20,7 +20,7 @@ import java.util.function.Function;
 public class AmmoRefillCommand extends Command {
     public static final Permission PERMISSION = new Permission("zombies.playtest.ammo_refill");
 
-    public AmmoRefillCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
+    public AmmoRefillCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("ammo_refill");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));

@@ -28,6 +28,7 @@ import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
+import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.game.scene.lobby.Lobby;
 import org.phantazm.core.guild.party.Party;
@@ -121,8 +122,8 @@ public final class ZombiesFeature {
             @NotNull KeyParser keyParser,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
-            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties)
-            throws IOException {
+            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
+            @NotNull Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -175,14 +176,8 @@ public final class ZombiesFeature {
                 .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
                         TaskSchedule.nextTick());
 
-        commandManager.register(new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, uuid -> {
-            Optional<Lobby> lobbyOptional = LobbyFeature.getLobbyRouter().getScene(uuid);
-            if (lobbyOptional.isPresent()) {
-                return lobbyOptional;
-            }
-
-            return sceneRouter.getScene(uuid);
-        }, sceneFallback));
+        commandManager.register(
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneMapper, sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {

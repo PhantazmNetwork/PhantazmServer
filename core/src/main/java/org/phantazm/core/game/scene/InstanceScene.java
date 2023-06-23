@@ -59,4 +59,9 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     public void shutdown() {
         shutdown = true;
     }
+
+    @Override
+    public @NotNull SceneFallback getFallback() {
+        return fallback;
+    }
 }

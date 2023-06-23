@@ -22,6 +22,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private final InstanceConfig instanceConfig;
     private final Map<UUID, PlayerView> players;
     private final NPCHandler npcHandler;
+    private final boolean quittable;
 
     private boolean joinable = true;
 
@@ -33,13 +34,13 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param fallback       A fallback for the lobby
      */
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
-            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler) {
+            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler, boolean quittable) {
         super(uuid, instance, fallback);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.players = new HashMap<>();
         this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");
-
         this.npcHandler.spawnAll();
+        this.quittable = quittable;
     }
 
     @Override
@@ -107,6 +108,20 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public void setJoinable(boolean joinable) {
         this.joinable = joinable;
+    }
+
+    @Override
+    public boolean isQuittable() {
+        return quittable;
+    }
+
+    @Override
+    public void shutdown() {
+        for (PlayerView player : players.values()) {
+            fallback.fallback(player);
+        }
+
+        super.shutdown();
     }
 
     public void cleanup() {

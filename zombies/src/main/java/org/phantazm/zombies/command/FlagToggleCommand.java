@@ -21,7 +21,7 @@ public class FlagToggleCommand extends Command {
 
     private static final ArgumentString FLAG_ARGUMENT = ArgumentType.String("flag");
 
-    public FlagToggleCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper,
+    public FlagToggleCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper,
             @NotNull KeyParser keyParser) {
         super("toggle_flag");
 

@@ -79,7 +79,7 @@ public final class LobbyFeature {
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
                 new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceLoader,
                         mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig(), contextManager,
-                        mainLobbyConfig.npcs());
+                        mainLobbyConfig.npcs(), false);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), LobbyFeature.getLobbyRouter(),
@@ -91,7 +91,7 @@ public final class LobbyFeature {
                 lobbyProviders.put(lobby.getKey(),
                         new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
                                 instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
-                                lobby.getValue().instanceConfig(), contextManager, mainLobbyConfig.npcs()));
+                                lobby.getValue().instanceConfig(), contextManager, mainLobbyConfig.npcs(), true));
             }
         }
 

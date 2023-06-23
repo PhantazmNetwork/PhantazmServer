@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class KillAllCommand extends Command {
     public static final Permission PERMISSION = new Permission("zombies.playtest.killall");
 
-    public KillAllCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
+    public KillAllCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("killall");
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 

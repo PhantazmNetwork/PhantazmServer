@@ -39,6 +39,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     private final SceneFallback fallback;
     private final InstanceConfig instanceConfig;
     private final List<ElementContext> npcContexts;
+    private final boolean quittable;
 
     /**
      * Creates a basic implementation of a {@link SceneProviderAbstract}.
@@ -53,7 +54,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
      */
     public BasicLobbyProvider(int maximumLobbies, int newLobbyThreshold, @NotNull InstanceLoader instanceLoader,
             @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig,
-            @NotNull ContextManager contextManager, @NotNull ConfigList npcConfigs) {
+            @NotNull ContextManager contextManager, @NotNull ConfigList npcConfigs, boolean quittable) {
         super(maximumLobbies, newLobbyThreshold);
 
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
@@ -70,6 +71,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         }
 
         this.npcContexts = List.copyOf(npcContexts);
+        this.quittable = quittable;
     }
 
     @Override
@@ -102,7 +104,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         }
 
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
-                new NPCHandler(List.copyOf(npcs), instance));
+                new NPCHandler(List.copyOf(npcs), instance), quittable);
         eventNode.addListener(PlayerDisconnectEvent.class,
                 event -> lobby.leave(Collections.singleton(event.getPlayer().getUuid())));
 

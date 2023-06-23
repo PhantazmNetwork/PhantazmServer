@@ -41,7 +41,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new GodmodeCommand(router::getScene));
         addSubcommand(new AmmoRefillCommand(router::getScene));
         addSubcommand(new FlagToggleCommand(router::getScene, keyParser));
-        addSubcommand(new QuitCommand(sceneMapper, fallback, viewProvider));
         addSubcommand(new ZombiesRejoinCommand(router, joinHelper));
     }
 }

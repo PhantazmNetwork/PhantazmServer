@@ -41,7 +41,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private static final Vec OFFSET = new Vec(0.5, 0, 0.5);
 
     private final KeyParser keyParser;
-    private final Supplier<? extends Optional<Round>> roundSupplier;
+    private final Supplier<Optional<Round>> roundSupplier;
     private final PowerupHandler powerupHandler;
 
     private final BoundedTracker<Room> roomTracker;
@@ -49,7 +49,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     public PhantazmMobDeathListener(@NotNull KeyParser keyParser, @NotNull Instance instance,
-            @NotNull MobStore mobStore, @NotNull Supplier<? extends Optional<Round>> roundSupplier,
+            @NotNull MobStore mobStore, @NotNull Supplier<Optional<Round>> roundSupplier,
             @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
             @NotNull BoundedTracker<Window> windowTracker,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {

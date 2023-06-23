@@ -24,7 +24,7 @@ import java.util.function.Function;
 public class RoundCommand extends Command {
     public static final Permission PERMISSION = new Permission("zombies.playtest.round");
 
-    public RoundCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
+    public RoundCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("round");
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 

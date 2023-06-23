@@ -216,6 +216,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.joinable = joinable;
     }
 
+    @Override
+    public boolean isQuittable() {
+        return true;
+    }
+
     private TransferResult checkWithinProtocolVersionBounds(@NotNull Collection<PlayerView> newPlayers) {
         for (PlayerView playerView : newPlayers) {
             Optional<Player> player = playerView.getPlayer();

@@ -3,6 +3,7 @@ package org.phantazm.core.game.scene;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.Tickable;
+import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Map;
@@ -73,5 +74,9 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
      * @param joinable Whether the scene should be joinable
      */
     void setJoinable(boolean joinable);
+
+    @NotNull SceneFallback getFallback();
+
+    boolean isQuittable();
 
 }

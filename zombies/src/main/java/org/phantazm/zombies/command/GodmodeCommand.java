@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class GodmodeCommand extends Command {
     public static final Permission PERMISSION = new Permission("zombies.playtest.godmode");
 
-    public GodmodeCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
+    public GodmodeCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("godmode");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));

@@ -30,7 +30,7 @@ public class CoinsCommand extends Command {
             ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
     private static final Argument<Integer> COIN_AMOUNT_ARGUMENT = ArgumentType.Integer("amount");
 
-    public CoinsCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
+    public CoinsCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("coins");
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
