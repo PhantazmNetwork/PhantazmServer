@@ -10,10 +10,7 @@ import org.phantazm.core.guild.party.PartyCreator;
 import org.phantazm.core.guild.party.command.PartyCommand;
 import org.phantazm.core.player.PlayerViewProvider;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class PartyFeature {
 
@@ -30,8 +27,12 @@ public class PartyFeature {
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {
+            Set<Party> ticked = Collections.newSetFromMap(new IdentityHashMap<>());
+            long time = System.currentTimeMillis();
             for (Party party : parties.values()) {
-                party.tick(System.currentTimeMillis());
+                if (ticked.add(party)) {
+                    party.tick(time);
+                }
             }
         }, TaskSchedule.immediate(), TaskSchedule.nextTick());
     }
