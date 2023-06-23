@@ -41,6 +41,7 @@ public class BasicQuitStateActivable implements Activable {
             player.setExp(0);
             sidebar.removeViewer(player);
             tabList.removeViewer(player);
+            player.setHealth(player.getMaxHealth());
         });
         playerView.getDisplayName()
                 .thenAccept(displayName -> instance.sendMessage(displayName.append(Component.text(" quit."))));
