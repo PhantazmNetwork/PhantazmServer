@@ -49,8 +49,18 @@ public class PartyLeaveCommand {
                 if (party.getMemberManager().getMembers().isEmpty()) {
                     party.getOwner().set(null);
                 } else {
-                    int memberIndex = random.nextInt(party.getMemberManager().getMembers().size());
-                    Iterator<PartyMember> memberIterator = party.getMemberManager().getMembers().values().iterator();
+                    Collection<PartyMember> online = new ArrayList<>(), offline = new ArrayList<>();
+                    for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                        if (member.getPlayerView().getPlayer().isPresent()) {
+                            online.add(member);
+                        } else {
+                            offline.add(member);
+                        }
+                    }
+                    
+                    Collection<PartyMember> candidates = online.size() != 0 ? online : offline;
+                    int memberIndex = random.nextInt(candidates.size());
+                    Iterator<PartyMember> memberIterator = candidates.iterator();
                     PartyMember newOwner = memberIterator.next();
                     for (int i = 0; i < memberIndex; ++i) {
                         newOwner = memberIterator.next();
