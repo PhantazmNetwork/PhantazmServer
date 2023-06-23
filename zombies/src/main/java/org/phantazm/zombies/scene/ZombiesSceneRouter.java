@@ -8,6 +8,7 @@ import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.TransferResult;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.*;
 
@@ -25,7 +26,7 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     public @NotNull Optional<ZombiesScene> getScene(@NotNull UUID uuid) {
         for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
             for (ZombiesScene scene : sceneProvider.getScenes()) {
-                if (scene.getPlayers().containsKey(uuid)) {
+                if (!scene.getZombiesPlayers().get(uuid).hasQuit()) {
                     return Optional.of(scene);
                 }
             }
