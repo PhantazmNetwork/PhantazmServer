@@ -4,6 +4,9 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.PlayerSkin;
@@ -30,6 +33,9 @@ public class PlayerEntitySupplier implements Supplier<Entity> {
 
     @DataObject
     public record Data(@NotNull String playerName, @NotNull String skinUUID) {
-
+        @Default("playerName")
+        public static ConfigElement defaultPlayerName() {
+            return ConfigPrimitive.of("");
+        }
     }
 }

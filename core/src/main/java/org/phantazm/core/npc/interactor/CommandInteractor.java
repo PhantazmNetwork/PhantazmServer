@@ -1,4 +1,4 @@
-package org.phantazm.core.npc.join;
+package org.phantazm.core.npc.interactor;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
@@ -19,7 +19,7 @@ public class CommandInteractor implements Interactor {
     }
 
     @Override
-    public void join(@NotNull Player player) {
+    public void interact(@NotNull Player player) {
         MinecraftServer.getCommandManager().execute(player, data.command);
     }
 

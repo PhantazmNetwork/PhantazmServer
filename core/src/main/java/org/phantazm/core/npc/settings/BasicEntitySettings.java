@@ -13,6 +13,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.metadata.EntityMeta;
+import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,17 +41,26 @@ public class BasicEntitySettings implements Consumer<Entity> {
 
         meta.setOnFire(data.onFire);
         meta.setPose(data.pose);
+        meta.setInvisible(data.invisible);
+        meta.setHasGlowingEffect(data.glowing);
 
         if (entity instanceof LivingEntity livingEntity) {
             for (Map.Entry<EquipmentSlot, ItemStack> entry : data.equipment.entrySet()) {
                 livingEntity.setEquipment(entry.getKey(), entry.getValue());
             }
         }
+
+        if (meta instanceof ArmorStandMeta armorStandMeta) {
+            armorStandMeta.setSmall(data.small);
+        }
     }
 
     @DataObject
     public record Data(@NotNull Component displayName,
                        boolean onFire,
+                       boolean invisible,
+                       boolean small,
+                       boolean glowing,
                        @NotNull Entity.Pose pose,
                        @NotNull Map<EquipmentSlot, ItemStack> equipment) {
         @Default("displayName")
@@ -60,6 +70,21 @@ public class BasicEntitySettings implements Consumer<Entity> {
 
         @Default("onFire")
         public static ConfigElement defaultOnFire() {
+            return ConfigPrimitive.of(false);
+        }
+
+        @Default("invisible")
+        public static ConfigElement defaultInvisible() {
+            return ConfigPrimitive.of(false);
+        }
+
+        @Default("small")
+        public static ConfigElement defaultSmall() {
+            return ConfigPrimitive.of(false);
+        }
+
+        @Default("glowing")
+        public static ConfigElement defaultGlowing() {
             return ConfigPrimitive.of(false);
         }
 

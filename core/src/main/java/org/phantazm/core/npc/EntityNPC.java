@@ -7,7 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.core.npc.join.Interactor;
+import org.phantazm.core.npc.interactor.Interactor;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -37,7 +37,7 @@ public class EntityNPC implements NPC {
 
     @Override
     public void handleInteraction(@NotNull Player interactor) {
-        this.interactor.join(interactor);
+        this.interactor.interact(interactor);
     }
 
     @Override
