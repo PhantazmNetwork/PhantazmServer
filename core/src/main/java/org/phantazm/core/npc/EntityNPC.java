@@ -1,9 +1,6 @@
 package org.phantazm.core.npc;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -85,9 +82,5 @@ public class EntityNPC implements NPC {
                        @NotNull @ChildPath("settings") String settings,
                        @NotNull @ChildPath("ticker") String ticker,
                        @NotNull @ChildPath("interactor") String interactor) {
-        @Default("ticker")
-        public static @NotNull ConfigElement defaultTicker() {
-            return ConfigNode.of("type", "npc.entity.ticker.none");
-        }
     }
 }
