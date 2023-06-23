@@ -45,8 +45,6 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     @NotNull ZombiesScene getScene();
 
-    @NotNull TickTaskScheduler scheduler();
-
     void registerCancellable(@NotNull CancellableState cancellable, boolean endOld);
 
     void removeCancellable(@NotNull UUID id);

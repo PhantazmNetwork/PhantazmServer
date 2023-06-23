@@ -47,11 +47,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     @Override
-    public @NotNull TickTaskScheduler scheduler() {
-        return taskScheduler;
-    }
-
-    @Override
     public void registerCancellable(@NotNull CancellableState cancellable, boolean endOld) {
         if (hasQuit()) {
             return;
