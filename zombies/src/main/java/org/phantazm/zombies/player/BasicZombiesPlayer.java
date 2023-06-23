@@ -53,6 +53,10 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public void registerCancellable(@NotNull CancellableState cancellable, boolean endOld) {
+        if (hasQuit()) {
+            return;
+        }
+
         CancellableState oldCancellable = stateMap.put(cancellable.id(), cancellable);
 
         if (oldCancellable != null && endOld) {
