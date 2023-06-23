@@ -23,7 +23,7 @@ public class PartyCommand {
         command.addSubcommand(PartyJoinCommand.joinCommand(parties, viewProvider));
         command.addSubcommand(PartyLeaveCommand.leaveCommand(parties, random));
         command.addSubcommand(PartyKickCommand.kickCommand(parties, viewProvider));
-        command.addSubcommand(PartyInviteCommand.inviteCommand(parties, viewProvider));
+        command.addSubcommand(PartyInviteCommand.inviteCommand(parties, viewProvider, partyCreator));
         command.addSubcommand(PartyListCommand.listCommand(parties));
 
         return command;

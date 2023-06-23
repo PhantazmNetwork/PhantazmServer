@@ -61,7 +61,8 @@ public class PartyJoinCommand {
 
                     Player player = (Player)sender;
                     if (!party.getInvitationManager().hasInvitation(player.getUuid())) {
-                        sender.sendMessage(Component.text("You don't have an invite to the party.", NamedTextColor.RED));
+                        sender.sendMessage(
+                                Component.text("You don't have an invite to the party.", NamedTextColor.RED));
                         return;
                     }
 
@@ -70,11 +71,8 @@ public class PartyJoinCommand {
                         previousParty.getMemberManager().removeMember(player.getUuid());
                     }
 
-                    PartyMember newMember = party.getMemberCreator().apply(viewProvider.fromPlayer(player));
-                    party.getMemberManager().addMember(newMember);
+                    party.getInvitationManager().acceptInvitation(viewProvider.fromPlayer(player));
                     parties.put(player.getUuid(), party);
-
-                    party.getNotification().notifyJoin(newMember);
                 }, () -> {
                     sender.sendMessage(
                             Component.text("Can't find anyone with the username " + name + "!", NamedTextColor.RED));

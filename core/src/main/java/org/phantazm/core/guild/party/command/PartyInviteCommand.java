@@ -8,6 +8,7 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.party.Party;
+import org.phantazm.core.guild.party.PartyCreator;
 import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerViewProvider;
 
@@ -21,8 +22,8 @@ public class PartyInviteCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command inviteCommand(@NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull PlayerViewProvider viewProvider) {
+    public static @NotNull Command inviteCommand(@NotNull Map<? super UUID, Party> parties,
+            @NotNull PlayerViewProvider viewProvider, @NotNull PartyCreator partyCreator) {
         Objects.requireNonNull(parties, "parties");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
@@ -40,28 +41,33 @@ public class PartyInviteCommand {
             }
 
             Party party = parties.get(player.getUuid());
-            if (party == null) {
-                sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
-                return false;
-            }
-
-            PartyMember member = party.getMemberManager().getMember(player.getUuid());
-            if (!party.getInvitePermission().hasPermission(member)) {
-                sender.sendMessage(Component.text("You can't invite players!", NamedTextColor.RED));
-                return false;
+            if (party != null) {
+                PartyMember member = party.getMemberManager().getMember(player.getUuid());
+                if (!party.getInvitePermission().hasPermission(member)) {
+                    sender.sendMessage(Component.text("You can't invite players!", NamedTextColor.RED));
+                    return false;
+                }
             }
 
             return true;
         }, (sender, context) -> {
             String name = context.get(nameArgument);
 
-            UUID uuid = ((Player) sender).getUuid();
-            Party inviterParty = parties.get(uuid);
-            PartyMember inviter = inviterParty.getMemberManager().getMember(uuid);
+            Player player = ((Player)sender);
+            Party tempParty = parties.get(player.getUuid());
+            if (tempParty == null) {
+                tempParty = partyCreator.createPartyFor(viewProvider.fromPlayer(player));
+                parties.put(player.getUuid(), tempParty);
+
+                sender.sendMessage(Component.text("Automatically created a new party.", NamedTextColor.GREEN));
+            }
+            Party inviterParty = tempParty;
+
+            PartyMember inviter = tempParty.getMemberManager().getMember(player.getUuid());
 
             viewProvider.fromName(name).thenAccept(playerViewOptional -> {
                 playerViewOptional.ifPresentOrElse(playerView -> {
-                    if (playerView.getUUID().equals(uuid)) {
+                    if (playerView.getUUID().equals(player.getUuid())) {
                         sender.sendMessage(Component.text("You can't invite yourself!", NamedTextColor.RED));
                         return;
                     }
@@ -77,8 +83,8 @@ public class PartyInviteCommand {
 
                     if (playerView.getPlayer().isEmpty()) {
                         playerView.getDisplayName().thenAccept(displayName -> {
-                            sender.sendMessage(Component.text().append(displayName,
-                                    Component.text(" is not online.")).color(NamedTextColor.RED));
+                            sender.sendMessage(Component.text().append(displayName, Component.text(" is not online."))
+                                    .color(NamedTextColor.RED));
                         });
                         return;
                     }

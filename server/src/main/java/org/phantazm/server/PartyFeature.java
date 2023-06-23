@@ -20,11 +20,12 @@ public class PartyFeature {
     private static final Map<? super UUID, Party> parties = new HashMap<>();
 
     private PartyFeature() {
+        throw new UnsupportedOperationException();
     }
 
     public static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
             @NotNull SchedulerManager schedulerManager) {
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
+        PartyCreator partyCreator = new PartyCreator(1, 0, 400, 1, 1);
         Command partyCommand = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
         commandManager.register(partyCommand);
 

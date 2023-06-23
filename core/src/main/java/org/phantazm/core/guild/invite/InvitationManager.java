@@ -40,7 +40,8 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
     public void tick(long time) {
         ++ticks;
 
-        for (Invitation invitation = invitations.poll(); invitation != null; invitation = invitations.poll()) {
+        Invitation invitation = invitations.peek();
+        while (invitation != null) {
             if (invitation.expirationTime() > ticks) {
                 break;
             }
@@ -49,6 +50,9 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
                 latestInviteTimes.removeLong(invitation.invitee().getUUID());
             }
             notification.notifyExpiry(invitation.invitee());
+
+            invitations.remove();
+            invitation = invitations.peek();
         }
     }
 

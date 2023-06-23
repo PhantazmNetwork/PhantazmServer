@@ -112,7 +112,7 @@ public class ZombiesJoinCommand extends Command {
                 ZombiesScene scene = result.scene().get();
                 boolean anyFailed = false;
                 for (PlayerView playerView : playerViews) {
-                    Scene<?> oldScene = previousScenes.get(player.getUuid());
+                    Scene<?> oldScene = previousScenes.get(playerView.getUUID());
                     if (oldScene == null || oldScene == scene) {
                         continue;
                     }
@@ -132,7 +132,7 @@ public class ZombiesJoinCommand extends Command {
 
                 if (anyFailed) {
                     player.sendMessage(
-                            Component.text("Failed to join because not all players could leave their old " + "games."));
+                            Component.text("Failed to join because not all players could leave their old games."));
                 }
                 else {
                     TransferResult joinResult = scene.join(joinRequest);

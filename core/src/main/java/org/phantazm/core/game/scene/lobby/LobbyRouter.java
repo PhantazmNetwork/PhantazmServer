@@ -1,14 +1,13 @@
 package org.phantazm.core.game.scene.lobby;
 
-import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
-import org.phantazm.core.game.scene.*;
-import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.game.scene.RouteResult;
+import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.SceneProvider;
+import org.phantazm.core.game.scene.SceneRouter;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * {@link Scene} router for {@link Lobby}s.
