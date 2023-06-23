@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.SceneRouter;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerView;
@@ -21,21 +22,22 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.scene.ZombiesJoinRequest;
 import org.phantazm.zombies.scene.ZombiesRouteRequest;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Function;
 
 public class ZombiesJoinCommand extends Command {
-    public ZombiesJoinCommand(@NotNull Scene<ZombiesRouteRequest> router,
-            @NotNull Function<? super UUID, Optional<SceneRouter<? extends Scene<?>, ?>>> globalRouterMapper,
-            @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
+    public ZombiesJoinCommand(@NotNull SceneRouter<ZombiesScene, ZombiesRouteRequest> router,
+            @NotNull Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper, @NotNull KeyParser keyParser,
+            @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
             @NotNull Map<? super UUID, ? extends Party> parties) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
 
         Objects.requireNonNull(router, "router");
-        Objects.requireNonNull(globalRouterMapper, "globalRouterMapper");
+        Objects.requireNonNull(sceneMapper, "sceneMapper");
         Objects.requireNonNull(keyParser, "keyParser");
         Objects.requireNonNull(maps, "maps");
         Objects.requireNonNull(viewProvider, "viewProvider");
@@ -82,13 +84,15 @@ public class ZombiesJoinCommand extends Command {
             }
 
             Set<UUID> excluded = new HashSet<>();
+            Map<UUID, Scene<?>> previousScenes = new HashMap<>();
             for (PlayerView playerView : playerViews) {
-                globalRouterMapper.apply(playerView.getUUID()).ifPresent(oldRouter -> {
-                    oldRouter.getScene(playerView.getUUID()).map(Scene::getUUID).ifPresent(excluded::add);
-                    oldRouter.leave(Collections.singleton(playerView.getUUID()));
+                sceneMapper.apply(playerView.getUUID()).ifPresent(previousScene -> {
+                    excluded.add(previousScene.getUUID());
+                    previousScenes.put(playerView.getUUID(), previousScene);
                 });
             }
-            RouteResult result = router.join(ZombiesRouteRequest.joinGame(mapKey, new ZombiesJoinRequest() {
+
+            ZombiesJoinRequest joinRequest = new ZombiesJoinRequest() {
                 @Override
                 public @NotNull Collection<PlayerView> getPlayers() {
                     return playerViews;
@@ -98,8 +102,46 @@ public class ZombiesJoinCommand extends Command {
                 public @NotNull Set<UUID> excludedScenes() {
                     return excluded;
                 }
-            }));
-            result.message().ifPresent(sender::sendMessage);
+            };
+            RouteResult<ZombiesScene> result = router.findScene(ZombiesRouteRequest.joinGame(mapKey, joinRequest));
+
+            if (result.message().isPresent()) {
+                sender.sendMessage(result.message().get());
+            }
+            else if (result.scene().isPresent()) {
+                ZombiesScene scene = result.scene().get();
+                boolean anyFailed = false;
+                for (PlayerView playerView : playerViews) {
+                    Scene<?> oldScene = previousScenes.get(player.getUuid());
+                    if (oldScene == null || oldScene == scene) {
+                        continue;
+                    }
+
+                    TransferResult leaveResult = oldScene.leave(Collections.singleton(playerView.getUUID()));
+                    if (leaveResult.success()) {
+                        continue;
+                    }
+
+                    anyFailed = true;
+                    leaveResult.message().ifPresent(message -> {
+                        playerView.getPlayer().ifPresent(leavingPlayer -> {
+                            leavingPlayer.sendMessage(message);
+                        });
+                    });
+                }
+
+                if (anyFailed) {
+                    player.sendMessage(
+                            Component.text("Failed to join because not all players could leave their old " + "games."));
+                }
+                else {
+                    TransferResult joinResult = scene.join(joinRequest);
+
+                    if (!joinResult.success() && joinResult.message().isPresent()) {
+                        player.sendMessage(joinResult.message().get());
+                    }
+                }
+            }
         }, mapKeyArgument);
     }
 

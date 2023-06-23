@@ -16,22 +16,6 @@ import java.util.UUID;
 public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
 
     /**
-     * Routes a join request to the scene.
-     *
-     * @param joinRequest The request for the join
-     * @return The result of the join
-     */
-    @NotNull RouteResult join(@NotNull TRequest joinRequest);
-
-    /**
-     * Removes players from the scene.
-     *
-     * @param leavers The {@link UUID}s of the players to remove
-     * @return The result of the leave
-     */
-    @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers);
-
-    /**
      * Gets the {@link PlayerView}s that are associated with the scene.
      * Some players might not be in game.
      *
@@ -40,6 +24,10 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers();
 
     @NotNull UUID getUUID();
+
+    @NotNull TransferResult join(@NotNull TRequest joinRequest);
+
+    @NotNull TransferResult leave(@NotNull Iterable<UUID> leavers);
 
     /**
      * Gets the number of players that are considered "ingame" in the scene.

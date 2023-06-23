@@ -2,11 +2,15 @@ package org.phantazm.core.game.scene.lobby;
 
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A {@link SceneFallback} which routes to a lobby.
@@ -34,9 +38,10 @@ public class LobbyRouterFallback implements SceneFallback {
 
     @Override
     public boolean fallback(@NotNull PlayerView player) {
-        return lobbyRouter.join(
-                        new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(connectionManager, List.of(player))))
-                .success();
+        LobbyJoinRequest joinRequest = new BasicLobbyJoinRequest(connectionManager, Collections.singleton(player));
+        LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbyName, joinRequest);
+        Optional<Lobby> lobbyOptional = lobbyRouter.findScene(routeRequest).scene();
+        return lobbyOptional.map(lobby -> lobby.join(joinRequest).success()).orElse(false);
     }
 
 }

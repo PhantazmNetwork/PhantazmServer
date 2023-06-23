@@ -24,10 +24,7 @@ import org.phantazm.core.npc.NPCHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -104,8 +101,12 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             }
         }
 
-        return new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
+        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
                 new NPCHandler(List.copyOf(npcs), instance));
+        eventNode.addListener(PlayerDisconnectEvent.class,
+                event -> lobby.leave(Collections.singleton(event.getPlayer().getUuid())));
+
+        return lobby;
     }
 
     @Override

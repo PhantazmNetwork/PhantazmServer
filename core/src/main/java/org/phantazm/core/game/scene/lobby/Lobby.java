@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.InstanceScene;
-import org.phantazm.core.game.scene.RouteResult;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
@@ -43,12 +43,12 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     }
 
     @Override
-    public @NotNull RouteResult join(@NotNull LobbyJoinRequest joinRequest) {
+    public @NotNull TransferResult join(@NotNull LobbyJoinRequest joinRequest) {
         if (isShutdown()) {
-            return new RouteResult(false, Component.text("Lobby is shutdown."));
+            return new TransferResult(false, Component.text("Lobby is shutdown."));
         }
         if (!isJoinable()) {
-            return new RouteResult(false, Component.text("Lobby is not joinable."));
+            return new TransferResult(false, Component.text("Lobby is not joinable."));
         }
 
         Collection<PlayerView> playerViews = joinRequest.getPlayers();
@@ -62,7 +62,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         if (joiners.isEmpty()) {
-            return new RouteResult(false, Component.text("Everybody is already in the lobby."));
+            return new TransferResult(false, Component.text("Everybody is already in the lobby."));
         }
 
         for (Pair<PlayerView, Player> player : joiners) {
@@ -70,11 +70,11 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         joinRequest.handleJoin(instance, instanceConfig);
-        return RouteResult.SUCCESSFUL;
+        return TransferResult.SUCCESSFUL;
     }
 
     @Override
-    public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+    public @NotNull TransferResult leave(@NotNull Iterable<UUID> leavers) {
         boolean anyInside = false;
         for (UUID uuid : leavers) {
             if (players.containsKey(uuid)) {
@@ -84,14 +84,14 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         if (!anyInside) {
-            return new RouteResult(false, Component.text("None of the players are in the lobby."));
+            return new TransferResult(false, Component.text("None of the players are in the lobby."));
         }
 
         for (UUID uuid : leavers) {
             players.remove(uuid);
         }
 
-        return RouteResult.SUCCESSFUL;
+        return TransferResult.SUCCESSFUL;
     }
 
     @Override

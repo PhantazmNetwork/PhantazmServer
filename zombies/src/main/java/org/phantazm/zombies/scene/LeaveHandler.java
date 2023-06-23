@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.RouteResult;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
@@ -31,9 +31,9 @@ public class LeaveHandler {
      * reports whether or the operation was "successful" (if there were players removed from the internal state).
      *
      * @param leavers the players who are leaving
-     * @return a {@link RouteResult} representing the operation
+     * @return a {@link TransferResult} representing the operation
      */
-    public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+    public @NotNull TransferResult leave(@NotNull Iterable<UUID> leavers) {
         List<Pair<UUID, ZombiesPlayer>> leavingPlayers = new ArrayList<>();
 
         boolean failure = false;
@@ -62,8 +62,8 @@ public class LeaveHandler {
             }
         }
 
-        return failure ? new RouteResult(false,
-                Component.text("Not all players are within the scene.", NamedTextColor.RED)) : RouteResult.SUCCESSFUL;
+        return failure ? new TransferResult(false,
+                Component.text("Not all players are within the scene.", NamedTextColor.RED)) : TransferResult.SUCCESSFUL;
     }
 
 }

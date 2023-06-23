@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.game.scene.InstanceScene;
-import org.phantazm.core.game.scene.RouteResult;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
@@ -100,7 +100,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     }
 
     @Override
-    public @NotNull RouteResult join(@NotNull ZombiesJoinRequest joinRequest) {
+    public @NotNull TransferResult join(@NotNull ZombiesJoinRequest joinRequest) {
         Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
         Collection<PlayerView> newPlayers = new ArrayList<>(joinRequest.getPlayers().size());
         for (PlayerView player : joinRequest.getPlayers()) {
@@ -117,17 +117,17 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         Stage stage = getCurrentStage();
         if (stage == null) {
-            return new RouteResult(false, Component.text("The game is not currently running.", NamedTextColor.RED));
+            return new TransferResult(false, Component.text("The game is not currently running.", NamedTextColor.RED));
         }
         if (stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
-            return new RouteResult(false, Component.text("The game is not accepting new players.", NamedTextColor.RED));
+            return new TransferResult(false, Component.text("The game is not accepting new players.", NamedTextColor.RED));
         }
 
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
-            return new RouteResult(false, Component.text("Too many players!", NamedTextColor.RED));
+            return new TransferResult(false, Component.text("Too many players!", NamedTextColor.RED));
         }
 
-        RouteResult protocolResult = checkWithinProtocolVersionBounds(newPlayers);
+        TransferResult protocolResult = checkWithinProtocolVersionBounds(newPlayers);
         if (protocolResult != null) {
             return protocolResult;
         }
@@ -192,11 +192,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             }
         }).join();
 
-        return RouteResult.SUCCESSFUL;
+        return TransferResult.SUCCESSFUL;
     }
 
     @Override
-    public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+    public @NotNull TransferResult leave(@NotNull Iterable<UUID> leavers) {
         return leaveHandler.leave(leavers);
     }
 
@@ -216,7 +216,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.joinable = joinable;
     }
 
-    private RouteResult checkWithinProtocolVersionBounds(@NotNull Collection<PlayerView> newPlayers) {
+    private TransferResult checkWithinProtocolVersionBounds(@NotNull Collection<PlayerView> newPlayers) {
         for (PlayerView playerView : newPlayers) {
             Optional<Player> player = playerView.getPlayer();
             if (player.isEmpty()) {
@@ -229,11 +229,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             int protocolVersion = getActualProtocolVersion(player.get().getPlayerConnection());
 
             if (hasMinimum && protocolVersion < mapSettingsInfo.minimumProtocolVersion()) {
-                return new RouteResult(false,
+                return new TransferResult(false,
                         Component.text("A player's Minecraft version is too old!", NamedTextColor.RED));
             }
             if (hasMaximum && protocolVersion > mapSettingsInfo.maximumProtocolVersion()) {
-                return new RouteResult(false,
+                return new TransferResult(false,
                         Component.text("A player's Minecraft version is too new!", NamedTextColor.RED));
             }
         }

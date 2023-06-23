@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.DynamicChunk;
@@ -13,10 +12,8 @@ import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FileUtils;
-import org.phantazm.core.game.scene.BasicSceneStore;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.SceneProvider;
-import org.phantazm.core.game.scene.SceneStore;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -30,7 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Main entrypoint for lobby-related features.
@@ -55,8 +55,6 @@ public final class LobbyFeature {
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
             @NotNull LobbiesConfig lobbiesConfig, @NotNull ContextManager contextManager) throws IOException {
-        SceneStore sceneStore = new BasicSceneStore();
-
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         FileUtils.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =
@@ -65,8 +63,7 @@ public final class LobbyFeature {
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
                 new HashMap<>(lobbiesConfig.lobbies().size());
-        lobbyRouter = new LobbyRouter(UUID.randomUUID(), lobbyProviders);
-        sceneStore.addScene(SceneKeys.LOBBY_ROUTER, lobbyRouter);
+        lobbyRouter = new LobbyRouter(lobbyProviders);
 
         LobbyConfig mainLobbyConfig = lobbiesConfig.lobbies().get(lobbiesConfig.mainLobbyName());
         if (mainLobbyConfig == null) {
@@ -104,12 +101,18 @@ public final class LobbyFeature {
             LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
-            RouteResult result = lobbyRouter.join(routeRequest);
-            if (!result.success()) {
-                finalFallback.fallback(playerViewProvider.fromPlayer(event.getPlayer()));
+            RouteResult<Lobby> result = lobbyRouter.findScene(routeRequest);
+            boolean success = false;
+            if (result.scene().isPresent()) {
+                Lobby lobby = result.scene().get();
+                if (lobby.join(joinRequest).success()) {
+                    loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
+                    success = true;
+                }
             }
-            else {
-                loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
+
+            if (!success) {
+                finalFallback.fallback(playerViewProvider.fromPlayer(event.getPlayer()));
             }
         });
 
@@ -123,12 +126,6 @@ public final class LobbyFeature {
                 LOGGER.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
                 event.getPlayer().kick(Component.empty());
             }
-        });
-
-        node.addListener(PlayerDisconnectEvent.class, event -> {
-            lobbyRouter.getScene(event.getPlayer().getUuid()).ifPresent(ignored -> {
-                lobbyRouter.leave(Collections.singleton(event.getPlayer().getUuid()));
-            });
         });
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
