@@ -23,8 +23,8 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
     @Test
     public void testNotInPartyAfterJoiningOtherPlayerNotInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1, 1);
+        Command command = PartyCommand.partyCommand(partyHolder, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -34,28 +34,28 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
 
         env.process().command().execute(secondPlayer, "party join first");
 
-        assertFalse(parties.containsKey(firstPlayer.getUuid()));
-        assertFalse(parties.containsKey(secondPlayer.getUuid()));
+        assertFalse(partyHolder.uuidToGuild().containsKey(firstPlayer.getUuid()));
+        assertFalse(partyHolder.uuidToGuild().containsKey(secondPlayer.getUuid()));
     }
 
     @SuppressWarnings({"UnstableApiUsage", "JUnitMalformedDeclaration"})
     @Test
     public void testNotInPartyWithoutInviteAndJoiningOtherPlayerInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1, 1);
+        Command command = PartyCommand.partyCommand(partyHolder, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
         firstPlayer.setUsernameField("first");
         env.process().command().execute(firstPlayer, "party create");
-        Party party = parties.get(firstPlayer.getUuid());
+        Party party = partyHolder.uuidToGuild().get(firstPlayer.getUuid());
         Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
         secondPlayer.setUsernameField("second");
 
         env.process().command().execute(secondPlayer, "party join first");
 
-        assertFalse(parties.containsKey(secondPlayer.getUuid()));
+        assertFalse(partyHolder.uuidToGuild().containsKey(secondPlayer.getUuid()));
         assertFalse(party.getMemberManager().hasMember(secondPlayer.getUuid()));
     }
 
@@ -63,14 +63,14 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
     @Test
     public void testInPartyAfterInviteAndJoiningOtherPlayerInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1, 1);
+        Command command = PartyCommand.partyCommand(partyHolder, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
         firstPlayer.setUsernameField("first");
         env.process().command().execute(firstPlayer, "party create");
-        Party party = parties.get(firstPlayer.getUuid());
+        Party party = partyHolder.uuidToGuild().get(firstPlayer.getUuid());
         Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
         secondPlayer.setUsernameField("second");
         party.getInvitationManager().invite(party.getMemberManager().getMember(firstPlayer.getUuid()),
@@ -78,7 +78,7 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
 
         env.process().command().execute(secondPlayer, "party join first");
 
-        assertEquals(party, parties.get(secondPlayer.getUuid()));
+        assertEquals(party, partyHolder.uuidToGuild().get(secondPlayer.getUuid()));
         assertTrue(party.getMemberManager().hasMember(secondPlayer.getUuid()));
     }
 

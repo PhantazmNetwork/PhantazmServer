@@ -7,14 +7,13 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyCreator;
 import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerViewProvider;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public class PartyInviteCommand {
 
@@ -22,9 +21,9 @@ public class PartyInviteCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command inviteCommand(@NotNull Map<? super UUID, Party> parties,
+    public static @NotNull Command inviteCommand(@NotNull GuildHolder<Party> partyHolder,
             @NotNull PlayerViewProvider viewProvider, @NotNull PartyCreator partyCreator) {
-        Objects.requireNonNull(parties, "parties");
+        Objects.requireNonNull(partyHolder, "partyHolder");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
         Argument<String> nameArgument = ArgumentType.Word("name");
@@ -40,7 +39,7 @@ public class PartyInviteCommand {
                 return false;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyHolder.uuidToGuild().get(player.getUuid());
             if (party != null) {
                 PartyMember member = party.getMemberManager().getMember(player.getUuid());
                 if (!party.getInvitePermission().hasPermission(member)) {
@@ -54,10 +53,11 @@ public class PartyInviteCommand {
             String name = context.get(nameArgument);
 
             Player player = ((Player)sender);
-            Party tempParty = parties.get(player.getUuid());
+            Party tempParty = partyHolder.uuidToGuild().get(player.getUuid());
             if (tempParty == null) {
                 tempParty = partyCreator.createPartyFor(viewProvider.fromPlayer(player));
-                parties.put(player.getUuid(), tempParty);
+                partyHolder.guilds().add(tempParty);
+                partyHolder.uuidToGuild().put(player.getUuid(), tempParty);
 
                 sender.sendMessage(Component.text("Automatically created a new party.", NamedTextColor.GREEN));
             }
@@ -72,7 +72,7 @@ public class PartyInviteCommand {
                         return;
                     }
 
-                    Party otherParty = parties.get(playerView.getUUID());
+                    Party otherParty = partyHolder.uuidToGuild().get(playerView.getUUID());
                     if (otherParty == inviterParty) {
                         playerView.getDisplayName().thenAccept(displayName -> {
                             sender.sendMessage(Component.text().append(displayName,

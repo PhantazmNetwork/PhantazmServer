@@ -8,6 +8,7 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.guild.permission.MultipleMemberPermission;
@@ -23,9 +24,9 @@ public class PartyKickCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command kickCommand(@NotNull Map<? super UUID, ? extends Party> parties,
+    public static @NotNull Command kickCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
             @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(parties, "parties");
+        Objects.requireNonNull(partyMap, "partyMap");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
         Command command = new Command("kick");
@@ -35,7 +36,7 @@ public class PartyKickCommand {
                 return;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyMap.get(player.getUuid());
             if (party == null) {
                 return;
             }
@@ -65,7 +66,7 @@ public class PartyKickCommand {
                 return false;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyMap.get(player.getUuid());
             if (party == null) {
                 sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
                 return false;
@@ -82,7 +83,7 @@ public class PartyKickCommand {
             String name = context.get(nameArgument);
 
             UUID uuid = ((Player)sender).getUuid();
-            Party party = parties.get(uuid);
+            Party party = partyMap.get(uuid);
             PartyMember kicker = party.getMemberManager().getMember(uuid);
 
             viewProvider.fromName(name).thenAccept(playerViewOptional -> {
@@ -111,7 +112,7 @@ public class PartyKickCommand {
                     }
 
                     party.getMemberManager().removeMember(playerView.getUUID());
-                    parties.remove(playerView.getUUID());
+                    partyMap.remove(playerView.getUUID());
                     party.getNotification().notifyKick(kicker, toKick);
                 }, () -> {
                     sender.sendMessage(

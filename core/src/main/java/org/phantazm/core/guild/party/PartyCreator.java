@@ -28,13 +28,16 @@ public class PartyCreator {
 
     private final int minimumInviteRank;
 
+    private final int minimumJoinRank;
+
     public PartyCreator(int creatorRank, int defaultRank, long invitationDuration, int minimumKickRank,
-            int minimumInviteRank) {
+            int minimumInviteRank, int minimumJoinRank) {
         this.creatorRank = creatorRank;
         this.defaultRank = defaultRank;
         this.invitationDuration = invitationDuration;
         this.minimumKickRank = minimumKickRank;
         this.minimumInviteRank = minimumInviteRank;
+        this.minimumJoinRank = minimumJoinRank;
     }
 
     public @NotNull Party createPartyFor(@NotNull PlayerView playerView) {
@@ -53,9 +56,10 @@ public class PartyCreator {
                 new InvitationManager<>(memberManager, memberCreator, notification, invitationDuration);
         MultipleMemberPermission<PartyMember> kickPermission = new RankMultipleMemberPermission<>(minimumKickRank);
         SingleMemberPermission<PartyMember> invitePermission = new RankSingleMemberPermission<>(minimumInviteRank);
+        SingleMemberPermission<PartyMember> joinPermission = new RankSingleMemberPermission<>(minimumJoinRank);
 
         return new Party(memberManager, memberCreator, audience, notification, invitationManager, kickPermission,
-                invitePermission, ownerWrapper);
+                invitePermission, joinPermission, ownerWrapper);
     }
 
     private PartyMember createMember(PlayerView playerView) {

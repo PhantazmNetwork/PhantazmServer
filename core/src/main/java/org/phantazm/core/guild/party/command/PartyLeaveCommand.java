@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
 
@@ -16,8 +17,9 @@ public class PartyLeaveCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command leaveCommand(@NotNull Map<? super UUID, ? extends Party> parties, @NotNull Random random) {
-        Objects.requireNonNull(parties, "parties");
+    public static @NotNull Command leaveCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
+            @NotNull Random random) {
+        Objects.requireNonNull(partyMap, "partyMap");
         Objects.requireNonNull(random, "random");
 
         Command command = new Command("leave");
@@ -31,7 +33,7 @@ public class PartyLeaveCommand {
                 return false;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyMap.get(player.getUuid());
             if (party == null) {
                 sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
                 return false;
@@ -40,7 +42,7 @@ public class PartyLeaveCommand {
             return true;
         }, (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
-            Party party = parties.remove(uuid);
+            Party party = partyMap.remove(uuid);
             PartyMember oldMember = party.getMemberManager().removeMember(uuid);
 
             party.getNotification().notifyLeave(oldMember);
@@ -57,7 +59,7 @@ public class PartyLeaveCommand {
                             offline.add(member);
                         }
                     }
-                    
+
                     Collection<PartyMember> candidates = online.size() != 0 ? online : offline;
                     int memberIndex = random.nextInt(candidates.size());
                     Iterator<PartyMember> memberIterator = candidates.iterator();

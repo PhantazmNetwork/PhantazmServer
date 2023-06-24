@@ -219,7 +219,7 @@ public final class PhantazmServer {
         PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
                 MinecraftServer.getSchedulerManager());
         LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
-        ChatFeature.initialize(global, viewProvider, PartyFeature.getParties(), MinecraftServer.getCommandManager());
+        ChatFeature.initialize(global, viewProvider, PartyFeature.getPartyHolder().uuidToGuild(), MinecraftServer.getCommandManager());
         MessagingFeature.initialize(global, serverConfig.serverInfoConfig().authType());
 
         ProximaFeature.initialize(global, contextManager, pathfinderConfig);
@@ -236,7 +236,7 @@ public final class PhantazmServer {
                 keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, commandManager,
                 new CompositeFallback(List.of(LobbyFeature.getFallback(),
                         new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))),
-                PartyFeature.getParties(), sceneMapper);
+                PartyFeature.getPartyHolder().uuidToGuild(), sceneMapper);
 
         ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
                 mappingProcessorSource, codec);

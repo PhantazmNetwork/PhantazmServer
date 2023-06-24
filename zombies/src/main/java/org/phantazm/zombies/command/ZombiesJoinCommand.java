@@ -17,6 +17,7 @@ import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
+import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
@@ -30,7 +31,7 @@ import java.util.function.Function;
 
 public class ZombiesJoinCommand extends Command {
     public ZombiesJoinCommand(@NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-            @NotNull ZombiesJoinHelper joinHelper) {
+            @NotNull ZombiesJoinHelper joinHelper, @NotNull Map<? super UUID, ? extends Party> parties) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
@@ -49,9 +50,19 @@ public class ZombiesJoinCommand extends Command {
                 return sender instanceof Player;
             }
 
-            if (!(sender instanceof Player)) {
+            if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return false;
+            }
+
+            Party party = parties.get(player.getUuid());
+            if (party != null) {
+                PartyMember member = party.getMemberManager().getMember(player.getUuid());
+                if (!party.getJoinPermission().hasPermission(member)) {
+                    sender.sendMessage(Component.text("You don't have permission in your party to join games!",
+                            NamedTextColor.RED));
+                    return false;
+                }
             }
 
             return true;

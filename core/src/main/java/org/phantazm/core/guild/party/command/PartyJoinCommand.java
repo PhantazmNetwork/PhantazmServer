@@ -8,7 +8,6 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.party.Party;
-import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Map;
@@ -21,9 +20,9 @@ public class PartyJoinCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command joinCommand(@NotNull Map<? super UUID, Party> parties,
+    public static @NotNull Command joinCommand(@NotNull Map<? super UUID, Party> partyMap,
             @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(parties, "parties");
+        Objects.requireNonNull(partyMap, "partyMap");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
         Command command = new Command("join");
@@ -39,7 +38,7 @@ public class PartyJoinCommand {
                 return false;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyMap.get(player.getUuid());
             if (party != null) {
                 sender.sendMessage(Component.text("You are already in a party!", NamedTextColor.GREEN));
                 return false;
@@ -50,7 +49,7 @@ public class PartyJoinCommand {
             String name = context.get(nameArgument);
             viewProvider.fromName(name).thenAccept(playerViewOptional -> {
                 playerViewOptional.ifPresentOrElse(playerView -> {
-                    Party party = parties.get(playerView.getUUID());
+                    Party party = partyMap.get(playerView.getUUID());
                     if (party == null) {
                         playerView.getDisplayName().thenAccept(displayName -> {
                             sender.sendMessage(Component.text().append(displayName,
@@ -66,13 +65,13 @@ public class PartyJoinCommand {
                         return;
                     }
 
-                    Party previousParty = parties.get(player.getUuid());
+                    Party previousParty = partyMap.get(player.getUuid());
                     if (previousParty != null) {
                         previousParty.getMemberManager().removeMember(player.getUuid());
                     }
 
                     party.getInvitationManager().acceptInvitation(viewProvider.fromPlayer(player));
-                    parties.put(player.getUuid(), party);
+                    partyMap.put(player.getUuid(), party);
                 }, () -> {
                     sender.sendMessage(
                             Component.text("Can't find anyone with the username " + name + "!", NamedTextColor.RED));

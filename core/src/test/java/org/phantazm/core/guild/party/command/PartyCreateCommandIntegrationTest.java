@@ -14,8 +14,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @EnvTest
 public class PartyCreateCommandIntegrationTest extends AbstractPartyCommandIntegrationTest {
@@ -24,32 +23,35 @@ public class PartyCreateCommandIntegrationTest extends AbstractPartyCommandInteg
     @Test
     public void testCreateCreatesParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1, 1);
+        Command command = PartyCommand.partyCommand(partyHolder, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
 
         env.process().command().execute(player, "party create");
 
-        assertTrue(parties.containsKey(player.getUuid()));
+        Party party = partyHolder.uuidToGuild().get(player.getUuid());
+        assertNotNull(party);
+        assertEquals(1, partyHolder.guilds().size());
+        assertEquals(party, partyHolder.guilds().iterator().next());
     }
 
     @SuppressWarnings({"UnstableApiUsage", "JUnitMalformedDeclaration"})
     @Test
     public void testCreateDoesNotCreatePartyIfAlreadyInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1);
-        Command command = PartyCommand.partyCommand(parties, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1, 1);
+        Command command = PartyCommand.partyCommand(partyHolder, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
         env.process().command().execute(player, "party create");
-        Party party = parties.get(player.getUuid());
+        Party party = partyHolder.uuidToGuild().get(player.getUuid());
 
         env.process().command().execute(player, "party create");
 
-        assertEquals(party, parties.get(player.getUuid()));
+        assertEquals(party, partyHolder.uuidToGuild().get(player.getUuid()));
     }
 
 }

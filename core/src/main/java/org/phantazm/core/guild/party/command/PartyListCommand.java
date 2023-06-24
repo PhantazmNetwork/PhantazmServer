@@ -1,12 +1,12 @@
 package org.phantazm.core.guild.party.command;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
 import org.slf4j.Logger;
@@ -25,8 +25,8 @@ public class PartyListCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command listCommand(@NotNull Map<? super UUID, ? extends Party> parties) {
-        Objects.requireNonNull(parties, "parties");
+    public static @NotNull Command listCommand(@NotNull Map<? super UUID, Party> partyMap) {
+        Objects.requireNonNull(partyMap, "partyMap");
 
         Command command = new Command("list");
         command.addConditionalSyntax((sender, commandString) -> {
@@ -39,7 +39,7 @@ public class PartyListCommand {
                 return false;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyMap.get(player.getUuid());
             if (party == null) {
                 sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
                 return false;
@@ -47,7 +47,7 @@ public class PartyListCommand {
 
             return true;
         }, (sender, context) -> {
-            Party party = parties.get(((Player)sender).getUuid());
+            Party party = partyMap.get(((Player)sender).getUuid());
             List<CompletableFuture<? extends Component>> displayNameFutures =
                     new ArrayList<>(party.getMemberManager().getMembers().size());
             for (PartyMember member : party.getMemberManager().getMembers().values()) {
