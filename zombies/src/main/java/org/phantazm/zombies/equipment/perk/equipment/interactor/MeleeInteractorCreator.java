@@ -25,6 +25,7 @@ import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
@@ -41,10 +42,10 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
     private final Flaggable mapFlags;
 
     @FactoryMethod
-    public MeleeInteractorCreator(@NotNull Data data, @NotNull MobStore mobStore, @NotNull Flaggable mapFlags) {
+    public MeleeInteractorCreator(@NotNull Data data, @NotNull MobStore mobStore, @NotNull MapObjects mapObjects) {
         this.data = Objects.requireNonNull(data, "data");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-        this.mapFlags = mapFlags;
+        this.mapFlags = mapObjects.module().flags();
     }
 
     @Override
