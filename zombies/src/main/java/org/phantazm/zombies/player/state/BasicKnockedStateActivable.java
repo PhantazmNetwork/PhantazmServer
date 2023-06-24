@@ -112,12 +112,12 @@ public class BasicKnockedStateActivable implements Activable {
         reviver.module().getPlayerView().getPlayer().ifPresent(reviverPlayer -> {
             Component message =
                     Component.textOfChildren(Component.text("Reviving "), knockedDisplayName, Component.text(" - "),
-                            tickFormatter.format(reviveHandler.getTicksUntilRevive()));
+                            Component.text(tickFormatter.format(reviveHandler.getTicksUntilRevive())));
             reviverPlayer.sendActionBar(message);
         });
         playerView.getPlayer().ifPresent(player -> {
             Component message = Component.textOfChildren(reviverDisplayName, Component.text(" is reviving you - "),
-                    tickFormatter.format(reviveHandler.getTicksUntilRevive()));
+                    Component.text(tickFormatter.format(reviveHandler.getTicksUntilRevive())));
             player.sendActionBar(message);
         });
     }
@@ -125,7 +125,7 @@ public class BasicKnockedStateActivable implements Activable {
     private void sendDyingStatus() {
         playerView.getPlayer().ifPresent(player -> {
             player.sendActionBar(Component.textOfChildren(Component.text("You are dying - "),
-                    tickFormatter.format(Math.max(reviveHandler.getTicksUntilDeath(), 0))));
+                    Component.text(tickFormatter.format(Math.max(reviveHandler.getTicksUntilDeath(), 0)))));
         });
     }
 

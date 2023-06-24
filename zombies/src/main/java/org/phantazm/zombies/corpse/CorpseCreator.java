@@ -6,7 +6,6 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
@@ -124,10 +123,9 @@ public class CorpseCreator {
 
         @Override
         public @NotNull Component update(@NotNull Corpse corpse, long time) {
-            return ComponentUtils.tryFormat(data.formatString, MiniMessage.miniMessage().serialize(tickFormatter.format(
-                    data.ticksUntilRevive
-                    ? corpse.reviveHandler.getTicksUntilRevive()
-                    : corpse.reviveHandler.getTicksUntilDeath())));
+            return ComponentUtils.tryFormat(data.formatString, tickFormatter.format(data.ticksUntilRevive
+                                                                                    ? corpse.reviveHandler.getTicksUntilRevive()
+                                                                                    : corpse.reviveHandler.getTicksUntilDeath()));
         }
 
         @DataObject

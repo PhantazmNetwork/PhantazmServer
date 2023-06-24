@@ -16,8 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class BestTimeLeaderboard {
@@ -77,7 +75,7 @@ public class BestTimeLeaderboard {
 
         for (int i = 0; i < bestTimes.size(); ++i) {
             BestTime time = bestTimes.get(i);
-            Component timeComponent = tickFormatter.format(time.time());
+            Component timeComponent = Component.text(tickFormatter.format(time.time()));
             hologram.set(i, Component.textOfChildren(Component.text((i + 1) + ". - Loading... - "), timeComponent));
 
             int finalI = i;

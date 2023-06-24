@@ -153,7 +153,7 @@ public class InGameStage implements Stage {
             }
         }
 
-        Component finalTime = tickFormatter.format(ticksSinceStart.get());
+        Component finalTime = Component.text(tickFormatter.format(ticksSinceStart.get()));
         int bestRound = Math.min(roundHandler.currentRoundIndex() + 1, roundHandler.roundCount());
 
         if (anyAlive) {

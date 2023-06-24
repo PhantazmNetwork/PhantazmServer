@@ -10,7 +10,6 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -345,8 +344,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Stage idle = new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")));
 
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
-        TickFormatter tickFormatter =
-                new DurationTickFormatter(new DurationTickFormatter.Data(NamedTextColor.YELLOW, true, false));
+        TickFormatter tickFormatter = new DurationTickFormatter(new DurationTickFormatter.Data(true, false));
 
         Stage countdown =
                 new CountdownStage(instance, zombiesPlayers, messages, random, 400L, alertTicks, tickFormatter,
@@ -355,8 +353,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         MapSettingsInfo settings = mapInfo.settings();
         Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
                 settings.defaultEquipment(), settings.equipmentGroups().keySet(),
-                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler, new AnalogTickFormatter(
-                new AnalogTickFormatter.Data(NamedTextColor.WHITE, NamedTextColor.WHITE, false)));
+                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler,
+                new AnalogTickFormatter(new AnalogTickFormatter.Data(false)));
         Stage end = new EndStage(instance, zombiesPlayers, 200L,
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")));
         return new StageTransition(idle, countdown, inGame, end);

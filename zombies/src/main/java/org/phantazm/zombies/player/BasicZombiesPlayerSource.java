@@ -160,8 +160,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
         Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateCreator = context -> {
-            TickFormatter tickFormatter =
-                    new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(NamedTextColor.RED, 1));
+            TickFormatter tickFormatter = new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(1));
 
             Wrapper<CorpseCreator.Corpse> corpseWrapper = Wrapper.ofNull();
             Supplier<ZombiesPlayerState> deadStateSupplier = () -> {
