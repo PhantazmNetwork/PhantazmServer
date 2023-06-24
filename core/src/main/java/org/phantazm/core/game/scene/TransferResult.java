@@ -10,30 +10,24 @@ import java.util.Optional;
 /**
  * Represents the result of transferring a player to or from a {@link Scene}.
  */
-public record TransferResult(boolean success, @NotNull Optional<Component> message) {
-    /**
-     * The common successful {@link TransferResult}, with an empty message.
-     */
-    public static final TransferResult SUCCESSFUL = new TransferResult(true, Optional.empty());
-
+public record TransferResult(@NotNull Optional<Runnable> executor, @NotNull Optional<Component> message) {
 
     /**
      * Creates a transfer result.
      *
-     * @param success Whether the routing was successful
      * @param message A message relating to the routing
      */
     public TransferResult {
+        Objects.requireNonNull(executor, "executor");
         Objects.requireNonNull(message, "message");
     }
 
-    /**
-     * Creates a route result.
-     *
-     * @param success whether the routing was successful
-     * @param message the message, which may be null if none is present
-     */
-    public TransferResult(boolean success, @Nullable Component message) {
-        this(success, Optional.ofNullable(message));
+    public static @NotNull TransferResult success(@NotNull Runnable executor) {
+        return new TransferResult(Optional.of(executor), Optional.empty());
     }
+
+    public static @NotNull TransferResult failure(@Nullable Component message) {
+        return new TransferResult(Optional.empty(), Optional.ofNullable(message));
+    }
+
 }

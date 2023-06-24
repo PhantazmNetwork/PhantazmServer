@@ -47,23 +47,26 @@ public class LeaveHandler {
             leavingPlayers.add(Pair.of(leaver, zombiesPlayer));
         }
 
-        Stage stage = stageTransition.getCurrentStage();
-        for (Pair<UUID, ZombiesPlayer> pair : leavingPlayers) {
-            ZombiesPlayer zombiesPlayer = pair.right();
-            if (stage != null) {
-                stage.onLeave(zombiesPlayer);
-            }
-
-            zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
-
-            if (stage == null || !stage.hasPermanentPlayers()) {
-                zombiesPlayers.remove(pair.left());
-                zombiesPlayer.end();
-            }
+        if (failure) {
+            return TransferResult.failure(Component.text("Not all players are within the scene.", NamedTextColor.RED));
         }
 
-        return failure ? new TransferResult(false,
-                Component.text("Not all players are within the scene.", NamedTextColor.RED)) : TransferResult.SUCCESSFUL;
+        return TransferResult.success(() -> {
+            Stage stage = stageTransition.getCurrentStage();
+            for (Pair<UUID, ZombiesPlayer> pair : leavingPlayers) {
+                ZombiesPlayer zombiesPlayer = pair.right();
+                if (stage != null) {
+                    stage.onLeave(zombiesPlayer);
+                }
+
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
+
+                if (stage == null || !stage.hasPermanentPlayers()) {
+                    zombiesPlayers.remove(pair.left());
+                    zombiesPlayer.end();
+                }
+            }
+        });
     }
 
 }

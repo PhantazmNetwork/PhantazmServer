@@ -8,6 +8,7 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.scene.ZombiesJoinHelper;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
@@ -17,10 +18,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ZombiesRejoinCommand extends Command {
-    public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router, @NotNull ZombiesJoinHelper joinHelper) {
+    public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router,
+            @NotNull PlayerViewProvider viewProvider, @NotNull ZombiesJoinHelper joinHelper) {
         super("rejoin");
 
         Objects.requireNonNull(router, "router");
+        Objects.requireNonNull(viewProvider, "viewProvider");
+        Objects.requireNonNull(joinHelper, "joinHelper");
 
         Argument<UUID> targetGameArgument = ArgumentType.UUID("target-game");
         targetGameArgument.setSuggestionCallback((sender, context, suggestion) -> {

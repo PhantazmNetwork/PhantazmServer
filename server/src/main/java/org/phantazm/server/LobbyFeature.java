@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FileUtils;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.SceneProvider;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -101,11 +102,13 @@ public final class LobbyFeature {
             LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
-            RouteResult<Lobby> result = lobbyRouter.findScene(routeRequest);
+            RouteResult<Lobby> routeResult = lobbyRouter.findScene(routeRequest);
             boolean success = false;
-            if (result.scene().isPresent()) {
-                Lobby lobby = result.scene().get();
-                if (lobby.join(joinRequest).success()) {
+            if (routeResult.scene().isPresent()) {
+                Lobby lobby = routeResult.scene().get();
+                TransferResult transferResult = lobby.join(joinRequest);
+                if (transferResult.executor().isPresent()) {
+                    transferResult.executor().get().run();
                     loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
                     success = true;
                 }

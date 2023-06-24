@@ -29,6 +29,7 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
 import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
@@ -175,8 +176,10 @@ public final class ZombiesFeature {
                 .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
                         TaskSchedule.nextTick());
 
+        SceneTransferHelper transferHelper = new SceneTransferHelper(sceneMapper);
         commandManager.register(
-                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneMapper, sceneFallback));
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneMapper, transferHelper,
+                        sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {

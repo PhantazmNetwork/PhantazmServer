@@ -120,8 +120,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     protected @NotNull Optional<ZombiesScene> chooseScene(@NotNull ZombiesJoinRequest request) {
         sceneLoop:
         for (ZombiesScene scene : getScenes()) {
-            if (request.excludedScenes().contains(scene.getUUID()) || scene.isComplete() || !scene.isJoinable() ||
-                    scene.isShutdown()) {
+            if (scene.isComplete() || !scene.isJoinable() || scene.isShutdown()) {
                 continue;
             }
 

@@ -27,7 +27,7 @@ public final class QuitCommand {
         Objects.requireNonNull(sceneMapper, "sceneMapper");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
-        Command command = new Command("quit");
+        Command command = new Command("quit", "leave", "l");
         command.addConditionalSyntax((sender, commandString) -> {
             if (commandString == null) {
                 return sender instanceof Player;
@@ -48,7 +48,8 @@ public final class QuitCommand {
                 }
 
                 TransferResult result = scene.leave(Collections.singleton(player.getUuid()));
-                if (result.success()) {
+                if (result.executor().isPresent()) {
+                    result.executor().get().run();
                     scene.getFallback().fallback(viewProvider.fromPlayer(player));
                 }
                 else {

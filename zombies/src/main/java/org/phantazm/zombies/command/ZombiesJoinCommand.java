@@ -11,10 +11,6 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.RouteResult;
-import org.phantazm.core.game.scene.Scene;
-import org.phantazm.core.game.scene.SceneRouter;
-import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
@@ -22,22 +18,22 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.scene.ZombiesJoinHelper;
-import org.phantazm.zombies.scene.ZombiesJoinRequest;
-import org.phantazm.zombies.scene.ZombiesRouteRequest;
-import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class ZombiesJoinCommand extends Command {
-    public ZombiesJoinCommand(@NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-            @NotNull ZombiesJoinHelper joinHelper, @NotNull Map<? super UUID, ? extends Party> parties) {
+    public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
+            @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
+            @NotNull ZombiesJoinHelper joinHelper) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
 
+        Objects.requireNonNull(partyMap, "partyMap");
+        Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(keyParser, "keyParser");
         Objects.requireNonNull(maps, "maps");
+        Objects.requireNonNull(joinHelper, "joinHelper");
 
         mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
             for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
@@ -55,7 +51,7 @@ public class ZombiesJoinCommand extends Command {
                 return false;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyMap.get(player.getUuid());
             if (party != null) {
                 PartyMember member = party.getMemberManager().getMember(player.getUuid());
                 if (!party.getJoinPermission().hasPermission(member)) {
@@ -80,7 +76,20 @@ public class ZombiesJoinCommand extends Command {
                 return;
             }
 
-            joinHelper.joinGame(((Player)sender), targetMap);
+            Player joiner = (Player)sender;
+            Party party = partyMap.get(joiner.getUuid());
+            Collection<PlayerView> playerViews;
+            if (party == null) {
+                playerViews = Collections.singleton(viewProvider.fromPlayer(joiner));
+            }
+            else {
+                playerViews = new ArrayList<>(party.getMemberManager().getMembers().size());
+                for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
+                    playerViews.add(guildMember.getPlayerView());
+                }
+            }
+
+            joinHelper.joinGame(joiner, playerViews, targetMap);
         }, mapKeyArgument);
     }
 

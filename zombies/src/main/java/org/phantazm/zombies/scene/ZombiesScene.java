@@ -101,6 +101,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public @NotNull TransferResult join(@NotNull ZombiesJoinRequest joinRequest) {
+        if (isShutdown()) {
+            return TransferResult.failure(Component.text("Game is shutdown."));
+        }
+        if (!isJoinable()) {
+            return TransferResult.failure(Component.text("Game is not joinable."));
+        }
+
         Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
         Collection<PlayerView> newPlayers = new ArrayList<>(joinRequest.getPlayers().size());
         for (PlayerView player : joinRequest.getPlayers()) {
@@ -117,14 +124,14 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         Stage stage = getCurrentStage();
         if (stage == null) {
-            return new TransferResult(false, Component.text("The game is not currently running.", NamedTextColor.RED));
+            return TransferResult.failure(Component.text("The game is not currently running.", NamedTextColor.RED));
         }
         if (stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
-            return new TransferResult(false, Component.text("The game is not accepting new players.", NamedTextColor.RED));
+            return TransferResult.failure(Component.text("The game is not accepting new players.", NamedTextColor.RED));
         }
 
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
-            return new TransferResult(false, Component.text("Too many players!", NamedTextColor.RED));
+            return TransferResult.failure(Component.text("Too many players!", NamedTextColor.RED));
         }
 
         TransferResult protocolResult = checkWithinProtocolVersionBounds(newPlayers);
@@ -132,67 +139,67 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             return protocolResult;
         }
 
-        Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
-        Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
-        List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
-        List<CompletableFuture<?>> futures = new ArrayList<>(oldPlayers.size() + newPlayers.size());
-        List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
-        for (ZombiesPlayer zombiesPlayer : oldPlayers) {
-            zombiesPlayer.getPlayer().ifPresent(player -> {
-                teleportedPlayers.add(Pair.of(player, player.getInstance()));
-                if (player.getInstance() == instance) {
-                    futures.add(player.teleport(pos));
-                }
-                else {
-                    futures.add(player.setInstance(instance, pos));
-                }
-                runnables.add(() -> {
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
-                });
-            });
-        }
-        for (PlayerView view : newPlayers) {
-            view.getPlayer().ifPresent(player -> {
-                teleportedPlayers.add(Pair.of(player, player.getInstance()));
-                if (player.getInstance() == instance) {
-                    futures.add(player.teleport(pos));
-                }
-                else {
-                    futures.add(player.setInstance(instance, pos));
-                }
-                runnables.add(() -> {
-                    ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-                    zombiesPlayer.start();
-                    zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                    zombiesPlayers.put(view.getUUID(), zombiesPlayer);
-                });
-            });
-        }
-
-        CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).whenComplete((ignored, error) -> {
-            for (int i = 0; i < futures.size(); i++) {
-                Pair<Player, Instance> pair = teleportedPlayers.get(i);
-                Player teleportedPlayer = pair.first();
-                Instance oldInstance = pair.second();
-
-                CompletableFuture<?> future = futures.get(i);
-                Runnable runnable = runnables.get(i);
-
-                if (future.isCompletedExceptionally()) {
-                    future.whenComplete((ignored1, throwable) -> {
-                        LOGGER.warn("Failed to send {} to an instance", teleportedPlayer.getUuid(), throwable);
+        return TransferResult.success(() -> {
+            Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
+            Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
+            List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+            List<CompletableFuture<?>> futures = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+            List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+            for (ZombiesPlayer zombiesPlayer : oldPlayers) {
+                zombiesPlayer.getPlayer().ifPresent(player -> {
+                    teleportedPlayers.add(Pair.of(player, player.getInstance()));
+                    if (player.getInstance() == instance) {
+                        futures.add(player.teleport(pos));
+                    }
+                    else {
+                        futures.add(player.setInstance(instance, pos));
+                    }
+                    runnables.add(() -> {
+                        zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
                     });
-                    continue;
-                }
-
-                Utils.handleInstanceTransfer(oldInstance, teleportedPlayer);
-
-                runnable.run();
-                stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
+                });
             }
-        }).join();
+            for (PlayerView view : newPlayers) {
+                view.getPlayer().ifPresent(player -> {
+                    teleportedPlayers.add(Pair.of(player, player.getInstance()));
+                    if (player.getInstance() == instance) {
+                        futures.add(player.teleport(pos));
+                    }
+                    else {
+                        futures.add(player.setInstance(instance, pos));
+                    }
+                    runnables.add(() -> {
+                        ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+                        zombiesPlayer.start();
+                        zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                        zombiesPlayers.put(view.getUUID(), zombiesPlayer);
+                    });
+                });
+            }
 
-        return TransferResult.SUCCESSFUL;
+            CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).whenComplete((ignored, error) -> {
+                for (int i = 0; i < futures.size(); i++) {
+                    Pair<Player, Instance> pair = teleportedPlayers.get(i);
+                    Player teleportedPlayer = pair.first();
+                    Instance oldInstance = pair.second();
+
+                    CompletableFuture<?> future = futures.get(i);
+                    Runnable runnable = runnables.get(i);
+
+                    if (future.isCompletedExceptionally()) {
+                        future.whenComplete((ignored1, throwable) -> {
+                            LOGGER.warn("Failed to send {} to an instance", teleportedPlayer.getUuid(), throwable);
+                        });
+                        continue;
+                    }
+
+                    Utils.handleInstanceTransfer(oldInstance, teleportedPlayer);
+
+                    runnable.run();
+                    stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
+                }
+            }).join();
+        });
     }
 
     @Override
@@ -234,11 +241,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             int protocolVersion = getActualProtocolVersion(player.get().getPlayerConnection());
 
             if (hasMinimum && protocolVersion < mapSettingsInfo.minimumProtocolVersion()) {
-                return new TransferResult(false,
+                return TransferResult.failure(
                         Component.text("A player's Minecraft version is too old!", NamedTextColor.RED));
             }
             if (hasMaximum && protocolVersion > mapSettingsInfo.maximumProtocolVersion()) {
-                return new TransferResult(false,
+                return TransferResult.failure(
                         Component.text("A player's Minecraft version is too new!", NamedTextColor.RED));
             }
         }

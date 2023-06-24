@@ -46,10 +46,10 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public @NotNull TransferResult join(@NotNull LobbyJoinRequest joinRequest) {
         if (isShutdown()) {
-            return new TransferResult(false, Component.text("Lobby is shutdown."));
+            return TransferResult.failure(Component.text("Lobby is shutdown."));
         }
         if (!isJoinable()) {
-            return new TransferResult(false, Component.text("Lobby is not joinable."));
+            return TransferResult.failure(Component.text("Lobby is not joinable."));
         }
 
         Collection<PlayerView> playerViews = joinRequest.getPlayers();
@@ -63,15 +63,16 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         if (joiners.isEmpty()) {
-            return new TransferResult(false, Component.text("Everybody is already in the lobby."));
+            return TransferResult.failure(Component.text("Everybody is already in the lobby."));
         }
 
-        for (Pair<PlayerView, Player> player : joiners) {
-            players.put(player.first().getUUID(), player.first());
-        }
+        return TransferResult.success(() -> {
+            for (Pair<PlayerView, Player> player : joiners) {
+                players.put(player.first().getUUID(), player.first());
+            }
 
-        joinRequest.handleJoin(instance, instanceConfig);
-        return TransferResult.SUCCESSFUL;
+            joinRequest.handleJoin(instance, instanceConfig);
+        });
     }
 
     @Override
@@ -85,14 +86,14 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         if (!anyInside) {
-            return new TransferResult(false, Component.text("None of the players are in the lobby."));
+            return TransferResult.failure(Component.text("None of the players are in the lobby."));
         }
 
-        for (UUID uuid : leavers) {
-            players.remove(uuid);
-        }
-
-        return TransferResult.SUCCESSFUL;
+        return TransferResult.success(() -> {
+            for (UUID uuid : leavers) {
+                players.remove(uuid);
+            }
+        });
     }
 
     @Override
