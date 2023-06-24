@@ -11,13 +11,15 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.prevent_ammo_drain")
+@Cache(false)
 public class PreventAmmoDrainAction implements Supplier<PowerupAction> {
     private final Supplier<DeactivationPredicate> deactivationPredicate;
     private final Supplier<? extends EventNode<Event>> eventNode;
-    private final Instance instance;
+    private final UUID instanceUUID;
 
     @FactoryMethod
     public PreventAmmoDrainAction(
@@ -25,28 +27,28 @@ public class PreventAmmoDrainAction implements Supplier<PowerupAction> {
             @NotNull Supplier<? extends EventNode<Event>> eventNode, @NotNull Instance instance) {
         this.deactivationPredicate = deactivationPredicate;
         this.eventNode = eventNode;
-        this.instance = instance;
+        this.instanceUUID = instance.getUniqueId();
     }
 
     @Override
     public PowerupAction get() {
-        return new Action(deactivationPredicate.get(), eventNode.get(), instance);
+        return new Action(deactivationPredicate.get(), eventNode.get(), instanceUUID);
     }
 
     private static class Action extends PowerupActionBase {
         private final EventListener<GunLoseAmmoEvent> listener;
         private final EventNode<Event> eventNode;
-        private final Instance instance;
+        private final UUID instanceUUID;
 
-        private Action(DeactivationPredicate deactivationPredicate, EventNode<Event> eventNode, Instance instance) {
+        private Action(DeactivationPredicate deactivationPredicate, EventNode<Event> eventNode, UUID instanceUUID) {
             super(deactivationPredicate);
             this.listener = EventListener.of(GunLoseAmmoEvent.class, this::gunLoseAmmo);
             this.eventNode = eventNode;
-            this.instance = instance;
+            this.instanceUUID = instanceUUID;
         }
 
         private void gunLoseAmmo(GunLoseAmmoEvent event) {
-            if (event.getInstance() != instance) {
+            if (!event.getInstance().getUniqueId().equals(instanceUUID)) {
                 return;
             }
 
