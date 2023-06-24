@@ -110,7 +110,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
                 PhantazmMob hitMob = mobStore.getMob(hit.entity().getUuid());
                 if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
-                        (hitMob != null && hitMob.model().getExtraNode()
+                        (hitMob != null && !hitMob.model().getExtraNode()
                                 .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
                     hit.entity.kill();
                 }
