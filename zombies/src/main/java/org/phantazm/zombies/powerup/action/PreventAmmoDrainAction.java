@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.event.GunLoseAmmoEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -16,31 +17,39 @@ import java.util.function.Supplier;
 public class PreventAmmoDrainAction implements Supplier<PowerupAction> {
     private final Supplier<DeactivationPredicate> deactivationPredicate;
     private final Supplier<? extends EventNode<Event>> eventNode;
+    private final Instance instance;
 
     @FactoryMethod
     public PreventAmmoDrainAction(
             @NotNull @Child("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
-            @NotNull Supplier<? extends EventNode<Event>> eventNode) {
+            @NotNull Supplier<? extends EventNode<Event>> eventNode, @NotNull Instance instance) {
         this.deactivationPredicate = deactivationPredicate;
         this.eventNode = eventNode;
+        this.instance = instance;
     }
 
     @Override
     public PowerupAction get() {
-        return new Action(deactivationPredicate.get(), eventNode.get());
+        return new Action(deactivationPredicate.get(), eventNode.get(), instance);
     }
 
     private static class Action extends PowerupActionBase {
         private final EventListener<GunLoseAmmoEvent> listener;
         private final EventNode<Event> eventNode;
+        private final Instance instance;
 
-        private Action(DeactivationPredicate deactivationPredicate, EventNode<Event> eventNode) {
+        private Action(DeactivationPredicate deactivationPredicate, EventNode<Event> eventNode, Instance instance) {
             super(deactivationPredicate);
             this.listener = EventListener.of(GunLoseAmmoEvent.class, this::gunLoseAmmo);
             this.eventNode = eventNode;
+            this.instance = instance;
         }
 
         private void gunLoseAmmo(GunLoseAmmoEvent event) {
+            if (event.getInstance() != instance) {
+                return;
+            }
+
             event.setAmmoLost(0);
         }
 
