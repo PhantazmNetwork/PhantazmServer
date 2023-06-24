@@ -5,9 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
-import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
@@ -15,7 +12,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
-import net.minestom.server.scoreboard.Team;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -25,11 +21,8 @@ import org.phantazm.commons.Activable;
 import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.CancellableState;
 import org.phantazm.commons.TickTaskScheduler;
-import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
-import org.phantazm.core.hologram.Hologram;
-import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.inventory.*;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
@@ -42,7 +35,7 @@ import org.phantazm.zombies.coin.BasicTransactionModifierSource;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.coin.component.BasicTransactionComponentCreator;
-import org.phantazm.zombies.corpse.Corpse;
+import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.equipment.gun.ZombiesEquipmentModule;
 import org.phantazm.zombies.kill.BasicPlayerKills;
 import org.phantazm.zombies.kill.PlayerKills;
@@ -76,15 +69,12 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     private final Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction;
 
-    private final Team corpseTeam;
-
     private final Map<Key, MobModel> mobModelMap;
 
     public BasicZombiesPlayerSource(
             @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
-            @NotNull Team corpseTeam, @NotNull Map<Key, MobModel> mobModelMap) {
+            @NotNull Map<Key, MobModel> mobModelMap) {
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
-        this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
         this.mobModelMap = Objects.requireNonNull(mobModelMap, "mobModelMap");
     }
 
@@ -95,7 +85,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner) {
+            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator) {
         TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
 
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
@@ -170,39 +160,34 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
         Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateCreator = context -> {
-            Hologram hologram =
-                    new InstanceHologram(context.getKnockLocation().add(0, 0.5, 0), 0, Hologram.Alignment.LOWER);
-            hologram.setInstance(instance);
-
-            PlayerSkin skin = playerView.getPlayer().map(Player::getSkin).orElse(null);
-            String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
-            MinimalFakePlayer corpseEntity =
-                    new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
-
-            corpseEntity.setInstance(instance, context.getKnockLocation().add(0, 0.25, 0));
-            corpseTeam.addMember(corpseUsername);
             TickFormatter tickFormatter =
                     new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(NamedTextColor.RED, 1));
-            Corpse corpse = new Corpse(hologram, corpseEntity, tickFormatter);
 
+            Wrapper<CorpseCreator.Corpse> corpseWrapper = Wrapper.ofNull();
             Supplier<ZombiesPlayerState> deadStateSupplier = () -> {
                 DeadPlayerStateContext deathContext = DeadPlayerStateContext.killed(context.getKiller().orElse(null),
                         context.getKnockRoom().orElse(null));
-                return deadStateCreator.apply(deathContext, List.of(corpse.asDeathActivable(), new Activable() {
-                    @Override
-                    public void end() {
-                        meta.setCorpse(null);
-                    }
-                }));
+                return deadStateCreator.apply(deathContext,
+                        List.of(corpseWrapper.get().asDeathActivable(), new Activable() {
+                            @Override
+                            public void end() {
+                                meta.setCorpse(null);
+                            }
+                        }));
             };
 
             ReviveHandler reviveHandler =
                     new ReviveHandler(() -> aliveStateCreator.apply(NoContext.INSTANCE), deadStateSupplier,
                             new NearbyReviverFinder(zombiesPlayers, playerView, mapSettingsInfo.reviveRadius()), 500L);
 
+            CorpseCreator.Corpse corpse =
+                    corpseCreator.forPlayer(instance, zombiesPlayerWrapper.get(), context.getKnockLocation(),
+                            reviveHandler);
+
+
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
-                            sidebar, tabList, stats), corpse.asKnockActivable(reviveHandler), new Activable() {
+                            sidebar, tabList, stats), corpse.asKnockActivable(), new Activable() {
                         @Override
                         public void start() {
                             meta.setCorpse(corpse);

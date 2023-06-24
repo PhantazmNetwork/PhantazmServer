@@ -19,7 +19,8 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
                       @NotNull List<RoundInfo> rounds,
                       @NotNull List<SpawnruleInfo> spawnrules,
                       @NotNull List<SpawnpointInfo> spawnpoints,
-                      @NotNull ConfigNode scoreboard) implements Keyed {
+                      @NotNull ConfigNode scoreboard,
+                      @NotNull ConfigNode corpse) implements Keyed {
     /**
      * Constructs a new instances of this record.
      *
@@ -36,7 +37,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
     public MapInfo(@NotNull MapSettingsInfo settings, @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors,
             @NotNull List<ShopInfo> shops, @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds,
             @NotNull List<SpawnruleInfo> spawnrules, @NotNull List<SpawnpointInfo> spawnpoints,
-            @NotNull ConfigNode scoreboard) {
+            @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse) {
         this.settings = Objects.requireNonNull(settings, "settings");
         this.rooms = Objects.requireNonNull(rooms, "rooms");
         this.doors = Objects.requireNonNull(doors, "doors");
@@ -46,6 +47,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
         this.spawnrules = Objects.requireNonNull(spawnrules, "spawnrules");
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
         this.scoreboard = Objects.requireNonNull(scoreboard, "scoreboard");
+        this.corpse = Objects.requireNonNull(corpse, "corpse");
     }
 
     @Override

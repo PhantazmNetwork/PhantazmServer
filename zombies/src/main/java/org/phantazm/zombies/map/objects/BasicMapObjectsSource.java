@@ -84,7 +84,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
             @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
             @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
-            @NotNull SongPlayer songPlayer, @NotNull TickTaskScheduler tickTaskScheduler) {
+            @NotNull SongPlayer songPlayer, @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor =
@@ -105,7 +105,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Module module =
                 new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
                         slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
-                        eventNode, mobStore, songPlayer);
+                        eventNode, mobStore, songPlayer, corpseTeam);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -279,6 +279,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Wrapper<EventNode<Event>> eventNode;
         private final MobStore mobStore;
         private final SongPlayer songPlayer;
+        private final Team corpseTeam;
 
         private Module(KeyParser keyParser, Instance instance, Random random,
                 Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
@@ -286,7 +287,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
                 Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
                 Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode, MobStore mobStore,
-                SongPlayer songPlayer) {
+                SongPlayer songPlayer, Team corpseTeam) {
             this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
             this.instance = Objects.requireNonNull(instance, "instance");
             this.random = Objects.requireNonNull(random, "random");
@@ -302,6 +303,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
             this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
             this.songPlayer = Objects.requireNonNull(songPlayer, "songPlayer");
+            this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
         }
 
         @Override
@@ -382,6 +384,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull SongPlayer songPlayer() {
             return songPlayer;
+        }
+
+        @Override
+        public @NotNull Team corpseTeam() {
+            return corpseTeam;
         }
     }
 }

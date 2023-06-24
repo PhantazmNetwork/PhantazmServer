@@ -1,6 +1,7 @@
 package org.phantazm.zombies.corpse;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
@@ -11,6 +12,8 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.ComponentUtils;
@@ -27,44 +30,58 @@ import java.util.UUID;
 @Model("zombies.corpse")
 @Cache(false)
 public class CorpseCreator {
+    public interface Source {
+        @NotNull CorpseCreator make(@NotNull DependencyProvider mapDependencyProvider);
+    }
+
     private final Data data;
     private final List<CorpseLine> idleLines;
     private final List<CorpseLine> revivingLines;
+    private final Team corpseTeam;
 
     @FactoryMethod
-    public CorpseCreator(@NotNull Data data, @NotNull @Child("line_formatters") List<CorpseLine> idleLines,
-            @NotNull @Child("reviving_lines") List<CorpseLine> revivingLines) {
+    public CorpseCreator(@NotNull Data data, @NotNull @Child("idle_lines") List<CorpseLine> idleLines,
+            @NotNull @Child("reviving_lines") List<CorpseLine> revivingLines, @NotNull Team corpseTeam) {
         this.data = data;
         this.idleLines = List.copyOf(idleLines);
         this.revivingLines = List.copyOf(revivingLines);
+        this.corpseTeam = corpseTeam;
     }
 
-    public @NotNull CorpseCreator.Corpse forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull Point deathLocation,
-            @NotNull ReviveHandler reviveHandler) {
+    public @NotNull CorpseCreator.Corpse forPlayer(@NotNull Instance instance, @NotNull ZombiesPlayer zombiesPlayer,
+            @NotNull Point deathLocation, @NotNull ReviveHandler reviveHandler) {
         PlayerSkin skin = zombiesPlayer.getPlayer().map(Player::getSkin).orElse(null);
         String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
         MinimalFakePlayer corpseEntity =
                 new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
 
-        Hologram hologram = new InstanceHologram(deathLocation.add(0, data.heightOffset, 0), data.gap);
+        Hologram hologram = new InstanceHologram(deathLocation.add(0, data.hologramHeightOffset, 0), data.hologramGap);
+
+        corpseEntity.setInstance(instance, deathLocation.add(0, data.corpseHeightOffset, 0));
+        corpseTeam.addMember(corpseUsername);
 
         return new Corpse(reviveHandler, hologram, corpseEntity, idleLines, revivingLines);
     }
 
     @DataObject
-    public record Data(double gap,
-                       double heightOffset,
-                       @NotNull @ChildPath("tick_formatter") String tickFormatter,
+    public record Data(double hologramGap,
+                       double hologramHeightOffset,
+                       double corpseHeightOffset,
                        @NotNull @ChildPath("idle_lines") List<String> idleLines,
                        @NotNull @ChildPath("reviving_lines") List<String> revivingLines) {
-        @Default("gap")
-        public static ConfigElement defaultGap() {
+        @Default("hologramGap")
+        public static ConfigElement defaultHologramGap() {
             return ConfigPrimitive.of(0.0);
         }
 
-        @Default("heightOffset")
-        public static ConfigElement defaultHeightOffset() {
+        @Default("hologramHeightOffset")
+        public static ConfigElement defaultHologramHeightOffset() {
             return ConfigPrimitive.of(1.0);
+        }
+
+        @Default("corpseHeightOffset")
+        public static ConfigElement defaultCorpseHeightOffset() {
+            return ConfigPrimitive.of(0.25);
         }
     }
 
@@ -73,7 +90,7 @@ public class CorpseCreator {
     }
 
     @Model("zombies.corpse.line.static")
-    @Cache(false)
+    @Cache
     public static class StaticLine implements CorpseLine {
         private final Data data;
 
@@ -93,7 +110,7 @@ public class CorpseCreator {
     }
 
     @Model("zombies.corpse.line.time")
-    @Cache(false)
+    @Cache
     public static class TimeLine implements CorpseLine {
         private final Data data;
         private final TickFormatter tickFormatter;

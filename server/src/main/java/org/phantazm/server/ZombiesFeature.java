@@ -44,6 +44,7 @@ import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.stats.zombies.*;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
+import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
@@ -145,12 +146,14 @@ public final class ZombiesFeature {
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();
-        Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
-                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
+
         // https://bugs.mojang.com/browse/MC-87984
         Team mobNoPushTeam =
                 teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS)
                         .build();
+        Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
+                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
+
         databaseExecutor = Executors.newSingleThreadExecutor();
         HikariConfig config = new HikariConfig("./zombies.hikari.properties");
         dataSource = new HikariDataSource(config);
@@ -164,9 +167,12 @@ public final class ZombiesFeature {
                                 DimensionType dimensionType = instance.getDimensionType();
                                 return new InstanceClientBlockHandler(instance, globalEventNode,
                                         dimensionType.getMinY(), dimensionType.getHeight());
-                            }), contextManager, keyParser, mobNoPushTeam, database, ZombiesFeature.powerups(),
-                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
-                                    MobFeature.getModels()));
+                            }), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
+                            ZombiesFeature.powerups(),
+                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator,
+                                    MobFeature.getModels()),
+                            mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
+                                    .provide(mapDependencyProvider));
             providers.put(entry.getKey(), provider);
         }
 
@@ -316,6 +322,11 @@ public final class ZombiesFeature {
 
         //Player conditions
         contextManager.registerElementClass(EquipmentCondition.class);
+
+        //Corpses
+        contextManager.registerElementClass(CorpseCreator.class);
+        contextManager.registerElementClass(CorpseCreator.TimeLine.class);
+        contextManager.registerElementClass(CorpseCreator.StaticLine.class);
 
         LOGGER.info("Registered Zombies element classes.");
     }

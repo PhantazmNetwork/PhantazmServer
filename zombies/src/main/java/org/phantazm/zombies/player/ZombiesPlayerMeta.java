@@ -1,14 +1,14 @@
 package org.phantazm.zombies.player;
 
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.zombies.corpse.Corpse;
+import org.phantazm.zombies.corpse.CorpseCreator;
 
 import java.util.Optional;
 
 //TODO: rename
 public class ZombiesPlayerMeta {
 
-    private Corpse corpse = null;
+    private CorpseCreator.Corpse corpse = null;
 
     private boolean inGame = false;
 
@@ -16,11 +16,11 @@ public class ZombiesPlayerMeta {
 
     private int windowRepairAmount = 1;
 
-    public Optional<Corpse> getCorpse() {
+    public Optional<CorpseCreator.Corpse> getCorpse() {
         return Optional.ofNullable(corpse);
     }
 
-    public void setCorpse(@Nullable Corpse corpse) {
+    public void setCorpse(@Nullable CorpseCreator.Corpse corpse) {
         this.corpse = corpse;
     }
 

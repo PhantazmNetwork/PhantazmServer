@@ -11,7 +11,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.commons.CancellableState;
-import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
@@ -19,6 +18,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
+import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -179,7 +179,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
                 @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
                 @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
                 @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner);
+                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator);
 
     }
 

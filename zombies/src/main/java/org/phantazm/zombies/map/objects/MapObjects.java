@@ -61,7 +61,7 @@ public interface MapObjects {
                 @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
                 @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
                 @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
-                @NotNull SongPlayer songPlayer, @NotNull TickTaskScheduler tickTaskScheduler);
+                @NotNull SongPlayer songPlayer, @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam);
     }
 
     interface Module {
@@ -96,5 +96,7 @@ public interface MapObjects {
         @NotNull MobStore mobStore();
 
         @NotNull SongPlayer songPlayer();
+
+        @NotNull Team corpseTeam();
     }
 }
