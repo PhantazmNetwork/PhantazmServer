@@ -42,7 +42,7 @@ public class LobbyIntegrationTest {
 
         TransferResult result =
                 lobby.join(new BasicLobbyJoinRequest(env.process().connection(), Collections.singleton(playerView)));
-        assertFalse(result.success());
+        assertFalse(result.executor().isPresent());
     }
 
     /* TODO: fix

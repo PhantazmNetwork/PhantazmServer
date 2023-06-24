@@ -25,6 +25,6 @@ public class PlayerQuitListener extends ZombiesPlayerEventListener<PlayerDisconn
 
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerDisconnectEvent event) {
-        leaveHandler.leave(Collections.singleton(zombiesPlayer.module().getPlayerView().getUUID()));
+        leaveHandler.leave(Collections.singleton(zombiesPlayer.module().getPlayerView().getUUID())).executor().ifPresent(Runnable::run);
     }
 }
