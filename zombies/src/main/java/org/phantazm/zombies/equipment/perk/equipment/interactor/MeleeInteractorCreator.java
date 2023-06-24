@@ -121,7 +121,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 }
 
                 PlayerCoins coins = zombiesPlayer.module().getCoins();
-                Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().playerTransactionModifiers()
+                Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
                         .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
 
                 coins.runTransaction(new Transaction(modifiers, data.coins)).applyIfAffordable(coins);
