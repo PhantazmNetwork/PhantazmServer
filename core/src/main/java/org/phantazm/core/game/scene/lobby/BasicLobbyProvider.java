@@ -106,7 +106,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
                 new NPCHandler(List.copyOf(npcs), instance), quittable);
         eventNode.addListener(PlayerDisconnectEvent.class,
-                event -> lobby.leave(Collections.singleton(event.getPlayer().getUuid())));
+                event -> lobby.leave(Collections.singleton(event.getPlayer().getUuid())).executor()
+                        .ifPresent(Runnable::run));
 
         return lobby;
     }
