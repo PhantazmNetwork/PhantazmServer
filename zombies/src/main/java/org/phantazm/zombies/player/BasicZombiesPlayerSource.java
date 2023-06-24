@@ -225,6 +225,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         ZombiesPlayerStateKeys.QUIT, quitStateCreator);
 
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
+
         ZombiesPlayerModule module =
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,

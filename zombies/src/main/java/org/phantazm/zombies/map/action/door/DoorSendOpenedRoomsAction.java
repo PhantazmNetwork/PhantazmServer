@@ -12,6 +12,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.ComponentUtils;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.action.Action;
@@ -40,19 +41,6 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
         this.instance = Objects.requireNonNull(instance, "instance");
     }
 
-    private Component tryFormat(String formatString, Object... objects) {
-        String message;
-        try {
-            message = String.format(formatString, objects);
-        }
-        catch (IllegalFormatException ignored) {
-            message = formatString;
-            LOGGER.warn("Bad format string " + formatString + " given arguments " + Arrays.toString(objects));
-        }
-
-        return MiniMessage.miniMessage().deserialize(message);
-    }
-
     @Override
     public void perform(@NotNull Door door) {
         Optional<ZombiesPlayer> lastInteractorOptional = door.lastInteractor();
@@ -64,7 +52,8 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
                 }
 
                 if (username != null) {
-                    instance.sendTitlePart(data.nameTitlePart, tryFormat(data.nameFormatString, username));
+                    instance.sendTitlePart(data.nameTitlePart,
+                            ComponentUtils.tryFormat(data.nameFormatString, username));
                 }
                 else {
                     LOGGER.warn("Null username");
@@ -104,7 +93,8 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
             builder.append("...");
         }
 
-        instance.sendTitlePart(data.openedRoomsTitlePart, tryFormat(data.openedRoomsFormatString, builder.toString()));
+        instance.sendTitlePart(data.openedRoomsTitlePart,
+                ComponentUtils.tryFormat(data.openedRoomsFormatString, builder.toString()));
     }
 
     @DataObject
