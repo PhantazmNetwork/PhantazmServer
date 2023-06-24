@@ -4,7 +4,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.*;
-import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
@@ -46,19 +45,7 @@ public class ZombiesJoinHelper {
 
     private void joinInternal(@NotNull Player joiner, @NotNull Collection<PlayerView> playerViews,
             @NotNull Function<ZombiesJoinRequest, ZombiesRouteRequest> routeRequestCreator) {
-        Set<UUID> excluded = new HashSet<>();
-        for (PlayerView playerView : playerViews) {
-            sceneMapper.apply(playerView.getUUID()).ifPresent(previousScene -> {
-                excluded.add(previousScene.getUUID());
-            });
-        }
-
-        ZombiesJoinRequest joinRequest = new ZombiesJoinRequest() {
-            @Override
-            public @NotNull Collection<PlayerView> getPlayers() {
-                return playerViews;
-            }
-        };
+        ZombiesJoinRequest joinRequest = () -> playerViews;
         RouteResult<ZombiesScene> result = router.findScene(routeRequestCreator.apply(joinRequest));
 
         if (result.message().isPresent()) {
