@@ -57,6 +57,7 @@ public class CorpseCreator {
 
         Hologram hologram = new InstanceHologram(deathLocation.add(0, data.hologramHeightOffset, 0), data.hologramGap);
 
+        hologram.setInstance(instance);
         corpseEntity.setInstance(instance, deathLocation.add(0, data.corpseHeightOffset, 0));
         corpseTeam.addMember(corpseUsername);
 
