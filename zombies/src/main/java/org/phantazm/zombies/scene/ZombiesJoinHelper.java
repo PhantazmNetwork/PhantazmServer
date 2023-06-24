@@ -4,7 +4,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.*;
-import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 
@@ -13,24 +12,17 @@ import java.util.function.Function;
 
 public class ZombiesJoinHelper {
 
-    private final Map<? super UUID, ? extends Party> parties;
-
     private final PlayerViewProvider viewProvider;
 
     private final SceneRouter<ZombiesScene, ZombiesRouteRequest> router;
 
-    private final Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper;
-
     private final SceneTransferHelper transferHelper;
 
-    public ZombiesJoinHelper(@NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull PlayerViewProvider viewProvider, @NotNull SceneRouter<ZombiesScene, ZombiesRouteRequest> router,
-            @NotNull Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper,
+    public ZombiesJoinHelper(@NotNull PlayerViewProvider viewProvider,
+            @NotNull SceneRouter<ZombiesScene, ZombiesRouteRequest> router,
             @NotNull SceneTransferHelper transferHelper) {
-        this.parties = Objects.requireNonNull(parties, "parties");
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
         this.router = Objects.requireNonNull(router, "router");
-        this.sceneMapper = Objects.requireNonNull(sceneMapper, "sceneMapper");
         this.transferHelper = Objects.requireNonNull(transferHelper, "transferHelper");
     }
 
