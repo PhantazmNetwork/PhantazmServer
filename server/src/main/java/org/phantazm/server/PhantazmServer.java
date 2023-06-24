@@ -3,6 +3,7 @@ package org.phantazm.server;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.BasicKeyParser;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
@@ -197,6 +198,9 @@ public final class PhantazmServer {
 
         MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
         ElementFeature.initialize(mappingProcessorSource, keyParser);
+
+        WhisperCommandFeature.initialize(MinecraftServer.getCommandManager(), MinecraftServer.getConnectionManager(),
+                mappingProcessorSource, new TomlCodec());
 
         ContextManager contextManager = ElementFeature.getContextManager();
 

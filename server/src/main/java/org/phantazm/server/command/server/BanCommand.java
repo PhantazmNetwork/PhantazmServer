@@ -1,4 +1,4 @@
-package org.phantazm.server.command;
+package org.phantazm.server.command.server;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;

@@ -6,7 +6,7 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
-import org.phantazm.server.command.*;
+import org.phantazm.server.command.server.*;
 import org.phantazm.server.permission.FilePermissionHandler;
 import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.player.LoginValidator;
