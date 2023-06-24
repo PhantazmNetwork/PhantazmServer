@@ -4,6 +4,9 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
@@ -34,7 +37,14 @@ public class HologramVisual implements Supplier<PowerupVisual> {
     }
 
     @DataObject
-    public record Data(@NotNull List<Component> lines, long timeUntilBlink, @NotNull List<Frame> blinkFrames) {
+    public record Data(@NotNull List<Component> lines,
+                       long timeUntilBlink,
+                       @NotNull List<Frame> blinkFrames,
+                       double heightOffset) {
+        @Default("heightOffset")
+        public static @NotNull ConfigElement heightOffsetDefault() {
+            return ConfigPrimitive.of(0.0);
+        }
     }
 
     public record Frame(@NotNull List<Component> components, long delay) {
@@ -104,7 +114,7 @@ public class HologramVisual implements Supplier<PowerupVisual> {
                 hologram.clear();
             }
 
-            this.hologram = new InstanceHologram(new Vec(x, y, z), 0, Hologram.Alignment.CENTERED);
+            this.hologram = new InstanceHologram(new Vec(x, y + data.heightOffset, z), 0, Hologram.Alignment.CENTERED);
             this.hologram.addAll(data.lines);
             this.hologram.setInstance(instance);
             this.start = System.currentTimeMillis();
