@@ -18,8 +18,10 @@ public class PartyCreateCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command createCommand(@NotNull GuildHolder<Party> partyHolder,
-            @NotNull PlayerViewProvider viewProvider, @NotNull PartyCreator partyCreator) {
+    public static @NotNull Command createCommand(@NotNull PartyCommandConfig config,
+            @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
+            @NotNull PartyCreator partyCreator) {
+        Objects.requireNonNull(config, "config");
         Objects.requireNonNull(partyHolder, "partyHolder");
         Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(partyCreator, "partyCreator");
@@ -31,13 +33,13 @@ public class PartyCreateCommand {
             }
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                sender.sendMessage(config.mustBeAPlayer());
                 return false;
             }
 
             Party party = partyHolder.uuidToGuild().get(player.getUuid());
             if (party != null) {
-                sender.sendMessage(Component.text("You are already in a party!", NamedTextColor.RED));
+                sender.sendMessage(config.alreadyInParty());
                 return false;
             }
 
@@ -48,7 +50,7 @@ public class PartyCreateCommand {
             partyHolder.guilds().add(party);
             partyHolder.uuidToGuild().put(player.getUuid(), party);
 
-            sender.sendMessage(Component.text("You are now in a party.", NamedTextColor.GREEN));
+            sender.sendMessage(config.createCommandSuccess());
         });
 
         return command;

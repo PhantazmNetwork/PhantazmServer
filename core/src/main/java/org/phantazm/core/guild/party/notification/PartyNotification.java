@@ -1,19 +1,24 @@
-package org.phantazm.core.guild.party;
+package org.phantazm.core.guild.party.notification;
 
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.invite.InvitationNotification;
+import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.time.TickFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -27,8 +32,15 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
 
     private final Wrapper<PartyMember> owner;
 
+    private final PartyNotificationConfig config;
+
+    private final TickFormatter tickFormatter;
+
+    private final MiniMessage miniMessage;
+
     public PartyNotification(@NotNull Collection<? extends PartyMember> partyMembers,
-            @NotNull Wrapper<PartyMember> owner) {
+            @NotNull Wrapper<PartyMember> owner, @NotNull PartyNotificationConfig config,
+            @NotNull TickFormatter tickFormatter, @NotNull MiniMessage miniMessage) {
         Objects.requireNonNull(partyMembers, "partyMembers");
         this.audience = (ForwardingAudience)() -> {
             Collection<Audience> audiences = new ArrayList<>(partyMembers.size());
@@ -40,28 +52,31 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             return audiences;
         };
         this.owner = Objects.requireNonNull(owner, "owner");
+        this.config = Objects.requireNonNull(config, "config");
+        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
+        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
     }
 
     @Override
     public void notifyJoin(@NotNull PartyMember newMember) {
         newMember.getPlayerView().getDisplayName().thenAccept(displayName -> {
-            ComponentLike message = Component.text().append(displayName, Component.text(" has joined the party."))
-                    .color(NamedTextColor.GOLD);
+            TagResolver joinerPlaceholder = Placeholder.component("joiner", displayName);
+            Component message = miniMessage.deserialize(config.joinToPartyFormat(), joinerPlaceholder);
+
             audience.sendMessage(message);
         });
 
         owner.get().getPlayerView().getDisplayName().thenAccept(displayName -> {
             newMember.getPlayerView().getPlayer().ifPresent(player -> {
-                ComponentLike message =
-                        Component.text().append(Component.text("Joined "), displayName, Component.text("'s party."))
-                                .color(NamedTextColor.GREEN);
+                TagResolver ownerPlaceholder = Placeholder.component("owner", displayName);
+                Component message = miniMessage.deserialize(config.joinToJoinerFormat(), ownerPlaceholder);
                 player.sendMessage(message);
             });
         });
     }
 
     @Override
-    public void notifyInvitation(@NotNull PartyMember inviter, @NotNull PlayerView invitee) {
+    public void notifyInvitation(@NotNull PartyMember inviter, @NotNull PlayerView invitee, long invitationDuration) {
         CompletableFuture<? extends Component> inviterDisplayName = inviter.getPlayerView().getDisplayName();
         CompletableFuture<? extends Component> inviteeDisplayName = invitee.getDisplayName();
 
@@ -71,34 +86,38 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
                 return;
             }
 
-            ComponentLike message = Component.text()
-                    .append(inviterDisplayName.join(), Component.text(" has invited "), inviteeDisplayName.join(),
-                            Component.text(" to the party.")).color(NamedTextColor.GOLD);
+            TagResolver inviterPlaceholder = Placeholder.component("inviter", inviterDisplayName.join());
+            TagResolver inviteePlaceholder = Placeholder.component("invitee", inviteeDisplayName.join());
+            TagResolver durationPlaceholder =
+                    Placeholder.unparsed("duration", tickFormatter.format(invitationDuration));
+            Component message =
+                    miniMessage.deserialize(config.inviteToPartyFormat(), inviterPlaceholder, inviteePlaceholder,
+                            durationPlaceholder);
             audience.sendMessage(message);
         });
 
         if (inviter == owner.get()) {
-            CompletableFuture<String> inviterName = inviter.getPlayerView().getUsername();
-            CompletableFuture.allOf(inviterName, inviterDisplayName).whenComplete((ignored, throwable) -> {
+            CompletableFuture<String> ownerUsername = inviter.getPlayerView().getUsername();
+            CompletableFuture.allOf(ownerUsername, inviterDisplayName).whenComplete((ignored, throwable) -> {
                 if (throwable != null) {
                     LOGGER.warn("Exception while sending invitation message", throwable);
                     return;
                 }
 
                 invitee.getPlayer().ifPresent(player -> {
-                    ComponentLike message = Component.text().append(inviterDisplayName.join(),
-                            Component.text(" has invited you to join their party. Click "),
-                            Component.text("here", NamedTextColor.GOLD, TextDecoration.BOLD)
-                                    .clickEvent(ClickEvent.runCommand("/party join " + inviterName.join())),
-                            Component.text(" to join!")).color(NamedTextColor.GOLD);
+                    TagResolver ownerUsernamePlaceholder = Placeholder.parsed("owner-username", ownerUsername.join());
+                    TagResolver ownerPlaceholder = Placeholder.component("owner", inviterDisplayName.join());
+                    Component message =
+                            miniMessage.deserialize(config.inviteToInviteeFromOwnerFormat(), ownerUsernamePlaceholder,
+                                    ownerPlaceholder);
                     player.sendMessage(message);
                 });
             });
         }
         else {
-            CompletableFuture<String> ownerName = owner.get().getPlayerView().getUsername();
+            CompletableFuture<String> ownerUsername = owner.get().getPlayerView().getUsername();
             CompletableFuture<? extends Component> ownerDisplayName = owner.get().getPlayerView().getDisplayName();
-            CompletableFuture.allOf(ownerName, ownerDisplayName, inviterDisplayName)
+            CompletableFuture.allOf(ownerUsername, ownerDisplayName, inviterDisplayName)
                     .whenComplete((ignored, throwable) -> {
                         if (throwable != null) {
                             LOGGER.warn("Exception while sending invitation message", throwable);
@@ -106,12 +125,17 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
                         }
 
                         invitee.getPlayer().ifPresent(player -> {
-                            ComponentLike message = Component.text()
-                                    .append(inviterDisplayName.join(), Component.text(" has invited you to join "),
-                                            ownerDisplayName.join(), Component.text("'s party. Click "),
-                                            Component.text("here", NamedTextColor.GOLD, TextDecoration.BOLD).clickEvent(
-                                                    ClickEvent.runCommand("/party join " + ownerName.join())),
-                                            Component.text(" to join!")).color(NamedTextColor.GOLD);
+                            TagResolver ownerUsernamePlaceholder =
+                                    Placeholder.parsed("owner-username", ownerUsername.join());
+                            TagResolver ownerPlaceholder = Placeholder.component("owner", ownerDisplayName.join());
+                            TagResolver inviterPlaceholder =
+                                    Placeholder.component("inviter", inviterDisplayName.join());
+                            TagResolver durationPlaceholder = Formatter.date("duration",
+                                    Duration.of(invitationDuration, TimeUnit.SERVER_TICK).addTo(LocalDate.EPOCH));
+
+                            Component message = miniMessage.deserialize(config.inviteToInviteeFromOtherFormat(),
+                                    ownerUsernamePlaceholder, ownerPlaceholder, inviterPlaceholder,
+                                    durationPlaceholder);
                             player.sendMessage(message);
                         });
                     });
@@ -126,9 +150,8 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
                 return;
             }
 
-            ComponentLike message = Component.text()
-                    .append(Component.text("The invitation to "), displayName, Component.text(" has expired."))
-                    .color(NamedTextColor.GOLD);
+            TagResolver inviteePlaceholder = Placeholder.component("invitee", displayName);
+            Component message = miniMessage.deserialize(config.expiryToPartyFormat(), inviteePlaceholder);
             audience.sendMessage(message);
         });
 
@@ -139,8 +162,8 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             }
 
             invitee.getPlayer().ifPresent(player -> {
-                ComponentLike message = Component.text().append(Component.text("The invitation to "), displayName,
-                        Component.text("'s party has expired.")).color(NamedTextColor.GOLD);
+                TagResolver ownerPlaceholder = Placeholder.component("owner", displayName);
+                Component message = miniMessage.deserialize(config.expiryToInviteeFormat(), ownerPlaceholder);
                 player.sendMessage(message);
             });
         });
@@ -153,13 +176,14 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
                 return;
             }
 
-            ComponentLike message = Component.text().append(displayName, Component.text(" has left the party."))
-                    .color(NamedTextColor.GOLD);
+            TagResolver leaverPlaceholder = Placeholder.component("leaver", displayName);
+            Component message = miniMessage.deserialize(config.leaveToPartyFormat(), leaverPlaceholder);
             audience.sendMessage(message);
         });
 
         oldMember.getPlayerView().getPlayer().ifPresent(player -> {
-            player.sendMessage(Component.text("Left the party.", NamedTextColor.GREEN));
+            Component message = miniMessage.deserialize(config.leaveToLeaverFormat());
+            player.sendMessage(message);
         });
     }
 
@@ -173,9 +197,10 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
                 return;
             }
 
-            ComponentLike message = Component.text()
-                    .append(toKickName.join(), Component.text(" was kicked by "), kickerName.join(),
-                            Component.text(".")).color(NamedTextColor.GOLD);
+            TagResolver kickerPlaceholder = Placeholder.component("kicker", kickerName.join());
+            TagResolver kickedPlaceholder = Placeholder.component("kicked", toKickName.join());
+            Component message =
+                    miniMessage.deserialize(config.kickToPartyFormat(), kickerPlaceholder, kickedPlaceholder);
             audience.sendMessage(message);
         });
 
@@ -186,9 +211,8 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             }
 
             toKick.getPlayerView().getPlayer().ifPresent(player -> {
-                ComponentLike message =
-                        Component.text().append(Component.text("You were kicked by "), name, Component.text("."))
-                                .color(NamedTextColor.GOLD);
+                TagResolver kickerPlaceholder = Placeholder.component("kicker", name);
+                Component message = miniMessage.deserialize(config.kickToKickedFormat(), kickerPlaceholder);
                 player.sendMessage(message);
             });
         });
@@ -204,8 +228,9 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
                 return;
             }
 
-            ComponentLike message = Component.text().append(Component.text("The party has been transferred from "),
-                    fromDisplayName.join(), Component.text(" to "), toDisplayName.join(), Component.text(".")).color(NamedTextColor.GOLD);
+            TagResolver fromPlaceholder = Placeholder.component("from", fromDisplayName.join());
+            TagResolver toPlaceholder = Placeholder.component("to", toDisplayName.join());
+            Component message = miniMessage.deserialize(config.transferFormat(), fromPlaceholder, toPlaceholder);
             audience.sendMessage(message);
         });
     }

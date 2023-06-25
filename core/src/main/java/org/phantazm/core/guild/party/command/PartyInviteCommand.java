@@ -1,7 +1,9 @@
 package org.phantazm.core.guild.party.command;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -21,10 +23,14 @@ public class PartyInviteCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command inviteCommand(@NotNull GuildHolder<Party> partyHolder,
-            @NotNull PlayerViewProvider viewProvider, @NotNull PartyCreator partyCreator) {
+    public static @NotNull Command inviteCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
+            @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
+            @NotNull PartyCreator partyCreator) {
+        Objects.requireNonNull(config, "config");
+        Objects.requireNonNull(miniMessage, "miniMessage");
         Objects.requireNonNull(partyHolder, "partyHolder");
         Objects.requireNonNull(viewProvider, "viewProvider");
+        Objects.requireNonNull(partyCreator, "partyCreator");
 
         Argument<String> nameArgument = ArgumentType.Word("name");
 
@@ -35,7 +41,7 @@ public class PartyInviteCommand {
             }
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                sender.sendMessage(config.mustBeAPlayer());
                 return false;
             }
 
@@ -43,7 +49,7 @@ public class PartyInviteCommand {
             if (party != null) {
                 PartyMember member = party.getMemberManager().getMember(player.getUuid());
                 if (!party.getInvitePermission().hasPermission(member)) {
-                    sender.sendMessage(Component.text("You can't invite players!", NamedTextColor.RED));
+                    sender.sendMessage(config.cannotInvitePlayers());
                     return false;
                 }
             }
@@ -59,7 +65,7 @@ public class PartyInviteCommand {
                 partyHolder.guilds().add(tempParty);
                 partyHolder.uuidToGuild().put(player.getUuid(), tempParty);
 
-                sender.sendMessage(Component.text("Automatically created a new party.", NamedTextColor.GREEN));
+                sender.sendMessage(config.automaticPartyCreation());
             }
             Party inviterParty = tempParty;
 
@@ -68,31 +74,33 @@ public class PartyInviteCommand {
             viewProvider.fromName(name).thenAccept(playerViewOptional -> {
                 playerViewOptional.ifPresentOrElse(playerView -> {
                     if (playerView.getUUID().equals(player.getUuid())) {
-                        sender.sendMessage(Component.text("You can't invite yourself!", NamedTextColor.RED));
+                        sender.sendMessage(config.cannotInviteSelf());
                         return;
                     }
 
                     Party otherParty = partyHolder.uuidToGuild().get(playerView.getUUID());
                     if (otherParty == inviterParty) {
                         playerView.getDisplayName().thenAccept(displayName -> {
-                            sender.sendMessage(Component.text().append(displayName,
-                                    Component.text(" is already in the party.").color(NamedTextColor.RED)));
+                            TagResolver inviteePlaceholder = Placeholder.component("invitee", displayName);
+                            Component message = miniMessage.deserialize(config.inviteeAlreadyInPartyFormat(),
+                                    inviteePlaceholder);
+                            sender.sendMessage(message);
                         });
                         return;
                     }
 
                     if (playerView.getPlayer().isEmpty()) {
                         playerView.getDisplayName().thenAccept(displayName -> {
-                            sender.sendMessage(Component.text().append(displayName, Component.text(" is not online."))
-                                    .color(NamedTextColor.RED));
+                            TagResolver playerPlaceholder = Placeholder.component("player", displayName);
+                            sender.sendMessage(miniMessage.deserialize(config.playerNotOnlineFormat(), playerPlaceholder));
                         });
                         return;
                     }
 
                     inviterParty.getInvitationManager().invite(inviter, playerView);
                 }, () -> {
-                    sender.sendMessage(
-                            Component.text("Can't find anyone with the username " + name + "!", NamedTextColor.RED));
+                    TagResolver usernamePlaceholder = Placeholder.unparsed("username", name);
+                    sender.sendMessage(miniMessage.deserialize(config.cannotFindPlayerFormat(), usernamePlaceholder));
                 });
             });
         }, nameArgument);

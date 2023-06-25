@@ -1,5 +1,6 @@
 package org.phantazm.core.guild.party.command;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.testing.EnvTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,10 @@ import java.util.concurrent.CompletableFuture;
 
 @EnvTest
 public class AbstractPartyCommandIntegrationTest {
+
+    protected PartyCommandConfig commandConfig = new PartyCommandConfig(Component.empty(), Component.empty(),
+            Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "", Component.empty(),
+            Component.empty(), "", Component.empty(), "");
 
     protected GuildHolder<Party> partyHolder;
 

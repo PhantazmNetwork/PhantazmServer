@@ -1,5 +1,6 @@
 package org.phantazm.core.guild.party.command;
 
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -23,8 +24,8 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
     @Test
     public void testNotInPartyAfterJoiningOtherPlayerNotInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1, 1);
-        Command command = PartyCommand.partyCommand(partyHolder, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator.Builder().build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -42,8 +43,8 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
     @Test
     public void testNotInPartyWithoutInviteAndJoiningOtherPlayerInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1, 1);
-        Command command = PartyCommand.partyCommand(partyHolder, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator.Builder().build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -63,8 +64,8 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
     @Test
     public void testInPartyAfterInviteAndJoiningOtherPlayerInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator(1, 0, 20, 1, 1, 1);
-        Command command = PartyCommand.partyCommand(partyHolder, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator.Builder().build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider, partyCreator, new Random());
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);

@@ -1,7 +1,9 @@
 package org.phantazm.core.guild.party.command;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -20,27 +22,28 @@ public class PartyJoinCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command joinCommand(@NotNull Map<? super UUID, Party> partyMap,
-            @NotNull PlayerViewProvider viewProvider) {
+    public static @NotNull Command joinCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
+            @NotNull Map<? super UUID, Party> partyMap, @NotNull PlayerViewProvider viewProvider) {
+        Objects.requireNonNull(config, "config");
+        Objects.requireNonNull(miniMessage, "miniMessage");
         Objects.requireNonNull(partyMap, "partyMap");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
-        Command command = new Command("join");
-
         Argument<String> nameArgument = ArgumentType.Word("name");
+        Command command = new Command("join");
         command.addConditionalSyntax((sender, commandString) -> {
             if (commandString == null) {
                 return sender instanceof Player;
             }
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                sender.sendMessage(config.mustBeAPlayer());
                 return false;
             }
 
             Party party = partyMap.get(player.getUuid());
             if (party != null) {
-                sender.sendMessage(Component.text("You are already in a party!", NamedTextColor.GREEN));
+                sender.sendMessage(config.alreadyInParty());
                 return false;
             }
 
@@ -52,16 +55,16 @@ public class PartyJoinCommand {
                     Party party = partyMap.get(playerView.getUUID());
                     if (party == null) {
                         playerView.getDisplayName().thenAccept(displayName -> {
-                            sender.sendMessage(Component.text().append(displayName,
-                                    Component.text(" is not in a party.").color(NamedTextColor.RED)));
+                            TagResolver targetPlaceholder = Placeholder.component("target", displayName);
+                            Component message = miniMessage.deserialize(config.toJoinNotInParty(), targetPlaceholder);
+                            sender.sendMessage(message);
                         });
                         return;
                     }
 
                     Player player = (Player)sender;
                     if (!party.getInvitationManager().hasInvitation(player.getUuid())) {
-                        sender.sendMessage(
-                                Component.text("You don't have an invite to the party.", NamedTextColor.RED));
+                        sender.sendMessage(config.noInvite());
                         return;
                     }
 
@@ -73,8 +76,8 @@ public class PartyJoinCommand {
                     party.getInvitationManager().acceptInvitation(viewProvider.fromPlayer(player));
                     partyMap.put(player.getUuid(), party);
                 }, () -> {
-                    sender.sendMessage(
-                            Component.text("Can't find anyone with the username " + name + "!", NamedTextColor.RED));
+                    TagResolver usernamePlaceholder = Placeholder.unparsed("username", name);
+                    sender.sendMessage(miniMessage.deserialize(config.cannotFindPlayerFormat(), usernamePlaceholder));
                 });
             });
         }, nameArgument);

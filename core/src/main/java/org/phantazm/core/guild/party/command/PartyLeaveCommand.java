@@ -17,8 +17,9 @@ public class PartyLeaveCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command leaveCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
-            @NotNull Random random) {
+    public static @NotNull Command leaveCommand(@NotNull PartyCommandConfig config,
+            @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull Random random) {
+        Objects.requireNonNull(config, "config");
         Objects.requireNonNull(partyMap, "partyMap");
         Objects.requireNonNull(random, "random");
 
@@ -29,13 +30,13 @@ public class PartyLeaveCommand {
             }
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                sender.sendMessage(config.mustBeAPlayer());
                 return false;
             }
 
             Party party = partyMap.get(player.getUuid());
             if (party == null) {
-                sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
+                sender.sendMessage(config.notInParty());
                 return false;
             }
 
@@ -50,12 +51,14 @@ public class PartyLeaveCommand {
             if (party.getOwner().get().getPlayerView().getUUID().equals(uuid)) {
                 if (party.getMemberManager().getMembers().isEmpty()) {
                     party.getOwner().set(null);
-                } else {
+                }
+                else {
                     Collection<PartyMember> online = new ArrayList<>(), offline = new ArrayList<>();
                     for (PartyMember member : party.getMemberManager().getMembers().values()) {
                         if (member.getPlayerView().getPlayer().isPresent()) {
                             online.add(member);
-                        } else {
+                        }
+                        else {
                             offline.add(member);
                         }
                     }

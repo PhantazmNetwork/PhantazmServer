@@ -35,9 +35,9 @@ public class WhisperManager {
     }
 
     public void whisper(@NotNull Audience sender, @NotNull Audience target, @NotNull String message) {
-        TagResolver.Single senderPlaceholder = Placeholder.component("sender", resolveDisplayName(sender));
-        TagResolver.Single targetPlaceholder = Placeholder.component("target", resolveDisplayName(target));
-        TagResolver.Single messagePlaceholder = Placeholder.component("message", Component.text(message));
+        TagResolver senderPlaceholder = Placeholder.component("sender", resolveDisplayName(sender));
+        TagResolver targetPlaceholder = Placeholder.component("target", resolveDisplayName(target));
+        TagResolver messagePlaceholder = Placeholder.component("message", Component.text(message));
 
         Component toTarget =
                 miniMessage.deserialize(whisperConfig.toTargetFormat(), senderPlaceholder, targetPlaceholder,

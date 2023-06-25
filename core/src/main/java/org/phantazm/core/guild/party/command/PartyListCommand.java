@@ -8,6 +8,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
+import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.guild.party.PartyMember;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,9 @@ public class PartyListCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command listCommand(@NotNull Map<? super UUID, Party> partyMap) {
+    public static @NotNull Command listCommand(@NotNull PartyCommandConfig config,
+            @NotNull Map<? super UUID, Party> partyMap) {
+        Objects.requireNonNull(config, "config");
         Objects.requireNonNull(partyMap, "partyMap");
 
         Command command = new Command("list");
@@ -35,13 +38,13 @@ public class PartyListCommand {
             }
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                sender.sendMessage(config.mustBeAPlayer());
                 return false;
             }
 
             Party party = partyMap.get(player.getUuid());
             if (party == null) {
-                sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
+                sender.sendMessage(config.notInParty());
                 return false;
             }
 

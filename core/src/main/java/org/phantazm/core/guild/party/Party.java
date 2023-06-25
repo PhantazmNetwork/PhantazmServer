@@ -7,6 +7,7 @@ import org.phantazm.commons.Tickable;
 import org.phantazm.core.guild.Guild;
 import org.phantazm.core.guild.GuildMemberManager;
 import org.phantazm.core.guild.invite.InvitationManager;
+import org.phantazm.core.guild.party.notification.PartyNotification;
 import org.phantazm.core.guild.permission.MultipleMemberPermission;
 import org.phantazm.core.guild.permission.SingleMemberPermission;
 import org.phantazm.core.player.PlayerView;

@@ -12,6 +12,7 @@ import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.Event;
@@ -199,8 +200,9 @@ public final class PhantazmServer {
         MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
         ElementFeature.initialize(mappingProcessorSource, keyParser);
 
+        ConfigCodec tomlCodec = new TomlCodec();
         WhisperCommandFeature.initialize(MinecraftServer.getCommandManager(), MinecraftServer.getConnectionManager(),
-                mappingProcessorSource, new TomlCodec());
+                mappingProcessorSource, tomlCodec);
 
         ContextManager contextManager = ElementFeature.getContextManager();
 
@@ -221,9 +223,11 @@ public final class PhantazmServer {
         CommandFeature.initialize(MinecraftServer.getCommandManager(), sceneMapper, viewProvider);
 
         PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
-                MinecraftServer.getSchedulerManager());
+                MinecraftServer.getSchedulerManager(), mappingProcessorSource, contextManager, tomlCodec,
+                MiniMessage.miniMessage());
         LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
-        ChatFeature.initialize(global, viewProvider, PartyFeature.getPartyHolder().uuidToGuild(), MinecraftServer.getCommandManager());
+        ChatFeature.initialize(global, viewProvider, PartyFeature.getPartyHolder().uuidToGuild(),
+                MinecraftServer.getCommandManager());
         MessagingFeature.initialize(global, serverConfig.serverInfoConfig().authType());
 
         ProximaFeature.initialize(global, contextManager, pathfinderConfig);

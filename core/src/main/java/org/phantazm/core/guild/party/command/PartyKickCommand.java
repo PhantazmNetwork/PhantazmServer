@@ -1,14 +1,15 @@
 package org.phantazm.core.guild.party.command;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.guild.permission.MultipleMemberPermission;
@@ -24,8 +25,10 @@ public class PartyKickCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command kickCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
-            @NotNull PlayerViewProvider viewProvider) {
+    public static @NotNull Command kickCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
+            @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull PlayerViewProvider viewProvider) {
+        Objects.requireNonNull(config, "config");
+        Objects.requireNonNull(miniMessage, "miniMessage");
         Objects.requireNonNull(partyMap, "partyMap");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
@@ -62,19 +65,19 @@ public class PartyKickCommand {
             }
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                sender.sendMessage(config.mustBeAPlayer());
                 return false;
             }
 
             Party party = partyMap.get(player.getUuid());
             if (party == null) {
-                sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
+                sender.sendMessage(config.notInParty());
                 return false;
             }
 
             PartyMember member = party.getMemberManager().getMember(player.getUuid());
             if (!party.getKickPermission().hasPermission(member)) {
-                sender.sendMessage(Component.text("You can't kick members!", NamedTextColor.RED));
+                sender.sendMessage(config.cannotKickMembers());
                 return false;
             }
 
@@ -91,22 +94,24 @@ public class PartyKickCommand {
                     PartyMember toKick = party.getMemberManager().getMember(playerView.getUUID());
                     if (toKick == null) {
                         playerView.getDisplayName().thenAccept(displayName -> {
-                            sender.sendMessage(
-                                    Component.text().append(displayName, Component.text(" is not in the party."))
-                                            .color(NamedTextColor.RED));
+                            TagResolver toKickPlaceholder = Placeholder.component("kicked", displayName);
+                            Component message =
+                                    miniMessage.deserialize(config.toKickNotInPartyFormat(), toKickPlaceholder);
+                            sender.sendMessage(message);
                         });
                         return;
                     }
 
                     if (toKick == kicker) {
-                        sender.sendMessage(Component.text("You can't kick yourself!", NamedTextColor.RED));
+                        sender.sendMessage(config.cannotKickSelf());
                     }
 
                     if (!party.getKickPermission().canExecute(kicker, toKick)) {
                         playerView.getDisplayName().thenAccept(displayName -> {
-                            sender.sendMessage(Component.text()
-                                    .append(Component.text("You can't kick "), displayName, Component.text("!"))
-                                    .color(NamedTextColor.RED));
+                            TagResolver kickedPlaceholder = Placeholder.component("kicked", displayName);
+                            Component message =
+                                    miniMessage.deserialize(config.cannotKickOtherFormat(), kickedPlaceholder);
+                            sender.sendMessage(message);
                         });
                         return;
                     }
@@ -115,8 +120,8 @@ public class PartyKickCommand {
                     partyMap.remove(playerView.getUUID());
                     party.getNotification().notifyKick(kicker, toKick);
                 }, () -> {
-                    sender.sendMessage(
-                            Component.text("Can't find anyone with the username " + name + "!", NamedTextColor.RED));
+                    TagResolver usernamePlaceholder = Placeholder.unparsed("username", name);
+                    sender.sendMessage(miniMessage.deserialize(config.cannotFindPlayerFormat(), usernamePlaceholder));
                 });
             });
         }, nameArgument);

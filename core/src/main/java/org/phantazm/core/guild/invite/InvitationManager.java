@@ -54,7 +54,7 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
 
     public void invite(@NotNull TMember inviter, @NotNull PlayerView invitee) {
         if (invitationDuration == 0) {
-            notification.notifyInvitation(inviter, invitee);
+            notification.notifyInvitation(inviter, invitee, invitationDuration);
             notification.notifyExpiry(invitee);
             return;
         }
@@ -62,7 +62,7 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
         long expirationTime = ticks + invitationDuration;
         invitations.add(new Invitation(invitee, expirationTime));
         latestInviteTimes.put(invitee.getUUID(), expirationTime);
-        notification.notifyInvitation(inviter, invitee);
+        notification.notifyInvitation(inviter, invitee, invitationDuration);
     }
 
     public boolean hasInvitation(@NotNull UUID candidate) {

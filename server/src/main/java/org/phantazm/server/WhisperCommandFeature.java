@@ -1,5 +1,6 @@
 package org.phantazm.server;
 
+import com.github.steanky.ethylene.codec.toml.TomlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
@@ -18,15 +19,17 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class WhisperCommandFeature {
-
-    public static final Path WHISPER_PATH = Path.of("./whisper.toml");
-
     static void initialize(@NotNull CommandManager commandManager, @NotNull ConnectionManager connectionManager,
             @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec whisperCodec)
             throws IOException {
         ConfigProcessor<WhisperConfig> whisperConfigProcessor =
                 mappingProcessorSource.processorFor(Token.ofClass(WhisperConfig.class));
-        WhisperConfig whisperConfig = Configuration.read(WHISPER_PATH, whisperCodec, whisperConfigProcessor);
+        String whisperFileName = whisperCodec.getPreferredExtensions().isEmpty()
+                                 ? "whisper"
+                                 : "whisper." + whisperCodec.getPreferredExtension();
+        WhisperConfig whisperConfig =
+                Configuration.read(Path.of(whisperFileName), whisperCodec,
+                        whisperConfigProcessor);
         WhisperManager whisperManager =
                 new WhisperManager(connectionManager, commandManager.getConsoleSender(), whisperConfig,
                         MiniMessage.miniMessage());
