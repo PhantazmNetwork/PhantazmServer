@@ -156,6 +156,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     @Override
     protected @NotNull ZombiesScene createScene(@NotNull ZombiesJoinRequest request) {
+        Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
+        Wrapper<PowerupHandler> powerupHandlerWrapper = Wrapper.ofNull();
+        Wrapper<WindowHandler> windowHandlerWrapper = Wrapper.ofNull();
+        Wrapper<EventNode<Event>> eventNodeWrapper = Wrapper.ofNull();
+        Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
+        Wrapper<ZombiesScene> sceneWrapper = Wrapper.ofNull();
+
         MapSettingsInfo settings = mapInfo.settings();
         Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
 
@@ -169,11 +176,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         MobStore mobStore = new MobStore();
         TickTaskScheduler tickTaskScheduler = new BasicTickTaskScheduler();
-
-        Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
-        Wrapper<PowerupHandler> powerupHandlerWrapper = Wrapper.ofNull();
-        Wrapper<WindowHandler> windowHandlerWrapper = Wrapper.ofNull();
-        Wrapper<EventNode<Event>> eventNodeWrapper = Wrapper.ofNull();
 
         SongPlayer songPlayer = new BasicSongPlayer();
         MapObjects mapObjects =
@@ -198,7 +200,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new ZombiesMap(mapObjects, songPlayer, powerupHandler, roundHandler, shopHandler, windowHandler,
                         doorHandler, mobStore);
 
-        Wrapper<Long> ticksSinceStart = Wrapper.of(0L);
+
         SidebarModule sidebarModule =
                 new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
                         settings.maxPlayers());
@@ -208,6 +210,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
 
+
         EventNode<Event> childNode =
                 createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
                         doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore,
@@ -216,7 +219,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
 
-        Wrapper<ZombiesScene> sceneWrapper = Wrapper.ofNull();
+
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
             playerView.getPlayer().ifPresent(player -> {
                 player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.healTicks());

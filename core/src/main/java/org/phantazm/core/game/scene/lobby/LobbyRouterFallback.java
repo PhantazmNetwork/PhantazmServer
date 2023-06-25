@@ -2,13 +2,11 @@ package org.phantazm.core.game.scene.lobby;
 
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 

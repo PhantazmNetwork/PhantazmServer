@@ -64,6 +64,7 @@ public final class PhantazmServer {
     public static final Path BANS_FILE = Path.of("./bans.txt");
     public static final Path WHITELIST_FILE = Path.of("./whitelist.txt");
     public static final Path PERMISSIONS_FILE = Path.of("./permissions.yml");
+    public static final Path MOBS_PATH = Path.of("./mobs");
 
     private static LoginValidator loginValidator;
 
@@ -225,7 +226,7 @@ public final class PhantazmServer {
         ConfigCodec codec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                 () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
 
-        MobFeature.initialize(contextManager, Path.of("./mobs/"), codec);
+        MobFeature.initialize(contextManager, MOBS_PATH, codec);
         EquipmentFeature.initialize(keyParser, contextManager, codec,
                 mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
 
@@ -237,7 +238,7 @@ public final class PhantazmServer {
                 PartyFeature.getPartyHolder().uuidToGuild(), routerStore);
 
         ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
-                mappingProcessorSource, codec);
+                mappingProcessorSource, codec, routerStore, serverConfig);
         ValidationFeature.initialize(global, loginValidator, ServerCommandFeature.permissionHandler());
 
         routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());

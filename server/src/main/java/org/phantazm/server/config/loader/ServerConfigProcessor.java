@@ -6,6 +6,7 @@ import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ConfigProcessors;
 import org.phantazm.server.config.server.*;
@@ -43,7 +44,10 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         Component description = COMPONENT_PROCESSOR.dataFromElement(pingList.getElementOrThrow("description"));
         PingListConfig pingListConfig = new PingListConfig(description);
 
-        return new ServerConfig(serverInfoConfig, pingListConfig);
+        Component shutdownMessage = MiniMessage.miniMessage().deserialize(element.getStringOrDefault(
+                () -> MiniMessage.miniMessage().serialize(ServerConfig.DEFAULT.shutdownMessage()), "shutdownMessage"));
+
+        return new ServerConfig(serverInfoConfig, pingListConfig, shutdownMessage);
     }
 
     @Override
@@ -64,6 +68,8 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         ConfigNode configNode = new LinkedConfigNode(3);
         configNode.put("serverInfo", serverInfo);
         configNode.put("pingList", pingList);
+
+        configNode.putString("shutdownMessage", MiniMessage.miniMessage().serialize(serverConfig.shutdownMessage()));
 
         return configNode;
     }

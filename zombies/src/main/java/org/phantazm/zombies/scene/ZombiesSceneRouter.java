@@ -114,6 +114,11 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     }
 
     @Override
+    public boolean isGame() {
+        return true;
+    }
+
+    @Override
     public @NotNull Collection<ZombiesScene> getScenes() {
         Collection<ZombiesScene> scenes = new ArrayList<>();
         for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
@@ -121,5 +126,16 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
         }
 
         return scenes;
+    }
+
+    @Override
+    public boolean hasScenes() {
+        for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
+            if (sceneProvider.hasScenes()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

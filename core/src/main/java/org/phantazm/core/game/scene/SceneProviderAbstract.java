@@ -1,7 +1,9 @@
 package org.phantazm.core.game.scene;
 
+import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.core.game.scene.event.SceneShutdownEvent;
 
 import java.util.*;
 
@@ -61,6 +63,8 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
             if (scene.isShutdown()) {
                 cleanupScene(scene);
                 iterator.remove();
+
+                EventDispatcher.call(new SceneShutdownEvent(scene));
             }
             else {
                 scene.tick(time);
@@ -86,4 +90,8 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
     protected abstract void cleanupScene(@NotNull TScene scene);
 
+    @Override
+    public boolean hasScenes() {
+        return !scenes.isEmpty();
+    }
 }

@@ -68,7 +68,8 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
 
         SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
         if (lobbyProvider == null) {
-            return RouteResult.failure(Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + "."));
+            return RouteResult.failure(
+                    Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + "."));
         }
 
         return lobbyProvider.provideScene(routeRequest.joinRequest()).map(RouteResult::success)
@@ -97,6 +98,22 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
     @Override
     public void setJoinable(boolean joinable) {
         this.joinable = joinable;
+    }
+
+    @Override
+    public boolean isGame() {
+        return false;
+    }
+
+    @Override
+    public boolean hasScenes() {
+        for (SceneProvider<Lobby, LobbyJoinRequest> sceneProvider : lobbyProviders.values()) {
+            if (sceneProvider.hasScenes()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

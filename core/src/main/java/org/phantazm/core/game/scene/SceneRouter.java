@@ -45,4 +45,18 @@ public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoin
      */
     void setJoinable(boolean joinable);
 
+    /**
+     * Whether this router is a "game".
+     *
+     * @return true if this router represents a game, false otherwise
+     */
+    boolean isGame();
+
+    /**
+     * Whether this router currently has any scenes.
+     *
+     * @return true if this router has any scenes, false otherwise
+     */
+    boolean hasScenes();
+
 }
