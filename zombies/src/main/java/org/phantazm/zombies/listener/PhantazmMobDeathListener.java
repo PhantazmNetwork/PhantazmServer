@@ -127,7 +127,15 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
                 normal = normal.mul(-1);
             }
 
+            normal = normal.mul(xSmaller ? frameRegion.lengthX() / 2.0 : frameRegion.lengthZ() / 2.0)
+                    .add(OFFSET.mul(normal));
 
+            Point test = seekDown(center.add(normal));
+            if (roomTracker.atPoint(test).isEmpty()) {
+                LOGGER.warn("Spawning powerup outside of a room");
+            }
+
+            powerupHandler.spawn(key, test);
         }
     }
 
