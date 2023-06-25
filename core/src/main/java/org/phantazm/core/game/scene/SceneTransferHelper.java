@@ -6,14 +6,13 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class SceneTransferHelper {
 
-    private final Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper;
+    private final RouterStore routerStore;
 
-    public SceneTransferHelper(@NotNull Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper) {
-        this.sceneMapper = Objects.requireNonNull(sceneMapper, "sceneMapper");
+    public SceneTransferHelper(@NotNull RouterStore routerStore) {
+        this.routerStore = Objects.requireNonNull(routerStore, "routerStore");
     }
 
     public <TJoinRequest extends SceneJoinRequest> void transfer(@NotNull Scene<TJoinRequest> to,
@@ -21,7 +20,7 @@ public class SceneTransferHelper {
         boolean anyFailures = false;
         Collection<Runnable> leaveExecutors = new ArrayList<>(leavers.size());
         for (PlayerView leaver : leavers) {
-            Optional<? extends Scene<?>> oldSceneOptional = sceneMapper.apply(leaver.getUUID());
+            Optional<? extends Scene<?>> oldSceneOptional = routerStore.getCurrentScene(leaver.getUUID());
             if (oldSceneOptional.isEmpty()) {
                 continue;
             }
@@ -45,8 +44,9 @@ public class SceneTransferHelper {
 
         if (anyFailures) {
             leader.getPlayer().ifPresent(leaderPlayer -> {
-                leaderPlayer.sendMessage(Component.text("Failed to join because not all players could leave their " +
-                        "previous scenes.", NamedTextColor.RED));
+                leaderPlayer.sendMessage(
+                        Component.text("Failed to join because not all players could leave their " + "previous scenes.",
+                                NamedTextColor.RED));
             });
             return;
         }
@@ -58,7 +58,8 @@ public class SceneTransferHelper {
         TransferResult joinResult = to.join(joinRequest);
         if (joinResult.executor().isPresent()) {
             joinResult.executor().get().run();
-        } else if (joinResult.message().isPresent()) {
+        }
+        else if (joinResult.message().isPresent()) {
             leader.getPlayer().ifPresent(leaderPlayer -> {
                 leaderPlayer.sendMessage(joinResult.message().get());
             });

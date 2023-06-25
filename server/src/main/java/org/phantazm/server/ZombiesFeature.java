@@ -28,7 +28,7 @@ import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
-import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
@@ -124,7 +124,7 @@ public final class ZombiesFeature {
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
             @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper) throws IOException {
+            @NotNull RouterStore routerStore) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -182,10 +182,9 @@ public final class ZombiesFeature {
                 .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
                         TaskSchedule.nextTick());
 
-        SceneTransferHelper transferHelper = new SceneTransferHelper(sceneMapper);
+        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         commandManager.register(
-                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneMapper, transferHelper,
-                        sceneFallback));
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, transferHelper, sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {

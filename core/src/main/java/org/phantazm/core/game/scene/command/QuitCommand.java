@@ -5,15 +5,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
 
 public final class QuitCommand {
 
@@ -21,10 +18,9 @@ public final class QuitCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command quitCommand(
-            @NotNull Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper,
+    public static @NotNull Command quitCommand(@NotNull RouterStore routerStore,
             @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(sceneMapper, "sceneMapper");
+        Objects.requireNonNull(routerStore, "routerStore");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
         Command command = new Command("quit", "leave", "l");
@@ -41,7 +37,7 @@ public final class QuitCommand {
             return true;
         }, (sender, context) -> {
             Player player = (Player)sender;
-            sceneMapper.apply(player.getUuid()).ifPresent(scene -> {
+            routerStore.getCurrentScene(player.getUuid()).ifPresent(scene -> {
                 if (!scene.isQuittable()) {
                     sender.sendMessage(Component.text("You can't quit this scene.", NamedTextColor.RED));
                     return;

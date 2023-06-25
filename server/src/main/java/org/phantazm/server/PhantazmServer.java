@@ -24,10 +24,10 @@ import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
-import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.game.scene.BasicRouterStore;
+import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
-import org.phantazm.core.game.scene.lobby.Lobby;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
@@ -48,10 +48,7 @@ import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
 
 /**
  * Launches the server, and provides some useful static constants.
@@ -190,6 +187,7 @@ public final class PhantazmServer {
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
             PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig, LoginValidator loginValidator)
             throws Exception {
+        RouterStore routerStore = new BasicRouterStore();
         BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
 
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
@@ -212,15 +210,7 @@ public final class PhantazmServer {
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
-        Function<UUID, Optional<? extends Scene<?>>> sceneMapper = uuid -> {
-            Optional<Lobby> lobbyOptional = LobbyFeature.getLobbyRouter().getCurrentScene(uuid);
-            if (lobbyOptional.isPresent()) {
-                return lobbyOptional;
-            }
-
-            return ZombiesFeature.zombiesSceneRouter().getCurrentScene(uuid);
-        };
-        CommandFeature.initialize(MinecraftServer.getCommandManager(), sceneMapper, viewProvider);
+        CommandFeature.initialize(MinecraftServer.getCommandManager(), routerStore, viewProvider);
 
         PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
                 MinecraftServer.getSchedulerManager(), mappingProcessorSource, contextManager, tomlCodec,
@@ -244,11 +234,14 @@ public final class PhantazmServer {
                 keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, commandManager,
                 new CompositeFallback(List.of(LobbyFeature.getFallback(),
                         new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))),
-                PartyFeature.getPartyHolder().uuidToGuild(), sceneMapper);
+                PartyFeature.getPartyHolder().uuidToGuild(), routerStore);
 
         ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
                 mappingProcessorSource, codec);
         ValidationFeature.initialize(global, loginValidator, ServerCommandFeature.permissionHandler());
+
+        routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
+        routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
