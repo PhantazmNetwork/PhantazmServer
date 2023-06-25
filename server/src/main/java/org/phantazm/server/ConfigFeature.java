@@ -10,9 +10,11 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.server.config.loader.LobbiesConfigProcessor;
 import org.phantazm.server.config.loader.PathfinderConfigProcessor;
 import org.phantazm.server.config.loader.ServerConfigProcessor;
+import org.phantazm.server.config.loader.ShutdownConfigProcessor;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.server.PathfinderConfig;
 import org.phantazm.server.config.server.ServerConfig;
+import org.phantazm.server.config.server.ShutdownConfig;
 
 import java.nio.file.Path;
 
@@ -33,6 +35,12 @@ public final class ConfigFeature {
      * The location of the pathfinder configuration file.
      */
     public static final Path PATHFINDER_CONFIG_PATH = Path.of("./pathfinder-config.toml");
+
+    /**
+     * The location of the shutdown configuration file.
+     */
+    public static final Path SHUTDOWN_CONFIG_PATH = Path.of("./shutdown-config.toml");
+
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link ServerConfig} loader.
      */
@@ -49,6 +57,12 @@ public final class ConfigFeature {
      */
     public static final ConfigHandler.ConfigKey<PathfinderConfig> PATHFINDER_CONFIG_KEY =
             new ConfigHandler.ConfigKey<>(PathfinderConfig.class, "pathfinder_config");
+
+    /**
+     * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link PathfinderConfig} loader.
+     */
+    public static final ConfigHandler.ConfigKey<ShutdownConfig> SHUTDOWN_CONFIG_KEY =
+            new ConfigHandler.ConfigKey<>(ShutdownConfig.class, "pathfinder_config");
 
     private static ConfigHandler handler;
 
@@ -74,6 +88,10 @@ public final class ConfigFeature {
         handler.registerLoader(PATHFINDER_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new PathfinderConfigProcessor(), PathfinderConfig.DEFAULT,
                         PATHFINDER_CONFIG_PATH, codec));
+
+        handler.registerLoader(SHUTDOWN_CONFIG_KEY,
+                new SyncFileConfigLoader<>(new ShutdownConfigProcessor(), ShutdownConfig.DEFAULT, SHUTDOWN_CONFIG_PATH,
+                        codec));
     }
 
     /**

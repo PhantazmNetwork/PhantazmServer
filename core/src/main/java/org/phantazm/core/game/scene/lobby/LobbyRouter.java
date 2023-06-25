@@ -106,9 +106,9 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
     }
 
     @Override
-    public boolean hasScenes() {
+    public boolean hasActiveScenes() {
         for (SceneProvider<Lobby, LobbyJoinRequest> sceneProvider : lobbyProviders.values()) {
-            if (sceneProvider.hasScenes()) {
+            if (sceneProvider.hasActiveScenes()) {
                 return true;
             }
         }

@@ -53,10 +53,10 @@ public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoin
     boolean isGame();
 
     /**
-     * Whether this router currently has any scenes.
+     * Whether this router currently has any scenes with players in them.
      *
-     * @return true if this router has any scenes, false otherwise
+     * @return true if this router has any scenes containing players, false otherwise
      */
-    boolean hasScenes();
+    boolean hasActiveScenes();
 
 }

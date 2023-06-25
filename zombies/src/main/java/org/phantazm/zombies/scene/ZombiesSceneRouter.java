@@ -129,9 +129,9 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     }
 
     @Override
-    public boolean hasScenes() {
+    public boolean hasActiveScenes() {
         for (SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider : sceneProviders.values()) {
-            if (sceneProvider.hasScenes()) {
+            if (sceneProvider.hasActiveScenes()) {
                 return true;
             }
         }

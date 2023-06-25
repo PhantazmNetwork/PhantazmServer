@@ -11,17 +11,18 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.event.SceneShutdownEvent;
-import org.phantazm.server.config.server.ServerConfig;
+import org.phantazm.server.config.server.ShutdownConfig;
 
 import java.util.Objects;
 
-public class OrderlyShutdown extends Command {
+public class OrderlyShutdownCommand extends Command {
     public static final Permission PERMISSION = new Permission("admin.orderly_shutdown");
 
     private final RouterStore routerStore;
     private boolean initialized;
+    private long shutdownStart;
 
-    public OrderlyShutdown(@NotNull RouterStore routerStore, @NotNull ServerConfig serverConfig,
+    public OrderlyShutdownCommand(@NotNull RouterStore routerStore, @NotNull ShutdownConfig shutdownConfig,
             @NotNull EventNode<Event> globalNode) {
         super("orderly_shutdown");
         this.routerStore = Objects.requireNonNull(routerStore, "routerStore");
@@ -34,16 +35,35 @@ public class OrderlyShutdown extends Command {
             }
 
             initialized = true;
-
-            MinecraftServer.getSchedulerManager()
-                    .scheduleTask(() -> Audiences.all().sendMessage(serverConfig.shutdownMessage()),
-                            TaskSchedule.immediate(), TaskSchedule.seconds(30));
+            shutdownStart = System.currentTimeMillis();
 
             for (SceneRouter<?, ?> router : routerStore.getRouters()) {
                 if (router.isGame()) {
                     router.setJoinable(false);
                 }
             }
+
+            MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+                long elapsedMs = System.currentTimeMillis() - shutdownStart;
+                if (elapsedMs > shutdownConfig.forceShutdownWarningTime()) {
+                    Audiences.all().sendMessage(shutdownConfig.forceShutdownMessage());
+                }
+                else {
+                    Audiences.all().sendMessage(shutdownConfig.shutdownMessage());
+                }
+            }, TaskSchedule.immediate(), TaskSchedule.millis(shutdownConfig.warningInterval()));
+
+            MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+                long elapsedMs = System.currentTimeMillis() - shutdownStart;
+                if (elapsedMs > shutdownConfig.forceShutdownTime()) {
+                    System.exit(0); //exit even if we've got games
+                    return;
+                }
+
+                if (noGamesActive()) {
+                    System.exit(0);
+                }
+            }, TaskSchedule.immediate(), TaskSchedule.tick(20));
 
             globalNode.addListener(SceneShutdownEvent.class, this::onSceneShutdown);
 
@@ -59,7 +79,7 @@ public class OrderlyShutdown extends Command {
                 continue;
             }
 
-            if (router.hasScenes()) {
+            if (router.hasActiveScenes()) {
                 return false;
             }
         }

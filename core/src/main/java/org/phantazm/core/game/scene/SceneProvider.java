@@ -34,6 +34,6 @@ public interface SceneProvider<TScene extends Scene<TRequest>, TRequest extends 
      */
     void forceShutdown();
 
-    boolean hasScenes();
+    boolean hasActiveScenes();
 
 }

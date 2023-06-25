@@ -35,6 +35,7 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.server.PathfinderConfig;
 import org.phantazm.server.config.server.ServerConfig;
 import org.phantazm.server.config.server.ServerInfoConfig;
+import org.phantazm.server.config.server.ShutdownConfig;
 import org.phantazm.server.player.BasicLoginValidator;
 import org.phantazm.server.player.LoginValidator;
 import org.phantazm.zombies.equipment.EquipmentData;
@@ -81,6 +82,7 @@ public final class PhantazmServer {
         ServerConfig serverConfig;
         LobbiesConfig lobbiesConfig;
         PathfinderConfig pathfinderConfig;
+        ShutdownConfig shutdownConfig;
         try {
             LOGGER.info("Loading server configuration data.");
             ConfigFeature.initialize();
@@ -127,6 +129,7 @@ public final class PhantazmServer {
 
             lobbiesConfig = handler.loadDataNow(ConfigFeature.LOBBIES_CONFIG_KEY);
             pathfinderConfig = handler.loadDataNow(ConfigFeature.PATHFINDER_CONFIG_KEY);
+            shutdownConfig = handler.loadDataNow(ConfigFeature.SHUTDOWN_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         }
         catch (ConfigProcessException e) {
@@ -141,7 +144,7 @@ public final class PhantazmServer {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(node, serverConfig, pathfinderConfig, lobbiesConfig, loginValidator);
+            initializeFeatures(node, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig, loginValidator);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -186,8 +189,8 @@ public final class PhantazmServer {
     }
 
     private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
-            PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig, LoginValidator loginValidator)
-            throws Exception {
+            ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
+            LoginValidator loginValidator) throws Exception {
         RouterStore routerStore = new BasicRouterStore();
         BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
 
@@ -238,7 +241,7 @@ public final class PhantazmServer {
                 PartyFeature.getPartyHolder().uuidToGuild(), routerStore);
 
         ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
-                mappingProcessorSource, codec, routerStore, serverConfig);
+                mappingProcessorSource, codec, routerStore, shutdownConfig);
         ValidationFeature.initialize(global, loginValidator, ServerCommandFeature.permissionHandler());
 
         routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());

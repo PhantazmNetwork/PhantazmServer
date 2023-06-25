@@ -116,21 +116,18 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
             Window nearestWindow = windowOptional.get();
             Bounds3I frameRegion = nearestWindow.getWindowInfo().frameRegion();
-            Point windowCenter = nearestWindow.center();
-            Point toWindow = windowCenter.sub(position);
+            Point center = nearestWindow.getCenter();
 
-            Vec axis = new Vec(Integer.signum((int)Math.rint(toWindow.x())), 0,
-                    Integer.signum((int)Math.rint(toWindow.z())));
+            boolean xSmaller = frameRegion.lengthX() < frameRegion.lengthZ();
 
-            Vec mulVec = new Vec(Math.abs(axis.x()) * (frameRegion.lengthX() / 2D), 0,
-                    Math.abs(axis.z()) * (frameRegion.lengthZ() / 2D));
+            Vec normal = new Vec(xSmaller ? 1 : 0, 0, xSmaller ? 0 : 1);
 
-            Point spawnCandidate = windowCenter.add(axis.mul(mulVec)).add(axis.mul(OFFSET));
-            if (roomTracker.atPoint(spawnCandidate).isEmpty()) {
-                LOGGER.warn("Tried to adjust powerup location to " + spawnCandidate + ", but it is not inside a room");
+            boolean invert = (xSmaller ? center.x() - position.x() : center.z() - position.z()) < 0;
+            if (invert) {
+                normal = normal.mul(-1);
             }
 
-            powerupHandler.spawn(key, seekDown(spawnCandidate));
+
         }
     }
 

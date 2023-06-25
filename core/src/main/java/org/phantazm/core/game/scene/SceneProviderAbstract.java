@@ -91,7 +91,13 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
     protected abstract void cleanupScene(@NotNull TScene scene);
 
     @Override
-    public boolean hasScenes() {
-        return !scenes.isEmpty();
+    public boolean hasActiveScenes() {
+        for (TScene scene : scenes) {
+            if (scene.getIngamePlayerCount() > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
