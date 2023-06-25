@@ -198,6 +198,7 @@ public class InGameStage implements Stage {
                                    ? 100
                                    : (int)Math.rint(((double)(stats.getHeadshotHits()) / (double)stats.getShots()) * 100);
             TagResolver[] tagResolvers = new TagResolver[] {
+                    Placeholder.component("map", settings.displayName()),
                     Placeholder.component("final_time", finalTime),
                     Placeholder.component("best_round", Component.text(bestRound)),
                     Placeholder.component("total_shots", Component.text(stats.getShots())),
@@ -206,6 +207,8 @@ public class InGameStage implements Stage {
                     Placeholder.component("gun_accuracy", Component.text(gunAccuracy)),
                     Placeholder.component("headshot_accuracy", Component.text(headshotAccuracy)),
                     Placeholder.component("kills", Component.text(stats.getKills())),
+                    Placeholder.component("coins_gained", Component.text(stats.getCoinsGained())),
+                    Placeholder.component("coins_spent", Component.text(stats.getCoinsSpent())),
                     Placeholder.component("knocks", Component.text(stats.getKnocks())),
                     Placeholder.component("deaths", Component.text(stats.getDeaths())),
                     Placeholder.component("revives", Component.text(stats.getRevives()))

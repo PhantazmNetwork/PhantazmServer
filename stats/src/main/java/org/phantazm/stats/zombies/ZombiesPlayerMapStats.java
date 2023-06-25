@@ -33,6 +33,14 @@ public interface ZombiesPlayerMapStats {
 
     void setKills(int kills);
 
+    int getCoinsGained();
+
+    void setCoinsGained(int goldGained);
+
+    int getCoinsSpent();
+
+    void setCoinsSpent(int goldSpent);
+
     int getKnocks();
 
     void setKnocks(int knocks);

@@ -24,6 +24,10 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
 
     private int kills;
 
+    private int coinsGained;
+
+    private int coinsSpent;
+
     private int knocks;
 
     private int deaths;
@@ -36,9 +40,9 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
 
     private int headshotHits;
 
-    public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey,
-            int gamesPlayed, int wins, @Nullable Long bestTime, int roundsSurvived, int kills, int knocks, int deaths, int revives,
-            int shots, int regularHits, int headshotHits) {
+    public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins,
+            @Nullable Long bestTime, int roundsSurvived, int kills, int knocks, int coinsGained, int coinsSpent,
+            int deaths, int revives, int shots, int regularHits, int headshotHits) {
         this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
         this.mapKey = Objects.requireNonNull(mapKey, "mapKey");
         this.gamesPlayed = gamesPlayed;
@@ -46,6 +50,8 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
         this.bestTime = bestTime;
         this.roundsSurvived = roundsSurvived;
         this.kills = kills;
+        this.coinsGained = coinsGained;
+        this.coinsSpent = coinsSpent;
         this.knocks = knocks;
         this.deaths = deaths;
         this.revives = revives;
@@ -55,7 +61,7 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     public static ZombiesPlayerMapStats createBasicStats(@NotNull UUID playerUUID, @NotNull Key mapKey) {
-        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0);
+        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     @Override
@@ -116,6 +122,26 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     @Override
     public void setKills(int kills) {
         this.kills = kills;
+    }
+
+    @Override
+    public int getCoinsGained() {
+        return coinsGained;
+    }
+
+    @Override
+    public void setCoinsGained(int coinsGained) {
+        this.coinsGained = coinsGained;
+    }
+
+    @Override
+    public int getCoinsSpent() {
+        return coinsSpent;
+    }
+
+    @Override
+    public void setCoinsSpent(int coinsSpent) {
+        this.coinsSpent = coinsSpent;
     }
 
     @Override

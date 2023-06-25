@@ -1,10 +1,13 @@
 package org.phantazm.zombies.game.coin;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.coin.BasicPlayerCoins;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -15,6 +18,7 @@ import org.phantazm.zombies.coin.component.TransactionComponentCreator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -30,7 +34,9 @@ public class BasicPlayerCoinsTest {
         when(playerView.getPlayer()).thenReturn(Optional.of(player));
         TransactionComponentCreator componentCreator = new BasicTransactionComponentCreator();
 
-        coins = new BasicPlayerCoins(playerView, componentCreator, initialCoins);
+        coins = new BasicPlayerCoins(playerView,
+                BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(), Key.key("phantazm:test")),
+                componentCreator, initialCoins);
     }
 
     @Test

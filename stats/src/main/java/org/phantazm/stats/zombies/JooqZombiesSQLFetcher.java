@@ -20,21 +20,23 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
             @NotNull ZombiesPlayerMapStats mapStats) {
         using(connection).insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),
                         field("games_played"), field("wins"), field("best_time"), field("rounds_survived"), field("kills"),
-                        field("knocks"), field("deaths"), field("revives"), field("shots"), field("regular_hits"),
-                        field("headshot_hits"))
+                        field("coins_gained"), field("coins_spent"), field("knocks"), field("deaths"), field("revives"),
+                        field("shots"), field("regular_hits"), field("headshot_hits"))
                 .values(mapStats.getPlayerUUID().toString(), mapStats.getMapKey().asString(), mapStats.getGamesPlayed(),
                         mapStats.getWins(), mapStats.getBestTime().orElse(null), mapStats.getRoundsSurvived(),
-                        mapStats.getKills(), mapStats.getKnocks(), mapStats.getDeaths(), mapStats.getRevives(),
-                        mapStats.getShots(), mapStats.getRegularHits(), mapStats.getHeadshotHits())
-                .onDuplicateKeyUpdate()
+                        mapStats.getKills(), mapStats.getCoinsGained(), mapStats.getCoinsSpent(), mapStats.getKnocks(),
+                        mapStats.getDeaths(), mapStats.getRevives(), mapStats.getShots(), mapStats.getRegularHits(),
+                        mapStats.getHeadshotHits()).onDuplicateKeyUpdate()
                 .set(field("games_played"), field("games_played", SQLDataType.INTEGER).plus(mapStats.getGamesPlayed()))
-                .set(field("wins"), field("wins", SQLDataType.INTEGER).plus(mapStats.getWins()))
-                .set(field("best_time"), mapStats.getBestTime().isPresent()
-                                         ? when(field("best_time").isNotNull(), least(field("best_time"),
-                        mapStats.getBestTime().get())).otherwise(inline(null, SQLDataType.INTEGER))
-                                         : field("best_time", SQLDataType.BIGINT)).set(field("rounds_survived"),
+                .set(field("wins"), field("wins", SQLDataType.INTEGER).plus(mapStats.getWins())).set(field("best_time"),
+                        mapStats.getBestTime().isPresent() ? when(field("best_time").isNotNull(),
+                                least(field("best_time"), mapStats.getBestTime().get())).otherwise(
+                                inline(null, SQLDataType.INTEGER)) : field("best_time", SQLDataType.BIGINT))
+                .set(field("rounds_survived"),
                         field("rounds_survived", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
                 .set(field("kills"), field("kills", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
+                .set(field("coins_gained"), field("coins_gained", SQLDataType.INTEGER).plus(mapStats.getCoinsGained()))
+                .set(field("coins_spent"), field("coins_spent", SQLDataType.INTEGER).plus(mapStats.getCoinsSpent()))
                 .set(field("knocks"), field("knocks", SQLDataType.INTEGER).plus(mapStats.getKnocks()))
                 .set(field("deaths"), field("deaths", SQLDataType.INTEGER).plus(mapStats.getDeaths()))
                 .set(field("revives"), field("revives", SQLDataType.INTEGER).plus(mapStats.getRevives()))

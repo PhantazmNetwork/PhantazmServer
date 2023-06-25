@@ -92,7 +92,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         ZombiesPlayerMapStats stats =
                 BasicZombiesPlayerMapStats.createBasicStats(playerView.getUUID(), mapSettingsInfo.id());
 
-        PlayerCoins coins = new BasicPlayerCoins(playerView, new BasicTransactionComponentCreator(), 0);
+        PlayerCoins coins = new BasicPlayerCoins(playerView, stats, new BasicTransactionComponentCreator(), 0);
         PlayerKills kills = new BasicPlayerKills(stats);
 
         InventoryProfile livingProfile = new BasicInventoryProfile(45);
