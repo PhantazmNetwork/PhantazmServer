@@ -18,5 +18,8 @@ public record PartyCommandConfig(@NotNull Component notInParty,
                                  @NotNull Component cannotKickMembers,
                                  @NotNull String toKickNotInPartyFormat,
                                  @NotNull Component cannotKickSelf,
-                                 @NotNull String cannotKickOtherFormat) {
+                                 @NotNull String cannotKickOtherFormat,
+                                 @NotNull String listFormat,
+                                 @NotNull String onlineMemberFormat,
+                                 @NotNull String offlineMemberFormat) {
 }

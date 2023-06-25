@@ -28,7 +28,7 @@ public class PartyCommand {
                 viewProvider));
         command.addSubcommand(
                 PartyInviteCommand.inviteCommand(config, miniMessage, partyHolder, viewProvider, partyCreator));
-        command.addSubcommand(PartyListCommand.listCommand(config, partyHolder.uuidToGuild()));
+        command.addSubcommand(PartyListCommand.listCommand(config, miniMessage, partyHolder.uuidToGuild()));
 
         return command;
     }
