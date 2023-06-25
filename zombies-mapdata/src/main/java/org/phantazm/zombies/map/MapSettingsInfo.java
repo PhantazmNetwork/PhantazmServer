@@ -64,7 +64,8 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull String deathMessageToKilledFormat,
                               @NotNull String deathMessageToOthersFormat,
                               @NotNull String rejoinMessageFormat,
-                              @NotNull String quitMessageFormat) {
+                              @NotNull String quitMessageFormat,
+                              @NotNull String endGameStatsFormat) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -128,6 +129,6 @@ public record MapSettingsInfo(int mapDataVersion,
                 Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false, false, 30, 5,
                 0, 4.5F, false, new ArrayList<>(0), new HashMap<>(0), new HashMap<>(),
                 Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F), "", "", "", "",
-                "", "", "", "", "", "", "", "", "", "", "", "");
+                "", "", "", "", "", "", "", "", "", "", "", "", "");
     }
 }

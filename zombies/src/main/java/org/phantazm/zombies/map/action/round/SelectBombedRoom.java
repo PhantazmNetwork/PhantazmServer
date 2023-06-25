@@ -22,6 +22,7 @@ import org.phantazm.commons.TickableTask;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.damage.ZombiesDamageType;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
@@ -161,7 +162,7 @@ public class SelectBombedRoom implements Action<Round> {
                                         player.sendMessage(data.inAreaMessage);
                                     }
 
-                                    player.damage(DamageType.VOID, data.damage, true);
+                                    player.damage(ZombiesDamageType.BOMBING, data.damage, true);
                                 }
                                 else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
                                     zombiesPlayer.removeCancellable(stateId);

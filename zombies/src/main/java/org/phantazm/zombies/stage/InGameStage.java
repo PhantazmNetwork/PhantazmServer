@@ -190,67 +190,28 @@ public class InGameStage implements Stage {
             }
 
             ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
-
-            int totalShots = stats.getShots();
-            int gunAccuracy = totalShots <= 0
+            int gunAccuracy = stats.getShots() <= 0
                               ? 100
                               : (int)Math.rint(((double)(stats.getRegularHits() + stats.getHeadshotHits()) /
-                                      (double)totalShots) * 100);
-
-            int headshotAccuracy = totalShots <= 0
+                                      (double)stats.getShots()) * 100);
+            int headshotAccuracy = stats.getShots() <= 0
                                    ? 100
-                                   : (int)Math.rint(((double)(stats.getHeadshotHits()) / (double)totalShots) * 100);
+                                   : (int)Math.rint(((double)(stats.getHeadshotHits()) / (double)stats.getShots()) * 100);
+            TagResolver[] tagResolvers = new TagResolver[] {
+                    Placeholder.component("final_time", finalTime),
+                    Placeholder.component("best_round", Component.text(bestRound)),
+                    Placeholder.component("total_shots", Component.text(stats.getShots())),
+                    Placeholder.component("regular_hits", Component.text(stats.getRegularHits())),
+                    Placeholder.component("headshot_hits", Component.text(stats.getHeadshotHits())),
+                    Placeholder.component("gun_accuracy", Component.text(gunAccuracy)),
+                    Placeholder.component("headshot_accuracy", Component.text(headshotAccuracy)),
+                    Placeholder.component("kills", Component.text(stats.getKills())),
+                    Placeholder.component("knocks", Component.text(stats.getKnocks())),
+                    Placeholder.component("deaths", Component.text(stats.getDeaths())),
+                    Placeholder.component("revives", Component.text(stats.getRevives()))
+            };
 
-            zombiesPlayer.sendMessage(Component.text("==========================================", NamedTextColor.GREEN,
-                    TextDecoration.STRIKETHROUGH));
-
-            zombiesPlayer.sendMessage(
-                    Component.text("Zombies", NamedTextColor.YELLOW).append(Component.text(" - ", NamedTextColor.WHITE))
-                            .append(finalTime).append(Component.text(" (", NamedTextColor.GRAY))
-                            .append(Component.text("Round ", NamedTextColor.RED))
-                            .append(Component.text(bestRound, NamedTextColor.RED))
-                            .append(Component.text(")", NamedTextColor.GRAY)));
-
-            zombiesPlayer.sendMessage(Component.empty());
-            zombiesPlayer.sendMessage(Component.text("Easy Difficulty", NamedTextColor.DARK_GREEN));
-            zombiesPlayer.sendMessage(Component.empty());
-
-            zombiesPlayer.sendMessage(
-                    Component.text("Times Knocked Down", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
-                            .append(Component.text(" - ", NamedTextColor.GRAY))
-                            .append(Component.text(stats.getKnocks(), NamedTextColor.GREEN)));
-
-            zombiesPlayer.sendMessage(Component.text("Deaths", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
-                    .append(Component.text(" - ", NamedTextColor.GRAY))
-                    .append(Component.text(stats.getDeaths(), NamedTextColor.GREEN)));
-
-            zombiesPlayer.sendMessage(
-                    Component.text("Zombie Kills", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
-                            .append(Component.text(" - ", NamedTextColor.GRAY))
-                            .append(Component.text(zombiesPlayer.module().getKills().getKills(),
-                                    NamedTextColor.GREEN)));
-
-            zombiesPlayer.sendMessage(
-                    Component.text("Players Revived", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
-                            .append(Component.text(" - ", NamedTextColor.GRAY))
-                            .append(Component.text(stats.getRevives(), NamedTextColor.GREEN)));
-
-            zombiesPlayer.sendMessage(
-                    Component.text("Gun Accuracy", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
-                            .append(Component.text(" - ", NamedTextColor.GRAY))
-                            .append(Component.text(gunAccuracy, NamedTextColor.GREEN).append(Component.text("%"))));
-
-            zombiesPlayer.sendMessage(
-                    Component.text("Headshot Accuracy", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
-                            .append(Component.text(" - ", NamedTextColor.GRAY))
-                            .append(Component.text(headshotAccuracy, NamedTextColor.GREEN)
-                                    .append(Component.text("%"))));
-
-
-            zombiesPlayer.sendMessage(Component.empty());
-
-            zombiesPlayer.sendMessage(Component.text("==========================================", NamedTextColor.GREEN,
-                    TextDecoration.STRIKETHROUGH));
+            zombiesPlayer.sendMessage(miniMessage.deserialize(settings.endGameStatsFormat(), tagResolvers));
         }
 
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {
