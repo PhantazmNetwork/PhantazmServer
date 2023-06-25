@@ -173,6 +173,7 @@ public class InGameStage implements Stage {
         }
         else {
             instance.sendTitlePart(TitlePart.TITLE, Component.text("You lost...", NamedTextColor.RED));
+            instance.sendTitlePart(TitlePart.SUBTITLE, Component.empty());
         }
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
