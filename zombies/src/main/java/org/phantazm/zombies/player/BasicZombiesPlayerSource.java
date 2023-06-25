@@ -183,7 +183,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     corpseCreator.forPlayer(instance, zombiesPlayerWrapper.get(), context.getKnockLocation(),
                             reviveHandler);
 
-
+            corpseWrapper.set(corpse);
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
                             sidebar, tabList, stats), corpse.asKnockActivable(), new Activable() {
