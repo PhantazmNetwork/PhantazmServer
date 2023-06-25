@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.event.SceneShutdownEvent;
-import org.phantazm.server.PhantazmServer;
 import org.phantazm.server.config.server.ServerConfig;
 
 import java.util.Objects;
@@ -36,9 +35,9 @@ public class OrderlyShutdown extends Command {
 
             initialized = true;
 
-            MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-                Audiences.all().sendMessage(serverConfig.shutdownMessage());
-            }, TaskSchedule.immediate(), TaskSchedule.seconds(30));
+            MinecraftServer.getSchedulerManager()
+                    .scheduleTask(() -> Audiences.all().sendMessage(serverConfig.shutdownMessage()),
+                            TaskSchedule.immediate(), TaskSchedule.seconds(30));
 
             for (SceneRouter<?, ?> router : routerStore.getRouters()) {
                 if (router.isGame()) {
@@ -47,24 +46,30 @@ public class OrderlyShutdown extends Command {
             }
 
             globalNode.addListener(SceneShutdownEvent.class, this::onSceneShutdown);
+
+            if (noGamesActive()) {
+                System.exit(0);
+            }
         });
     }
 
-    private void onSceneShutdown(@NotNull SceneShutdownEvent event) {
-        boolean anyGames = false;
+    private boolean noGamesActive() {
         for (SceneRouter<?, ?> router : routerStore.getRouters()) {
             if (!router.isGame()) {
                 continue;
             }
 
             if (router.hasScenes()) {
-                anyGames = true;
-                break;
+                return false;
             }
         }
 
-        if (!anyGames) {
-            PhantazmServer.shutdown("orderly shutdown completion");
+        return true;
+    }
+
+    private void onSceneShutdown(@NotNull SceneShutdownEvent event) {
+        if (noGamesActive()) {
+            System.exit(0);
         }
     }
 }
