@@ -302,13 +302,28 @@ public final class MapProcessors {
                     keyToListKeyMap.dataFromElement(element.getElementOrThrow("defaultEquipment"));
             Map<Key, EquipmentGroupInfo> equipmentGroups =
                     keyToEquipmentGroup.dataFromElement(element.getElementOrThrow("equipmentGroups"));
+            Sound countdownTickSound =
+                    ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("countdownTickSound"));
+            String countdownTimeFormat = element.getStringOrThrow("countdownTimeFormat");
+            String winTitleFormat = element.getStringOrThrow("winTitleFormat");
+            String winSubtitleFormat = element.getStringOrThrow("winSubtitleFormat");
+            String lossTitleFormat = element.getStringOrThrow("lossTitleFormat");
+            String lossSubtitleFormat = element.getStringOrThrow("lossSubtitleFormat");
+            String reviveStatusToReviverFormat = element.getStringOrThrow("reviveStatusToReviverFormat");
+            String reviveStatusToKnockedFormat = element.getStringOrThrow("reviveStatusToKnockedFormat");
+            String dyingStatusFormat = element.getStringOrThrow("dyingStatusFormat");
+            String knockedMessageFormat = element.getStringOrThrow("knockedMessageFormat");
+            String deathMessageFormat = element.getStringOrThrow("deathMessageFormat");
+            String rejoinMessageFormat = element.getStringOrThrow("rejoinMessageFormat");
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
                     corpseDeathTicks, healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks,
                     rollsPerChest, punchDamage, punchRange, mobPlayerCollisions, milestoneRounds, defaultEquipment,
-                    equipmentGroups);
+                    equipmentGroups, countdownTickSound, countdownTimeFormat, winTitleFormat, winSubtitleFormat,
+                    lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat, reviveStatusToKnockedFormat,
+                    dyingStatusFormat, knockedMessageFormat, deathMessageFormat, rejoinMessageFormat);
         }
 
         @Override
@@ -352,6 +367,18 @@ public final class MapProcessors {
             node.put("milestoneRounds", integerList.elementFromData(mapConfig.milestoneRounds()));
             node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
             node.put("equipmentGroups", keyToEquipmentGroup.elementFromData(mapConfig.equipmentGroups()));
+            node.put("countdownTickSound", ConfigProcessors.sound().elementFromData(mapConfig.countdownTickSound()));
+            node.putString("countdownTimeFormat", mapConfig.countdownTimeFormat());
+            node.putString("winTitleFormat", mapConfig.winTitleFormat());
+            node.putString("winSubtitleFormat", mapConfig.winSubtitleFormat());
+            node.putString("lossTitleFormat", mapConfig.lossTitleFormat());
+            node.putString("lossSubtitleFormat", mapConfig.lossSubtitleFormat());
+            node.putString("reviveStatusToReviverFormat", mapConfig.reviveStatusToReviverFormat());
+            node.putString("reviveStatusToKnockedFormat", mapConfig.reviveStatusToKnockedFormat());
+            node.putString("dyingStatusFormat", mapConfig.dyingStatusFormat());
+            node.putString("knockedMessageFormat", mapConfig.knockedMessageFormat());
+            node.putString("deathMessageFormat", mapConfig.deathMessageFormat());
+            node.putString("rejoinMessageFormat", mapConfig.rejoinMessageFormat());
             return node;
         }
     };

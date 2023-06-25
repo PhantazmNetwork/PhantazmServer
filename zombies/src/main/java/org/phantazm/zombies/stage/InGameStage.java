@@ -6,12 +6,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -25,6 +29,7 @@ import java.util.function.Function;
 public class InGameStage implements Stage {
     private final Instance instance;
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
+    private final MapSettingsInfo settings;
     private final Map<UUID, SidebarUpdater> sidebarUpdaters = new HashMap<>();
     private final Pos spawnPos;
     private final RoundHandler roundHandler;
@@ -34,14 +39,17 @@ public class InGameStage implements Stage {
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final ShopHandler shopHandler;
     private final TickFormatter tickFormatter;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public InGameStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
-            @NotNull Map<Key, List<Key>> defaultEquipment, @NotNull Set<Key> equipmentGroups,
+            @NotNull MapSettingsInfo settings, @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler,
+            @NotNull Wrapper<Long> ticksSinceStart, @NotNull Map<Key, List<Key>> defaultEquipment,
+            @NotNull Set<Key> equipmentGroups,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
             @NotNull ShopHandler shopHandler, @NotNull TickFormatter endTimeTickFormatter) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        this.settings = Objects.requireNonNull(settings, "settings");
         this.spawnPos = Objects.requireNonNull(spawnPos, "spawnPos");
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
@@ -156,10 +164,10 @@ public class InGameStage implements Stage {
         Component finalTime = Component.text(tickFormatter.format(ticksSinceStart.get()));
         int bestRound = Math.min(roundHandler.currentRoundIndex() + 1, roundHandler.roundCount());
 
+        TagResolver roundPlaceholder = Placeholder.component("round", Component.text(bestRound));
         if (anyAlive) {
-            instance.sendTitlePart(TitlePart.TITLE, Component.text("You Win!", NamedTextColor.GREEN));
-            instance.sendTitlePart(TitlePart.SUBTITLE, Component.text("You made it to Round ", NamedTextColor.GRAY)
-                    .append(Component.text(bestRound, NamedTextColor.WHITE)).append(Component.text("!")));
+            instance.sendTitlePart(TitlePart.TITLE, miniMessage.deserialize(settings.winTitleFormat(), roundPlaceholder));
+            instance.sendTitlePart(TitlePart.SUBTITLE, miniMessage.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
                 ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
@@ -172,8 +180,8 @@ public class InGameStage implements Stage {
             }
         }
         else {
-            instance.sendTitlePart(TitlePart.TITLE, Component.text("You lost...", NamedTextColor.RED));
-            instance.sendTitlePart(TitlePart.SUBTITLE, Component.empty());
+            instance.sendTitlePart(TitlePart.TITLE, miniMessage.deserialize(settings.lossTitleFormat(), roundPlaceholder));
+            instance.sendTitlePart(TitlePart.SUBTITLE, miniMessage.deserialize(settings.lossSubtitleFormat(), roundPlaceholder));
         }
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {

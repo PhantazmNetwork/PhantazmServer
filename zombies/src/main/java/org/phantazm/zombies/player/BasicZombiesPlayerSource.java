@@ -154,8 +154,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                 (context, activables) -> {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
                     combinedActivables.add(
-                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, sidebar, tabList,
-                                    stats));
+                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, mapSettingsInfo,
+                                    sidebar, tabList, stats));
                     return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
@@ -185,13 +185,14 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             corpseWrapper.set(corpse);
             return new KnockedPlayerState(reviveHandler,
-                    List.of(new BasicKnockedStateActivable(context, instance, playerView, reviveHandler, tickFormatter,
-                            sidebar, tabList, stats), corpse.asKnockActivable(), new Activable() {
-                        @Override
-                        public void start() {
-                            meta.setCorpse(corpse);
-                        }
-                    }));
+                    List.of(new BasicKnockedStateActivable(context, instance, playerView, mapSettingsInfo,
+                                    reviveHandler, tickFormatter, sidebar, tabList, stats), corpse.asKnockActivable(),
+                            new Activable() {
+                                @Override
+                                public void start() {
+                                    meta.setCorpse(corpse);
+                                }
+                            }));
         };
         Map<UUID, CancellableState> stateMap = new ConcurrentHashMap<>();
         TickTaskScheduler taskScheduler = new BasicTickTaskScheduler();

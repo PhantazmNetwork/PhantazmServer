@@ -205,8 +205,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
                         settings.maxPlayers());
         StageTransition stageTransition =
-                createStageTransition(instance, settings.introMessages(), mapObjects.module().random(),
-                        zombiesPlayers.values(), spawnPos, roundHandler, ticksSinceStart, sidebarModule, shopHandler);
+                createStageTransition(instance, mapObjects.module().random(), zombiesPlayers.values(), spawnPos,
+                        roundHandler, ticksSinceStart, sidebarModule, shopHandler);
 
         LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
 
@@ -339,8 +339,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return node;
     }
 
-    private @NotNull StageTransition createStageTransition(@NotNull Instance instance,
-            @NotNull List<Component> messages, @NotNull Random random,
+    private @NotNull StageTransition createStageTransition(@NotNull Instance instance, @NotNull Random random,
             @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
             @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
@@ -349,12 +348,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
         TickFormatter tickFormatter = new DurationTickFormatter(new DurationTickFormatter.Data(true, false));
 
-        Stage countdown =
-                new CountdownStage(instance, zombiesPlayers, messages, random, 400L, alertTicks, tickFormatter,
-                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
-
         MapSettingsInfo settings = mapInfo.settings();
-        Stage inGame = new InGameStage(instance, zombiesPlayers, spawnPos, roundHandler, ticksSinceStart,
+        Stage countdown =
+                new CountdownStage(instance, zombiesPlayers, settings, random, 400L, alertTicks, tickFormatter,
+                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
+        Stage inGame = new InGameStage(instance, zombiesPlayers, settings, spawnPos, roundHandler, ticksSinceStart,
                 settings.defaultEquipment(), settings.equipmentGroups().keySet(),
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler,
                 new AnalogTickFormatter(new AnalogTickFormatter.Data(false)));
