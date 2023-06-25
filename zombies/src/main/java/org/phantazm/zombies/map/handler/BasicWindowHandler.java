@@ -115,6 +115,28 @@ public class BasicWindowHandler implements WindowHandler {
                 continue;
             }
 
+            {
+                Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                if (playerOptional.isEmpty()) {
+                    repairOperationIterator.remove();
+                    continue;
+                }
+
+                Player player = playerOptional.get();
+                Window targetWindow = repairOperation.window;
+
+                BoundingBox boundingBox = player.getBoundingBox();
+                double width = boundingBox.width();
+                double height = boundingBox.height();
+
+                Optional<Window> windowOptional =
+                        windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius);
+                if (windowOptional.isEmpty() || windowOptional.get() != targetWindow) {
+                    repairOperationIterator.remove();
+                    continue;
+                }
+            }
+
             long elapsedMS = time - repairOperation.lastRepairTime;
             long elapsedTicks = elapsedMS / MinecraftServer.TICK_MS;
 
