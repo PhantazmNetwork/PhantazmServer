@@ -76,7 +76,7 @@ public class Pathfinding {
         EntityType type = entity.getEntityType();
         return PositionResolver.asIfByInitial(
                 new BasicNodeSnapper(spaceHandler.space(), type.width(), type.height(), fallTolerance(), jumpHeight(),
-                        Vec.EPSILON));
+                        Vec.EPSILON), 16, type.width(), Vec.EPSILON);
     }
 
     public @NotNull BiPredicate<Vec3D, Vec3D> targetChangePredicate(@NotNull Entity entity) {
