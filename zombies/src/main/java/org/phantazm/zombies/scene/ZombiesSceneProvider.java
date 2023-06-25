@@ -33,6 +33,7 @@ import org.phantazm.core.sound.BasicSongPlayer;
 import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.DurationTickFormatter;
+import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobModel;
@@ -346,11 +347,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Stage idle = new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")));
 
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
-        TickFormatter tickFormatter = new DurationTickFormatter(new DurationTickFormatter.Data(true, false));
 
         MapSettingsInfo settings = mapInfo.settings();
         Stage countdown =
-                new CountdownStage(instance, zombiesPlayers, settings, random, 400L, alertTicks, tickFormatter,
+                new CountdownStage(instance, zombiesPlayers, settings, random, 400L, alertTicks,
+                        new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(0)),
                         newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
         Stage inGame = new InGameStage(instance, zombiesPlayers, settings, spawnPos, roundHandler, ticksSinceStart,
                 settings.defaultEquipment(), settings.equipmentGroups().keySet(),
