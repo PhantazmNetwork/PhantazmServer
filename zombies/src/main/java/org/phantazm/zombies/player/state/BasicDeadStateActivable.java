@@ -1,11 +1,14 @@
 package org.phantazm.zombies.player.state;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.title.TitlePart;
+import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
@@ -18,9 +21,7 @@ import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class BasicDeadStateActivable implements Activable {
     private static final TagResolver[] EMPTY_TAG_RESOLVER_ARRAY = new TagResolver[0];
@@ -57,7 +58,20 @@ public class BasicDeadStateActivable implements Activable {
             tabList.addViewer(player);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
-            instance.sendMessage(buildDeathMessage(displayName));
+            if (context.isRejoin()) {
+                TagResolver rejoinerPlaceholder = Placeholder.component("rejoiner", displayName);
+                instance.sendMessage(miniMessage.deserialize(settings.rejoinMessageFormat(), rejoinerPlaceholder));
+                return;
+            }
+
+            Set<Player> players = new HashSet<>(instance.getPlayers());
+            TagResolver[] tagResolvers = getTagResolvers(displayName);
+            playerView.getPlayer().ifPresent(player -> {
+                players.remove(player);
+                player.sendMessage(miniMessage.deserialize(settings.deathMessageToKilledFormat(), tagResolvers));
+            });
+            Audience instanceAudience = PacketGroupingAudience.of(players);
+            instanceAudience.sendMessage(miniMessage.deserialize(settings.deathMessageToOthersFormat(), tagResolvers));
         });
 
         stats.setDeaths(stats.getDeaths() + 1);
@@ -76,12 +90,7 @@ public class BasicDeadStateActivable implements Activable {
         accessRegistry.switchAccess(null);
     }
 
-    private @NotNull Component buildDeathMessage(@NotNull Component displayName) {
-        if (context.isRejoin()) {
-            TagResolver rejoinerPlaceholder = Placeholder.component("rejoiner", displayName);
-            return miniMessage.deserialize(settings.rejoinMessageFormat(), rejoinerPlaceholder);
-        }
-
+    private TagResolver[] getTagResolvers(@NotNull Component displayName) {
         boolean knockedRoomPresent = context.getDeathRoomName().isPresent();
         boolean killerPresent = context.getKiller().isPresent();
         List<TagResolver> tagResolvers = new ArrayList<>();
@@ -95,7 +104,7 @@ public class BasicDeadStateActivable implements Activable {
             tagResolvers.add(Placeholder.component("killer", context.getKiller().get()));
         }
 
-        return miniMessage.deserialize(settings.deathMessageFormat(), tagResolvers.toArray(EMPTY_TAG_RESOLVER_ARRAY));
+        return tagResolvers.toArray(EMPTY_TAG_RESOLVER_ARRAY);
     }
 
 }

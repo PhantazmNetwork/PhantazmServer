@@ -312,9 +312,14 @@ public final class MapProcessors {
             String reviveStatusToReviverFormat = element.getStringOrThrow("reviveStatusToReviverFormat");
             String reviveStatusToKnockedFormat = element.getStringOrThrow("reviveStatusToKnockedFormat");
             String dyingStatusFormat = element.getStringOrThrow("dyingStatusFormat");
-            String knockedMessageFormat = element.getStringOrThrow("knockedMessageFormat");
-            String deathMessageFormat = element.getStringOrThrow("deathMessageFormat");
+            String knockedMessageToKilledFormat = element.getStringOrThrow("knockedMessageToKilledFormat");
+            String knockedMessageToOthersFormat = element.getStringOrThrow("knockedMessageToOthersFormat");
+            String knockedTitleFormat = element.getStringOrDefault("knockedTitleFormat");
+            String knockedSubtitleFormat = element.getStringOrDefault("knockedSubtitleFormat");
+            String deathMessageToKilledFormat = element.getStringOrThrow("deathMessageToKilledFormat");
+            String deathMessageToOthersFormat = element.getStringOrThrow("deathMessageToOthersFormat");
             String rejoinMessageFormat = element.getStringOrThrow("rejoinMessageFormat");
+            String quitMessageFormat = element.getStringOrDefault("quitMessageFormat");
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
@@ -323,7 +328,9 @@ public final class MapProcessors {
                     rollsPerChest, punchDamage, punchRange, mobPlayerCollisions, milestoneRounds, defaultEquipment,
                     equipmentGroups, countdownTickSound, countdownTimeFormat, winTitleFormat, winSubtitleFormat,
                     lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat, reviveStatusToKnockedFormat,
-                    dyingStatusFormat, knockedMessageFormat, deathMessageFormat, rejoinMessageFormat);
+                    dyingStatusFormat, knockedMessageToKilledFormat, knockedMessageToOthersFormat, knockedTitleFormat,
+                    knockedSubtitleFormat, deathMessageToKilledFormat, deathMessageToOthersFormat, rejoinMessageFormat,
+                    quitMessageFormat);
         }
 
         @Override
@@ -376,9 +383,14 @@ public final class MapProcessors {
             node.putString("reviveStatusToReviverFormat", mapConfig.reviveStatusToReviverFormat());
             node.putString("reviveStatusToKnockedFormat", mapConfig.reviveStatusToKnockedFormat());
             node.putString("dyingStatusFormat", mapConfig.dyingStatusFormat());
-            node.putString("knockedMessageFormat", mapConfig.knockedMessageFormat());
-            node.putString("deathMessageFormat", mapConfig.deathMessageFormat());
+            node.putString("knockedMessageToKnockedFormat", mapConfig.knockedMessageToKnockedFormat());
+            node.putString("knockedMessageToOthersFormat", mapConfig.knockedMessageToOthersFormat());
+            node.putString("knockedTitleFormat", mapConfig.knockedTitleFormat());
+            node.putString("knockedSubtitleFormat", mapConfig.knockedTitleFormat());
+            node.putString("deathMessageToKilledFormat", mapConfig.deathMessageToKilledFormat());
+            node.putString("deathMessageToOthersFormat", mapConfig.deathMessageToOthersFormat());
             node.putString("rejoinMessageFormat", mapConfig.rejoinMessageFormat());
+            node.putString("quitMessageFormat", mapConfig.quitMessageFormat());
             return node;
         }
     };

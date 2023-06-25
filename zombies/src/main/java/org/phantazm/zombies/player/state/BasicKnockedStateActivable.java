@@ -1,13 +1,17 @@
 package org.phantazm.zombies.player.state;
 
 import com.github.steanky.toolkit.collection.Wrapper;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.title.TitlePart;
+import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
@@ -22,9 +26,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class BasicKnockedStateActivable implements Activable {
@@ -80,7 +82,19 @@ public class BasicKnockedStateActivable implements Activable {
             context.getVehicle().addPassenger(player);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
-            instance.sendMessage(buildKnockedMessage(displayName));
+            Set<Player> players = new HashSet<>(instance.getPlayers());
+            TagResolver[] tagResolvers = getTagResolvers(displayName);
+            playerView.getPlayer().ifPresent(player -> {
+                players.remove(player);
+                player.sendMessage(miniMessage.deserialize(settings.knockedMessageToKnockedFormat(), tagResolvers));
+            });
+            Audience instanceAudience = PacketGroupingAudience.of(players);
+            instanceAudience.sendMessage(
+                    miniMessage.deserialize(settings.knockedMessageToOthersFormat(), tagResolvers));
+            instanceAudience.sendTitlePart(TitlePart.TITLE,
+                    miniMessage.deserialize(settings.knockedTitleFormat(), tagResolvers));
+            instanceAudience.sendTitlePart(TitlePart.SUBTITLE,
+                    miniMessage.deserialize(settings.knockedSubtitleFormat(), tagResolvers));
         });
 
         stats.setKnocks(stats.getKnocks() + 1);
@@ -149,14 +163,14 @@ public class BasicKnockedStateActivable implements Activable {
         });
     }
 
-    private @NotNull Component buildKnockedMessage(@NotNull Component displayName) {
+    private TagResolver[] getTagResolvers(@NotNull Component displayName) {
         boolean knockedRoomPresent = context.getKnockRoom().isPresent();
         boolean killerPresent = context.getKiller().isPresent();
         List<TagResolver> tagResolvers = new ArrayList<>();
         tagResolvers.add(Placeholder.component("knocked", displayName));
-        tagResolvers.add(MiniMessageUtils.optional("knocked_room_present",
-                knockedRoomPresent));
+        tagResolvers.add(MiniMessageUtils.optional("knocked_room_present", knockedRoomPresent));
         tagResolvers.add(MiniMessageUtils.optional("killer_present", killerPresent));
+        tagResolvers.add(Placeholder.unparsed("time", tickFormatter.format(reviveHandler.getTicksUntilDeath())));
         if (knockedRoomPresent) {
             tagResolvers.add(Placeholder.component("knocked_room", context.getKnockRoom().get()));
         }
@@ -164,6 +178,7 @@ public class BasicKnockedStateActivable implements Activable {
             tagResolvers.add(Placeholder.component("killer", context.getKiller().get()));
         }
 
-        return miniMessage.deserialize(settings.knockedMessageFormat(), tagResolvers.toArray(EMPTY_TAG_RESOLVER_ARRAY));
+        return tagResolvers.toArray(EMPTY_TAG_RESOLVER_ARRAY);
     }
+
 }
