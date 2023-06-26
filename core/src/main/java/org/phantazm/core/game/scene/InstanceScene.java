@@ -59,9 +59,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     @Override
     public void shutdown() {
         shutdown = true;
-
-        instance.getPlayers().forEach(player -> player.kick("The world you were in was unloaded!"));
-        MinecraftServer.getInstanceManager().unregisterInstance(instance);
+        MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
     }
 
     @Override
