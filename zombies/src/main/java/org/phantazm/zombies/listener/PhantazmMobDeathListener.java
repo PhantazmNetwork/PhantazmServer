@@ -122,15 +122,24 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
             Vec normal = new Vec(xSmaller ? 1 : 0, 0, xSmaller ? 0 : 1);
 
-            boolean invert = (xSmaller ? center.x() - position.x() : center.z() - position.z()) < 0;
-            if (invert) {
-                normal = normal.mul(-1);
-            }
-
             normal = normal.mul(xSmaller ? frameRegion.lengthX() / 2.0 : frameRegion.lengthZ() / 2.0)
                     .add(OFFSET.mul(normal));
 
-            Point test = seekDown(center.add(normal));
+            Vec otherNormal = normal.mul(-1);
+
+            Vec targetNormal;
+            if (roomTracker.atPoint(center.add(normal)).isPresent()) {
+                targetNormal = normal;
+            }
+            else if (roomTracker.atPoint(center.add(otherNormal)).isPresent()) {
+                targetNormal = otherNormal;
+            }
+            else {
+                targetNormal = normal;
+                LOGGER.warn("Unable to find matching room at window near " + center);
+            }
+
+            Point test = seekDown(center.add(targetNormal));
             if (roomTracker.atPoint(test).isEmpty()) {
                 LOGGER.warn("Spawning powerup outside of a room");
             }
