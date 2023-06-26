@@ -17,7 +17,6 @@ import com.github.steanky.proxima.snapper.NodeSnapper;
 import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import com.github.steanky.vector.Vec3IBiPredicate;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.*;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
@@ -28,6 +27,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
+    public static final double PATH_EPSILON = 1E-3;
+
     public interface Factory {
         @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
                 @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler,
@@ -76,7 +77,7 @@ public class Pathfinding {
         EntityType type = entity.getEntityType();
         return PositionResolver.asIfByInitial(
                 new BasicNodeSnapper(spaceHandler.space(), type.width(), type.height(), fallTolerance(), jumpHeight(),
-                        Vec.EPSILON), 16, type.width(), Vec.EPSILON);
+                        PATH_EPSILON), 16, type.width(), PATH_EPSILON);
     }
 
     public @NotNull BiPredicate<Vec3D, Vec3D> targetChangePredicate(@NotNull Entity entity) {
@@ -138,7 +139,7 @@ public class Pathfinding {
 
     protected @NotNull NodeSnapper nodeSnapper() {
         return new BasicNodeSnapper(spaceHandler.space(), entityType.width(), entityType.height(), fallTolerance(),
-                jumpHeight(), Vec.EPSILON);
+                jumpHeight(), PATH_EPSILON);
     }
 
     protected @NotNull Explorer explorer() {
