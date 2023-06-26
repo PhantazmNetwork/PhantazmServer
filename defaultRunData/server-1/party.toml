@@ -1,3 +1,4 @@
+chatFormat = "<blue>Party <dark_gray>> <reset> <<sender>> <message>"
 creatorRank = 1
 defaultRank = 0
 invitationDuration = 1200
