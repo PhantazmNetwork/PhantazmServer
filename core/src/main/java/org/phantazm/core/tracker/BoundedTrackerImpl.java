@@ -60,37 +60,6 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
     }
 
     @Override
-    public @NotNull Optional<T> closestInRangeToCenter(@NotNull Point origin, double distance) {
-        int startX = (int)Math.floor(origin.x() - distance) >> 4;
-        int startZ = (int)Math.floor(origin.z() - distance) >> 4;
-
-        int endX = (int)Math.floor(origin.x() + distance - Vec.EPSILON) >> 4;
-        int endZ = (int)Math.floor(origin.z() + distance - Vec.EPSILON) >> 4;
-
-        T closest = null;
-        double closestDistance = Double.POSITIVE_INFINITY;
-
-        for (int cx = startX; cx <= endX; cx++) {
-            for (int cz = startZ; cz <= endZ; cz++) {
-                Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(cx, cz));
-                if (chunkItems != null) {
-                    for (Object item : chunkItems) {
-                        T boundedItem = (T)item;
-
-                        double thisDistance = origin.distanceSquared(boundedItem.center());
-                        if (thisDistance < closestDistance && thisDistance <= distance * distance) {
-                            closest = boundedItem;
-                            closestDistance = thisDistance;
-                        }
-                    }
-                }
-            }
-        }
-
-        return Optional.ofNullable(closest);
-    }
-
-    @Override
     public @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height, double depth,
             double distance) {
         int startX = (int)Math.floor(origin.x() - distance) >> 4;
@@ -122,6 +91,44 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
                             double agentZ = MathUtils.clamp(boundZ, origin.z() - halfDepth, origin.z() + halfDepth);
 
                             double thisDistance = Vec3D.distanceSquared(boundX, boundY, boundZ, agentX, agentY, agentZ);
+                            if (thisDistance < distance * distance && thisDistance < closestDistance) {
+                                closest = boundedItem;
+                                closestDistance = thisDistance;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return Optional.ofNullable(closest);
+    }
+
+    @Override
+    public @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double distance) {
+        int startX = (int)Math.floor(origin.x() - distance) >> 4;
+        int startZ = (int)Math.floor(origin.z() - distance) >> 4;
+
+        int endX = (int)Math.floor(origin.x() + distance - Vec.EPSILON) >> 4;
+        int endZ = (int)Math.floor(origin.z() + distance - Vec.EPSILON) >> 4;
+
+        T closest = null;
+        double closestDistance = Double.POSITIVE_INFINITY;
+
+        for (int cx = startX; cx <= endX; cx++) {
+            for (int cz = startZ; cz <= endZ; cz++) {
+                Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(cx, cz));
+                if (chunkItems != null) {
+                    for (Object item : chunkItems) {
+                        T boundedItem = (T)item;
+
+                        for (Bounds3I bounds : boundedItem.bounds()) {
+                            double boundX = MathUtils.clamp(origin.x(), bounds.originX(), bounds.maxX());
+                            double boundY = MathUtils.clamp(origin.y(), bounds.originY(), bounds.maxY());
+                            double boundZ = MathUtils.clamp(origin.z(), bounds.originZ(), bounds.maxZ());
+
+                            double thisDistance =
+                                    Vec3D.distanceSquared(boundX, boundY, boundZ, origin.x(), origin.y(), origin.z());
                             if (thisDistance < distance * distance && thisDistance < closestDistance) {
                                 closest = boundedItem;
                                 closestDistance = thisDistance;
