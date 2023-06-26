@@ -221,7 +221,7 @@ public final class PhantazmServer {
                 MiniMessage.miniMessage());
         LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
         ChatFeature.initialize(global, viewProvider, PartyFeature.getPartyHolder().uuidToGuild(),
-                MinecraftServer.getCommandManager());
+                PartyFeature.getConfig(), MinecraftServer.getCommandManager());
         MessagingFeature.initialize(global, serverConfig.serverInfoConfig().authType());
 
         ProximaFeature.initialize(global, contextManager, pathfinderConfig);

@@ -75,4 +75,7 @@ public abstract class BasicChatChannel implements ChatChannel {
      */
     protected abstract @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player);
 
+    protected @NotNull PlayerViewProvider getViewProvider() {
+        return viewProvider;
+    }
 }
