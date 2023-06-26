@@ -6,7 +6,7 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 
 abstract class SetupServer : DefaultTask() {
-    var dataFolder: File = project.rootDir.resolve("runData")
+    var dataFolder: File = project.rootDir.resolve("defaultRunData")
         @Internal get
 
     @TaskAction

@@ -37,6 +37,14 @@ public class IdleStage implements Stage {
     }
 
     @Override
+    public void onLeave(@NotNull ZombiesPlayer zombiesPlayer) {
+        SidebarUpdater updater = sidebarUpdaters.remove(zombiesPlayer.getUUID());
+        if (updater != null) {
+            updater.end();
+        }
+    }
+
+    @Override
     public void tick(long time) {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (!zombiesPlayer.hasQuit()) {

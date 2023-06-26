@@ -3,13 +3,16 @@ package org.phantazm.zombies.map.action.door;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.ComponentUtils;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.action.Action;
@@ -18,10 +21,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 @Model("zombies.map.door.action.send_opened_rooms")
@@ -48,26 +48,23 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
             lastInteractorOptional.get().module().getPlayerView().getUsername().whenComplete((username, err) -> {
                 if (err != null) {
                     LOGGER.warn("Error resolving display name of door-opening player", err);
+                    return;
                 }
 
                 if (username != null) {
-                    instance.sendTitlePart(data.openerNameTitlePart,
-                            Component.text().style(data.openerNameFormatStyle).append(Component.text(username))
-                                    .build());
+                    instance.sendTitlePart(data.nameTitlePart,
+                            ComponentUtils.tryFormat(data.nameFormatString, username));
                 }
                 else {
                     LOGGER.warn("Null username");
-                    instance.sendTitlePart(data.openerNameTitlePart, UNKNOWN_COMPONENT);
+                    instance.sendTitlePart(data.nameTitlePart, UNKNOWN_COMPONENT);
                 }
             });
         }
         else {
             LOGGER.warn("Interacting player was null, cannot announce opener");
-            instance.sendTitlePart(data.openerNameTitlePart, UNKNOWN_COMPONENT);
+            instance.sendTitlePart(data.nameTitlePart, UNKNOWN_COMPONENT);
         }
-
-        TextComponent.Builder builder =
-                Component.text().style(data.openedRoomsFormatStyle).append(Component.text("opened "));
 
         Map<? super Key, ? extends Room> roomMap = mapObjects.get().roomMap();
         List<Room> opensTo =
@@ -79,30 +76,36 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
                     return !room.isOpen();
                 }).toList();
 
+        StringBuilder builder = new StringBuilder();
         boolean appendedRoom = false;
         for (int i = 0; i < opensTo.size(); i++) {
             Room room = opensTo.get(i);
 
-            builder.append(room.getRoomInfo().displayName());
+            builder.append(MiniMessage.miniMessage().serialize(room.getRoomInfo().displayName()));
             appendedRoom = true;
 
             if (i < opensTo.size() - 1) {
-                builder.append(Component.text(", "));
+                builder.append(data.separator);
             }
         }
 
         if (!appendedRoom) {
-            builder.append(UNKNOWN_COMPONENT);
+            builder.append("...");
         }
 
-        instance.sendTitlePart(data.openedRoomsTitlePart, builder.build());
+        instance.sendTitlePart(data.openedRoomsTitlePart,
+                ComponentUtils.tryFormat(data.openedRoomsFormatString, builder.toString()));
     }
 
     @DataObject
-    public record Data(@NotNull Style openerNameFormatStyle,
-                       @NotNull Style openedRoomsFormatStyle,
-                       @NotNull TitlePart<Component> openerNameTitlePart,
+    public record Data(@NotNull String nameFormatString,
+                       @NotNull String openedRoomsFormatString,
+                       @NotNull String separator,
+                       @NotNull TitlePart<Component> nameTitlePart,
                        @NotNull TitlePart<Component> openedRoomsTitlePart) {
-
+        @Default("separator")
+        public static ConfigElement separatorDefault() {
+            return ConfigPrimitive.of(", ");
+        }
     }
 }

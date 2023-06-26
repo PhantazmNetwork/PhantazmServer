@@ -110,9 +110,31 @@ public class BasicWindowHandler implements WindowHandler {
         while (repairOperationIterator.hasNext()) {
             RepairOperation repairOperation = repairOperationIterator.next();
             ZombiesPlayer zombiesPlayer = repairOperation.zombiesPlayer;
-            if (!zombiesPlayer.isAlive()) {
+            if (!zombiesPlayer.canRepairWindow()) {
                 repairOperationIterator.remove();
                 continue;
+            }
+
+            {
+                Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                if (playerOptional.isEmpty()) {
+                    repairOperationIterator.remove();
+                    continue;
+                }
+
+                Player player = playerOptional.get();
+                Window targetWindow = repairOperation.window;
+
+                BoundingBox boundingBox = player.getBoundingBox();
+                double width = boundingBox.width();
+                double height = boundingBox.height();
+
+                Optional<Window> windowOptional =
+                        windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius);
+                if (windowOptional.isEmpty() || windowOptional.get() != targetWindow) {
+                    repairOperationIterator.remove();
+                    continue;
+                }
             }
 
             long elapsedMS = time - repairOperation.lastRepairTime;

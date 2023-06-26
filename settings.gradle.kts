@@ -7,6 +7,7 @@ if (localSettings.exists()) {
     apply(localSettings)
 }
 
+includeBuild("./minestom")
 pluginManagement {
     repositories {
         //necessary for phantazm-zombies-mapeditor module which contains a Fabric mod
@@ -32,6 +33,7 @@ sequenceOf(
     "mob",
     "proxima-minestom",
     "server",
+    "stats",
     "velocity",
     "zombies",
     "zombies-mapdata",

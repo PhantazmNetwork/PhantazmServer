@@ -30,8 +30,10 @@ public class PlaySoundAction implements Action<Round> {
     @Override
     public void perform(@NotNull Round round) {
         for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-            zombiesPlayer.getPlayer()
-                    .ifPresent(player -> player.playSound(Sound.sound(data.sound).seed(random.nextLong()).build()));
+            if (!zombiesPlayer.hasQuit()) {
+                zombiesPlayer.getPlayer()
+                        .ifPresent(player -> player.playSound(Sound.sound(data.sound).seed(random.nextLong()).build()));
+            }
         }
     }
 

@@ -5,10 +5,12 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.InstanceScene;
-import org.phantazm.core.game.scene.RouteResult;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
@@ -18,6 +20,9 @@ import java.util.*;
  */
 public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private final InstanceConfig instanceConfig;
+    private final Map<UUID, PlayerView> players;
+    private final NPCHandler npcHandler;
+    private final boolean quittable;
 
     private boolean joinable = true;
 
@@ -28,18 +33,23 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param instanceConfig The {@link InstanceConfig} used for the lobby's {@link Instance}
      * @param fallback       A fallback for the lobby
      */
-    public Lobby(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig, @NotNull SceneFallback fallback) {
-        super(instance, new HashMap<>(), fallback);
+    public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
+            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler, boolean quittable) {
+        super(uuid, instance, fallback);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
+        this.players = new HashMap<>();
+        this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");
+        this.npcHandler.spawnAll();
+        this.quittable = quittable;
     }
 
     @Override
-    public @NotNull RouteResult join(@NotNull LobbyJoinRequest joinRequest) {
+    public @NotNull TransferResult join(@NotNull LobbyJoinRequest joinRequest) {
         if (isShutdown()) {
-            return new RouteResult(false, Component.text("Lobby is shutdown."));
+            return TransferResult.failure(Component.text("Lobby is shutdown."));
         }
         if (!isJoinable()) {
-            return new RouteResult(false, Component.text("Lobby is not joinable."));
+            return TransferResult.failure(Component.text("Lobby is not joinable."));
         }
 
         Collection<PlayerView> playerViews = joinRequest.getPlayers();
@@ -53,19 +63,20 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         if (joiners.isEmpty()) {
-            return new RouteResult(false, Component.text("Everybody is already in the lobby."));
+            return TransferResult.failure(Component.text("Everybody is already in the lobby."));
         }
 
-        for (Pair<PlayerView, Player> player : joiners) {
+        return TransferResult.success(() -> {
+            for (Pair<PlayerView, Player> player : joiners) {
+                players.put(player.first().getUUID(), player.first());
+            }
+
             joinRequest.handleJoin(instance, instanceConfig);
-            players.put(player.first().getUUID(), player.first());
-        }
-
-        return RouteResult.SUCCESSFUL;
+        });
     }
 
     @Override
-    public @NotNull RouteResult leave(@NotNull Iterable<UUID> leavers) {
+    public @NotNull TransferResult leave(@NotNull Iterable<UUID> leavers) {
         boolean anyInside = false;
         for (UUID uuid : leavers) {
             if (players.containsKey(uuid)) {
@@ -75,14 +86,19 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         if (!anyInside) {
-            return new RouteResult(false, Component.text("None of the players are in the lobby."));
+            return TransferResult.failure(Component.text("None of the players are in the lobby."));
         }
 
-        for (UUID uuid : leavers) {
-            players.remove(uuid);
-        }
+        return TransferResult.success(() -> {
+            for (UUID uuid : leavers) {
+                players.remove(uuid);
+            }
+        });
+    }
 
-        return RouteResult.SUCCESSFUL;
+    @Override
+    public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
+        return players;
     }
 
     @Override
@@ -93,5 +109,28 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public void setJoinable(boolean joinable) {
         this.joinable = joinable;
+    }
+
+    @Override
+    public boolean isQuittable() {
+        return quittable;
+    }
+
+    @Override
+    public void shutdown() {
+        for (PlayerView player : players.values()) {
+            fallback.fallback(player);
+        }
+
+        super.shutdown();
+    }
+
+    public void cleanup() {
+        this.npcHandler.end();
+    }
+
+    @Override
+    public void tick(long time) {
+        this.npcHandler.tick(time);
     }
 }

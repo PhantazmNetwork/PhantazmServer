@@ -8,7 +8,7 @@ public interface InvitationNotification<TMember extends GuildMember> {
 
     void notifyJoin(@NotNull TMember member);
 
-    void notifyInvitation(@NotNull TMember inviter, @NotNull PlayerView invitee);
+    void notifyInvitation(@NotNull TMember inviter, @NotNull PlayerView invitee, long invitationDuration);
 
     void notifyExpiry(@NotNull PlayerView invitee);
 

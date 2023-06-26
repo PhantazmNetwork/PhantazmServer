@@ -5,19 +5,24 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyCreator;
 import org.phantazm.core.player.PlayerViewProvider;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public class PartyCreateCommand {
 
-    public static Command createCommand(@NotNull Map<? super UUID, Party> parties,
-            @NotNull PlayerViewProvider viewProvider, @NotNull PartyCreator partyCreator) {
-        Objects.requireNonNull(parties, "parties");
+    private PartyCreateCommand() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static @NotNull Command createCommand(@NotNull PartyCommandConfig config,
+            @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
+            @NotNull PartyCreator partyCreator) {
+        Objects.requireNonNull(config, "config");
+        Objects.requireNonNull(partyHolder, "partyHolder");
         Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(partyCreator, "partyCreator");
 
@@ -28,22 +33,24 @@ public class PartyCreateCommand {
             }
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                sender.sendMessage(config.mustBeAPlayer());
                 return false;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyHolder.uuidToGuild().get(player.getUuid());
             if (party != null) {
-                sender.sendMessage(Component.text("You are already in a party!", NamedTextColor.RED));
+                sender.sendMessage(config.alreadyInParty());
                 return false;
             }
 
             return true;
         }, (sender, context) -> {
             Player player = (Player)sender;
-            parties.put(player.getUuid(), partyCreator.createPartyFor(viewProvider.fromPlayer(player)));
+            Party party = partyCreator.createPartyFor(viewProvider.fromPlayer(player));
+            partyHolder.guilds().add(party);
+            partyHolder.uuidToGuild().put(player.getUuid(), party);
 
-            sender.sendMessage(Component.text("You are now in a party.", NamedTextColor.GREEN));
+            sender.sendMessage(config.createCommandSuccess());
         });
 
         return command;

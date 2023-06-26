@@ -8,44 +8,47 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.RouteResult;
-import org.phantazm.core.guild.GuildMember;
-import org.phantazm.core.guild.party.Party;
-import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
-import org.phantazm.zombies.scene.ZombiesRouteRequest;
+import org.phantazm.zombies.scene.ZombiesJoinHelper;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class ZombiesRejoinCommand extends Command {
-    public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router, @NotNull PlayerViewProvider viewProvider,
-            @NotNull Map<? super UUID, ? extends Party> parties) {
+    public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router,
+            @NotNull PlayerViewProvider viewProvider, @NotNull ZombiesJoinHelper joinHelper) {
         super("rejoin");
 
         Objects.requireNonNull(router, "router");
         Objects.requireNonNull(viewProvider, "viewProvider");
-        Objects.requireNonNull(parties, "parties");
+        Objects.requireNonNull(joinHelper, "joinHelper");
 
         Argument<UUID> targetGameArgument = ArgumentType.UUID("target-game");
-        targetGameArgument.setSuggestionCallback(((sender, context, suggestion) -> {
+        targetGameArgument.setSuggestionCallback((sender, context, suggestion) -> {
             if (!(sender instanceof Player player)) {
                 return;
             }
 
-            UUID uuid = player.getUuid();
-            for (ZombiesScene scene : router.getScenes()) {
-                if (!scene.getPlayers().containsKey(uuid)) {
+            Optional<ZombiesScene> currentScene = router.getCurrentScene(player.getUuid());
+            for (ZombiesScene scene : router.getScenesContainingPlayer(player.getUuid())) {
+                if (currentScene.isPresent() && currentScene.get() == scene) {
                     continue;
                 }
 
-                SuggestionEntry entry = new SuggestionEntry(scene.getUuid().toString(), scene.getMapSettingsInfo().displayName());
+                SuggestionEntry entry =
+                        new SuggestionEntry(scene.getUUID().toString(), scene.getMapSettingsInfo().displayName());
                 suggestion.addEntry(entry);
             }
-        }));
+        });
 
         addConditionalSyntax((sender, commandString) -> {
+            if (commandString == null) {
+                return sender instanceof Player;
+            }
+
             if (!(sender instanceof Player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return false;
@@ -55,9 +58,15 @@ public class ZombiesRejoinCommand extends Command {
         }, (sender, context) -> {
             UUID targetGame = context.get(targetGameArgument);
 
+            Optional<ZombiesScene> currentScene = router.getCurrentScene(sender.identity().uuid());
+
             boolean anyMatch = false;
-            for (ZombiesScene scene : router.getScenes()) {
-                if (scene.getUuid().equals(targetGame)) {
+            for (ZombiesScene scene : router.getScenesContainingPlayer(sender.identity().uuid())) {
+                if (currentScene.isPresent() && currentScene.get() == scene) {
+                    continue;
+                }
+
+                if (scene.getUUID().equals(targetGame)) {
                     anyMatch = true;
                     break;
                 }
@@ -68,21 +77,7 @@ public class ZombiesRejoinCommand extends Command {
                 return;
             }
 
-            Player player = (Player)sender;
-            Collection<PlayerView> playerViews;
-            Party party = parties.get(player.getUuid());
-            if (party == null) {
-                playerViews = Collections.singleton(viewProvider.fromPlayer(player));
-            }
-            else {
-                playerViews = new ArrayList<>(party.getMemberManager().getMembers().size());
-                for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
-                    playerViews.add(guildMember.getPlayerView());
-                }
-            }
-
-            RouteResult result = router.join(ZombiesRouteRequest.rejoinGame(targetGame, () -> playerViews));
-            result.message().ifPresent(sender::sendMessage);
+            joinHelper.rejoinGame(((Player)sender), targetGame);
         }, targetGameArgument);
     }
 }

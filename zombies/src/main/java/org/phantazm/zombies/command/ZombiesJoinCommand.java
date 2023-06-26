@@ -11,29 +11,29 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.RouteResult;
-import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
+import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
-import org.phantazm.zombies.scene.ZombiesRouteRequest;
+import org.phantazm.zombies.scene.ZombiesJoinHelper;
 
 import java.util.*;
 
 public class ZombiesJoinCommand extends Command {
-    public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull Scene<ZombiesRouteRequest> router, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-            @NotNull PlayerViewProvider viewProvider) {
+    public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
+            @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
+            @NotNull ZombiesJoinHelper joinHelper) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
 
-        Objects.requireNonNull(router, "router");
+        Objects.requireNonNull(partyMap, "partyMap");
+        Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(keyParser, "keyParser");
         Objects.requireNonNull(maps, "maps");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+        Objects.requireNonNull(joinHelper, "joinHelper");
 
         mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
             for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
@@ -42,12 +42,26 @@ public class ZombiesJoinCommand extends Command {
             }
         });
         addConditionalSyntax((sender, commandString) -> {
-            if (sender instanceof Player) {
-                return true;
+            if (commandString == null) {
+                return sender instanceof Player;
             }
 
-            sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
-            return false;
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                return false;
+            }
+
+            Party party = partyMap.get(player.getUuid());
+            if (party != null) {
+                PartyMember member = party.getMemberManager().getMember(player.getUuid());
+                if (!party.getJoinPermission().hasPermission(member)) {
+                    sender.sendMessage(Component.text("You don't have permission in your party to join games!",
+                            NamedTextColor.RED));
+                    return false;
+                }
+            }
+
+            return true;
         }, (sender, context) -> {
             @Subst("test_map")
             String mapKeyString = context.get(mapKeyArgument);
@@ -56,17 +70,17 @@ public class ZombiesJoinCommand extends Command {
                 return;
             }
 
-            Key mapKey = keyParser.parseKey(mapKeyString);
-            if (!maps.containsKey(mapKey)) {
+            Key targetMap = keyParser.parseKey(mapKeyString);
+            if (!maps.containsKey(targetMap)) {
                 sender.sendMessage(Component.text("Invalid map!", NamedTextColor.RED));
                 return;
             }
 
-            Player player = (Player)sender;
+            Player joiner = (Player)sender;
+            Party party = partyMap.get(joiner.getUuid());
             Collection<PlayerView> playerViews;
-            Party party = parties.get(player.getUuid());
             if (party == null) {
-                playerViews = Collections.singleton(viewProvider.fromPlayer(player));
+                playerViews = Collections.singleton(viewProvider.fromPlayer(joiner));
             }
             else {
                 playerViews = new ArrayList<>(party.getMemberManager().getMembers().size());
@@ -75,8 +89,7 @@ public class ZombiesJoinCommand extends Command {
                 }
             }
 
-            RouteResult result = router.join(ZombiesRouteRequest.joinGame(mapKey, () -> playerViews));
-            result.message().ifPresent(sender::sendMessage);
+            joinHelper.joinGame(joiner, playerViews, targetMap);
         }, mapKeyArgument);
     }
 

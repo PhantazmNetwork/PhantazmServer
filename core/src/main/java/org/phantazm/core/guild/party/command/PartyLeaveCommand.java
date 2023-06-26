@@ -5,17 +5,23 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class PartyLeaveCommand {
 
-    public static Command leaveCommand(@NotNull Map<? super UUID, ? extends Party> parties) {
-        Objects.requireNonNull(parties, "parties");
+    private PartyLeaveCommand() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static @NotNull Command leaveCommand(@NotNull PartyCommandConfig config,
+            @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull Random random) {
+        Objects.requireNonNull(config, "config");
+        Objects.requireNonNull(partyMap, "partyMap");
+        Objects.requireNonNull(random, "random");
 
         Command command = new Command("leave");
         command.addConditionalSyntax((sender, commandString) -> {
@@ -24,24 +30,51 @@ public class PartyLeaveCommand {
             }
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
+                sender.sendMessage(config.mustBeAPlayer());
                 return false;
             }
 
-            Party party = parties.get(player.getUuid());
+            Party party = partyMap.get(player.getUuid());
             if (party == null) {
-                sender.sendMessage(Component.text("You have to be in a party!", NamedTextColor.RED));
+                sender.sendMessage(config.notInParty());
                 return false;
             }
 
             return true;
         }, (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
-            Party party = parties.remove(uuid);
+            Party party = partyMap.remove(uuid);
             PartyMember oldMember = party.getMemberManager().removeMember(uuid);
 
             party.getNotification().notifyLeave(oldMember);
-            sender.sendMessage(Component.text("Left the party.", NamedTextColor.GREEN));
+
+            if (party.getOwner().get().getPlayerView().getUUID().equals(uuid)) {
+                if (party.getMemberManager().getMembers().isEmpty()) {
+                    party.getOwner().set(null);
+                }
+                else {
+                    Collection<PartyMember> online = new ArrayList<>(), offline = new ArrayList<>();
+                    for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                        if (member.getPlayerView().getPlayer().isPresent()) {
+                            online.add(member);
+                        }
+                        else {
+                            offline.add(member);
+                        }
+                    }
+
+                    Collection<PartyMember> candidates = online.size() != 0 ? online : offline;
+                    int memberIndex = random.nextInt(candidates.size());
+                    Iterator<PartyMember> memberIterator = candidates.iterator();
+                    PartyMember newOwner = memberIterator.next();
+                    for (int i = 0; i < memberIndex; ++i) {
+                        newOwner = memberIterator.next();
+                    }
+
+                    party.getOwner().set(newOwner);
+                    party.getNotification().notifyTransfer(oldMember, newOwner);
+                }
+            }
         });
 
         return command;

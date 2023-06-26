@@ -1,38 +1,43 @@
 package org.phantazm.zombies.player.state;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
+import org.phantazm.commons.CancellableState;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.ZombiesPlayerMeta;
+import org.phantazm.zombies.map.MapSettingsInfo;
 
-import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class BasicQuitStateActivable implements Activable {
-
     private final Instance instance;
-
     private final PlayerView playerView;
-
-    private final ZombiesPlayerMeta meta;
-
+    private final MapSettingsInfo settings;
     private final Sidebar sidebar;
-
     private final TabList tabList;
+    private final Map<UUID, CancellableState> stateMap;
+    private final TickTaskScheduler scheduler;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
-    public BasicQuitStateActivable(@NotNull Instance instance,
-            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull PlayerView playerView,
-            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+    public BasicQuitStateActivable(@NotNull Instance instance, @NotNull PlayerView playerView,
+            @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
+            @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler scheduler) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.meta = Objects.requireNonNull(meta, "meta");
+        this.settings = Objects.requireNonNull(settings, "settings");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
+        this.scheduler = Objects.requireNonNull(scheduler, "scheduler");
     }
 
     @Override
@@ -43,12 +48,18 @@ public class BasicQuitStateActivable implements Activable {
             player.setExp(0);
             sidebar.removeViewer(player);
             tabList.removeViewer(player);
+            player.setHealth(player.getMaxHealth());
         });
-        playerView.getDisplayName()
-                .thenAccept(displayName -> instance.sendMessage(displayName.append(Component.text(" quit."))));
-        meta.setInGame(false);
-        meta.setCanRevive(false);
-        meta.setCanTriggerSLA(false);
-    }
+        playerView.getDisplayName().thenAccept(displayName -> {
+            TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);
+            instance.sendMessage(miniMessage.deserialize(settings.quitMessageFormat(), quitterPlaceholder));
+        });
 
+        for (CancellableState state : stateMap.values()) {
+            state.end();
+        }
+
+        scheduler.end();
+        stateMap.clear();
+    }
 }

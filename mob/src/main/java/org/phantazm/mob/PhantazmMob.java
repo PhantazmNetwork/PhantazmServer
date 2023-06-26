@@ -1,6 +1,8 @@
 package org.phantazm.mob;
 
 import net.kyori.adventure.key.Key;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
@@ -8,9 +10,9 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface PhantazmMob {
-    MobModel model();
+    @NotNull MobModel model();
 
-    ProximaEntity entity();
+    @NotNull ProximaEntity entity();
 
-    Map<Key, Collection<Skill>> triggers();
+    @NotNull @Unmodifiable Map<Key, Collection<Skill>> triggers();
 }

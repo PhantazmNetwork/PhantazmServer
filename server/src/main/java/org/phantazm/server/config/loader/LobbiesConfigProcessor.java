@@ -52,7 +52,11 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 long time = instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME, "time").longValue();
                 int timeRate =
                         instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME_RATE, "timeRate").intValue();
-                InstanceConfig instanceConfig = new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate);
+                int chunkLoadRange =
+                        instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_CHUNK_LOAD_RANGE, "chunkLoadRange")
+                                .intValue();
+                InstanceConfig instanceConfig =
+                        new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate, chunkLoadRange);
 
                 ConfigList lobbyPathsList = lobby.getValue().getListOrThrow("lobbyPaths");
                 List<String> lobbyPaths = new ArrayList<>(lobbyPathsList.size());
@@ -63,7 +67,9 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 int maxPlayers = lobby.getValue().getNumberOrThrow("maxPlayers").intValue();
                 int maxLobbies = lobby.getValue().getNumberOrThrow("maxLobbies").intValue();
 
-                lobbies.put(lobby.getKey(), new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies));
+                ConfigList npcs = lobby.getValue().getListOrDefault(ConfigList::of, "npcs");
+
+                lobbies.put(lobby.getKey(), new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies, npcs));
             }
 
             return new LobbiesConfig(instancesPath, kickMessage, mainLobbyName, lobbies);
@@ -89,6 +95,8 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
             ConfigNode instanceConfigNode = new LinkedConfigNode(1);
             instanceConfigNode.put("spawnPoint", spawnPointNode);
+            instanceConfigNode.putNumber("time", lobby.getValue().instanceConfig().time());
+            instanceConfigNode.putNumber("timeRate", lobby.getValue().instanceConfig().timeRate());
 
             ConfigList lobbyPathsList = new ArrayConfigList(lobby.getValue().lobbyPaths().size());
             for (String subPath : lobby.getValue().lobbyPaths()) {
@@ -99,6 +107,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             lobbyNode.put("lobbyPaths", lobbyPathsList);
             lobbyNode.putNumber("maxPlayers", lobby.getValue().maxPlayers());
             lobbyNode.putNumber("maxLobbies", lobby.getValue().maxLobbies());
+            lobbyNode.put("npcs", lobby.getValue().npcs());
 
             lobbiesNode.put(lobby.getKey(), lobbyNode);
         }

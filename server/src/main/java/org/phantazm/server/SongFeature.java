@@ -12,6 +12,9 @@ public class SongFeature {
 
     private static SongLoader songLoader;
 
+    private SongFeature() {
+    }
+
     static void initialize(@NotNull KeyParser keyParser) {
         SongFeature.songLoader = new NBSSongLoader(SONG_PATH, keyParser);
         SongFeature.songLoader.load();

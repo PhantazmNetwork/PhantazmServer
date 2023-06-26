@@ -60,7 +60,8 @@ public class InvitationManagerIntegrationTest {
             }
 
             @Override
-            public void notifyInvitation(@NotNull GuildMember inviter, @NotNull PlayerView invitee) {
+            public void notifyInvitation(@NotNull GuildMember inviter, @NotNull PlayerView invitee,
+                    long invitationDuration) {
 
             }
 

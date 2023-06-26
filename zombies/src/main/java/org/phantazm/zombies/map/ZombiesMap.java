@@ -67,7 +67,6 @@ public class ZombiesMap implements Tickable {
 
     @Override
     public void tick(long time) {
-        mapObjects.tick(time);
         songPlayer.tick(time);
         powerupHandler.tick(time);
         roundHandler.tick(time);

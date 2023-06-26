@@ -3,7 +3,6 @@ package org.phantazm.core.game.scene;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 
@@ -15,24 +14,21 @@ import java.util.*;
  * @param <TRequest>
  */
 public abstract class InstanceScene<TRequest extends SceneJoinRequest> implements Scene<TRequest> {
+    private final UUID uuid;
     protected final Instance instance;
     protected final SceneFallback fallback;
-    protected final Map<UUID, PlayerView> players;
-    protected final Map<UUID, PlayerView> unmodifiablePlayers;
 
     private boolean shutdown = false;
 
-    public InstanceScene(@NotNull Instance instance, @NotNull Map<UUID, PlayerView> players,
-            @NotNull SceneFallback fallback) {
+    public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback) {
+        this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.instance = Objects.requireNonNull(instance, "instance");
-        this.players = Objects.requireNonNull(players, "players");
-        this.unmodifiablePlayers = Collections.unmodifiableMap(players);
         this.fallback = Objects.requireNonNull(fallback, "fallback");
     }
 
     @Override
-    public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
-        return unmodifiablePlayers;
+    public @NotNull UUID getUUID() {
+        return uuid;
     }
 
     @Override
@@ -61,15 +57,11 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
 
     @Override
     public void shutdown() {
-        for (PlayerView player : players.values()) {
-            player.getPlayer().ifPresent(unused -> fallback.fallback(player));
-        }
-
-        players.clear();
         shutdown = true;
     }
 
     @Override
-    public void tick(long time) {
+    public @NotNull SceneFallback getFallback() {
+        return fallback;
     }
 }

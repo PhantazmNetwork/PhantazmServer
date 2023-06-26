@@ -9,24 +9,21 @@ import org.phantazm.commons.Activable;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.zombies.player.ZombiesPlayerMeta;
 
 import java.util.Objects;
 
 public class BasicAliveStateActivable implements Activable {
     private final InventoryAccessRegistry accessRegistry;
     private final PlayerView playerView;
-    private final ZombiesPlayerMeta meta;
     private final Sidebar sidebar;
     private final TabList tabList;
 
     private long lastHeal;
 
     public BasicAliveStateActivable(@NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
-            @NotNull ZombiesPlayerMeta meta, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+            @NotNull Sidebar sidebar, @NotNull TabList tabList) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.meta = Objects.requireNonNull(meta, "meta");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
     }
@@ -43,10 +40,6 @@ public class BasicAliveStateActivable implements Activable {
         });
 
         accessRegistry.switchAccess(InventoryKeys.ALIVE_ACCESS);
-
-        meta.setInGame(true);
-        meta.setCanRevive(true);
-        meta.setCanTriggerSLA(true);
     }
 
     @Override

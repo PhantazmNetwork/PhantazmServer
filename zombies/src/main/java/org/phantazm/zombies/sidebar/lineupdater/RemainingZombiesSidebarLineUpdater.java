@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 @Model("zombies.sidebar.line_updater.remaining_zombies")
 public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
     private final Data data;
-    private final Supplier<? extends Optional<Round>> roundSupplier;
+    private final Supplier<Optional<Round>> roundSupplier;
     private int lastRemainingZombies = -1;
 
     @FactoryMethod

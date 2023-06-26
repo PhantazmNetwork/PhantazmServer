@@ -1,0 +1,4 @@
+[submodule "minestom"]
+	path = minestom
+	url = https://github.com/PhantazmNetwork/Minestom
+	branch = master

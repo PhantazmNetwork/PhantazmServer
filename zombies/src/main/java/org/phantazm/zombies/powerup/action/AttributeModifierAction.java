@@ -5,6 +5,7 @@ import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.CancellableState;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
@@ -62,16 +63,20 @@ public class AttributeModifierAction implements Supplier<PowerupAction> {
         }
 
         private void applyAttribute(ZombiesPlayer player) {
-            player.getPlayer().ifPresent(p -> {
-                p.getAttribute(attribute).addModifier(
-                        new AttributeModifier(attributeUID, attributeName, data.amount, data.attributeOperation));
-            });
+            player.registerCancellable(CancellableState.named(attributeUID, () -> {
+                player.getPlayer().ifPresent(p -> {
+                    p.getAttribute(attribute).addModifier(
+                            new AttributeModifier(attributeUID, attributeName, data.amount, data.attributeOperation));
+                });
+            }, () -> {
+                player.getPlayer().ifPresent(p -> {
+                    p.getAttribute(attribute).removeModifier(attributeUID);
+                });
+            }), true);
         }
 
         private void removeAttribute(ZombiesPlayer player) {
-            player.getPlayer().ifPresent(p -> {
-                p.getAttribute(attribute).removeModifier(attributeUID);
-            });
+            player.removeCancellable(attributeUID);
         }
 
         @Override
@@ -80,6 +85,10 @@ public class AttributeModifierAction implements Supplier<PowerupAction> {
 
             if (data.global) {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                    if (zombiesPlayer.hasQuit()) {
+                        continue;
+                    }
+
                     applyAttribute(zombiesPlayer);
                 }
             }
@@ -92,6 +101,10 @@ public class AttributeModifierAction implements Supplier<PowerupAction> {
         public void deactivate(@NotNull ZombiesPlayer player) {
             if (data.global) {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                    if (zombiesPlayer.hasQuit()) {
+                        continue;
+                    }
+
                     removeAttribute(zombiesPlayer);
                 }
             }

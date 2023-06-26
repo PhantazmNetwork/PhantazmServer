@@ -36,8 +36,8 @@ public class RoundSidebarLineUpdater implements SidebarLineUpdater {
         int newIndex = roundHandler.currentRoundIndex();
         if ((lastRoundIndex == -1 || lastRoundIndex != newIndex) && newIndex != -1) {
             lastRoundIndex = newIndex;
-            return Optional.of(
-                    MiniMessage.miniMessage().deserialize(String.format(data.formatString, lastRoundIndex + 1)));
+            return Optional.of(MiniMessage.miniMessage().deserialize(
+                    String.format(data.formatString, Math.min(lastRoundIndex + 1, roundHandler.roundCount()))));
         }
 
         return Optional.empty();

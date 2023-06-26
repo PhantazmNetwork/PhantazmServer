@@ -5,6 +5,8 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -14,7 +16,6 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
 import net.minestom.server.scoreboard.TeamManager;
@@ -27,6 +28,8 @@ import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
+import org.phantazm.core.game.scene.RouterStore;
+import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
@@ -38,8 +41,10 @@ import org.phantazm.core.particle.data.*;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.stats.zombies.*;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
+import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
@@ -93,6 +98,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public final class ZombiesFeature {
@@ -106,14 +114,17 @@ public final class ZombiesFeature {
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
+    private static ExecutorService databaseExecutor;
+    private static HikariDataSource dataSource;
+    private static ZombiesDatabase database;
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
-            @NotNull KeyParser keyParser, @NotNull ConnectionManager connectionManager,
+            @NotNull KeyParser keyParser,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
-            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties)
-            throws IOException {
+            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
+            @NotNull RouterStore routerStore) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -130,25 +141,38 @@ public final class ZombiesFeature {
         for (MapInfo map : maps.values()) {
             instanceLoader.preload(map.settings().instancePath(),
                     VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())),
-                    MinecraftServer.getChunkViewDistance());
+                    map.settings().chunkLoadRange());
         }
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();
+
+        // https://bugs.mojang.com/browse/MC-87984
+        Team mobNoPushTeam =
+                teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS)
+                        .build();
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
+
+        databaseExecutor = Executors.newSingleThreadExecutor();
+        HikariConfig config = new HikariConfig("./zombies.hikari.properties");
+        dataSource = new HikariDataSource(config);
+        ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
+        database = new SQLZombiesDatabase(databaseExecutor, dataSource, sqlFetcher);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
-                    new ZombiesSceneProvider(2, instanceSpaceFunction, entry.getValue(), connectionManager,
-                            MinecraftServer.getInstanceManager(), instanceLoader, sceneFallback, globalEventNode,
-                            ZombiesFeature.mobSpawnerSource(), Mob.getModels(),
+                    new ZombiesSceneProvider(20, instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback,
+                            globalEventNode, ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(),
                             new BasicClientBlockHandlerSource(instance -> {
                                 DimensionType dimensionType = instance.getDimensionType();
-                                return new InstanceClientBlockHandler(instance, globalEventNode,
-                                        dimensionType.getMinY(), dimensionType.getHeight());
-                            }), contextManager, keyParser, ZombiesFeature.powerups(),
-                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator, corpseTeam,
-                                    Mob.getModels()));
+                                return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
+                                        dimensionType.getHeight());
+                            }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
+                            ZombiesFeature.powerups(),
+                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator,
+                                    MobFeature.getModels()),
+                            mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
+                                    .provide(mapDependencyProvider));
             providers.put(entry.getKey(), provider);
         }
 
@@ -158,9 +182,9 @@ public final class ZombiesFeature {
                 .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
                         TaskSchedule.nextTick());
 
+        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         commandManager.register(
-                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, ZombiesFeature::getPlayerScene,
-                        sceneFallback));
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, transferHelper, sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
@@ -181,6 +205,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(MapFlagPredicate.class);
         contextManager.registerElementClass(InteractingPredicate.class);
         contextManager.registerElementClass(PlayerFlagPredicate.class);
+        contextManager.registerElementClass(PlayerInGamePredicate.class);
         contextManager.registerElementClass(PlayerStatePredicate.class);
         contextManager.registerElementClass(UuidPredicate.class);
         contextManager.registerElementClass(TypePredicate.class);
@@ -297,6 +322,11 @@ public final class ZombiesFeature {
         //Player conditions
         contextManager.registerElementClass(EquipmentCondition.class);
 
+        //Corpses
+        contextManager.registerElementClass(CorpseCreator.class);
+        contextManager.registerElementClass(CorpseCreator.TimeLine.class);
+        contextManager.registerElementClass(CorpseCreator.StaticLine.class);
+
         LOGGER.info("Registered Zombies element classes.");
     }
 
@@ -338,15 +368,47 @@ public final class ZombiesFeature {
     }
 
     public static @NotNull Optional<ZombiesScene> getPlayerScene(@NotNull UUID playerUUID) {
-        return FeatureUtils.check(sceneRouter).getScene(playerUUID);
+        return FeatureUtils.check(sceneRouter).getCurrentScene(playerUUID);
     }
 
     public static @NotNull Optional<ZombiesPlayer> getZombiesPlayer(@NotNull UUID playerUUID) {
-        return FeatureUtils.check(sceneRouter).getScene(playerUUID)
+        return FeatureUtils.check(sceneRouter).getCurrentScene(playerUUID)
                 .map(scene -> scene.getZombiesPlayers().get(playerUUID));
     }
 
     public static @NotNull ZombiesSceneRouter zombiesSceneRouter() {
         return FeatureUtils.check(sceneRouter);
+    }
+
+    public static @NotNull ZombiesDatabase getDatabase() {
+        return FeatureUtils.check(database);
+    }
+
+    public static void end() {
+        if (dataSource != null) {
+            dataSource.close();
+        }
+
+        if (databaseExecutor != null) {
+            databaseExecutor.shutdown();
+
+            try {
+                LOGGER.info(
+                        "Shutting down database executor. Please allow for one minute before shutdown " + "completes.");
+                if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
+                    databaseExecutor.shutdownNow();
+
+                    LOGGER.warn(
+                            "Not all database tasks completed. Please allow for one minute for tasks to be canceled.");
+                    if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
+                        LOGGER.warn("Database tasks failed to cancel.");
+                    }
+                }
+            }
+            catch (InterruptedException e) {
+                databaseExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }

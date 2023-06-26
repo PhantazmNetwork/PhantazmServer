@@ -1,7 +1,10 @@
 package org.phantazm.core.game.scene;
 
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.ServerProcess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.core.game.scene.event.SceneShutdownEvent;
 
 import java.util.*;
 
@@ -61,6 +64,11 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
             if (scene.isShutdown()) {
                 cleanupScene(scene);
                 iterator.remove();
+
+                ServerProcess process = MinecraftServer.process();
+                if (process != null) {
+                    process.eventHandler().call(new SceneShutdownEvent(scene));
+                }
             }
             else {
                 scene.tick(time);
@@ -86,4 +94,14 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
     protected abstract void cleanupScene(@NotNull TScene scene);
 
+    @Override
+    public boolean hasActiveScenes() {
+        for (TScene scene : scenes) {
+            if (scene.getIngamePlayerCount() > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

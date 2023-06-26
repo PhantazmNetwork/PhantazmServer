@@ -94,10 +94,10 @@ compression-level = -1
 login-ratelimit = 3000
 
 # Specify a custom timeout for connection timeouts here. The default is five seconds.
-connection-timeout = 5000
+connection-timeout = 86400000
 
 # Specify a read timeout for connections here. The default is 30 seconds.
-read-timeout = 30000
+read-timeout = 86400000
 
 # Enables compatibility with HAProxy's PROXY protocol. If you don't know what this is for, then
 # don't enable it.

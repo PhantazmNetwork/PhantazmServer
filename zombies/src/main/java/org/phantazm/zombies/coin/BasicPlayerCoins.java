@@ -3,6 +3,7 @@ package org.phantazm.zombies.coin;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.coin.component.TransactionComponentCreator;
 
 import java.util.ArrayList;
@@ -12,13 +13,15 @@ import java.util.Objects;
 
 public class BasicPlayerCoins implements PlayerCoins {
     private final PlayerView playerView;
+    private final ZombiesPlayerMapStats stats;
     private final TransactionComponentCreator componentCreator;
     private volatile int coins;
     private final Object sync;
 
-    public BasicPlayerCoins(@NotNull PlayerView playerView, @NotNull TransactionComponentCreator componentCreator,
-            int initialCoins) {
+    public BasicPlayerCoins(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats stats,
+            @NotNull TransactionComponentCreator componentCreator, int initialCoins) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.stats = Objects.requireNonNull(stats, "stats");
         this.componentCreator = Objects.requireNonNull(componentCreator, "componentCreator");
         this.coins = initialCoins;
 
@@ -64,6 +67,12 @@ public class BasicPlayerCoins implements PlayerCoins {
         synchronized (sync) {
             if (!result.hasChange()) {
                 return;
+            }
+
+            if (result.change() > 0) {
+                stats.setCoinsGained(stats.getCoinsGained() + result.change());
+            } else {
+                stats.setCoinsSpent(stats.getCoinsSpent() - result.change());
             }
 
             coins += result.change();

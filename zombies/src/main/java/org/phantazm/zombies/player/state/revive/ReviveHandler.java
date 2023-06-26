@@ -1,6 +1,6 @@
 package org.phantazm.zombies.player.state.revive;
 
-import net.minestom.server.entity.Entity;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Activable;
@@ -54,7 +54,7 @@ public class ReviveHandler implements Activable {
             }
 
             if (reviver != null) {
-                reviver.module().getMeta().setReviving(false);
+                clearReviverState();
             }
 
             reviver = null;
@@ -66,7 +66,8 @@ public class ReviveHandler implements Activable {
             }
 
             if (reviver != null) {
-                reviver.module().getMeta().setReviving(false);
+                reviver.module().getStats().setRevives(reviver.module().getStats().getRevives() + 1);
+                clearReviverState();
             }
 
             reviver = null;
@@ -84,9 +85,8 @@ public class ReviveHandler implements Activable {
                 --ticksUntilDeath;
             }
         }
-        else if (!reviver.module().getMeta().isCanRevive() ||
-                !reviver.getPlayer().map(player -> player.getPose() == Entity.Pose.SNEAKING).orElse(true)) {
-            reviver.module().getMeta().setReviving(false);
+        else if (!reviver.canRevive()) {
+            clearReviverState();
             reviver = null;
             ticksUntilRevive = -1;
         }
@@ -97,10 +97,7 @@ public class ReviveHandler implements Activable {
 
     @Override
     public void end() {
-        if (reviver != null) {
-            reviver.module().getMeta().setReviving(false);
-        }
-
+        clearReviverState();
         reviver = null;
     }
 
@@ -113,9 +110,7 @@ public class ReviveHandler implements Activable {
             return;
         }
 
-        if (this.reviver != null) {
-            this.reviver.module().getMeta().setReviving(false);
-        }
+        clearReviverState();
         this.reviver = reviver;
         if (reviver != null) {
             ticksUntilDeath = deathTime;
@@ -124,6 +119,13 @@ public class ReviveHandler implements Activable {
         }
         else {
             ticksUntilRevive = -1;
+        }
+    }
+
+    private void clearReviverState() {
+        if (reviver != null) {
+            reviver.module().getMeta().setReviving(false);
+            reviver.getPlayer().ifPresent(player -> player.sendActionBar(Component.empty()));
         }
     }
 

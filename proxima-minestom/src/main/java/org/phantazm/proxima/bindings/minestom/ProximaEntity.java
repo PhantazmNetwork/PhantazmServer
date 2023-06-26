@@ -29,6 +29,8 @@ import java.util.UUID;
  * An entity with navigation capabilities based on the Proxima library.
  */
 public class ProximaEntity extends LivingEntity {
+    private static final double NODE_REACH_DISTANCE = 0.4;
+
     protected final Pathfinding pathfinding;
     protected final List<GoalGroup> goalGroups;
 
@@ -258,7 +260,8 @@ public class ProximaEntity extends LivingEntity {
 
     protected boolean withinDistance(@NotNull Node node) {
         Pos position = getPosition();
-        return position.distanceSquared(new Vec(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5)) < 0.0625;
+        return position.distanceSquared(new Vec(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5)) <
+                NODE_REACH_DISTANCE;
     }
 
     protected boolean moveAlongPath(long time) {
