@@ -1,6 +1,7 @@
 package org.phantazm.core.game.scene;
 
 import com.github.steanky.toolkit.collection.Wrapper;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -58,6 +59,9 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     @Override
     public void shutdown() {
         shutdown = true;
+
+        instance.getPlayers().forEach(player -> player.kick("The world you were in was unloaded!"));
+        MinecraftServer.getInstanceManager().unregisterInstance(instance);
     }
 
     @Override
