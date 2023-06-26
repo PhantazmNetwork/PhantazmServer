@@ -313,8 +313,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             return;
         }
 
-        map.tick(time);
         stageTransition.tick(time);
+        map.tick(time);
         taskScheduler.tick(time);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             if (zombiesPlayer.hasQuit()) {
