@@ -123,7 +123,6 @@ public final class MobFeature {
         //mob goals
         contextManager.registerElementClass(FollowEntityGoal.class);
         contextManager.registerElementClass(ChargeAtEntityGoal.class);
-        contextManager.registerElementClass(UseSkillGoal.class);
         contextManager.registerElementClass(MeleeAttackGoal.class);
         contextManager.registerElementClass(PlayStepSoundGoal.class);
 
