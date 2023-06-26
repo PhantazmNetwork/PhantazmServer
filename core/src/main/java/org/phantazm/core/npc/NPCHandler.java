@@ -1,6 +1,7 @@
 package org.phantazm.core.npc;
 
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
@@ -31,6 +32,10 @@ public class NPCHandler implements Tickable {
     }
 
     private void entityInteractEvent(PlayerEntityInteractEvent event) {
+        if (event.getHand() != Player.Hand.MAIN) {
+            return;
+        }
+
         if (event.getInstance() != instance) {
             return;
         }
