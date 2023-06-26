@@ -1,6 +1,7 @@
 package org.phantazm.zombies.listener;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -13,6 +14,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.damage.ZombiesDamageType;
 import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -98,6 +100,8 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         else if (damageType instanceof EntityProjectileDamage projectileDamage) {
             Entity shooter = projectileDamage.getShooter();
             return getEntityName(Objects.requireNonNullElseGet(shooter, projectileDamage::getProjectile));
+        } else if (damageType.getIdentifier().equals(ZombiesDamageType.BOMBING.getIdentifier())) {
+            return Component.text("Bombing", NamedTextColor.DARK_RED);
         }
 
         return null;

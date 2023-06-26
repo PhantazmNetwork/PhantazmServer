@@ -40,21 +40,21 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
     public void tick(long time) {
         ++ticks;
 
-        for (Invitation invitation = invitations.poll(); invitation != null; invitation = invitations.poll()) {
-            if (invitation.expirationTime() > ticks) {
-                break;
-            }
-
+        Invitation invitation = invitations.peek();
+        while (invitation != null && invitation.expirationTime <= ticks) {
             if (latestInviteTimes.getLong(invitation.invitee().getUUID()) == invitation.expirationTime()) {
                 latestInviteTimes.removeLong(invitation.invitee().getUUID());
             }
             notification.notifyExpiry(invitation.invitee());
+
+            invitations.remove();
+            invitation = invitations.peek();
         }
     }
 
     public void invite(@NotNull TMember inviter, @NotNull PlayerView invitee) {
         if (invitationDuration == 0) {
-            notification.notifyInvitation(inviter, invitee);
+            notification.notifyInvitation(inviter, invitee, invitationDuration);
             notification.notifyExpiry(invitee);
             return;
         }
@@ -62,7 +62,7 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
         long expirationTime = ticks + invitationDuration;
         invitations.add(new Invitation(invitee, expirationTime));
         latestInviteTimes.put(invitee.getUUID(), expirationTime);
-        notification.notifyInvitation(inviter, invitee);
+        notification.notifyInvitation(inviter, invitee, invitationDuration);
     }
 
     public boolean hasInvitation(@NotNull UUID candidate) {

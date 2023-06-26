@@ -13,8 +13,6 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +28,7 @@ public class InstanceSpace extends ConcurrentCachingSpace {
         splitMap = new ConcurrentHashMap<>();
     }
 
-    private final Reference<Instance> instanceReference;
+    private final Instance instance;
     private volatile Vec3IFunction<? extends Solid> overrideFunction;
 
     public InstanceSpace(@NotNull Instance instance) {
@@ -39,17 +37,12 @@ public class InstanceSpace extends ConcurrentCachingSpace {
 
     public InstanceSpace(@NotNull Instance instance, @NotNull Vec3IFunction<? extends Solid> overrideFunction) {
         super(instance.getDimensionType().getMinY());
-        this.instanceReference = new WeakReference<>(Objects.requireNonNull(instance, "instance"));
+        this.instance = Objects.requireNonNull(instance, "instance");
         this.overrideFunction = Objects.requireNonNull(overrideFunction, "overrideFunction");
     }
 
     @Override
     public @Nullable Solid loadSolid(int x, int y, int z) {
-        Instance instance = instanceReference.get();
-        if (instance == null) {
-            return null;
-        }
-
         Chunk chunk = instance.getChunk(x >> 4, z >> 4);
         if (chunk == null) {
             return null;
@@ -148,8 +141,8 @@ public class InstanceSpace extends ConcurrentCachingSpace {
         return cachedSolid(shape);
     }
 
-    public @Nullable Instance instance() {
-        return instanceReference.get();
+    public @NotNull Instance instance() {
+        return instance;
     }
 
     public void setOverrideFunction(@NotNull Vec3IFunction<? extends Solid> overrideFunction) {

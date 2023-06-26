@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class MinimalFakePlayer extends Entity {
+public class MinimalFakePlayer extends LivingEntity {
 
     private final SchedulerManager schedulerManager;
 

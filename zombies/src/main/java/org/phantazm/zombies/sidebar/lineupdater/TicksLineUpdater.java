@@ -3,8 +3,8 @@ package org.phantazm.zombies.sidebar.lineupdater;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.ComponentUtils;
 import org.phantazm.core.time.TickFormatter;
 
 import java.util.Objects;
@@ -36,15 +36,15 @@ public class TicksLineUpdater implements SidebarLineUpdater {
         if (lastTicks == -1 || lastTicks != ticksWrapper.get()) {
             lastTicks = ticksWrapper.get();
 
-            return Optional.of(Component.join(JoinConfiguration.noSeparators(), data.prefix,
-                    tickFormatter.format(ticksWrapper.get())));
+
+            return Optional.of(ComponentUtils.tryFormat(data.formatString, tickFormatter.format(ticksWrapper.get())));
         }
 
         return Optional.empty();
     }
 
     @DataObject
-    public record Data(@NotNull Component prefix, @NotNull @ChildPath("tick_formatter") String tickFormatterPath) {
+    public record Data(@NotNull String formatString, @NotNull @ChildPath("tick_formatter") String tickFormatterPath) {
 
         public Data {
             Objects.requireNonNull(tickFormatterPath, "tickFormatterPath");

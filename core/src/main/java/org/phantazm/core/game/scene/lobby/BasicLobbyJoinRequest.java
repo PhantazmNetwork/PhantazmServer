@@ -1,5 +1,6 @@
 package org.phantazm.core.game.scene.lobby;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -7,6 +8,7 @@ import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
+import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.ArrayList;
@@ -44,36 +46,32 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
     @Override
     public void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
-        List<Player> teleportedPlayers = new ArrayList<>(players.size());
+        List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(players.size());
         List<CompletableFuture<?>> futures = new ArrayList<>(players.size());
         for (PlayerView view : players) {
             view.getPlayer().ifPresent(player -> {
                 player.setGameMode(GameMode.ADVENTURE);
 
-                teleportedPlayers.add(player);
-                futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
+                teleportedPlayers.add(Pair.of(player, player.getInstance()));
+                if (player.getInstance() == instance) {
+                    futures.add(player.teleport(instanceConfig.spawnPoint()));
+                }
+                else {
+                    futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
+                }
             });
         }
 
         CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenRun(() -> {
             for (int i = 0; i < futures.size(); ++i) {
-                Player teleportedPlayer = teleportedPlayers.get(i);
+                Pair<Player, Instance> pair = teleportedPlayers.get(i);
 
-                for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-                    if (otherPlayer.getInstance() != instance) {
-                        otherPlayer.removeViewer(teleportedPlayer);
-                        teleportedPlayer.sendPacket(otherPlayer.getRemovePlayerToList());
-                        teleportedPlayer.removeViewer(otherPlayer);
-                        otherPlayer.sendPacket(teleportedPlayer.getRemovePlayerToList());
-                    } else {
-                        teleportedPlayer.sendPacket(otherPlayer.getAddPlayerToList());
-                        otherPlayer.addViewer(teleportedPlayer);
-                        otherPlayer.sendPacket(teleportedPlayer.getAddPlayerToList());
-                        teleportedPlayer.addViewer(otherPlayer);
-                    }
-                }
+                Player teleportedPlayer = pair.first();
+                Instance oldInstance = pair.second();
+
+                Utils.handleInstanceTransfer(oldInstance, teleportedPlayer);
             }
-        });
+        }).join();
     }
 
 }

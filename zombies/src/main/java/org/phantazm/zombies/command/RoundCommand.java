@@ -7,6 +7,7 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.map.handler.RoundHandler;
@@ -21,7 +22,9 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public class RoundCommand extends Command {
-    public RoundCommand(@NotNull Function<? super UUID, ? extends Optional<ZombiesScene>> sceneMapper) {
+    public static final Permission PERMISSION = new Permission("zombies.playtest.round");
+
+    public RoundCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("round");
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
@@ -38,7 +41,8 @@ public class RoundCommand extends Command {
                     });
                 });
 
-        addConditionalSyntax((sender, commandString) -> sender instanceof Player, (sender, context) -> {
+        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
+        addConditionalSyntax(getCondition(), (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 RoundHandler handler = scene.getMap().roundHandler();

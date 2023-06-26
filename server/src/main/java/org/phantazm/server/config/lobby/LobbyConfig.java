@@ -1,5 +1,6 @@
 package org.phantazm.server.config.lobby;
 
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.config.InstanceConfig;
@@ -19,7 +20,8 @@ import java.util.Objects;
 public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
                           @NotNull List<String> lobbyPaths,
                           int maxPlayers,
-                          int maxLobbies) {
+                          int maxLobbies,
+                          @NotNull ConfigList npcs) {
 
     /**
      * The default number of max players.

@@ -9,9 +9,7 @@ import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Instance-wide Hologram implementation. This object retains a strong reference to its instance, and therefore should
@@ -137,6 +135,30 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
             armorStands.add(constructEntity(component));
             updateArmorStands();
         }
+    }
+
+    @Override
+    public boolean addAll(int index, @NotNull Collection<? extends Component> c) {
+        boolean changed;
+        synchronized (sync) {
+            changed = components.addAll(index, c);
+            armorStands.addAll(index, c.stream().map(this::constructEntity).toList());
+            updateArmorStands();
+        }
+
+        return changed;
+    }
+
+    @Override
+    public boolean addAll(@NotNull Collection<? extends Component> c) {
+        boolean changed;
+        synchronized (sync) {
+            changed = components.addAll(c);
+            armorStands.addAll(c.stream().map(this::constructEntity).toList());
+            updateArmorStands();
+        }
+
+        return changed;
     }
 
     @Override

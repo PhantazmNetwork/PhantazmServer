@@ -69,9 +69,7 @@ public class Window extends BoundedBase {
             throw new IllegalArgumentException("Zero-volume window");
         }
 
-        Optional<Room> closestRoom =
-                roomTracker.closestInRangeToBounds(center.sub(0, frame.lengthY() / 2D, 0), frame.lengthX(),
-                        frame.lengthY(), frame.lengthZ(), 10);
+        Optional<Room> closestRoom = roomTracker.closestInRangeToBounds(center, 10);
         if (closestRoom.isEmpty()) {
             this.linkedRoom = null;
             LOGGER.warn("No linkable room found within 10 blocks for window at ~" + center);

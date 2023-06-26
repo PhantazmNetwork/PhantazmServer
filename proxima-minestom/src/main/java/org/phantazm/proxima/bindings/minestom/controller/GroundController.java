@@ -24,11 +24,14 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class GroundController implements Controller {
+    private static final double ENTITY_COLLISION_FACTOR = 10;
+
     private final LivingEntity entity;
     private final double step;
     private final TrackerPredicate trackerPredicate;
 
     private boolean jumping;
+    private double jumpTargetHeight;
 
     private double lastH = -1;
     private double lastB = -1;
@@ -101,14 +104,12 @@ public class GroundController implements Controller {
                 else {
                     double pZ = -vX;
                     if (iterations % 2 == 0) {
-                        candidate.setVelocity(
-                                new Vec(vZ * scaleFactor * MinecraftServer.TICK_PER_SECOND, oldVelocity.y(),
-                                        pZ * scaleFactor * MinecraftServer.TICK_PER_SECOND));
+                        candidate.setVelocity(new Vec(vZ * scaleFactor * ENTITY_COLLISION_FACTOR, oldVelocity.y(),
+                                pZ * scaleFactor * ENTITY_COLLISION_FACTOR));
                     }
                     else {
-                        candidate.setVelocity(
-                                new Vec(-vZ * scaleFactor * MinecraftServer.TICK_PER_SECOND, oldVelocity.y(),
-                                        -pZ * scaleFactor * MinecraftServer.TICK_PER_SECOND));
+                        candidate.setVelocity(new Vec(-vZ * scaleFactor * ENTITY_COLLISION_FACTOR, oldVelocity.y(),
+                                -pZ * scaleFactor * ENTITY_COLLISION_FACTOR));
                     }
                 }
             }
@@ -167,12 +168,10 @@ public class GroundController implements Controller {
         assert chunk != null;
 
         if (jumping) {
-            if (entityPos.y() > exactTargetY + Vec.EPSILON) {
-
-
+            if (entityPos.y() > jumpTargetHeight + Vec.EPSILON) {
                 PhysicsResult physics = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
-                        new Pos(entityPos.x(), exactTargetY + Vec.EPSILON, entityPos.z()), new Vec(speedX, 0, speedZ),
-                        null);
+                        new Pos(entityPos.x(), jumpTargetHeight + Vec.EPSILON, entityPos.z()),
+                        new Vec(speedX, 0, speedZ), null);
 
                 if (!physics.hasCollision()) {
                     entity.refreshPosition(physics.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
@@ -198,20 +197,22 @@ public class GroundController implements Controller {
 
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-            if (entityPos.y() < exactTargetY && physicsResult.hasCollision()) {
-                double currentTarget = current.y + current.blockOffset;
-
-                double nodeDiff = Double.NEGATIVE_INFINITY;
+            double currentTarget = current.y + current.blockOffset;
+            if ((entityPos.y() < exactTargetY - Vec.EPSILON || entityPos.y() < currentTarget - Vec.EPSILON) &&
+                    physicsResult.hasCollision()) {
+                double actualDiff = Double.NEGATIVE_INFINITY;
                 if (currentTarget - Vec.EPSILON > entityPos.y()) {
-                    nodeDiff = currentTarget - entityPos.y();
+                    actualDiff = currentTarget - entityPos.y();
+                    jumpTargetHeight = currentTarget;
                 }
 
                 double targetDiff = exactTargetY - entityPos.y();
-                if (targetDiff > nodeDiff) {
-                    nodeDiff = targetDiff;
+                if (targetDiff > actualDiff) {
+                    actualDiff = targetDiff;
+                    jumpTargetHeight = exactTargetY;
                 }
 
-                stepOrJump(nodeDiff, speedX, speedZ, instance, deltaMove, pos);
+                stepOrJump(actualDiff, speedX, speedZ, instance, deltaMove, pos);
                 return;
             }
 

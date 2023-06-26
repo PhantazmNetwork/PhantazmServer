@@ -260,6 +260,7 @@ public final class MapProcessors {
             }
 
             Key id = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("id"));
+            int chunkLoadRange = element.getNumberOrDefault(10, "chunkLoadRange").intValue();
             List<String> instancePath =
                     ConfigProcessor.STRING.listProcessor().dataFromElement(element.getListOrThrow("instancePath"));
             Vec3I origin = VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("origin"));
@@ -294,24 +295,50 @@ public final class MapProcessors {
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             float punchDamage = element.getNumberOrThrow("punchDamage").floatValue();
             float punchRange = element.getNumberOrThrow("punchRange").floatValue();
+            boolean mobPlayerCollisions = element.getBooleanOrThrow("mobPlayerCollisions");
 
             List<Integer> milestoneRounds = integerList.dataFromElement(element.getElementOrThrow("milestoneRounds"));
             Map<Key, List<Key>> defaultEquipment =
                     keyToListKeyMap.dataFromElement(element.getElementOrThrow("defaultEquipment"));
             Map<Key, EquipmentGroupInfo> equipmentGroups =
                     keyToEquipmentGroup.dataFromElement(element.getElementOrThrow("equipmentGroups"));
-            return new MapSettingsInfo(mapDataVersion, id, instancePath, origin, minimumProtocolVersion,
+            Sound countdownTickSound =
+                    ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("countdownTickSound"));
+            String countdownTimeFormat = element.getStringOrThrow("countdownTimeFormat");
+            String winTitleFormat = element.getStringOrThrow("winTitleFormat");
+            String winSubtitleFormat = element.getStringOrThrow("winSubtitleFormat");
+            String lossTitleFormat = element.getStringOrThrow("lossTitleFormat");
+            String lossSubtitleFormat = element.getStringOrThrow("lossSubtitleFormat");
+            String reviveStatusToReviverFormat = element.getStringOrThrow("reviveStatusToReviverFormat");
+            String reviveStatusToKnockedFormat = element.getStringOrThrow("reviveStatusToKnockedFormat");
+            String dyingStatusFormat = element.getStringOrThrow("dyingStatusFormat");
+            String knockedMessageToKnockedFormat = element.getStringOrThrow("knockedMessageToKnockedFormat");
+            String knockedMessageToOthersFormat = element.getStringOrThrow("knockedMessageToOthersFormat");
+            String knockedTitleFormat = element.getStringOrThrow("knockedTitleFormat");
+            String knockedSubtitleFormat = element.getStringOrThrow("knockedSubtitleFormat");
+            String deathMessageToKilledFormat = element.getStringOrThrow("deathMessageToKilledFormat");
+            String deathMessageToOthersFormat = element.getStringOrThrow("deathMessageToOthersFormat");
+            String rejoinMessageFormat = element.getStringOrThrow("rejoinMessageFormat");
+            String quitMessageFormat = element.getStringOrThrow("quitMessageFormat");
+            String endGameStatsFormat = element.getStringOrThrow("endGameStatsFormat");
+            return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
                     scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
                     startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
                     corpseDeathTicks, healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks,
-                    rollsPerChest, punchDamage, punchRange, milestoneRounds, defaultEquipment, equipmentGroups);
+                    rollsPerChest, punchDamage, punchRange, mobPlayerCollisions, milestoneRounds, defaultEquipment,
+                    equipmentGroups, countdownTickSound, countdownTimeFormat, winTitleFormat, winSubtitleFormat,
+                    lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat, reviveStatusToKnockedFormat,
+                    dyingStatusFormat, knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
+                    knockedSubtitleFormat, deathMessageToKilledFormat, deathMessageToOthersFormat, rejoinMessageFormat,
+                    quitMessageFormat, endGameStatsFormat);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(MapSettingsInfo mapConfig) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(29);
             node.putNumber("mapDataVersion", mapConfig.mapDataVersion());
+            node.putNumber("chunkLoadRange", mapConfig.chunkLoadRange());
             node.put("id", ConfigProcessors.key().elementFromData(mapConfig.id()));
             node.put("instancePath", ConfigProcessor.STRING.listProcessor().elementFromData(mapConfig.instancePath()));
             node.put("origin", VectorConfigProcessors.vec3I().elementFromData(mapConfig.origin()));
@@ -344,9 +371,28 @@ public final class MapProcessors {
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());
             node.putNumber("punchDamage", mapConfig.punchDamage());
             node.putNumber("punchRange", mapConfig.punchRange());
+            node.putBoolean("mobPlayerCollisions", mapConfig.mobPlayerCollisions());
             node.put("milestoneRounds", integerList.elementFromData(mapConfig.milestoneRounds()));
             node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
             node.put("equipmentGroups", keyToEquipmentGroup.elementFromData(mapConfig.equipmentGroups()));
+            node.put("countdownTickSound", ConfigProcessors.sound().elementFromData(mapConfig.countdownTickSound()));
+            node.putString("countdownTimeFormat", mapConfig.countdownTimeFormat());
+            node.putString("winTitleFormat", mapConfig.winTitleFormat());
+            node.putString("winSubtitleFormat", mapConfig.winSubtitleFormat());
+            node.putString("lossTitleFormat", mapConfig.lossTitleFormat());
+            node.putString("lossSubtitleFormat", mapConfig.lossSubtitleFormat());
+            node.putString("reviveStatusToReviverFormat", mapConfig.reviveStatusToReviverFormat());
+            node.putString("reviveStatusToKnockedFormat", mapConfig.reviveStatusToKnockedFormat());
+            node.putString("dyingStatusFormat", mapConfig.dyingStatusFormat());
+            node.putString("knockedMessageToKnockedFormat", mapConfig.knockedMessageToKnockedFormat());
+            node.putString("knockedMessageToOthersFormat", mapConfig.knockedMessageToOthersFormat());
+            node.putString("knockedTitleFormat", mapConfig.knockedTitleFormat());
+            node.putString("knockedSubtitleFormat", mapConfig.knockedTitleFormat());
+            node.putString("deathMessageToKilledFormat", mapConfig.deathMessageToKilledFormat());
+            node.putString("deathMessageToOthersFormat", mapConfig.deathMessageToOthersFormat());
+            node.putString("rejoinMessageFormat", mapConfig.rejoinMessageFormat());
+            node.putString("quitMessageFormat", mapConfig.quitMessageFormat());
+            node.putString("endGameStatsFormat", mapConfig.endGameStatsFormat());
             return node;
         }
     };

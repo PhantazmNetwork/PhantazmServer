@@ -2,6 +2,7 @@ package org.phantazm.zombies.player;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -9,6 +10,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
+import org.phantazm.commons.CancellableState;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
@@ -16,6 +18,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
+import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -25,6 +28,7 @@ import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.stage.Stage;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +44,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     long getReviveTime();
 
     @NotNull ZombiesScene getScene();
+
+    void registerCancellable(@NotNull CancellableState cancellable, boolean endOld);
+
+    void removeCancellable(@NotNull UUID id);
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();
@@ -103,30 +111,55 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     }
 
     default boolean canPickupPowerup(@NotNull Powerup powerup) {
-        return isAlive();
+        return canDoGenericActions();
     }
 
     default boolean canOpenDoor(@NotNull Door door) {
-        return isAlive();
+        return canDoGenericActions();
     }
 
     default boolean canRepairWindow() {
-        return isAlive();
+        return canDoGenericActions();
     }
 
     default boolean canTakeDamage() {
-        return isAlive();
+        return canDoGenericActions();
     }
 
     default boolean canBeTargeted() {
-        return isAlive() && getPlayer().map(player -> {
+        return canDoGenericActions() && getPlayer().map(player -> {
             GameMode mode = player.getGameMode();
             return mode == GameMode.SURVIVAL || mode == GameMode.ADVENTURE;
         }).orElse(false);
     }
 
+    default boolean canDoGenericActions() {
+        return isAlive() && isInGame();
+    }
+
+    default boolean canRevive() {
+        if (!canDoGenericActions()) {
+            return false;
+        }
+
+        return getPlayer().filter(value -> value.getPose() == Entity.Pose.SNEAKING).isPresent();
+    }
+
+    default boolean canTriggerSLA() {
+        return canDoGenericActions();
+    }
+
+    default boolean isInGame() {
+        return module().getMeta().isInGame();
+    }
+
     default boolean inStage(@NotNull Key stageKey) {
-        return getScene().getCurrentStage().key().equals(stageKey);
+        Stage currentStage = getScene().getCurrentStage();
+        if (currentStage == null) {
+            return false;
+        }
+
+        return currentStage.key().equals(stageKey);
     }
 
     default @NotNull String getUsername() {
@@ -146,7 +179,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
                 @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
                 @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
                 @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner);
+                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator);
 
     }
 

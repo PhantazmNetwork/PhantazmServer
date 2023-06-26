@@ -6,70 +6,29 @@ import com.github.steanky.vector.HashVec3I2ObjectMap;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.InstanceUnregisterEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.WeakHashMap;
-import java.util.concurrent.locks.StampedLock;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class InstanceSettingsFunction implements Function<Instance, InstanceSpawner.InstanceSettings> {
-    private static final int MAX_READ_TRIES = 10;
-
-    private final EventNode<Event> rootNode;
-
-    private final StampedLock stampedLock;
-    private final Map<Instance, InstanceSpawner.InstanceSettings> settingsMap;
+    private final Map<UUID, InstanceSpawner.InstanceSettings> settingsMap;
 
     public InstanceSettingsFunction(@NotNull EventNode<Event> rootNode) {
-        this.rootNode = Objects.requireNonNull(rootNode, "rootNode");
-        this.stampedLock = new StampedLock();
-        this.settingsMap = new WeakHashMap<>();
+        this.settingsMap = new ConcurrentHashMap<>();
+        rootNode.addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
     }
 
     @Override
     public @NotNull InstanceSpawner.InstanceSettings apply(@NotNull Instance instance) {
-        InstanceSpawner.InstanceSettings settings = null;
-
-        boolean lockBroken = true;
-        int tries = 0;
-        do {
-            long optimisticStamp = stampedLock.tryOptimisticRead();
-            try {
-                settings = settingsMap.get(instance);
-            }
-            catch (Throwable ignored) {
-            }
-
-            if (stampedLock.validate(optimisticStamp)) {
-                lockBroken = false;
-                break;
-            }
-        } while (++tries <= MAX_READ_TRIES);
-
-        if (lockBroken) {
-            long fullReadLock = stampedLock.readLock();
-            try {
-                settings = settingsMap.get(instance);
-            }
-            finally {
-                stampedLock.unlockRead(fullReadLock);
-            }
-        }
-
-        if (settings != null) {
-            return settings;
-        }
-
-        long writeLock = stampedLock.writeLock();
-        try {
-            settings = settingsMap.get(instance);
-            if (settings != null) {
-                return settings;
+        return settingsMap.computeIfAbsent(instance.getUniqueId(), ignored -> {
+            if (!instance.isRegistered()) {
+                throw new IllegalArgumentException("Cannot get settings for unregistered instance");
             }
 
             DimensionType dimensionType = instance.getDimensionType();
@@ -89,16 +48,17 @@ public class InstanceSettingsFunction implements Function<Instance, InstanceSpaw
 
             InstanceSpace instanceSpace = new InstanceSpace(instance);
             ThreadLocal<Vec3I2ObjectMap<Node>> local = ThreadLocal.withInitial(() -> new HashVec3I2ObjectMap<>(bounds));
-            BasicInstanceSpaceHandler instanceSpaceHandler = new BasicInstanceSpaceHandler(instanceSpace, rootNode);
-            instanceSpaceHandler.registerEvents();
+            BasicInstanceSpaceHandler instanceSpaceHandler = new BasicInstanceSpaceHandler(instanceSpace);
 
-            settings = new InstanceSpawner.InstanceSettings(local, instanceSpaceHandler);
-            settingsMap.put(instance, settings);
+            return new InstanceSpawner.InstanceSettings(local, instanceSpaceHandler);
+        });
+    }
 
-            return settings;
-        }
-        finally {
-            stampedLock.unlockWrite(writeLock);
+    private void onInstanceUnregister(InstanceUnregisterEvent event) {
+        InstanceSpawner.InstanceSettings settings = settingsMap.remove(event.getInstance().getUniqueId());
+
+        if (settings != null) {
+            settings.spaceHandler().space().clearCache();
         }
     }
 }

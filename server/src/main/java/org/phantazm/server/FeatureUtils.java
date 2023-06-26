@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 final class FeatureUtils {
+    private FeatureUtils() {
+    }
+
     @Contract("null -> fail")
     static <T> @NotNull T check(@Nullable T object) {
         if (object != null) {

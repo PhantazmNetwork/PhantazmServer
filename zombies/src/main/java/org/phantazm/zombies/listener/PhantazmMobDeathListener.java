@@ -41,7 +41,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private static final Vec OFFSET = new Vec(0.5, 0, 0.5);
 
     private final KeyParser keyParser;
-    private final Supplier<? extends Optional<Round>> roundSupplier;
+    private final Supplier<Optional<Round>> roundSupplier;
     private final PowerupHandler powerupHandler;
 
     private final BoundedTracker<Room> roomTracker;
@@ -49,7 +49,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     public PhantazmMobDeathListener(@NotNull KeyParser keyParser, @NotNull Instance instance,
-            @NotNull MobStore mobStore, @NotNull Supplier<? extends Optional<Round>> roundSupplier,
+            @NotNull MobStore mobStore, @NotNull Supplier<Optional<Round>> roundSupplier,
             @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
             @NotNull BoundedTracker<Window> windowTracker,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
@@ -116,21 +116,35 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
             Window nearestWindow = windowOptional.get();
             Bounds3I frameRegion = nearestWindow.getWindowInfo().frameRegion();
-            Point windowCenter = nearestWindow.center();
-            Point toWindow = windowCenter.sub(position);
+            Point center = nearestWindow.getCenter();
 
-            Vec axis = new Vec(Integer.signum((int)Math.rint(toWindow.x())), 0,
-                    Integer.signum((int)Math.rint(toWindow.z())));
+            boolean xSmaller = frameRegion.lengthX() < frameRegion.lengthZ();
 
-            Vec mulVec = new Vec(Math.abs(axis.x()) * (frameRegion.lengthX() / 2D), 0,
-                    Math.abs(axis.z()) * (frameRegion.lengthZ() / 2D));
+            Vec normal = new Vec(xSmaller ? 1 : 0, 0, xSmaller ? 0 : 1);
 
-            Point spawnCandidate = windowCenter.add(axis.mul(mulVec)).add(axis.mul(OFFSET));
-            if (roomTracker.atPoint(spawnCandidate).isEmpty()) {
-                LOGGER.warn("Tried to adjust powerup location to " + spawnCandidate + ", but it is not inside a room");
+            normal = normal.mul(xSmaller ? frameRegion.lengthX() / 2.0 : frameRegion.lengthZ() / 2.0)
+                    .add(OFFSET.mul(normal));
+
+            Vec otherNormal = normal.mul(-1);
+
+            Vec targetNormal;
+            if (roomTracker.atPoint(center.add(normal)).isPresent()) {
+                targetNormal = normal;
+            }
+            else if (roomTracker.atPoint(center.add(otherNormal)).isPresent()) {
+                targetNormal = otherNormal;
+            }
+            else {
+                targetNormal = normal;
+                LOGGER.warn("Unable to find matching room at window near " + center);
             }
 
-            powerupHandler.spawn(key, seekDown(spawnCandidate));
+            Point test = seekDown(center.add(targetNormal));
+            if (roomTracker.atPoint(test).isEmpty()) {
+                LOGGER.warn("Spawning powerup outside of a room");
+            }
+
+            powerupHandler.spawn(key, test);
         }
     }
 

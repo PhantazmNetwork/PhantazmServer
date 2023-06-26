@@ -1,0 +1,13 @@
+instancesPath: "./lobbies"
+kickMessage: "<red>Couldn't find where to send you!"
+mainLobbyName: "main"
+
+lobbies:
+    main:
+        lobbyPaths: [ "main" ]
+        maxPlayers: 10
+        maxLobbies: 10
+
+        instanceConfig:
+            time: 18000
+            spawnPoint: { x: 8.0, y: -59.0, z: 8.0, yaw: 0.0, pitch: 0.0 }

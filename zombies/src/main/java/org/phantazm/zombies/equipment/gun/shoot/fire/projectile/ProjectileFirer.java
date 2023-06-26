@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
@@ -19,6 +20,7 @@ import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
+import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
@@ -112,16 +114,6 @@ public class ProjectileFirer implements Firer {
     }
 
     @Override
-    public void addExtraShotHandler(ShotHandler shotHandler) {
-
-    }
-
-    @Override
-    public void removeExtraShotHandler(ShotHandler shotHandler) {
-
-    }
-
-    @Override
     public void tick(@NotNull GunState state, long time) {
         for (AliveProjectile aliveProjectile = removalQueue.peek();
                 aliveProjectile != null && (time - aliveProjectile.time()) / 50 > data.maxAliveTime();
@@ -193,8 +185,9 @@ public class ProjectileFirer implements Firer {
                 firedShot.previousHits().add(hit.entity().getUuid());
             }
 
+            GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
+            EventDispatcher.call(new GunShootEvent(firedShot.gun, shot, firedShot.shooter()));
             for (ShotHandler shotHandler : shotHandlers) {
-                GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
                 shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
                         shot);
             }

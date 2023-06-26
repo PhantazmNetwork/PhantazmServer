@@ -51,20 +51,12 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
                 .nearbyEntitiesUntil(knockedPosition, reviveRadius, EntityTracker.Target.PLAYERS, candidate -> {
                     UUID candidateUUID = candidate.getUuid();
                     ZombiesPlayer revivingPlayer = zombiesPlayers.get(candidateUUID);
-                    if (revivingPlayer == null) {
-                        return false;
-                    }
-
-                    if (candidateUUID.equals(playerView.getUUID())) {
-                        return false;
-                    }
-
-                    if (!revivingPlayer.isAlive()) {
+                    if (revivingPlayer == null || candidateUUID.equals(playerView.getUUID()) || !revivingPlayer.canRevive()) {
                         return false;
                     }
 
                     ZombiesPlayerMeta meta = revivingPlayer.module().getMeta();
-                    if (!(meta.isCanRevive() && !meta.isReviving())) {
+                    if (meta.isReviving()) {
                         return false;
                     }
 
@@ -72,11 +64,7 @@ public class NearbyReviverFinder implements Supplier<ZombiesPlayer> {
                     if (reviverPlayerOptional.isEmpty()) {
                         return false;
                     }
-
                     Player player = reviverPlayerOptional.get();
-                    if (player.getPose() != Entity.Pose.SNEAKING) {
-                        return false;
-                    }
 
                     if (player.getPosition().distance(knockedPosition) <= reviveRadius) {
                         playerWrapper.set(revivingPlayer);

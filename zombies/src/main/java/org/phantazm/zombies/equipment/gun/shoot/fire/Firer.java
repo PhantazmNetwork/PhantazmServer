@@ -25,8 +25,4 @@ public interface Firer extends GunTickEffect {
      */
     void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start, @NotNull Collection<UUID> previousHits);
 
-    void addExtraShotHandler(ShotHandler shotHandler);
-
-    void removeExtraShotHandler(ShotHandler shotHandler);
-
 }

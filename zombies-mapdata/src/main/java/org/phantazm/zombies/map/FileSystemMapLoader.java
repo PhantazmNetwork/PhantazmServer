@@ -108,10 +108,16 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
 
         String sidebarSettingsPath =
                 "settings" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+        String corpsePath =
+                "corpse" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+
         ConfigNode scoreboard =
                 Configuration.read(paths.sidebar.resolve(sidebarSettingsPath), codec, MapProcessors.sidebar());
 
-        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, scoreboard);
+        ConfigNode corpse = Configuration.read(mapDirectory.resolve(corpsePath), codec).asNode();
+
+        return new MapInfo(mapSettingsInfo, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints, scoreboard,
+                corpse);
     }
 
     @Override
@@ -189,6 +195,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         }
 
         Configuration.write(paths.sidebar.resolve("settings" + extension), data.scoreboard(), codec);
+        Configuration.write(mapDirectory.resolve("corpse" + extension), data.corpse(), codec);
     }
 
     @Override

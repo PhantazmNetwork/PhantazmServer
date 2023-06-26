@@ -4,9 +4,10 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.phantazmCore)
-    implementation(projects.phantazmMob)
-    implementation(projects.phantazmZombiesMapdata)
+    api(projects.phantazmCore)
+    api(projects.phantazmMob)
+    api(projects.phantazmStats)
+    api(projects.phantazmZombiesMapdata)
 }
 
 elementAutodoc {

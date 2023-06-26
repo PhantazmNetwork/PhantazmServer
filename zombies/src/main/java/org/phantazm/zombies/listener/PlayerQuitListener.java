@@ -4,8 +4,6 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
-import org.phantazm.zombies.player.state.context.NoContext;
 import org.phantazm.zombies.scene.LeaveHandler;
 
 import java.util.Collections;
@@ -25,6 +23,7 @@ public class PlayerQuitListener extends ZombiesPlayerEventListener<PlayerDisconn
 
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerDisconnectEvent event) {
-        leaveHandler.leave(Collections.singleton(zombiesPlayer.module().getPlayerView().getUUID()));
+        leaveHandler.leave(Collections.singleton(zombiesPlayer.module().getPlayerView().getUUID())).executor()
+                .ifPresent(Runnable::run);
     }
 }

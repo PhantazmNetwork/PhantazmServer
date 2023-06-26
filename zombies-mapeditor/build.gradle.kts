@@ -58,6 +58,7 @@ dependencies {
     include(projects.phantazmCommons)
     include(projects.phantazmMessaging)
     include(projects.phantazmZombiesMapdata)
+    include(libs.vector.core)
     include(libs.adventure.api)
     include(libs.adventure.key)
     include(libs.adventure.text.minimessage)

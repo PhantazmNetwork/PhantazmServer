@@ -4,9 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +21,7 @@ public class DurationTickFormatter implements TickFormatter {
     }
 
     @Override
-    public @NotNull Component format(long ticks) {
+    public @NotNull String format(long ticks) {
         long elapsedSeconds;
         if (data.ceil) {
             elapsedSeconds = (long)Math.ceil((double)ticks / MinecraftServer.TICK_PER_SECOND);
@@ -36,39 +33,39 @@ public class DurationTickFormatter implements TickFormatter {
         long minutes = (elapsedSeconds % 3600) / 60;
         long seconds = elapsedSeconds % 60;
 
-        TextComponent.Builder builder = Component.text().color(data.color);
+        StringBuilder builder = new StringBuilder();
         if (hours != 0) {
-            builder.append(Component.text(hours));
+            builder.append(hours);
             if (data.verbose) {
-                builder.append(Component.text(" hours"));
+                builder.append(" hours");
             }
             else {
-                builder.append(Component.text("h"));
+                builder.append("h");
             }
         }
         if (minutes != 0) {
-            builder.append(Component.text(minutes));
+            builder.append(minutes);
             if (data.verbose) {
-                builder.append(Component.text(" minutes"));
+                builder.append(" minutes");
             }
             else {
-                builder.append(Component.text("m"));
+                builder.append("m");
             }
         }
         if ((hours == 0 && minutes == 0) || seconds != 0) {
-            builder.append(Component.text(seconds));
+            builder.append(seconds);
             if (data.verbose) {
-                builder.append(Component.text(" seconds"));
+                builder.append(" seconds");
             }
             else {
-                builder.append(Component.text("s"));
+                builder.append("s");
             }
         }
 
-        return builder.build();
+        return builder.toString();
     }
 
     @DataObject
-    public record Data(@NotNull TextColor color, boolean verbose, boolean ceil) {
+    public record Data(boolean verbose, boolean ceil) {
     }
 }

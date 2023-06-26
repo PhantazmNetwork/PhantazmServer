@@ -3,7 +3,9 @@ package org.phantazm.zombies.spawn;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
+import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.map.SpawnInfo;
@@ -23,11 +25,15 @@ public class BasicSpawnDistributor implements SpawnDistributor {
 
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
 
+    private final Team mobNoPushTeam;
+
     public BasicSpawnDistributor(@NotNull Function<? super Key, ? extends MobModel> modelFunction,
-            @NotNull Random random, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+            @NotNull Random random, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+            @Nullable Team mobNoPushTeam) {
         this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
         this.random = Objects.requireNonNull(random, "random");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        this.mobNoPushTeam = mobNoPushTeam;
     }
 
     @Override
@@ -102,7 +108,12 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 candidateIndex %= sortedSpawnpoints.size();
 
                 if (candidate.canSpawn(model, spawnType, zombiesPlayers)) {
-                    spawnedMobs.add(candidate.spawn(model));
+                    PhantazmMob mob = candidate.spawn(model);
+                    if (mobNoPushTeam != null) {
+                        mob.entity().setTeam(mobNoPushTeam);
+                    }
+
+                    spawnedMobs.add(mob);
                     spawned = true;
                     break;
                 }

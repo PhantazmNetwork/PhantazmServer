@@ -4,6 +4,8 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.CancellableState;
+import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.Attributes;
@@ -12,19 +14,20 @@ import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene.ZombiesScene;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
-
     private final ZombiesScene scene;
-
     private final ZombiesPlayerModule module;
+    private final Map<UUID, CancellableState> stateMap;
+    private final TickTaskScheduler taskScheduler;
 
-    public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module) {
+    public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
+            @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler taskScheduler) {
         this.scene = Objects.requireNonNull(scene, "scene");
         this.module = Objects.requireNonNull(module, "module");
+        this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
+        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
     }
 
     @Override
@@ -44,6 +47,30 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     @Override
+    public void registerCancellable(@NotNull CancellableState cancellable, boolean endOld) {
+        if (hasQuit()) {
+            return;
+        }
+
+        CancellableState oldCancellable = stateMap.put(cancellable.id(), cancellable);
+
+        if (oldCancellable != null && endOld) {
+            oldCancellable.end();
+        }
+
+        cancellable.start();
+    }
+
+    @Override
+    public void removeCancellable(@NotNull UUID id) {
+        CancellableState state = stateMap.remove(id);
+
+        if (state != null) {
+            state.end();
+        }
+    }
+
+    @Override
     public void start() {
         module.getStateSwitcher().start();
     }
@@ -57,6 +84,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         }
 
         module.getStateSwitcher().tick(time);
+        taskScheduler.tick(time);
     }
 
     @Override
@@ -87,7 +115,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     public @NotNull Flaggable flags() {
         return module.flags();
     }
-
 
     @Override
     public @NotNull Iterable<? extends Audience> audiences() {

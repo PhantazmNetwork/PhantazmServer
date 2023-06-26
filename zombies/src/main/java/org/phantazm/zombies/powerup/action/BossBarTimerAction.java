@@ -6,11 +6,14 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.CancellableState;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.boss_bar_timer")
@@ -18,27 +21,32 @@ import java.util.function.Supplier;
 public class BossBarTimerAction implements Supplier<PowerupAction> {
     private final Data data;
     private final Instance instance;
+    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     @FactoryMethod
-    public BossBarTimerAction(@NotNull Data data, @NotNull Instance instance) {
+    public BossBarTimerAction(@NotNull Data data, @NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         this.data = data;
         this.instance = instance;
+        this.playerMap = playerMap;
     }
 
     @Override
     public PowerupAction get() {
-        return new Action(data, instance);
+        return new Action(data, instance, playerMap);
     }
 
     private static class Action implements PowerupAction {
         private final Data data;
         private final Instance instance;
         private final DeactivationPredicate predicate;
+        private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+        private final UUID id;
 
         private long startTime = -1;
         private BossBar bossBar;
 
-        private Action(Data data, Instance instance) {
+        private Action(Data data, Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
             this.data = data;
             this.instance = instance;
             this.predicate = new DeactivationPredicate() {
@@ -52,11 +60,14 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
                     return (time - startTime) / MinecraftServer.TICK_MS >= data.duration;
                 }
             };
+            this.playerMap = playerMap;
+            this.id = UUID.randomUUID();
         }
 
         @Override
         public void tick(long time) {
-            if (startTime < 0) {
+            BossBar bossBar = this.bossBar;
+            if (startTime < 0 || bossBar == null) {
                 return;
             }
 
@@ -68,14 +79,27 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             this.startTime = System.currentTimeMillis();
 
-            this.bossBar = BossBar.bossBar(data.name, 1.0F, data.color, data.overlay);
-            instance.showBossBar(this.bossBar);
+            BossBar bossBar = BossBar.bossBar(data.name, 1.0F, data.color, data.overlay);
+            instance.showBossBar(bossBar);
+
+            this.bossBar = bossBar;
+
+            for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                zombiesPlayer.registerCancellable(CancellableState.named(id, () -> {
+                }, () -> zombiesPlayer.getPlayer().ifPresent(actualPlayer -> actualPlayer.hideBossBar(bossBar))), true);
+            }
         }
 
         @Override
         public void deactivate(@NotNull ZombiesPlayer player) {
+            BossBar bossBar = this.bossBar;
             if (bossBar != null) {
-                instance.hideBossBar(bossBar);
+                for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                    zombiesPlayer.removeCancellable(id);
+                }
+
+                MinecraftServer.getBossBarManager().destroyBossBar(bossBar);
+                this.bossBar = null;
             }
         }
 

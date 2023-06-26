@@ -6,18 +6,22 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.title.TitlePart;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerModule;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.*;
 import java.util.function.Function;
@@ -25,6 +29,7 @@ import java.util.function.Function;
 public class InGameStage implements Stage {
     private final Instance instance;
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
+    private final MapSettingsInfo settings;
     private final Map<UUID, SidebarUpdater> sidebarUpdaters = new HashMap<>();
     private final Pos spawnPos;
     private final RoundHandler roundHandler;
@@ -34,16 +39,17 @@ public class InGameStage implements Stage {
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final ShopHandler shopHandler;
     private final TickFormatter tickFormatter;
-
-    private long startTime;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public InGameStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
-            @NotNull Map<Key, List<Key>> defaultEquipment, @NotNull Set<Key> equipmentGroups,
+            @NotNull MapSettingsInfo settings, @NotNull Pos spawnPos, @NotNull RoundHandler roundHandler,
+            @NotNull Wrapper<Long> ticksSinceStart, @NotNull Map<Key, List<Key>> defaultEquipment,
+            @NotNull Set<Key> equipmentGroups,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
             @NotNull ShopHandler shopHandler, @NotNull TickFormatter endTimeTickFormatter) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        this.settings = Objects.requireNonNull(settings, "settings");
         this.spawnPos = Objects.requireNonNull(spawnPos, "spawnPos");
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
@@ -77,6 +83,11 @@ public class InGameStage implements Stage {
 
     @Override
     public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
+        zombiesPlayer.module().getMeta().setInGame(true);
+    }
+
+    @Override
+    public void onLeave(@NotNull ZombiesPlayer zombiesPlayer) {
 
     }
 
@@ -87,9 +98,9 @@ public class InGameStage implements Stage {
 
     @Override
     public void start() {
-        this.startTime = System.currentTimeMillis();
-
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            zombiesPlayer.module().getMeta().setInGame(true);
+            zombiesPlayer.module().getStats().setGamesPlayed(zombiesPlayer.module().getStats().getGamesPlayed() + 1);
             zombiesPlayer.getPlayer().ifPresent(player -> {
                 player.teleport(spawnPos);
             });
@@ -142,8 +153,6 @@ public class InGameStage implements Stage {
 
     @Override
     public void end() {
-        long endTime = System.currentTimeMillis();
-
         boolean anyAlive = false;
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (zombiesPlayer.isAlive()) {
@@ -152,41 +161,60 @@ public class InGameStage implements Stage {
             }
         }
 
-        Component finalTime = tickFormatter.format((endTime - startTime) / MinecraftServer.TICK_MS);
+        Component finalTime = Component.text(tickFormatter.format(ticksSinceStart.get()));
         int bestRound = Math.min(roundHandler.currentRoundIndex() + 1, roundHandler.roundCount());
 
+        TagResolver roundPlaceholder = Placeholder.component("round", Component.text(bestRound));
         if (anyAlive) {
-            instance.sendTitlePart(TitlePart.TITLE, Component.text("You Win!", NamedTextColor.GREEN));
-            instance.sendTitlePart(TitlePart.SUBTITLE, Component.text("You made it to Round ", NamedTextColor.GRAY)
-                    .append(Component.text(bestRound, NamedTextColor.WHITE)).append(Component.text("!")));
+            instance.sendTitlePart(TitlePart.TITLE, miniMessage.deserialize(settings.winTitleFormat(), roundPlaceholder));
+            instance.sendTitlePart(TitlePart.SUBTITLE, miniMessage.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
+
+            for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+                ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
+                stats.setWins(stats.getWins() + 1);
+                stats.getBestTime().ifPresentOrElse(prevBest -> {
+                    if (ticksSinceStart.get() < prevBest) {
+                        stats.setBestTime(ticksSinceStart.get());
+                    }
+                }, () -> stats.setBestTime(ticksSinceStart.get()));
+            }
         }
         else {
-            instance.sendTitlePart(TitlePart.TITLE, Component.text("You lost...", NamedTextColor.RED));
+            instance.sendTitlePart(TitlePart.TITLE, miniMessage.deserialize(settings.lossTitleFormat(), roundPlaceholder));
+            instance.sendTitlePart(TitlePart.SUBTITLE, miniMessage.deserialize(settings.lossSubtitleFormat(), roundPlaceholder));
         }
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            zombiesPlayer.sendMessage(Component.text("==========================================",
-                    Style.style(NamedTextColor.GREEN, TextDecoration.STRIKETHROUGH)));
+            if (zombiesPlayer.hasQuit()) {
+                continue;
+            }
 
-            zombiesPlayer.sendMessage(
-                    Component.text("Zombies", NamedTextColor.YELLOW).append(Component.text(" - ", NamedTextColor.WHITE))
-                            .append(finalTime).append(Component.text(" (", NamedTextColor.GRAY))
-                            .append(Component.text("Round ", NamedTextColor.RED))
-                            .append(Component.text(bestRound, NamedTextColor.RED))
-                            .append(Component.text(")", NamedTextColor.GRAY)));
+            ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
+            int gunAccuracy = stats.getShots() <= 0
+                              ? 100
+                              : (int)Math.rint(((double)(stats.getRegularHits() + stats.getHeadshotHits()) /
+                                      (double)stats.getShots()) * 100);
+            int headshotAccuracy = stats.getShots() <= 0
+                                   ? 100
+                                   : (int)Math.rint(((double)(stats.getHeadshotHits()) / (double)stats.getShots()) * 100);
+            TagResolver[] tagResolvers = new TagResolver[] {
+                    Placeholder.component("map", settings.displayName()),
+                    Placeholder.component("final_time", finalTime),
+                    Placeholder.component("best_round", Component.text(bestRound)),
+                    Placeholder.component("total_shots", Component.text(stats.getShots())),
+                    Placeholder.component("regular_hits", Component.text(stats.getRegularHits())),
+                    Placeholder.component("headshot_hits", Component.text(stats.getHeadshotHits())),
+                    Placeholder.component("gun_accuracy", Component.text(gunAccuracy)),
+                    Placeholder.component("headshot_accuracy", Component.text(headshotAccuracy)),
+                    Placeholder.component("kills", Component.text(stats.getKills())),
+                    Placeholder.component("coins_gained", Component.text(stats.getCoinsGained())),
+                    Placeholder.component("coins_spent", Component.text(stats.getCoinsSpent())),
+                    Placeholder.component("knocks", Component.text(stats.getKnocks())),
+                    Placeholder.component("deaths", Component.text(stats.getDeaths())),
+                    Placeholder.component("revives", Component.text(stats.getRevives()))
+            };
 
-            zombiesPlayer.sendMessage(Component.empty());
-
-            zombiesPlayer.sendMessage(
-                    Component.text("Zombie Kills", Style.style(TextDecoration.BOLD, NamedTextColor.WHITE))
-                            .append(Component.text(" - ", NamedTextColor.GRAY))
-                            .append(Component.text(zombiesPlayer.module().getKills().getKills(),
-                                    NamedTextColor.GREEN)));
-
-            zombiesPlayer.sendMessage(Component.empty());
-
-            zombiesPlayer.sendMessage(Component.text("==========================================",
-                    Style.style(NamedTextColor.GREEN, TextDecoration.STRIKETHROUGH)));
+            zombiesPlayer.sendMessage(miniMessage.deserialize(settings.endGameStatsFormat(), tagResolvers));
         }
 
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {

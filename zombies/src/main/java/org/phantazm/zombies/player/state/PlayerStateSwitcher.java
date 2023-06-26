@@ -8,7 +8,6 @@ public class PlayerStateSwitcher implements Activable {
     private ZombiesPlayerState state;
 
     public PlayerStateSwitcher() {
-
     }
 
     @Override
