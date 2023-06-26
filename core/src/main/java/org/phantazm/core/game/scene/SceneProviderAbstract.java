@@ -1,6 +1,7 @@
 package org.phantazm.core.game.scene;
 
-import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.ServerProcess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.game.scene.event.SceneShutdownEvent;
@@ -64,7 +65,10 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
                 cleanupScene(scene);
                 iterator.remove();
 
-                EventDispatcher.call(new SceneShutdownEvent(scene));
+                ServerProcess process = MinecraftServer.process();
+                if (process != null) {
+                    process.eventHandler().call(new SceneShutdownEvent(scene));
+                }
             }
             else {
                 scene.tick(time);
