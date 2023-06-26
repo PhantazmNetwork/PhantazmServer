@@ -165,9 +165,9 @@ public final class ZombiesFeature {
                             globalEventNode, ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(),
                             new BasicClientBlockHandlerSource(instance -> {
                                 DimensionType dimensionType = instance.getDimensionType();
-                                return new InstanceClientBlockHandler(instance, globalEventNode,
-                                        dimensionType.getMinY(), dimensionType.getHeight());
-                            }), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
+                                return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
+                                        dimensionType.getHeight());
+                            }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
                             ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator,
                                     MobFeature.getModels()),

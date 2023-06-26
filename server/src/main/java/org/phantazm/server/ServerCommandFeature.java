@@ -36,6 +36,7 @@ public final class ServerCommandFeature {
         commandManager.register(new PermissionCommand(permissionHandler, IdentitySource.MOJANG));
         commandManager.register(
                 new OrderlyShutdownCommand(routerStore, shutdownConfig, MinecraftServer.getGlobalEventHandler()));
+        commandManager.register(new DebugCommand());
 
         commandManager.getConsoleSender().addPermission(ALL_PERMISSIONS);
     }

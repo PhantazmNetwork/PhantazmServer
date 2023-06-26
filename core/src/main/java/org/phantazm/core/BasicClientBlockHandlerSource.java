@@ -1,20 +1,21 @@
 package org.phantazm.core;
 
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.InstanceUnregisterEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.WeakHashMap;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * Standard implementation of {@link ClientBlockHandlerSource}. Does not maintain strong references to Instance objects.
+ * Standard implementation of {@link ClientBlockHandlerSource}.
  */
 public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
     private final Function<? super Instance, ? extends ClientBlockHandler> blockHandlerFunction;
-    private final Map<Instance, ClientBlockHandler> map;
-    private final Object sync;
+    private final Map<UUID, ClientBlockHandler> map;
 
     /**
      * Creates a new instance of this class given the provided {@link ClientBlockHandler}-producing function. This
@@ -23,17 +24,26 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
      * @param handlerFunction the handler function, which should never return null
      */
     public BasicClientBlockHandlerSource(
-            @NotNull Function<? super Instance, ? extends ClientBlockHandler> handlerFunction) {
+            @NotNull Function<? super Instance, ? extends ClientBlockHandler> handlerFunction,
+            @NotNull EventNode<Event> globalNode) {
         this.blockHandlerFunction = Objects.requireNonNull(handlerFunction, "handlerFunction");
-        this.map = new WeakHashMap<>();
-        this.sync = new Object();
+        this.map = new ConcurrentHashMap<>();
+
+        globalNode.addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
     }
 
     @Override
     public @NotNull ClientBlockHandler forInstance(@NotNull Instance instance) {
-        synchronized (sync) {
-            return map.computeIfAbsent(Objects.requireNonNull(instance, "instance"),
-                    world -> Objects.requireNonNull(this.blockHandlerFunction.apply(world), "handler"));
-        }
+        return map.computeIfAbsent(instance.getUniqueId(), ignored -> {
+            if (!instance.isRegistered()) {
+                throw new IllegalArgumentException("Cannot hold an unregistered instance");
+            }
+
+            return Objects.requireNonNull(this.blockHandlerFunction.apply(instance), "handler");
+        });
+    }
+
+    private void onInstanceUnregister(InstanceUnregisterEvent event) {
+        map.remove(event.getInstance().getUniqueId());
     }
 }
