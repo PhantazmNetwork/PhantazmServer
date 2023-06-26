@@ -2,6 +2,7 @@ package org.phantazm.server;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -15,6 +16,7 @@ import org.phantazm.core.chat.SelfChatChannel;
 import org.phantazm.core.chat.command.ChatCommand;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
+import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 
@@ -45,7 +47,8 @@ public final class ChatFeature {
      * @param commandManager The {@link CommandManager} to register chat commands to
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
-            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull CommandManager commandManager) {
+            @NotNull Map<? super UUID, ? extends Party> parties,
+            @NotNull PartyConfig partyConfig, @NotNull CommandManager commandManager) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -59,7 +62,7 @@ public final class ChatFeature {
 
         channels.put(DEFAULT_CHAT_CHANNEL_NAME, new InstanceChatChannel(viewProvider));
         channels.put(SelfChatChannel.CHANNEL_NAME, new SelfChatChannel(viewProvider));
-        channels.put(PartyChatChannel.CHANNEL_NAME, new PartyChatChannel(parties, viewProvider));
+        channels.put(PartyChatChannel.CHANNEL_NAME, new PartyChatChannel(parties, viewProvider, partyConfig, MiniMessage.miniMessage()));
 
         Map<UUID, String> playerChannels = new HashMap<>();
         commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));

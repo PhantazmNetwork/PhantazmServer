@@ -29,6 +29,8 @@ public class PartyFeature {
 
     private static final GuildHolder<Party> partyHolder = new GuildHolder<>(new HashMap<>(), new ArrayList<>());
 
+    private static PartyConfig config;
+
     private PartyFeature() {
         throw new UnsupportedOperationException();
     }
@@ -44,15 +46,15 @@ public class PartyFeature {
         ConfigElement partyConfigNode = Configuration.read(Path.of(partyFileName), partyCodec);
         TickFormatter tickFormatter =
                 contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
-        PartyConfig partyConfig = partyConfigProcessor.dataFromElement(partyConfigNode);
+        config = partyConfigProcessor.dataFromElement(partyConfigNode);
 
-        PartyCreator partyCreator = new PartyCreator.Builder().setNotificationConfig(partyConfig.notificationConfig())
-                .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(partyConfig.creatorRank())
-                .setDefaultRank(partyConfig.defaultRank()).setInvitationDuration(partyConfig.invitationDuration())
-                .setMinimumKickRank(partyConfig.minimumKickRank()).setMinimumInviteRank(partyConfig.minimumInviteRank())
-                .setMinimumJoinRank(partyConfig.minimumJoinRank()).build();
+        PartyCreator partyCreator = new PartyCreator.Builder().setNotificationConfig(config.notificationConfig())
+                .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
+                .setDefaultRank(config.defaultRank()).setInvitationDuration(config.invitationDuration())
+                .setMinimumKickRank(config.minimumKickRank()).setMinimumInviteRank(config.minimumInviteRank())
+                .setMinimumJoinRank(config.minimumJoinRank()).build();
         Command partyCommand =
-                PartyCommand.partyCommand(partyConfig.commandConfig(), miniMessage, partyHolder, viewProvider,
+                PartyCommand.partyCommand(config.commandConfig(), miniMessage, partyHolder, viewProvider,
                         partyCreator, new Random());
         commandManager.register(partyCommand);
 
@@ -69,5 +71,9 @@ public class PartyFeature {
 
     public static @NotNull GuildHolder<Party> getPartyHolder() {
         return partyHolder;
+    }
+
+    public static @NotNull PartyConfig getConfig() {
+        return FeatureUtils.check(config);
     }
 }
