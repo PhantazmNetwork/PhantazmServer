@@ -2,6 +2,8 @@ package org.phantazm.core.game.scene;
 
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -18,13 +20,16 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     private final UUID uuid;
     protected final Instance instance;
     protected final SceneFallback fallback;
+    protected final Point spawnPoint;
 
     private boolean shutdown = false;
 
-    public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback) {
+    public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback,
+            @NotNull Point spawnPoint) {
         this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.fallback = Objects.requireNonNull(fallback, "fallback");
+        this.spawnPoint = Objects.requireNonNull(spawnPoint, "spawnPoint");
     }
 
     @Override
@@ -65,5 +70,13 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     @Override
     public @NotNull SceneFallback getFallback() {
         return fallback;
+    }
+
+    @Override
+    public void acceptGhost(@NotNull PlayerView playerView) {
+        playerView.getPlayer().ifPresent(player -> {
+            player.setInstance(instance, spawnPoint).join();
+            player.setGameMode(GameMode.SPECTATOR);
+        });
     }
 }

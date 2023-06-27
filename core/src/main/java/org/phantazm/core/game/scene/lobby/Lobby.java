@@ -35,7 +35,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      */
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
             @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler, boolean quittable) {
-        super(uuid, instance, fallback);
+        super(uuid, instance, fallback, instanceConfig.spawnPoint());
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.players = new HashMap<>();
         this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");

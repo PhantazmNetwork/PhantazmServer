@@ -16,6 +16,7 @@ import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.Utils;
@@ -59,7 +60,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
             @NotNull EventNode<Event> sceneNode) {
-        super(uuid, instance, fallback);
+        super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()));
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.game.scene.BasicRouterStore;
 import org.phantazm.core.game.scene.RouterStore;
+import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
 import org.phantazm.core.player.BasicPlayerViewProvider;
@@ -237,14 +238,17 @@ public final class PhantazmServer {
                 mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
+
+        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         ZombiesFeature.initialize(global, contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
                 keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, commandManager,
                 new CompositeFallback(List.of(LobbyFeature.getFallback(),
                         new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))),
-                PartyFeature.getPartyHolder().uuidToGuild(), routerStore);
+                PartyFeature.getPartyHolder().uuidToGuild(), routerStore, transferHelper);
 
         ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
-                mappingProcessorSource, codec, routerStore, shutdownConfig, zombiesGamereportConfig);
+                mappingProcessorSource, codec, routerStore, shutdownConfig, zombiesGamereportConfig, viewProvider,
+                transferHelper);
         ValidationFeature.initialize(global, loginValidator, ServerCommandFeature.permissionHandler());
 
         routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());

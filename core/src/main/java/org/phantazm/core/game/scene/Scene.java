@@ -79,4 +79,5 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
 
     boolean isQuittable();
 
+    void acceptGhost(@NotNull PlayerView playerView);
 }

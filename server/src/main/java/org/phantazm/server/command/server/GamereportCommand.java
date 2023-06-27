@@ -99,7 +99,7 @@ public class GamereportCommand extends Command {
                 TagResolver gameStateTag = Placeholder.component("game_state", gameState);
 
                 TagResolver warpTag = TagResolver.resolver("warp",
-                        Tag.styling(ClickEvent.runCommand("/ghost phantazm:zombies " + zombiesScene.getUUID())));
+                        Tag.styling(ClickEvent.runCommand("/ghost " + zombiesScene.getUUID())));
 
                 gameEntries.add(MiniMessage.miniMessage()
                         .deserialize(config.gameEntryFormatString(), totalGamesTag, currentGameTag, gameUUIDTag,
@@ -161,7 +161,7 @@ public class GamereportCommand extends Command {
             }
         });
 
-        Argument<Integer> pageArgument = ArgumentType.Integer("page");
+        Argument<Integer> pageArgument = ArgumentType.Integer("page").setDefaultValue(1);
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
 

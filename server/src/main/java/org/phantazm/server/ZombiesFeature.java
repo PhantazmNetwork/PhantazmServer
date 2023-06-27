@@ -124,7 +124,7 @@ public final class ZombiesFeature {
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
             @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull RouterStore routerStore) throws IOException {
+            @NotNull RouterStore routerStore, @NotNull SceneTransferHelper sceneTransferHelper) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -182,9 +182,9 @@ public final class ZombiesFeature {
                 .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
                         TaskSchedule.nextTick());
 
-        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         commandManager.register(
-                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, transferHelper, sceneFallback));
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneTransferHelper,
+                        sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
