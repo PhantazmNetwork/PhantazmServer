@@ -6,11 +6,14 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouterStore;
+import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.TransferResult;
+import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class QuitCommand {
 
@@ -19,7 +22,7 @@ public final class QuitCommand {
     }
 
     public static @NotNull Command quitCommand(@NotNull RouterStore routerStore,
-            @NotNull PlayerViewProvider viewProvider) {
+            @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback defaultFallback) {
         Objects.requireNonNull(routerStore, "routerStore");
         Objects.requireNonNull(viewProvider, "viewProvider");
 
@@ -37,7 +40,9 @@ public final class QuitCommand {
             return true;
         }, (sender, context) -> {
             Player player = (Player)sender;
-            routerStore.getCurrentScene(player.getUuid()).ifPresent(scene -> {
+            Optional<? extends Scene<?>> sceneOptional = routerStore.getCurrentScene(player.getUuid());
+            if (sceneOptional.isPresent()) {
+                Scene<?> scene = sceneOptional.get();
                 if (!scene.isQuittable()) {
                     sender.sendMessage(Component.text("You can't quit this scene.", NamedTextColor.RED));
                     return;
@@ -51,7 +56,10 @@ public final class QuitCommand {
                 else {
                     result.message().ifPresent(sender::sendMessage);
                 }
-            });
+            }
+            else {
+                defaultFallback.fallback(viewProvider.fromPlayer(player));
+            }
         });
 
         return command;

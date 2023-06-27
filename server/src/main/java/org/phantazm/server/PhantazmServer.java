@@ -216,7 +216,6 @@ public final class PhantazmServer {
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
-        CommandFeature.initialize(MinecraftServer.getCommandManager(), routerStore, viewProvider);
 
         PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
                 MinecraftServer.getSchedulerManager(), mappingProcessorSource, contextManager, tomlCodec,
@@ -225,6 +224,8 @@ public final class PhantazmServer {
         ChatFeature.initialize(global, viewProvider, PartyFeature.getPartyHolder().uuidToGuild(),
                 PartyFeature.getConfig(), MinecraftServer.getCommandManager());
         MessagingFeature.initialize(global, serverConfig.serverInfoConfig().authType());
+        CommandFeature.initialize(MinecraftServer.getCommandManager(), routerStore, viewProvider,
+                LobbyFeature.getFallback());
 
         ProximaFeature.initialize(global, contextManager, pathfinderConfig);
 
