@@ -86,12 +86,11 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
             return false;
         }
 
-        if (oldInstance != null) {
-            Utils.handleInstanceTransfer(oldInstance, player);
-        }
 
         player.setInstance(instance, spawnPoint).join();
         player.setGameMode(GameMode.SPECTATOR);
+
+        Utils.handleInstanceTransfer(oldInstance, player, false);
         return true;
     }
 }
