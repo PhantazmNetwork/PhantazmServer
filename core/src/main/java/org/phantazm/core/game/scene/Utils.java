@@ -13,10 +13,12 @@ import java.util.Objects;
 
 public class Utils {
     /**
-     * Handles player transfer between instances, sending list packets.
+     * Handles player transfer between instances, sending list packets. Will optionally add this player to the tab
+     * list of other players in the instance.
      *
      * @param oldInstance the old instance; is {@code null} if the player is logging in for the first time
      * @param player      the player
+     * @param showPlayers whether to send packets to players in the new instance (the player's current instance)
      */
     public static void handleInstanceTransfer(@Nullable Instance oldInstance, @NotNull Player player,
             boolean showPlayers) {
@@ -56,6 +58,13 @@ public class Utils {
         }
     }
 
+    /**
+     * Handles player transfer between instances, sending list packets. Will also notify players in the new instance
+     * (the player's current instance).
+     *
+     * @param oldInstance the old instance; is {@code null} if the player is logging in for the first time
+     * @param player      the player
+     */
     public static void handleInstanceTransfer(@NotNull Instance oldInstance, @NotNull Player player) {
         handleInstanceTransfer(oldInstance, player, true);
     }
