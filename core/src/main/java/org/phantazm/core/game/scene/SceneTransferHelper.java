@@ -85,10 +85,10 @@ public class SceneTransferHelper {
             return;
         }
 
-        for (Runnable leaveExecutor : result.second()) {
-            leaveExecutor.run();
+        if (target.acceptGhost(ghoster)) {
+            for (Runnable leaveExecutor : result.second()) {
+                leaveExecutor.run();
+            }
         }
-
-        target.acceptGhost(ghoster);
     }
 }

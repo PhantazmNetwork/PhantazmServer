@@ -29,6 +29,10 @@ public class GhostCommand extends Command {
         ArgumentUUID sceneArgument = ArgumentType.UUID("scene");
         sceneArgument.setSuggestionCallback((sender, context, suggestion) -> {
             for (SceneRouter<?, ?> router : routerStore.getRouters()) {
+                if (!router.isGame()) {
+                    continue;
+                }
+
                 for (Scene<?> scene : router.getScenes()) {
                     suggestion.addEntry(new SuggestionEntry(scene.getUUID().toString(), null));
                 }
@@ -44,6 +48,10 @@ public class GhostCommand extends Command {
 
             UUID argument = context.get(sceneArgument);
             for (SceneRouter<?, ?> router : routerStore.getRouters()) {
+                if (!router.isGame()) {
+                    continue;
+                }
+
                 for (Scene<?> scene : router.getScenes()) {
                     if (scene.getUUID().equals(argument)) {
                         transferHelper.ghost(scene, viewProvider.fromPlayer(player));

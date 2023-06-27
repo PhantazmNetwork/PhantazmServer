@@ -4,6 +4,7 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -73,10 +74,19 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     }
 
     @Override
-    public void acceptGhost(@NotNull PlayerView playerView) {
-        playerView.getPlayer().ifPresent(player -> {
-            player.setInstance(instance, spawnPoint).join();
-            player.setGameMode(GameMode.SPECTATOR);
-        });
+    public boolean acceptGhost(@NotNull PlayerView playerView) {
+        Optional<Player> playerOptional = playerView.getPlayer();
+        if (playerOptional.isEmpty()) {
+            return false;
+        }
+
+        Player player = playerOptional.get();
+        if (player.getInstance() == instance) {
+            return false;
+        }
+
+        player.setInstance(instance, spawnPoint).join();
+        player.setGameMode(GameMode.SPECTATOR);
+        return true;
     }
 }
