@@ -29,7 +29,7 @@ public class SendMessageEffect implements GunEffect {
     public SendMessageEffect(@NotNull Data data,
             @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
+        this.audienceProvider = Objects.requireNonNull(audienceProvider, "actionBarSender");
     }
 
     @Override

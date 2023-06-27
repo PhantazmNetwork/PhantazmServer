@@ -69,6 +69,11 @@ public class IdleStage implements Stage {
     }
 
     @Override
+    public boolean canRejoin() {
+        return false;
+    }
+
+    @Override
     public @NotNull Key key() {
         return StageKeys.IDLE_STAGE;
     }

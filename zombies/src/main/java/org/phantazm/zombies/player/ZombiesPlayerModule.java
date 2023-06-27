@@ -14,6 +14,7 @@ import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.kill.PlayerKills;
 import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
@@ -32,6 +33,7 @@ public class ZombiesPlayerModule implements DependencyModule {
     private final PlayerKills kills;
     private final EquipmentHandler equipmentHandler;
     private final EquipmentCreator equipmentCreator;
+    private final ZombiesPlayerActionBar actionBar;
     private final InventoryAccessRegistry profileSwitcher;
     private final PlayerStateSwitcher stateSwitcher;
     private final Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions;
@@ -44,11 +46,11 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     public ZombiesPlayerModule(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
             @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
-            @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
-            @NotNull PlayerStateSwitcher stateSwitcher,
+            @NotNull EquipmentCreator equipmentCreator, @NotNull ZombiesPlayerActionBar actionBar,
+            @NotNull InventoryAccessRegistry profileSwitcher, @NotNull PlayerStateSwitcher stateSwitcher,
             @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
-            @NotNull Sidebar sidebar,
-            @NotNull TabList tabList, @NotNull TransactionModifierSource mapTransactionModifierSource,
+            @NotNull Sidebar sidebar, @NotNull TabList tabList,
+            @NotNull TransactionModifierSource mapTransactionModifierSource,
             @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull ZombiesPlayerMapStats stats) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
@@ -57,6 +59,7 @@ public class ZombiesPlayerModule implements DependencyModule {
         this.kills = Objects.requireNonNull(kills, "kills");
         this.equipmentHandler = Objects.requireNonNull(equipmentHandler, "equipmentHandler");
         this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
+        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
         this.stateFunctions = Map.copyOf(stateFunctions);
@@ -92,6 +95,10 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     public @NotNull InventoryAccessRegistry getInventoryAccessRegistry() {
         return profileSwitcher;
+    }
+
+    public @NotNull ZombiesPlayerActionBar getActionBar() {
+        return actionBar;
     }
 
     public @NotNull PlayerStateSwitcher getStateSwitcher() {

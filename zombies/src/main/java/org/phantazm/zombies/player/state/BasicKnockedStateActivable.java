@@ -23,6 +23,7 @@ import org.phantazm.core.time.TickFormatter;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
@@ -39,6 +40,8 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final PlayerView playerView;
 
+    private final ZombiesPlayerActionBar actionBar;
+
     private final MapSettingsInfo settings;
 
     private final ReviveHandler reviveHandler;
@@ -54,12 +57,15 @@ public class BasicKnockedStateActivable implements Activable {
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
-            @NotNull PlayerView playerView, @NotNull MapSettingsInfo settings, @NotNull ReviveHandler reviveHandler,
+            @NotNull PlayerView playerView, @NotNull ZombiesPlayerActionBar actionBar,
+            @NotNull MapSettingsInfo settings,
+            @NotNull ReviveHandler reviveHandler,
             @NotNull TickFormatter tickFormatter, @NotNull Sidebar sidebar, @NotNull TabList tabList,
             @NotNull ZombiesPlayerMapStats stats) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.reviveHandler = Objects.requireNonNull(reviveHandler, "reviveHandler");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
@@ -127,12 +133,12 @@ public class BasicKnockedStateActivable implements Activable {
             player.setFlyingSpeed(0.4F);
             player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
             player.setGameMode(GameMode.ADVENTURE);
-            player.sendActionBar(Component.empty());
             sidebar.addViewer(player);
             tabList.addViewer(player);
             context.getVehicle().remove();
             player.teleport(Pos.fromPoint(context.getKnockLocation()));
         });
+        actionBar.sendActionBar(Component.empty(), 2);
     }
 
     private void sendReviveStatus(@NotNull ZombiesPlayer reviver, @NotNull Component knockedDisplayName,
@@ -143,7 +149,7 @@ public class BasicKnockedStateActivable implements Activable {
                     Placeholder.unparsed("time", tickFormatter.format(reviveHandler.getTicksUntilRevive()));
             Component message = miniMessage.deserialize(settings.reviveStatusToReviverFormat(), knockedNamePlaceholder,
                     timePlaceholder);
-            reviverPlayer.sendActionBar(message);
+            reviver.module().getActionBar().sendActionBar(message, 2);
         });
         playerView.getPlayer().ifPresent(player -> {
             TagResolver reviverNamePlaceholder = Placeholder.component("reviver", reviverDisplayName);
@@ -151,7 +157,7 @@ public class BasicKnockedStateActivable implements Activable {
                     Placeholder.unparsed("time", tickFormatter.format(reviveHandler.getTicksUntilRevive()));
             Component message = miniMessage.deserialize(settings.reviveStatusToKnockedFormat(), reviverNamePlaceholder,
                     timePlaceholder);
-            player.sendActionBar(message);
+            actionBar.sendActionBar(message, 2);
         });
     }
 
@@ -159,7 +165,7 @@ public class BasicKnockedStateActivable implements Activable {
         playerView.getPlayer().ifPresent(player -> {
             TagResolver timePlaceholder = Placeholder.component("time",
                     Component.text(tickFormatter.format(Math.max(reviveHandler.getTicksUntilDeath(), 0))));
-            player.sendActionBar(miniMessage.deserialize(settings.dyingStatusFormat(), timePlaceholder));
+            actionBar.sendActionBar(miniMessage.deserialize(settings.dyingStatusFormat(), timePlaceholder), 2);
         });
     }
 

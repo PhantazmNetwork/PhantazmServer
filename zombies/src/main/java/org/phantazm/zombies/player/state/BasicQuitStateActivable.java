@@ -1,5 +1,6 @@
 package org.phantazm.zombies.player.state;
 
+import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -49,6 +50,9 @@ public class BasicQuitStateActivable implements Activable {
             sidebar.removeViewer(player);
             tabList.removeViewer(player);
             player.setHealth(player.getMaxHealth());
+            player.resetTitle();
+            player.sendActionBar(Component.empty());
+            player.stopSound(SoundStop.all());
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);

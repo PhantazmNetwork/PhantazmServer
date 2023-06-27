@@ -125,7 +125,7 @@ public class ReviveHandler implements Activable {
     private void clearReviverState() {
         if (reviver != null) {
             reviver.module().getMeta().setReviving(false);
-            reviver.getPlayer().ifPresent(player -> player.sendActionBar(Component.empty()));
+            reviver.module().getActionBar().sendActionBar(Component.empty(), 2);
         }
     }
 

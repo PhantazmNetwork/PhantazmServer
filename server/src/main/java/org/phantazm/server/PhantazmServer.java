@@ -177,7 +177,9 @@ public final class PhantazmServer {
         LOGGER.info("Shutting down server. Reason: " + reason);
 
         ZombiesFeature.end();
-        loginValidator.flush();
+        if (loginValidator != null) {
+            loginValidator.flush();
+        }
 
         MinecraftServer.stopCleanly();
         ServerCommandFeature.flushPermissions();

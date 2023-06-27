@@ -85,6 +85,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
         module.getStateSwitcher().tick(time);
         taskScheduler.tick(time);
+        module.getActionBar().tick(time);
     }
 
     @Override

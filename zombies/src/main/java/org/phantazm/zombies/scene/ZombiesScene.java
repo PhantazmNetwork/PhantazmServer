@@ -130,6 +130,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         if (stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
             return TransferResult.failure(Component.text("The game is not accepting new players.", NamedTextColor.RED));
         }
+        if (!stage.canRejoin() && !oldPlayers.isEmpty()) {
+            return TransferResult.failure(Component.text("The game is not accepting rejoining players.",
+                    NamedTextColor.RED));
+        }
 
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
             return TransferResult.failure(Component.text("Too many players!", NamedTextColor.RED));

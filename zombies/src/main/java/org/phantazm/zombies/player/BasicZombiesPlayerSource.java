@@ -43,6 +43,7 @@ import org.phantazm.zombies.map.EquipmentGroupInfo;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.*;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
@@ -137,9 +138,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
 
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
+        ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
         ZombiesEquipmentModule equipmentModule =
-                new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, mobSpawner, mobStore, eventNode, random,
-                        mapObjects, zombiesPlayerWrapper, mobModelMap::get);
+                new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, actionBar, mobSpawner, mobStore,
+                        eventNode, random, mapObjects, zombiesPlayerWrapper, mobModelMap::get);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 
         Sidebar sidebar = new Sidebar(
@@ -185,7 +187,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             corpseWrapper.set(corpse);
             return new KnockedPlayerState(reviveHandler,
-                    List.of(new BasicKnockedStateActivable(context, instance, playerView, mapSettingsInfo,
+                    List.of(new BasicKnockedStateActivable(context, instance, playerView, actionBar, mapSettingsInfo,
                                     reviveHandler, tickFormatter, sidebar, tabList, stats), corpse.asKnockActivable(),
                             new Activable() {
                                 @Override
@@ -212,7 +214,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
 
         ZombiesPlayerModule module =
-                new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator,
+                new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator, actionBar,
                         accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
                         playerTransactionModifierSource, flaggable, stats);
 

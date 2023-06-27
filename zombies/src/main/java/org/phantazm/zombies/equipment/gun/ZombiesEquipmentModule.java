@@ -12,9 +12,11 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.zombies.equipment.gun.action_bar.ZombiesPlayerActionBarSender;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 
 import java.util.*;
 import java.util.function.Function;
@@ -27,6 +29,7 @@ public class ZombiesEquipmentModule implements DependencyModule {
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
     private final PlayerView playerView;
     private final ZombiesPlayerMapStats mapStats;
+    private final ZombiesPlayerActionBar actionBar;
     private final MobSpawner mobSpawner;
     private final MobStore mobStore;
     private final EventNode<Event> eventNode;
@@ -36,13 +39,15 @@ public class ZombiesEquipmentModule implements DependencyModule {
     private final Function<? super Key, ? extends MobModel> mobModelFunction;
 
     public ZombiesEquipmentModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats mapStats, @NotNull MobSpawner mobSpawner,
+            @NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats mapStats,
+            @NotNull ZombiesPlayerActionBar actionBar, @NotNull MobSpawner mobSpawner,
             @NotNull MobStore mobStore, @NotNull EventNode<Event> eventNode, @NotNull Random random,
             @NotNull MapObjects mapObjects, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier,
             @NotNull Function<? super Key, ? extends MobModel> mobModelFunction) {
         this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.mapStats = Objects.requireNonNull(mapStats, "mapStats");
+        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
@@ -62,6 +67,10 @@ public class ZombiesEquipmentModule implements DependencyModule {
 
     public @NotNull ZombiesPlayerMapStats getMapStats() {
         return mapStats;
+    }
+
+    public @NotNull ZombiesPlayerActionBar getActionBar() {
+        return actionBar;
     }
 
     public @NotNull Supplier<Optional<? extends Entity>> getPlayerSupplier() {

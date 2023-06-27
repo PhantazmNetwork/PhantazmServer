@@ -17,4 +17,6 @@ public interface Stage extends Activable, Keyed {
 
     boolean hasPermanentPlayers();
 
+    boolean canRejoin();
+
 }

@@ -12,6 +12,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.scene.ZombiesJoinHelper;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
+import org.phantazm.zombies.stage.Stage;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -35,6 +36,11 @@ public class ZombiesRejoinCommand extends Command {
             Optional<ZombiesScene> currentScene = router.getCurrentScene(player.getUuid());
             for (ZombiesScene scene : router.getScenesContainingPlayer(player.getUuid())) {
                 if (currentScene.isPresent() && currentScene.get() == scene) {
+                    continue;
+                }
+
+                Stage stage = scene.getCurrentStage();
+                if (stage != null && !stage.canRejoin()) {
                     continue;
                 }
 

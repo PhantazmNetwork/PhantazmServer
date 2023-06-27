@@ -21,6 +21,7 @@ import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.equipment.EquipmentTypes;
 import org.phantazm.zombies.equipment.gun.*;
+import org.phantazm.zombies.equipment.gun.action_bar.ZombiesPlayerActionBarSender;
 import org.phantazm.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import org.phantazm.zombies.equipment.gun.audience.PlayerAudienceProvider;
 import org.phantazm.zombies.equipment.gun.effect.*;
@@ -187,6 +188,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(GunLevel.class);
         contextManager.registerElementClass(EntityInstanceAudienceProvider.class);
         contextManager.registerElementClass(PlayerAudienceProvider.class);
+        contextManager.registerElementClass(ZombiesPlayerActionBarSender.class);
         contextManager.registerElementClass(AmmoLevelEffect.class);
         contextManager.registerElementClass(PlaySoundEffect.class);
         contextManager.registerElementClass(ReloadActionBarEffect.class);

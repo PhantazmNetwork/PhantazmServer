@@ -98,6 +98,11 @@ public class CountdownStage implements Stage {
     }
 
     @Override
+    public boolean canRejoin() {
+        return false;
+    }
+
+    @Override
     public void start() {
         ticksRemaining.set(initialTicks);
     }
