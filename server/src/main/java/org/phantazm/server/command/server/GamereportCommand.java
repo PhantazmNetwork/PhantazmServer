@@ -114,7 +114,7 @@ public class GamereportCommand extends Command {
             TagResolver gameListTag = Placeholder.component("game_list", gameList);
 
             Component nextPageOptionalComponent;
-            if (page >= scenes.size()) {
+            if (page * ITEMS_PER_PAGE >= scenes.size()) {
                 nextPageOptionalComponent = Component.empty();
             }
             else {
