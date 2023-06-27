@@ -1,7 +1,9 @@
 package org.phantazm.core.game.scene.lobby;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.SceneProvider;
@@ -13,6 +15,7 @@ import java.util.*;
  * {@link Scene} router for {@link Lobby}s.
  */
 public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
+    public static final Key KEY = Key.key(Namespaces.PHANTAZM, "lobby");
 
     private final Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders;
 
@@ -123,4 +126,8 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
         }
     }
 
+    @Override
+    public @NotNull Key key() {
+        return KEY;
+    }
 }

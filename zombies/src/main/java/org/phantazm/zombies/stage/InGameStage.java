@@ -3,9 +3,6 @@ package org.phantazm.zombies.stage;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -58,6 +55,10 @@ public class InGameStage implements Stage {
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
         this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
         this.tickFormatter = Objects.requireNonNull(endTimeTickFormatter, "tickFormatter");
+    }
+
+    public long ticksSinceStart() {
+        return ticksSinceStart.get();
     }
 
     @Override
@@ -166,8 +167,10 @@ public class InGameStage implements Stage {
 
         TagResolver roundPlaceholder = Placeholder.component("round", Component.text(bestRound));
         if (anyAlive) {
-            instance.sendTitlePart(TitlePart.TITLE, miniMessage.deserialize(settings.winTitleFormat(), roundPlaceholder));
-            instance.sendTitlePart(TitlePart.SUBTITLE, miniMessage.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
+            instance.sendTitlePart(TitlePart.TITLE,
+                    miniMessage.deserialize(settings.winTitleFormat(), roundPlaceholder));
+            instance.sendTitlePart(TitlePart.SUBTITLE,
+                    miniMessage.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
                 ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
@@ -180,8 +183,10 @@ public class InGameStage implements Stage {
             }
         }
         else {
-            instance.sendTitlePart(TitlePart.TITLE, miniMessage.deserialize(settings.lossTitleFormat(), roundPlaceholder));
-            instance.sendTitlePart(TitlePart.SUBTITLE, miniMessage.deserialize(settings.lossSubtitleFormat(), roundPlaceholder));
+            instance.sendTitlePart(TitlePart.TITLE,
+                    miniMessage.deserialize(settings.lossTitleFormat(), roundPlaceholder));
+            instance.sendTitlePart(TitlePart.SUBTITLE,
+                    miniMessage.deserialize(settings.lossSubtitleFormat(), roundPlaceholder));
         }
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
@@ -196,9 +201,9 @@ public class InGameStage implements Stage {
                                       (double)stats.getShots()) * 100);
             int headshotAccuracy = stats.getShots() <= 0
                                    ? 100
-                                   : (int)Math.rint(((double)(stats.getHeadshotHits()) / (double)stats.getShots()) * 100);
-            TagResolver[] tagResolvers = new TagResolver[] {
-                    Placeholder.component("map", settings.displayName()),
+                                   : (int)Math.rint(
+                                           ((double)(stats.getHeadshotHits()) / (double)stats.getShots()) * 100);
+            TagResolver[] tagResolvers = new TagResolver[] {Placeholder.component("map", settings.displayName()),
                     Placeholder.component("final_time", finalTime),
                     Placeholder.component("best_round", Component.text(bestRound)),
                     Placeholder.component("total_shots", Component.text(stats.getShots())),
@@ -211,8 +216,7 @@ public class InGameStage implements Stage {
                     Placeholder.component("coins_spent", Component.text(stats.getCoinsSpent())),
                     Placeholder.component("knocks", Component.text(stats.getKnocks())),
                     Placeholder.component("deaths", Component.text(stats.getDeaths())),
-                    Placeholder.component("revives", Component.text(stats.getRevives()))
-            };
+                    Placeholder.component("revives", Component.text(stats.getRevives()))};
 
             zombiesPlayer.sendMessage(miniMessage.deserialize(settings.endGameStatsFormat(), tagResolvers));
         }

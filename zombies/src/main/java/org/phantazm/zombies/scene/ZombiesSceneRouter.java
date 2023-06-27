@@ -3,6 +3,7 @@ package org.phantazm.zombies.scene;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneRouter;
@@ -11,6 +12,8 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.*;
 
 public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRouteRequest> {
+    public static final Key KEY = Key.key(Namespaces.PHANTAZM, "zombies");
+
     private final Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders;
 
     private boolean shutdown = false;
@@ -137,5 +140,10 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
         }
 
         return false;
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return KEY;
     }
 }

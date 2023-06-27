@@ -1,5 +1,6 @@
 package org.phantazm.core.game.scene;
 
+import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 
@@ -7,7 +8,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoinRequest> extends Tickable {
+public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoinRequest> extends Tickable, Keyed {
 
     @NotNull RouteResult<TScene> findScene(@NotNull TRequest joinRequest);
 

@@ -6,6 +6,8 @@ import com.github.steanky.ethylene.core.BasicConfigHandler;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.loader.SyncFileConfigLoader;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.type.Token;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.server.config.loader.LobbiesConfigProcessor;
 import org.phantazm.server.config.loader.PathfinderConfigProcessor;
@@ -15,6 +17,7 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.server.PathfinderConfig;
 import org.phantazm.server.config.server.ServerConfig;
 import org.phantazm.server.config.server.ShutdownConfig;
+import org.phantazm.server.config.server.ZombiesGamereportConfig;
 
 import java.nio.file.Path;
 
@@ -41,6 +44,8 @@ public final class ConfigFeature {
      */
     public static final Path SHUTDOWN_CONFIG_PATH = Path.of("./shutdown-config.toml");
 
+    public static final Path ZOMBIES_GAMEREPORT_CONFIG_PATH = Path.of("./zombies-gamereport-config.toml");
+
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link ServerConfig} loader.
      */
@@ -62,7 +67,10 @@ public final class ConfigFeature {
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link PathfinderConfig} loader.
      */
     public static final ConfigHandler.ConfigKey<ShutdownConfig> SHUTDOWN_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(ShutdownConfig.class, "pathfinder_config");
+            new ConfigHandler.ConfigKey<>(ShutdownConfig.class, "shutdown_config");
+
+    public static final ConfigHandler.ConfigKey<ZombiesGamereportConfig> ZOMBIES_GAMEREPORT_CONFIG_KEY =
+            new ConfigHandler.ConfigKey<>(ZombiesGamereportConfig.class, "zombies_gamereport_config");
 
     private static ConfigHandler handler;
 
@@ -73,7 +81,7 @@ public final class ConfigFeature {
     /**
      * Initializes server configuration features. Should only be called once from {@link PhantazmServer#main(String[])}.
      */
-    static void initialize() {
+    static void initialize(@NotNull MappingProcessorSource mappingProcessorSource) {
         handler = new BasicConfigHandler();
 
         ConfigCodec codec = new TomlCodec();
@@ -92,6 +100,10 @@ public final class ConfigFeature {
         handler.registerLoader(SHUTDOWN_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new ShutdownConfigProcessor(), ShutdownConfig.DEFAULT, SHUTDOWN_CONFIG_PATH,
                         codec));
+
+        handler.registerLoader(ZOMBIES_GAMEREPORT_CONFIG_KEY, new SyncFileConfigLoader<>(
+                mappingProcessorSource.processorFor(Token.ofClass(ZombiesGamereportConfig.class)),
+                ZombiesGamereportConfig.DEFAULT, ZOMBIES_GAMEREPORT_CONFIG_PATH, codec));
     }
 
     /**

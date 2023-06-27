@@ -10,6 +10,7 @@ import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.server.command.server.*;
 import org.phantazm.server.config.server.ShutdownConfig;
+import org.phantazm.server.config.server.ZombiesGamereportConfig;
 import org.phantazm.server.permission.FilePermissionHandler;
 import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.player.LoginValidator;
@@ -25,7 +26,7 @@ public final class ServerCommandFeature {
     static void initialize(@NotNull CommandManager commandManager, @NotNull LoginValidator loginValidator,
             boolean whitelist, @NotNull MappingProcessorSource mappingProcessorSource,
             @NotNull ConfigCodec permissionsCodec, @NotNull RouterStore routerStore,
-            @NotNull ShutdownConfig shutdownConfig) {
+            @NotNull ShutdownConfig shutdownConfig, @NotNull ZombiesGamereportConfig zombiesGamereportConfig) {
         ServerCommandFeature.permissionHandler =
                 new FilePermissionHandler(mappingProcessorSource, permissionsCodec, PhantazmServer.PERMISSIONS_FILE);
 
@@ -37,6 +38,7 @@ public final class ServerCommandFeature {
         commandManager.register(
                 new OrderlyShutdownCommand(routerStore, shutdownConfig, MinecraftServer.getGlobalEventHandler()));
         commandManager.register(new DebugCommand());
+        commandManager.register(new GamereportCommand(routerStore, zombiesGamereportConfig));
 
         commandManager.getConsoleSender().addPermission(ALL_PERMISSIONS);
     }
