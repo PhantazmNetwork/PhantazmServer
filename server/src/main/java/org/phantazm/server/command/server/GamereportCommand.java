@@ -8,6 +8,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.builder.Command;
@@ -26,6 +27,7 @@ import org.phantazm.server.config.server.ZombiesGamereportConfig;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
+import org.phantazm.zombies.stage.EndStage;
 import org.phantazm.zombies.stage.InGameStage;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
@@ -34,6 +36,8 @@ import java.time.Instant;
 import java.util.*;
 
 public class GamereportCommand extends Command {
+    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+
     private interface PageFormatter {
         @NotNull Component page(int pageIndex, @NotNull List<? extends Scene<?>> scenes);
 
@@ -74,26 +78,31 @@ public class GamereportCommand extends Command {
                 Component gameState;
                 Stage currentStage = zombiesScene.getCurrentStage();
 
+                TagResolver currentRoundTag = Placeholder.unparsed("current_round",
+                        Integer.toString(zombiesScene.getMap().roundHandler().currentRoundIndex() + 1));
+
                 if (currentStage == null || currentStage.key().equals(StageKeys.IDLE_STAGE)) {
-                    gameState = MiniMessage.miniMessage().deserialize(config.idleStageFormatString());
+                    gameState = MINI_MESSAGE.deserialize(config.idleStageFormat());
                 }
                 else if (currentStage.key().equals(StageKeys.COUNTDOWN)) {
-                    gameState = MiniMessage.miniMessage().deserialize(config.countdownStageFormatString());
+                    gameState = MINI_MESSAGE.deserialize(config.countdownStageFormat());
                 }
                 else if (currentStage.key().equals(StageKeys.IN_GAME)) {
-                    TagResolver currentRoundTag = Placeholder.unparsed("current_round",
-                            Integer.toString(zombiesScene.getMap().roundHandler().currentRoundIndex() + 1));
-
                     InGameStage inGameStage = (InGameStage)currentStage;
 
                     TagResolver gameTimeTag =
                             Placeholder.unparsed("game_time", TIME_FORMATTER.format(inGameStage.ticksSinceStart()));
 
-                    gameState = MiniMessage.miniMessage()
-                            .deserialize(config.inGameFormatString(), currentRoundTag, gameTimeTag);
+                    gameState = MINI_MESSAGE.deserialize(config.inGameFormat(), currentRoundTag, gameTimeTag);
+                }
+                else if (currentStage.key().equals(StageKeys.END)) {
+                    EndStage endStage = (EndStage)currentStage;
+
+                    gameState = MINI_MESSAGE.deserialize(config.endedFormat(),
+                            Formatter.choice("result", endStage.hasWon() ? 1 : 0), currentRoundTag);
                 }
                 else {
-                    gameState = MiniMessage.miniMessage().deserialize(config.endedFormatString());
+                    gameState = Component.empty();
                 }
 
                 TagResolver gameStateTag = Placeholder.component("game_state", gameState);
@@ -101,8 +110,8 @@ public class GamereportCommand extends Command {
                 TagResolver warpTag = TagResolver.resolver("warp",
                         Tag.styling(ClickEvent.runCommand("/ghost " + zombiesScene.getUUID())));
 
-                gameEntries.add(MiniMessage.miniMessage()
-                        .deserialize(config.gameEntryFormatString(), totalGamesTag, currentGameTag, gameUUIDTag,
+                gameEntries.add(
+                        MINI_MESSAGE.deserialize(config.gameEntryFormat(), totalGamesTag, currentGameTag, gameUUIDTag,
                                 playerListTag, mapNameTag, gameStateTag, warpTag));
             }
 
@@ -121,15 +130,27 @@ public class GamereportCommand extends Command {
                 TagResolver pageAdvancingResolver = TagResolver.resolver("next_page",
                         Tag.styling(ClickEvent.runCommand("/gamereport phantazm:zombies " + (page + 1))));
 
-                nextPageOptionalComponent =
-                        MiniMessage.miniMessage().deserialize(config.nextPageFormatString(), pageAdvancingResolver);
+                nextPageOptionalComponent = MINI_MESSAGE.deserialize(config.nextPageFormat(), pageAdvancingResolver);
+            }
+
+            Component previousPageOptionalComponent;
+            if (page == 1) {
+                previousPageOptionalComponent = Component.empty();
+            }
+            else {
+                TagResolver pageRetractingResolver = TagResolver.resolver("previous_page",
+                        Tag.styling(ClickEvent.runCommand("/gamereport phantazm:zombies " + (page - 1))));
+
+                previousPageOptionalComponent =
+                        MINI_MESSAGE.deserialize(config.previousPageFormat(), pageRetractingResolver);
             }
 
             TagResolver nextPageOptionalTag = Placeholder.component("next_page_optional", nextPageOptionalComponent);
+            TagResolver previousPageOptionalTag =
+                    Placeholder.component("previous_page_optional", previousPageOptionalComponent);
 
-            return MiniMessage.miniMessage()
-                    .deserialize(config.pageFormatString(), currentPageTag, maxPagesTag, timeTag, totalGamesTag,
-                            gameListTag, nextPageOptionalTag);
+            return MINI_MESSAGE.deserialize(config.pageFormat(), currentPageTag, maxPagesTag, timeTag, totalGamesTag,
+                    gameListTag, nextPageOptionalTag, previousPageOptionalTag);
         }
 
         @Override

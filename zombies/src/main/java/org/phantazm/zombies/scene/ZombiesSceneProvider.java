@@ -9,7 +9,6 @@ import com.github.steanky.proxima.solid.Solid;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -32,9 +31,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.sound.BasicSongPlayer;
 import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.time.AnalogTickFormatter;
-import org.phantazm.core.time.DurationTickFormatter;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
-import org.phantazm.core.time.TickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
@@ -349,16 +346,18 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
 
         MapSettingsInfo settings = mapInfo.settings();
-        Stage countdown =
-                new CountdownStage(instance, zombiesPlayers, settings, random, 400L, alertTicks,
-                        new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(0)),
-                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
-        Stage inGame = new InGameStage(instance, zombiesPlayers, settings, spawnPos, roundHandler, ticksSinceStart,
-                settings.defaultEquipment(), settings.equipmentGroups().keySet(),
-                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler,
-                new AnalogTickFormatter(new AnalogTickFormatter.Data(false)));
-        Stage end = new EndStage(instance, zombiesPlayers, 200L,
-                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")));
+        Stage countdown = new CountdownStage(instance, zombiesPlayers, settings, random, 400L, alertTicks,
+                new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(0)),
+                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
+
+        Stage inGame =
+                new InGameStage(zombiesPlayers, spawnPos, roundHandler, ticksSinceStart, settings.defaultEquipment(),
+                        settings.equipmentGroups().keySet(),
+                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler);
+
+        Stage end = new EndStage(instance, settings, new AnalogTickFormatter(new AnalogTickFormatter.Data(false)),
+                zombiesPlayers, Wrapper.of(200L), ticksSinceStart,
+                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")), roundHandler);
         return new StageTransition(idle, countdown, inGame, end);
     }
 

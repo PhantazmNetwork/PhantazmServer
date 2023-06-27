@@ -54,7 +54,7 @@ public class BasicRoundHandler implements RoundHandler {
 
     @Override
     public int currentRoundIndex() {
-        return roundIndex;
+        return Math.min(roundIndex, rounds.size() - 1);
     }
 
     @Override
