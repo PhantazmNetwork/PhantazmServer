@@ -103,7 +103,7 @@ public class EndStage implements Stage {
         Component finalTime = Component.text(tickFormatter.format(ticksSinceStart.get()));
         int bestRound = roundHandler.currentRoundIndex();
 
-        TagResolver roundPlaceholder = Placeholder.component("round", Component.text(bestRound));
+        TagResolver roundPlaceholder = Placeholder.component("round", Component.text(bestRound + 1));
         if (anyAlive) {
             instance.sendTitlePart(TitlePart.TITLE,
                     MINI_MESSAGE.deserialize(settings.winTitleFormat(), roundPlaceholder));
