@@ -33,7 +33,7 @@ public class StateReloadTester implements ReloadTester {
 
     @Override
     public boolean canReload(@NotNull GunState state) {
-        return !isReloading(state) && state.ammo() > 0;
+        return !isReloading(state) && state.ammo() > 0 && state.reloadComplete();
     }
 
     @Override
