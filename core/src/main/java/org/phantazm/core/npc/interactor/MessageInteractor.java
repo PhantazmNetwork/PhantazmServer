@@ -24,7 +24,7 @@ public class MessageInteractor implements Interactor {
 
     @Override
     public void interact(@NotNull Player player) {
-        if (data.broadccast) {
+        if (data.broadcast) {
             Instance instance = player.getInstance();
             if (instance != null) {
                 instance.sendMessage(data.message);
@@ -39,7 +39,7 @@ public class MessageInteractor implements Interactor {
     }
 
     @DataObject
-    public record Data(@NotNull Component message, boolean broadccast) {
+    public record Data(@NotNull Component message, boolean broadcast) {
         @Default("broadcast")
         public static @NotNull ConfigElement broadcastDefault() {
             return ConfigPrimitive.of(false);
