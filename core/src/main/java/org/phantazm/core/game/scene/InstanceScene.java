@@ -81,8 +81,13 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         }
 
         Player player = playerOptional.get();
-        if (player.getInstance() == instance) {
+        Instance oldInstance;
+        if ((oldInstance = player.getInstance()) == instance) {
             return false;
+        }
+
+        if (oldInstance != null) {
+            Utils.handleInstanceTransfer(oldInstance, player);
         }
 
         player.setInstance(instance, spawnPoint).join();
