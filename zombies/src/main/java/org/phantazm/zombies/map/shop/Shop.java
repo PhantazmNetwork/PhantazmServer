@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.tracker.BoundedBase;
+import org.phantazm.zombies.map.BasicFlaggable;
+import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.ShopInfo;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.map.shop.interactor.ShopInteractor;
@@ -32,6 +34,8 @@ public class Shop extends BoundedBase implements Tickable {
 
     private final Tag<Long> lastActivationTag;
 
+    private final Flaggable flaggable;
+
     public Shop(@NotNull Point mapOrigin, @NotNull ShopInfo shopInfo, @NotNull Instance instance,
             @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
             @NotNull List<ShopInteractor> failureInteractors, @NotNull List<ShopDisplay> displays) {
@@ -47,6 +51,7 @@ public class Shop extends BoundedBase implements Tickable {
         this.displays = List.copyOf(displays);
 
         this.lastActivationTag = Tag.Long(UUID.randomUUID().toString()).defaultValue(-1L);
+        this.flaggable = new BasicFlaggable();
     }
 
     public @NotNull Point mapOrigin() {
@@ -89,6 +94,10 @@ public class Shop extends BoundedBase implements Tickable {
         for (ShopInteractor interactor : failureInteractors) {
             interactor.initialize(this);
         }
+    }
+
+    public @NotNull Flaggable flags() {
+        return flaggable;
     }
 
     public void handleInteraction(@NotNull PlayerInteraction interaction) {

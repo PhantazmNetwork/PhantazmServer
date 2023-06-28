@@ -21,6 +21,7 @@ public class SelectionGroupInteractor implements ShopInteractor {
     private final Random random;
 
     private boolean active;
+    private Shop shop;
 
     @FactoryMethod
     public SelectionGroupInteractor(@NotNull Data data,
@@ -56,6 +57,8 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     @Override
     public void initialize(@NotNull Shop shop) {
+        this.shop = shop;
+
         for (ShopInteractor inactiveInteractor : inactiveInteractors) {
             inactiveInteractor.initialize(shop);
         }
@@ -71,8 +74,25 @@ public class SelectionGroupInteractor implements ShopInteractor {
             return;
         }
 
-        int active = random.nextInt(interactors.size());
-        interactors.get(active).active = true;
+        interactors.get(random.nextInt(interactors.size())).setActive(true);
+    }
+
+    public void setActive(boolean active) {
+        boolean currentlyActive = this.active;
+        if (currentlyActive == active) {
+            return;
+        }
+
+        if (active) {
+            shop.flags().setFlag(data.group);
+        }
+        else {
+            shop.flags().clearFlag(data.group);
+        }
+    }
+
+    public boolean isActive() {
+        return this.active;
     }
 
     @DataObject

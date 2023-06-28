@@ -47,7 +47,7 @@ public class PlaySongInteractor implements ShopInteractor {
             });
         }
         else {
-            interaction.player().getPlayer().ifPresent(player -> songPlayer.play(player, player, notes));
+            interaction.player().getPlayer().ifPresent(player -> songPlayer.play(player, Sound.Emitter.self(), notes));
         }
 
         return true;
