@@ -13,6 +13,4 @@ public final class Tags {
     public static final Tag<UUID> LAST_HIT_BY = Tag.UUID("last_hit");
 
     public static final Tag<Integer> ARMOR_TIER = Tag.Integer("armor_tier").defaultValue(-1);
-
-    public static final Tag<Long> LAST_SHOP_ACTIVATE = Tag.Long("last_shop_activate").defaultValue(-1L);
 }
