@@ -34,23 +34,28 @@ public class BasicRoundHandler implements RoundHandler {
         }
 
         currentRound.tick(time);
+        if (currentRound.isActive()) {
+            return;
+        }
 
-        if (!currentRound.isActive()) {
-            for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                zombiesPlayer.module().getStats()
-                        .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            if (zombiesPlayer.hasQuit()) {
+                return;
             }
 
-            if (++roundIndex < rounds.size()) {
-                currentRound = rounds.get(roundIndex);
-                currentRound.startRound(time);
+            zombiesPlayer.module().getStats()
+                    .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
+        }
 
-                this.currentRound = currentRound;
-            }
-            else {
-                this.hasEnded = true;
-                this.currentRound = null;
-            }
+        if (++roundIndex < rounds.size()) {
+            currentRound = rounds.get(roundIndex);
+            currentRound.startRound(time);
+
+            this.currentRound = currentRound;
+        }
+        else {
+            this.hasEnded = true;
+            this.currentRound = null;
         }
     }
 
