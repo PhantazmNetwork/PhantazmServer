@@ -26,23 +26,30 @@ public class BasicRoundHandler implements RoundHandler {
 
     @Override
     public void tick(long time) {
-        if (currentRound != null) {
-            currentRound.tick(time);
+        boolean hasEnded = this.hasEnded;
+        Round currentRound = this.currentRound;
 
-            if (!currentRound.isActive()) {
-                for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                    zombiesPlayer.module().getStats()
-                            .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
-                }
+        if (currentRound == null || hasEnded) {
+            return;
+        }
 
-                if (++roundIndex < rounds.size()) {
-                    currentRound = rounds.get(roundIndex);
-                    currentRound.startRound(time);
-                }
-                else {
-                    hasEnded = true;
-                    currentRound = null;
-                }
+        currentRound.tick(time);
+
+        if (!currentRound.isActive()) {
+            for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+                zombiesPlayer.module().getStats()
+                        .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
+            }
+
+            if (++roundIndex < rounds.size()) {
+                currentRound = rounds.get(roundIndex);
+                currentRound.startRound(time);
+
+                this.currentRound = currentRound;
+            }
+            else {
+                this.hasEnded = true;
+                this.currentRound = null;
             }
         }
     }
@@ -81,5 +88,11 @@ public class BasicRoundHandler implements RoundHandler {
     @Override
     public boolean hasEnded() {
         return hasEnded;
+    }
+
+    @Override
+    public void end() {
+        hasEnded = true;
+        currentRound = null;
     }
 }
