@@ -40,7 +40,7 @@ public class BasicRoundHandler implements RoundHandler {
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (zombiesPlayer.hasQuit()) {
-                return;
+                continue;
             }
 
             zombiesPlayer.module().getStats()
