@@ -145,6 +145,8 @@ public class InGameStage implements Stage {
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {
             sidebarUpdater.end();
         }
+
+        roundHandler.end();
     }
 
     @Override

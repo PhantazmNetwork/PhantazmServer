@@ -16,4 +16,6 @@ public interface RoundHandler extends Tickable {
     @NotNull Optional<Round> currentRound();
 
     boolean hasEnded();
+
+    void end();
 }
