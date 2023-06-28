@@ -146,8 +146,7 @@ public class EndStage implements Stage {
                                    : (int)Math.rint(
                                            ((double)(stats.getHeadshotHits()) / (double)stats.getShots()) * 100);
             TagResolver[] tagResolvers = new TagResolver[] {Placeholder.component("map", settings.displayName()),
-                    Placeholder.component("final_time", finalTime),
-                    Placeholder.component("best_round", Component.text(bestRound + 1)),
+                    Placeholder.component("final_time", finalTime), roundPlaceholder,
                     Placeholder.component("total_shots", Component.text(stats.getShots())),
                     Placeholder.component("regular_hits", Component.text(stats.getRegularHits())),
                     Placeholder.component("headshot_hits", Component.text(stats.getHeadshotHits())),
