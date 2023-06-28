@@ -1,6 +1,9 @@
 package org.phantazm.zombies.map.shop.display;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Flaggable;
@@ -33,20 +36,22 @@ public class FlagConditionalDisplay implements ShopDisplay {
     @Override
     public void initialize(@NotNull Shop shop) {
         this.shop = shop;
-        if (flags.hasFlag(data.flag)) {
-            current = success;
-        }
-        else {
-            current = failure;
-        }
+
+        List<ShopDisplay> current = switch (data.source) {
+            case MAP -> flags.hasFlag(data.flag) ? success : failure;
+            case SHOP -> shop.flags().hasFlag(data.flag) ? success : failure;
+        };
 
         for (ShopDisplay display : current) {
             display.initialize(shop);
         }
+
+        this.current = current;
     }
 
     @Override
     public void destroy(@NotNull Shop shop) {
+        List<ShopDisplay> current = this.current;
         if (current == null) {
             return;
         }
@@ -58,6 +63,7 @@ public class FlagConditionalDisplay implements ShopDisplay {
 
     @Override
     public void update(@NotNull Shop shop, @NotNull PlayerInteraction interaction, boolean interacted) {
+        List<ShopDisplay> current = this.current;
         if (current == null) {
             return;
         }
@@ -69,6 +75,7 @@ public class FlagConditionalDisplay implements ShopDisplay {
 
     @Override
     public void tick(long time) {
+        Shop shop = this.shop;
         if (shop == null) {
             return;
         }
@@ -77,7 +84,7 @@ public class FlagConditionalDisplay implements ShopDisplay {
             List<ShopDisplay> oldCurrent = current;
 
             List<ShopDisplay> newCurrent;
-            if (flags.hasFlag(data.flag)) {
+            if (hasFlag()) {
                 newCurrent = success;
             }
             else {
@@ -98,6 +105,7 @@ public class FlagConditionalDisplay implements ShopDisplay {
             }
         }
 
+        List<ShopDisplay> current = this.current;
         if (current != null) {
             for (ShopDisplay display : current) {
                 display.tick(time);
@@ -105,9 +113,27 @@ public class FlagConditionalDisplay implements ShopDisplay {
         }
     }
 
+    private boolean hasFlag() {
+        Shop shop = this.shop;
+        return switch (data.source) {
+            case MAP -> flags.hasFlag(data.flag);
+            case SHOP -> shop != null && shop.flags().hasFlag(data.flag);
+        };
+    }
+
+    public enum FlagSource {
+        MAP,
+        SHOP
+    }
+
     @DataObject
     public record Data(@NotNull Key flag,
+                       @NotNull FlagSource source,
                        @NotNull @ChildPath("success") List<String> success,
                        @NotNull @ChildPath("failure") List<String> failure) {
+        @Default("source")
+        public static @NotNull ConfigElement defaultFlagSource() {
+            return ConfigPrimitive.of("MAP");
+        }
     }
 }

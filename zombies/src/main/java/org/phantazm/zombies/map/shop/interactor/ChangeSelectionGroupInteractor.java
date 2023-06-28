@@ -48,41 +48,33 @@ public class ChangeSelectionGroupInteractor implements ShopInteractor {
             currentActiveInteractorIndex++;
         }
 
+        if (!hasCurrentlyActiveInteractor) {
+            interactors.get(random.nextInt(interactors.size())).setActive(true);
+            return true;
+        }
+
         if (data.excludeCurrent) {
             if (interactors.size() == 1) {
-                if (hasCurrentlyActiveInteractor) {
-                    return true;
-                }
-
-                interactors.get(0).setActive(true);
                 return true;
             }
 
-            int index = random.nextInt(interactors.size() - 1);
-            if (index >= currentActiveInteractorIndex) {
-                if (++index >= interactors.size()) {
-                    index = 0;
-                }
+            int newIndex = random.nextInt(interactors.size() - 1);
+            if (newIndex >= currentActiveInteractorIndex) {
+                newIndex++;
             }
 
             interactors.get(currentActiveInteractorIndex).setActive(false);
-            interactors.get(index).setActive(true);
+            interactors.get(newIndex).setActive(true);
             return true;
         }
 
-        int index = random.nextInt(interactors.size());
-        SelectionGroupInteractor newInteractor = interactors.get(index);
-        SelectionGroupInteractor oldInteractor =
-                hasCurrentlyActiveInteractor ? interactors.get(currentActiveInteractorIndex) : null;
-
-        if (oldInteractor != null && newInteractor == oldInteractor) {
+        SelectionGroupInteractor newInteractor = interactors.get(random.nextInt(interactors.size()));
+        SelectionGroupInteractor oldInteractor = interactors.get(currentActiveInteractorIndex);
+        if (newInteractor == oldInteractor) {
             return true;
         }
 
-        if (oldInteractor != null) {
-            oldInteractor.setActive(false);
-        }
-
+        oldInteractor.setActive(false);
         newInteractor.setActive(true);
         return false;
     }
