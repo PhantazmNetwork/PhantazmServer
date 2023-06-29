@@ -7,6 +7,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.game.scene.event.SceneShutdownEvent;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * An abstract base for {@link SceneProvider}s.
@@ -27,16 +28,16 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
     }
 
     @Override
-    public @NotNull Optional<TScene> provideScene(@NotNull TRequest request) {
-        return Optional.ofNullable(chooseScene(request).orElseGet(() -> {
+    public @NotNull Optional<CompletableFuture<TScene>> provideScene(@NotNull TRequest request) {
+        return Optional.ofNullable(chooseScene(request).map(CompletableFuture::completedFuture).orElseGet(() -> {
             if (scenes.size() >= maximumScenes) {
                 return null;
             }
 
-            TScene newScene = createScene(request);
-            scenes.add(newScene);
+            CompletableFuture<TScene> newSceneFuture = createScene(request);
+            newSceneFuture.thenAccept(scenes::add);
 
-            return newScene;
+            return newSceneFuture;
         }));
     }
 
@@ -90,7 +91,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
      * @param request The join request which triggered the creation of the {@link Scene}
      * @return The new {@link Scene}
      */
-    protected abstract @NotNull TScene createScene(@NotNull TRequest request);
+    protected abstract @NotNull CompletableFuture<TScene> createScene(@NotNull TRequest request);
 
     protected abstract void cleanupScene(@NotNull TScene scene);
 

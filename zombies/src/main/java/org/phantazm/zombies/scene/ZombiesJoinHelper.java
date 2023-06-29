@@ -6,11 +6,16 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.*;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class ZombiesJoinHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesJoinHelper.class);
 
     private final PlayerViewProvider viewProvider;
 
@@ -43,9 +48,16 @@ public class ZombiesJoinHelper {
         if (result.message().isPresent()) {
             joiner.sendMessage(result.message().get());
         }
-        else if (result.scene().isPresent()) {
-            ZombiesScene scene = result.scene().get();
-            transferHelper.transfer(scene, joinRequest, playerViews, viewProvider.fromPlayer(joiner));
+        else if (result.sceneFuture().isPresent()) {
+            CompletableFuture<ZombiesScene> sceneFuture = result.sceneFuture().get();
+            sceneFuture.whenComplete((scene, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.warn("Exception while loading zombies scene", throwable);
+                    return;
+                }
+
+                transferHelper.transfer(scene, joinRequest, playerViews, viewProvider.fromPlayer(joiner));
+            });
         }
     }
 

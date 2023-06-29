@@ -12,6 +12,8 @@ import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -19,6 +21,7 @@ import java.util.*;
  * Represents a lobby. Most basic scene which contains {@link Player}s.
  */
 public class Lobby extends InstanceScene<LobbyJoinRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Lobby.class);
     private final InstanceConfig instanceConfig;
     private final Map<UUID, PlayerView> players;
     private final NPCHandler npcHandler;
@@ -119,7 +122,12 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public void shutdown() {
         for (PlayerView player : players.values()) {
-            fallback.fallback(player);
+            fallback.fallback(player).whenComplete((fallbackResult,
+                    throwable) -> {
+                if (throwable != null) {
+                    LOGGER.warn("Failed to fallback {}", player.getUUID(), throwable);
+                }
+            });;
         }
 
         super.shutdown();

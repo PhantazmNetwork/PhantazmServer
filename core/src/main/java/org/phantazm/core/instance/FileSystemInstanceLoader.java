@@ -14,8 +14,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Phaser;
+import java.util.concurrent.*;
 
 /**
  * Implements an {@link InstanceLoader} using the file system.
@@ -31,6 +30,8 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
 
     private final Map<Path, InstanceContainer> instanceSources;
 
+    private final Executor executor;
+
     /**
      * Creates an {@link InstanceLoader} based on a file system.
      *
@@ -38,16 +39,17 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
      * @param chunkSupplier The {@link ChunkSupplier} used to define the chunk implementation used
      */
     public FileSystemInstanceLoader(@NotNull InstanceManager instanceManager, @NotNull Path rootPath,
-            @NotNull ChunkSupplier chunkSupplier) {
+            @NotNull ChunkSupplier chunkSupplier, @NotNull Executor executor) {
         this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
         this.rootPath = Objects.requireNonNull(rootPath, "rootPath");
         this.chunkSupplier = Objects.requireNonNull(chunkSupplier, "chunkSupplier");
         this.instanceSources = new ConcurrentHashMap<>();
+        this.executor = Objects.requireNonNull(executor, "executorService");
     }
 
     // TODO: what if there are distinct spawnPos invocations?
     @Override
-    public @NotNull Instance loadInstance(@UnmodifiableView @NotNull List<String> subPaths) {
+    public @NotNull CompletableFuture<Instance> loadInstance(@UnmodifiableView @NotNull List<String> subPaths) {
         Path path = rootPath;
         for (String subPath : subPaths) {
             path = path.resolve(subPath);
@@ -58,11 +60,12 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
             throw new IllegalArgumentException("Instance at " + path + " has not been preloaded");
         }
 
-        InstanceContainer container = source.copy();
-        container.setChunkSupplier(chunkSupplier);
-        instanceManager.registerInstance(container);
+        return CompletableFuture.supplyAsync(source::copy, executor).thenApply(container -> {
+            container.setChunkSupplier(chunkSupplier);
+            instanceManager.registerInstance(container);
 
-        return container;
+            return container;
+        });
     }
 
     @Override

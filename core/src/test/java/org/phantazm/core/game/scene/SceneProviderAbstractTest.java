@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,8 +29,8 @@ public class SceneProviderAbstractTest {
 
                     @SuppressWarnings("unchecked")
                     @Override
-                    protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
-                        return (Scene<SceneJoinRequest>)mock(Scene.class);
+                    protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
+                        return CompletableFuture.completedFuture((Scene<SceneJoinRequest>)mock(Scene.class));
                     }
 
                     @Override
@@ -64,8 +65,8 @@ public class SceneProviderAbstractTest {
                     }
 
                     @Override
-                    protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
-                        return iterator.next();
+                    protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
+                        return CompletableFuture.completedFuture(iterator.next());
                     }
 
                     @Override
@@ -100,8 +101,8 @@ public class SceneProviderAbstractTest {
                     }
 
                     @Override
-                    protected @NotNull Scene<SceneJoinRequest> createScene(@NotNull SceneJoinRequest o) {
-                        return scene;
+                    protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
+                        return CompletableFuture.completedFuture(scene);
                     }
 
                     @Override

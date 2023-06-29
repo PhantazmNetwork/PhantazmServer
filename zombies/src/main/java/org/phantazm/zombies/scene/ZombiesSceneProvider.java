@@ -60,6 +60,7 @@ import org.phantazm.zombies.stage.*;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -158,7 +159,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     @Override
-    protected @NotNull ZombiesScene createScene(@NotNull ZombiesJoinRequest request) {
+    protected @NotNull CompletableFuture<ZombiesScene> createScene(@NotNull ZombiesJoinRequest request) {
         Wrapper<RoundHandler> roundHandlerWrapper = Wrapper.ofNull();
         Wrapper<PowerupHandler> powerupHandlerWrapper = Wrapper.ofNull();
         Wrapper<WindowHandler> windowHandlerWrapper = Wrapper.ofNull();
@@ -169,87 +170,87 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         MapSettingsInfo settings = mapInfo.settings();
         Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
 
-        Instance instance = instanceLoader.loadInstance(settings.instancePath());
+        return instanceLoader.loadInstance(settings.instancePath()).thenApply(instance -> {
+            instance.setTime(settings.worldTime());
+            instance.setTimeRate(0);
 
-        instance.setTime(settings.worldTime());
-        instance.setTimeRate(0);
+            //LinkedHashMap for better value iteration performance
+            Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
 
-        //LinkedHashMap for better value iteration performance
-        Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
+            MobStore mobStore = new MobStore();
+            TickTaskScheduler tickTaskScheduler = new BasicTickTaskScheduler();
 
-        MobStore mobStore = new MobStore();
-        TickTaskScheduler tickTaskScheduler = new BasicTickTaskScheduler();
+            SongPlayer songPlayer = new BasicSongPlayer();
+            MapObjects mapObjects =
+                    createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, mobNoPushTeam, corpseTeam,
+                            powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper, songPlayer, songLoader,
+                            tickTaskScheduler);
 
-        SongPlayer songPlayer = new BasicSongPlayer();
-        MapObjects mapObjects =
-                createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, mobNoPushTeam, corpseTeam,
-                        powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper, songPlayer, songLoader,
-                        tickTaskScheduler);
+            RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds());
+            roundHandlerWrapper.set(roundHandler);
 
-        RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds());
-        roundHandlerWrapper.set(roundHandler);
+            PowerupHandler powerupHandler =
+                    createPowerupHandler(instance, zombiesPlayers, mapObjects.mapDependencyProvider());
+            powerupHandlerWrapper.set(powerupHandler);
 
-        PowerupHandler powerupHandler =
-                createPowerupHandler(instance, zombiesPlayers, mapObjects.mapDependencyProvider());
-        powerupHandlerWrapper.set(powerupHandler);
+            ShopHandler shopHandler = createShopHandler(mapObjects.shopTracker());
 
-        ShopHandler shopHandler = createShopHandler(mapObjects.shopTracker());
+            WindowHandler windowHandler = createWindowHandler(mapObjects.windowTracker(), zombiesPlayers.values());
+            windowHandlerWrapper.set(windowHandler);
 
-        WindowHandler windowHandler = createWindowHandler(mapObjects.windowTracker(), zombiesPlayers.values());
-        windowHandlerWrapper.set(windowHandler);
+            DoorHandler doorHandler = createDoorHandler(mapObjects.doorTracker(), mapObjects.roomTracker());
 
-        DoorHandler doorHandler = createDoorHandler(mapObjects.doorTracker(), mapObjects.roomTracker());
-
-        ZombiesMap map =
-                new ZombiesMap(mapObjects, songPlayer, powerupHandler, roundHandler, shopHandler, windowHandler,
-                        doorHandler, mobStore);
-
-
-        SidebarModule sidebarModule =
-                new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
-                        settings.maxPlayers());
-        StageTransition stageTransition =
-                createStageTransition(instance, mapObjects.module().random(), zombiesPlayers.values(), spawnPos,
-                        roundHandler, ticksSinceStart, sidebarModule, shopHandler);
-
-        LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
+            ZombiesMap map =
+                    new ZombiesMap(mapObjects, songPlayer, powerupHandler, roundHandler, shopHandler, windowHandler,
+                            doorHandler, mobStore);
 
 
-        EventNode<Event> childNode =
-                createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
-                        doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore,
-                        leaveHandler);
-        eventNodeWrapper.set(childNode);
+            SidebarModule sidebarModule =
+                    new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
+                            settings.maxPlayers());
+            StageTransition stageTransition =
+                    createStageTransition(instance, mapObjects.module().random(), zombiesPlayers.values(), spawnPos,
+                            roundHandler, ticksSinceStart, sidebarModule, shopHandler);
 
-        CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
+            LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
 
 
-        Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-            playerView.getPlayer().ifPresent(player -> {
-                player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.healTicks());
-                player.getAttribute(Attributes.REVIVE_TICKS).setBaseValue(settings.baseReviveTicks());
+            EventNode<Event> childNode =
+                    createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
+                            doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore,
+                            leaveHandler);
+            eventNodeWrapper.set(childNode);
+
+            CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
+
+
+            Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
+                playerView.getPlayer().ifPresent(player -> {
+                    player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.healTicks());
+                    player.getAttribute(Attributes.REVIVE_TICKS).setBaseValue(settings.baseReviveTicks());
+                });
+
+                return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings, instance, playerView,
+                        mapObjects.module().modifierSource(), new BasicFlaggable(), childNode, mapObjects.module().random(),
+                        mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator);
+            };
+
+            ZombiesScene scene = new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
+                    stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode);
+            sceneWrapper.set(scene);
+            rootNode.addChild(childNode);
+
+            InstanceSpawner.InstanceSettings instanceSettings = instanceSpaceFunction.apply(instance);
+            instanceSettings.spaceHandler().space().setOverrideFunction((x, y, z) -> {
+                if (windowHandler.tracker().atPoint(x, y, z).isPresent()) {
+                    return Solid.EMPTY;
+                }
+
+                return null;
             });
 
-            return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings, instance, playerView,
-                    mapObjects.module().modifierSource(), new BasicFlaggable(), childNode, mapObjects.module().random(),
-                    mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator);
-        };
-
-        ZombiesScene scene = new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
-                stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode);
-        sceneWrapper.set(scene);
-        rootNode.addChild(childNode);
-
-        InstanceSpawner.InstanceSettings instanceSettings = instanceSpaceFunction.apply(instance);
-        instanceSettings.spaceHandler().space().setOverrideFunction((x, y, z) -> {
-            if (windowHandler.tracker().atPoint(x, y, z).isPresent()) {
-                return Solid.EMPTY;
-            }
-
-            return null;
+            return scene;
         });
-
-        return scene;
     }
 
     @Override

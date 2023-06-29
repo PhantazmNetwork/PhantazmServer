@@ -10,6 +10,7 @@ import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRouteRequest> {
     public static final Key KEY = Key.key(Namespaces.PHANTAZM, "zombies");
@@ -89,7 +90,7 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     private RouteResult<ZombiesScene> rejoinGame(ZombiesRouteRequest routeRequest) {
         for (ZombiesScene scene : getScenes()) {
             if (scene.getUUID().equals(routeRequest.targetGame())) {
-                return RouteResult.success(scene);
+                return RouteResult.success(CompletableFuture.completedFuture(scene));
             }
         }
 

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Loads usable {@link Instance}s.
@@ -18,7 +19,7 @@ public interface InstanceLoader {
      * @param subPaths Paths used to identify the {@link Instance}
      * @return A new {@link Instance}
      */
-    @NotNull Instance loadInstance(@UnmodifiableView @NotNull List<String> subPaths);
+    @NotNull CompletableFuture<Instance> loadInstance(@UnmodifiableView @NotNull List<String> subPaths);
 
     void preload(@UnmodifiableView @NotNull List<String> subPaths, @NotNull Point spawnPos, int chunkViewDistance);
 

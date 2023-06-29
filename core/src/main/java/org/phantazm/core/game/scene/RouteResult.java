@@ -5,12 +5,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-public record RouteResult<TScene extends Scene<?>>(@NotNull Optional<TScene> scene,
+public record RouteResult<TScene extends Scene<?>>(@NotNull Optional<CompletableFuture<TScene>> sceneFuture,
                                                    @NotNull Optional<Component> message) {
 
-    public static <TScene extends Scene<?>> RouteResult<TScene> success(@NotNull TScene scene) {
-        return new RouteResult<>(Optional.of(scene), Optional.empty());
+    public static <TScene extends Scene<?>> RouteResult<TScene> success(@NotNull CompletableFuture<TScene> sceneFuture) {
+        return new RouteResult<>(Optional.of(sceneFuture), Optional.empty());
     }
 
     public static <TScene extends Scene<?>> RouteResult<TScene> failure(@NotNull Component message) {
@@ -18,7 +19,7 @@ public record RouteResult<TScene extends Scene<?>>(@NotNull Optional<TScene> sce
     }
 
     public RouteResult {
-        Objects.requireNonNull(scene, "scene");
+        Objects.requireNonNull(sceneFuture, "sceneFuture");
         Objects.requireNonNull(message, "message");
     }
 

@@ -7,6 +7,7 @@ import org.phantazm.core.player.PlayerView;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A {@link SceneFallback} which kicks {@link Player}s.
@@ -25,14 +26,14 @@ public class KickFallback implements SceneFallback {
     }
 
     @Override
-    public boolean fallback(@NotNull PlayerView playerView) {
+    public CompletableFuture<Boolean> fallback(@NotNull PlayerView playerView) {
         Optional<Player> playerOptional = playerView.getPlayer();
         if (playerOptional.isPresent()) {
             playerOptional.get().kick(kickMessage);
-            return true;
+            return CompletableFuture.completedFuture(true);
         }
 
-        return false;
+        return CompletableFuture.completedFuture(false);
     }
 
 }

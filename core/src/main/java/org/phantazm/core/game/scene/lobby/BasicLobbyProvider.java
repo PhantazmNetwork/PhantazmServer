@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -75,41 +76,42 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     }
 
     @Override
-    protected @NotNull Lobby createScene(@NotNull LobbyJoinRequest request) {
-        Instance instance = instanceLoader.loadInstance(lobbyPaths);
-        instance.setTime(instanceConfig.time());
-        instance.setTimeRate(instanceConfig.timeRate());
+    protected @NotNull CompletableFuture<Lobby> createScene(@NotNull LobbyJoinRequest request) {
+        return instanceLoader.loadInstance(lobbyPaths).thenApply(instance -> {
+            instance.setTime(instanceConfig.time());
+            instance.setTimeRate(instanceConfig.timeRate());
 
-        EventNode<? super InstanceEvent> eventNode = instance.eventNode();
-        eventNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
-        eventNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
-        eventNode.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
-        eventNode.addListener(PlayerPreEatEvent.class, event -> event.setCancelled(true));
-        eventNode.addListener(PickupItemEvent.class, event -> event.setCancelled(true));
-        eventNode.addListener(PickupExperienceEvent.class, event -> event.setCancelled(true));
-        eventNode.addListener(PrePlayerStartDiggingEvent.class, event -> event.setCancelled(true));
-        eventNode.addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true));
-        eventNode.addListener(PlayerBlockInteractEvent.class, event -> {
-            event.setCancelled(true);
-            event.setBlockingItemUse(true);
-        });
-        eventNode.addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true));
+            EventNode<? super InstanceEvent> eventNode = instance.eventNode();
+            eventNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
+            eventNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
+            eventNode.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
+            eventNode.addListener(PlayerPreEatEvent.class, event -> event.setCancelled(true));
+            eventNode.addListener(PickupItemEvent.class, event -> event.setCancelled(true));
+            eventNode.addListener(PickupExperienceEvent.class, event -> event.setCancelled(true));
+            eventNode.addListener(PrePlayerStartDiggingEvent.class, event -> event.setCancelled(true));
+            eventNode.addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true));
+            eventNode.addListener(PlayerBlockInteractEvent.class, event -> {
+                event.setCancelled(true);
+                event.setBlockingItemUse(true);
+            });
+            eventNode.addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true));
 
-        List<NPC> npcs = new ArrayList<>(npcContexts.size());
-        for (ElementContext context : npcContexts) {
-            NPC npc = context.provide(HANDLER, () -> null);
-            if (npc != null) {
-                npcs.add(npc);
+            List<NPC> npcs = new ArrayList<>(npcContexts.size());
+            for (ElementContext context : npcContexts) {
+                NPC npc = context.provide(HANDLER, () -> null);
+                if (npc != null) {
+                    npcs.add(npc);
+                }
             }
-        }
 
-        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
-                new NPCHandler(List.copyOf(npcs), instance), quittable);
-        eventNode.addListener(PlayerDisconnectEvent.class,
-                event -> lobby.leave(Collections.singleton(event.getPlayer().getUuid())).executor()
-                        .ifPresent(Runnable::run));
+            Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
+                    new NPCHandler(List.copyOf(npcs), instance), quittable);
+            eventNode.addListener(PlayerDisconnectEvent.class,
+                    event -> lobby.leave(Collections.singleton(event.getPlayer().getUuid())).executor()
+                            .ifPresent(Runnable::run));
 
-        return lobby;
+            return lobby;
+        });
     }
 
     @Override

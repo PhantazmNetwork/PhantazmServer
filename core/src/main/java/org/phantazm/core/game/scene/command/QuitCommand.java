@@ -10,12 +10,16 @@ import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
 public final class QuitCommand {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuitCommand.class);
 
     private QuitCommand() {
         throw new UnsupportedOperationException();
@@ -51,14 +55,23 @@ public final class QuitCommand {
                 TransferResult result = scene.leave(Collections.singleton(player.getUuid()));
                 if (result.executor().isPresent()) {
                     result.executor().get().run();
-                    scene.getFallback().fallback(viewProvider.fromPlayer(player));
+                    scene.getFallback().fallback(viewProvider.fromPlayer(player))
+                            .whenComplete((fallbackResult, throwable) -> {
+                                if (throwable != null) {
+                                    LOGGER.warn("Failed to fallback", throwable);
+                                }
+                            });
                 }
                 else {
                     result.message().ifPresent(sender::sendMessage);
                 }
             }
             else {
-                defaultFallback.fallback(viewProvider.fromPlayer(player));
+                defaultFallback.fallback(viewProvider.fromPlayer(player)).whenComplete((fallbackResult, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Failed to fallback", throwable);
+                    }
+                });
             }
         });
 

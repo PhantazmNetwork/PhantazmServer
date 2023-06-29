@@ -9,6 +9,7 @@ import org.phantazm.core.player.PlayerView;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A {@link SceneFallback} which routes to a lobby.
@@ -35,22 +36,23 @@ public class LobbyRouterFallback implements SceneFallback {
     }
 
     @Override
-    public boolean fallback(@NotNull PlayerView player) {
+    public CompletableFuture<Boolean> fallback(@NotNull PlayerView player) {
         LobbyJoinRequest joinRequest = new BasicLobbyJoinRequest(connectionManager, Collections.singleton(player));
         LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbyName, joinRequest);
-        Optional<Lobby> lobbyOptional = lobbyRouter.findScene(routeRequest).scene();
+        Optional<CompletableFuture<Lobby>> lobbyOptional = lobbyRouter.findScene(routeRequest).sceneFuture();
         if (lobbyOptional.isEmpty()) {
-            return false;
+            return CompletableFuture.completedFuture(false);
         }
 
-        Lobby lobby = lobbyOptional.get();
-        TransferResult result = lobby.join(joinRequest);
-        if (result.executor().isEmpty()) {
-            return false;
-        }
+        return lobbyOptional.get().thenApply(lobby -> {
+            TransferResult result = lobby.join(joinRequest);
+            if (result.executor().isEmpty()) {
+                return false;
+            }
 
-        result.executor().get().run();
-        return true;
+            result.executor().get().run();
+            return true;
+        });
     }
 
 }

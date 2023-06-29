@@ -59,7 +59,8 @@ public final class LobbyFeature {
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         FileUtils.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =
-                new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new);
+                new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new,
+                        ExecutorFeature.getExecutor());
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
@@ -104,8 +105,8 @@ public final class LobbyFeature {
 
             RouteResult<Lobby> routeResult = lobbyRouter.findScene(routeRequest);
             boolean success = false;
-            if (routeResult.scene().isPresent()) {
-                Lobby lobby = routeResult.scene().get();
+            if (routeResult.sceneFuture().isPresent()) {
+                Lobby lobby = routeResult.sceneFuture().get().join();
                 TransferResult transferResult = lobby.join(joinRequest);
                 if (transferResult.executor().isPresent()) {
                     transferResult.executor().get().run();

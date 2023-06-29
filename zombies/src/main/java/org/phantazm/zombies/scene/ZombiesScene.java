@@ -131,8 +131,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             return TransferResult.failure(Component.text("The game is not accepting new players.", NamedTextColor.RED));
         }
         if (!stage.canRejoin() && !oldPlayers.isEmpty()) {
-            return TransferResult.failure(Component.text("The game is not accepting rejoining players.",
-                    NamedTextColor.RED));
+            return TransferResult.failure(
+                    Component.text("The game is not accepting rejoining players.", NamedTextColor.RED));
         }
 
         if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
@@ -301,7 +301,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
 
             if (!zombiesPlayer.hasQuit()) {
-                fallback.fallback(zombiesPlayer.module().getPlayerView());
+                fallback.fallback(zombiesPlayer.module().getPlayerView()).whenComplete((fallbackResult, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(), throwable);
+                    }
+                });
             }
 
             zombiesPlayer.end();

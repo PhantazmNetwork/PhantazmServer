@@ -118,7 +118,6 @@ public final class ZombiesFeature {
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
-    private static ExecutorService databaseExecutor;
     private static HikariDataSource dataSource;
     private static ZombiesDatabase database;
 
@@ -141,7 +140,7 @@ public final class ZombiesFeature {
 
         InstanceLoader instanceLoader =
                 new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,
-                        DynamicChunk::new);
+                        DynamicChunk::new, ExecutorFeature.getExecutor());
 
         LOGGER.info("Preloading {} map instances", maps.size());
         for (MapInfo map : maps.values()) {
@@ -168,11 +167,10 @@ public final class ZombiesFeature {
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
 
-        databaseExecutor = Executors.newSingleThreadExecutor();
         HikariConfig config = new HikariConfig("./zombies.hikari.properties");
         dataSource = new HikariDataSource(config);
         ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
-        database = new SQLZombiesDatabase(databaseExecutor, dataSource, sqlFetcher);
+        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), dataSource, sqlFetcher);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(zombiesConfig.maximumScenes(), instanceSpaceFunction, entry.getValue(),
@@ -407,28 +405,6 @@ public final class ZombiesFeature {
     public static void end() {
         if (dataSource != null) {
             dataSource.close();
-        }
-
-        if (databaseExecutor != null) {
-            databaseExecutor.shutdown();
-
-            try {
-                LOGGER.info(
-                        "Shutting down database executor. Please allow for one minute before shutdown " + "completes.");
-                if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
-                    databaseExecutor.shutdownNow();
-
-                    LOGGER.warn(
-                            "Not all database tasks completed. Please allow for one minute for tasks to be canceled.");
-                    if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
-                        LOGGER.warn("Database tasks failed to cancel.");
-                    }
-                }
-            }
-            catch (InterruptedException e) {
-                databaseExecutor.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
         }
     }
 }

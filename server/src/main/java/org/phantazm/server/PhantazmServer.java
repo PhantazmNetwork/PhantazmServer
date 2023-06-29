@@ -181,6 +181,7 @@ public final class PhantazmServer {
             loginValidator.flush();
         }
 
+        ExecutorFeature.shutdown();
         MinecraftServer.stopCleanly();
         ServerCommandFeature.flushPermissions();
     }
@@ -200,6 +201,7 @@ public final class PhantazmServer {
             PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig, LoginValidator loginValidator)
             throws Exception {
         RouterStore routerStore = new BasicRouterStore();
+        ExecutorFeature.initialize();
         BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
 
         SongFeature.initialize(keyParser);
