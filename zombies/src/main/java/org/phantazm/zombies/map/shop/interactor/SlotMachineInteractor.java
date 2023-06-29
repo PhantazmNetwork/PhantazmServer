@@ -13,29 +13,34 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
+import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
-import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
-@Model("zombies.map.shop.interactor.lucky_chest")
+@Model("zombies.map.shop.interactor.slot_machine")
 @Cache(false)
-public class LuckyChestInteractor implements ShopInteractor {
+public class SlotMachineInteractor implements ShopInteractor {
     private final Data data;
+    private final TickFormatter tickFormatter;
     private final DelayFormula delayFormula;
-    private final List<LuckyChestFrame> frames;
+    private final List<SlotMachineFrame> frames;
+    private final List<ShopInteractor> mismatchedPlayerInteractors;
     private final List<ShopInteractor> whileRollingInteractors;
+    private final List<ShopInteractor> timeoutExpiredInteractors;
+    private final Random random;
 
     //non-null in tick and interaction methods - set in initialize(Shop)
     private Shop shop;
     private Hologram hologram;
 
-
     private Entity item;
 
-    private ZombiesPlayer rollingPlayer;
+    private PlayerInteraction rollInteraction;
     private boolean rolling;
     private boolean doneRolling;
 
@@ -44,16 +49,23 @@ public class LuckyChestInteractor implements ShopInteractor {
     private long lastFrameTime;
     private int currentFrameIndex;
     private int ticksUntilNextFrame;
-    private LuckyChestFrame nextFrame;
 
     @FactoryMethod
-    public LuckyChestInteractor(Data data, @NotNull @Child("delay_formula") DelayFormula delayFormula,
-            @NotNull @Child("frames") List<LuckyChestFrame> frames,
-            @NotNull @Child("while_rolling_interactors") List<ShopInteractor> whileRollingInteractors) {
+    public SlotMachineInteractor(Data data, @NotNull @Child("tick_formatter") TickFormatter tickFormatter,
+            @NotNull @Child("delay_formula") DelayFormula delayFormula,
+            @NotNull @Child("frames") List<SlotMachineFrame> frames,
+            @NotNull @Child("mismatched_player_interactors") List<ShopInteractor> mismatchedPlayerInteractors,
+            @NotNull @Child("while_rolling_interactors") List<ShopInteractor> whileRollingInteractors,
+            @NotNull @Child("timeout_expired_interactors") List<ShopInteractor> timeoutExpiredInteractors,
+            @NotNull Random random) {
         this.data = data;
+        this.tickFormatter = tickFormatter;
         this.delayFormula = delayFormula;
-        this.frames = frames;
+        this.frames = new ArrayList<>(frames);
+        this.mismatchedPlayerInteractors = mismatchedPlayerInteractors;
         this.whileRollingInteractors = whileRollingInteractors;
+        this.timeoutExpiredInteractors = timeoutExpiredInteractors;
+        this.random = random;
     }
 
     @Override
@@ -74,16 +86,31 @@ public class LuckyChestInteractor implements ShopInteractor {
                 return false;
             }
 
-            return false;
+            if (interaction.player() != rollInteraction.player()) {
+                for (ShopInteractor interactor : mismatchedPlayerInteractors) {
+                    interactor.handleInteraction(interaction);
+                }
+
+                return false;
+            }
+
+            SlotMachineFrame currentFrame = frames.get((currentFrameIndex - 1) % frames.size());
+            for (ShopInteractor interactor : currentFrame.interactors()) {
+                interactor.handleInteraction(rollInteraction);
+            }
+
+            reset();
+            return true;
         }
 
         rolling = true;
 
-        rollingPlayer = interaction.player();
+        Collections.shuffle(frames, random);
+
+        rollInteraction = interaction;
         lastFrameTime = System.currentTimeMillis();
         currentFrameIndex = 0;
         ticksUntilNextFrame = delayFormula.delay(data.frameCount, currentFrameIndex);
-        nextFrame = frames.get(0);
         return false;
     }
 
@@ -96,12 +123,11 @@ public class LuckyChestInteractor implements ShopInteractor {
         if (!doneRolling) {
             long ticksSinceLastFrame = (time - lastFrameTime) / MinecraftServer.TICK_MS;
             if (ticksSinceLastFrame >= ticksUntilNextFrame) {
-                displayFrame(currentFrameIndex);
+                displayRollFrame(currentFrameIndex);
 
                 lastFrameTime = time;
                 currentFrameIndex++;
                 ticksUntilNextFrame = delayFormula.delay(data.frameCount, currentFrameIndex);
-                nextFrame = frames.get(currentFrameIndex % frames.size());
             }
         }
 
@@ -111,13 +137,48 @@ public class LuckyChestInteractor implements ShopInteractor {
             }
 
             doneRolling = true;
+            long ticksSinceDoneRolling = time - rollFinishTime / MinecraftServer.TICK_MS;
 
+            if (ticksSinceDoneRolling < data.gracePeriodTicks) {
+                String timeString = tickFormatter.format(data.gracePeriodTicks - ticksSinceDoneRolling);
+                TagResolver[] tags = getTagsForFrame(frames.get((currentFrameIndex - 1) % frames.size()),
+                        Placeholder.unparsed("time_left", timeString));
 
+                List<Component> newComponents = new ArrayList<>(data.gracePeriodFormat.size());
+                for (String formatString : data.gracePeriodFormat) {
+                    newComponents.add(MiniMessage.miniMessage().deserialize(formatString, tags));
+                }
+
+                updateHologram(newComponents);
+                return;
+            }
+
+            for (ShopInteractor interactor : timeoutExpiredInteractors) {
+                interactor.handleInteraction(rollInteraction);
+            }
+
+            reset();
         }
     }
 
-    private void displayFrame(int index) {
-        LuckyChestFrame frame = frames.get(index);
+    private void reset() {
+        if (item != null) {
+            item.remove();
+            item = null;
+        }
+
+        hologram.clear();
+        rollInteraction = null;
+        rolling = false;
+        doneRolling = false;
+        rollFinishTime = 0L;
+        lastFrameTime = 0L;
+        currentFrameIndex = 0;
+        ticksUntilNextFrame = 0;
+    }
+
+    private void displayRollFrame(int index) {
+        SlotMachineFrame frame = frames.get(index % frames.size());
 
         if (item != null) {
             item.remove();
@@ -129,9 +190,19 @@ public class LuckyChestInteractor implements ShopInteractor {
 
         item.setInstance(shop.instance(), shop.center().add(0, data.itemOffset, 0));
 
-        rollingPlayer.getUsername();
+        TagResolver[] tags = getTagsForFrame(frame);
+
+        List<Component> newComponents = new ArrayList<>(frame.hologramFormats().size());
+        for (String formatString : frame.hologramFormats()) {
+            newComponents.add(MiniMessage.miniMessage().deserialize(formatString, tags));
+        }
+
+        updateHologram(newComponents);
+    }
+
+    private TagResolver[] getTagsForFrame(SlotMachineFrame frame, TagResolver... additionalTags) {
         TagResolver rollingPlayerTag = Placeholder.component("rolling_player",
-                rollingPlayer.module().getPlayerView().getDisplayNameIfPresent());
+                rollInteraction.player().module().getPlayerView().getDisplayNameIfPresent());
 
         Component displayName = frame.getVisual().getDisplayName();
         if (displayName == null) {
@@ -140,11 +211,15 @@ public class LuckyChestInteractor implements ShopInteractor {
 
         TagResolver itemName = Placeholder.component("item_name", displayName);
 
-        List<Component> newComponents = new ArrayList<>(frame.hologramFormats().size());
-        for (String formatString : frame.hologramFormats()) {
-            newComponents.add(MiniMessage.miniMessage().deserialize(formatString, rollingPlayerTag, itemName));
-        }
+        TagResolver[] tags = new TagResolver[additionalTags.length + 2];
+        tags[0] = rollingPlayerTag;
+        tags[1] = itemName;
 
+        System.arraycopy(additionalTags, 0, tags, 2, additionalTags.length);
+        return tags;
+    }
+
+    private void updateHologram(List<Component> newComponents) {
         while (hologram.size() > newComponents.size()) {
             hologram.remove(hologram.size() - 1);
         }
@@ -159,10 +234,10 @@ public class LuckyChestInteractor implements ShopInteractor {
         }
     }
 
-    public interface LuckyChestFrame {
+    public interface SlotMachineFrame {
         @NotNull ItemStack getVisual();
 
-        @NotNull ShopInteractor interactor();
+        @NotNull List<ShopInteractor> interactors();
 
         @NotNull List<String> hologramFormats();
     }
@@ -171,7 +246,7 @@ public class LuckyChestInteractor implements ShopInteractor {
         int delay(int frameCount, int frame);
     }
 
-    @Model("zombies.map.shop.interactor.lucky_chest.delay.constant")
+    @Model("zombies.map.shop.interactor.slot_machine.delay.constant")
     @Cache(false)
     public static class ConstantDelayFormula implements DelayFormula {
         private final Data data;
@@ -191,7 +266,7 @@ public class LuckyChestInteractor implements ShopInteractor {
         }
     }
 
-    @Model("zombies.map.shop.interactor.lucky_chest.delay.linear")
+    @Model("zombies.map.shop.interactor.slot_machine.delay.linear")
     @Cache(false)
     public static class LinearDelayFormula implements DelayFormula {
         private final Data data;
@@ -212,16 +287,17 @@ public class LuckyChestInteractor implements ShopInteractor {
         }
     }
 
-    @Model("zombies.map.shop.interactor.lucky_chest.frame")
+    @Model("zombies.map.shop.interactor.slot_machine.frame")
     @Cache(false)
-    public static class BasicLuckyChestFrame implements LuckyChestFrame {
+    public static class BasicSlotMachineFrame implements SlotMachineFrame {
         private final Data data;
-        private final ShopInteractor interactor;
+        private final List<ShopInteractor> interactors;
 
         @FactoryMethod
-        public BasicLuckyChestFrame(@NotNull Data data, @NotNull ShopInteractor interactor) {
+        public BasicSlotMachineFrame(@NotNull Data data,
+                @NotNull @Child("interactors") List<ShopInteractor> interactors) {
             this.data = data;
-            this.interactor = interactor;
+            this.interactors = interactors;
         }
 
         @Override
@@ -230,8 +306,8 @@ public class LuckyChestInteractor implements ShopInteractor {
         }
 
         @Override
-        public @NotNull ShopInteractor interactor() {
-            return interactor;
+        public @NotNull List<ShopInteractor> interactors() {
+            return interactors;
         }
 
         @Override
@@ -241,7 +317,7 @@ public class LuckyChestInteractor implements ShopInteractor {
 
         public record Data(@NotNull ItemStack itemStack,
                            @NotNull List<String> hologramFormats,
-                           @NotNull @ChildPath("interactor") String interactor) {
+                           @NotNull @ChildPath("interactors") List<String> interactors) {
         }
     }
 
@@ -250,8 +326,12 @@ public class LuckyChestInteractor implements ShopInteractor {
                        double hologramOffset,
                        double itemOffset,
                        int gracePeriodTicks,
+                       @NotNull List<String> gracePeriodFormat,
+                       @NotNull @ChildPath("tick_formatter") String tickFormatter,
                        @NotNull @ChildPath("delay_formula") String delayFormula,
                        @NotNull @ChildPath("frames") List<String> frames,
-                       @NotNull @ChildPath("while_rolling_interactors") List<String> whileRollingInteractors) {
+                       @NotNull @ChildPath("mismatched_player_interactors") List<String> mismatchedPlayerInteractors,
+                       @NotNull @ChildPath("while_rolling_interactors") List<String> whileRollingInteractors,
+                       @NotNull @ChildPath("timeout_expired_interactors") List<String> timeoutExpiredInteractors) {
     }
 }
