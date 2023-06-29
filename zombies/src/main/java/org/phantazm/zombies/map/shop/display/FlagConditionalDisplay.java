@@ -7,6 +7,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.map.shop.FlagSource;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
@@ -82,14 +83,7 @@ public class FlagConditionalDisplay implements ShopDisplay {
 
         if (ticks++ % 20 == 0) {
             List<ShopDisplay> oldCurrent = current;
-
-            List<ShopDisplay> newCurrent;
-            if (hasFlag()) {
-                newCurrent = success;
-            }
-            else {
-                newCurrent = failure;
-            }
+            List<ShopDisplay> newCurrent = hasFlag() ? success : failure;
 
             if (newCurrent != oldCurrent) {
                 if (oldCurrent != null) {
@@ -119,11 +113,6 @@ public class FlagConditionalDisplay implements ShopDisplay {
             case MAP -> flags.hasFlag(data.flag);
             case SHOP -> shop != null && shop.flags().hasFlag(data.flag);
         };
-    }
-
-    public enum FlagSource {
-        MAP,
-        SHOP
     }
 
     @DataObject

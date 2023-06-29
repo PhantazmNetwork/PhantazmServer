@@ -41,6 +41,8 @@ public interface PlayerView {
 
     @NotNull CompletableFuture<? extends Component> getDisplayName();
 
+    @NotNull Component getDisplayNameIfPresent();
+
     @NotNull Optional<? extends Component> getDisplayNameIfCached();
 
     /**
