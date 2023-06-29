@@ -28,7 +28,6 @@ import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
-import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
@@ -39,6 +38,7 @@ import org.phantazm.core.item.StaticUpdatingItem;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.core.particle.data.*;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.sound.SongLoader;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.stats.zombies.*;
@@ -124,7 +124,7 @@ public final class ZombiesFeature {
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
             @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull RouterStore routerStore, @NotNull SceneTransferHelper sceneTransferHelper) throws IOException {
+            @NotNull SceneTransferHelper sceneTransferHelper, @NotNull SongLoader songLoader) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -172,7 +172,7 @@ public final class ZombiesFeature {
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator,
                                     MobFeature.getModels()),
                             mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                                    .provide(mapDependencyProvider));
+                                    .provide(mapDependencyProvider), songLoader);
             providers.put(entry.getKey(), provider);
         }
 
@@ -235,6 +235,12 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(UpdateBlockPropertiesInteractor.class);
         contextManager.registerElementClass(SubstitutedTitleInteractor.class);
         contextManager.registerElementClass(TitleInteractor.class);
+        contextManager.registerElementClass(SlotMachineInteractor.class);
+        contextManager.registerElementClass(SlotMachineInteractor.BasicSlotMachineFrame.class);
+        contextManager.registerElementClass(SlotMachineInteractor.ConstantDelayFormula.class);
+        contextManager.registerElementClass(SlotMachineInteractor.LinearDelayFormula.class);
+        contextManager.registerElementClass(PlaySongInteractor.class);
+        contextManager.registerElementClass(ChangeSelectionGroupInteractor.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);

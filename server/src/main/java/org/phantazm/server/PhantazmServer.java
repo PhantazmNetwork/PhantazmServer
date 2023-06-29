@@ -246,7 +246,7 @@ public final class PhantazmServer {
                 keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, commandManager,
                 new CompositeFallback(List.of(LobbyFeature.getFallback(),
                         new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))),
-                PartyFeature.getPartyHolder().uuidToGuild(), routerStore, transferHelper);
+                PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader());
 
         ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
                 mappingProcessorSource, codec, routerStore, shutdownConfig, zombiesGamereportConfig, viewProvider,

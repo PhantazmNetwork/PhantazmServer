@@ -127,6 +127,17 @@ class BasicPlayerView implements PlayerView {
     }
 
     @Override
+    public @NotNull Component getDisplayNameIfPresent() {
+        Optional<? extends Component> cached = getPlayer().map(Player::getDisplayName);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
+        return getUsernameIfCached().map(Component::text).orElseGet(() -> Component.text(getUUID().toString()));
+
+    }
+
+    @Override
     public @NotNull Optional<? extends Component> getDisplayNameIfCached() {
         return getPlayer().map(Player::getDisplayName).or(() -> getUsernameIfCached().map(Component::text));
     }
