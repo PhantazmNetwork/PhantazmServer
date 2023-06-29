@@ -58,6 +58,10 @@ public class EndStage implements Stage {
         this.sidebarUpdaters = new HashMap<>();
     }
 
+    public long ticksSinceStart() {
+        return ticksSinceStart.get();
+    }
+
     @Override
     public boolean shouldContinue() {
         return remainingTicks.get() == 0L;

@@ -78,7 +78,7 @@ public class GamereportCommand extends Command {
                 Component gameState;
                 Stage currentStage = zombiesScene.getCurrentStage();
 
-                TagResolver currentRoundTag = Placeholder.unparsed("current_round",
+                TagResolver currentRoundTag = Placeholder.parsed("current_round",
                         Integer.toString(zombiesScene.getMap().roundHandler().currentRoundIndex() + 1));
 
                 if (currentStage == null || currentStage.key().equals(StageKeys.IDLE_STAGE)) {
@@ -98,8 +98,10 @@ public class GamereportCommand extends Command {
                 else if (currentStage.key().equals(StageKeys.END)) {
                     EndStage endStage = (EndStage)currentStage;
 
+                    TagResolver gameTimeTag =
+                            Placeholder.parsed("game_time", TIME_FORMATTER.format(endStage.ticksSinceStart()));
                     gameState = MINI_MESSAGE.deserialize(config.endedFormat(),
-                            Formatter.choice("result", endStage.hasWon() ? 1 : 0), currentRoundTag);
+                            Formatter.choice("result", endStage.hasWon() ? 1 : 0), currentRoundTag, gameTimeTag);
                 }
                 else {
                     gameState = Component.empty();
