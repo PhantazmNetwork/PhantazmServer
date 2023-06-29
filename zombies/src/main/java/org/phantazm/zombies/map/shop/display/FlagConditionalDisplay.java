@@ -7,7 +7,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Flaggable;
-import org.phantazm.zombies.map.shop.FlagSource;
+import org.phantazm.zombies.map.shop.ShopFlagSource;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
@@ -117,11 +117,11 @@ public class FlagConditionalDisplay implements ShopDisplay {
 
     @DataObject
     public record Data(@NotNull Key flag,
-                       @NotNull FlagSource source,
+                       @NotNull ShopFlagSource source,
                        @NotNull @ChildPath("success") List<String> success,
                        @NotNull @ChildPath("failure") List<String> failure) {
         @Default("source")
-        public static @NotNull ConfigElement defaultFlagSource() {
+        public static @NotNull ConfigElement defaultShopFlagSource() {
             return ConfigPrimitive.of("MAP");
         }
     }

@@ -1,6 +1,6 @@
 package org.phantazm.zombies.map.shop;
 
-public enum FlagSource {
+public enum ShopFlagSource {
     MAP,
     SHOP
 }

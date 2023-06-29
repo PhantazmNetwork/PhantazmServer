@@ -214,7 +214,7 @@ public class SlotMachineInteractor implements ShopInteractor {
 
         Component displayName = frame.getVisual().getDisplayName();
         if (displayName == null) {
-            displayName = Component.text(frame.getVisual().material().key().value());
+            displayName = Component.translatable(frame.getVisual().material().registry().translationKey());
         }
 
         TagResolver itemName = Placeholder.component("item_name", displayName);
@@ -323,6 +323,7 @@ public class SlotMachineInteractor implements ShopInteractor {
             return data.hologramFormats;
         }
 
+        @DataObject
         public record Data(@NotNull ItemStack itemStack,
                            @NotNull List<String> hologramFormats,
                            @NotNull @ChildPath("interactors") List<String> interactors) {
