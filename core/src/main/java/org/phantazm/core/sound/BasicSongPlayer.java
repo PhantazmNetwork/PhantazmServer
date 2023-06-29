@@ -3,6 +3,8 @@ package org.phantazm.core.sound;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Deque;
@@ -25,7 +27,18 @@ public class BasicSongPlayer implements SongPlayer {
     @Override
     public @NotNull Song play(@NotNull Audience audience, @NotNull Sound.Emitter emitter, @NotNull List<Note> notes,
             boolean loop) {
-        SongImpl song = new SongImpl(audience, emitter, notes, loop);
+        SongImpl song = new SongImpl(audience, emitter, null, notes, loop);
+        if (song.nextNote != null) {
+            songDeque.add(song);
+        }
+
+        return song;
+    }
+
+    @Override
+    public @NotNull Song play(@NotNull Audience audience, double x, double y, double z, @NotNull List<Note> notes,
+            boolean loop) {
+        SongImpl song = new SongImpl(audience, null, new Vec(x, y, z), notes, loop);
         if (song.nextNote != null) {
             songDeque.add(song);
         }
@@ -36,6 +49,7 @@ public class BasicSongPlayer implements SongPlayer {
     private static class SongImpl implements Song {
         private final Audience audience;
         private final Sound.Emitter emitter;
+        private final Point location;
         private final List<Note> notes;
         private final boolean loop;
 
@@ -46,9 +60,10 @@ public class BasicSongPlayer implements SongPlayer {
         private Note nextNote;
         private long lastNoteTime;
 
-        private SongImpl(Audience audience, Sound.Emitter emitter, List<Note> notes, boolean loop) {
+        private SongImpl(Audience audience, Sound.Emitter emitter, Point location, List<Note> notes, boolean loop) {
             this.audience = Objects.requireNonNull(audience, "audience");
-            this.emitter = Objects.requireNonNull(emitter, "emitter");
+            this.emitter = emitter;
+            this.location = location;
             this.notes = List.copyOf(notes);
             this.loop = loop;
 
@@ -97,7 +112,13 @@ public class BasicSongPlayer implements SongPlayer {
                 this.lastNoteTime = time;
 
                 do {
-                    this.audience.playSound(this.currentSound = nextNote.sound(), this.emitter);
+                    if (this.emitter != null) {
+                        this.audience.playSound(this.currentSound = nextNote.sound(), this.emitter);
+                    }
+                    else {
+                        this.audience.playSound(this.currentSound = nextNote.sound(), location.x(), location.y(),
+                                location.z());
+                    }
 
                     nextNoteIndex = ++this.noteIndex;
                     if (nextNoteIndex < this.notes.size()) {
