@@ -29,6 +29,7 @@ public class SlotMachineInteractor implements ShopInteractor {
     private final TickFormatter tickFormatter;
     private final DelayFormula delayFormula;
     private final List<SlotMachineFrame> frames;
+    private final List<ShopInteractor> rollStartInteractors;
     private final List<ShopInteractor> mismatchedPlayerInteractors;
     private final List<ShopInteractor> whileRollingInteractors;
     private final List<ShopInteractor> timeoutExpiredInteractors;
@@ -54,6 +55,7 @@ public class SlotMachineInteractor implements ShopInteractor {
     public SlotMachineInteractor(Data data, @NotNull @Child("tick_formatter") TickFormatter tickFormatter,
             @NotNull @Child("delay_formula") DelayFormula delayFormula,
             @NotNull @Child("frames") List<SlotMachineFrame> frames,
+            @NotNull @Child("roll_start_interactors") List<ShopInteractor> rollStartInteractors,
             @NotNull @Child("mismatched_player_interactors") List<ShopInteractor> mismatchedPlayerInteractors,
             @NotNull @Child("while_rolling_interactors") List<ShopInteractor> whileRollingInteractors,
             @NotNull @Child("timeout_expired_interactors") List<ShopInteractor> timeoutExpiredInteractors,
@@ -62,6 +64,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         this.tickFormatter = tickFormatter;
         this.delayFormula = delayFormula;
         this.frames = new ArrayList<>(frames);
+        this.rollStartInteractors = rollStartInteractors;
         this.mismatchedPlayerInteractors = mismatchedPlayerInteractors;
         this.whileRollingInteractors = whileRollingInteractors;
         this.timeoutExpiredInteractors = timeoutExpiredInteractors;
@@ -111,6 +114,11 @@ public class SlotMachineInteractor implements ShopInteractor {
         lastFrameTime = System.currentTimeMillis();
         currentFrameIndex = 0;
         ticksUntilNextFrame = delayFormula.delay(data.frameCount, currentFrameIndex);
+
+        for (ShopInteractor interactor : rollStartInteractors) {
+            interactor.handleInteraction(interaction);
+        }
+
         return false;
     }
 
@@ -330,6 +338,7 @@ public class SlotMachineInteractor implements ShopInteractor {
                        @NotNull @ChildPath("tick_formatter") String tickFormatter,
                        @NotNull @ChildPath("delay_formula") String delayFormula,
                        @NotNull @ChildPath("frames") List<String> frames,
+                       @NotNull @ChildPath("roll_start_interactors") List<String> rollStartInteractors,
                        @NotNull @ChildPath("mismatched_player_interactors") List<String> mismatchedPlayerInteractors,
                        @NotNull @ChildPath("while_rolling_interactors") List<String> whileRollingInteractors,
                        @NotNull @ChildPath("timeout_expired_interactors") List<String> timeoutExpiredInteractors) {
