@@ -145,7 +145,7 @@ public class SlotMachineInteractor implements ShopInteractor {
             }
 
             doneRolling = true;
-            long ticksSinceDoneRolling = time - rollFinishTime / MinecraftServer.TICK_MS;
+            long ticksSinceDoneRolling = (time - rollFinishTime) / MinecraftServer.TICK_MS;
 
             if (ticksSinceDoneRolling < data.gracePeriodTicks) {
                 String timeString = tickFormatter.format(data.gracePeriodTicks - ticksSinceDoneRolling);
