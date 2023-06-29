@@ -115,7 +115,9 @@ public final class LobbyFeature {
             }
 
             if (!success) {
-                finalFallback.fallback(playerViewProvider.fromPlayer(event.getPlayer()));
+                LOGGER.warn("Kicking player {} because we weren't able to find a lobby for them to join",
+                        event.getPlayer().getUuid());
+                event.setCancelled(true);
             }
         });
 
