@@ -4,7 +4,10 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
+import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.type.Token;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
@@ -41,6 +44,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.stats.zombies.*;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
@@ -124,7 +128,9 @@ public final class ZombiesFeature {
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
             @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull SceneTransferHelper sceneTransferHelper, @NotNull SongLoader songLoader) throws IOException {
+            @NotNull SceneTransferHelper sceneTransferHelper, @NotNull SongLoader songLoader,
+            @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec zombiesCodec)
+            throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -143,6 +149,14 @@ public final class ZombiesFeature {
                     VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())),
                     map.settings().chunkLoadRange());
         }
+
+        ConfigProcessor<ZombiesConfig> zombiesConfigProcessor =
+                mappingProcessorSource.processorFor(Token.ofClass(ZombiesConfig.class));
+        String zombiesFileName = zombiesCodec.getPreferredExtensions().isEmpty()
+                                 ? "zombies"
+                                 : "zombies." + zombiesCodec.getPreferredExtension();
+        ZombiesConfig zombiesConfig =
+                Configuration.read(Path.of(zombiesFileName), zombiesCodec, zombiesConfigProcessor);
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();
