@@ -235,6 +235,10 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(UpdateBlockPropertiesInteractor.class);
         contextManager.registerElementClass(SubstitutedTitleInteractor.class);
         contextManager.registerElementClass(TitleInteractor.class);
+        contextManager.registerElementClass(SlotMachineInteractor.class);
+        contextManager.registerElementClass(SlotMachineInteractor.BasicSlotMachineFrame.class);
+        contextManager.registerElementClass(SlotMachineInteractor.ConstantDelayFormula.class);
+        contextManager.registerElementClass(SlotMachineInteractor.LinearDelayFormula.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
