@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -43,7 +44,20 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey) {
+    public @NotNull CompletableFuture<ZombiesPlayerMapStats> getMapStats(@NotNull UUID playerUUID,
+            @NotNull Key mapKey) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                return sqlFetcher.getMapStats(connection, playerUUID, mapKey);
+            }
+            catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }, executor).whenComplete(this::logException);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 return sqlFetcher.getBestTimes(connection, mapKey);

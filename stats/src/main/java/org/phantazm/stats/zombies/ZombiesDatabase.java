@@ -4,11 +4,17 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface ZombiesDatabase {
 
     @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats);
 
-    CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey);
+    @NotNull CompletableFuture<ZombiesPlayerMapStats> getMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey);
+
+    @NotNull CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey);
+
+
+
 }

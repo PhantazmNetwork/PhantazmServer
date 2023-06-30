@@ -2,7 +2,8 @@ package org.phantazm.stats.zombies;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.impl.SQLDataType;
 
 import java.sql.Connection;
@@ -48,6 +49,25 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
                 .set(field("regular_hits"), field("regular_hits", SQLDataType.INTEGER).plus(mapStats.getRegularHits()))
                 .set(field("headshot_hits"),
                         field("headshot_hits", SQLDataType.INTEGER).plus(mapStats.getHeadshotHits())).execute();
+    }
+
+    @Override
+    public @NotNull ZombiesPlayerMapStats getMapStats(@NotNull Connection connection, @NotNull UUID playerUUID,
+            @NotNull Key mapKey) {
+        Record result = using(connection).select().from(table("zombies_player_map_stats"))
+                .where(field("player_uuid").eq(playerUUID.toString())).and(field("map_key").eq(mapKey.asString()))
+                .fetchOne();
+        if (result == null) {
+            return BasicZombiesPlayerMapStats.createBasicStats(playerUUID, mapKey);
+        }
+
+        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, result.get("games_played", int.class),
+                result.get("wins", int.class), result.get("best_time", Long.class), result.get("best_round", int.class),
+                result.get("rounds_survived", int.class), result.get("kills", int.class),
+                result.get("knocks", int.class), result.get("coins_gained", int.class),
+                result.get("coins_spent", int.class), result.get("deaths", int.class), result.get("revives", int.class),
+                result.get("shots", int.class), result.get("regular_hits", int.class),
+                result.get("headshot_hits", int.class));
     }
 
     @Override
