@@ -3,12 +3,16 @@ package org.phantazm.zombies.game.player.state.revive;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerMeta;
 import org.phantazm.zombies.player.ZombiesPlayerModule;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -31,6 +35,10 @@ public class ReviveHandlerTest {
         ZombiesPlayerModule module = mock(ZombiesPlayerModule.class);
         when(module.getMeta()).thenReturn(meta);
         when(module.getStats()).thenReturn(mock(ZombiesPlayerMapStats.class));
+        PlayerView playerView = mock(PlayerView.class);
+        when(playerView.getPlayer()).thenReturn(Optional.empty());
+        ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
+        when(module.getActionBar()).thenReturn(actionBar);
         reviver = mock(ZombiesPlayer.class);
         when(reviver.module()).thenReturn(module);
     }

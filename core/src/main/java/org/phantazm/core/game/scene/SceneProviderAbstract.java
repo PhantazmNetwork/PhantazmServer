@@ -17,7 +17,7 @@ import java.util.concurrent.locks.StampedLock;
  */
 public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TRequest extends SceneJoinRequest>
         implements SceneProvider<TScene, TRequest> {
-    private final Collection<TScene> scenes = new CopyOnWriteArrayList<>();
+    private final List<TScene> scenes = new CopyOnWriteArrayList<>();
     private final Collection<TScene> unmodifiableScenes = Collections.unmodifiableCollection(scenes);
     private final StampedLock lock = new StampedLock();
     private final Executor executor;
@@ -84,14 +84,12 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
 
     @Override
     public void tick(long time) {
-        Iterator<TScene> iterator = scenes.iterator();
-
-        while (iterator.hasNext()) {
-            TScene scene = iterator.next();
+        for (int i = scenes.size() - 1; i >= 0; --i) {
+            TScene scene = scenes.get(i);
 
             if (scene.isShutdown()) {
                 cleanupScene(scene);
-                iterator.remove();
+                scenes.remove(i);
 
                 ServerProcess process = MinecraftServer.process();
                 if (process != null) {

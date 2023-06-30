@@ -32,7 +32,7 @@ public class LobbyIntegrationTest {
         Instance instance = env.createFlatInstance();
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
                 InstanceConfig.DEFAULT_TIME_RATE, InstanceConfig.DEFAULT_CHUNK_LOAD_RANGE);
-        SceneFallback sceneFallback = (ignored) -> true;
+        SceneFallback sceneFallback = (ignored) -> CompletableFuture.completedFuture(true);
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
                 new NPCHandler(List.of(), instance), true);
         PlayerView playerView = mock(PlayerView.class);
