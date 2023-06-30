@@ -142,7 +142,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
             return false;
         }
 
-        return getPlayer().filter(value -> value.getPose() == Entity.Pose.SNEAKING).isPresent();
+        return getPlayer().filter(Player::isSneaking).isPresent();
     }
 
     default boolean canTriggerSLA() {

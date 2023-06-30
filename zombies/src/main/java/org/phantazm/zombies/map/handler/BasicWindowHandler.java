@@ -97,7 +97,7 @@ public class BasicWindowHandler implements WindowHandler {
                 if (playerOptional.isPresent() && zombiesPlayer.canRepairWindow()) {
                     Player player = playerOptional.get();
 
-                    if (player.getPose() == Entity.Pose.SNEAKING) {
+                    if (player.isSneaking()) {
                         addOperationIfNearby(zombiesPlayer, player);
                     }
                 }
