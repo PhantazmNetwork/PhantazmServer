@@ -81,16 +81,16 @@ public class SlotMachineInteractor implements ShopInteractor {
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (rolling) {
-            if (!doneRolling) {
-                for (ShopInteractor interactor : whileRollingInteractors) {
+            if (interaction.player() != rollInteraction.player()) {
+                for (ShopInteractor interactor : mismatchedPlayerInteractors) {
                     interactor.handleInteraction(interaction);
                 }
 
                 return false;
             }
 
-            if (interaction.player() != rollInteraction.player()) {
-                for (ShopInteractor interactor : mismatchedPlayerInteractors) {
+            if (!doneRolling) {
+                for (ShopInteractor interactor : whileRollingInteractors) {
                     interactor.handleInteraction(interaction);
                 }
 
@@ -152,8 +152,8 @@ public class SlotMachineInteractor implements ShopInteractor {
                 TagResolver[] tags = getTagsForFrame(frames.get((currentFrameIndex - 1) % frames.size()),
                         Placeholder.unparsed("time_left", timeString));
 
-                List<Component> newComponents = new ArrayList<>(data.gracePeriodFormat.size());
-                for (String formatString : data.gracePeriodFormat) {
+                List<Component> newComponents = new ArrayList<>(data.gracePeriodFormats.size());
+                for (String formatString : data.gracePeriodFormats) {
                     newComponents.add(MiniMessage.miniMessage().deserialize(formatString, tags));
                 }
 
@@ -335,7 +335,7 @@ public class SlotMachineInteractor implements ShopInteractor {
                        double hologramOffset,
                        double itemOffset,
                        int gracePeriodTicks,
-                       @NotNull List<String> gracePeriodFormat,
+                       @NotNull List<String> gracePeriodFormats,
                        @NotNull @ChildPath("tick_formatter") String tickFormatter,
                        @NotNull @ChildPath("delay_formula") String delayFormula,
                        @NotNull @ChildPath("frames") List<String> frames,
