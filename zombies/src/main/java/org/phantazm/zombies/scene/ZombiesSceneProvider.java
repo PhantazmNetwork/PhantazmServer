@@ -61,6 +61,8 @@ import org.phantazm.stats.zombies.ZombiesDatabase;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -87,7 +89,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     private final SongLoader songLoader;
 
-    public ZombiesSceneProvider(int maximumScenes,
+    public ZombiesSceneProvider(@NotNull Executor executor, int maximumScenes,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
@@ -96,7 +98,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull Team corpseTeam, @NotNull ZombiesDatabase database, @NotNull Map<Key, PowerupInfo> powerups,
             @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
             @NotNull SongLoader songLoader) {
-        super(maximumScenes);
+        super(executor, maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
@@ -175,7 +177,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             instance.setTimeRate(0);
 
             //LinkedHashMap for better value iteration performance
-            Map<UUID, ZombiesPlayer> zombiesPlayers = new LinkedHashMap<>(settings.maxPlayers());
+            Map<UUID, ZombiesPlayer> zombiesPlayers = new ConcurrentHashMap<>(settings.maxPlayers());
 
             MobStore mobStore = new MobStore();
             TickTaskScheduler tickTaskScheduler = new BasicTickTaskScheduler();

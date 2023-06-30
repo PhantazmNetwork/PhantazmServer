@@ -21,7 +21,7 @@ public interface SceneProvider<TScene extends Scene<TRequest>, TRequest extends 
      * @param request The request used to provide an appropriate scene
      * @return An {@link Optional} of a {@link Scene}. The scene may be newly created or from the provider's store.
      */
-    @NotNull Optional<CompletableFuture<TScene>> provideScene(@NotNull TRequest request);
+    @NotNull CompletableFuture<Optional<TScene>> provideScene(@NotNull TRequest request);
 
     /**
      * Gets the {@link Scene}s currently stored by the {@link Scene} provider.

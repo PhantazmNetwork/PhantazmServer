@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -53,10 +54,11 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
      * @param fallback          A {@link SceneFallback} for the created {@link Lobby}s
      * @param instanceConfig    The {@link InstanceConfig} for the {@link Lobby}s
      */
-    public BasicLobbyProvider(int maximumLobbies, int newLobbyThreshold, @NotNull InstanceLoader instanceLoader,
+    public BasicLobbyProvider(@NotNull Executor executor, int maximumLobbies, int newLobbyThreshold,
+            @NotNull InstanceLoader instanceLoader,
             @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig,
             @NotNull ContextManager contextManager, @NotNull ConfigList npcConfigs, boolean quittable) {
-        super(maximumLobbies, newLobbyThreshold);
+        super(executor, maximumLobbies, newLobbyThreshold);
 
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
         this.lobbyPaths = List.copyOf(Objects.requireNonNull(lobbyPaths, "lobbyPaths"));

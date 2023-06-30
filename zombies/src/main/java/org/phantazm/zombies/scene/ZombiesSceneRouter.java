@@ -62,35 +62,37 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     }
 
     @Override
-    public @NotNull RouteResult<ZombiesScene> findScene(@NotNull ZombiesRouteRequest routeRequest) {
+    public @NotNull CompletableFuture<RouteResult<ZombiesScene>> findScene(@NotNull ZombiesRouteRequest routeRequest) {
         if (isShutdown()) {
-            return RouteResult.failure(Component.text("The router is shutdown."));
+            return CompletableFuture.completedFuture(RouteResult.failure(Component.text("The router is shutdown.")));
         }
         if (!isJoinable()) {
-            return RouteResult.failure(Component.text("The router is not joinable."));
+            return CompletableFuture.completedFuture(RouteResult.failure(Component.text("The router is not joinable.")));
         }
 
         if (routeRequest.targetMap() != null) {
             return joinGame(routeRequest);
         }
 
-        return rejoinGame(routeRequest);
+        return CompletableFuture.completedFuture(rejoinGame(routeRequest));
     }
 
-    private RouteResult<ZombiesScene> joinGame(ZombiesRouteRequest routeRequest) {
+    private CompletableFuture<RouteResult<ZombiesScene>> joinGame(ZombiesRouteRequest routeRequest) {
         SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider = sceneProviders.get(routeRequest.targetMap());
         if (sceneProvider == null) {
-            return RouteResult.failure(Component.text("No games exist with key " + routeRequest.targetMap() + "."));
+            return CompletableFuture.completedFuture(RouteResult.failure(Component.text("No games exist with key " + routeRequest.targetMap() + ".")));
         }
 
-        return sceneProvider.provideScene(routeRequest.joinRequest()).map(RouteResult::success)
-                .orElseGet(() -> RouteResult.failure(Component.text("No games are joinable.")));
+        return sceneProvider.provideScene(routeRequest.joinRequest()).thenApply(sceneOptional -> {
+            return sceneOptional.map(RouteResult::success)
+                    .orElseGet(() -> RouteResult.failure(Component.text("No games are joinable.")));
+        });
     }
 
     private RouteResult<ZombiesScene> rejoinGame(ZombiesRouteRequest routeRequest) {
         for (ZombiesScene scene : getScenes()) {
             if (scene.getUUID().equals(routeRequest.targetGame())) {
-                return RouteResult.success(CompletableFuture.completedFuture(scene));
+                return RouteResult.success(scene);
             }
         }
 

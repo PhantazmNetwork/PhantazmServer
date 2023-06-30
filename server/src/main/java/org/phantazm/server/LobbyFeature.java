@@ -79,9 +79,9 @@ public final class LobbyFeature {
         }
 
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
-                new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceLoader,
-                        mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig(), contextManager,
-                        mainLobbyConfig.npcs(), false);
+                new BasicLobbyProvider(ExecutorFeature.getExecutor(), mainLobbyConfig.maxLobbies(),
+                        -mainLobbyConfig.maxPlayers(), instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
+                        mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(), false);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), LobbyFeature.getLobbyRouter(),
@@ -91,9 +91,10 @@ public final class LobbyFeature {
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
                 lobbyProviders.put(lobby.getKey(),
-                        new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
-                                instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
-                                lobby.getValue().instanceConfig(), contextManager, mainLobbyConfig.npcs(), true));
+                        new BasicLobbyProvider(ExecutorFeature.getExecutor(), lobby.getValue().maxLobbies(),
+                                -lobby.getValue().maxPlayers(), instanceLoader, lobby.getValue().lobbyPaths(),
+                                regularFallback, lobby.getValue().instanceConfig(), contextManager,
+                                mainLobbyConfig.npcs(), true));
             }
         }
 
@@ -103,10 +104,10 @@ public final class LobbyFeature {
             LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
-            RouteResult<Lobby> routeResult = lobbyRouter.findScene(routeRequest);
+            RouteResult<Lobby> routeResult = lobbyRouter.findScene(routeRequest).join();
             boolean success = false;
-            if (routeResult.sceneFuture().isPresent()) {
-                Lobby lobby = routeResult.sceneFuture().get().join();
+            if (routeResult.scene().isPresent()) {
+                Lobby lobby = routeResult.scene().get();
                 TransferResult transferResult = lobby.join(joinRequest);
                 if (transferResult.executor().isPresent()) {
                     transferResult.executor().get().run();

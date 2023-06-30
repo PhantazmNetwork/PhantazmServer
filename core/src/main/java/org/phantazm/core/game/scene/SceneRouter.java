@@ -7,10 +7,11 @@ import org.phantazm.commons.Tickable;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoinRequest> extends Tickable, Keyed {
 
-    @NotNull RouteResult<TScene> findScene(@NotNull TRequest joinRequest);
+    @NotNull CompletableFuture<RouteResult<TScene>> findScene(@NotNull TRequest joinRequest);
 
     @NotNull Collection<TScene> getScenes();
 

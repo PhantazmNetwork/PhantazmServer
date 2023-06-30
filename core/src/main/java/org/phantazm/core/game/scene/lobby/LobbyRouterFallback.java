@@ -39,12 +39,12 @@ public class LobbyRouterFallback implements SceneFallback {
     public CompletableFuture<Boolean> fallback(@NotNull PlayerView player) {
         LobbyJoinRequest joinRequest = new BasicLobbyJoinRequest(connectionManager, Collections.singleton(player));
         LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbyName, joinRequest);
-        Optional<CompletableFuture<Lobby>> lobbyOptional = lobbyRouter.findScene(routeRequest).sceneFuture();
-        if (lobbyOptional.isEmpty()) {
-            return CompletableFuture.completedFuture(false);
-        }
+        return lobbyRouter.findScene(routeRequest).thenApply(routeResult -> {
+            if (routeResult.scene().isEmpty()) {
+                return false;
+            }
 
-        return lobbyOptional.get().thenApply(lobby -> {
+            Lobby lobby = routeResult.scene().get();
             TransferResult result = lobby.join(joinRequest);
             if (result.executor().isEmpty()) {
                 return false;

@@ -173,13 +173,14 @@ public final class ZombiesFeature {
         database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), dataSource, sqlFetcher);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
-                    new ZombiesSceneProvider(zombiesConfig.maximumScenes(), instanceSpaceFunction, entry.getValue(),
-                            instanceLoader, sceneFallback, globalEventNode, ZombiesFeature.mobSpawnerSource(),
-                            MobFeature.getModels(), new BasicClientBlockHandlerSource(instance -> {
-                        DimensionType dimensionType = instance.getDimensionType();
-                        return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
-                                dimensionType.getHeight());
-                    }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
+                    new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
+                            instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
+                            ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(),
+                            new BasicClientBlockHandlerSource(instance -> {
+                                DimensionType dimensionType = instance.getDimensionType();
+                                return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
+                                        dimensionType.getHeight());
+                            }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
                             ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator,
                                     MobFeature.getModels()),

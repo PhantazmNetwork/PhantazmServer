@@ -8,14 +8,19 @@ import org.phantazm.core.game.scene.event.SceneShutdownEvent;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.locks.StampedLock;
 
 /**
  * An abstract base for {@link SceneProvider}s.
  */
 public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TRequest extends SceneJoinRequest>
         implements SceneProvider<TScene, TRequest> {
-    private final Collection<TScene> scenes = new ArrayList<>();
+    private final Collection<TScene> scenes = new CopyOnWriteArrayList<>();
     private final Collection<TScene> unmodifiableScenes = Collections.unmodifiableCollection(scenes);
+    private final StampedLock lock = new StampedLock();
+    private final Executor executor;
     private final int maximumScenes;
 
     /**
@@ -23,22 +28,44 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
      *
      * @param maximumScenes The maximum number of {@link Scene}s in the provider.
      */
-    public SceneProviderAbstract(int maximumScenes) {
+    public SceneProviderAbstract(@NotNull Executor executor, int maximumScenes) {
+        this.executor = Objects.requireNonNull(executor, "executor");
         this.maximumScenes = maximumScenes;
     }
 
     @Override
-    public @NotNull Optional<CompletableFuture<TScene>> provideScene(@NotNull TRequest request) {
-        return Optional.ofNullable(chooseScene(request).map(CompletableFuture::completedFuture).orElseGet(() -> {
-            if (scenes.size() >= maximumScenes) {
-                return null;
+    public @NotNull CompletableFuture<Optional<TScene>> provideScene(@NotNull TRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            long optimisticReadStamp = lock.tryOptimisticRead();
+            if (lock.validate(optimisticReadStamp)) {
+                Optional<TScene> sceneOptional = chooseScene(request);
+
+                if (lock.validate(optimisticReadStamp) && sceneOptional.isPresent()) {
+                    return sceneOptional;
+                }
             }
 
-            CompletableFuture<TScene> newSceneFuture = createScene(request);
-            newSceneFuture.thenAccept(scenes::add);
+            long writeStamp = lock.writeLock();
 
-            return newSceneFuture;
-        }));
+            try {
+                Optional<TScene> sceneOptional = chooseScene(request);
+                if (sceneOptional.isPresent()) {
+                    return sceneOptional;
+                }
+
+                if (scenes.size() >= maximumScenes) {
+                    return Optional.empty();
+                }
+
+                TScene scene = createScene(request).join();
+                scenes.add(scene);
+
+                return Optional.ofNullable(scene);
+            }
+            finally {
+                lock.unlockWrite(writeStamp);
+            }
+        }, executor);
     }
 
     @Override
