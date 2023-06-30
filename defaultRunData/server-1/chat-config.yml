@@ -1,0 +1,5 @@
+chatFormats:
+    - key: all
+      value: <<sender>> <message>
+    - key: party
+      value: <blue>Party <dark_gray>> <reset> <<sender>> <message>

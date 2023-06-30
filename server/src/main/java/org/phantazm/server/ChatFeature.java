@@ -11,8 +11,8 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.chat.ChatChannel;
+import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.chat.InstanceChatChannel;
-import org.phantazm.core.chat.SelfChatChannel;
 import org.phantazm.core.chat.command.ChatCommand;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
@@ -33,8 +33,6 @@ public final class ChatFeature {
      */
     public static final String DEFAULT_CHAT_CHANNEL_NAME = "all";
 
-    public static final String SELF_CHAT_CHANNEL_NAME = "self";
-
     private ChatFeature() {
         throw new UnsupportedOperationException();
     }
@@ -47,7 +45,7 @@ public final class ChatFeature {
      * @param commandManager The {@link CommandManager} to register chat commands to
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
-            @NotNull Map<? super UUID, ? extends Party> parties,
+            @NotNull ChatConfig chatConfig, @NotNull Map<? super UUID, ? extends Party> parties,
             @NotNull PartyConfig partyConfig, @NotNull CommandManager commandManager) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
@@ -60,9 +58,11 @@ public final class ChatFeature {
             }
         };
 
-        channels.put(DEFAULT_CHAT_CHANNEL_NAME, new InstanceChatChannel(viewProvider));
-        channels.put(SelfChatChannel.CHANNEL_NAME, new SelfChatChannel(viewProvider));
-        channels.put(PartyChatChannel.CHANNEL_NAME, new PartyChatChannel(parties, viewProvider, partyConfig, MiniMessage.miniMessage()));
+        channels.put(DEFAULT_CHAT_CHANNEL_NAME, new InstanceChatChannel(viewProvider, MiniMessage.miniMessage(),
+                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME)));
+        channels.put(PartyChatChannel.CHANNEL_NAME,
+                new PartyChatChannel(parties, viewProvider, MiniMessage.miniMessage(),
+                        chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME)));
 
         Map<UUID, String> playerChannels = new HashMap<>();
         commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));

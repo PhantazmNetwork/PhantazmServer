@@ -27,16 +27,10 @@ public class PartyChatChannel extends BasicChatChannel {
 
     private final Map<? super UUID, ? extends Party> parties;
 
-    private final PartyConfig config;
-
-    private final MiniMessage miniMessage;
-
     public PartyChatChannel(@NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull PlayerViewProvider viewProvider, @NotNull PartyConfig config, @NotNull MiniMessage miniMessage) {
-        super(viewProvider);
+            @NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage, @NotNull String chatFormat) {
+        super(viewProvider, miniMessage, chatFormat);
         this.parties = Objects.requireNonNull(parties, "parties");
-        this.config = Objects.requireNonNull(config, "config");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
     }
 
     @Override
@@ -50,17 +44,4 @@ public class PartyChatChannel extends BasicChatChannel {
         return Pair.of(party.getAudience(), null);
     }
 
-    @Override
-    public @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent) {
-        Optional<? extends Component> displayNameOptional =
-                getViewProvider().fromPlayer(chatEvent.getPlayer()).getDisplayNameIfCached();
-        Component displayName = displayNameOptional.isPresent()
-                                ? displayNameOptional.get()
-                                : Component.text(chatEvent.getPlayer().getUsername());
-
-        TagResolver senderPlaceholder = Placeholder.component("sender", displayName);
-        TagResolver message = Placeholder.unparsed("message", chatEvent.getMessage());
-
-        return miniMessage.deserialize(config.chatFormat(), senderPlaceholder, message);
-    }
 }

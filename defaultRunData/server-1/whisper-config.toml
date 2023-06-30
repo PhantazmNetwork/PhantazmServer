@@ -1,0 +1,5 @@
+toTargetFormat="<b><#d277c1>From</#d277c1></b> <sender> <#b8bfde>></#b8bfde> <#9096ad><message></#9096ad>"
+toSenderFormat="<b><#d277c1>To</#d277c1></b> <target> <#b8bfde>></#b8bfde> <#9096ad><message></#9096ad>"
+fallbackNameColor = { r = 152, g = 255, b = 152 }
+consoleName="<#fffa9e>✦</#fffa9e> <gradient:#9345b5:#bd69e0>Console</gradient>"
+defaultName="Unknown"

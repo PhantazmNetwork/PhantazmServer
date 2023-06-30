@@ -7,7 +7,6 @@ import org.phantazm.core.guild.party.notification.PartyNotificationConfig;
 
 public record PartyConfig(@NotNull PartyNotificationConfig notificationConfig,
                           @NotNull PartyCommandConfig commandConfig,
-                          @NotNull String chatFormat,
                           int creatorRank,
                           int defaultRank,
                           long invitationDuration,
@@ -16,8 +15,7 @@ public record PartyConfig(@NotNull PartyNotificationConfig notificationConfig,
                           int minimumJoinRank) {
 
     public static final PartyConfig DEFAULT =
-            new PartyConfig(PartyNotificationConfig.DEFAULT, PartyCommandConfig.DEFAULT,
-                    "<blue>Party <dark_gray>> <reset> <<sender>> <message>", 1, 0,
+            new PartyConfig(PartyNotificationConfig.DEFAULT, PartyCommandConfig.DEFAULT, 1, 0,
                     60L * MinecraftServer.TICK_PER_SECOND, 1, 1, 1);
 
 }

@@ -5,6 +5,9 @@ import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChatEvent;
 import org.jetbrains.annotations.NotNull;
@@ -24,13 +27,20 @@ public abstract class BasicChatChannel implements ChatChannel {
 
     private final PlayerViewProvider viewProvider;
 
+    private final MiniMessage miniMessage;
+
+    private final String chatFormat;
+
     /**
      * Creates a {@link BasicChatChannel}.
      *
      * @param viewProvider The {@link BasicChatChannel}'s {@link PlayerViewProvider}
      */
-    public BasicChatChannel(@NotNull PlayerViewProvider viewProvider) {
+    public BasicChatChannel(@NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage,
+            @NotNull String chatFormat) {
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
+        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        this.chatFormat = Objects.requireNonNull(chatFormat, "chatFormat");
     }
 
     @Override
@@ -56,12 +66,16 @@ public abstract class BasicChatChannel implements ChatChannel {
 
     @Override
     public @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent) {
-        Function<PlayerChatEvent, Component> chatFormatter = chatEvent.getChatFormatFunction();
-        if (chatFormatter != null) {
-            return chatFormatter.apply(chatEvent);
-        }
+        Optional<? extends Component> displayNameOptional =
+                getViewProvider().fromPlayer(chatEvent.getPlayer()).getDisplayNameIfCached();
+        Component displayName = displayNameOptional.isPresent()
+                                ? displayNameOptional.get()
+                                : Component.text(chatEvent.getPlayer().getUsername());
 
-        return chatEvent.getDefaultChatFormat().get();
+        TagResolver senderPlaceholder = Placeholder.component("sender", displayName);
+        TagResolver message = Placeholder.unparsed("message", chatEvent.getMessage());
+
+        return miniMessage.deserialize(chatFormat, senderPlaceholder, message);
     }
 
     /**

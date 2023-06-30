@@ -24,7 +24,10 @@ public class ExecutorFeature {
     }
 
     static void shutdown() {
-        FeatureUtils.check(executorService);
+        if (executorService == null) {
+            return;
+        }
+
         try {
             LOGGER.info(
                     "Shutting down executor. Please allow for one minute before shutdown completes.");

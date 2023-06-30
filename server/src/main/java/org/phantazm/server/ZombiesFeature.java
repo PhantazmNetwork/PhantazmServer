@@ -4,10 +4,7 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
-import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import com.github.steanky.ethylene.mapper.MappingProcessorSource;
-import com.github.steanky.ethylene.mapper.type.Token;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
@@ -45,7 +42,10 @@ import org.phantazm.core.sound.SongLoader;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.stats.zombies.*;
+import org.phantazm.stats.zombies.JooqZombiesSQLFetcher;
+import org.phantazm.stats.zombies.SQLZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesSQLFetcher;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
@@ -80,7 +80,6 @@ import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
-import org.phantazm.zombies.powerup.action.BossBarTimerAction;
 import org.phantazm.zombies.powerup.visual.HologramVisual;
 import org.phantazm.zombies.powerup.visual.ItemVisual;
 import org.phantazm.zombies.scene.ZombiesScene;
@@ -102,9 +101,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public final class ZombiesFeature {
@@ -128,8 +124,7 @@ public final class ZombiesFeature {
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
             @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
             @NotNull SceneTransferHelper sceneTransferHelper, @NotNull SongLoader songLoader,
-            @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec zombiesCodec)
-            throws IOException {
+            @NotNull ZombiesConfig zombiesConfig) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -148,14 +143,6 @@ public final class ZombiesFeature {
                     VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())),
                     map.settings().chunkLoadRange());
         }
-
-        ConfigProcessor<ZombiesConfig> zombiesConfigProcessor =
-                mappingProcessorSource.processorFor(Token.ofClass(ZombiesConfig.class));
-        String zombiesFileName = zombiesCodec.getPreferredExtensions().isEmpty()
-                                 ? "zombies"
-                                 : "zombies." + zombiesCodec.getPreferredExtension();
-        ZombiesConfig zombiesConfig =
-                Configuration.read(Path.of(zombiesFileName), zombiesCodec, zombiesConfigProcessor);
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();

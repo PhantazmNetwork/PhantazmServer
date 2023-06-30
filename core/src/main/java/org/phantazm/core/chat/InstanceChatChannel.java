@@ -6,6 +6,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -23,8 +24,9 @@ public class InstanceChatChannel extends BasicChatChannel {
      *
      * @param viewProvider The {@link InstanceChatChannel}'s {@link PlayerViewProvider}
      */
-    public InstanceChatChannel(@NotNull PlayerViewProvider viewProvider) {
-        super(viewProvider);
+    public InstanceChatChannel(@NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage,
+            @NotNull String chatFormat) {
+        super(viewProvider, miniMessage, chatFormat);
     }
 
     @Override
