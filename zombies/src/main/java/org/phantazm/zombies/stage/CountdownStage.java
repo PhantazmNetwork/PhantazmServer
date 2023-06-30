@@ -76,6 +76,11 @@ public class CountdownStage implements Stage {
     }
 
     @Override
+    public boolean shouldAbort() {
+        return false;
+    }
+
+    @Override
     public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
         zombiesPlayer.getPlayer().ifPresent(player -> {
             if (!settings.introMessages().isEmpty()) {

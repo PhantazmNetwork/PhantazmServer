@@ -32,6 +32,10 @@ public class StageTransition implements Tickable {
             setCurrentStageIndex(currentStageIndex - 1);
             return;
         }
+        if (currentStage.shouldAbort()) {
+            setCurrentStageIndex(stages.length);
+            return;
+        }
 
         currentStage.tick(time);
     }

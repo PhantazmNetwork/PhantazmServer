@@ -11,6 +11,8 @@ public interface Stage extends Activable, Keyed {
 
     boolean shouldRevert();
 
+    boolean shouldAbort();
+
     void onJoin(@NotNull ZombiesPlayer zombiesPlayer);
 
     void onLeave(@NotNull ZombiesPlayer zombiesPlayer);

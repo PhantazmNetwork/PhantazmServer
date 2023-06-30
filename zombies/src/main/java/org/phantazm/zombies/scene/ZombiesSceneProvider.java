@@ -232,13 +232,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     player.getAttribute(Attributes.REVIVE_TICKS).setBaseValue(settings.baseReviveTicks());
                 });
 
-                return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings, instance, playerView,
-                        mapObjects.module().modifierSource(), new BasicFlaggable(), childNode, mapObjects.module().random(),
-                        mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator);
+                return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings, instance,
+                        playerView, mapObjects.module().modifierSource(), new BasicFlaggable(), childNode,
+                        mapObjects.module().random(), mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator);
             };
 
-            ZombiesScene scene = new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
-                    stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode);
+            ZombiesScene scene =
+                    new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
+                            stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode);
             sceneWrapper.set(scene);
             rootNode.addChild(childNode);
 
@@ -351,7 +352,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
             @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
-        Stage idle = new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")));
+        Stage idle =
+                new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")), 12000);
 
         LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
 
