@@ -36,17 +36,13 @@ public class PartyFeature {
     }
 
     static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
-            @NotNull SchedulerManager schedulerManager, @NotNull MappingProcessorSource mappingProcessorSource,
-            @NotNull ContextManager contextManager, @NotNull ConfigCodec partyCodec, @NotNull MiniMessage miniMessage)
+            @NotNull SchedulerManager schedulerManager, @NotNull ContextManager contextManager,
+            @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec, @NotNull MiniMessage miniMessage)
             throws IOException {
-        ConfigProcessor<PartyConfig> partyConfigProcessor =
-                mappingProcessorSource.processorFor(Token.ofClass(PartyConfig.class));
-        String partyFileName =
-                partyCodec.getPreferredExtensions().isEmpty() ? "party" : "party." + partyCodec.getPreferredExtension();
-        ConfigElement partyConfigNode = Configuration.read(Path.of(partyFileName), partyCodec);
+        PartyFeature.config = config;
+        ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
         TickFormatter tickFormatter =
                 contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
-        config = partyConfigProcessor.dataFromElement(partyConfigNode);
 
         PartyCreator partyCreator = new PartyCreator.Builder().setNotificationConfig(config.notificationConfig())
                 .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
@@ -54,8 +50,8 @@ public class PartyFeature {
                 .setMinimumKickRank(config.minimumKickRank()).setMinimumInviteRank(config.minimumInviteRank())
                 .setMinimumJoinRank(config.minimumJoinRank()).build();
         Command partyCommand =
-                PartyCommand.partyCommand(config.commandConfig(), miniMessage, partyHolder, viewProvider,
-                        partyCreator, new Random());
+                PartyCommand.partyCommand(config.commandConfig(), miniMessage, partyHolder, viewProvider, partyCreator,
+                        new Random());
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {

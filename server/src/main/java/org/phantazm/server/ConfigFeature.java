@@ -9,6 +9,8 @@ import com.github.steanky.ethylene.core.loader.SyncFileConfigLoader;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.guild.party.PartyConfig;
+import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.loader.LobbiesConfigProcessor;
 import org.phantazm.server.config.loader.PathfinderConfigProcessor;
 import org.phantazm.server.config.loader.ServerConfigProcessor;
@@ -46,6 +48,10 @@ public final class ConfigFeature {
 
     public static final Path ZOMBIES_GAMEREPORT_CONFIG_PATH = Path.of("./zombies-gamereport-config.toml");
 
+    public static final Path PARTY_CONFIG_PATH = Path.of("./party-config.toml");
+
+    public static final Path WHISPER_CONFIG_PATH = Path.of("./whisper-config.toml");
+
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link ServerConfig} loader.
      */
@@ -71,6 +77,12 @@ public final class ConfigFeature {
 
     public static final ConfigHandler.ConfigKey<ZombiesGamereportConfig> ZOMBIES_GAMEREPORT_CONFIG_KEY =
             new ConfigHandler.ConfigKey<>(ZombiesGamereportConfig.class, "zombies_gamereport_config");
+
+    public static final ConfigHandler.ConfigKey<PartyConfig> PARTY_CONFIG_KEY =
+            new ConfigHandler.ConfigKey<>(PartyConfig.class, "party_config");
+
+    public static final ConfigHandler.ConfigKey<WhisperConfig> WHISPER_CONFIG_KEY =
+            new ConfigHandler.ConfigKey<>(WhisperConfig.class, "whisper_config");
 
     private static ConfigHandler handler;
 
@@ -104,6 +116,14 @@ public final class ConfigFeature {
         handler.registerLoader(ZOMBIES_GAMEREPORT_CONFIG_KEY, new SyncFileConfigLoader<>(
                 mappingProcessorSource.processorFor(Token.ofClass(ZombiesGamereportConfig.class)),
                 ZombiesGamereportConfig.DEFAULT, ZOMBIES_GAMEREPORT_CONFIG_PATH, codec));
+
+        handler.registerLoader(PARTY_CONFIG_KEY,
+                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PartyConfig.class)),
+                        PartyConfig.DEFAULT, PARTY_CONFIG_PATH, codec));
+
+        handler.registerLoader(WHISPER_CONFIG_KEY,
+                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(WhisperConfig.class)),
+                        WhisperConfig.DEFAULT, WHISPER_CONFIG_PATH, codec));
     }
 
     /**

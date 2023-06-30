@@ -29,9 +29,11 @@ import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
+import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.player.BasicLoginValidator;
@@ -82,6 +84,8 @@ public final class PhantazmServer {
         PathfinderConfig pathfinderConfig;
         ShutdownConfig shutdownConfig;
         ZombiesGamereportConfig zombiesGamereportConfig;
+        PartyConfig partyConfig;
+        WhisperConfig whisperConfig;
 
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
         EthyleneFeature.initialize(keyParser);
@@ -134,6 +138,8 @@ public final class PhantazmServer {
             pathfinderConfig = handler.loadDataNow(ConfigFeature.PATHFINDER_CONFIG_KEY);
             shutdownConfig = handler.loadDataNow(ConfigFeature.SHUTDOWN_CONFIG_KEY);
             zombiesGamereportConfig = handler.loadDataNow(ConfigFeature.ZOMBIES_GAMEREPORT_CONFIG_KEY);
+            partyConfig = handler.loadDataNow(ConfigFeature.PARTY_CONFIG_KEY);
+            whisperConfig = handler.loadDataNow(ConfigFeature.WHISPER_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         }
         catch (ConfigProcessException e) {
@@ -149,7 +155,7 @@ public final class PhantazmServer {
         try {
             LOGGER.info("Initializing features.");
             initializeFeatures(keyParser, node, serverConfig, shutdownConfig, zombiesGamereportConfig, pathfinderConfig,
-                    lobbiesConfig, loginValidator);
+                    lobbiesConfig, partyConfig, whisperConfig, loginValidator);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -198,7 +204,9 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(KeyParser keyParser, EventNode<Event> global, ServerConfig serverConfig,
             ShutdownConfig shutdownConfig, ZombiesGamereportConfig zombiesGamereportConfig,
-            PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig, LoginValidator loginValidator)
+            PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig, PartyConfig partyConfig,
+            WhisperConfig whisperConfig,
+            LoginValidator loginValidator)
             throws Exception {
         RouterStore routerStore = new BasicRouterStore();
         ExecutorFeature.initialize();
@@ -211,7 +219,7 @@ public final class PhantazmServer {
 
         ConfigCodec tomlCodec = new TomlCodec();
         WhisperCommandFeature.initialize(MinecraftServer.getCommandManager(), MinecraftServer.getConnectionManager(),
-                mappingProcessorSource, tomlCodec);
+                whisperConfig);
 
         ContextManager contextManager = ElementFeature.getContextManager();
 
@@ -223,7 +231,7 @@ public final class PhantazmServer {
 
 
         PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
-                MinecraftServer.getSchedulerManager(), mappingProcessorSource, contextManager, tomlCodec,
+                MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec,
                 MiniMessage.miniMessage());
         LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
         ChatFeature.initialize(global, viewProvider, PartyFeature.getPartyHolder().uuidToGuild(),

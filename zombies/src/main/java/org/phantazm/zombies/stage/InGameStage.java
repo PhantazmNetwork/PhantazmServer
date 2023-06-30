@@ -66,6 +66,11 @@ public class InGameStage implements Stage {
     }
 
     @Override
+    public boolean shouldAbort() {
+        return false;
+    }
+
+    @Override
     public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
         zombiesPlayer.module().getMeta().setInGame(true);
     }

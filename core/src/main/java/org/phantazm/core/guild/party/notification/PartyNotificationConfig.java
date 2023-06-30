@@ -16,4 +16,8 @@ public record PartyNotificationConfig(
         @NotNull String kickToKickedFormat,
         @NotNull String transferFormat
 ) {
+
+    public static final PartyNotificationConfig DEFAULT = new PartyNotificationConfig("", "", "", "", "", "", "", "",
+            "", "", "", "");
+
 }
