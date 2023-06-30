@@ -2,6 +2,7 @@ package org.phantazm.stats.zombies;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Field;
 import org.jooq.impl.SQLDataType;
 
 import java.sql.Connection;
@@ -19,20 +20,23 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
     public void synchronizeZombiesPlayerMapStats(@NotNull Connection connection,
             @NotNull ZombiesPlayerMapStats mapStats) {
         using(connection).insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),
-                        field("games_played"), field("wins"), field("best_time"), field("rounds_survived"), field("kills"),
-                        field("coins_gained"), field("coins_spent"), field("knocks"), field("deaths"), field("revives"),
-                        field("shots"), field("regular_hits"), field("headshot_hits"))
+                        field("games_played"), field("wins"), field("best_time"), field("best_round"), field("rounds_survived"),
+                        field("kills"), field("coins_gained"), field("coins_spent"), field("knocks"), field("deaths"),
+                        field("revives"), field("shots"), field("regular_hits"), field("headshot_hits"))
                 .values(mapStats.getPlayerUUID().toString(), mapStats.getMapKey().asString(), mapStats.getGamesPlayed(),
-                        mapStats.getWins(), mapStats.getBestTime().orElse(null), mapStats.getRoundsSurvived(),
-                        mapStats.getKills(), mapStats.getCoinsGained(), mapStats.getCoinsSpent(), mapStats.getKnocks(),
-                        mapStats.getDeaths(), mapStats.getRevives(), mapStats.getShots(), mapStats.getRegularHits(),
-                        mapStats.getHeadshotHits()).onDuplicateKeyUpdate()
+                        mapStats.getWins(), mapStats.getBestTime().orElse(null), mapStats.getBestRound(),
+                        mapStats.getRoundsSurvived(), mapStats.getKills(), mapStats.getCoinsGained(),
+                        mapStats.getCoinsSpent(), mapStats.getKnocks(), mapStats.getDeaths(), mapStats.getRevives(),
+                        mapStats.getShots(), mapStats.getRegularHits(), mapStats.getHeadshotHits())
+                .onDuplicateKeyUpdate()
                 .set(field("games_played"), field("games_played", SQLDataType.INTEGER).plus(mapStats.getGamesPlayed()))
                 .set(field("wins"), field("wins", SQLDataType.INTEGER).plus(mapStats.getWins())).set(field("best_time"),
                         mapStats.getBestTime().isPresent()
                         ? when(field("best_time").isNotNull(),
                                 least(field("best_time"), mapStats.getBestTime().get())).otherwise(mapStats.getBestTime().get())
-                        : field("best_time", SQLDataType.BIGINT)).set(field("rounds_survived"),
+                        : field("best_time", SQLDataType.BIGINT)).set(field("best_round"),
+                        greatest(field("best_round", SQLDataType.INTEGER), val(mapStats.getBestRound())))
+                .set(field("rounds_survived"),
                         field("rounds_survived", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
                 .set(field("kills"), field("kills", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
                 .set(field("coins_gained"), field("coins_gained", SQLDataType.INTEGER).plus(mapStats.getCoinsGained()))

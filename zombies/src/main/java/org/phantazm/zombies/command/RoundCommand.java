@@ -61,11 +61,6 @@ public class RoundCommand extends Command {
                     transition.setCurrentStage(StageKeys.IN_GAME);
                 }
 
-                handler.currentRound().ifPresent(round -> {
-                    for (PhantazmMob mob : round.getSpawnedMobs()) {
-                        mob.entity().kill();
-                    }
-                });
                 handler.setCurrentRound(roundIndex);
             });
         }, roundArgument);

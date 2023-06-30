@@ -187,7 +187,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             MapObjects mapObjects =
                     createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, mobNoPushTeam, corpseTeam,
                             powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper, songPlayer, songLoader,
-                            tickTaskScheduler);
+                            tickTaskScheduler, ticksSinceStart);
 
             RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds());
             roundHandlerWrapper.set(roundHandler);
@@ -270,9 +270,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore, Team mobNoPushTeam,
             Team corpseTeam, Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler,
             Wrapper<EventNode<Event>> eventNode, SongPlayer songPlayer, SongLoader songLoader,
-            TickTaskScheduler tickTaskScheduler) {
+            TickTaskScheduler tickTaskScheduler, Wrapper<Long> ticksSinceStart) {
         return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, mobNoPushTeam,
-                powerupHandler, windowHandler, eventNode, songPlayer, songLoader, tickTaskScheduler, corpseTeam);
+                powerupHandler, windowHandler, eventNode, songPlayer, songLoader, tickTaskScheduler, corpseTeam, ticksSinceStart);
     }
 
     private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,

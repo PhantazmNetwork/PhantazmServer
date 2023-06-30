@@ -64,7 +64,8 @@ public interface MapObjects {
                 @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
                 @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
                 @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
-                @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam);
+                @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
+                @NotNull Wrapper<Long> ticksSinceStart);
     }
 
     interface Module {
@@ -105,5 +106,7 @@ public interface MapObjects {
         @NotNull Team corpseTeam();
 
         @NotNull InteractorGroupHandler interactorGroupHandler();
+
+        @NotNull Wrapper<Long> ticksSinceStart();
     }
 }

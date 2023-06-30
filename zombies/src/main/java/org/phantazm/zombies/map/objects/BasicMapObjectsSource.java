@@ -88,7 +88,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
             @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
             @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
-            @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam) {
+            @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
+            @NotNull Wrapper<Long> ticksSinceStart) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor =
@@ -109,7 +110,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Module module =
                 new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
                         slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
-                        eventNode, mobStore, songPlayer, songLoader, corpseTeam, new BasicInteractorGroupHandler());
+                        eventNode, mobStore, songPlayer, songLoader, corpseTeam, new BasicInteractorGroupHandler(),
+                        ticksSinceStart);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -134,7 +136,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner, windowTracker,
                         roomTracker);
 
-        List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor);
+        List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor, playerMap);
 
         MapObjects mapObjects =
                 new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
@@ -241,7 +243,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Round> buildRounds(List<RoundInfo> roundInfoList, List<Spawnpoint> spawnpoints,
-            DependencyProvider dependencyProvider, SpawnDistributor spawnDistributor) {
+            DependencyProvider dependencyProvider, SpawnDistributor spawnDistributor,
+            Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
             List<Action<Round>> startActions = contextManager.makeContext(roundInfo.startActions())
@@ -259,7 +262,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 waves.add(new Wave(wave, spawnActions));
             }
 
-            rounds.add(new Round(roundInfo, waves, startActions, endActions, spawnDistributor, spawnpoints));
+            rounds.add(new Round(roundInfo, waves, startActions, endActions, spawnDistributor, spawnpoints,
+                    zombiesPlayers.values()));
         }
 
         return rounds;
@@ -286,6 +290,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final SongLoader songLoader;
         private final Team corpseTeam;
         private final InteractorGroupHandler interactorGroupHandler;
+        private final Wrapper<Long> ticksSinceStart;
 
         private Module(KeyParser keyParser, Instance instance, Random random,
                 Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
@@ -294,7 +299,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
                 Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode, MobStore mobStore,
                 SongPlayer songPlayer, SongLoader songLoader, Team corpseTeam,
-                InteractorGroupHandler interactorGroupHandler) {
+                InteractorGroupHandler interactorGroupHandler, Wrapper<Long> ticksSinceStart) {
             this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
             this.instance = Objects.requireNonNull(instance, "instance");
             this.random = Objects.requireNonNull(random, "random");
@@ -313,6 +318,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.songLoader = Objects.requireNonNull(songLoader, "songLoader");
             this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
             this.interactorGroupHandler = Objects.requireNonNull(interactorGroupHandler, "interactorGroupHandler");
+            this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
         }
 
         @Override
@@ -408,6 +414,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull InteractorGroupHandler interactorGroupHandler() {
             return interactorGroupHandler;
+        }
+
+        @Override
+        public @NotNull Wrapper<Long> ticksSinceStart() {
+            return ticksSinceStart;
         }
     }
 }

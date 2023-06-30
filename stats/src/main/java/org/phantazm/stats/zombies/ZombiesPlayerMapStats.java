@@ -25,6 +25,10 @@ public interface ZombiesPlayerMapStats {
 
     void setBestTime(@Nullable Long bestTime);
 
+    int getBestRound();
+
+    void setBestRound(int bestRound);
+
     int getRoundsSurvived();
 
     void setRoundsSurvived(int roundsSurvived);

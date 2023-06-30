@@ -6,11 +6,13 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.map.action.Action;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.spawn.SpawnDistributor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +26,7 @@ public class Round implements Tickable {
     private final SpawnDistributor spawnDistributor;
     private final List<Spawnpoint> spawnpoints;
     private final List<PhantazmMob> spawnedMobs;
+    private final Collection<? extends ZombiesPlayer> zombiesPlayers;
     
     private boolean isActive;
     private long waveStartTime;
@@ -38,7 +41,7 @@ public class Round implements Tickable {
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
             @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-            @NotNull List<Spawnpoint> spawnpoints) {
+            @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.isEmpty()) {
             LOGGER.warn("Round {} has no waves", roundInfo);
@@ -52,6 +55,7 @@ public class Round implements Tickable {
 
         this.spawnedMobs = new ArrayList<>();
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }
 
     public @NotNull RoundInfo getRoundInfo() {
@@ -90,6 +94,14 @@ public class Round implements Tickable {
         }
 
         isActive = true;
+
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            if (!zombiesPlayer.hasQuit()) {
+                int prevBestRound = zombiesPlayer.module().getStats().getBestRound();
+                zombiesPlayer.module().getStats().setBestRound(Math.max(prevBestRound, roundInfo.round()));
+            }
+        }
+
         for (Action<Round> action : startActions) {
             action.perform(this);
         }
@@ -122,6 +134,9 @@ public class Round implements Tickable {
         waveStartTime = 0;
         totalMobCount = 0;
 
+        for (PhantazmMob mob : new ArrayList<>(spawnedMobs)) {
+            mob.entity().kill();
+        }
         spawnedMobs.clear();
     }
 

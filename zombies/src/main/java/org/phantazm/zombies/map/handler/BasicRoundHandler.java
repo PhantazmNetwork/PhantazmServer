@@ -73,15 +73,12 @@ public class BasicRoundHandler implements RoundHandler {
     public void setCurrentRound(int roundIndex) {
         Objects.checkIndex(roundIndex, rounds.size());
 
-        this.roundIndex = roundIndex;
-        Round newCurrent = rounds.get(roundIndex);
-        if (newCurrent == currentRound) {
+        if (currentRound != null) {
             currentRound.endRound();
-            currentRound.startRound(System.currentTimeMillis());
-            return;
         }
 
-        currentRound = newCurrent;
+        this.roundIndex = roundIndex;
+        currentRound = rounds.get(roundIndex);
         currentRound.startRound(System.currentTimeMillis());
     }
 
