@@ -272,7 +272,16 @@ public final class MapProcessors {
             Component displayName =
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("displayName"));
             String displayItemTag = element.getStringOrThrow("displayItemSnbt");
+            long idleRevertTicks = element.getNumberOrThrow("idleRevertTicks").longValue();
             List<Component> introMessages = componentList.dataFromElement(element.getElementOrThrow("introMessages"));
+            long countdownTicks = element.getNumberOrThrow("countdownTicks").longValue();
+            List<Long> countdownAlertTicks = ConfigProcessor.LONG.listProcessor()
+                    .dataFromElement(element.getElementOrThrow("countdownAlertTicks"));
+            Sound countdownTickSound =
+                    ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("countdownTickSound"));
+            String countdownTimeFormat = element.getStringOrThrow("countdownTimeFormat");
+            long endTicks = element.getNumberOrThrow("endTicks").longValue();
+            String endGameStatsFormat = element.getStringOrThrow("endGameStatsFormat");
             Component scoreboardHeader =
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("scoreboardHeader"));
             Vec3I leaderboardPosition =
@@ -302,9 +311,6 @@ public final class MapProcessors {
                     keyToListKeyMap.dataFromElement(element.getElementOrThrow("defaultEquipment"));
             Map<Key, EquipmentGroupInfo> equipmentGroups =
                     keyToEquipmentGroup.dataFromElement(element.getElementOrThrow("equipmentGroups"));
-            Sound countdownTickSound =
-                    ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("countdownTickSound"));
-            String countdownTimeFormat = element.getStringOrThrow("countdownTimeFormat");
             String winTitleFormat = element.getStringOrThrow("winTitleFormat");
             String winSubtitleFormat = element.getStringOrThrow("winSubtitleFormat");
             String lossTitleFormat = element.getStringOrThrow("lossTitleFormat");
@@ -320,18 +326,18 @@ public final class MapProcessors {
             String deathMessageToOthersFormat = element.getStringOrThrow("deathMessageToOthersFormat");
             String rejoinMessageFormat = element.getStringOrThrow("rejoinMessageFormat");
             String quitMessageFormat = element.getStringOrThrow("quitMessageFormat");
-            String endGameStatsFormat = element.getStringOrThrow("endGameStatsFormat");
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
-                    maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, introMessages,
-                    scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime, maxPlayers, minPlayers,
-                    startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks,
-                    corpseDeathTicks, healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks,
-                    rollsPerChest, punchDamage, punchRange, mobPlayerCollisions, milestoneRounds, defaultEquipment,
-                    equipmentGroups, countdownTickSound, countdownTimeFormat, winTitleFormat, winSubtitleFormat,
-                    lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat, reviveStatusToKnockedFormat,
-                    dyingStatusFormat, knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
+                    maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, idleRevertTicks,
+                    introMessages, countdownTicks, countdownAlertTicks, countdownTickSound, countdownTimeFormat,
+                    endTicks, endGameStatsFormat, scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime,
+                    maxPlayers, minPlayers, startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius,
+                    windowRepairTicks, corpseDeathTicks, healTicks, reviveRadius, canWallshoot, perksLostOnDeath,
+                    baseReviveTicks, rollsPerChest, punchDamage, punchRange, mobPlayerCollisions, milestoneRounds,
+                    defaultEquipment, equipmentGroups, winTitleFormat, winSubtitleFormat, lossTitleFormat,
+                    lossSubtitleFormat, reviveStatusToReviverFormat, reviveStatusToKnockedFormat, dyingStatusFormat,
+                    knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
                     knockedSubtitleFormat, deathMessageToKilledFormat, deathMessageToOthersFormat, rejoinMessageFormat,
-                    quitMessageFormat, endGameStatsFormat);
+                    quitMessageFormat);
         }
 
         @Override
@@ -349,7 +355,15 @@ public final class MapProcessors {
             node.putNumber("yaw", mapConfig.yaw());
             node.put("displayName", ConfigProcessors.component().elementFromData(mapConfig.displayName()));
             node.putString("displayItemSnbt", mapConfig.displayItemSnbt());
+            node.putNumber("idleRevertTicks", mapConfig.idleRevertTicks());
             node.put("introMessages", componentList.elementFromData(mapConfig.introMessages()));
+            node.putNumber("countdownTicks", mapConfig.countdownTicks());
+            node.put("countdownAlertTicks",
+                    ConfigProcessor.LONG.listProcessor().elementFromData(mapConfig.countdownAlertTicks()));
+            node.put("countdownTickSound", ConfigProcessors.sound().elementFromData(mapConfig.countdownTickSound()));
+            node.putString("countdownTimeFormat", mapConfig.countdownTimeFormat());
+            node.putNumber("endTicks", mapConfig.endTicks());
+            node.putString("endGameStatsFormat", mapConfig.endGameStatsFormat());
             node.put("scoreboardHeader", ConfigProcessors.component().elementFromData(mapConfig.scoreboardHeader()));
             node.put("leaderboardPosition",
                     VectorConfigProcessors.vec3I().elementFromData(mapConfig.leaderboardPosition()));
@@ -375,8 +389,6 @@ public final class MapProcessors {
             node.put("milestoneRounds", integerList.elementFromData(mapConfig.milestoneRounds()));
             node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
             node.put("equipmentGroups", keyToEquipmentGroup.elementFromData(mapConfig.equipmentGroups()));
-            node.put("countdownTickSound", ConfigProcessors.sound().elementFromData(mapConfig.countdownTickSound()));
-            node.putString("countdownTimeFormat", mapConfig.countdownTimeFormat());
             node.putString("winTitleFormat", mapConfig.winTitleFormat());
             node.putString("winSubtitleFormat", mapConfig.winSubtitleFormat());
             node.putString("lossTitleFormat", mapConfig.lossTitleFormat());
@@ -392,7 +404,6 @@ public final class MapProcessors {
             node.putString("deathMessageToOthersFormat", mapConfig.deathMessageToOthersFormat());
             node.putString("rejoinMessageFormat", mapConfig.rejoinMessageFormat());
             node.putString("quitMessageFormat", mapConfig.quitMessageFormat());
-            node.putString("endGameStatsFormat", mapConfig.endGameStatsFormat());
             return node;
         }
     };

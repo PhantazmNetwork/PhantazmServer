@@ -18,7 +18,7 @@ public class IdleStage implements Stage {
 
     private final long revertTicks;
 
-    private long ticks;
+    private long emptyTicks;
 
     public IdleStage(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Function<?
             super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator, long revertTicks) {
@@ -39,7 +39,7 @@ public class IdleStage implements Stage {
 
     @Override
     public boolean shouldAbort() {
-        return ticks >= revertTicks;
+        return emptyTicks >= revertTicks;
     }
 
     @Override
@@ -57,18 +57,23 @@ public class IdleStage implements Stage {
 
     @Override
     public void start() {
-        ticks = 0L;
+        emptyTicks = 0L;
     }
 
     @Override
     public void tick(long time) {
-        ++ticks;
-        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            if (!zombiesPlayer.hasQuit()) {
-                SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> {
-                    return sidebarUpdaterCreator.apply(zombiesPlayer);
-                });
-                sidebarUpdater.tick(time);
+        if (zombiesPlayers.isEmpty()) {
+            ++emptyTicks;
+        } else {
+            emptyTicks = 0L;
+
+            for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+                if (!zombiesPlayer.hasQuit()) {
+                    SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(), unused -> {
+                        return sidebarUpdaterCreator.apply(zombiesPlayer);
+                    });
+                    sidebarUpdater.tick(time);
+                }
             }
         }
     }

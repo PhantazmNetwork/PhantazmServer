@@ -144,8 +144,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         eventNode, random, mapObjects, zombiesPlayerWrapper, mobModelMap::get);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 
-        Sidebar sidebar = new Sidebar(
-                Component.text(StringUtils.center("ZOMBIES", 16), NamedTextColor.YELLOW, TextDecoration.BOLD));
+        Sidebar sidebar = new Sidebar(mapSettingsInfo.scoreboardHeader());
         TabList tabList = new TabList(UUID.randomUUID().toString(), ScoreboardObjectivePacket.Type.INTEGER);
 
         Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {

@@ -52,7 +52,7 @@ public class CountdownStage implements Stage {
         this.random = Objects.requireNonNull(random, "random");
         this.ticksRemaining = Objects.requireNonNull(ticksRemaining, "ticksRemaining");
         this.initialTicks = ticksRemaining.get();
-        this.alertTicks = Objects.requireNonNull(alertTicks, "alertTicks");
+        this.alertTicks = Objects.requireNonNull(alertTicks, "countdownAlertTicks");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
     }

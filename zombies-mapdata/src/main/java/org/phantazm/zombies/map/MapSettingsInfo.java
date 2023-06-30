@@ -23,7 +23,14 @@ public record MapSettingsInfo(int mapDataVersion,
                               float yaw,
                               @NotNull Component displayName,
                               @NotNull String displayItemSnbt,
+                              long idleRevertTicks,
                               @NotNull List<Component> introMessages,
+                              long countdownTicks,
+                              @NotNull List<Long> countdownAlertTicks,
+                              @NotNull Sound countdownTickSound,
+                              @NotNull String countdownTimeFormat,
+                              long endTicks,
+                              @NotNull String endGameStatsFormat,
                               @NotNull Component scoreboardHeader,
                               @NotNull Vec3I leaderboardPosition,
                               int leaderboardLength,
@@ -48,8 +55,6 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull List<Integer> milestoneRounds,
                               @NotNull Map<Key, List<Key>> defaultEquipment,
                               @NotNull Map<Key, EquipmentGroupInfo> equipmentGroups,
-                              @NotNull Sound countdownTickSound,
-                              @NotNull String countdownTimeFormat,
                               @NotNull String winTitleFormat,
                               @NotNull String winSubtitleFormat,
                               @NotNull String lossTitleFormat,
@@ -64,8 +69,7 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull String deathMessageToKilledFormat,
                               @NotNull String deathMessageToOthersFormat,
                               @NotNull String rejoinMessageFormat,
-                              @NotNull String quitMessageFormat,
-                              @NotNull String endGameStatsFormat) {
+                              @NotNull String quitMessageFormat) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -125,10 +129,10 @@ public record MapSettingsInfo(int mapDataVersion,
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
         this(MAP_DATA_VERSION, 10, id, List.of(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
-                "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0),
-                Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false, false, 30, 5,
-                0, 4.5F, false, new ArrayList<>(0), new HashMap<>(0), new HashMap<>(),
-                Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F), "", "", "", "",
-                "", "", "", "", "", "", "", "", "", "", "", "", "");
+                "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L, new ArrayList<>(0), 400L,
+                new ArrayList<>(0), Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F),
+                "", 200L, "", Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false,
+                false, 30, 5, 0, 4.5F, false, new ArrayList<>(0), new HashMap<>(0), new HashMap<>(), "", "", "", "", "",
+                "", "", "", "", "", "", "", "", "", "");
     }
 }

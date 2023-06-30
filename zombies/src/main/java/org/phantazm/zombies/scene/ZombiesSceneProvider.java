@@ -7,6 +7,7 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.proxima.solid.Solid;
 import com.github.steanky.toolkit.collection.Wrapper;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
@@ -352,14 +353,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
             @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
-        Stage idle =
-                new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")), 12000);
-
-        LongList alertTicks = LongList.of(400L, 200L, 100L, 80L, 60L, 40L, 20L);
-
         MapSettingsInfo settings = mapInfo.settings();
-        Stage countdown = new CountdownStage(instance, zombiesPlayers, settings, random, 400L, alertTicks,
-                new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(0)),
+        Stage idle = new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")),
+                settings.idleRevertTicks());
+
+        LongList countdownAlertTicks = new LongArrayList(settings.countdownAlertTicks());
+
+        Stage countdown = new CountdownStage(instance, zombiesPlayers, settings, random, settings.countdownTicks(),
+                countdownAlertTicks, new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(0)),
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
 
         Stage inGame =
@@ -368,7 +369,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler);
 
         Stage end = new EndStage(instance, settings, new AnalogTickFormatter(new AnalogTickFormatter.Data(false)),
-                zombiesPlayers, Wrapper.of(200L), ticksSinceStart,
+                zombiesPlayers, Wrapper.of(settings.endTicks()), ticksSinceStart,
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")), roundHandler);
         return new StageTransition(idle, countdown, inGame, end);
     }
