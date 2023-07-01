@@ -162,8 +162,6 @@ public class SelectBombedRoom implements Action<Round> {
                             if (roomOptional.isPresent()) {
                                 Room currentRoom = roomOptional.get();
                                 if (currentRoom == room) {
-                                    applyModifiers(zombiesPlayer);
-
                                     if (ticks % 40 == 0) {
                                         player.sendMessage(data.inAreaMessage);
                                     }
@@ -175,11 +173,14 @@ public class SelectBombedRoom implements Action<Round> {
                                     }
 
                                     long ticksSinceEnter = (time - lastEnterBombedRoom) / MinecraftServer.TICK_MS;
-                                    if (ticksSinceEnter < data.effectDelay) {
-                                        return;
+
+                                    if (ticksSinceEnter >= data.damageDelay) {
+                                        player.damage(ZombiesDamageType.BOMBING, data.damage, true);
                                     }
 
-                                    player.damage(ZombiesDamageType.BOMBING, data.damage, true);
+                                    if (ticksSinceEnter >= data.effectDelay) {
+                                        applyModifiers(zombiesPlayer);
+                                    }
                                 }
                                 else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
                                     zombiesPlayer.removeCancellable(stateId);
@@ -265,14 +266,20 @@ public class SelectBombedRoom implements Action<Round> {
                        @NotNull Component inAreaMessage,
                        float damage,
                        int gracePeriod,
+                       long damageDelay,
                        long effectDelay,
                        int duration,
                        @NotNull List<Key> exemptRooms,
                        @NotNull List<Modifier> modifiers,
                        @NotNull @ChildPath("particle") String particle) {
+        @Default("damageDelay")
+        public static @NotNull ConfigElement defaultDamageDelay() {
+            return ConfigPrimitive.of(100L);
+        }
+
         @Default("effectDelay")
         public static @NotNull ConfigElement defaultEffectDelay() {
-            return ConfigPrimitive.of(100L);
+            return ConfigPrimitive.of(150L);
         }
     }
 }
