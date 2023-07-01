@@ -19,15 +19,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ZombiesRejoinCommand extends Command {
-    public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router,
-            @NotNull PlayerViewProvider viewProvider, @NotNull ZombiesJoinHelper joinHelper) {
+    public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router, @NotNull PlayerViewProvider viewProvider,
+            @NotNull ZombiesJoinHelper joinHelper) {
         super("rejoin");
 
         Objects.requireNonNull(router, "router");
         Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(joinHelper, "joinHelper");
 
-        Argument<UUID> targetGameArgument = ArgumentType.UUID("target-game");
+        Argument<UUID> targetGameArgument = ArgumentType.UUID("target-game").setDefaultValue(() -> null);
+
         targetGameArgument.setSuggestionCallback((sender, context, suggestion) -> {
             if (!(sender instanceof Player player)) {
                 return;
@@ -65,22 +66,41 @@ public class ZombiesRejoinCommand extends Command {
             UUID targetGame = context.get(targetGameArgument);
 
             Optional<ZombiesScene> currentScene = router.getCurrentScene(sender.identity().uuid());
+            if (targetGame == null) {
+                for (ZombiesScene scene : router.getScenesContainingPlayer(sender.identity().uuid())) {
+                    if (currentScene.isPresent() && currentScene.get() == scene) {
+                        continue;
+                    }
 
-            boolean anyMatch = false;
-            for (ZombiesScene scene : router.getScenesContainingPlayer(sender.identity().uuid())) {
-                if (currentScene.isPresent() && currentScene.get() == scene) {
-                    continue;
+                    Stage stage = scene.getCurrentStage();
+
+                    if (stage != null && stage.canRejoin()) {
+                        targetGame = scene.getUUID();
+                    }
                 }
 
-                if (scene.getUUID().equals(targetGame)) {
-                    anyMatch = true;
-                    break;
+                if (targetGame == null) {
+                    sender.sendMessage(Component.text("Couldn't find a game to rejoin!", NamedTextColor.RED));
+                    return;
                 }
             }
+            else {
+                boolean anyMatch = false;
+                for (ZombiesScene scene : router.getScenesContainingPlayer(sender.identity().uuid())) {
+                    if (currentScene.isPresent() && currentScene.get() == scene) {
+                        continue;
+                    }
 
-            if (!anyMatch) {
-                sender.sendMessage(Component.text("Invalid game!", NamedTextColor.RED));
-                return;
+                    if (scene.getUUID().equals(targetGame)) {
+                        anyMatch = true;
+                        break;
+                    }
+                }
+
+                if (!anyMatch) {
+                    sender.sendMessage(Component.text("Invalid game!", NamedTextColor.RED));
+                    return;
+                }
             }
 
             joinHelper.rejoinGame(((Player)sender), targetGame);
