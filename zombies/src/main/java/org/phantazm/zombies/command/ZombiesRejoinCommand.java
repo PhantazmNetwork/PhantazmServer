@@ -76,6 +76,7 @@ public class ZombiesRejoinCommand extends Command {
 
                     if (stage != null && stage.canRejoin()) {
                         targetGame = scene.getUUID();
+                        break;
                     }
                 }
 
