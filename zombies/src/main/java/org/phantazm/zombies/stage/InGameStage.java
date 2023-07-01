@@ -5,6 +5,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.EquipmentHandler;
+import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -23,13 +24,16 @@ public class InGameStage implements Stage {
     private final Map<Key, List<Key>> defaultEquipment;
     private final Set<Key> equipmentGroups;
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
+
+    private final BestTimeLeaderboard timeLeaderboard;
+
     private final ShopHandler shopHandler;
 
     public InGameStage(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
             @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull Map<Key, List<Key>> defaultEquipment, @NotNull Set<Key> equipmentGroups,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
-            @NotNull ShopHandler shopHandler) {
+            @NotNull BestTimeLeaderboard timeLeaderboard, @NotNull ShopHandler shopHandler) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.spawnPos = Objects.requireNonNull(spawnPos, "spawnPos");
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
@@ -37,6 +41,7 @@ public class InGameStage implements Stage {
         this.defaultEquipment = Objects.requireNonNull(defaultEquipment, "defaultEquipment");
         this.equipmentGroups = Objects.requireNonNull(equipmentGroups, "equipmentGroups");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
+        this.timeLeaderboard = Objects.requireNonNull(timeLeaderboard, "timeLeaderboard");
         this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
     }
 
@@ -92,6 +97,8 @@ public class InGameStage implements Stage {
 
     @Override
     public void start() {
+        timeLeaderboard.endIfActive();
+
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             zombiesPlayer.module().getMeta().setInGame(true);
             zombiesPlayer.module().getStats().setGamesPlayed(zombiesPlayer.module().getStats().getGamesPlayed() + 1);
