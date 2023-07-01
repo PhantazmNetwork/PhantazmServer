@@ -279,7 +279,7 @@ public class SelectBombedRoom implements Action<Round> {
 
         @Default("effectDelay")
         public static @NotNull ConfigElement defaultEffectDelay() {
-            return ConfigPrimitive.of(150L);
+            return ConfigPrimitive.of(50L);
         }
     }
 }
