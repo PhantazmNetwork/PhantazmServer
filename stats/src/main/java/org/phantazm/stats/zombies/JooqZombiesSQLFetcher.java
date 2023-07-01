@@ -3,7 +3,7 @@ package org.phantazm.stats.zombies;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
-import org.jooq.Result;
+import org.jooq.Record2;
 import org.jooq.impl.SQLDataType;
 
 import java.sql.Connection;
@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.jooq.impl.DSL.*;
@@ -71,19 +72,38 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
     }
 
     @Override
-    public @NotNull List<BestTime> getBestTimes(@NotNull Connection connection, @NotNull Key mapKey)
+    public @NotNull List<BestTime> getBestTimes(@NotNull Connection connection, @NotNull Key mapKey, int maxLength)
             throws SQLException {
         List<BestTime> bestTimes = new ArrayList<>();
         try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"))
                 .from(table("zombies_player_map_stats")).where(field("map_key").eq(mapKey.asString()))
-                .and(field("best_time").isNotNull()).orderBy(field("best_time")).fetchResultSet()) {
+                .and(field("best_time").isNotNull()).orderBy(field("best_time")).limit(maxLength).fetchResultSet()) {
+            int i = 0;
             while (resultSet.next()) {
                 UUID uuid = UUID.fromString(resultSet.getString("player_uuid"));
                 long bestTime = resultSet.getLong("best_time");
-                bestTimes.add(new BestTime(uuid, bestTime));
+                bestTimes.add(new BestTime(++i, uuid, bestTime));
             }
         }
 
         return bestTimes;
     }
+
+    @Override
+    public @NotNull Optional<BestTime> getBestTime(@NotNull Connection connection, @NotNull UUID playerUUID,
+            @NotNull Key mapKey) {
+        Record2<Long, Integer> result =
+                using(connection).select(field("best_time", SQLDataType.BIGINT), field("rank", SQLDataType.INTEGER))
+                        .from(select(field("best_time"),
+                                field("player_uuid"), rowNumber().over(orderBy(field("best_time"))).as("rank")).from(
+                                        table("zombies_player_map_stats")).where(field("map_key").eq(mapKey.asString()))
+                                .and(field("best_time").isNotNull()))
+                        .where(field("player_uuid").eq(playerUUID.toString())).fetchOne();
+        if (result == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new BestTime(result.value2(), playerUUID, result.value1()));
+    }
+
 }

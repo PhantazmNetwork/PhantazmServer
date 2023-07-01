@@ -13,6 +13,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.kill.PlayerKills;
+import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.PlayerStateKey;
@@ -43,6 +44,7 @@ public class ZombiesPlayerModule implements DependencyModule {
     private final TransactionModifierSource compositeTransactionModifierSource;
     private final Flaggable flaggable;
     private final ZombiesPlayerMapStats stats;
+    private final BestTimeLeaderboard leaderboard;
 
     public ZombiesPlayerModule(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
             @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
@@ -52,7 +54,7 @@ public class ZombiesPlayerModule implements DependencyModule {
             @NotNull Sidebar sidebar, @NotNull TabList tabList,
             @NotNull TransactionModifierSource mapTransactionModifierSource,
             @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable,
-            @NotNull ZombiesPlayerMapStats stats) {
+            @NotNull ZombiesPlayerMapStats stats, @NotNull BestTimeLeaderboard leaderboard) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
@@ -71,6 +73,7 @@ public class ZombiesPlayerModule implements DependencyModule {
                 TransactionModifierSource.compositeView(mapTransactionModifierSource, playerTransactionModifierSource);
         this.flaggable = Objects.requireNonNull(flaggable, "flags");
         this.stats = Objects.requireNonNull(stats, "stats");
+        this.leaderboard = Objects.requireNonNull(leaderboard, "leaderboard");
     }
 
     public @NotNull ZombiesPlayerMeta getMeta() {
@@ -137,5 +140,9 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     public @NotNull ZombiesPlayerMapStats getStats() {
         return stats;
+    }
+
+    public @NotNull BestTimeLeaderboard getLeaderboard() {
+        return leaderboard;
     }
 }

@@ -87,6 +87,8 @@ public class CountdownStage implements Stage {
                 player.sendMessage(settings.introMessages().get(random.nextInt(settings.introMessages().size())));
             }
         });
+
+        zombiesPlayer.module().getLeaderboard().startIfNotActive();
     }
 
     @Override
@@ -95,6 +97,8 @@ public class CountdownStage implements Stage {
         if (updater != null) {
             updater.end();
         }
+
+        zombiesPlayer.module().getLeaderboard().endIfActive();
     }
 
     @Override

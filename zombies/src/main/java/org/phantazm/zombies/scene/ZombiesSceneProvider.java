@@ -33,6 +33,7 @@ import org.phantazm.core.game.scene.SceneProviderAbstract;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
+import org.phantazm.core.hologram.ViewableHologram;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
@@ -243,9 +244,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 });
 
                 return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings,
-                        mapInfo.playerCoins(), instance, playerView, mapObjects.module().modifierSource(),
-                        new BasicFlaggable(), childNode, mapObjects.module().random(), mapObjects, mobStore,
-                        mapObjects.mobSpawner(), corpseCreator);
+                        mapInfo.playerCoins(), mapInfo.leaderboard(), instance, playerView,
+                        mapObjects.module().modifierSource(), new BasicFlaggable(), childNode,
+                        mapObjects.module().random(), mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator);
             };
 
             ZombiesScene scene =
@@ -366,16 +367,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
         MapSettingsInfo settings = mapInfo.settings();
 
-        Point location =
-                VecUtils.toPoint(mapInfo.settings().origin()).add(VecUtils.toPoint(mapInfo.leaderboard().location()));
-        Hologram hologram = new InstanceHologram(location, mapInfo.leaderboard().gap());
-        hologram.setInstance(instance);
-        DependencyModule module =
-                new BestTimeLeaderboard.Module(database, hologram, settings, viewProvider, MiniMessage.miniMessage());
-        BestTimeLeaderboard timeLeaderboard = contextManager.makeContext(mapInfo.leaderboard().data())
-                .provide(new ModuleDependencyProvider(keyParser, module));
         Stage idle = new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")),
-                timeLeaderboard, settings.idleRevertTicks());
+                settings.idleRevertTicks());
 
         LongList countdownAlertTicks = new LongArrayList(settings.countdownAlertTicks());
 
@@ -386,8 +379,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Stage inGame =
                 new InGameStage(zombiesPlayers, spawnPos, roundHandler, ticksSinceStart, settings.defaultEquipment(),
                         settings.equipmentGroups().keySet(),
-                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), timeLeaderboard,
-                        shopHandler);
+                        newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler);
 
         Stage end = new EndStage(instance, settings, new AnalogTickFormatter(new AnalogTickFormatter.Data(false)),
                 zombiesPlayers, Wrapper.of(settings.endTicks()), ticksSinceStart,

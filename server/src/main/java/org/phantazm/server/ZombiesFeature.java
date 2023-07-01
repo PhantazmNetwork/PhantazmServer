@@ -167,11 +167,10 @@ public final class ZombiesFeature {
                                 return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
                                         dimensionType.getHeight());
                             }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
-                            ZombiesFeature.powerups(),
-                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator,
-                                    MobFeature.getModels()),
-                            mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                                    .provide(mapDependencyProvider), viewProvider, songLoader);
+                            ZombiesFeature.powerups(), new BasicZombiesPlayerSource(database, viewProvider,
+                            EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
+                            keyParser), mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
+                            .provide(mapDependencyProvider), viewProvider, songLoader);
             providers.put(entry.getKey(), provider);
         }
 

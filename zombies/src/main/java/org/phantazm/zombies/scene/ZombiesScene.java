@@ -203,6 +203,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     runnable.run();
                     stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
                 }
+            }).whenComplete((ignored, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.warn("Failed to finish player join", throwable);
+                }
             }).join();
         });
     }

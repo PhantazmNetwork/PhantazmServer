@@ -17,19 +17,15 @@ public class IdleStage implements Stage {
 
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
 
-    private final BestTimeLeaderboard timeLeaderboard;
-
     private final long revertTicks;
 
     private long emptyTicks;
 
     public IdleStage(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
-            @NotNull BestTimeLeaderboard timeLeaderboard,
             long revertTicks) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
-        this.timeLeaderboard = Objects.requireNonNull(timeLeaderboard, "timeLeaderboard");
         this.revertTicks = revertTicks;
     }
 
@@ -50,7 +46,7 @@ public class IdleStage implements Stage {
 
     @Override
     public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
-
+        zombiesPlayer.module().getLeaderboard().startIfNotActive();
     }
 
     @Override
@@ -59,12 +55,13 @@ public class IdleStage implements Stage {
         if (updater != null) {
             updater.end();
         }
+
+        zombiesPlayer.module().getLeaderboard().endIfActive();
     }
 
     @Override
     public void start() {
         emptyTicks = 0L;
-        timeLeaderboard.startIfNotActive();
     }
 
     @Override

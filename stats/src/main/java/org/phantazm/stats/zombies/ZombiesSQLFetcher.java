@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ZombiesSQLFetcher {
@@ -15,6 +16,8 @@ public interface ZombiesSQLFetcher {
     @NotNull ZombiesPlayerMapStats getMapStats(@NotNull Connection connection, @NotNull UUID playerUUID,
             @NotNull Key mapKey);
 
-    @NotNull List<BestTime> getBestTimes(@NotNull Connection connection, @NotNull Key mapKey) throws SQLException;
+    @NotNull List<BestTime> getBestTimes(@NotNull Connection connection, @NotNull Key mapKey, int maxLength) throws SQLException;
 
+    @NotNull Optional<BestTime> getBestTime(@NotNull Connection connection, @NotNull UUID playerUUID,
+            @NotNull Key mapKey);
 }
