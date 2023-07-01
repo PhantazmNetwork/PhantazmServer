@@ -158,16 +158,6 @@ public class SelectBombedRoom implements Action<Round> {
                         }
 
                         zombiesPlayer.getPlayer().ifPresent(player -> {
-                            long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
-                            if (lastEnterBombedRoom == -1) {
-                                player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, time);
-                            }
-
-                            long ticksSinceEnter = (time - lastEnterBombedRoom) / MinecraftServer.TICK_MS;
-                            if (ticksSinceEnter < data.effectDelay) {
-                                return;
-                            }
-
                             Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
                             if (roomOptional.isPresent()) {
                                 Room currentRoom = roomOptional.get();
@@ -176,6 +166,17 @@ public class SelectBombedRoom implements Action<Round> {
 
                                     if (ticks % 40 == 0) {
                                         player.sendMessage(data.inAreaMessage);
+                                    }
+
+                                    long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                                    if (lastEnterBombedRoom == -1) {
+                                        player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, time);
+                                        lastEnterBombedRoom = time;
+                                    }
+
+                                    long ticksSinceEnter = (time - lastEnterBombedRoom) / MinecraftServer.TICK_MS;
+                                    if (ticksSinceEnter < data.effectDelay) {
+                                        return;
                                     }
 
                                     player.damage(ZombiesDamageType.BOMBING, data.damage, true);
