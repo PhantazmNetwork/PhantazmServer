@@ -1,6 +1,9 @@
 package org.phantazm.zombies.map.action.round;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
@@ -11,7 +14,6 @@ import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
@@ -22,6 +24,7 @@ import org.phantazm.commons.TickableTask;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.damage.ZombiesDamageType;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
@@ -102,6 +105,7 @@ public class SelectBombedRoom implements Action<Round> {
             public void end() {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
                     zombiesPlayer.removeCancellable(stateId);
+                    zombiesPlayer.getPlayer().ifPresent(player -> player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM));
                 }
             }
 
@@ -121,6 +125,8 @@ public class SelectBombedRoom implements Action<Round> {
 
                     for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
                         zombiesPlayer.getPlayer().ifPresent(player -> {
+                            player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
+
                             if (!zombiesPlayer.canDoGenericActions()) {
                                 zombiesPlayer.removeCancellable(stateId);
                             }
@@ -152,6 +158,16 @@ public class SelectBombedRoom implements Action<Round> {
                         }
 
                         zombiesPlayer.getPlayer().ifPresent(player -> {
+                            long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                            if (lastEnterBombedRoom == -1) {
+                                player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, time);
+                            }
+
+                            long ticksSinceEnter = (time - lastEnterBombedRoom) / MinecraftServer.TICK_MS;
+                            if (ticksSinceEnter < data.effectDelay) {
+                                return;
+                            }
+
                             Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
                             if (roomOptional.isPresent()) {
                                 Room currentRoom = roomOptional.get();
@@ -166,10 +182,12 @@ public class SelectBombedRoom implements Action<Round> {
                                 }
                                 else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
                                     zombiesPlayer.removeCancellable(stateId);
+                                    player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
                                 }
                             }
                             else {
                                 zombiesPlayer.removeCancellable(stateId);
+                                player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
                             }
                         });
                     }
@@ -246,9 +264,14 @@ public class SelectBombedRoom implements Action<Round> {
                        @NotNull Component inAreaMessage,
                        float damage,
                        int gracePeriod,
+                       long effectDelay,
                        int duration,
                        @NotNull List<Key> exemptRooms,
                        @NotNull List<Modifier> modifiers,
                        @NotNull @ChildPath("particle") String particle) {
+        @Default("effectDelay")
+        public static @NotNull ConfigElement defaultEffectDelay() {
+            return ConfigPrimitive.of(100L);
+        }
     }
 }
