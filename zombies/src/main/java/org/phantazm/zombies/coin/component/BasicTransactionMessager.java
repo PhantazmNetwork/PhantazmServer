@@ -62,7 +62,6 @@ public class BasicTransactionMessager implements TransactionMessager {
 
         if (lastMessage != null) {
             if (ticks - lastMessageTick > coinsInfo.actionBarDuration()) {
-                actionBar.sendActionBar(Component.empty(), ZombiesPlayerActionBar.COINS_PRIORITY);
                 lastMessage = null;
             } else {
                 float progress = (float)(ticks - lastMessageTick) / coinsInfo.actionBarDuration();

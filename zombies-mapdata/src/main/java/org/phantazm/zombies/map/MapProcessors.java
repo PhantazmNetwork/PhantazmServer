@@ -82,6 +82,23 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<LeaderboardInfo> leaderboardInfo = new ConfigProcessor<>() {
+        @Override
+        public LeaderboardInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Vec3D location = VectorConfigProcessors.vec3D().dataFromElement(element.getElementOrThrow("location"));
+            double gap = element.getNumberOrThrow("gap").doubleValue();
+            ConfigNode data = element.getNodeOrThrow("data");
+
+            return new LeaderboardInfo(location, gap, data);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(LeaderboardInfo leaderboardInfo) throws ConfigProcessException {
+            return ConfigNode.of("location", VectorConfigProcessors.vec3D().elementFromData(leaderboardInfo.location()),
+                    "gap", leaderboardInfo.gap(), "data", leaderboardInfo.data());
+        }
+    };
+
     private static final ConfigProcessor<IntSet> intSetProcessor =
             ConfigProcessor.INTEGER.collectionProcessor(IntOpenHashSet::new);
     private static final ConfigProcessor<EquipmentGroupInfo> equipmentGroupInfo = new ConfigProcessor<>() {
@@ -311,9 +328,6 @@ public final class MapProcessors {
             String endGameStatsFormat = element.getStringOrThrow("endGameStatsFormat");
             Component scoreboardHeader =
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("scoreboardHeader"));
-            Vec3I leaderboardPosition =
-                    VectorConfigProcessors.vec3I().dataFromElement(element.getElementOrThrow("leaderboardPosition"));
-            int leaderboardLength = element.getNumberOrThrow("leaderboardLength").intValue();
             int worldTime = element.getNumberOrThrow("worldTime").intValue();
             int maxPlayers = element.getNumberOrThrow("maxPlayers").intValue();
             int minPlayers = element.getNumberOrThrow("minPlayers").intValue();
@@ -354,7 +368,7 @@ public final class MapProcessors {
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, idleRevertTicks,
                     introMessages, countdownTicks, countdownAlertTicks, countdownTickSound, countdownTimeFormat,
-                    endTicks, endGameStatsFormat, scoreboardHeader, leaderboardPosition, leaderboardLength, worldTime,
+                    endTicks, endGameStatsFormat, scoreboardHeader, worldTime,
                     maxPlayers, minPlayers, startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius,
                     windowRepairTicks, corpseDeathTicks, healTicks, reviveRadius, perksLostOnDeath, baseReviveTicks,
                     rollsPerChest, punchDamage, punchRange, mobPlayerCollisions, defaultEquipment, equipmentGroups,
@@ -389,9 +403,6 @@ public final class MapProcessors {
             node.putNumber("endTicks", mapConfig.endTicks());
             node.putString("endGameStatsFormat", mapConfig.endGameStatsFormat());
             node.put("scoreboardHeader", ConfigProcessors.component().elementFromData(mapConfig.scoreboardHeader()));
-            node.put("leaderboardPosition",
-                    VectorConfigProcessors.vec3I().elementFromData(mapConfig.leaderboardPosition()));
-            node.putNumber("leaderboardLength", mapConfig.leaderboardLength());
             node.putNumber("worldTime", mapConfig.worldTime());
             node.putNumber("maxPlayers", mapConfig.maxPlayers());
             node.putNumber("minPlayers", mapConfig.minPlayers());
@@ -608,6 +619,10 @@ public final class MapProcessors {
      */
     public static @NotNull ConfigProcessor<SpawnInfo> spawnInfo() {
         return spawnInfo;
+    }
+
+    public static @NotNull ConfigProcessor<LeaderboardInfo> leaderboardInfo() {
+        return leaderboardInfo;
     }
 
     public static @NotNull ConfigProcessor<HologramInfo> hologramInfo() {

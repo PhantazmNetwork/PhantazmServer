@@ -296,6 +296,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public void shutdown() {
+        stageTransition.end();
         taskScheduler.end();
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());

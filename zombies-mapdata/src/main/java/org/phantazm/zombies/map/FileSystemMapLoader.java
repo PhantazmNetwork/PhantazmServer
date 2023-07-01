@@ -118,10 +118,15 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         PlayerCoinsInfo playerCoins =
                 Configuration.read(mapDirectory.resolve(coinsPath), codec, MapProcessors.playerCoinsInfo());
 
+        String leaderboardPath =
+                "leaderboard" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+        LeaderboardInfo leaderboard =
+                Configuration.read(mapDirectory.resolve(leaderboardPath), codec, MapProcessors.leaderboardInfo());
+
         MapSettingsInfo mapSettingsInfo = Configuration.read(mapInfoFile, codec, MapProcessors.mapInfo());
 
         return new MapInfo(mapSettingsInfo, playerCoins, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints,
-                scoreboard, corpse);
+                leaderboard, scoreboard, corpse);
     }
 
     @Override

@@ -20,6 +20,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
                       @NotNull List<RoundInfo> rounds,
                       @NotNull List<SpawnruleInfo> spawnrules,
                       @NotNull List<SpawnpointInfo> spawnpoints,
+                      @NotNull LeaderboardInfo leaderboard,
                       @NotNull ConfigNode scoreboard,
                       @NotNull ConfigNode corpse) implements Keyed {
     /**
@@ -38,7 +39,8 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
     public MapInfo(@NotNull MapSettingsInfo settings, @NotNull PlayerCoinsInfo playerCoins,
             @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors, @NotNull List<ShopInfo> shops,
             @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds, @NotNull List<SpawnruleInfo> spawnrules,
-            @NotNull List<SpawnpointInfo> spawnpoints, @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse) {
+            @NotNull List<SpawnpointInfo> spawnpoints, @NotNull LeaderboardInfo leaderboard,
+            @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse) {
         this.settings = Objects.requireNonNull(settings, "settings");
         this.playerCoins = Objects.requireNonNull(playerCoins, "playerCoins");
         this.rooms = Objects.requireNonNull(rooms, "rooms");
@@ -48,6 +50,7 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
         this.rounds = Objects.requireNonNull(rounds, "rounds");
         this.spawnrules = Objects.requireNonNull(spawnrules, "spawnrules");
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
+        this.leaderboard = Objects.requireNonNull(leaderboard, "leaderboard");
         this.scoreboard = Objects.requireNonNull(scoreboard, "scoreboard");
         this.corpse = Objects.requireNonNull(corpse, "corpse");
     }

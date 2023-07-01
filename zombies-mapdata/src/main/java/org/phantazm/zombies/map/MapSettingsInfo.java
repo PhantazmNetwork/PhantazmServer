@@ -32,8 +32,6 @@ public record MapSettingsInfo(int mapDataVersion,
                               long endTicks,
                               @NotNull String endGameStatsFormat,
                               @NotNull Component scoreboardHeader,
-                              @NotNull Vec3I leaderboardPosition,
-                              int leaderboardLength,
                               int worldTime,
                               int maxPlayers,
                               int minPlayers,
@@ -86,8 +84,6 @@ public record MapSettingsInfo(int mapDataVersion,
      * @param displayItemSnbt        the SNBT for the item used to represent this map
      * @param introMessages          the messages that may be sent when the game starts
      * @param scoreboardHeader       the component displayed at the top of the scoreboard
-     * @param leaderboardPosition    the position of the leaderboard, relative to origin
-     * @param leaderboardLength      the number of entries in the leaderboard
      * @param worldTime              the time in ticks that the world should have
      * @param maxPlayers             the maximum number of players this map can fit
      * @param minPlayers             the minimum number of players this map needs to start
@@ -111,7 +107,6 @@ public record MapSettingsInfo(int mapDataVersion,
         Objects.requireNonNull(displayItemSnbt, "displayItemSnbt");
         Objects.requireNonNull(introMessages, "introMessages");
         Objects.requireNonNull(scoreboardHeader, "scoreboardHeader");
-        Objects.requireNonNull(leaderboardPosition, "leaderboardPosition");
         Objects.requireNonNull(defaultEquipment, "defaultEquipment");
     }
 
@@ -126,7 +121,7 @@ public record MapSettingsInfo(int mapDataVersion,
         this(MAP_DATA_VERSION, 10, id, List.of(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L, new ArrayList<>(0), 400L,
                 new ArrayList<>(0), Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F),
-                "", 200L, "", Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2,
+                "", 200L, "", Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2,
                 false, 30, 5, 0, 4.5F, false, new HashMap<>(0), new HashMap<>(), "", "", "", "", "",
                 "", "", "", "", "", "", "", "", "", "");
     }

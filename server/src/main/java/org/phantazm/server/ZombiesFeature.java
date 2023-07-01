@@ -49,6 +49,7 @@ import org.phantazm.stats.zombies.ZombiesSQLFetcher;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
+import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
@@ -170,7 +171,7 @@ public final class ZombiesFeature {
                             new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator,
                                     MobFeature.getModels()),
                             mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                                    .provide(mapDependencyProvider), songLoader);
+                                    .provide(mapDependencyProvider), viewProvider, songLoader);
             providers.put(entry.getKey(), provider);
         }
 
@@ -256,6 +257,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlayerConditionalDisplayCreator.class);
         contextManager.registerElementClass(InteractionPoint.class);
         contextManager.registerElementClass(CombiningArmorPlayerDisplayCreator.class);
+
+        contextManager.registerElementClass(BestTimeLeaderboard.class);
 
         //Sidebar
         contextManager.registerElementClass(SidebarUpdater.class);
