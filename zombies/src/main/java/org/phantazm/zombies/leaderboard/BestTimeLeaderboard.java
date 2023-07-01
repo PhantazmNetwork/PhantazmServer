@@ -1,108 +1,184 @@
 package org.phantazm.zombies.leaderboard;
 
-import net.kyori.adventure.key.Key;
+import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.dependency.DependencyModule;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.stats.zombies.BestTime;
 import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.zombies.map.MapSettingsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
+@Model("zombies.leaderboard.best_time")
 public class BestTimeLeaderboard {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BestTimeLeaderboard.class);
+
+    private final Data data;
 
     private final ZombiesDatabase database;
 
     private final Hologram hologram;
 
-    private final Component mapName;
-
-    private final Key mapKey;
-
-    private final TickFormatter tickFormatter;
+    private final MapSettingsInfo settings;
 
     private final PlayerViewProvider viewProvider;
 
-    private final int maxLength;
+    private final MiniMessage miniMessage;
 
-    private final Collection<Future<?>> nameFutures = new ArrayList<>();
+    private final TickFormatter tickFormatter;
 
-    private Future<?> bestTimesFuture = null;
+    private final Object sync = new Object();
 
-    public BestTimeLeaderboard(@NotNull ZombiesDatabase database, @NotNull Hologram hologram,
-            @NotNull Component mapName, @NotNull Key mapKey, @NotNull TickFormatter tickFormatter,
-            @NotNull PlayerViewProvider viewProvider, int maxLength) {
+    private volatile boolean active = false;
+
+    @FactoryMethod
+    public BestTimeLeaderboard(@NotNull Data data, @NotNull ZombiesDatabase database, @NotNull Hologram hologram,
+            @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
+            @NotNull MiniMessage miniMessage, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+        this.data = Objects.requireNonNull(data, "data");
         this.database = Objects.requireNonNull(database, "database");
         this.hologram = Objects.requireNonNull(hologram, "hologram");
-        this.mapName = Objects.requireNonNull(mapName, "mapName");
-        this.mapKey = Objects.requireNonNull(mapKey, "mapKey");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
+        this.settings = Objects.requireNonNull(settings, "settings");
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
-        this.maxLength = maxLength;
+        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
     }
 
-    public void start() {
-        hologram.add(Component.textOfChildren(Component.text("Zombies - "), mapName));
-        for (int i = 0; i < maxLength; ++i) {
-            hologram.add(Component.text((i + 1) + ". - Loading..."));
-        }
 
-        bestTimesFuture = database.getBestTimes(mapKey).whenComplete(((bestTimes, throwable) -> {
-            if (throwable != null) {
-                LOGGER.warn("Failed to fetch best times", throwable);
+    public void startIfNotActive() {
+        synchronized (sync) {
+            if (active) {
                 return;
             }
 
-            updateBestTimes(bestTimes);
-        }));
+            TagResolver mapNamePlaceholder = Placeholder.component("map_name", settings.displayName());
+            hologram.add(miniMessage.deserialize(data.titleFormat(), mapNamePlaceholder));
+            for (int i = 0; i < data.length(); ++i) {
+                TagResolver placePlaceholder = Placeholder.component("place", Component.text(i + 1));
+                hologram.add(miniMessage.deserialize(data.initialFormat(), placePlaceholder));
+            }
+
+            database.getBestTimes(settings.id()).whenComplete(((bestTimes, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.warn("Failed to fetch best times", throwable);
+                    return;
+                }
+
+                updateBestTimes(bestTimes);
+            }));
+            active = true;
+        }
     }
 
-    public void updateBestTimes(@NotNull List<BestTime> bestTimes) {
-        while (hologram.size() != bestTimes.size() + 1) {
-            hologram.remove(hologram.size() - 1);
-        }
+    private void updateBestTimes(@NotNull List<BestTime> bestTimes) {
+        synchronized (sync) {
+            if (!active) {
+                return;
+            }
 
-        for (int i = 0; i < bestTimes.size(); ++i) {
-            BestTime time = bestTimes.get(i);
-            Component timeComponent = Component.text(tickFormatter.format(time.time()));
-            hologram.set(i, Component.textOfChildren(Component.text((i + 1) + ". - Loading... - "), timeComponent));
+            while (hologram.size() > bestTimes.size() + 1) {
+                hologram.remove(hologram.size() - 1);
+            }
 
-            int finalI = i;
-            CompletableFuture<?> future =
-                    viewProvider.fromUUID(time.uuid()).getDisplayName().whenComplete((displayName, throwable) -> {
-                        if (throwable != null) {
-                            LOGGER.warn("Failed to fetch display name for {}", time.uuid());
+            for (int i = 1; i < hologram.size(); ++i) {
+                BestTime time = bestTimes.get(i - 1);
+                TagResolver placePlaceholder = Placeholder.component("place", Component.text(i));
+                TagResolver timePlaceholder = Placeholder.unparsed("time", tickFormatter.format(time.time()));
+                hologram.set(i, miniMessage.deserialize(data.timeFormat(), placePlaceholder, timePlaceholder));
+
+                int finalI = i;
+                viewProvider.fromUUID(time.uuid()).getDisplayName().whenComplete((displayName, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Failed to fetch display name for {}", time.uuid());
+                        return;
+                    }
+
+                    synchronized (sync) {
+                        if (!active) {
                             return;
                         }
 
+                        TagResolver playerNamePlaceholder = Placeholder.component("player_name", displayName);
                         hologram.set(finalI,
-                                Component.textOfChildren(Component.text((finalI + 1) + ". - "), displayName,
-                                        Component.text(" - "), timeComponent));
-                    });
-            nameFutures.add(future);
+                                miniMessage.deserialize(data.nameTimeFormat(), placePlaceholder, playerNamePlaceholder,
+                                        timePlaceholder));
+                    }
+                });
+            }
         }
     }
 
-    public void end() {
-        if (bestTimesFuture != null) {
-            bestTimesFuture.cancel(true);
+    public void endIfActive() {
+        synchronized (sync) {
+            if (active) {
+                hologram.clear();
+                active = false;
+            }
+        }
+    }
+
+    @Depend
+    public static class Module implements DependencyModule {
+
+        private final ZombiesDatabase database;
+
+        private final Hologram hologram;
+
+        private final MapSettingsInfo settings;
+
+        private final PlayerViewProvider viewProvider;
+
+        private final MiniMessage miniMessage;
+
+        public Module(@NotNull ZombiesDatabase database, @NotNull Hologram hologram, @NotNull MapSettingsInfo settings,
+                @NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage) {
+            this.database = Objects.requireNonNull(database, "database");
+            this.hologram = Objects.requireNonNull(hologram, "hologram");
+            this.settings = Objects.requireNonNull(settings, "settings");
+            this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
+            this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
         }
 
-        for (Future<?> future : nameFutures) {
-            future.cancel(true);
+        public @NotNull ZombiesDatabase getDatabase() {
+            return database;
         }
-        nameFutures.clear();
+
+        public @NotNull Hologram getHologram() {
+            return hologram;
+        }
+
+        public @NotNull MapSettingsInfo getSettings() {
+            return settings;
+        }
+
+        public @NotNull PlayerViewProvider getViewProvider() {
+            return viewProvider;
+        }
+
+        public @NotNull MiniMessage getMiniMessage() {
+            return miniMessage;
+        }
+    }
+
+    @DataObject
+    public record Data(@NotNull @ChildPath("tick_formatter") String tickFormatter,
+                       @NotNull String titleFormat,
+                       @NotNull String initialFormat,
+                       @NotNull String timeFormat,
+                       @NotNull String nameTimeFormat,
+                       int length) {
+
     }
 
 }

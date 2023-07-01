@@ -2,6 +2,7 @@ package org.phantazm.zombies.stage;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 
@@ -16,14 +17,19 @@ public class IdleStage implements Stage {
 
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
 
+    private final BestTimeLeaderboard timeLeaderboard;
+
     private final long revertTicks;
 
     private long emptyTicks;
 
-    public IdleStage(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Function<?
-            super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator, long revertTicks) {
+    public IdleStage(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
+            @NotNull BestTimeLeaderboard timeLeaderboard,
+            long revertTicks) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
+        this.timeLeaderboard = Objects.requireNonNull(timeLeaderboard, "timeLeaderboard");
         this.revertTicks = revertTicks;
     }
 
@@ -58,13 +64,15 @@ public class IdleStage implements Stage {
     @Override
     public void start() {
         emptyTicks = 0L;
+        timeLeaderboard.startIfNotActive();
     }
 
     @Override
     public void tick(long time) {
         if (zombiesPlayers.isEmpty()) {
             ++emptyTicks;
-        } else {
+        }
+        else {
             emptyTicks = 0L;
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {

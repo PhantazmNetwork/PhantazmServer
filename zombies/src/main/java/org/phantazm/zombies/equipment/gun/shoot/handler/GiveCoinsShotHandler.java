@@ -68,7 +68,7 @@ public class GiveCoinsShotHandler implements ShotHandler {
         if (!shot.headshotTargets().isEmpty()) {
             displays.add(Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + shot.headshotTargets().size() + "x"));
             for (GunHit ignored : shot.headshotTargets()) {
-                change += isInstaKill ? data.instaKillCoins : data.normalCoins;
+                change += isInstaKill ? data.instaKillCoins : data.headshotCoins;
             }
         }
 

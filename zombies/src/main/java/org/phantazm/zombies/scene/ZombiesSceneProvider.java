@@ -2,7 +2,9 @@ package org.phantazm.zombies.scene;
 
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
+import com.github.steanky.element.core.dependency.DependencyModule;
 import com.github.steanky.element.core.dependency.DependencyProvider;
+import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.proxima.solid.Solid;
@@ -10,6 +12,8 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -27,8 +31,11 @@ import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.SceneProviderAbstract;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.hologram.Hologram;
+import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.sound.BasicSongPlayer;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.core.sound.SongPlayer;
@@ -40,9 +47,11 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.trigger.EventTrigger;
 import org.phantazm.mob.trigger.EventTriggers;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
+import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
+import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.listener.*;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.*;
@@ -58,7 +67,6 @@ import org.phantazm.zombies.sidebar.ElementSidebarUpdaterCreator;
 import org.phantazm.zombies.sidebar.SidebarModule;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.phantazm.zombies.stage.*;
-import org.phantazm.stats.zombies.ZombiesDatabase;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -85,9 +93,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final ShopHandler.Source shopHandlerSource;
     private final WindowHandler.Source windowHandlerSource;
     private final DoorHandler.Source doorHandlerSource;
-
     private final CorpseCreator.Source corpseCreatorSource;
-
+    private final PlayerViewProvider viewProvider;
     private final SongLoader songLoader;
 
     public ZombiesSceneProvider(@NotNull Executor executor, int maximumScenes,
@@ -98,7 +105,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull Team mobNoPushTeam,
             @NotNull Team corpseTeam, @NotNull ZombiesDatabase database, @NotNull Map<Key, PowerupInfo> powerups,
             @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
-            @NotNull SongLoader songLoader) {
+            @NotNull PlayerViewProvider viewProvider, @NotNull SongLoader songLoader) {
         super(executor, maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
@@ -126,6 +133,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.doorHandlerSource = new BasicDoorHandlerSource();
 
         this.corpseCreatorSource = Objects.requireNonNull(corpseCreatorSource, "corpseCreatorSource");
+        this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
         this.songLoader = Objects.requireNonNull(songLoader, "songLoader");
     }
 
@@ -214,6 +222,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             StageTransition stageTransition =
                     createStageTransition(instance, mapObjects.module().random(), zombiesPlayers.values(), spawnPos,
                             roundHandler, ticksSinceStart, sidebarModule, shopHandler);
+            stageTransition.start();
 
             LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
 
@@ -356,8 +365,17 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
         MapSettingsInfo settings = mapInfo.settings();
+
+        Point location =
+                VecUtils.toPoint(mapInfo.settings().origin()).add(VecUtils.toPoint(mapInfo.leaderboard().location()));
+        Hologram hologram = new InstanceHologram(location, mapInfo.leaderboard().gap());
+        hologram.setInstance(instance);
+        DependencyModule module =
+                new BestTimeLeaderboard.Module(database, hologram, settings, viewProvider, MiniMessage.miniMessage());
+        BestTimeLeaderboard timeLeaderboard = contextManager.makeContext(mapInfo.leaderboard().data())
+                .provide(new ModuleDependencyProvider(keyParser, module));
         Stage idle = new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")),
-                settings.idleRevertTicks());
+                timeLeaderboard, settings.idleRevertTicks());
 
         LongList countdownAlertTicks = new LongArrayList(settings.countdownAlertTicks());
 
