@@ -7,6 +7,8 @@ import org.phantazm.core.npc.EntityNPC;
 import org.phantazm.core.npc.NoTicker;
 import org.phantazm.core.npc.interactor.MessageInteractor;
 import org.phantazm.core.npc.interactor.NoInteractor;
+import org.phantazm.core.npc.interactor.ShowGuiInteractor;
+import org.phantazm.core.npc.interactor.item.InteractorDelegatingItem;
 import org.phantazm.core.npc.settings.BasicEntitySettings;
 import org.phantazm.core.npc.supplier.MobEntitySupplier;
 import org.phantazm.core.npc.interactor.CommandInteractor;
@@ -28,5 +30,7 @@ public class NPCFeature {
         contextManager.registerElementClass(AnimationTicker.class);
         contextManager.registerElementClass(AnimationTicker.Frame.class);
         contextManager.registerElementClass(NoTicker.class);
+        contextManager.registerElementClass(InteractorDelegatingItem.class);
+        contextManager.registerElementClass(ShowGuiInteractor.class);
     }
 }
