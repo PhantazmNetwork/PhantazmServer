@@ -61,12 +61,12 @@ public class BasicTransactionMessager implements TransactionMessager {
         ++ticks;
 
         if (lastMessage != null) {
-            float progress = (float)(ticks - lastMessageTick) / coinsInfo.actionBarDuration();
-            actionBar.sendActionBar(lerpColorRecursive(lastMessage, progress).asComponent(), ZombiesPlayerActionBar.COINS_PRIORITY);
-
-            if (ticks - lastMessageTick == coinsInfo.actionBarDuration()) {
+            if (ticks - lastMessageTick > coinsInfo.actionBarDuration()) {
                 actionBar.sendActionBar(Component.empty(), ZombiesPlayerActionBar.COINS_PRIORITY);
                 lastMessage = null;
+            } else {
+                float progress = (float)(ticks - lastMessageTick) / coinsInfo.actionBarDuration();
+                actionBar.sendActionBar(lerpColorRecursive(lastMessage, progress).asComponent(), ZombiesPlayerActionBar.COINS_PRIORITY);
             }
         }
     }
