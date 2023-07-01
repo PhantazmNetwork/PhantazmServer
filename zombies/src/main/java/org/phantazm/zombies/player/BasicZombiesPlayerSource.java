@@ -4,7 +4,7 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
@@ -12,7 +12,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
@@ -34,7 +33,7 @@ import org.phantazm.zombies.coin.BasicPlayerCoins;
 import org.phantazm.zombies.coin.BasicTransactionModifierSource;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
-import org.phantazm.zombies.coin.component.BasicTransactionComponentCreator;
+import org.phantazm.zombies.coin.component.BasicTransactionMessager;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.equipment.gun.ZombiesEquipmentModule;
 import org.phantazm.zombies.kill.BasicPlayerKills;
@@ -42,6 +41,7 @@ import org.phantazm.zombies.kill.PlayerKills;
 import org.phantazm.zombies.map.EquipmentGroupInfo;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
+import org.phantazm.zombies.map.PlayerCoinsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.*;
@@ -83,7 +83,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     @Override
     public @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+            @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
+            @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
             @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator) {
@@ -93,7 +94,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         ZombiesPlayerMapStats stats =
                 BasicZombiesPlayerMapStats.createBasicStats(playerView.getUUID(), mapSettingsInfo.id());
 
-        PlayerCoins coins = new BasicPlayerCoins(playerView, stats, new BasicTransactionComponentCreator(), 0);
+        ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
+
+        PlayerCoins coins = new BasicPlayerCoins(stats,
+                new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(), playerCoinsInfo), 0);
         PlayerKills kills = new BasicPlayerKills(stats);
 
         InventoryProfile livingProfile = new BasicInventoryProfile(45);
@@ -138,7 +142,6 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
 
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
-        ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
         ZombiesEquipmentModule equipmentModule =
                 new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, actionBar, mobSpawner, mobStore,
                         eventNode, random, mapObjects, zombiesPlayerWrapper, mobModelMap::get);

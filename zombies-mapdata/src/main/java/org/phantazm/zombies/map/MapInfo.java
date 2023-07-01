@@ -12,6 +12,7 @@ import java.util.Objects;
  * Represents a Zombies map.
  */
 public record MapInfo(@NotNull MapSettingsInfo settings,
+                      @NotNull PlayerCoinsInfo playerCoins,
                       @NotNull List<RoomInfo> rooms,
                       @NotNull List<DoorInfo> doors,
                       @NotNull List<ShopInfo> shops,
@@ -34,11 +35,12 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
      * @param spawnpoints this map's spawnpoints
      * @param scoreboard  this map's scoreboard info
      */
-    public MapInfo(@NotNull MapSettingsInfo settings, @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors,
-            @NotNull List<ShopInfo> shops, @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds,
-            @NotNull List<SpawnruleInfo> spawnrules, @NotNull List<SpawnpointInfo> spawnpoints,
-            @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse) {
+    public MapInfo(@NotNull MapSettingsInfo settings, @NotNull PlayerCoinsInfo playerCoins,
+            @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors, @NotNull List<ShopInfo> shops,
+            @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds, @NotNull List<SpawnruleInfo> spawnrules,
+            @NotNull List<SpawnpointInfo> spawnpoints, @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse) {
         this.settings = Objects.requireNonNull(settings, "settings");
+        this.playerCoins = Objects.requireNonNull(playerCoins, "playerCoins");
         this.rooms = Objects.requireNonNull(rooms, "rooms");
         this.doors = Objects.requireNonNull(doors, "doors");
         this.shops = Objects.requireNonNull(shops, "shops");

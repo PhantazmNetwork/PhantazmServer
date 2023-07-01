@@ -9,6 +9,15 @@ import java.util.Objects;
 
 public class ZombiesPlayerActionBar implements Tickable {
 
+    // TODO: configure
+    public static int GUN_RELOAD_PRIORITY = 1;
+
+    public static int COINS_PRIORITY = 2;
+
+    public static int REVIVE_MESSAGE_PRIORITY = 3;
+
+    public static int REVIVE_MESSAGE_CLEAR_PRIORITY = 4;
+
     private final PlayerView playerView;
 
     private Component message = null;

@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
@@ -181,7 +180,7 @@ public class BasicWindowHandler implements WindowHandler {
                         continue;
                     }
 
-                    coins.applyTransaction(new TransactionResult(result.modifierNames(), event.goldGain()));
+                    coins.applyTransaction(new TransactionResult(result.displays(), event.goldGain()));
                 }
             }
         }

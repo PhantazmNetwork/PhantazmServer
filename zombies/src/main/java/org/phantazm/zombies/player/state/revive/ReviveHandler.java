@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Activable;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 
 import java.util.Objects;
@@ -125,7 +126,7 @@ public class ReviveHandler implements Activable {
     private void clearReviverState() {
         if (reviver != null) {
             reviver.module().getMeta().setReviving(false);
-            reviver.module().getActionBar().sendActionBar(Component.empty(), 3);
+            reviver.module().getActionBar().sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
         }
     }
 

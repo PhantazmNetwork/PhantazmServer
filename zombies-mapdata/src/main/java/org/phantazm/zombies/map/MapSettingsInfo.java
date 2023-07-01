@@ -97,7 +97,6 @@ public record MapSettingsInfo(int mapDataVersion,
      * @param windowRepairTicks      the number of ticks between each consecutive "repair tick"
      * @param corpseDeathTicks       the number of ticks it takes for a downed player to fully die if they are not revived
      * @param reviveRadius           the maximum distance away players can be from a corpse and still revive it
-     * @param canWallshoot           true if wallshooting is enabled, false otherwise
      * @param perksLostOnDeath       true if perks are lost on death, false otherwise
      * @param baseReviveTicks        the base number of ticks it takes to revive a player
      * @param rollsPerChest          the number of rolls a lucky chest can have before it moves to another location

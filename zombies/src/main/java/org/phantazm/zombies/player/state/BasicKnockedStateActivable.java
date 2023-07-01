@@ -138,7 +138,7 @@ public class BasicKnockedStateActivable implements Activable {
             context.getVehicle().remove();
             player.teleport(Pos.fromPoint(context.getKnockLocation()));
         });
-        actionBar.sendActionBar(Component.empty(), 2);
+        actionBar.sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
     }
 
     private void sendReviveStatus(@NotNull ZombiesPlayer reviver, @NotNull Component knockedDisplayName,
@@ -149,7 +149,7 @@ public class BasicKnockedStateActivable implements Activable {
                     Placeholder.unparsed("time", tickFormatter.format(reviveHandler.getTicksUntilRevive()));
             Component message = miniMessage.deserialize(settings.reviveStatusToReviverFormat(), knockedNamePlaceholder,
                     timePlaceholder);
-            reviver.module().getActionBar().sendActionBar(message, 2);
+            reviver.module().getActionBar().sendActionBar(message, ZombiesPlayerActionBar.REVIVE_MESSAGE_PRIORITY);
         });
         playerView.getPlayer().ifPresent(player -> {
             TagResolver reviverNamePlaceholder = Placeholder.component("reviver", reviverDisplayName);
@@ -157,7 +157,7 @@ public class BasicKnockedStateActivable implements Activable {
                     Placeholder.unparsed("time", tickFormatter.format(reviveHandler.getTicksUntilRevive()));
             Component message = miniMessage.deserialize(settings.reviveStatusToKnockedFormat(), reviverNamePlaceholder,
                     timePlaceholder);
-            actionBar.sendActionBar(message, 2);
+            actionBar.sendActionBar(message, ZombiesPlayerActionBar.REVIVE_MESSAGE_PRIORITY);
         });
     }
 
@@ -165,7 +165,7 @@ public class BasicKnockedStateActivable implements Activable {
         playerView.getPlayer().ifPresent(player -> {
             TagResolver timePlaceholder = Placeholder.component("time",
                     Component.text(tickFormatter.format(Math.max(reviveHandler.getTicksUntilDeath(), 0))));
-            actionBar.sendActionBar(miniMessage.deserialize(settings.dyingStatusFormat(), timePlaceholder), 2);
+            actionBar.sendActionBar(miniMessage.deserialize(settings.dyingStatusFormat(), timePlaceholder), ZombiesPlayerActionBar.REVIVE_MESSAGE_PRIORITY);
         });
     }
 

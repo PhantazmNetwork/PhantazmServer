@@ -233,9 +233,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     player.getAttribute(Attributes.REVIVE_TICKS).setBaseValue(settings.baseReviveTicks());
                 });
 
-                return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings, instance,
-                        playerView, mapObjects.module().modifierSource(), new BasicFlaggable(), childNode,
-                        mapObjects.module().random(), mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator);
+                return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings,
+                        mapInfo.playerCoins(), instance, playerView, mapObjects.module().modifierSource(),
+                        new BasicFlaggable(), childNode, mapObjects.module().random(), mapObjects, mobStore,
+                        mapObjects.mobSpawner(), corpseCreator);
             };
 
             ZombiesScene scene =
@@ -272,7 +273,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             Wrapper<EventNode<Event>> eventNode, SongPlayer songPlayer, SongLoader songLoader,
             TickTaskScheduler tickTaskScheduler, Wrapper<Long> ticksSinceStart) {
         return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, mobNoPushTeam,
-                powerupHandler, windowHandler, eventNode, songPlayer, songLoader, tickTaskScheduler, corpseTeam, ticksSinceStart);
+                powerupHandler, windowHandler, eventNode, songPlayer, songLoader, tickTaskScheduler, corpseTeam,
+                ticksSinceStart);
     }
 
     private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,

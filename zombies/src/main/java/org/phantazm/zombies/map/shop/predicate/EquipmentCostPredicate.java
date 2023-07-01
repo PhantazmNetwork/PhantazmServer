@@ -13,6 +13,7 @@ import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,7 +40,8 @@ public class EquipmentCostPredicate implements EquipmentPredicate {
         }
 
         TransactionResult result =
-                coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifier), -cost));
+                coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifier),
+                        Collections.emptyList(), -cost));
         return result.isAffordable(coins);
     }
 

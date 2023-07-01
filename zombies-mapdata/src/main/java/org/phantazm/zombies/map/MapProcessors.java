@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ConfigProcessors;
 import org.phantazm.commons.vector.VectorConfigProcessors;
@@ -250,6 +251,32 @@ public final class MapProcessors {
         }
     };
     private static final ConfigProcessor<List<Integer>> integerList = ConfigProcessor.INTEGER.listProcessor();
+
+    private static final ConfigProcessor<PlayerCoinsInfo> playerCoinsInfo = new ConfigProcessor<>() {
+        @Override
+        public PlayerCoinsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String transactionMessageFormat = element.getStringOrThrow("transactionMessageFormat");
+            String transactionDisplayFormat = element.getStringOrThrow("transactionDisplayFormat");
+            TextColor gradientFrom = TextColor.color(
+                    ConfigProcessors.rgbLike().dataFromElement(element.getElementOrThrow("gradientFrom")));
+            TextColor gradientTo = TextColor.color(
+                    ConfigProcessors.rgbLike().dataFromElement(element.getElementOrThrow("gradientTo")));
+            long actionBarDuration = element.getNumberOrThrow("actionBarDuration").longValue();
+
+            return new PlayerCoinsInfo(transactionMessageFormat, transactionDisplayFormat, gradientFrom, gradientTo,
+                    actionBarDuration);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(PlayerCoinsInfo playerCoinsInfo) throws ConfigProcessException {
+            return ConfigNode.of("transactionMessageFormat", playerCoinsInfo.transactionMessageFormat(),
+                    "transactionDisplayFormat", playerCoinsInfo.transactionDisplayFormat(), "gradientFrom",
+                    ConfigProcessors.rgbLike().elementFromData(playerCoinsInfo.gradientFrom()), "gradientTo",
+                    ConfigProcessors.rgbLike().elementFromData(playerCoinsInfo.gradientTo()), "actionBarDuration",
+                    playerCoinsInfo.actionBarDuration());
+        }
+    };
+
     private static final ConfigProcessor<MapSettingsInfo> mapInfo = new ConfigProcessor<>() {
         @Override
         public MapSettingsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -496,6 +523,10 @@ public final class MapProcessors {
      */
     public static @NotNull ConfigProcessor<MapSettingsInfo> mapInfo() {
         return mapInfo;
+    }
+
+    public static @NotNull ConfigProcessor<PlayerCoinsInfo> playerCoinsInfo() {
+        return playerCoinsInfo;
     }
 
     /**

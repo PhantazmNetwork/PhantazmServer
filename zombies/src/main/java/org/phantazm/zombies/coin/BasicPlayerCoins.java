@@ -2,59 +2,53 @@ package org.phantazm.zombies.coin;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.player.PlayerView;
+import org.phantazm.commons.Tickable;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
-import org.phantazm.zombies.coin.component.TransactionComponentCreator;
+import org.phantazm.zombies.coin.component.TransactionMessager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public class BasicPlayerCoins implements PlayerCoins {
-    private final PlayerView playerView;
+public class BasicPlayerCoins implements PlayerCoins, Tickable {
     private final ZombiesPlayerMapStats stats;
-    private final TransactionComponentCreator componentCreator;
-    private volatile int coins;
-    private final Object sync;
+    private final TransactionMessager transactionMessager;
+    private int coins;
 
-    public BasicPlayerCoins(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats stats,
-            @NotNull TransactionComponentCreator componentCreator, int initialCoins) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+    public BasicPlayerCoins(@NotNull ZombiesPlayerMapStats stats, @NotNull TransactionMessager transactionMessager,
+            int initialCoins) {
         this.stats = Objects.requireNonNull(stats, "stats");
-        this.componentCreator = Objects.requireNonNull(componentCreator, "componentCreator");
+        this.transactionMessager = Objects.requireNonNull(transactionMessager, "componentCreator");
         this.coins = initialCoins;
-
-        this.sync = new Object();
     }
 
     @Override
     public @NotNull TransactionResult runTransaction(@NotNull Transaction transaction) {
-        synchronized (sync) {
-            List<Transaction.Modifier> modifiers = new ArrayList<>(transaction.modifiers());
-            modifiers.sort(Comparator.comparingInt(Transaction.Modifier::getPriority).reversed());
+        List<Transaction.Modifier> modifiers = new ArrayList<>(transaction.modifiers());
+        modifiers.sort(Comparator.comparingInt(Transaction.Modifier::getPriority).reversed());
 
-            List<Component> modifierNames = new ArrayList<>(modifiers.size());
-            int change = transaction.initialChange();
-            for (Transaction.Modifier modifier : modifiers) {
-                int newChange = modifier.modify(change);
-                if (change != newChange) {
-                    modifierNames.add(modifier.getDisplayName());
-                }
-
-                change = newChange;
+        List<Component> displays = new ArrayList<>(modifiers.size() + transaction.extraDisplays().size());
+        int change = transaction.initialChange();
+        for (Transaction.Modifier modifier : modifiers) {
+            int newChange = modifier.modify(change);
+            if (change != newChange) {
+                displays.add(modifier.getDisplayName());
             }
 
-            int newCoins = coins + change;
-            if (change < 0 && newCoins > coins) {
-                change = -(coins - Integer.MIN_VALUE);
-            }
-            else if (change > 0 && newCoins < coins) {
-                change = Integer.MAX_VALUE - coins;
-            }
-
-            return new TransactionResult(modifierNames, change);
+            change = newChange;
         }
+        displays.addAll(transaction.extraDisplays());
+
+        int newCoins = coins + change;
+        if (change < 0 && newCoins > coins) {
+            change = -(coins - Integer.MIN_VALUE);
+        }
+        else if (change > 0 && newCoins < coins) {
+            change = Integer.MAX_VALUE - coins;
+        }
+
+        return new TransactionResult(displays, change);
     }
 
     @Override
@@ -64,30 +58,28 @@ public class BasicPlayerCoins implements PlayerCoins {
 
     @Override
     public void applyTransaction(@NotNull TransactionResult result) {
-        synchronized (sync) {
-            if (!result.hasChange()) {
-                return;
-            }
-
-            if (result.change() > 0) {
-                stats.setCoinsGained(stats.getCoinsGained() + result.change());
-            } else {
-                stats.setCoinsSpent(stats.getCoinsSpent() - result.change());
-            }
-
-            coins += result.change();
-            playerView.getPlayer().ifPresent(player -> {
-                Component message =
-                        componentCreator.createTransactionComponent(result.modifierNames(), result.change());
-                player.sendMessage(message);
-            });
+        if (!result.hasChange()) {
+            return;
         }
+
+        if (result.change() > 0) {
+            stats.setCoinsGained(stats.getCoinsGained() + result.change());
+        }
+        else {
+            stats.setCoinsSpent(stats.getCoinsSpent() - result.change());
+        }
+
+        coins += result.change();
+        transactionMessager.sendMessage(result.displays(), result.change());
     }
 
     @Override
     public void set(int newValue) {
-        synchronized (sync) {
-            coins = newValue;
-        }
+        coins = newValue;
+    }
+
+    @Override
+    public void tick(long time) {
+        transactionMessager.tick(time);
     }
 }

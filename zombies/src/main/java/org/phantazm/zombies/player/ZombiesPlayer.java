@@ -22,6 +22,7 @@ import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.MapSettingsInfo;
+import org.phantazm.zombies.map.PlayerCoinsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
@@ -176,7 +177,8 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
         @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-                @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+                @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
+                @NotNull Instance instance, @NotNull PlayerView playerView,
                 @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
                 @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
                 @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator);
