@@ -99,6 +99,25 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<WebhookInfo> webhookInfo = new ConfigProcessor<WebhookInfo>() {
+        @Override
+        public WebhookInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            String webhookURL = element.getStringOrThrow("webhookURL");
+            String webhookFormat = element.getStringOrThrow("webhookFormat");
+            String playerFormat = element.getStringOrThrow("playerFormat");
+            boolean enabled = element.getBooleanOrDefault(false, "enabled");
+
+            return new WebhookInfo(webhookURL, webhookFormat, playerFormat, enabled);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(WebhookInfo webhookInfo) {
+            return ConfigNode.of("webhookURL", webhookInfo.webhookURL(), "webhookFormat", webhookInfo.webhookFormat(),
+                    "playerFormat",
+                    webhookInfo.playerFormat(), "enabled", webhookInfo.enabled());
+        }
+    };
+
     private static final ConfigProcessor<IntSet> intSetProcessor =
             ConfigProcessor.INTEGER.collectionProcessor(IntOpenHashSet::new);
     private static final ConfigProcessor<EquipmentGroupInfo> equipmentGroupInfo = new ConfigProcessor<>() {
@@ -368,14 +387,14 @@ public final class MapProcessors {
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, idleRevertTicks,
                     introMessages, countdownTicks, countdownAlertTicks, countdownTickSound, countdownTimeFormat,
-                    endTicks, endGameStatsFormat, scoreboardHeader, worldTime,
-                    maxPlayers, minPlayers, startingCoins, repairCoins, windowRepairRadius, powerupPickupRadius,
-                    windowRepairTicks, corpseDeathTicks, healTicks, reviveRadius, perksLostOnDeath, baseReviveTicks,
-                    rollsPerChest, punchDamage, punchRange, mobPlayerCollisions, defaultEquipment, equipmentGroups,
-                    winTitleFormat, winSubtitleFormat, lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat,
-                    reviveStatusToKnockedFormat, dyingStatusFormat, knockedMessageToKnockedFormat,
-                    knockedMessageToOthersFormat, knockedTitleFormat, knockedSubtitleFormat, deathMessageToKilledFormat,
-                    deathMessageToOthersFormat, rejoinMessageFormat, quitMessageFormat);
+                    endTicks, endGameStatsFormat, scoreboardHeader, worldTime, maxPlayers, minPlayers, startingCoins,
+                    repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks, corpseDeathTicks,
+                    healTicks, reviveRadius, perksLostOnDeath, baseReviveTicks, rollsPerChest, punchDamage, punchRange,
+                    mobPlayerCollisions, defaultEquipment, equipmentGroups, winTitleFormat, winSubtitleFormat,
+                    lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat, reviveStatusToKnockedFormat,
+                    dyingStatusFormat, knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
+                    knockedSubtitleFormat, deathMessageToKilledFormat, deathMessageToOthersFormat, rejoinMessageFormat,
+                    quitMessageFormat);
         }
 
         @Override
@@ -623,6 +642,10 @@ public final class MapProcessors {
 
     public static @NotNull ConfigProcessor<LeaderboardInfo> leaderboardInfo() {
         return leaderboardInfo;
+    }
+
+    public static @NotNull ConfigProcessor<WebhookInfo> webhookInfo() {
+        return webhookInfo;
     }
 
     public static @NotNull ConfigProcessor<HologramInfo> hologramInfo() {

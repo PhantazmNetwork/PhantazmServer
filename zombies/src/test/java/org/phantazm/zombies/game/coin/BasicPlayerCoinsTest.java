@@ -2,6 +2,7 @@ package org.phantazm.zombies.game.coin;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,8 @@ public class BasicPlayerCoinsTest {
         when(playerView.getPlayer()).thenReturn(Optional.of(player));
         ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
         TransactionMessager componentCreator =
-                new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(), new PlayerCoinsInfo("", ""));
+                new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(), new PlayerCoinsInfo("", "",
+                        NamedTextColor.WHITE, NamedTextColor.WHITE, 20L));
 
         coins = new BasicPlayerCoins(
                 BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(), Key.key("phantazm:test")),

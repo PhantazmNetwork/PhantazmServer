@@ -381,8 +381,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         settings.equipmentGroups().keySet(),
                         newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler);
 
-        Stage end = new EndStage(instance, settings, new AnalogTickFormatter(new AnalogTickFormatter.Data(false)),
-                zombiesPlayers, Wrapper.of(settings.endTicks()), ticksSinceStart,
+        Stage end = new EndStage(instance, settings, mapInfo.webhook(),
+                new AnalogTickFormatter(new AnalogTickFormatter.Data(false)), zombiesPlayers,
+                Wrapper.of(settings.endTicks()), ticksSinceStart,
                 newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")), roundHandler);
         return new StageTransition(idle, countdown, inGame, end);
     }

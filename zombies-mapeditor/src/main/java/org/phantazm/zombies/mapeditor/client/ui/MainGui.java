@@ -9,10 +9,7 @@ import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Namespaces;
-import org.phantazm.zombies.map.LeaderboardInfo;
-import org.phantazm.zombies.map.MapInfo;
-import org.phantazm.zombies.map.MapSettingsInfo;
-import org.phantazm.zombies.map.PlayerCoinsInfo;
+import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.mapeditor.client.EditorSession;
 import org.phantazm.zombies.mapeditor.client.Identifiers;
 import org.phantazm.zombies.mapeditor.client.TextPredicates;
@@ -110,7 +107,7 @@ public class MainGui extends SimplePanelGui {
                     new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), PlayerCoinsInfo.DEFAULT,
                             new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
                             new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), LeaderboardInfo.DEFAULT,
-                            new LinkedConfigNode(0), new LinkedConfigNode()));
+                            new LinkedConfigNode(0), new LinkedConfigNode(), WebhookInfo.DEFAULT));
             session.setCurrent(mapKey);
 
             refreshMainGui(session);

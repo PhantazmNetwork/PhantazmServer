@@ -1,6 +1,8 @@
 package org.phantazm.zombies.stage;
 
 import com.github.steanky.toolkit.collection.Wrapper;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -14,20 +16,37 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
+import org.phantazm.zombies.map.WebhookInfo;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.net.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class EndStage implements Stage {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EndStage.class);
+    private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     private final Instance instance;
     private final MapSettingsInfo settings;
+    private final WebhookInfo webhook;
     private final TickFormatter tickFormatter;
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
 
@@ -38,16 +57,18 @@ public class EndStage implements Stage {
     private final RoundHandler roundHandler;
 
     private final Map<UUID, SidebarUpdater> sidebarUpdaters;
+    private final HttpClient client = HttpClient.newHttpClient();
 
     private boolean hasWon;
 
-    public EndStage(@NotNull Instance instance, @NotNull MapSettingsInfo settings, @NotNull TickFormatter tickFormatter,
-            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Wrapper<Long> remainingTicks,
-            @NotNull Wrapper<Long> ticksSinceStart,
+    public EndStage(@NotNull Instance instance, @NotNull MapSettingsInfo settings, @NotNull WebhookInfo webhook,
+            @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
             @NotNull RoundHandler roundHandler) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.settings = Objects.requireNonNull(settings, "settings");
+        this.webhook = Objects.requireNonNull(webhook, "webhook");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.remainingTicks = Objects.requireNonNull(remainingTicks, "remainingTicks");
@@ -109,7 +130,8 @@ public class EndStage implements Stage {
             }
         }
 
-        Component finalTime = Component.text(tickFormatter.format(ticksSinceStart.get()));
+        String timeString = tickFormatter.format(ticksSinceStart.get());
+        Component finalTime = Component.text(timeString);
         int bestRound = roundHandler.currentRoundIndex();
 
         TagResolver roundPlaceholder = Placeholder.component("round", Component.text(bestRound + 1));
@@ -130,6 +152,7 @@ public class EndStage implements Stage {
             }
 
             this.hasWon = true;
+            runWebhook(timeString);
         }
         else {
             instance.sendTitlePart(TitlePart.TITLE,
@@ -177,6 +200,42 @@ public class EndStage implements Stage {
             if (zombiesPlayer.isState(ZombiesPlayerStateKeys.KNOCKED)) {
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.killed(null, null));
             }
+        }
+    }
+
+    private void runWebhook(String time) {
+        if (!webhook.enabled()) {
+            return;
+        }
+
+        try {
+            List<CompletableFuture<String>> futures = new ArrayList<>(zombiesPlayers.size());
+            IntList kills = new IntArrayList();
+            for (ZombiesPlayer player : zombiesPlayers) {
+                futures.add(player.module().getPlayerView().getUsername());
+                kills.add(player.module().getKills().getKills());
+            }
+
+            String date = "<t:" + Instant.now().getEpochSecond() + ":f>";
+
+            CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenCompose(ignored -> {
+                List<String> formattedUsernames = new ArrayList<>(futures.size());
+                for (int i = 0; i < futures.size(); i++) {
+                    formattedUsernames.add(MessageFormat.format(webhook.playerFormat(), futures.get(i).join(), kills.getInt(i)));
+                }
+
+                String playerList = String.join(", ", formattedUsernames);
+                String output = MessageFormat.format(webhook.webhookFormat(), date, time, playerList);
+                HttpRequest request = HttpRequest.newBuilder(URI.create(webhook.webhookURL())).header("Content-Type",
+                        "application/json").POST(HttpRequest.BodyPublishers.ofString(output)).build();
+                return client.sendAsync(request, HttpResponse.BodyHandlers.discarding());
+            }).whenComplete((ignored, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.warn("Failed to send webhook", throwable);
+                }
+            });
+        } catch (Exception e) {
+            LOGGER.warn("Failed to send webhook", e);
         }
     }
 

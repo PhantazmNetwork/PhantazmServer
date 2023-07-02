@@ -123,10 +123,16 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         LeaderboardInfo leaderboard =
                 Configuration.read(mapDirectory.resolve(leaderboardPath), codec, MapProcessors.leaderboardInfo());
 
+        String webhookPath =
+                "webhook" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+        WebhookInfo webhook =
+                Configuration.read(mapDirectory.resolve(webhookPath), codec, MapProcessors.webhookInfo());
+
+
         MapSettingsInfo mapSettingsInfo = Configuration.read(mapInfoFile, codec, MapProcessors.mapInfo());
 
         return new MapInfo(mapSettingsInfo, playerCoins, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints,
-                leaderboard, scoreboard, corpse);
+                leaderboard, scoreboard, corpse, webhook);
     }
 
     @Override
