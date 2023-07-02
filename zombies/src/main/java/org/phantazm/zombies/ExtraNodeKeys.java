@@ -10,6 +10,8 @@ public final class ExtraNodeKeys {
 
     public static final String RESIST_SLOW_DOWN = "resistSlowDown";
 
+    public static final String HEADSHOT_MULTIPLIER = "headshotMultiplier";
+
     public static final String TICKS_UNTIL_DEATH = "ticksUntilDeath";
 
     public static final String SPEEDUP_INCREMENTS = "speedupIncrements";
