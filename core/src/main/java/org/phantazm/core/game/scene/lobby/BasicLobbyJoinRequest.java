@@ -2,7 +2,6 @@ package org.phantazm.core.game.scene.lobby;
 
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
@@ -22,8 +21,6 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
     private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
 
-    private final ConnectionManager connectionManager;
-
     private final Collection<PlayerView> players;
 
     /**
@@ -31,9 +28,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
      *
      * @param players The players in the request
      */
-    public BasicLobbyJoinRequest(@NotNull ConnectionManager connectionManager,
-            @NotNull Collection<PlayerView> players) {
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
+    public BasicLobbyJoinRequest(@NotNull Collection<PlayerView> players) {
         this.players = Objects.requireNonNull(players, "players");
     }
 

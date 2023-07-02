@@ -1,11 +1,8 @@
 package org.phantazm.core.game.scene.lobby;
 
-import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.EnvTest;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.TransferResult;
@@ -15,7 +12,6 @@ import org.phantazm.core.player.PlayerView;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -40,8 +36,7 @@ public class LobbyIntegrationTest {
         lobby.shutdown();
         assertTrue(lobby.isShutdown());
 
-        TransferResult result =
-                lobby.join(new BasicLobbyJoinRequest(env.process().connection(), Collections.singleton(playerView)));
+        TransferResult result = lobby.join(new BasicLobbyJoinRequest(Collections.singleton(playerView)));
         assertFalse(result.executor().isPresent());
     }
 

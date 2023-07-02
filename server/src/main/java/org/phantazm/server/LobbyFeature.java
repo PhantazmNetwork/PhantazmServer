@@ -84,8 +84,7 @@ public final class LobbyFeature {
                         mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(), false);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
-        fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), LobbyFeature.getLobbyRouter(),
-                lobbiesConfig.mainLobbyName());
+        fallback = new LobbyRouterFallback(LobbyFeature.getLobbyRouter(), lobbiesConfig.mainLobbyName());
         SceneFallback regularFallback = new CompositeFallback(List.of(fallback, finalFallback));
 
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
