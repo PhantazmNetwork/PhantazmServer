@@ -140,6 +140,9 @@ public class CountdownStage implements Stage {
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {
             sidebarUpdater.end();
         }
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            zombiesPlayer.module().getLeaderboard().endIfActive();
+        }
     }
 
     @Override
