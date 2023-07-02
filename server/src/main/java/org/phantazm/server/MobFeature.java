@@ -130,6 +130,8 @@ public final class MobFeature {
         contextManager.registerElementClass(BreakNearbyWindowGoal.class);
 
         //mob skills
+        contextManager.registerElementClass(AddVelocitySkill.class);
+        contextManager.registerElementClass(ApplyPotionSkill.class);
         contextManager.registerElementClass(BleedEntitiesSkill.class);
         contextManager.registerElementClass(DamageEntitySkill.class);
         contextManager.registerElementClass(KnockbackEntitySkill.class);

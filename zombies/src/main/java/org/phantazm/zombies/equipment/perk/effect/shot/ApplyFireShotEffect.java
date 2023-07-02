@@ -12,6 +12,9 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
+import org.phantazm.mob.MobStore;
+import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -29,24 +32,31 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     private final Data data;
     private final Tag<Long> lastDamageTime;
     private final Deque<DamageTarget> activeEntities;
+    private final MobStore mobStore;
 
     private record DamageTarget(UUID damager, LivingEntity target) {
     }
 
     @FactoryMethod
-    public ApplyFireShotEffect(@NotNull Data data) {
+    public ApplyFireShotEffect(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
 
         UUID uuid = UUID.randomUUID();
         this.lastDamageTime = Tag.Long("last_fire_damage_time_" + uuid).defaultValue(-1L);
 
         this.activeEntities = new ConcurrentLinkedDeque<>();
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
     public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
         if (!(entity instanceof LivingEntity livingEntity)) {
             //can't set non-LivingEntity on fire as they have no health
+            return;
+        }
+
+        PhantazmMob mob = mobStore.getMob(entity.getUuid());
+        if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
             return;
         }
 
