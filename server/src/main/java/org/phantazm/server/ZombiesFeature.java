@@ -324,6 +324,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(SendMessageAction.class);
         contextManager.registerElementClass(AttributeModifierAction.class);
         contextManager.registerElementClass(PreventAmmoDrainAction.class);
+        contextManager.registerElementClass(RefillAmmoAction.class);
 
         //Player conditions
         contextManager.registerElementClass(EquipmentCondition.class);
