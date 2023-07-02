@@ -3,7 +3,6 @@ rootProject.name = "phantazm"
 val localSettings = file("local.settings.gradle.kts")
 if (localSettings.exists()) {
     //apply from local settings too, if it exists
-    //can be used to sideload Minestom for faster testing
     apply(localSettings)
 }
 
@@ -37,7 +36,8 @@ sequenceOf(
     "velocity",
     "zombies",
     "zombies-mapdata",
-    "zombies-mapeditor"
+    "zombies-mapeditor",
+    "snbt-builder"
 ).forEach {
     if (!toSkip.contains(it)) {
         include(":phantazm-$it")
