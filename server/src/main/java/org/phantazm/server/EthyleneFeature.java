@@ -63,7 +63,7 @@ public final class EthyleneFeature {
                         .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
                         .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
                         .withScalarSignature(particle()).withScalarSignature(block()).withScalarSignature(permission())
-                        .withScalarSignature(entityType())
+                        .withScalarSignature(entityType()).withScalarSignature(material())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
                         .withStandardTypeImplementations().ignoringLengths().build();
@@ -186,6 +186,12 @@ public final class EthyleneFeature {
                 permission -> permission == null
                               ? ConfigPrimitive.NULL
                               : ConfigPrimitive.of(permission.getPermissionName()));
+    }
+
+    private static ScalarSignature<Material> material() {
+        return ScalarSignature.of(Token.ofClass(Material.class),
+                element -> Material.fromNamespaceId(element.asString()),
+                material -> material == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(material.key().toString()));
     }
 
     private static ScalarSignature<Particle> particle() {
