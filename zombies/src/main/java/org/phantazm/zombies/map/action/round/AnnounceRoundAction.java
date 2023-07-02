@@ -10,6 +10,7 @@ import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.zombies.chat.ChatDestination;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 
@@ -52,20 +53,15 @@ public class AnnounceRoundAction implements Action<Round> {
             case TITLE -> instance.sendTitlePart(TitlePart.TITLE, message);
             case SUBTITLE -> instance.sendTitlePart(TitlePart.SUBTITLE, message);
             case CHAT -> instance.sendMessage(message);
+            case ACTION_BAR -> instance.sendActionBar(message);
         }
     }
 
     @DataObject
     public record Data(@NotNull String format,
-                       @NotNull AnnounceDestination destination,
+                       @NotNull ChatDestination destination,
                        @NotNull @ChildPath("tick_formatter") String tickFormatter) {
 
-    }
-
-    public enum AnnounceDestination {
-        TITLE,
-        SUBTITLE,
-        CHAT
     }
 
 }

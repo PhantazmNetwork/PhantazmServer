@@ -3,12 +3,15 @@ package org.phantazm.zombies.equipment.gun.effect;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.TitlePart;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.chat.ChatDestination;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.audience.AudienceProvider;
 
 import java.util.Objects;
 
+// TODO: priority support, also do priorities for titles
 /**
  * A {@link GunEffect} that sends a message to an {@link Audience}.
  */
@@ -34,7 +37,14 @@ public class SendMessageEffect implements GunEffect {
 
     @Override
     public void apply(@NotNull GunState state) {
-        audienceProvider.provideAudience().ifPresent(audience -> audience.sendMessage(data.message()));
+        audienceProvider.provideAudience().ifPresent(audience -> {
+            switch (data.destination()) {
+                case TITLE -> audience.sendTitlePart(TitlePart.TITLE, data.message());
+                case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, data.message());
+                case CHAT -> audience.sendMessage(data.message());
+                case ACTION_BAR -> audience.sendActionBar(data.message());
+            }
+        });
     }
 
     @Override
@@ -49,6 +59,8 @@ public class SendMessageEffect implements GunEffect {
      * @param message          The {@link Component} to send to the {@link Audience}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider, @NotNull Component message) {
+    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
+                       @NotNull Component message,
+                       @NotNull ChatDestination destination) {
     }
 }
