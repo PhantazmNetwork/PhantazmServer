@@ -73,7 +73,7 @@ public class SummonMobSkill implements Skill {
         }
 
         int spawned = self.entity().getTag(mobCountTag);
-        for (int i = spawned; i < data.maxSpawn && i < data.spawnAmount; i++) {
+        for (int i = spawned, j = 0; i < data.maxSpawn && j < data.spawnAmount; i++, j++) {
             spawn(self, model);
         }
     }
