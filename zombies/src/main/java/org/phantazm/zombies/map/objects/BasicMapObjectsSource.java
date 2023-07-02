@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicMapObjectsSource implements MapObjects.Source {
@@ -111,7 +112,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
                         slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
                         eventNode, mobStore, songPlayer, songLoader, corpseTeam, new BasicInteractorGroupHandler(),
-                        ticksSinceStart);
+                        ticksSinceStart, mobModels::get);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -291,6 +292,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Team corpseTeam;
         private final InteractorGroupHandler interactorGroupHandler;
         private final Wrapper<Long> ticksSinceStart;
+        private final Function<? super Key, ? extends MobModel> mobModelFunction;
 
         private Module(KeyParser keyParser, Instance instance, Random random,
                 Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
@@ -299,7 +301,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
                 Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode, MobStore mobStore,
                 SongPlayer songPlayer, SongLoader songLoader, Team corpseTeam,
-                InteractorGroupHandler interactorGroupHandler, Wrapper<Long> ticksSinceStart) {
+                InteractorGroupHandler interactorGroupHandler, Wrapper<Long> ticksSinceStart,
+                Function<? super Key, ? extends MobModel> mobModelFunction) {
             this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
             this.instance = Objects.requireNonNull(instance, "instance");
             this.random = Objects.requireNonNull(random, "random");
@@ -319,6 +322,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
             this.interactorGroupHandler = Objects.requireNonNull(interactorGroupHandler, "interactorGroupHandler");
             this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
+            this.mobModelFunction = Objects.requireNonNull(mobModelFunction, "mobModelFunction");
         }
 
         @Override
@@ -419,6 +423,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull Wrapper<Long> ticksSinceStart() {
             return ticksSinceStart;
+        }
+
+        @Override
+        public @NotNull Function<? super Key, ? extends MobModel> mobModelFunction() {
+            return mobModelFunction;
         }
     }
 }

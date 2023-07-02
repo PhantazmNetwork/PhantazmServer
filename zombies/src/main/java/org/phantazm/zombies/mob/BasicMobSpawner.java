@@ -292,8 +292,12 @@ public class BasicMobSpawner implements MobSpawner {
             return random;
         }
 
-        public @NotNull Supplier<? extends MapObjects> mapObjects() {
+        public @NotNull Supplier<? extends MapObjects> mapObjectsSupplier() {
             return mapObjects;
+        }
+
+        public @NotNull MapObjects mapObjects() {
+            return mapObjects.get();
         }
     }
 }

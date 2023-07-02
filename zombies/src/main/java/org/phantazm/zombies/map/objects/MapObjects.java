@@ -18,6 +18,7 @@ import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.tracker.BoundedTracker;
+import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
@@ -30,6 +31,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface MapObjects {
@@ -108,5 +110,7 @@ public interface MapObjects {
         @NotNull InteractorGroupHandler interactorGroupHandler();
 
         @NotNull Wrapper<Long> ticksSinceStart();
+
+        @NotNull Function<? super Key, ? extends MobModel> mobModelFunction();
     }
 }

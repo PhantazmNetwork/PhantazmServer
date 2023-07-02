@@ -33,6 +33,7 @@ import org.phantazm.mob.validator.AndValidator;
 import org.phantazm.mob.validator.NotSelfValidator;
 import org.phantazm.mob.validator.OrValidator;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
+import org.phantazm.zombies.mob.skill.SummonMobSkill;
 import org.phantazm.zombies.mob.validator.MobValidator;
 import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
 import org.slf4j.Logger;
@@ -141,6 +142,8 @@ public final class MobFeature {
         contextManager.registerElementClass(JumpTowardsTargetSkill.class);
         contextManager.registerElementClass(SpawnParticleSkill.class);
         contextManager.registerElementClass(RadialDamageEntitySkill.class);
+
+        contextManager.registerElementClass(SummonMobSkill.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);

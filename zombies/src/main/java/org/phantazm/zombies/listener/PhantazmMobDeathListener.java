@@ -11,6 +11,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -20,6 +21,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.Tags;
+import org.phantazm.zombies.event.PhantazmMobDeathEvent;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.Window;
@@ -65,6 +67,8 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
     @Override
     public void accept(@NotNull PhantazmMob mob, @NotNull EntityDeathEvent event) {
+        EventDispatcher.call(new PhantazmMobDeathEvent(mob));
+
         roundSupplier.get().ifPresent(round -> {
             round.removeMob(mob);
         });
