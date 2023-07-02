@@ -2,6 +2,7 @@ package org.phantazm.server;
 
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
 import com.github.steanky.ethylene.mapper.signature.Signature;
@@ -29,6 +30,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
@@ -55,18 +57,37 @@ public final class EthyleneFeature {
 
         mappingProcessorSource =
                 MappingProcessorSource.builder().withCustomSignature(vec3I()).withCustomSignature(sound())
-                        .withCustomSignature(style()).withCustomSignature(textColor()).withCustomSignature(vec3D())
-                        .withCustomSignature(pos()).withCustomSignature(bounds3D()).withCustomSignature(rgbLike())
-                        .withScalarSignature(key()).withScalarSignature(uuid()).withScalarSignature(component())
-                        .withScalarSignature(itemStack()).withScalarSignature(titlePartComponent())
-                        .withScalarSignature(namedTextColor()).withScalarSignature(particle())
-                        .withScalarSignature(block()).withScalarSignature(permission())
+                        .withCustomSignature(basicItemStack()).withCustomSignature(style())
+                        .withCustomSignature(textColor()).withCustomSignature(vec3D()).withCustomSignature(pos())
+                        .withCustomSignature(bounds3D()).withCustomSignature(rgbLike()).withScalarSignature(key())
+                        .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
+                        .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
+                        .withScalarSignature(particle()).withScalarSignature(block()).withScalarSignature(permission())
                         .withScalarSignature(entityType())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
                         .withStandardTypeImplementations().ignoringLengths().build();
 
         LOGGER.info("Ethylene initialized.");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Signature<ItemStack> basicItemStack() {
+        return Signature.builder(Token.ofClass(ItemStack.class),
+                (ignored, args) -> ItemStack.builder(args.get(0)).displayName(args.get(1))
+                        .lore((List<? extends Component>)args.get(2)).build(), itemStack -> {
+
+                    List<Object> list = new ArrayList<>(3);
+                    list.add(itemStack.material());
+                    list.add(itemStack.getDisplayName());
+                    list.add(itemStack.getLore());
+
+                    return list;
+                }, Map.entry("material", SignatureParameter.parameter(Token.ofClass(Material.class))),
+                Map.entry("displayName",
+                        SignatureParameter.parameter(Token.ofClass(Component.class), ConfigPrimitive.NULL)),
+                Map.entry("lore", SignatureParameter.parameter(new Token<List<Component>>() {
+                }, ConfigList.of()))).matchingNames().matchingTypeHints().build();
     }
 
     private static Signature<Pos> pos() {
