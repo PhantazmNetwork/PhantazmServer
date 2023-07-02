@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.chat.ChatChannel;
 import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.chat.InstanceChatChannel;
+import org.phantazm.core.chat.command.ChatChannelSendCommand;
 import org.phantazm.core.chat.command.ChatCommand;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
@@ -46,7 +47,7 @@ public final class ChatFeature {
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
             @NotNull ChatConfig chatConfig, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull PartyConfig partyConfig, @NotNull CommandManager commandManager) {
+            @NotNull CommandManager commandManager) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -58,11 +59,14 @@ public final class ChatFeature {
             }
         };
 
-        channels.put(DEFAULT_CHAT_CHANNEL_NAME, new InstanceChatChannel(viewProvider, MiniMessage.miniMessage(),
-                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME)));
-        channels.put(PartyChatChannel.CHANNEL_NAME,
-                new PartyChatChannel(parties, viewProvider, MiniMessage.miniMessage(),
-                        chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME)));
+        ChatChannel defaultChannel = new InstanceChatChannel(viewProvider, MiniMessage.miniMessage(),
+                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME));
+        channels.put(DEFAULT_CHAT_CHANNEL_NAME, defaultChannel);
+        commandManager.register(ChatChannelSendCommand.chatChannelSend("ac", defaultChannel));
+        ChatChannel partyChannel = new PartyChatChannel(parties, viewProvider, MiniMessage.miniMessage(),
+                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME));
+        channels.put(PartyChatChannel.CHANNEL_NAME, partyChannel);
+        commandManager.register(ChatChannelSendCommand.chatChannelSend("pc", partyChannel));
 
         Map<UUID, String> playerChannels = new HashMap<>();
         commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));
@@ -82,7 +86,7 @@ public final class ChatFeature {
             }
 
             channel.findAudience(uuid, audience -> {
-                Component message = channel.formatMessage(event);
+                Component message = channel.formatMessage(event.getPlayer(), event.getMessage());
                 audience.sendMessage(message);
             }, failure -> {
                 player.sendMessage(failure.left());

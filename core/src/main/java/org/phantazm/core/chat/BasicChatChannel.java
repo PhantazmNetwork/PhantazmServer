@@ -65,17 +65,17 @@ public abstract class BasicChatChannel implements ChatChannel {
 
 
     @Override
-    public @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent) {
+    public @NotNull Component formatMessage(@NotNull Player player, @NotNull String message) {
         Optional<? extends Component> displayNameOptional =
-                getViewProvider().fromPlayer(chatEvent.getPlayer()).getDisplayNameIfCached();
+                getViewProvider().fromPlayer(player).getDisplayNameIfCached();
         Component displayName = displayNameOptional.isPresent()
                                 ? displayNameOptional.get()
-                                : Component.text(chatEvent.getPlayer().getUsername());
+                                : Component.text(player.getUsername());
 
         TagResolver senderPlaceholder = Placeholder.component("sender", displayName);
-        TagResolver message = Placeholder.unparsed("message", chatEvent.getMessage());
+        TagResolver messagePlaceholder = Placeholder.unparsed("message", message);
 
-        return miniMessage.deserialize(chatFormat, senderPlaceholder, message);
+        return miniMessage.deserialize(chatFormat, senderPlaceholder, messagePlaceholder);
     }
 
     /**
