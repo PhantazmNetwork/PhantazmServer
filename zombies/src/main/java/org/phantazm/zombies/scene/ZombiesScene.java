@@ -171,6 +171,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         futures.add(player.teleport(pos));
                     }
                     else {
+                        Utils.handleInstanceTransfer(player.getInstance(), instance, player);
                         futures.add(player.setInstance(instance, pos));
                     }
                     runnables.add(() -> {
@@ -186,7 +187,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 for (int i = 0; i < futures.size(); i++) {
                     Pair<Player, Instance> pair = teleportedPlayers.get(i);
                     Player teleportedPlayer = pair.first();
-                    Instance oldInstance = pair.second();
 
                     CompletableFuture<?> future = futures.get(i);
                     Runnable runnable = runnables.get(i);
@@ -197,8 +197,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         });
                         continue;
                     }
-
-                    Utils.handleInstanceTransfer(oldInstance, teleportedPlayer);
 
                     runnable.run();
                     stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));

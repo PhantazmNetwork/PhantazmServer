@@ -1,8 +1,6 @@
 package org.phantazm.core.game.scene.lobby;
 
-import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
@@ -46,32 +44,22 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
     @Override
     public void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
-        List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(players.size());
         List<CompletableFuture<?>> futures = new ArrayList<>(players.size());
         for (PlayerView view : players) {
             view.getPlayer().ifPresent(player -> {
                 player.setGameMode(GameMode.ADVENTURE);
 
-                teleportedPlayers.add(Pair.of(player, player.getInstance()));
                 if (player.getInstance() == instance) {
                     futures.add(player.teleport(instanceConfig.spawnPoint()));
                 }
                 else {
+                    Utils.handleInstanceTransfer(player.getInstance(), instance, player);
                     futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
                 }
             });
         }
 
-        CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenRun(() -> {
-            for (int i = 0; i < futures.size(); ++i) {
-                Pair<Player, Instance> pair = teleportedPlayers.get(i);
-
-                Player teleportedPlayer = pair.first();
-                Instance oldInstance = pair.second();
-
-                Utils.handleInstanceTransfer(oldInstance, teleportedPlayer);
-            }
-        }).join();
+        CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).join();
     }
 
 }
