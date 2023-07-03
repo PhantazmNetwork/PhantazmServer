@@ -27,6 +27,11 @@ public final class Attributes {
     public static final Attribute HEAL_TICKS = new Attribute("phantazm.heal_rate", 20F, 2048F);
 
     /**
+     * Damage multiplier for the player.
+     */
+    public static final Attribute DAMAGE_MULTIPLIER = new Attribute("phantazm.damage_multiplier", 1F, 2048F);
+
+    /**
      * The "nil" attribute. Used as a fallback when the desired attribute cannot be found.
      */
     public static final Attribute NIL = new Attribute("phantazm.nil", 0F, 0F);
@@ -36,6 +41,7 @@ public final class Attributes {
         FIRE_RATE_MULTIPLIER.register();
         REVIVE_TICKS.register();
         HEAL_TICKS.register();
+        DAMAGE_MULTIPLIER.register();
         NIL.register();
     }
 }

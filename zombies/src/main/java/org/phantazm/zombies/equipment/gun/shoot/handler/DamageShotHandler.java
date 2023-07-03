@@ -9,10 +9,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
-import org.phantazm.zombies.ExtraNodeKeys;
-import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -24,15 +21,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * A {@link ShotHandler} that deals damage to targets. Respects the instakill flag {@link Flags#INSTA_KILL}. Raises
- * {@link EntityDamageByGunEvent}s on a successful hit.
+ * A {@link ShotHandler} that deals damage to targets. Raises {@link EntityDamageByGunEvent}s on a successful hit.
  */
 @Model("zombies.gun.shot_handler.damage")
 @Cache(false)
 public class DamageShotHandler implements ShotHandler {
     private final Data data;
-
-    private final MobStore mobStore;
 
     /**
      * Creates a new {@link DamageShotHandler} with the given {@link Data}.
@@ -40,9 +34,8 @@ public class DamageShotHandler implements ShotHandler {
      * @param data The {@link Data} to use
      */
     @FactoryMethod
-    public DamageShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
+    public DamageShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data, "data");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
@@ -70,19 +63,16 @@ public class DamageShotHandler implements ShotHandler {
                 continue;
             }
 
-            float realDamage = damage;
-            PhantazmMob mob = mobStore.getMob(target.entity().getUuid());
-            if (mob != null) {
-                realDamage *= mob.model().getExtraNode().getNumberOrDefault(1.0, ExtraNodeKeys.HEADSHOT_MULTIPLIER).floatValue();
+            if (attacker instanceof LivingEntity livingEntity) {
+                damage *= livingEntity.getAttributeValue(Attributes.DAMAGE_MULTIPLIER);
             }
 
             DamageType damageType = DamageType.fromEntity(attacker);
-
             switch (data.armorBehavior) {
-                case ALWAYS_BYPASS -> targetEntity.damage(damageType, realDamage);
-                case NEVER_BYPASS -> targetEntity.damage(damageType, realDamage, false);
-                case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, realDamage, headshot);
-                case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, realDamage, !headshot);
+                case ALWAYS_BYPASS -> targetEntity.damage(damageType, damage);
+                case NEVER_BYPASS -> targetEntity.damage(damageType, damage, false);
+                case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, damage, headshot);
+                case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, damage, !headshot);
             }
         }
     }
