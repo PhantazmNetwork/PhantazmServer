@@ -1,6 +1,9 @@
 package org.phantazm.mob.goal;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
@@ -127,5 +130,14 @@ public class MeleeAttackGoal implements GoalCreator {
             Objects.requireNonNull(lastHitSelectorPath, "lastHitSelectorPath");
         }
 
+        @Default("swingHand")
+        public static @NotNull ConfigElement defaultSwingHand() {
+            return ConfigPrimitive.of(true);
+        }
+
+        @Default("bypassArmor")
+        public static @NotNull ConfigElement defaultBypassArmor() {
+            return ConfigPrimitive.of(false);
+        }
     }
 }
