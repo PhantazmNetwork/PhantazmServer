@@ -20,7 +20,6 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
-import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
@@ -36,7 +35,10 @@ import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.lobby.LobbiesConfig;
-import org.phantazm.server.config.server.*;
+import org.phantazm.server.config.server.PathfinderConfig;
+import org.phantazm.server.config.server.ServerConfig;
+import org.phantazm.server.config.server.ServerInfoConfig;
+import org.phantazm.server.config.server.ShutdownConfig;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.player.BasicLoginValidator;
 import org.phantazm.server.player.LoginValidator;
@@ -85,7 +87,6 @@ public final class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         PathfinderConfig pathfinderConfig;
         ShutdownConfig shutdownConfig;
-        ZombiesGamereportConfig zombiesGamereportConfig;
         PartyConfig partyConfig;
         WhisperConfig whisperConfig;
         ChatConfig chatConfig;
@@ -211,6 +212,8 @@ public final class PhantazmServer {
             ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
             PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig,
             LoginValidator loginValidator) throws Exception {
+        DatapackFeature.initialize(MinecraftServer.getBiomeManager());
+
         RouterStore routerStore = new BasicRouterStore();
         ExecutorFeature.initialize();
         BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
@@ -272,10 +275,6 @@ public final class PhantazmServer {
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
-
-        if (infoConfig.optifineEnabled()) {
-            OptifineSupport.enable();
-        }
 
         switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
