@@ -1,6 +1,5 @@
 package org.phantazm.zombies.map.handler;
 
-import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Player;
@@ -128,9 +127,6 @@ public class BasicWindowHandler implements WindowHandler {
                             if (!windowOptional.get().isFullyRepaired()) {
                                 player.sendActionBar(windowMessages.nearWindow());
                             }
-                        }
-                        else {
-                            player.sendActionBar(Component.empty());
                         }
                     }
                 }
