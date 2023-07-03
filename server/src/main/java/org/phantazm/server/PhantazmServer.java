@@ -20,16 +20,10 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
-import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.world.biomes.Biome;
-import net.minestom.server.world.biomes.BiomeManager;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.chat.ChatConfig;
-import org.phantazm.core.datapack.Datapack;
-import org.phantazm.core.datapack.DatapackLoader;
 import org.phantazm.core.game.scene.BasicRouterStore;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneTransferHelper;
@@ -41,7 +35,10 @@ import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.lobby.LobbiesConfig;
-import org.phantazm.server.config.server.*;
+import org.phantazm.server.config.server.PathfinderConfig;
+import org.phantazm.server.config.server.ServerConfig;
+import org.phantazm.server.config.server.ServerInfoConfig;
+import org.phantazm.server.config.server.ShutdownConfig;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.player.BasicLoginValidator;
 import org.phantazm.server.player.LoginValidator;
@@ -54,7 +51,6 @@ import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -279,10 +275,6 @@ public final class PhantazmServer {
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
-
-        if (infoConfig.optifineEnabled()) {
-            OptifineSupport.enable();
-        }
 
         switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
