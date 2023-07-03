@@ -22,9 +22,14 @@ import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.world.biomes.Biome;
+import net.minestom.server.world.biomes.BiomeManager;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.chat.ChatConfig;
+import org.phantazm.core.datapack.Datapack;
+import org.phantazm.core.datapack.DatapackLoader;
 import org.phantazm.core.game.scene.BasicRouterStore;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneTransferHelper;
@@ -49,6 +54,7 @@ import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -85,7 +91,6 @@ public final class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         PathfinderConfig pathfinderConfig;
         ShutdownConfig shutdownConfig;
-        ZombiesGamereportConfig zombiesGamereportConfig;
         PartyConfig partyConfig;
         WhisperConfig whisperConfig;
         ChatConfig chatConfig;
@@ -211,6 +216,8 @@ public final class PhantazmServer {
             ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
             PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig,
             LoginValidator loginValidator) throws Exception {
+        DatapackFeature.initialize(MinecraftServer.getBiomeManager());
+
         RouterStore routerStore = new BasicRouterStore();
         ExecutorFeature.initialize();
         BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());

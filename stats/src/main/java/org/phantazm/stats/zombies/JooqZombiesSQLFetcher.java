@@ -77,7 +77,8 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
         List<BestTime> bestTimes = new ArrayList<>();
         try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"))
                 .from(table("zombies_player_map_stats")).where(field("map_key").eq(mapKey.asString()))
-                .and(field("best_time").isNotNull()).orderBy(field("best_time")).limit(maxLength).fetchResultSet()) {
+                .and(field("best_time").isNotNull()).orderBy(field("best_time"), field("player_uuid")).limit(maxLength)
+                .fetchResultSet()) {
             int i = 0;
             while (resultSet.next()) {
                 UUID uuid = UUID.fromString(resultSet.getString("player_uuid"));
@@ -94,8 +95,8 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
             @NotNull Key mapKey) {
         Record2<Long, Integer> result =
                 using(connection).select(field("best_time", SQLDataType.BIGINT), field("rank", SQLDataType.INTEGER))
-                        .from(select(field("best_time"),
-                                field("player_uuid"), rowNumber().over(orderBy(field("best_time"))).as("rank")).from(
+                        .from(select(field("best_time"), field("player_uuid"),
+                                rowNumber().over(orderBy(field("best_time"), field("player_uuid"))).as("rank")).from(
                                         table("zombies_player_map_stats")).where(field("map_key").eq(mapKey.asString()))
                                 .and(field("best_time").isNotNull()))
                         .where(field("player_uuid").eq(playerUUID.toString())).fetchOne();
