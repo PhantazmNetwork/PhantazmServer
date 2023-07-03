@@ -57,7 +57,15 @@ public class MeleeAttackGoal implements GoalCreator {
         @Override
         public boolean shouldStart() {
             ProximaEntity self = mob.entity();
-            if ((System.currentTimeMillis() - lastAttackTime) / MinecraftServer.TICK_MS >= data.cooldown()) {
+
+            Attribute attribute = Attribute.fromKey("phantazm.attack_speed_multiplier");
+            float attackSpeedMultiplier = 1F;
+            if (attribute != null) {
+                attackSpeedMultiplier = self.getAttributeValue(attribute);
+            }
+
+            if ((float)((System.currentTimeMillis() - lastAttackTime) / MinecraftServer.TICK_MS) *
+                    attackSpeedMultiplier >= data.cooldown()) {
                 Entity target = self.getTargetEntity();
                 if (target == null) {
                     return false;
@@ -88,7 +96,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 boolean damaged = livingEntity.damage(DamageType.fromEntity(self), damageAmount, data.bypassArmor);
 
                 if (damaged) {
-                    livingEntity.takeKnockback(0.4F * knockbackStrength, Math.sin(angle), -Math.cos(angle));
+                    livingEntity.takeKnockback(knockbackStrength, Math.sin(angle), -Math.cos(angle));
                 }
 
                 lastHitSelector.setLastHit(livingEntity);

@@ -32,6 +32,12 @@ public final class Attributes {
     public static final Attribute DAMAGE_MULTIPLIER = new Attribute("phantazm.damage_multiplier", 1F, 2048F);
 
     /**
+     * Attack speed multiplier for mobs.
+     */
+    public static final Attribute ATTACK_SPEED_MULTIPLIER =
+            new Attribute("phantazm.attack_speed_multiplier", 1F, 2048F);
+
+    /**
      * The "nil" attribute. Used as a fallback when the desired attribute cannot be found.
      */
     public static final Attribute NIL = new Attribute("phantazm.nil", 0F, 0F);
@@ -42,6 +48,7 @@ public final class Attributes {
         REVIVE_TICKS.register();
         HEAL_TICKS.register();
         DAMAGE_MULTIPLIER.register();
+        ATTACK_SPEED_MULTIPLIER.register();
         NIL.register();
     }
 }
