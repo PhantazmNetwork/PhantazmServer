@@ -24,8 +24,9 @@ public class PartyInviteCommandIntegrationTest extends AbstractPartyCommandInteg
     @Test
     public void testCanInviteWithInvitePermission(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator.Builder().build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
+                partyCreator, new Random(), 1);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -44,8 +45,9 @@ public class PartyInviteCommandIntegrationTest extends AbstractPartyCommandInteg
     @Test
     public void testCanInviteOtherPlayerInPartyWithInvitePermission(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator.Builder().build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
+                partyCreator, new Random(), 1);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -65,8 +67,9 @@ public class PartyInviteCommandIntegrationTest extends AbstractPartyCommandInteg
     @Test
     public void testCannotInviteWithoutInvitePermission(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator.Builder().setMinimumInviteRank(2).build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator.Builder().setMinimumInviteRank(2).setCreatorRank(1).build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
+                partyCreator, new Random(), 1);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -85,8 +88,9 @@ public class PartyInviteCommandIntegrationTest extends AbstractPartyCommandInteg
     @Test
     public void testCannotInviteSelf(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator.Builder().build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
+                partyCreator, new Random(), 1);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
@@ -102,8 +106,9 @@ public class PartyInviteCommandIntegrationTest extends AbstractPartyCommandInteg
     @Test
     public void testPartyCreatedOnInviteWithoutAlreadyBeingInParty(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator.Builder().build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider, partyCreator, new Random());
+        PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
+                partyCreator, new Random(), 1);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);

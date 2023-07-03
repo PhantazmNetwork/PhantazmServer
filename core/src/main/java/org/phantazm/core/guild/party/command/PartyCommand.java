@@ -18,12 +18,12 @@ public class PartyCommand {
 
     public static @NotNull Command partyCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
             @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
-            @NotNull PartyCreator partyCreator, @NotNull Random random) {
+            @NotNull PartyCreator partyCreator, @NotNull Random random, int creatorRank) {
         Command command = new Command("party", "p");
         command.addSubcommand(PartyCreateCommand.createCommand(config, partyHolder, viewProvider, partyCreator));
         command.addSubcommand(
                 PartyJoinCommand.joinCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider));
-        command.addSubcommand(PartyLeaveCommand.leaveCommand(config, partyHolder.uuidToGuild(), random));
+        command.addSubcommand(PartyLeaveCommand.leaveCommand(config, partyHolder.uuidToGuild(), random, creatorRank));
         command.addSubcommand(PartyKickCommand.kickCommand(config, miniMessage, partyHolder.uuidToGuild(),
                 viewProvider));
         command.addSubcommand(
