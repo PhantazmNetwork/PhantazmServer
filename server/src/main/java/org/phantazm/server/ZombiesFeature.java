@@ -181,7 +181,7 @@ public final class ZombiesFeature {
                             ZombiesFeature.powerups(), new BasicZombiesPlayerSource(database, viewProvider,
                             EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
                             keyParser), mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                            .provide(mapDependencyProvider), viewProvider, songLoader);
+                            .provide(mapDependencyProvider), songLoader);
             providers.put(entry.getKey(), provider);
         }
 

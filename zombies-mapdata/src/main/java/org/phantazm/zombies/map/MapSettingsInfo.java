@@ -4,6 +4,7 @@ import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -65,7 +66,12 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull String deathMessageToKilledFormat,
                               @NotNull String deathMessageToOthersFormat,
                               @NotNull String rejoinMessageFormat,
-                              @NotNull String quitMessageFormat) {
+                              @NotNull String quitMessageFormat,
+                              @NotNull Component nearWindowMessage,
+                              @NotNull Component startRepairingMessage,
+                              @NotNull Component stopRepairingMessage,
+                              @NotNull Component finishRepairingMessage,
+                              @NotNull Component enemiesNearbyMessage) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -121,8 +127,12 @@ public record MapSettingsInfo(int mapDataVersion,
         this(MAP_DATA_VERSION, 10, id, List.of(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L, new ArrayList<>(0), 400L,
                 new ArrayList<>(0), Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F),
-                "", 200L, "", Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2,
-                false, 30, 5, 0, 4.5F, false, new HashMap<>(0), new HashMap<>(), "", "", "", "", "",
-                "", "", "", "", "", "", "", "", "", "");
+                "", 200L, "", Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false, 30, 5, 0, 4.5F,
+                false, new HashMap<>(0), new HashMap<>(), "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                Component.text("Hold SNEAK to repair", NamedTextColor.GREEN),
+                Component.text("Started repairing. Keep holding SNEAK to continue.", NamedTextColor.GREEN),
+                Component.text("Stopped repairing.", NamedTextColor.RED),
+                Component.text("Fully repaired!", NamedTextColor.GREEN),
+                Component.text("You cannot repair that window while enemies are nearby!", NamedTextColor.RED));
     }
 }

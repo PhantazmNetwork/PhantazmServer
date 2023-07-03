@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.handler;
 
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.tracker.BoundedTracker;
@@ -16,5 +17,13 @@ public interface WindowHandler extends Tickable {
     interface Source {
         @NotNull WindowHandler make(@NotNull BoundedTracker<Window> windowTracker,
                 @NotNull Collection<? extends ZombiesPlayer> players);
+    }
+
+    record WindowMessages(@NotNull Component nearWindow,
+                          @NotNull Component startRepairing,
+                          @NotNull Component stopRepairing,
+                          @NotNull Component finishRepairing,
+                          @NotNull Component enemiesNearby) {
+
     }
 }

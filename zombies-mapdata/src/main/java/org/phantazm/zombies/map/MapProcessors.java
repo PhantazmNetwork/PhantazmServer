@@ -113,8 +113,7 @@ public final class MapProcessors {
         @Override
         public @NotNull ConfigElement elementFromData(WebhookInfo webhookInfo) {
             return ConfigNode.of("webhookURL", webhookInfo.webhookURL(), "webhookFormat", webhookInfo.webhookFormat(),
-                    "playerFormat",
-                    webhookInfo.playerFormat(), "enabled", webhookInfo.enabled());
+                    "playerFormat", webhookInfo.playerFormat(), "enabled", webhookInfo.enabled());
         }
     };
 
@@ -384,6 +383,17 @@ public final class MapProcessors {
             String deathMessageToOthersFormat = element.getStringOrThrow("deathMessageToOthersFormat");
             String rejoinMessageFormat = element.getStringOrThrow("rejoinMessageFormat");
             String quitMessageFormat = element.getStringOrThrow("quitMessageFormat");
+            Component nearWindowMessage =
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("nearWindowMessage"));
+            Component startRepairingMessage =
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("startRepairingMessage"));
+            Component stopRepairingMessage =
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("stopRepairingMessage"));
+            Component finishRepairingMessage =
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("finishRepairingMessage"));
+            Component enemiesNearbyMessage =
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("enemiesNearbyMessage"));
+
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, idleRevertTicks,
                     introMessages, countdownTicks, countdownAlertTicks, countdownTickSound, countdownTimeFormat,
@@ -394,7 +404,8 @@ public final class MapProcessors {
                     lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat, reviveStatusToKnockedFormat,
                     dyingStatusFormat, knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
                     knockedSubtitleFormat, deathMessageToKilledFormat, deathMessageToOthersFormat, rejoinMessageFormat,
-                    quitMessageFormat);
+                    quitMessageFormat, nearWindowMessage, startRepairingMessage, stopRepairingMessage,
+                    finishRepairingMessage, enemiesNearbyMessage);
         }
 
         @Override
@@ -456,10 +467,18 @@ public final class MapProcessors {
             node.putString("deathMessageToOthersFormat", mapConfig.deathMessageToOthersFormat());
             node.putString("rejoinMessageFormat", mapConfig.rejoinMessageFormat());
             node.putString("quitMessageFormat", mapConfig.quitMessageFormat());
+            node.put("nearWindowMessage", ConfigProcessors.component().elementFromData(mapConfig.nearWindowMessage()));
+            node.put("startRepairingMessage",
+                    ConfigProcessors.component().elementFromData(mapConfig.startRepairingMessage()));
+            node.put("stopRepairingMessage",
+                    ConfigProcessors.component().elementFromData(mapConfig.stopRepairingMessage()));
+            node.put("finishRepairingMessage",
+                    ConfigProcessors.component().elementFromData(mapConfig.finishRepairingMessage()));
+            node.put("enemiesNearbyMessage",
+                    ConfigProcessors.component().elementFromData(mapConfig.enemiesNearbyMessage()));
             return node;
         }
     };
-    private static final ConfigProcessor<List<String>> stringList = ConfigProcessor.STRING.listProcessor();
     private static final ConfigProcessor<WindowInfo> windowInfo = new ConfigProcessor<>() {
         @Override
         public @NotNull WindowInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {

@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map.handler;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Player;
@@ -44,11 +43,13 @@ public class BasicWindowHandler implements WindowHandler {
     private final Map<UUID, RepairOperation> repairOperationMap;
     private final Collection<RepairOperation> activeRepairs;
 
+    private final WindowMessages windowMessages;
+
     private long lastPositionCheck;
 
     public BasicWindowHandler(@NotNull BoundedTracker<Window> windowTracker,
             @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius, long repairInterval,
-            int coinsPerWindowBlock) {
+            int coinsPerWindowBlock, @NotNull WindowMessages windowMessages) {
         this.windowTracker = Objects.requireNonNull(windowTracker, "windowTracker");
         this.players = Objects.requireNonNull(players, "players");
         this.repairRadius = repairRadius;
@@ -57,11 +58,22 @@ public class BasicWindowHandler implements WindowHandler {
         this.activeRepairs = repairOperationMap.values();
         this.coinsPerWindowBlock = coinsPerWindowBlock;
         this.lastPositionCheck = System.currentTimeMillis();
+        this.windowMessages = Objects.requireNonNull(windowMessages, "windowMessages");
     }
 
     @Override
     public void handleCrouchStateChange(@NotNull ZombiesPlayer zombiesPlayer, boolean crouching) {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+
+        if (!crouching && playerOptional.isPresent() && zombiesPlayer.canRepairWindow() &&
+                zombiesPlayer.inStage(StageKeys.IN_GAME)) {
+            RepairOperation repairOperation = repairOperationMap.remove(zombiesPlayer.getUUID());
+            if (repairOperation != null && !repairOperation.window.isFullyRepaired()) {
+                zombiesPlayer.sendMessage(windowMessages.stopRepairing());
+            }
+
+            return;
+        }
 
         if (!crouching || playerOptional.isEmpty() || !zombiesPlayer.canRepairWindow() ||
                 !zombiesPlayer.inStage(StageKeys.IN_GAME)) {
@@ -78,9 +90,15 @@ public class BasicWindowHandler implements WindowHandler {
         double width = boundingBox.width();
         double height = boundingBox.height();
 
-        windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius).ifPresent(
-                window -> repairOperationMap.putIfAbsent(player.getUuid(),
-                        new RepairOperation(zombiesPlayer, window, System.currentTimeMillis())));
+        windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius).ifPresent(window -> {
+            repairOperationMap.computeIfAbsent(player.getUuid(), ignored -> {
+                if (!window.isFullyRepaired()) {
+                    player.sendMessage(windowMessages.startRepairing());
+                }
+
+                return new RepairOperation(zombiesPlayer, window, System.currentTimeMillis());
+            });
+        });
     }
 
     @Override
@@ -98,6 +116,22 @@ public class BasicWindowHandler implements WindowHandler {
 
                     if (player.isSneaking()) {
                         addOperationIfNearby(zombiesPlayer, player);
+                    }
+                    else {
+                        BoundingBox boundingBox = player.getBoundingBox();
+                        double width = boundingBox.width();
+                        double height = boundingBox.height();
+
+                        Optional<Window> windowOptional =
+                                windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius);
+                        if (windowOptional.isPresent()) {
+                            if (!windowOptional.get().isFullyRepaired()) {
+                                player.sendActionBar(windowMessages.nearWindow());
+                            }
+                        }
+                        else {
+                            player.sendActionBar(Component.empty());
+                        }
                     }
                 }
             }
@@ -146,8 +180,7 @@ public class BasicWindowHandler implements WindowHandler {
                 if (!targetWindow.isFullyRepaired()) {
                     long timeElapsedSinceLastBroken = time - targetWindow.getLastBreakTime();
                     if (timeElapsedSinceLastBroken < UNREPAIRABLE_BREAK_DELAY) {
-                        zombiesPlayer.sendMessage(Component.text("You can't repair windows while enemies are nearby!")
-                                .color(NamedTextColor.RED));
+                        zombiesPlayer.sendMessage(windowMessages.enemiesNearby());
                         continue;
                     }
 
@@ -159,6 +192,7 @@ public class BasicWindowHandler implements WindowHandler {
 
                     Optional<Player> playerOptional = zombiesPlayer.getPlayer();
                     if (playerOptional.isEmpty()) {
+                        repairOperationIterator.remove();
                         continue;
                     }
 
@@ -181,6 +215,9 @@ public class BasicWindowHandler implements WindowHandler {
                     }
 
                     coins.applyTransaction(new TransactionResult(result.displays(), event.goldGain()));
+                    if (targetWindow.isFullyRepaired()) {
+                        zombiesPlayer.sendMessage(windowMessages.finishRepairing());
+                    }
                 }
             }
         }
