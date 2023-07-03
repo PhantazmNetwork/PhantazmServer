@@ -12,6 +12,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.DynamicChunk;
@@ -116,6 +117,11 @@ public final class ZombiesFeature {
     private static HikariDataSource dataSource;
     private static ZombiesDatabase database;
 
+    private record PreloadedMap(@NotNull List<String> instancePath, @NotNull Point spawn, int chunkLoadRange) {
+
+    }
+
+
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
             @NotNull KeyParser keyParser,
@@ -136,11 +142,16 @@ public final class ZombiesFeature {
                 new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,
                         DynamicChunk::new, ExecutorFeature.getExecutor());
 
-        LOGGER.info("Preloading {} map instances", maps.size());
-        for (MapInfo map : maps.values()) {
-            instanceLoader.preload(map.settings().instancePath(),
-                    VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())),
-                    map.settings().chunkLoadRange());
+        Set<PreloadedMap> instancePaths = new HashSet<>(maps.size());
+        for (MapInfo mapInfo : maps.values()) {
+            instancePaths.add(new PreloadedMap(mapInfo.settings().instancePath(),
+                    VecUtils.toPoint(mapInfo.settings().origin().add(mapInfo.settings().spawn())),
+                    mapInfo.settings().chunkLoadRange()));
+        }
+
+        LOGGER.info("Preloading {} map instances", instancePaths.size());
+        for (PreloadedMap map : instancePaths) {
+            instanceLoader.preload(map.instancePath, map.spawn, map.chunkLoadRange);
         }
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
