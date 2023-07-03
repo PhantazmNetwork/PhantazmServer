@@ -99,7 +99,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 boolean damaged = livingEntity.damage(DamageType.fromEntity(self), damageAmount, data.bypassArmor);
 
                 if (damaged) {
-                    livingEntity.takeKnockback(knockbackStrength, Math.sin(angle), -Math.cos(angle));
+                    livingEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 }
 
                 lastHitSelector.setLastHit(livingEntity);
@@ -123,6 +123,7 @@ public class MeleeAttackGoal implements GoalCreator {
                        double range,
                        boolean swingHand,
                        boolean bypassArmor,
+                       boolean horizontal,
                        @NotNull @ChildPath("skills") Collection<String> skillPaths,
                        @NotNull @ChildPath("last_hit_selector") String lastHitSelectorPath) {
 
@@ -138,6 +139,11 @@ public class MeleeAttackGoal implements GoalCreator {
         @Default("bypassArmor")
         public static @NotNull ConfigElement defaultBypassArmor() {
             return ConfigPrimitive.of(false);
+        }
+
+        @Default("horizontal")
+        public static @NotNull ConfigElement defaultHorizontal() {
+            return ConfigPrimitive.of(true);
         }
     }
 }
