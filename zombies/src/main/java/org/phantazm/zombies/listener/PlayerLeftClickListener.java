@@ -29,17 +29,21 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
     private final MobStore mobStore;
     private final float punchDamage;
     private final float punchRange;
+    private final int punchCooldown;
+    private final float punchKnockback;
 
     private final Tag<Long> lastPunchTag;
 
     public PlayerLeftClickListener(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MobStore mobStore,
-            float punchDamage, float punchRange) {
+            float punchDamage, float punchRange, int punchCooldown, float punchKnockback) {
         super(instance, zombiesPlayers);
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.punchDamage = punchDamage;
         this.punchRange = punchRange;
         this.lastPunchTag = Tag.Long("last_punch").defaultValue(0L);
+        this.punchCooldown = punchCooldown;
+        this.punchKnockback = punchKnockback;
     }
 
     @Override
@@ -75,7 +79,7 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
 
             long currentTime = 0L;
             if (!godmode && ((currentTime = System.currentTimeMillis()) - player.getTag(lastPunchTag)) /
-                    MinecraftServer.TICK_MS < 20) {
+                    MinecraftServer.TICK_MS < punchCooldown) {
                 return;
             }
 
@@ -94,7 +98,10 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
                     entity.kill();
                 }
                 else {
+                    double angle = player.getPosition().yaw() * (Math.PI / 180);
+
                     entity.damage(DamageType.fromPlayer(player), punchDamage, false);
+                    entity.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
                     player.setTag(lastPunchTag, currentTime);
                 }
             }

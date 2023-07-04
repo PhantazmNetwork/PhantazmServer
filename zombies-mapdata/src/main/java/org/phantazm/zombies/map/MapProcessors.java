@@ -362,6 +362,8 @@ public final class MapProcessors {
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             float punchDamage = element.getNumberOrThrow("punchDamage").floatValue();
             float punchRange = element.getNumberOrThrow("punchRange").floatValue();
+            float punchKnockback = element.getNumberOrThrow("punchKnockback").floatValue();
+            int punchCooldown = element.getNumberOrThrow("punchCooldown").intValue();
             boolean mobPlayerCollisions = element.getBooleanOrThrow("mobPlayerCollisions");
 
             Map<Key, List<Key>> defaultEquipment =
@@ -400,12 +402,12 @@ public final class MapProcessors {
                     endTicks, endGameStatsFormat, scoreboardHeader, worldTime, maxPlayers, minPlayers, startingCoins,
                     repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks, corpseDeathTicks,
                     healTicks, reviveRadius, perksLostOnDeath, baseReviveTicks, rollsPerChest, punchDamage, punchRange,
-                    mobPlayerCollisions, defaultEquipment, equipmentGroups, winTitleFormat, winSubtitleFormat,
-                    lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat, reviveStatusToKnockedFormat,
-                    dyingStatusFormat, knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
-                    knockedSubtitleFormat, deathMessageToKilledFormat, deathMessageToOthersFormat, rejoinMessageFormat,
-                    quitMessageFormat, nearWindowMessage, startRepairingMessage, stopRepairingMessage,
-                    finishRepairingMessage, enemiesNearbyMessage);
+                    punchKnockback, punchCooldown, mobPlayerCollisions, defaultEquipment, equipmentGroups,
+                    winTitleFormat, winSubtitleFormat, lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat,
+                    reviveStatusToKnockedFormat, dyingStatusFormat, knockedMessageToKnockedFormat,
+                    knockedMessageToOthersFormat, knockedTitleFormat, knockedSubtitleFormat, deathMessageToKilledFormat,
+                    deathMessageToOthersFormat, rejoinMessageFormat, quitMessageFormat, nearWindowMessage,
+                    startRepairingMessage, stopRepairingMessage, finishRepairingMessage, enemiesNearbyMessage);
         }
 
         @Override
@@ -449,6 +451,8 @@ public final class MapProcessors {
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());
             node.putNumber("punchDamage", mapConfig.punchDamage());
             node.putNumber("punchRange", mapConfig.punchRange());
+            node.putNumber("punchKnockback", mapConfig.punchKnockback());
+            node.putNumber("punchCooldown", mapConfig.punchCooldown());
             node.putBoolean("mobPlayerCollisions", mapConfig.mobPlayerCollisions());
             node.put("defaultEquipment", keyToListKeyMap.elementFromData(mapConfig.defaultEquipment()));
             node.put("equipmentGroups", keyToEquipmentGroup.elementFromData(mapConfig.equipmentGroups()));

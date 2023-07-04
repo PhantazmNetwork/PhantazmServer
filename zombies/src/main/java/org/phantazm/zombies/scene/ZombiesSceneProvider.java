@@ -317,7 +317,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         node.addListener(EntityDamageEvent.class, new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects));
         node.addListener(PlayerHandAnimationEvent.class,
                 new PlayerLeftClickListener(instance, zombiesPlayers, mobStore, settings.punchDamage(),
-                        settings.punchRange()));
+                        settings.punchRange(), settings.punchCooldown(), settings.punchKnockback()));
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers, leaveHandler));
