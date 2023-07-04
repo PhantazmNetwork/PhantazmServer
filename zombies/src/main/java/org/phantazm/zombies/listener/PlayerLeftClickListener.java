@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.player.PlayerHandAnimationEvent;
 import net.minestom.server.instance.EntityTracker;
@@ -100,7 +101,7 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
                 else {
                     double angle = player.getPosition().yaw() * (Math.PI / 180);
 
-                    entity.damage(DamageType.fromPlayer(player), punchDamage, false);
+                    entity.damage(Damage.fromPlayer(player, punchDamage), false);
                     entity.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
                     player.setTag(lastPunchTag, currentTime);
                 }

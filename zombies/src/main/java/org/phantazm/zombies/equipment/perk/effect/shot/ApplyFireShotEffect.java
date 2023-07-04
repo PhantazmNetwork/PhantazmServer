@@ -8,6 +8,7 @@ import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -91,10 +92,10 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     }
 
     private void doDamage(LivingEntity entity, UUID damager) {
-        DamageType damageType = new DamageType(DamageType.ON_FIRE.getIdentifier());
-        damageType.setTag(Tags.LAST_HIT_BY, damager);
+        Damage damage = new Damage(DamageType.ON_FIRE, null, null, null, data.damage);
+        damage.setTag(Tags.LAST_HIT_BY, damager);
 
-        entity.damage(damageType, data.damage, data.bypassArmor);
+        entity.damage(damage, data.bypassArmor);
     }
 
     private void stopFire(Entity entity) {
