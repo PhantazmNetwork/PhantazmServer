@@ -12,6 +12,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
@@ -116,7 +117,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 }
                 else {
                     double angle = feetPos.yaw() * (Math.PI / 180);
-                    hit.entity.damage(DamageType.fromPlayer(player), data.damage, data.bypassArmor);
+                    hit.entity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
                     hit.entity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
                 }
 

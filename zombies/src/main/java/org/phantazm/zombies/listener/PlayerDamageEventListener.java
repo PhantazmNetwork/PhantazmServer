@@ -50,7 +50,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
             return;
         }
 
-        if (event.getDamage() < event.getEntity().getHealth()) {
+        if (event.getDamage().getAmount() < event.getEntity().getHealth()) {
             return;
         }
 
@@ -60,7 +60,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
             ZombiesPlayerDeathEvent deathEvent =
-                    new ZombiesPlayerDeathEvent(player, zombiesPlayer, event.getDamageType());
+                    new ZombiesPlayerDeathEvent(player, zombiesPlayer, event.getDamage());
             EventDispatcher.call(deathEvent);
 
             if (deathEvent.isCancelled()) {

@@ -9,6 +9,7 @@ import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,8 +31,8 @@ public class DamageAction implements ProjectileHitEntityAction {
             return;
         }
 
-        if (livingEntity.damage(DamageType.fromProjectile(shooter == null ? null : shooter.entity(), projectile),
-                data.damage, data.bypassArmor)) {
+        if (livingEntity.damage(Damage.fromProjectile(shooter == null ? null : shooter.entity(), projectile, data.damage),
+                data.bypassArmor)) {
             double yaw = Math.toRadians(projectile.getPosition().yaw());
             livingEntity.takeKnockback(data.knockback, Math.sin(yaw), -Math.cos(yaw));
         }

@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
@@ -67,12 +68,12 @@ public class DamageShotHandler implements ShotHandler {
                 damage *= livingEntity.getAttributeValue(Attributes.DAMAGE_MULTIPLIER);
             }
 
-            DamageType damageType = DamageType.fromEntity(attacker);
+            Damage damageType = Damage.fromEntity(attacker, damage);
             switch (data.armorBehavior) {
-                case ALWAYS_BYPASS -> targetEntity.damage(damageType, damage);
-                case NEVER_BYPASS -> targetEntity.damage(damageType, damage, false);
-                case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, damage, headshot);
-                case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, damage, !headshot);
+                case ALWAYS_BYPASS -> targetEntity.damage(damageType, true);
+                case NEVER_BYPASS -> targetEntity.damage(damageType, false);
+                case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, headshot);
+                case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, !headshot);
             }
         }
     }

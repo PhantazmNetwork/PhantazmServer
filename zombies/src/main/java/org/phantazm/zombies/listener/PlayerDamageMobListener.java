@@ -25,7 +25,7 @@ public class PlayerDamageMobListener extends PhantazmMobEventListener<EntityDama
 
     @Override
     public void accept(@NotNull PhantazmMob mob, @NotNull EntityDamageEvent event) {
-        if (!(event.getDamageType() instanceof EntityDamage entityDamage)) {
+        if (!(event.getDamage() instanceof EntityDamage entityDamage)) {
             return;
         }
 
