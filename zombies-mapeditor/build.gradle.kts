@@ -32,8 +32,6 @@ repositories {
     maven("https://server.bbkr.space/artifactory/libs-release")
 }
 
-val fabricApiVersion: String by project
-
 dependencies {
     minecraft(libs.minecraft)
     mappings(libs.yarn.mappings) {
