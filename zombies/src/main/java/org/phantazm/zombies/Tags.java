@@ -1,5 +1,6 @@
 package org.phantazm.zombies;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.tag.Tag;
 
 import java.util.UUID;
@@ -19,4 +20,7 @@ public final class Tags {
     public static final Tag<Long> LAST_ENTER_BOMBED_ROOM = Tag.Long("entered_bombed_room").defaultValue(-1L);
 
     public static final Tag<UUID> IDENTIFIER = Tag.UUID("identifier");
+
+    public static final Tag<Component> DAMAGE_NAME = Tag.Component("damage_name");
+
 }

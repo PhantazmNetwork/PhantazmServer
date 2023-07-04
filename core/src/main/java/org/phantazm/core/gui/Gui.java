@@ -12,6 +12,8 @@ import org.phantazm.commons.Tickable;
 
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 /**
  * Extension of {@link Inventory} designed to ease the creation of graphical user interfaces. May or may not be
@@ -121,27 +123,27 @@ public class Gui extends Inventory implements Tickable {
 
     @Override
     public boolean leftClick(@NotNull Player player, int slot) {
-        return handleClick(player, slot, super::leftClick, GuiItem.ClickType.LEFT_CLICK);
+        return handleClick(player, slot, () -> super.leftClick(player, slot), GuiItem.ClickType.LEFT_CLICK);
     }
 
     @Override
     public boolean rightClick(@NotNull Player player, int slot) {
-        return handleClick(player, slot, super::rightClick, GuiItem.ClickType.RIGHT_CLICK);
+        return handleClick(player, slot, () -> super.rightClick(player, slot), GuiItem.ClickType.RIGHT_CLICK);
     }
 
     @Override
     public boolean shiftClick(@NotNull Player player, int slot) {
-        return handleClick(player, slot, super::shiftClick, GuiItem.ClickType.SHIFT_CLICK);
+        return handleClick(player, slot, () -> super.shiftClick(player, slot), GuiItem.ClickType.SHIFT_CLICK);
     }
 
     @Override
     public boolean middleClick(@NotNull Player player, int slot) {
-        return handleClick(player, slot, super::middleClick, GuiItem.ClickType.MIDDLE_CLICK);
+        return handleClick(player, slot, () -> super.middleClick(player, slot), GuiItem.ClickType.MIDDLE_CLICK);
     }
 
     @Override
-    public boolean doubleClick(@NotNull Player player, int slot) {
-        return handleClick(player, slot, super::doubleClick, GuiItem.ClickType.DOUBLE_CLICK);
+    public boolean doubleClick(@NotNull Player player, int slot, int button) {
+        return handleClick(player, slot, () -> super.doubleClick(player, slot, button), GuiItem.ClickType.DOUBLE_CLICK);
     }
 
     @Override
@@ -183,8 +185,7 @@ public class Gui extends Inventory implements Tickable {
         return tickItems;
     }
 
-    private boolean handleClick(Player player, int slot, BiPredicate<? super Player, Integer> superFunction,
-            GuiItem.ClickType clickType) {
+    private boolean handleClick(Player player, int slot, BooleanSupplier superFunction, GuiItem.ClickType clickType) {
         if (slot < getInventoryType().getSize()) {
             GuiItem item = items.get(slot);
             if (item != null) {
@@ -195,7 +196,7 @@ public class Gui extends Inventory implements Tickable {
             }
         }
 
-        return superFunction.test(player, slot);
+        return superFunction.getAsBoolean();
     }
 
     /**
