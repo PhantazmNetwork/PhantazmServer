@@ -222,6 +222,18 @@ public class GroundController implements Controller {
 
     private void stepOrJump(double nodeDiff, double speedX, double speedZ, Instance instance, Vec deltaMove, Pos pos) {
         if (nodeDiff > step) {
+            Chunk chunk = entity.getChunk();
+            assert chunk != null;
+
+            Pos entityPos = entity.getPosition();
+            PhysicsResult physicsResult = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
+                    new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON + step, entityPos.z()),
+                    new Vec(speedX, 0, speedZ), null);
+            if (!physicsResult.hasCollision()) {
+                entity.refreshPosition(physicsResult.newPosition());
+                return;
+            }
+
             entity.setVelocity(
                     new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
             jumping = true;
