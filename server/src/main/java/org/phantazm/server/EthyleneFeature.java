@@ -73,21 +73,35 @@ public final class EthyleneFeature {
 
     @SuppressWarnings("unchecked")
     private static Signature<ItemStack> basicItemStack() {
-        return Signature.builder(Token.ofClass(ItemStack.class),
-                (ignored, args) -> ItemStack.builder(args.get(0)).displayName(args.get(1))
-                        .lore((List<? extends Component>)args.get(2)).build(), itemStack -> {
+        return Signature.builder(Token.ofClass(ItemStack.class), (ignored, args) -> {
 
-                    List<Object> list = new ArrayList<>(3);
-                    list.add(itemStack.material());
-                    list.add(itemStack.getDisplayName());
-                    list.add(itemStack.getLore());
+                            ItemStack.Builder builder = ItemStack.builder(args.get(0));
+                            String meta = args.get(3);
+                            if (meta != null) {
+                                try {
+                                    builder.meta((NBTCompound)new SNBTParser(new StringReader(meta)).parse());
+                                }
+                                catch (NBTException ignored1) {
+                                }
+                            }
 
-                    return list;
-                }, Map.entry("material", SignatureParameter.parameter(Token.ofClass(Material.class))),
-                Map.entry("displayName",
-                        SignatureParameter.parameter(Token.ofClass(Component.class), ConfigPrimitive.NULL)),
-                Map.entry("lore", SignatureParameter.parameter(new Token<List<Component>>() {
-                }, ConfigList.of()))).matchingNames().matchingTypeHints().build();
+                            builder.displayName(args.get(1)).lore((List<? extends Component>)args.get(2));
+                            return builder.build();
+                        }, itemStack -> {
+
+                            List<Object> list = new ArrayList<>(3);
+                            list.add(itemStack.material());
+                            list.add(itemStack.getDisplayName());
+                            list.add(itemStack.getLore());
+                            list.add(itemStack.meta().toSNBT());
+
+                            return list;
+                        }, Map.entry("material", SignatureParameter.parameter(Token.ofClass(Material.class))), Map.entry("displayName",
+                                SignatureParameter.parameter(Token.ofClass(Component.class), ConfigPrimitive.NULL)),
+                        Map.entry("lore", SignatureParameter.parameter(new Token<List<Component>>() {
+                        }, ConfigList.of())),
+                        Map.entry("tag", SignatureParameter.parameter(Token.STRING, ConfigPrimitive.NULL))).matchingNames()
+                .matchingTypeHints().build();
     }
 
     private static Signature<Pos> pos() {
