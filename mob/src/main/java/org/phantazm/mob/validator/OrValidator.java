@@ -3,6 +3,7 @@ package org.phantazm.mob.validator;
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class OrValidator implements TargetValidator {
     }
 
     @Override
-    public boolean valid(@NotNull Entity targeter, @NotNull Entity entity) {
+    public boolean valid(@Nullable Entity targeter, @NotNull Entity entity) {
         for (TargetValidator validator : validators) {
             if (validator.valid(targeter, entity)) {
                 return true;
