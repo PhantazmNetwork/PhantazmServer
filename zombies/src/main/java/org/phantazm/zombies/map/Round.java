@@ -22,7 +22,7 @@ public class Round implements Tickable {
     private final List<Action<Round>> endActions;
     private final SpawnDistributor spawnDistributor;
     private final List<Spawnpoint> spawnpoints;
-    private final List<PhantazmMob> spawnedMobs;
+    private final Map<UUID, PhantazmMob> spawnedMobs;
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
 
     private boolean isActive;
@@ -50,7 +50,7 @@ public class Round implements Tickable {
         this.endActions = List.copyOf(endActions);
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
 
-        this.spawnedMobs = new ArrayList<>();
+        this.spawnedMobs = new HashMap<>();
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }
@@ -60,21 +60,17 @@ public class Round implements Tickable {
     }
 
     public void removeMob(@NotNull PhantazmMob mob) {
-        if (spawnedMobs.remove(mob)) {
+        if (spawnedMobs.remove(mob.entity().getUuid()) != null) {
             totalMobCount--;
         }
     }
 
     public @Unmodifiable @NotNull List<PhantazmMob> getSpawnedMobs() {
-        return List.copyOf(spawnedMobs);
+        return List.copyOf(spawnedMobs.values());
     }
 
     public int getTotalMobCount() {
         return totalMobCount;
-    }
-
-    public void setTotalMobCount(int count) {
-        this.totalMobCount = count;
     }
 
     public @Unmodifiable @NotNull List<Wave> getWaves() {
@@ -93,10 +89,12 @@ public class Round implements Tickable {
         isActive = true;
 
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            if (!zombiesPlayer.hasQuit()) {
-                int prevBestRound = zombiesPlayer.module().getStats().getBestRound();
-                zombiesPlayer.module().getStats().setBestRound(Math.max(prevBestRound, roundInfo.round()));
+            if (zombiesPlayer.hasQuit()) {
+                continue;
             }
+
+            int prevBestRound = zombiesPlayer.module().getStats().getBestRound();
+            zombiesPlayer.module().getStats().setBestRound(Math.max(prevBestRound, roundInfo.round()));
         }
 
         for (Action<Round> action : startActions) {
@@ -131,10 +129,13 @@ public class Round implements Tickable {
         waveStartTime = 0;
         totalMobCount = 0;
 
-        for (PhantazmMob mob : new ArrayList<>(spawnedMobs)) {
+        Iterator<PhantazmMob> spawnedIterator = spawnedMobs.values().iterator();
+        while (spawnedIterator.hasNext()) {
+            PhantazmMob mob = spawnedIterator.next();
+            spawnedIterator.remove();
+
             mob.entity().kill();
         }
-        spawnedMobs.clear();
     }
 
     public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo) {
@@ -142,13 +143,7 @@ public class Round implements Tickable {
     }
 
     public boolean hasMob(@NotNull UUID uuid) {
-        for (PhantazmMob mob : spawnedMobs) {
-            if (mob.entity().getUuid().equals(uuid)) {
-                return true;
-            }
-        }
-
-        return false;
+        return spawnedMobs.containsKey(uuid);
     }
 
     private @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
@@ -158,7 +153,9 @@ public class Round implements Tickable {
         }
 
         List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnpoints, spawnInfo);
-        spawnedMobs.addAll(spawns);
+        for (PhantazmMob spawn : spawns) {
+            spawnedMobs.put(spawn.entity().getUuid(), spawn);
+        }
 
         if (isWave) {
             //adjust for mobs that may have failed to spawn
