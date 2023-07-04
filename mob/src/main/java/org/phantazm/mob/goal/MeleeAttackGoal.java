@@ -9,6 +9,7 @@ import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
@@ -96,7 +97,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 float knockbackStrength = self.getAttributeValue(Attribute.ATTACK_KNOCKBACK);
 
                 double angle = pos.yaw() * (Math.PI / 180);
-                boolean damaged = livingEntity.damage(DamageType.fromEntity(self), damageAmount, data.bypassArmor);
+                boolean damaged = livingEntity.damage(Damage.fromEntity(self, damageAmount), data.bypassArmor);
 
                 if (damaged) {
                     livingEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));

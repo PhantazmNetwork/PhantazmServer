@@ -2,6 +2,7 @@ package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
@@ -31,12 +32,12 @@ public class RadialDamageEntitySkill implements Skill {
                 Iterable<LivingEntity> entityIterable = (Iterable<LivingEntity>)iterable;
                 for (LivingEntity entity : entityIterable) {
                     double damage = calculateDamage(entity.getDistance(selfEntity));
-                    entity.damage(DamageType.fromEntity(selfEntity), (float)damage, data.bypassArmor);
+                    entity.damage(Damage.fromEntity(selfEntity, (float) damage), data.bypassArmor);
                 }
             }
             else if (object instanceof LivingEntity living) {
                 double damage = calculateDamage(living.getDistance(selfEntity));
-                living.damage(DamageType.fromEntity(selfEntity), (float)damage, data.bypassArmor);
+                living.damage(Damage.fromEntity(selfEntity, (float) damage), data.bypassArmor);
             }
         });
     }

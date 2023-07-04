@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.entity.damage.EntityDamage;
 import net.minestom.server.entity.damage.EntityProjectileDamage;
@@ -14,6 +15,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.damage.ZombiesDamageType;
 import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
@@ -92,16 +94,13 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
     }
 
     private Component getKiller(@NotNull EntityDamageEvent event) {
-        DamageType damageType = event.getDamageType();
-
-        if (damageType instanceof EntityDamage entityDamage) {
-            return getEntityName(entityDamage.getSource());
-        }
-        else if (damageType instanceof EntityProjectileDamage projectileDamage) {
-            Entity shooter = projectileDamage.getShooter();
-            return getEntityName(Objects.requireNonNullElseGet(shooter, projectileDamage::getProjectile));
-        } else if (damageType.getIdentifier().equals(ZombiesDamageType.BOMBING.getIdentifier())) {
-            return Component.text("Bombing", NamedTextColor.DARK_RED);
+        Damage damage = event.getDamage();
+        if (damage.getAttacker() != null) {
+            return getEntityName(damage.getAttacker());
+        } else if (damage.getSource() != null) {
+            return getEntityName(damage.getSource());
+        } else if (damage.hasTag(Tags.DAMAGE_NAME)) {
+            return damage.tagHandler().getTag(Tags.DAMAGE_NAME);
         }
 
         return null;

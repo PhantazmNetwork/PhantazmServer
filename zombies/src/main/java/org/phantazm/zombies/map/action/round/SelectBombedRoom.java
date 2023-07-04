@@ -8,12 +8,15 @@ import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.damage.Damage;
+import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
@@ -175,7 +178,10 @@ public class SelectBombedRoom implements Action<Round> {
                                     long ticksSinceEnter = (time - lastEnterBombedRoom) / MinecraftServer.TICK_MS;
 
                                     if (ticksSinceEnter >= data.damageDelay) {
-                                        player.damage(ZombiesDamageType.BOMBING, data.damage, true);
+                                        Damage damage = new Damage(DamageType.GENERIC, null, null, null, data.damage);
+                                        damage.tagHandler().setTag(Tags.DAMAGE_NAME, Component.text("Bombing",
+                                                NamedTextColor.DARK_RED));
+                                        player.damage(damage, true);
                                     }
 
                                     if (ticksSinceEnter >= data.effectDelay) {

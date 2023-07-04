@@ -2,6 +2,7 @@ package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
@@ -50,7 +51,7 @@ public class BleedEntitiesSkill implements Skill {
             long ticksSinceStart = bleedContext.ticksSinceStart();
             bleedContext.setTicksSinceStart(ticksSinceStart + 1);
             if (ticksSinceStart % data.bleedInterval() == 0) {
-                livingEntity.damage(DamageType.fromEntity(self.entity()), data.bleedDamage(), data.bypassArmor);
+                livingEntity.damage(Damage.fromEntity(self.entity(), data.bleedDamage()), data.bypassArmor);
                 contextIterator.remove();
             }
             if (ticksSinceStart >= data.bleedTime()) {
