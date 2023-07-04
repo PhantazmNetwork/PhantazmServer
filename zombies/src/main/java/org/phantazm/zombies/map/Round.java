@@ -11,10 +11,7 @@ import org.phantazm.zombies.spawn.SpawnDistributor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Round implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
@@ -27,7 +24,7 @@ public class Round implements Tickable {
     private final List<Spawnpoint> spawnpoints;
     private final List<PhantazmMob> spawnedMobs;
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
-    
+
     private boolean isActive;
     private long waveStartTime;
     private Wave currentWave;
@@ -142,6 +139,16 @@ public class Round implements Tickable {
 
     public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo) {
         return spawnMobs(spawnInfo, spawnDistributor, false);
+    }
+
+    public boolean hasMob(@NotNull UUID uuid) {
+        for (PhantazmMob mob : spawnedMobs) {
+            if (mob.entity().getUuid().equals(uuid)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
