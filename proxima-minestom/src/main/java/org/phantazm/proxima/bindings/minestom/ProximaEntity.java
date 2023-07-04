@@ -17,6 +17,7 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.MathUtils;
 import org.phantazm.core.VecUtils;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
@@ -279,6 +280,13 @@ public class ProximaEntity extends LivingEntity {
     }
 
     protected MoveResult moveAlongPath(long time) {
+        Point pos = getPosition();
+
+        if (pos.distanceSquared(current.x + 0.5, current.y + current.blockOffset, current.z + 0.5) > 3 &&
+                !current.equals(currentPath.head())) {
+            return MoveResult.CANCEL;
+        }
+
         Controller controller = pathfinding.getController(this);
 
         if (withinDistance(target)) {
@@ -286,6 +294,7 @@ public class ProximaEntity extends LivingEntity {
             target = current.parent;
         }
 
+        Node target = this.target;
         if (target == null && targetEntity != null && currentPath != null && currentPath.isSuccessful()) {
             Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(targetEntity.getPosition()));
             target = new Node(synthetic.x(), synthetic.y(), synthetic.z(), 0, 0,
@@ -293,14 +302,14 @@ public class ProximaEntity extends LivingEntity {
         }
 
         if (target != null) {
-            Point pos = getPosition();
-
             double currentX = pos.x();
             double currentY = pos.y();
             double currentZ = pos.z();
 
             if (!controller.hasControl()) {
-                if (!(currentX == lastX && currentY == lastY && currentZ == lastZ)) {
+                if (!(MathUtils.fuzzyEquals(currentX, lastX, Vec.EPSILON) &&
+                        MathUtils.fuzzyEquals(currentY, lastY, Vec.EPSILON) &&
+                        MathUtils.fuzzyEquals(currentZ, lastZ, Vec.EPSILON))) {
                     lastMoved = time;
                 }
                 else if (time - lastMoved > pathfinding.immobileThreshold()) {

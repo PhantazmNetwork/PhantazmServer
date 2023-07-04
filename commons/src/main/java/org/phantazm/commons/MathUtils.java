@@ -12,6 +12,10 @@ public final class MathUtils {
         throw new UnsupportedOperationException();
     }
 
+    public static boolean fuzzyEquals(double a, double b, double epsilon) {
+        return Math.abs(a - b) < epsilon;
+    }
+
     public static long randomInterval(long min, long max) {
         return (long)(Math.random() * (min - max)) + min;
     }

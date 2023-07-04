@@ -143,7 +143,7 @@ public class MeleeAttackGoal implements GoalCreator {
 
         @Default("horizontal")
         public static @NotNull ConfigElement defaultHorizontal() {
-            return ConfigPrimitive.of(true);
+            return ConfigPrimitive.of(false);
         }
     }
 }
