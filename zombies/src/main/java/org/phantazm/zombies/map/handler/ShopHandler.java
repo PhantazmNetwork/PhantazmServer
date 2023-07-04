@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.tracker.BoundedTracker;
+import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -17,6 +18,6 @@ public interface ShopHandler extends Tickable {
     void initialize();
 
     interface Source {
-        @NotNull ShopHandler make(@NotNull BoundedTracker<Shop> shops);
+        @NotNull ShopHandler make(@NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Room> rooms);
     }
 }

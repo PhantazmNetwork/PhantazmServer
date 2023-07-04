@@ -196,7 +196,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     createPowerupHandler(instance, zombiesPlayers, mapObjects.mapDependencyProvider());
             powerupHandlerWrapper.set(powerupHandler);
 
-            ShopHandler shopHandler = createShopHandler(mapObjects.shopTracker());
+            ShopHandler shopHandler = createShopHandler(mapObjects.shopTracker(), mapObjects.roomTracker());
 
             WindowHandler windowHandler = createWindowHandler(mapObjects.windowTracker(), zombiesPlayers.values());
             windowHandlerWrapper.set(windowHandler);
@@ -283,8 +283,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return powerupHandlerSource.make(instance, playerMap, mapDependencyProvider);
     }
 
-    private ShopHandler createShopHandler(BoundedTracker<Shop> shopTracker) {
-        return shopHandlerSource.make(shopTracker);
+    private ShopHandler createShopHandler(BoundedTracker<Shop> shopTracker, BoundedTracker<Room> rooms) {
+        return shopHandlerSource.make(shopTracker, rooms);
     }
 
     private WindowHandler createWindowHandler(BoundedTracker<Window> windowTracker,

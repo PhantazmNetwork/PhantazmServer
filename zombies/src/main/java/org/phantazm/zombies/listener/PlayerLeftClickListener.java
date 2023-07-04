@@ -1,5 +1,6 @@
 package org.phantazm.zombies.listener;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -9,6 +10,7 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.player.PlayerHandAnimationEvent;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.RayUtils;
 import org.phantazm.core.equipment.Equipment;
@@ -28,6 +30,8 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
     private final float punchDamage;
     private final float punchRange;
 
+    private final Tag<Long> lastPunchTag;
+
     public PlayerLeftClickListener(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MobStore mobStore,
             float punchDamage, float punchRange) {
@@ -35,6 +39,7 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.punchDamage = punchDamage;
         this.punchRange = punchRange;
+        this.lastPunchTag = Tag.Long("last_punch").defaultValue(0L);
     }
 
     @Override
@@ -68,6 +73,12 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
 
             boolean godmode = zombiesPlayer.flags().hasFlag(Flags.GODMODE);
 
+            long currentTime = 0L;
+            if (!godmode && ((currentTime = System.currentTimeMillis()) - player.getTag(lastPunchTag)) /
+                    MinecraftServer.TICK_MS < 20) {
+                return;
+            }
+
             Pos start = player.getPosition().add(0, player.getEyeHeight(), 0);
             Vec end = start.direction().mul(godmode ? 20 : punchRange);
 
@@ -84,6 +95,7 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
                 }
                 else {
                     entity.damage(DamageType.fromPlayer(player), punchDamage, false);
+                    player.setTag(lastPunchTag, currentTime);
                 }
             }
         });
