@@ -45,8 +45,8 @@ public class TransactionModifierPerkEffectCreator implements PerkEffectCreator {
                 @Override
                 public int modify(int coins) {
                     return switch (data.modifierAction) {
-                        case ADD -> coins + data.amount;
-                        case MULTIPLY -> coins * data.amount;
+                        case ADD -> (int)Math.rint(coins + data.amount);
+                        case MULTIPLY -> (int)Math.rint(coins + (data.amount * coins));
                     };
                 }
 
@@ -78,7 +78,7 @@ public class TransactionModifierPerkEffectCreator implements PerkEffectCreator {
                        @NotNull Component modifierName,
                        @NotNull ModifierAction modifierAction,
                        int priority,
-                       int amount) {
+                       double amount) {
         @Default("priority")
         public static @NotNull ConfigElement priorityDefault() {
             return ConfigPrimitive.of(0);
