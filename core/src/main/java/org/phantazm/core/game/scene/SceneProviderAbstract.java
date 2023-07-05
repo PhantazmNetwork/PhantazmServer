@@ -58,9 +58,12 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
                 }
 
                 TScene scene = createScene(request).join();
-                scenes.add(scene);
+                if (scene != null) {
+                    scenes.add(scene);
+                    return Optional.of(scene);
+                }
 
-                return Optional.ofNullable(scene);
+                return Optional.empty();
             }
             finally {
                 lock.unlockWrite(writeStamp);
