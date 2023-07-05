@@ -37,6 +37,7 @@ public class ShootProjectileSkill implements Skill {
     private final MapObjects mapObjects;
     private final TargetSelector<? extends Entity> targetSelector;
     private final TargetValidator targetValidator;
+    private final TargetValidator hitValidator;
     private final List<ProjectileHitEntityAction> actions;
 
     private final UUID uuid;
@@ -45,11 +46,13 @@ public class ShootProjectileSkill implements Skill {
     public ShootProjectileSkill(@NotNull Data data, @NotNull MapObjects mapObjects,
             @NotNull @Child("target_selector") TargetSelector<? extends Entity> targetSelector,
             @NotNull @Child("target_validator") TargetValidator targetValidator,
+            @NotNull @Child("hit_validator") TargetValidator hitValidator,
             @NotNull @Child("actions") List<ProjectileHitEntityAction> actions) {
         this.data = data;
         this.mapObjects = mapObjects;
         this.targetSelector = targetSelector;
         this.targetValidator = targetValidator;
+        this.hitValidator = hitValidator;
         this.actions = actions;
 
         this.uuid = UUID.randomUUID();
@@ -85,7 +88,7 @@ public class ShootProjectileSkill implements Skill {
         }
 
         PhantazmMob shootingMob = mapObjects.module().mobStore().getMob(shooter);
-        if (!targetValidator.valid(shootingMob == null ? null : shootingMob.entity(), event.getTarget())) {
+        if (!hitValidator.valid(shootingMob == null ? null : shootingMob.entity(), event.getTarget())) {
             return;
         }
 
@@ -129,6 +132,9 @@ public class ShootProjectileSkill implements Skill {
         ProximaEntity mobEntity = mob.entity();
 
         Entity targetEntity = targetOptional.get();
+        if (!targetValidator.valid(selfEntity, targetEntity)) {
+            return;
+        }
 
         mobEntity.setTag(Tags.PROJECTILE_SHOOTER, selfEntity.getUuid());
         mobEntity.setTag(Tags.SKILL_IDENTIFIER, uuid);
@@ -140,7 +146,14 @@ public class ShootProjectileSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull Key entity, double power, double spread, boolean gravity) {
+    public record Data(@NotNull Key entity,
+                       double power,
+                       double spread,
+                       boolean gravity,
+                       @NotNull @ChildPath("target_selector") String targetSelector,
+                       @NotNull @ChildPath("target_validator") String targetValidator,
+                       @NotNull @ChildPath("hit_validator") String hitValidator,
+                       @NotNull @ChildPath("actions") List<String> hitEntityActions) {
         @Default("spread")
         public static @NotNull ConfigElement defaultSpread() {
             return ConfigPrimitive.of(0.0D);

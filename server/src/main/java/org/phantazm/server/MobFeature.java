@@ -163,6 +163,7 @@ public final class MobFeature {
         contextManager.registerElementClass(LastHitEntitySelector.class);
         contextManager.registerElementClass(AllPlayersSelector.class);
         contextManager.registerElementClass(NearestEntitiesSelector.class);
+        contextManager.registerElementClass(AITargetSelector.class);
 
         //mob validators
         contextManager.registerElementClass(AlwaysValid.class);
