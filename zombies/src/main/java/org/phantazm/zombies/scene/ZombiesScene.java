@@ -301,18 +301,29 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     public void shutdown() {
         stageTransition.end();
         taskScheduler.end();
+
+        List<CompletableFuture<Boolean>> fallbackFutures = new ArrayList<>(zombiesPlayers.size());
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
 
             if (!zombiesPlayer.hasQuit()) {
-                fallback.fallback(zombiesPlayer.module().getPlayerView()).whenComplete((fallbackResult, throwable) -> {
-                    if (throwable != null) {
-                        LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(), throwable);
-                    }
-                });
+                fallbackFutures.add(fallback.fallback(zombiesPlayer.module().getPlayerView())
+                        .whenComplete((fallbackResult, throwable) -> {
+                            if (throwable != null) {
+                                LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(), throwable);
+                            }
+                        }));
             }
 
             zombiesPlayer.end();
+        }
+
+        //wait for all players to fallback before we shut down the scene
+        try {
+            CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new)).join();
+        }
+        catch (Throwable throwable) {
+            LOGGER.warn("Error when waiting on player fallback", throwable);
         }
 
         super.shutdown();
