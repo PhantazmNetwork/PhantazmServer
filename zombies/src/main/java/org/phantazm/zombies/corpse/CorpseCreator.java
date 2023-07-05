@@ -9,10 +9,12 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Team;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.core.ComponentUtils;
@@ -33,6 +35,8 @@ public class CorpseCreator {
         @NotNull CorpseCreator make(@NotNull DependencyProvider mapDependencyProvider);
     }
 
+    private static final String POSSIBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
+
     private final Data data;
     private final List<CorpseLine> idleLines;
     private final List<CorpseLine> revivingLines;
@@ -50,9 +54,14 @@ public class CorpseCreator {
     public @NotNull CorpseCreator.Corpse forPlayer(@NotNull Instance instance, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull Point deathLocation, @NotNull ReviveHandler reviveHandler) {
         PlayerSkin skin = zombiesPlayer.getPlayer().map(Player::getSkin).orElse(null);
-        String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
+        String corpseUsername = RandomStringUtils.random(16, POSSIBLE_CHARACTERS);
         MinimalFakePlayer corpseEntity =
                 new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
+        zombiesPlayer.getPlayer().ifPresent(player -> {
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
+                corpseEntity.setEquipment(slot, player.getEquipment(slot));
+            }
+        });
 
         Hologram hologram = new InstanceHologram(deathLocation.add(0, data.hologramHeightOffset, 0), data.hologramGap);
 
