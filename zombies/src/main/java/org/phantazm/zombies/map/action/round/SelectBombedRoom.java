@@ -94,7 +94,7 @@ public class SelectBombedRoom implements Action<Round> {
         int startRoundIndex = objects.module().roundHandlerSupplier().get().currentRoundIndex();
 
         Damage bombDamage = new Damage(DamageType.GENERIC, null, null, null, data.damage);
-        bombDamage.tagHandler().setTag(Tags.DAMAGE_NAME, data.bombingDamageType);
+        bombDamage.tagHandler().setTag(Tags.DAMAGE_NAME, data.bombingDamageName);
 
         objects.taskScheduler().scheduleTaskAfter(new TickableTask() {
             private boolean flagSet;
@@ -269,7 +269,7 @@ public class SelectBombedRoom implements Action<Round> {
     @DataObject
     public record Data(@NotNull String warningFormatMessage,
                        @NotNull Component inAreaMessage,
-                       @NotNull Component bombingDamageType,
+                       @NotNull Component bombingDamageName,
                        float damage,
                        int gracePeriod,
                        long damageDelay,
@@ -278,8 +278,8 @@ public class SelectBombedRoom implements Action<Round> {
                        @NotNull List<Key> exemptRooms,
                        @NotNull List<Modifier> modifiers,
                        @NotNull @ChildPath("particle") String particle) {
-        @Default("bombingDamageType")
-        public static @NotNull ConfigElement defaultBombingDamageType() {
+        @Default("bombingDamageName")
+        public static @NotNull ConfigElement defaultBombingDamageName() {
             return ConfigPrimitive.of("<red>Bombing");
         }
 
