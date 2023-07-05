@@ -8,7 +8,6 @@ import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
@@ -28,7 +27,6 @@ import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
-import org.phantazm.zombies.damage.ZombiesDamageType;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
@@ -94,6 +92,10 @@ public class SelectBombedRoom implements Action<Round> {
         instance.sendMessage(warningMessage);
 
         int startRoundIndex = objects.module().roundHandlerSupplier().get().currentRoundIndex();
+
+        Damage bombDamage = new Damage(DamageType.GENERIC, null, null, null, data.damage);
+        bombDamage.tagHandler().setTag(Tags.DAMAGE_NAME, data.bombingDamageType);
+
         objects.taskScheduler().scheduleTaskAfter(new TickableTask() {
             private boolean flagSet;
             private int ticks;
@@ -178,10 +180,7 @@ public class SelectBombedRoom implements Action<Round> {
                                     long ticksSinceEnter = (time - lastEnterBombedRoom) / MinecraftServer.TICK_MS;
 
                                     if (ticksSinceEnter >= data.damageDelay) {
-                                        Damage damage = new Damage(DamageType.GENERIC, null, null, null, data.damage);
-                                        damage.tagHandler().setTag(Tags.DAMAGE_NAME, Component.text("Bombing",
-                                                NamedTextColor.DARK_RED));
-                                        player.damage(damage, true);
+                                        player.damage(bombDamage, true);
                                     }
 
                                     if (ticksSinceEnter >= data.effectDelay) {
@@ -270,6 +269,7 @@ public class SelectBombedRoom implements Action<Round> {
     @DataObject
     public record Data(@NotNull String warningFormatMessage,
                        @NotNull Component inAreaMessage,
+                       @NotNull Component bombingDamageType,
                        float damage,
                        int gracePeriod,
                        long damageDelay,
@@ -278,6 +278,11 @@ public class SelectBombedRoom implements Action<Round> {
                        @NotNull List<Key> exemptRooms,
                        @NotNull List<Modifier> modifiers,
                        @NotNull @ChildPath("particle") String particle) {
+        @Default("bombingDamageType")
+        public static @NotNull ConfigElement defaultBombingDamageType() {
+            return ConfigPrimitive.of("<red>Bombing");
+        }
+
         @Default("damageDelay")
         public static @NotNull ConfigElement defaultDamageDelay() {
             return ConfigPrimitive.of(100L);
