@@ -19,7 +19,7 @@ public final class Tags {
 
     public static final Tag<Long> LAST_ENTER_BOMBED_ROOM = Tag.Long("entered_bombed_room").defaultValue(-1L);
 
-    public static final Tag<UUID> IDENTIFIER = Tag.UUID("identifier");
+    public static final Tag<UUID> SKILL_IDENTIFIER = Tag.UUID("skill_identifier");
 
     public static final Tag<Component> DAMAGE_NAME = Tag.Component("damage_name");
 

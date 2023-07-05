@@ -63,7 +63,7 @@ public class ShootProjectileSkill implements Skill {
     private void onCollideWithBlock(ProjectileCollideWithBlockEvent event) {
         Entity projectile = event.getEntity();
 
-        UUID identifier = projectile.getTag(Tags.IDENTIFIER);
+        UUID identifier = projectile.getTag(Tags.SKILL_IDENTIFIER);
         if (identifier == null || !identifier.equals(uuid)) {
             return;
         }
@@ -79,7 +79,7 @@ public class ShootProjectileSkill implements Skill {
             return;
         }
 
-        UUID identifier = projectile.getTag(Tags.IDENTIFIER);
+        UUID identifier = projectile.getTag(Tags.SKILL_IDENTIFIER);
         if (identifier == null || !identifier.equals(uuid)) {
             return;
         }
@@ -131,7 +131,7 @@ public class ShootProjectileSkill implements Skill {
         Entity targetEntity = targetOptional.get();
 
         mobEntity.setTag(Tags.PROJECTILE_SHOOTER, selfEntity.getUuid());
-        mobEntity.setTag(Tags.IDENTIFIER, uuid);
+        mobEntity.setTag(Tags.SKILL_IDENTIFIER, uuid);
 
         mobEntity.setNoGravity(!data.gravity);
         mobEntity.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(mob.entity(), selfEntity,

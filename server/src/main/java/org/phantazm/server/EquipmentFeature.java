@@ -54,10 +54,7 @@ import org.phantazm.zombies.equipment.gun.visual.ClipStackMapper;
 import org.phantazm.zombies.equipment.gun.visual.ReloadStackMapper;
 import org.phantazm.zombies.equipment.perk.BasicPerkCreator;
 import org.phantazm.zombies.equipment.perk.PerkCreator;
-import org.phantazm.zombies.equipment.perk.effect.AddGroupSlotsCreator;
-import org.phantazm.zombies.equipment.perk.effect.FlaggingPerkEffectCreator;
-import org.phantazm.zombies.equipment.perk.effect.ModifierPerkEffectCreator;
-import org.phantazm.zombies.equipment.perk.effect.ShotEffectCreator;
+import org.phantazm.zombies.equipment.perk.effect.*;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyAttributeShotEffect;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyFireShotEffect;
 import org.phantazm.zombies.equipment.perk.equipment.BasicPerkEquipmentCreator;
@@ -240,6 +237,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(ModifierPerkEffectCreator.class);
         contextManager.registerElementClass(AddGroupSlotsCreator.class);
         contextManager.registerElementClass(ShotEffectCreator.class);
+        contextManager.registerElementClass(TransactionModifierPerkEffectCreator.class);
 
         //ShotEffects
         contextManager.registerElementClass(ApplyAttributeShotEffect.class);
@@ -366,9 +364,12 @@ final class EquipmentFeature {
                     equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
 
                     if (!event.shot().headshotTargets().isEmpty()) {
-                        equipmentModule.getMapStats().setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
-                    } else if (!event.shot().regularTargets().isEmpty()) {
-                        equipmentModule.getMapStats().setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
+                        equipmentModule.getMapStats()
+                                .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
+                    }
+                    else if (!event.shot().regularTargets().isEmpty()) {
+                        equipmentModule.getMapStats()
+                                .setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
                     }
                 });
 
