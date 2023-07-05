@@ -31,7 +31,7 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
     @Override
     protected @NotNull Optional<Lobby> chooseScene(@NotNull LobbyJoinRequest request) {
         Lobby maximumLobby = null;
-        int maximumWeighting = Integer.MIN_VALUE;
+        int maximumWeighting = Integer.MAX_VALUE;
 
         sceneLoop:
         for (Lobby lobby : getScenes()) {
@@ -43,7 +43,7 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
 
             int joinWeight = lobby.getJoinWeight(request);
 
-            if (joinWeight > maximumWeighting) {
+            if (joinWeight < maximumWeighting) {
                 maximumLobby = lobby;
                 maximumWeighting = joinWeight;
             }
