@@ -157,6 +157,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         futures.add(player.teleport(pos));
                     }
                     else {
+                        Utils.handleInstanceTransfer(player.getInstance(), instance, player);
                         futures.add(player.setInstance(instance, pos));
                     }
                     runnables.add(() -> {
