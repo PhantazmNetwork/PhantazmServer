@@ -66,12 +66,13 @@ public class AttributeModifyingSkill implements Skill {
         if (zombiesPlayer != null) {
             zombiesPlayer.cancellableAttribute(attribute,
                     new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
-            zombiesPlayer.getPlayer().ifPresent(effectedEntities::add);
+            effectedEntities.add(entity);
             return;
         }
 
         entity.getAttribute(attribute)
                 .addModifier(new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
+        effectedEntities.add(entity);
     }
 
     private void removeFromEntity(LivingEntity livingEntity) {
