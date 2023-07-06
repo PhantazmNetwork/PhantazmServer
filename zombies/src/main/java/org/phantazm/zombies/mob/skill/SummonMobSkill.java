@@ -4,6 +4,9 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -82,9 +85,19 @@ public class SummonMobSkill implements Skill {
         PhantazmMob mob = mobSpawner.spawn(mapObjects.module().instance(), self.entity().getPosition(), model);
         mob.entity().setTag(ownerUUID, self.entity().getUuid());
         self.entity().tagHandler().updateTag(mobCountTag, value -> value + 1);
+
+        if (data.addToRound) {
+            mapObjects.module().roundHandlerSupplier().get().currentRound().ifPresent(round -> {
+                round.addMob(mob);
+            });
+        }
     }
 
     @DataObject
-    public record Data(@NotNull Key mob, int spawnAmount, int maxSpawn) {
+    public record Data(@NotNull Key mob, int spawnAmount, int maxSpawn, boolean addToRound) {
+        @Default("addToRound")
+        public static @NotNull ConfigElement defaultAddToRound() {
+            return ConfigPrimitive.of(true);
+        }
     }
 }

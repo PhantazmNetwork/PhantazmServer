@@ -65,6 +65,12 @@ public class Round implements Tickable {
         }
     }
 
+    public void addMob(@NotNull PhantazmMob mob) {
+        if (spawnedMobs.put(mob.entity().getUuid(), mob) == null) {
+            totalMobCount++;
+        }
+    }
+
     public @Unmodifiable @NotNull List<PhantazmMob> getSpawnedMobs() {
         return List.copyOf(spawnedMobs.values());
     }
