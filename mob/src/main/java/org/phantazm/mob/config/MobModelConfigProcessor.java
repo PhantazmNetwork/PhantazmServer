@@ -80,7 +80,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ElementContext context = contextManager.makeContext(element.getNodeOrThrow("pathfindingSettings"));
 
         Pathfinding.Factory factory = context.provide(HANDLER,
-                () -> new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F)));
+                () -> new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F, 0)));
 
         ConfigNode metaNode = element.getNodeOrDefault(ConfigNode::of, "meta");
         ConfigNode extraNode = element.getNodeOrDefault(ConfigNode::of, "extra");
