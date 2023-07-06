@@ -90,6 +90,8 @@ public class AttributeModifyingSkill implements Skill {
         for (LivingEntity entity : effectedEntities) {
             removeFromEntity(entity);
         }
+
+        effectedEntities.clear();
     }
 
     @DataObject
