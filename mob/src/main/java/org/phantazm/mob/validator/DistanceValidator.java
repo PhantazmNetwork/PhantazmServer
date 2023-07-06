@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Model("mob.target_validator.distance")
-@Cache(false)
+@Cache
 public class DistanceValidator implements TargetValidator {
     private final Data data;
 
