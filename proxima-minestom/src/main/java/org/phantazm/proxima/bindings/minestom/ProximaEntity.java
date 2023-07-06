@@ -297,8 +297,12 @@ public class ProximaEntity extends LivingEntity {
         Node target = this.target;
         if (target == null && targetEntity != null && currentPath != null && currentPath.isSuccessful()) {
             Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(targetEntity.getPosition()));
-            target = new Node(synthetic.x(), synthetic.y(), synthetic.z(), 0, 0,
-                    (float)(targetEntity.getPosition().y() - targetEntity.getPosition().blockY()));
+
+            if (!pathfinding.getSettings().successPredicate()
+                    .test(synthetic.x(), synthetic.y(), synthetic.z(), current.x, current.y, current.z)) {
+                target = new Node(synthetic.x(), synthetic.y(), synthetic.z(), 0, 0,
+                        (float)(targetEntity.getPosition().y() - targetEntity.getPosition().blockY()));
+            }
         }
 
         if (target != null) {
