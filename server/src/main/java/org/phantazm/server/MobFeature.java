@@ -28,13 +28,11 @@ import org.phantazm.mob.config.MobModelConfigProcessor;
 import org.phantazm.mob.goal.*;
 import org.phantazm.mob.skill.*;
 import org.phantazm.mob.target.*;
-import org.phantazm.mob.validator.AlwaysValid;
-import org.phantazm.mob.validator.AndValidator;
-import org.phantazm.mob.validator.NotSelfValidator;
-import org.phantazm.mob.validator.OrValidator;
+import org.phantazm.mob.validator.*;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
 import org.phantazm.zombies.mob.skill.ShootProjectileSkill;
 import org.phantazm.zombies.mob.skill.SummonMobSkill;
+import org.phantazm.zombies.mob.skill.hit_action.AttributeModifierAction;
 import org.phantazm.zombies.mob.skill.hit_action.DamageAction;
 import org.phantazm.zombies.mob.validator.MobValidator;
 import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
@@ -148,6 +146,7 @@ public final class MobFeature {
         contextManager.registerElementClass(SummonMobSkill.class);
         contextManager.registerElementClass(ShootProjectileSkill.class);
         contextManager.registerElementClass(DamageAction.class);
+        contextManager.registerElementClass(AttributeModifierAction.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);
@@ -170,6 +169,7 @@ public final class MobFeature {
         contextManager.registerElementClass(AndValidator.class);
         contextManager.registerElementClass(OrValidator.class);
         contextManager.registerElementClass(NotSelfValidator.class);
+        contextManager.registerElementClass(LineOfSightValidator.class);
 
         //zombies mob validators
         contextManager.registerElementClass(ZombiesPlayerValidator.class);

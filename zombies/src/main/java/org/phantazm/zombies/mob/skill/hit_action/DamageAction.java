@@ -10,13 +10,12 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob.PhantazmMob;
 
 @Model("zombies.mob.skill.projectile.hit_action.damage")
-@Cache(false)
+@Cache
 public class DamageAction implements ProjectileHitEntityAction {
     private final Data data;
 
@@ -31,7 +30,8 @@ public class DamageAction implements ProjectileHitEntityAction {
             return;
         }
 
-        if (livingEntity.damage(Damage.fromProjectile(shooter == null ? null : shooter.entity(), projectile, data.damage),
+        if (livingEntity.damage(
+                Damage.fromProjectile(shooter == null ? null : shooter.entity(), projectile, data.damage),
                 data.bypassArmor)) {
             double yaw = Math.toRadians(projectile.getPosition().yaw());
             livingEntity.takeKnockback(data.knockback, Math.sin(yaw), -Math.cos(yaw));
