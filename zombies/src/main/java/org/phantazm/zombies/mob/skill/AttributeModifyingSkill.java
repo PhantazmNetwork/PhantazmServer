@@ -26,7 +26,7 @@ public class AttributeModifyingSkill implements Skill {
 
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
-    private final Set<LivingEntity> effectedEntities;
+    private final Set<LivingEntity> affectedEntities;
 
     @FactoryMethod
     public AttributeModifyingSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<?> targetSelector,
@@ -37,7 +37,7 @@ public class AttributeModifyingSkill implements Skill {
         this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
         this.targetSelector = targetSelector;
         this.playerMap = mapObjects.module().playerMap();
-        this.effectedEntities = Collections.newSetFromMap(new WeakHashMap<>());
+        this.affectedEntities = Collections.newSetFromMap(new WeakHashMap<>());
     }
 
     @Override
@@ -66,13 +66,13 @@ public class AttributeModifyingSkill implements Skill {
         if (zombiesPlayer != null) {
             zombiesPlayer.cancellableAttribute(attribute,
                     new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
-            effectedEntities.add(entity);
+            affectedEntities.add(entity);
             return;
         }
 
         entity.getAttribute(attribute)
                 .addModifier(new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
-        effectedEntities.add(entity);
+        affectedEntities.add(entity);
     }
 
     private void removeFromEntity(LivingEntity livingEntity) {
@@ -88,11 +88,11 @@ public class AttributeModifyingSkill implements Skill {
 
     @Override
     public void end(@NotNull PhantazmMob self) {
-        for (LivingEntity entity : effectedEntities) {
+        for (LivingEntity entity : affectedEntities) {
             removeFromEntity(entity);
         }
 
-        effectedEntities.clear();
+        affectedEntities.clear();
     }
 
     @DataObject
