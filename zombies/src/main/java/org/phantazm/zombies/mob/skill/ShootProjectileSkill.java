@@ -126,15 +126,21 @@ public class ShootProjectileSkill implements Skill {
         }
 
         ProximaEntity selfEntity = self.entity();
-        Pos selfPosition = selfEntity.getPosition();
-        PhantazmMob mob = mapObjects.mobSpawner()
-                .spawn(mapObjects.module().instance(), selfPosition.add(0, selfEntity.getEyeHeight(), 0), model);
-        ProximaEntity mobEntity = mob.entity();
-
         Entity targetEntity = targetOptional.get();
         if (!targetValidator.valid(selfEntity, targetEntity)) {
             return;
         }
+
+        Pos selfPosition = selfEntity.getPosition();
+        PhantazmMob mob = mapObjects.mobSpawner()
+                .spawn(mapObjects.module().instance(), selfPosition.add(0, selfEntity.getEyeHeight(), 0), model);
+        if (data.addToRound) {
+            mapObjects.module().roundHandlerSupplier().get().currentRound().ifPresent(round -> {
+                round.addMob(mob);
+            });
+        }
+
+        ProximaEntity mobEntity = mob.entity();
 
         mobEntity.setTag(Tags.PROJECTILE_SHOOTER, selfEntity.getUuid());
         mobEntity.setTag(Tags.SKILL_IDENTIFIER, uuid);
@@ -150,6 +156,7 @@ public class ShootProjectileSkill implements Skill {
                        double power,
                        double spread,
                        boolean gravity,
+                       boolean addToRound,
                        @NotNull @ChildPath("target_selector") String targetSelector,
                        @NotNull @ChildPath("target_validator") String targetValidator,
                        @NotNull @ChildPath("hit_validator") String hitValidator,
@@ -162,6 +169,11 @@ public class ShootProjectileSkill implements Skill {
         @Default("gravity")
         public static @NotNull ConfigElement defaultGravity() {
             return ConfigPrimitive.of(true);
+        }
+
+        @Default("addToRound")
+        public static @NotNull ConfigElement defaultAddToRound() {
+            return ConfigPrimitive.of(false);
         }
     }
 }
