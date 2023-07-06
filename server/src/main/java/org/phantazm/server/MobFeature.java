@@ -30,6 +30,7 @@ import org.phantazm.mob.skill.*;
 import org.phantazm.mob.target.*;
 import org.phantazm.mob.validator.*;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
+import org.phantazm.zombies.mob.skill.AttributeModifyingSkill;
 import org.phantazm.zombies.mob.skill.ShootProjectileSkill;
 import org.phantazm.zombies.mob.skill.SummonMobSkill;
 import org.phantazm.zombies.mob.skill.hit_action.AttributeModifierAction;
@@ -137,13 +138,13 @@ public final class MobFeature {
         contextManager.registerElementClass(DamageEntitySkill.class);
         contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
-        contextManager.registerElementClass(AttributeModifyingSkill.class);
         contextManager.registerElementClass(SendMessageSkill.class);
         contextManager.registerElementClass(JumpTowardsTargetSkill.class);
         contextManager.registerElementClass(SpawnParticleSkill.class);
         contextManager.registerElementClass(RadialDamageEntitySkill.class);
 
         contextManager.registerElementClass(SummonMobSkill.class);
+        contextManager.registerElementClass(AttributeModifyingSkill.class);
         contextManager.registerElementClass(ShootProjectileSkill.class);
         contextManager.registerElementClass(DamageAction.class);
         contextManager.registerElementClass(AttributeModifierAction.class);

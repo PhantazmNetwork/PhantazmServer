@@ -2,7 +2,8 @@ package org.phantazm.zombies.player;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.entity.Entity;
+import net.minestom.server.attribute.Attribute;
+import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -46,6 +47,13 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     void registerCancellable(@NotNull CancellableState cancellable, boolean endOld);
 
     void removeCancellable(@NotNull UUID id);
+
+    default void cancellableAttribute(@NotNull Attribute attribute, @NotNull AttributeModifier modifier) {
+        registerCancellable(CancellableState.named(modifier.getId(),
+                        () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).addModifier(modifier)),
+                        () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).removeModifier(modifier.getId()))),
+                true);
+    }
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();
