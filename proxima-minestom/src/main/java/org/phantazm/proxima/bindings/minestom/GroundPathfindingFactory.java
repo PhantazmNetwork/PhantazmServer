@@ -35,7 +35,7 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
                                      ? (x1, y1, z1, x2, y2, z2) -> x1 == x2 && y1 == y2 && z1 == z2
                                      : (x1, y1, z1, x2, y2, z2) ->
                                              Vec3D.distanceSquared(x1 + 0.5, y1, z1 + 0.5, x2 + 0.5, y2, z2 + 0.5) <=
-                                                     data.targetDeviation;
+                                                     data.targetDeviation * data.targetDeviation;
 
         return new Pathfinding(pathfinder, nodeMapLocal, spaceHandler, entityType) {
             @Override
