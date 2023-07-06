@@ -58,7 +58,7 @@ import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.context.NoContext;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
-import org.phantazm.zombies.player.state.revive.NearbyReviverFinder;
+import org.phantazm.zombies.player.state.revive.NearbyReviverPredicate;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
@@ -201,8 +201,9 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             };
 
             ReviveHandler reviveHandler =
-                    new ReviveHandler(() -> aliveStateCreator.apply(NoContext.INSTANCE), deadStateSupplier,
-                            new NearbyReviverFinder(zombiesPlayers, playerView, mapSettingsInfo.reviveRadius()), 500L);
+                    new ReviveHandler(zombiesPlayers.values(), () -> aliveStateCreator.apply(NoContext.INSTANCE),
+                            deadStateSupplier, new NearbyReviverPredicate(playerView, mapSettingsInfo.reviveRadius()),
+                            500L);
 
             CorpseCreator.Corpse corpse =
                     corpseCreator.forPlayer(instance, zombiesPlayerWrapper.get(), context.getKnockLocation(),

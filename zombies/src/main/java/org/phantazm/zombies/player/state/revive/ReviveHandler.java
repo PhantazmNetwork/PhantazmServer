@@ -8,14 +8,17 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ReviveHandler implements Activable {
+    private final Collection<? extends ZombiesPlayer> zombiesPlayers;
     private final Supplier<? extends ZombiesPlayerState> defaultStateSupplier;
     private final Supplier<? extends ZombiesPlayerState> deathStateSupplier;
-    private final Supplier<? extends ZombiesPlayer> reviverFinder;
+    private final Predicate<? super ZombiesPlayer> reviverPredicate;
 
     private final long deathTime;
 
@@ -26,12 +29,14 @@ public class ReviveHandler implements Activable {
 
     private long ticksUntilRevive = -1;
 
-    public ReviveHandler(@NotNull Supplier<? extends ZombiesPlayerState> defaultStateSupplier,
+    public ReviveHandler(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull Supplier<? extends ZombiesPlayerState> defaultStateSupplier,
             @NotNull Supplier<? extends ZombiesPlayerState> deathStateSupplier,
-            @NotNull Supplier<? extends ZombiesPlayer> reviverFinder, long deathTime) {
+            @NotNull Predicate<? super ZombiesPlayer> reviverPredicate, long deathTime) {
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.defaultStateSupplier = Objects.requireNonNull(defaultStateSupplier, "defaultStateSupplier");
         this.deathStateSupplier = Objects.requireNonNull(deathStateSupplier, "deathStateSupplier");
-        this.reviverFinder = Objects.requireNonNull(reviverFinder, "reviverFinder");
+        this.reviverPredicate = Objects.requireNonNull(reviverPredicate, "reviverPredicate");
         this.deathTime = deathTime;
         this.ticksUntilDeath = deathTime;
     }
@@ -76,7 +81,12 @@ public class ReviveHandler implements Activable {
         }
 
         if (reviver == null) {
-            reviver = reviverFinder.get();
+            for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+                if (reviverPredicate.test(zombiesPlayer)) {
+                    reviver = zombiesPlayer;
+                    break;
+                }
+            }
             if (reviver != null) {
                 ticksUntilDeath = deathTime;
                 reviver.module().getMeta().setReviving(true);
@@ -126,7 +136,8 @@ public class ReviveHandler implements Activable {
     private void clearReviverState() {
         if (reviver != null) {
             reviver.module().getMeta().setReviving(false);
-            reviver.module().getActionBar().sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
+            reviver.module().getActionBar()
+                    .sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
         }
     }
 

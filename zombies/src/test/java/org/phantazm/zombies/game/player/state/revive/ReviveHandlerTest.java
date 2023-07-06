@@ -12,12 +12,16 @@ import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class ReviveHandlerTest {
+
+    private Collection<? extends ZombiesPlayer> zombiesPlayers;
 
     private ZombiesPlayerState aliveState;
 
@@ -41,13 +45,15 @@ public class ReviveHandlerTest {
         when(module.getActionBar()).thenReturn(actionBar);
         reviver = mock(ZombiesPlayer.class);
         when(reviver.module()).thenReturn(module);
+        zombiesPlayers = Collections.singleton(reviver);
     }
 
     @Test
     public void testDeathContinuesWithoutReviver() {
         long initialDeathTime = 20L;
         ReviveHandler reviveHandler =
-                new ReviveHandler(() -> aliveState, () -> deathState, () -> null, initialDeathTime);
+                new ReviveHandler(zombiesPlayers, () -> aliveState, () -> deathState, ignored -> false,
+                        initialDeathTime);
 
         reviveHandler.tick(0L);
 
@@ -62,7 +68,8 @@ public class ReviveHandlerTest {
         when(reviver.getReviveTime()).thenReturn(reviveTime);
         long initialDeathTime = 20L;
         ReviveHandler reviveHandler =
-                new ReviveHandler(() -> aliveState, () -> deathState, () -> reviver, initialDeathTime);
+                new ReviveHandler(zombiesPlayers, () -> aliveState, () -> deathState, candidate -> candidate == reviver,
+                        initialDeathTime);
 
         reviveHandler.tick(0L);
 
@@ -76,7 +83,8 @@ public class ReviveHandlerTest {
     public void testDeathSuggestsDeathState() {
         long initialDeathTime = 0L;
         ReviveHandler reviveHandler =
-                new ReviveHandler(() -> aliveState, () -> deathState, () -> null, initialDeathTime);
+                new ReviveHandler(zombiesPlayers, () -> aliveState, () -> deathState, ignored -> false,
+                        initialDeathTime);
 
         reviveHandler.tick(0L);
 
@@ -88,7 +96,9 @@ public class ReviveHandlerTest {
     public void testReviveSuggestsAliveState() {
         long reviveTime = 0L;
         when(reviver.getReviveTime()).thenReturn(reviveTime);
-        ReviveHandler reviveHandler = new ReviveHandler(() -> aliveState, () -> deathState, () -> reviver, 20L);
+        ReviveHandler reviveHandler =
+                new ReviveHandler(zombiesPlayers, () -> aliveState, () -> deathState, candidate -> candidate == reviver,
+                        20L);
 
         reviveHandler.tick(0L);
         reviveHandler.tick(0L);
@@ -102,7 +112,8 @@ public class ReviveHandlerTest {
         when(reviver.getReviveTime()).thenReturn(10L);
         long initialDeathTime = 20L;
         ReviveHandler reviveHandler =
-                new ReviveHandler(() -> aliveState, () -> deathState, () -> reviver, initialDeathTime);
+                new ReviveHandler(zombiesPlayers, () -> aliveState, () -> deathState, candidate -> candidate == reviver,
+                        initialDeathTime);
 
         reviveHandler.tick(0L);
         reviveHandler.tick(0L);
