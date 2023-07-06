@@ -38,6 +38,11 @@ public final class Attributes {
             new Attribute("phantazm.attack_speed_multiplier", 1F, 2048F);
 
     /**
+     * When applied to a mob, modifies any headshot damage received.
+     */
+    public static final Attribute HEADSHOT_DAMAGE_MULTIPLIER = new Attribute("phantazm.headshot_multiplier", 1F, 2048F);
+
+    /**
      * The "nil" attribute. Used as a fallback when the desired attribute cannot be found.
      */
     public static final Attribute NIL = new Attribute("phantazm.nil", 0F, 0F);
@@ -49,6 +54,7 @@ public final class Attributes {
         HEAL_TICKS.register();
         DAMAGE_MULTIPLIER.register();
         ATTACK_SPEED_MULTIPLIER.register();
+        HEADSHOT_DAMAGE_MULTIPLIER.register();
         NIL.register();
     }
 }

@@ -7,7 +7,6 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.Attributes;
@@ -66,6 +65,10 @@ public class DamageShotHandler implements ShotHandler {
 
             if (attacker instanceof LivingEntity livingEntity) {
                 damage *= livingEntity.getAttributeValue(Attributes.DAMAGE_MULTIPLIER);
+            }
+
+            if (headshot) {
+                damage *= target.entity().getAttributeValue(Attributes.HEADSHOT_DAMAGE_MULTIPLIER);
             }
 
             Damage damageType = Damage.fromEntity(attacker, damage);
