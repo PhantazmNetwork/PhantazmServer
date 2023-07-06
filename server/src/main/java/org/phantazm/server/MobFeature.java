@@ -170,6 +170,7 @@ public final class MobFeature {
         contextManager.registerElementClass(OrValidator.class);
         contextManager.registerElementClass(NotSelfValidator.class);
         contextManager.registerElementClass(LineOfSightValidator.class);
+        contextManager.registerElementClass(DistanceValidator.class);
 
         //zombies mob validators
         contextManager.registerElementClass(ZombiesPlayerValidator.class);
