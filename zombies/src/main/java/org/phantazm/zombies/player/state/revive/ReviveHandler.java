@@ -82,7 +82,7 @@ public class ReviveHandler implements Activable {
 
         if (reviver == null) {
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                if (reviverPredicate.test(zombiesPlayer)) {
+                if (!zombiesPlayer.module().getMeta().isReviving() && reviverPredicate.test(zombiesPlayer)) {
                     reviver = zombiesPlayer;
                     break;
                 }
@@ -96,7 +96,7 @@ public class ReviveHandler implements Activable {
                 --ticksUntilDeath;
             }
         }
-        else if (!reviver.canRevive()) {
+        else if (!reviverPredicate.test(reviver)) {
             clearReviverState();
             reviver = null;
             ticksUntilRevive = -1;
