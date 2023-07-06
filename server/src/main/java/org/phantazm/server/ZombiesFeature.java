@@ -101,6 +101,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public final class ZombiesFeature {
@@ -150,9 +151,14 @@ public final class ZombiesFeature {
         }
 
         LOGGER.info("Preloading {} map instances", instancePaths.size());
+        List<CompletableFuture<Void>> loadFutures = new ArrayList<>(instancePaths.size());
         for (PreloadedMap map : instancePaths) {
-            instanceLoader.preload(map.instancePath, map.spawn, map.chunkLoadRange);
+            loadFutures.add(CompletableFuture.runAsync(() -> {
+                instanceLoader.preload(map.instancePath, map.spawn, map.chunkLoadRange);
+            }));
         }
+
+        CompletableFuture.allOf(loadFutures.toArray(CompletableFuture[]::new)).join();
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
         TeamManager teamManager = MinecraftServer.getTeamManager();
