@@ -1,22 +1,21 @@
 package org.phantazm.zombies.listener;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.collision.CollisionUtils;
+import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.entity.damage.DamageType;
-import net.minestom.server.entity.damage.EntityDamage;
-import net.minestom.server.entity.damage.EntityProjectileDamage;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.PhysicsUtils;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
-import org.phantazm.zombies.damage.ZombiesDamageType;
 import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -71,6 +70,14 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         }
 
         Pos deathPosition = event.getEntity().getPosition();
+        // +2 just to sidestep any block border issues
+        double heightAboveBottom = deathPosition.y() - event.getInstance().getDimensionType().getMinY() + 2;
+        PhysicsResult collision = CollisionUtils.handlePhysics(event.getEntity(), new Vec(0, -heightAboveBottom, 0));
+        if (PhysicsUtils.hasCollision(collision)) {
+            deathPosition = collision.newPosition();
+            event.getEntity().teleport(deathPosition).join();
+        }
+
         Component killer = getKiller(event);
         Component roomName = getRoomName(deathPosition);
 
