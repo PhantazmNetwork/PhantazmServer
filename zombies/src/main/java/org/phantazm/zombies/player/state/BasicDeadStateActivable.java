@@ -1,12 +1,13 @@
 package org.phantazm.zombies.player.state;
 
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -57,6 +58,11 @@ public class BasicDeadStateActivable implements Activable {
             sidebar.addViewer(player);
             tabList.addViewer(player);
         });
+
+        Set<Player> players = new HashSet<>(instance.getPlayers());
+        playerView.getPlayer().ifPresent(players::remove);
+        Audience instanceAudience = PacketGroupingAudience.of(players);
+
         playerView.getDisplayName().thenAccept(displayName -> {
             if (context.isRejoin()) {
                 TagResolver rejoinerPlaceholder = Placeholder.component("rejoiner", displayName);
@@ -64,15 +70,18 @@ public class BasicDeadStateActivable implements Activable {
                 return;
             }
 
-            Set<Player> players = new HashSet<>(instance.getPlayers());
             TagResolver[] tagResolvers = getTagResolvers(displayName);
             playerView.getPlayer().ifPresent(player -> {
-                players.remove(player);
                 player.sendMessage(miniMessage.deserialize(settings.deathMessageToKilledFormat(), tagResolvers));
             });
-            Audience instanceAudience = PacketGroupingAudience.of(players);
             instanceAudience.sendMessage(miniMessage.deserialize(settings.deathMessageToOthersFormat(), tagResolvers));
         });
+
+        Point deathLocation = context.getDeathLocation();
+        if (deathLocation != null) {
+            instanceAudience.playSound(settings.deathSound(), deathLocation.x(), deathLocation.y(),
+                    deathLocation.z());
+        }
 
         stats.setDeaths(stats.getDeaths() + 1);
         accessRegistry.switchAccess(InventoryKeys.DEAD_ACCESS);

@@ -18,6 +18,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ConfigProcessors;
+import org.phantazm.commons.chat.ChatDestination;
+import org.phantazm.commons.chat.MessageWithDestination;
 import org.phantazm.commons.vector.VectorConfigProcessors;
 
 import java.util.*;
@@ -312,6 +314,27 @@ public final class MapProcessors {
         }
     };
 
+    private static final ConfigProcessor<ChatDestination> chatDestination =
+            ConfigProcessor.enumProcessor(ChatDestination.class);
+
+    private static final ConfigProcessor<MessageWithDestination> messageWithDestination = new ConfigProcessor<>() {
+        @Override
+        public MessageWithDestination dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
+            Component message = ConfigProcessors.component().dataFromElement(element.getElementOrThrow("component"));
+            ChatDestination destination = chatDestination.dataFromElement(element.getElementOrThrow("destination"));
+            return new MessageWithDestination(message, destination);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(MessageWithDestination messageWithDestination) {
+            return ConfigNode.of("component", messageWithDestination.component(), "destination",
+                    messageWithDestination.destination());
+        }
+    };
+
+    private static final ConfigProcessor<List<List<MessageWithDestination>>> messageWithDestinationListList =
+            messageWithDestination.listProcessor().listProcessor();
+
     private static final ConfigProcessor<MapSettingsInfo> mapInfo = new ConfigProcessor<>() {
         @Override
         public MapSettingsInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
@@ -335,7 +358,8 @@ public final class MapProcessors {
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("displayName"));
             String displayItemTag = element.getStringOrThrow("displayItemSnbt");
             long idleRevertTicks = element.getNumberOrThrow("idleRevertTicks").longValue();
-            List<Component> introMessages = componentList.dataFromElement(element.getElementOrThrow("introMessages"));
+            List<List<MessageWithDestination>> introMessages =
+                    messageWithDestinationListList.dataFromElement(element.getElementOrThrow("introMessages"));
             long countdownTicks = element.getNumberOrThrow("countdownTicks").longValue();
             List<Long> countdownAlertTicks = ConfigProcessor.LONG.listProcessor()
                     .dataFromElement(element.getElementOrThrow("countdownAlertTicks"));
@@ -377,12 +401,17 @@ public final class MapProcessors {
             String reviveStatusToReviverFormat = element.getStringOrThrow("reviveStatusToReviverFormat");
             String reviveStatusToKnockedFormat = element.getStringOrThrow("reviveStatusToKnockedFormat");
             String dyingStatusFormat = element.getStringOrThrow("dyingStatusFormat");
+            String reviveMessageToRevivedFormat = element.getStringOrThrow("reviveMessageToRevivedFormat");
+            String reviveMessageToOthersFormat = element.getStringOrThrow("reviveMessageToOthersFormat");
+            Sound reviveSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("reviveSound"));
             String knockedMessageToKnockedFormat = element.getStringOrThrow("knockedMessageToKnockedFormat");
             String knockedMessageToOthersFormat = element.getStringOrThrow("knockedMessageToOthersFormat");
             String knockedTitleFormat = element.getStringOrThrow("knockedTitleFormat");
             String knockedSubtitleFormat = element.getStringOrThrow("knockedSubtitleFormat");
+            Sound knockedSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("knockedSound"));
             String deathMessageToKilledFormat = element.getStringOrThrow("deathMessageToKilledFormat");
             String deathMessageToOthersFormat = element.getStringOrThrow("deathMessageToOthersFormat");
+            Sound deathSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("deathSound"));
             String rejoinMessageFormat = element.getStringOrThrow("rejoinMessageFormat");
             String quitMessageFormat = element.getStringOrThrow("quitMessageFormat");
             Component nearWindowMessage =
@@ -404,10 +433,12 @@ public final class MapProcessors {
                     healTicks, reviveRadius, perksLostOnDeath, baseReviveTicks, rollsPerChest, punchDamage, punchRange,
                     punchKnockback, punchCooldown, mobPlayerCollisions, defaultEquipment, equipmentGroups,
                     winTitleFormat, winSubtitleFormat, lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat,
-                    reviveStatusToKnockedFormat, dyingStatusFormat, knockedMessageToKnockedFormat,
-                    knockedMessageToOthersFormat, knockedTitleFormat, knockedSubtitleFormat, deathMessageToKilledFormat,
-                    deathMessageToOthersFormat, rejoinMessageFormat, quitMessageFormat, nearWindowMessage,
-                    startRepairingMessage, stopRepairingMessage, finishRepairingMessage, enemiesNearbyMessage);
+                    reviveStatusToKnockedFormat, dyingStatusFormat, reviveMessageToRevivedFormat,
+                    reviveMessageToOthersFormat, reviveSound, knockedMessageToKnockedFormat,
+                    knockedMessageToOthersFormat, knockedTitleFormat, knockedSubtitleFormat, knockedSound,
+                    deathMessageToKilledFormat, deathMessageToOthersFormat, deathSound, rejoinMessageFormat,
+                    quitMessageFormat, nearWindowMessage, startRepairingMessage, stopRepairingMessage,
+                    finishRepairingMessage, enemiesNearbyMessage);
         }
 
         @Override
@@ -426,7 +457,7 @@ public final class MapProcessors {
             node.put("displayName", ConfigProcessors.component().elementFromData(mapConfig.displayName()));
             node.putString("displayItemSnbt", mapConfig.displayItemSnbt());
             node.putNumber("idleRevertTicks", mapConfig.idleRevertTicks());
-            node.put("introMessages", componentList.elementFromData(mapConfig.introMessages()));
+            node.put("introMessages", messageWithDestinationListList.elementFromData(mapConfig.introMessages()));
             node.putNumber("countdownTicks", mapConfig.countdownTicks());
             node.put("countdownAlertTicks",
                     ConfigProcessor.LONG.listProcessor().elementFromData(mapConfig.countdownAlertTicks()));
@@ -463,12 +494,17 @@ public final class MapProcessors {
             node.putString("reviveStatusToReviverFormat", mapConfig.reviveStatusToReviverFormat());
             node.putString("reviveStatusToKnockedFormat", mapConfig.reviveStatusToKnockedFormat());
             node.putString("dyingStatusFormat", mapConfig.dyingStatusFormat());
+            node.putString("reviveMessageToRevivedFormat", mapConfig.reviveMessageToRevivedFormat());
+            node.putString("reviveMessageToOthersFormat", mapConfig.reviveMessageToOthersFormat());
+            node.put("reviveSound", ConfigProcessors.sound().elementFromData(mapConfig.reviveSound()));
             node.putString("knockedMessageToKnockedFormat", mapConfig.knockedMessageToKnockedFormat());
             node.putString("knockedMessageToOthersFormat", mapConfig.knockedMessageToOthersFormat());
             node.putString("knockedTitleFormat", mapConfig.knockedTitleFormat());
             node.putString("knockedSubtitleFormat", mapConfig.knockedTitleFormat());
+            node.put("knockedSound", ConfigProcessors.sound().elementFromData(mapConfig.knockedSound()));
             node.putString("deathMessageToKilledFormat", mapConfig.deathMessageToKilledFormat());
             node.putString("deathMessageToOthersFormat", mapConfig.deathMessageToOthersFormat());
+            node.put("deathSound", ConfigProcessors.sound().elementFromData(mapConfig.deathSound()));
             node.putString("rejoinMessageFormat", mapConfig.rejoinMessageFormat());
             node.putString("quitMessageFormat", mapConfig.quitMessageFormat());
             node.put("nearWindowMessage", ConfigProcessors.component().elementFromData(mapConfig.nearWindowMessage()));

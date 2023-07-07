@@ -4,7 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.TitlePart;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.chat.ChatDestination;
+import org.phantazm.commons.chat.MessageWithDestination;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.audience.AudienceProvider;
 
@@ -16,8 +16,6 @@ public class AlertNoAmmoEffect implements GunEffect {
     private final Data data;
 
     private final AudienceProvider audienceProvider;
-
-    private boolean currentlyActive = true;
 
     private boolean hadNoAmmo = false;
 
@@ -33,21 +31,19 @@ public class AlertNoAmmoEffect implements GunEffect {
         if (state.isMainEquipment()) {
             if (state.ammo() == 0) {
                 audienceProvider.provideAudience().ifPresent(audience -> {
-                    switch (data.destination()) {
-                        case TITLE -> audience.sendTitlePart(TitlePart.TITLE, data.message());
-                        case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, data.message());
-                        case CHAT -> audience.sendMessage(data.message());
-                        case ACTION_BAR -> audience.sendActionBar(data.message());
+                    switch (data.message().destination()) {
+                        case TITLE -> audience.sendTitlePart(TitlePart.TITLE, data.message().component());
+                        case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, data.message().component());
+                        case CHAT -> audience.sendMessage(data.message().component());
+                        case ACTION_BAR -> audience.sendActionBar(data.message().component());
                     }
                 });
 
                 hadNoAmmo = true;
             }
-
-            currentlyActive = true;
         } else {
             audienceProvider.provideAudience().ifPresent(audience -> {
-                switch (data.destination) {
+                switch (data.message().destination()) {
                     case TITLE -> audience.sendTitlePart(TitlePart.TITLE, Component.empty());
                     case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, Component.empty());
                     case ACTION_BAR -> audience.sendActionBar(Component.empty());
@@ -55,7 +51,6 @@ public class AlertNoAmmoEffect implements GunEffect {
             });
 
             hadNoAmmo = false;
-            currentlyActive = false;
         }
     }
 
@@ -63,7 +58,7 @@ public class AlertNoAmmoEffect implements GunEffect {
     public void tick(@NotNull GunState state, long time) {
         if (state.isMainEquipment() && hadNoAmmo && state.ammo() > 0) {
             audienceProvider.provideAudience().ifPresent(audience -> {
-                switch (data.destination) {
+                switch (data.message().destination()) {
                     case TITLE -> audience.sendTitlePart(TitlePart.TITLE, Component.empty());
                     case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, Component.empty());
                     case ACTION_BAR -> audience.sendActionBar(Component.empty());
@@ -76,8 +71,7 @@ public class AlertNoAmmoEffect implements GunEffect {
 
     @DataObject
     public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
-                       @NotNull Component message,
-                       @NotNull ChatDestination destination) {
+                       @NotNull MessageWithDestination message) {
     }
 
 }

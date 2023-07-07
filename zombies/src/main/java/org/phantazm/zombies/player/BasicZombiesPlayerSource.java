@@ -53,10 +53,7 @@ import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.*;
-import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
-import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
-import org.phantazm.zombies.player.state.context.NoContext;
-import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
+import org.phantazm.zombies.player.state.context.*;
 import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverPredicate;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
@@ -143,7 +140,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     }
                 }
                 catch (NBTException e) {
-                    LOGGER.warn("Failed to load item in slot {} because its NBT string is invalid: {}", i, e);
+                    LOGGER.warn("Failed to load item in slot {} because its NBT string is invalid:", i, e);
                 }
             }
 
@@ -171,9 +168,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Sidebar sidebar = new Sidebar(mapSettingsInfo.scoreboardHeader());
         TabList tabList = new TabList(UUID.randomUUID().toString(), ScoreboardObjectivePacket.Type.INTEGER);
 
-        Function<NoContext, ZombiesPlayerState> aliveStateCreator = unused -> {
+        Function<AlivePlayerStateContext, ZombiesPlayerState> aliveStateCreator = context -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE"), ZombiesPlayerStateKeys.ALIVE.key(),
-                    List.of(new BasicAliveStateActivable(accessRegistry, playerView, sidebar, tabList)));
+                    List.of(new BasicAliveStateActivable(context, instance, accessRegistry, playerView, mapSettingsInfo,
+                            sidebar, tabList)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
                 (context, activables) -> {
@@ -189,8 +187,9 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             Wrapper<CorpseCreator.Corpse> corpseWrapper = Wrapper.ofNull();
             Supplier<ZombiesPlayerState> deadStateSupplier = () -> {
-                DeadPlayerStateContext deathContext = DeadPlayerStateContext.killed(context.getKiller().orElse(null),
-                        context.getKnockRoom().orElse(null));
+                DeadPlayerStateContext deathContext =
+                        DeadPlayerStateContext.killed(context.getKnockLocation(), context.getKiller().orElse(null),
+                                context.getKnockRoom().orElse(null));
                 return deadStateCreator.apply(deathContext,
                         List.of(corpseWrapper.get().asDeathActivable(), new Activable() {
                             @Override
@@ -201,9 +200,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             };
 
             ReviveHandler reviveHandler =
-                    new ReviveHandler(zombiesPlayers.values(), () -> aliveStateCreator.apply(NoContext.INSTANCE),
-                            deadStateSupplier, new NearbyReviverPredicate(playerView, mapSettingsInfo.reviveRadius()),
-                            500L);
+                    new ReviveHandler(context, zombiesPlayers.values(), aliveStateCreator, deadStateSupplier,
+                            new NearbyReviverPredicate(playerView, mapSettingsInfo.reviveRadius()), 500L);
 
             CorpseCreator.Corpse corpse =
                     corpseCreator.forPlayer(instance, zombiesPlayerWrapper.get(), context.getKnockLocation(),

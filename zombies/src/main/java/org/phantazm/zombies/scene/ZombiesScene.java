@@ -26,6 +26,7 @@ import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
+import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.NoContext;
 import org.phantazm.zombies.stage.Stage;
@@ -178,7 +179,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     runnables.add(() -> {
                         ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
                         zombiesPlayer.start();
-                        zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                        zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.regular());
                         zombiesPlayers.put(view.getUUID(), zombiesPlayer);
                     });
                 });

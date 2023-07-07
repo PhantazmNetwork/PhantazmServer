@@ -2,6 +2,7 @@ package org.phantazm.zombies.player.state;
 
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -101,6 +102,7 @@ public class BasicKnockedStateActivable implements Activable {
                     miniMessage.deserialize(settings.knockedTitleFormat(), tagResolvers));
             instanceAudience.sendTitlePart(TitlePart.SUBTITLE,
                     miniMessage.deserialize(settings.knockedSubtitleFormat(), tagResolvers));
+            instanceAudience.playSound(settings.knockedSound(), Sound.Emitter.self());
         });
 
         stats.setKnocks(stats.getKnocks() + 1);

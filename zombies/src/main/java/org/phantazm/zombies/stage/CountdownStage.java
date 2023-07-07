@@ -8,9 +8,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.chat.MessageWithDestination;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -83,8 +85,18 @@ public class CountdownStage implements Stage {
     @Override
     public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
         zombiesPlayer.getPlayer().ifPresent(player -> {
-            if (!settings.introMessages().isEmpty()) {
-                player.sendMessage(settings.introMessages().get(random.nextInt(settings.introMessages().size())));
+            if (settings.introMessages().isEmpty()) {
+                return;
+            }
+
+            List<MessageWithDestination> messages = settings.introMessages().get(random.nextInt(settings.introMessages().size()));
+            for (MessageWithDestination message : messages) {
+                switch (message.destination()) {
+                    case TITLE -> player.sendTitlePart(TitlePart.TITLE, message.component());
+                    case SUBTITLE -> player.sendTitlePart(TitlePart.SUBTITLE, message.component());
+                    case CHAT -> player.sendMessage(message.component());
+                    case ACTION_BAR -> player.sendActionBar(message.component());
+                }
             }
         });
 
@@ -114,6 +126,27 @@ public class CountdownStage implements Stage {
     @Override
     public void start() {
         ticksRemaining.set(initialTicks);
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            if (zombiesPlayer.hasQuit()) {
+                continue;
+            }
+
+            zombiesPlayer.getPlayer().ifPresent(player -> {
+                if (settings.introMessages().isEmpty()) {
+                    return;
+                }
+
+                List<MessageWithDestination> messages = settings.introMessages().get(random.nextInt(settings.introMessages().size()));
+                for (MessageWithDestination message : messages) {
+                    switch (message.destination()) {
+                        case TITLE -> player.sendTitlePart(TitlePart.TITLE, message.component());
+                        case SUBTITLE -> player.sendTitlePart(TitlePart.SUBTITLE, message.component());
+                        case CHAT -> player.sendMessage(message.component());
+                        case ACTION_BAR -> player.sendActionBar(message.component());
+                    }
+                }
+            });
+        }
     }
 
     @Override

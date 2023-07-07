@@ -10,7 +10,7 @@ import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.time.TickFormatter;
-import org.phantazm.zombies.chat.ChatDestination;
+import org.phantazm.commons.chat.ChatDestination;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 

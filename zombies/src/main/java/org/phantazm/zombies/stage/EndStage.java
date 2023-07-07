@@ -10,6 +10,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.title.TitlePart;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
@@ -198,7 +200,9 @@ public class EndStage implements Stage {
             zombiesPlayer.module().getMeta().setInGame(false);
 
             if (zombiesPlayer.isState(ZombiesPlayerStateKeys.KNOCKED)) {
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.killed(null, null));
+                Point deathLocation = zombiesPlayer.getPlayer().map(Player::getPosition).orElse(null);
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD,
+                        DeadPlayerStateContext.killed(deathLocation, null, null));
             }
         }
     }
@@ -221,20 +225,23 @@ public class EndStage implements Stage {
             CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenCompose(ignored -> {
                 List<String> formattedUsernames = new ArrayList<>(futures.size());
                 for (int i = 0; i < futures.size(); i++) {
-                    formattedUsernames.add(MessageFormat.format(webhook.playerFormat(), futures.get(i).join(), kills.getInt(i)));
+                    formattedUsernames.add(
+                            MessageFormat.format(webhook.playerFormat(), futures.get(i).join(), kills.getInt(i)));
                 }
 
                 String playerList = String.join(", ", formattedUsernames);
                 String output = MessageFormat.format(webhook.webhookFormat(), date, time, playerList);
-                HttpRequest request = HttpRequest.newBuilder(URI.create(webhook.webhookURL())).header("Content-Type",
-                        "application/json").POST(HttpRequest.BodyPublishers.ofString(output)).build();
+                HttpRequest request = HttpRequest.newBuilder(URI.create(webhook.webhookURL()))
+                        .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(output))
+                        .build();
                 return client.sendAsync(request, HttpResponse.BodyHandlers.discarding());
             }).whenComplete((ignored, throwable) -> {
                 if (throwable != null) {
                     LOGGER.warn("Failed to send webhook", throwable);
                 }
             });
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOGGER.warn("Failed to send webhook", e);
         }
     }

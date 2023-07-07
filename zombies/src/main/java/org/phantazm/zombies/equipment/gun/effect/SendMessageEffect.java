@@ -5,7 +5,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.TitlePart;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.chat.ChatDestination;
+import org.phantazm.commons.chat.MessageWithDestination;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.audience.AudienceProvider;
 
@@ -38,11 +38,11 @@ public class SendMessageEffect implements GunEffect {
     @Override
     public void apply(@NotNull GunState state) {
         audienceProvider.provideAudience().ifPresent(audience -> {
-            switch (data.destination()) {
-                case TITLE -> audience.sendTitlePart(TitlePart.TITLE, data.message());
-                case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, data.message());
-                case CHAT -> audience.sendMessage(data.message());
-                case ACTION_BAR -> audience.sendActionBar(data.message());
+            switch (data.message().destination()) {
+                case TITLE -> audience.sendTitlePart(TitlePart.TITLE, data.message().component());
+                case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, data.message().component());
+                case CHAT -> audience.sendMessage(data.message().component());
+                case ACTION_BAR -> audience.sendActionBar(data.message().component());
             }
         });
     }
@@ -60,7 +60,6 @@ public class SendMessageEffect implements GunEffect {
      */
     @DataObject
     public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
-                       @NotNull Component message,
-                       @NotNull ChatDestination destination) {
+                       @NotNull MessageWithDestination message) {
     }
 }

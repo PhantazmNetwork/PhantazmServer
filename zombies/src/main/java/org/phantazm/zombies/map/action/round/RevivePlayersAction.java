@@ -8,6 +8,7 @@ import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
+import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.NoContext;
 
 import java.util.Map;
@@ -34,7 +35,7 @@ public class RevivePlayersAction implements Action<Round> {
                     zombiesPlayer.getPlayer().ifPresent(player -> player.teleport(respawnPos));
                 }
 
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.regular());
             }
         }
     }
