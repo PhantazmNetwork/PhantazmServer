@@ -74,7 +74,6 @@ public class ProximaEntity extends LivingEntity {
         pathfinding.getNavigator().cancel();
 
         targetEntity = null;
-        destination = null;
         currentPath = null;
 
         current = null;
@@ -92,6 +91,7 @@ public class ProximaEntity extends LivingEntity {
     public void setDestination(@Nullable PathTarget destination) {
         if (destination == null && this.destination != null) {
             cancelPath();
+            this.destination = null;
             return;
         }
 
@@ -113,6 +113,7 @@ public class ProximaEntity extends LivingEntity {
 
         if (targetEntity == null) {
             cancelPath();
+            this.destination = null;
             return;
         }
 
@@ -189,8 +190,9 @@ public class ProximaEntity extends LivingEntity {
         Navigator navigator = pathfinding.getNavigator();
 
         if (targetEntity != null && !pathfinding.isValidTarget(targetEntity)) {
-            targetEntity = null;
             cancelPath();
+            targetEntity = null;
+            destination = null;
             return;
         }
 
