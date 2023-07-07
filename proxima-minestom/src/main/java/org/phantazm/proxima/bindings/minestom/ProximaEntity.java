@@ -204,8 +204,8 @@ public class ProximaEntity extends LivingEntity {
                 currentPath = null;
             }
         }
-        else if (destination != null && pathfinding.canPathfind(this) &&
-                (time - lastPathfind > recalculationDelay && destination.hasChanged())) {
+        else if (destination != null && pathfinding.canPathfind(this) && (time - lastPathfind > recalculationDelay &&
+                (destination.hasChanged() || (currentPath != null && !currentPath.isSuccessful())))) {
             navigator.navigate(position.x(), position.y(), position.z(), destination);
             this.lastPathfind = time;
         }
