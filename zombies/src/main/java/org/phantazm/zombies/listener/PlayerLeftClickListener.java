@@ -76,6 +76,10 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
             Instance instance = player.getInstance();
             assert instance != null;
 
+            if (!zombiesPlayer.canDoGenericActions()) {
+                return;
+            }
+
             boolean godmode = zombiesPlayer.flags().hasFlag(Flags.GODMODE);
 
             long currentTime = 0L;
