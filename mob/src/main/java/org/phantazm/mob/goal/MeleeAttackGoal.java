@@ -10,7 +10,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.skill.Skill;
@@ -75,7 +74,8 @@ public class MeleeAttackGoal implements GoalCreator {
                     return false;
                 }
 
-                return self.getDistanceSquared(target) <= data.range * data.range;
+                return self.getBoundingBox().expand(data.range, data.range, data.range)
+                        .intersectEntity(self.getPosition(), target);
             }
 
             return false;

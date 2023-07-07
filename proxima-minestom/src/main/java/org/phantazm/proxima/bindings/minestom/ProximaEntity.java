@@ -32,7 +32,7 @@ import java.util.UUID;
  * An entity with navigation capabilities based on the Proxima library.
  */
 public class ProximaEntity extends LivingEntity {
-    private static final double NODE_REACH_DISTANCE = 0.4;
+    private static final double NODE_REACH_DISTANCE = 0.2;
 
     protected final Pathfinding pathfinding;
     protected final List<GoalGroup> goalGroups;

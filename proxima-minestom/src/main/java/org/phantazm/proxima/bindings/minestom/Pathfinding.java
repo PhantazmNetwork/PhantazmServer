@@ -27,7 +27,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
-    public static final double PATH_EPSILON = 1E-4;
+    public static final double PLAYER_PATH_EPSILON = 1E-4;
+
+    public static final double MOB_PATH_EPSILON = 1E-6;
 
     public interface Factory {
         @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
@@ -77,7 +79,7 @@ public class Pathfinding {
         EntityType type = entity.getEntityType();
         return PositionResolver.asIfByInitial(
                 new BasicNodeSnapper(spaceHandler.space(), type.width(), type.height(), fallTolerance(), jumpHeight(),
-                        PATH_EPSILON), 16, type.width(), PATH_EPSILON);
+                        PLAYER_PATH_EPSILON), 16, type.width(), PLAYER_PATH_EPSILON);
     }
 
     public @NotNull BiPredicate<Vec3D, Vec3D> targetChangePredicate(@NotNull Entity entity) {
@@ -139,7 +141,7 @@ public class Pathfinding {
 
     protected @NotNull NodeSnapper nodeSnapper() {
         return new BasicNodeSnapper(spaceHandler.space(), entityType.width(), entityType.height(), fallTolerance(),
-                jumpHeight(), PATH_EPSILON);
+                jumpHeight(), MOB_PATH_EPSILON);
     }
 
     protected @NotNull Explorer explorer() {
