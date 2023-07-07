@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
-    public static final double PATH_EPSILON = 1E-3;
+    public static final double PATH_EPSILON = 1E-4;
 
     public interface Factory {
         @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
