@@ -166,7 +166,7 @@ public class InstanceSpace extends ConcurrentCachingSpace {
             for (BoundingBox boundingBox : bounds) {
                 if (boundingBox.maxY() > 1) {
                     double minY = boundingBox.minY();
-                    upper.add(Bounds3D.immutable(boundingBox.minX(), 1, boundingBox.minZ(), boundingBox.width(),
+                    upper.add(Bounds3D.immutable(boundingBox.minX(), 0, boundingBox.minZ(), boundingBox.width(),
                             boundingBox.height() - 1, boundingBox.depth()));
 
                     if (minY < 1) {
