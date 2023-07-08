@@ -45,18 +45,13 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
                 }
             }
 
-            long readStamp = lock.readLock();
+            long writeStamp = lock.writeLock();
             try {
                 Optional<TScene> sceneOptional = chooseScene(request);
                 if (sceneOptional.isPresent()) {
                     return sceneOptional;
                 }
-            } finally {
-                lock.unlockRead(readStamp);
-            }
 
-            long writeStamp = lock.writeLock();
-            try {
                 if (scenes.size() >= maximumScenes) {
                     return Optional.empty();
                 }
