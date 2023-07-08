@@ -315,9 +315,9 @@ public class ProximaEntity extends LivingEntity {
             double currentZ = pos.z();
 
             if (!controller.hasControl()) {
-                if (!(MathUtils.fuzzyEquals(currentX, lastX, Vec.EPSILON) &&
-                        MathUtils.fuzzyEquals(currentY, lastY, Vec.EPSILON) &&
-                        MathUtils.fuzzyEquals(currentZ, lastZ, Vec.EPSILON))) {
+                if (!(MathUtils.fuzzyEquals(currentX, lastX, Pathfinding.MOB_PATH_EPSILON) &&
+                        MathUtils.fuzzyEquals(currentY, lastY, Pathfinding.MOB_PATH_EPSILON) &&
+                        MathUtils.fuzzyEquals(currentZ, lastZ, Pathfinding.MOB_PATH_EPSILON))) {
                     lastMoved = time;
                 }
                 else if (time - lastMoved > pathfinding.immobileThreshold()) {
