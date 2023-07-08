@@ -32,7 +32,9 @@ import java.util.UUID;
  * An entity with navigation capabilities based on the Proxima library.
  */
 public class ProximaEntity extends LivingEntity {
-    private static final double NODE_REACH_DISTANCE = 0.2;
+    private static final double NODE_REACH_DISTANCE_SQ = 0.2;
+    private static final double NODE_DEVIATION_DISTANCE_SQ = 2.5;
+    private static final double ENTITY_LOOK_DISTANCE_SQ = 100;
 
     protected final Pathfinding pathfinding;
     protected final List<GoalGroup> goalGroups;
@@ -196,7 +198,7 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
-        if (targetEntity != null && getDistanceSquared(targetEntity) < 100) {
+        if (targetEntity != null && getDistanceSquared(targetEntity) < ENTITY_LOOK_DISTANCE_SQ) {
             lookAt(targetEntity);
         }
 
@@ -272,7 +274,7 @@ public class ProximaEntity extends LivingEntity {
 
         Pos position = getPosition();
         return position.distanceSquared(new Vec(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5)) <
-                NODE_REACH_DISTANCE;
+                NODE_REACH_DISTANCE_SQ;
     }
 
     private enum MoveResult {
@@ -284,8 +286,8 @@ public class ProximaEntity extends LivingEntity {
     protected MoveResult moveAlongPath(long time) {
         Point pos = getPosition();
 
-        if (pos.distanceSquared(current.x + 0.5, current.y + current.blockOffset, current.z + 0.5) > 3 &&
-                !current.equals(currentPath.head())) {
+        if (pos.distanceSquared(current.x + 0.5, current.y + current.blockOffset, current.z + 0.5) >
+                NODE_DEVIATION_DISTANCE_SQ && !current.equals(currentPath.head())) {
             return MoveResult.CANCEL;
         }
 

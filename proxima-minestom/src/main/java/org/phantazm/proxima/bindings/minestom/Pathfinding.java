@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
-    public static final double PLAYER_PATH_EPSILON = 1E-4;
+    public static final double PLAYER_PATH_EPSILON = 0.00015;
 
     public static final double MOB_PATH_EPSILON = 1E-6;
 

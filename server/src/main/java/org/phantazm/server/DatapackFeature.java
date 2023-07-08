@@ -1,5 +1,6 @@
 package org.phantazm.server;
 
+import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.biomes.Biome;
 import net.minestom.server.world.biomes.BiomeManager;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class DatapackFeature {
@@ -37,7 +39,8 @@ public class DatapackFeature {
                 try {
                     datapack = loadDatapackFromPath(loader, zipPath);
                     ++loadedDatapacks;
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     LOGGER.warn("Failed to load datapack at {}", zipPath, e);
                     continue;
                 }
@@ -52,16 +55,20 @@ public class DatapackFeature {
         biomeManager.removeBiome(Biome.PLAINS);
         int id = -1;
         boolean hasPlains = false;
+
+        Collection<IntObjectPair<Biome>> biomeEntries = new ArrayList<>(biomes.size());
         for (Biome biome : biomes) {
             if (biome.name().equals(plainsID)) {
                 hasPlains = true;
             }
 
-            biomeManager.addBiome(++id, biome);
+            biomeEntries.add(IntObjectPair.of(++id, biome));
         }
         if (!hasPlains) {
-            biomeManager.addBiome(++id, Biome.PLAINS);
+            biomeEntries.add(IntObjectPair.of(++id, Biome.PLAINS));
         }
+
+        biomeManager.addBiomes(biomeEntries);
     }
 
     private static Datapack loadDatapackFromPath(DatapackLoader loader, Path zipPath) throws IOException {
