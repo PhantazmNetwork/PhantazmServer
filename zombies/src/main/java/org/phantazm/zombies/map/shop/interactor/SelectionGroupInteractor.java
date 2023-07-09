@@ -25,12 +25,12 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     @FactoryMethod
     public SelectionGroupInteractor(@NotNull Data data,
-            @NotNull @Child("inactive_interactors") List<ShopInteractor> inactiveInteractors,
             @NotNull @Child("active_interactors") List<ShopInteractor> activeInteractors,
+            @NotNull @Child("inactive_interactors") List<ShopInteractor> inactiveInteractors,
             @NotNull InteractorGroupHandler handler, @NotNull Random random) {
         this.data = data;
-        this.inactiveInteractors = inactiveInteractors;
         this.activeInteractors = activeInteractors;
+        this.inactiveInteractors = inactiveInteractors;
         this.handler = handler;
         this.random = random;
 
@@ -89,6 +89,8 @@ public class SelectionGroupInteractor implements ShopInteractor {
         else {
             shop.flags().clearFlag(data.group);
         }
+
+        this.active = active;
     }
 
     public boolean isActive() {
@@ -97,6 +99,7 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     @DataObject
     public record Data(@NotNull Key group,
+                       @NotNull @ChildPath("active_interactors") List<String> activeInteractors,
                        @NotNull @ChildPath("inactive_interactors") List<String> inactiveInteractors) {
     }
 }
