@@ -241,6 +241,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlaySoundInteractor.class);
         contextManager.registerElementClass(DelayedInteractor.class);
         contextManager.registerElementClass(ConditionalInteractor.class);
+        contextManager.registerElementClass(CountingInteractor.class);
         contextManager.registerElementClass(OpenGuiInteractor.class);
         contextManager.registerElementClass(CloseGuiInteractor.class);
         contextManager.registerElementClass(AddEquipmentInteractor.class);

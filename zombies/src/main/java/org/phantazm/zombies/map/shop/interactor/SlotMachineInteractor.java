@@ -33,6 +33,7 @@ public class SlotMachineInteractor implements ShopInteractor {
     private final List<ShopInteractor> mismatchedPlayerInteractors;
     private final List<ShopInteractor> whileRollingInteractors;
     private final List<ShopInteractor> timeoutExpiredInteractors;
+    private final List<ShopInteractor> itemClaimedInteractors;
     private final Random random;
 
     //non-null in tick and interaction methods - set in initialize(Shop)
@@ -59,6 +60,7 @@ public class SlotMachineInteractor implements ShopInteractor {
             @NotNull @Child("mismatched_player_interactors") List<ShopInteractor> mismatchedPlayerInteractors,
             @NotNull @Child("while_rolling_interactors") List<ShopInteractor> whileRollingInteractors,
             @NotNull @Child("timeout_expired_interactors") List<ShopInteractor> timeoutExpiredInteractors,
+            @NotNull @Child("item_claimed_interactors") List<ShopInteractor> itemClaimedInteractors,
             @NotNull Random random) {
         this.data = data;
         this.tickFormatter = tickFormatter;
@@ -68,6 +70,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         this.mismatchedPlayerInteractors = mismatchedPlayerInteractors;
         this.whileRollingInteractors = whileRollingInteractors;
         this.timeoutExpiredInteractors = timeoutExpiredInteractors;
+        this.itemClaimedInteractors = itemClaimedInteractors;
         this.random = random;
     }
 
@@ -99,6 +102,10 @@ public class SlotMachineInteractor implements ShopInteractor {
 
             SlotMachineFrame currentFrame = frames.get((currentFrameIndex - 1) % frames.size());
             for (ShopInteractor interactor : currentFrame.interactors()) {
+                interactor.handleInteraction(rollInteraction);
+            }
+
+            for (ShopInteractor interactor : itemClaimedInteractors) {
                 interactor.handleInteraction(rollInteraction);
             }
 
@@ -342,6 +349,7 @@ public class SlotMachineInteractor implements ShopInteractor {
                        @NotNull @ChildPath("roll_start_interactors") List<String> rollStartInteractors,
                        @NotNull @ChildPath("mismatched_player_interactors") List<String> mismatchedPlayerInteractors,
                        @NotNull @ChildPath("while_rolling_interactors") List<String> whileRollingInteractors,
-                       @NotNull @ChildPath("timeout_expired_interactors") List<String> timeoutExpiredInteractors) {
+                       @NotNull @ChildPath("timeout_expired_interactors") List<String> timeoutExpiredInteractors,
+                       @NotNull @ChildPath("item_claimed_interactors") List<String> itemClaimedInteractors) {
     }
 }
