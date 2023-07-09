@@ -71,13 +71,13 @@ public class SlotMachineInteractor implements ShopInteractor {
         this.random = random;
     }
 
-    private void initializeShops(Collection<ShopInteractor> interactors, Shop shop) {
+    private void initializeInteractors(Iterable<ShopInteractor> interactors, Shop shop) {
         for (ShopInteractor interactor : interactors) {
             interactor.initialize(shop);
         }
     }
 
-    private void tickShops(Collection<ShopInteractor> interactors, long time) {
+    private void tickInteractors(Iterable<ShopInteractor> interactors, long time) {
         for (ShopInteractor interactor : interactors) {
             interactor.tick(time);
         }
@@ -89,14 +89,14 @@ public class SlotMachineInteractor implements ShopInteractor {
         this.hologram = new InstanceHologram(shop.center().add(0, data.hologramOffset, 0), 0);
         this.hologram.setInstance(shop.instance());
 
-        initializeShops(rollStartInteractors, shop);
-        initializeShops(mismatchedPlayerInteractors, shop);
-        initializeShops(whileRollingInteractors, shop);
-        initializeShops(timeoutExpiredInteractors, shop);
-        initializeShops(itemClaimedInteractors, shop);
+        initializeInteractors(rollStartInteractors, shop);
+        initializeInteractors(mismatchedPlayerInteractors, shop);
+        initializeInteractors(whileRollingInteractors, shop);
+        initializeInteractors(timeoutExpiredInteractors, shop);
+        initializeInteractors(itemClaimedInteractors, shop);
 
         for (SlotMachineFrame frame : frames) {
-            initializeShops(frame.interactors(), shop);
+            initializeInteractors(frame.interactors(), shop);
         }
     }
 
@@ -150,14 +150,14 @@ public class SlotMachineInteractor implements ShopInteractor {
 
     @Override
     public void tick(long time) {
-        tickShops(rollStartInteractors, time);
-        tickShops(mismatchedPlayerInteractors, time);
-        tickShops(whileRollingInteractors, time);
-        tickShops(timeoutExpiredInteractors, time);
-        tickShops(itemClaimedInteractors, time);
+        tickInteractors(rollStartInteractors, time);
+        tickInteractors(mismatchedPlayerInteractors, time);
+        tickInteractors(whileRollingInteractors, time);
+        tickInteractors(timeoutExpiredInteractors, time);
+        tickInteractors(itemClaimedInteractors, time);
 
         for (SlotMachineFrame frame : frames) {
-            tickShops(frame.interactors(), time);
+            tickInteractors(frame.interactors(), time);
         }
 
         if (!rolling) {
