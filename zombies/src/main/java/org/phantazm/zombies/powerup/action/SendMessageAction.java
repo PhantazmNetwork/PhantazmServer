@@ -5,12 +5,13 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 
-import java.util.IllegalFormatException;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -31,7 +32,7 @@ public class SendMessageAction implements Supplier<PowerupAction> {
     }
 
     @DataObject
-    public record Data(@NotNull String message, boolean broadcast) {
+    public record Data(@NotNull String format, boolean broadcast) {
     }
 
     private static class Action extends InstantAction {
@@ -55,16 +56,10 @@ public class SendMessageAction implements Supplier<PowerupAction> {
         }
 
         private Component getComponent(ZombiesPlayer player) {
-            Component formattedMessage;
-            try {
-                String message = String.format(data.message, player.getUsername());
-                formattedMessage = MiniMessage.miniMessage().deserialize(message);
-            }
-            catch (IllegalFormatException ignored) {
-                formattedMessage = MiniMessage.miniMessage().deserialize(data.message);
-            }
+            Component playerName = player.module().getPlayerView().getDisplayNameIfPresent();
+            TagResolver playerPlaceholder = Placeholder.component("player", playerName);
 
-            return formattedMessage;
+            return MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder);
         }
     }
 }

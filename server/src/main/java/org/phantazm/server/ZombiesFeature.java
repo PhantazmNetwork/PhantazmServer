@@ -287,7 +287,6 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(ConstantSidebarLineUpdater.class);
         contextManager.registerElementClass(DateLineUpdater.class);
         contextManager.registerElementClass(JoinedPlayersSidebarLineUpdater.class);
-        contextManager.registerElementClass(PlayerStateSidebarLineUpdater.class);
         contextManager.registerElementClass(RemainingZombiesSidebarLineUpdater.class);
         contextManager.registerElementClass(RoundSidebarLineUpdater.class);
         contextManager.registerElementClass(TicksLineUpdater.class);

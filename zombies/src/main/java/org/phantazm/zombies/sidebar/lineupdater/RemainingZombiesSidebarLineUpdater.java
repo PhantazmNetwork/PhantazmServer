@@ -5,6 +5,8 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.handler.RoundHandler;
@@ -36,7 +38,9 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
             int totalMobCount = round.getTotalMobCount();
             if ((lastRemainingZombies == -1 || lastRemainingZombies != totalMobCount)) {
                 lastRemainingZombies = totalMobCount;
-                return MiniMessage.miniMessage().deserialize(String.format(data.formatString, lastRemainingZombies));
+
+                TagResolver remainingZombiesPlaceholder = Placeholder.component("remaining_zombies", Component.text(lastRemainingZombies));
+                return MiniMessage.miniMessage().deserialize(data.format, remainingZombiesPlaceholder);
             }
 
             return null;
@@ -44,6 +48,6 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
     }
 
     @DataObject
-    public record Data(@NotNull String formatString) {
+    public record Data(@NotNull String format) {
     }
 }

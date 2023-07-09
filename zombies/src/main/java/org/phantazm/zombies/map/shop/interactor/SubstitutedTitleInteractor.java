@@ -6,6 +6,8 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.title.TitlePart;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
@@ -28,8 +30,9 @@ public class SubstitutedTitleInteractor extends InteractorBase<SubstitutedTitleI
             return false;
         }
 
-        String name = interaction.player().getUsername();
-        Component message = MiniMessage.miniMessage().deserialize(String.format(data.formatString, name));
+        Component playerName = interaction.player().module().getPlayerView().getDisplayNameIfPresent();
+        TagResolver playerPlaceholder = Placeholder.component("player", playerName);
+        Component message = MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder);
 
         if (data.broadcast) {
             shop.instance().sendTitlePart(data.titlePart, message);
@@ -47,6 +50,6 @@ public class SubstitutedTitleInteractor extends InteractorBase<SubstitutedTitleI
     }
 
     @DataObject
-    public record Data(@NotNull String formatString, boolean broadcast, TitlePart<Component> titlePart) {
+    public record Data(@NotNull String format, boolean broadcast, TitlePart<Component> titlePart) {
     }
 }

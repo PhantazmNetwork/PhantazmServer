@@ -5,6 +5,8 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.handler.RoundHandler;
 
@@ -36,14 +38,15 @@ public class RoundSidebarLineUpdater implements SidebarLineUpdater {
         int newIndex = roundHandler.currentRoundIndex();
         if ((lastRoundIndex == -1 || lastRoundIndex != newIndex) && newIndex != -1) {
             lastRoundIndex = newIndex;
-            return Optional.of(MiniMessage.miniMessage().deserialize(
-                    String.format(data.formatString, Math.min(lastRoundIndex + 1, roundHandler.roundCount()))));
+            TagResolver roundPlaceholder = Placeholder.component("round", Component.text(Math.min(lastRoundIndex + 1,
+                    roundHandler.roundCount())));
+            return Optional.of(MiniMessage.miniMessage().deserialize(data.format, roundPlaceholder));
         }
 
         return Optional.empty();
     }
 
     @DataObject
-    public record Data(@NotNull String formatString) {
+    public record Data(@NotNull String format) {
     }
 }

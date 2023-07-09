@@ -9,10 +9,12 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.ComponentUtils;
+import org.phantazm.commons.MiniMessageUtils;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.action.Action;
@@ -32,6 +34,7 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
     private final Data data;
     private final Supplier<? extends MapObjects> mapObjects;
     private final Instance instance;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     @FactoryMethod
     public DoorSendOpenedRoomsAction(@NotNull Data data, @NotNull Supplier<? extends MapObjects> mapObjects,
@@ -45,25 +48,22 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
     public void perform(@NotNull Door door) {
         Optional<ZombiesPlayer> lastInteractorOptional = door.lastInteractor();
         if (lastInteractorOptional.isPresent()) {
-            lastInteractorOptional.get().module().getPlayerView().getUsername().whenComplete((username, err) -> {
-                if (err != null) {
-                    LOGGER.warn("Error resolving display name of door-opening player", err);
-                    return;
-                }
+            lastInteractorOptional.get().module().getPlayerView().getDisplayName()
+                    .whenComplete((displayName, throwable) -> {
+                        if (throwable != null) {
+                            LOGGER.warn("Error resolving display name of door-opening player", throwable);
+                            return;
+                        }
 
-                if (username != null) {
-                    instance.sendTitlePart(data.nameTitlePart,
-                            ComponentUtils.tryFormat(data.nameFormatString, username));
-                }
-                else {
-                    LOGGER.warn("Null username");
-                    instance.sendTitlePart(data.nameTitlePart, UNKNOWN_COMPONENT);
-                }
-            });
+                        TagResolver openerPlaceholder = Placeholder.component("opener", displayName);
+                        instance.sendTitlePart(data.nameTitlePart,
+                                miniMessage.deserialize(data.nameFormat, openerPlaceholder));
+                    });
         }
         else {
             LOGGER.warn("Interacting player was null, cannot announce opener");
-            instance.sendTitlePart(data.nameTitlePart, UNKNOWN_COMPONENT);
+            TagResolver openerPlaceholder = Placeholder.component("opener", UNKNOWN_COMPONENT);
+            instance.sendTitlePart(data.nameTitlePart, miniMessage.deserialize(data.nameFormat, openerPlaceholder));
         }
 
         Map<? super Key, ? extends Room> roomMap = mapObjects.get().roomMap();
@@ -76,30 +76,24 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
                     return !room.isOpen();
                 }).toList();
 
-        StringBuilder builder = new StringBuilder();
-        boolean appendedRoom = false;
-        for (int i = 0; i < opensTo.size(); i++) {
-            Room room = opensTo.get(i);
-
-            builder.append(MiniMessage.miniMessage().serialize(room.getRoomInfo().displayName()));
-            appendedRoom = true;
-
-            if (i < opensTo.size() - 1) {
-                builder.append(data.separator);
+        List<Component> roomNames = new ArrayList<>(opensTo.size());
+        if (opensTo.isEmpty()) {
+            roomNames.add(Component.text("..."));
+        }
+        else {
+            for (Room room : opensTo) {
+                roomNames.add(room.getRoomInfo().displayName());
             }
         }
-
-        if (!appendedRoom) {
-            builder.append("...");
-        }
+        TagResolver roomsPlaceholder = MiniMessageUtils.list("rooms", roomNames);
 
         instance.sendTitlePart(data.openedRoomsTitlePart,
-                ComponentUtils.tryFormat(data.openedRoomsFormatString, builder.toString()));
+                miniMessage.deserialize(data.openedRoomsFormat, roomsPlaceholder));
     }
 
     @DataObject
-    public record Data(@NotNull String nameFormatString,
-                       @NotNull String openedRoomsFormatString,
+    public record Data(@NotNull String nameFormat,
+                       @NotNull String openedRoomsFormat,
                        @NotNull String separator,
                        @NotNull TitlePart<Component> nameTitlePart,
                        @NotNull TitlePart<Component> openedRoomsTitlePart) {

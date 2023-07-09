@@ -5,6 +5,8 @@ import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
@@ -95,8 +97,8 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
         private void updateCostDisplay() {
             Optional<Integer> costOptional = computeCost();
             if (costOptional.isPresent()) {
-                Component text =
-                        MiniMessage.miniMessage().deserialize(String.format(data.formatString, costOptional.get()));
+                TagResolver costPlaceholder = Placeholder.component("cost", Component.text(costOptional.get()));
+                Component text = MiniMessage.miniMessage().deserialize(data.format, costPlaceholder);
                 if (hologram.isEmpty()) {
                     hologram.add(text);
                 }
@@ -130,7 +132,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
     @DataObject
     public record Data(@NotNull Vec3D position,
-                       @NotNull String formatString,
+                       @NotNull String format,
                        @NotNull Key equipmentKey,
                        @NotNull Key groupKey,
                        int baseCost,

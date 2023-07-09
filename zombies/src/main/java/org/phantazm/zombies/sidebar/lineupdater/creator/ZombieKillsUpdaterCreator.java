@@ -6,6 +6,8 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.kill.PlayerKills;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -49,7 +51,9 @@ public class ZombieKillsUpdaterCreator implements PlayerUpdaterCreator {
         public @NotNull Optional<Component> tick(long time) {
             if (killCount == -1 || killCount != playerKills.getKills()) {
                 killCount = playerKills.getKills();
-                return Optional.of(MiniMessage.miniMessage().deserialize(String.format(data.formatString, killCount)));
+
+                TagResolver killsPlaceholder = Placeholder.component("kills", Component.text(killCount));
+                return Optional.of(MiniMessage.miniMessage().deserialize(data.format, killsPlaceholder));
             }
 
             return Optional.empty();
@@ -57,6 +61,6 @@ public class ZombieKillsUpdaterCreator implements PlayerUpdaterCreator {
     }
 
     @DataObject
-    public record Data(@NotNull String formatString) {
+    public record Data(@NotNull String format) {
     }
 }
