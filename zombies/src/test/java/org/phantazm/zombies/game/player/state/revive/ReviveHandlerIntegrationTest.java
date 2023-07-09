@@ -2,6 +2,8 @@ package org.phantazm.zombies.game.player.state.revive;
 
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
+import net.minestom.testing.Env;
+import net.minestom.testing.EnvTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,9 +24,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ReviveHandlerTest {
-
-    private KnockedPlayerStateContext context;
+@EnvTest
+public class ReviveHandlerIntegrationTest {
 
     private Collection<? extends ZombiesPlayer> zombiesPlayers;
 
@@ -38,7 +39,6 @@ public class ReviveHandlerTest {
 
     @BeforeEach
     public void setup() {
-        context = new KnockedPlayerStateContext(mock(Instance.class), Vec.ZERO, null, null);
         aliveState = mock(ZombiesPlayerState.class);
         deathState = mock(ZombiesPlayerState.class);
         meta = mock(ZombiesPlayerMeta.class);
@@ -56,7 +56,8 @@ public class ReviveHandlerTest {
     }
 
     @Test
-    public void testDeathContinuesWithoutReviver() {
+    public void testDeathContinuesWithoutReviver(Env env) {
+        KnockedPlayerStateContext context = new KnockedPlayerStateContext(env.createFlatInstance(), Vec.ZERO, null, null);
         long initialDeathTime = 20L;
         ReviveHandler reviveHandler =
                 new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState, ignored -> false,
@@ -70,7 +71,8 @@ public class ReviveHandlerTest {
     }
 
     @Test
-    public void testDeathStopsWithReviverAndReviverSet() {
+    public void testDeathStopsWithReviverAndReviverSet(Env env) {
+        KnockedPlayerStateContext context = new KnockedPlayerStateContext(env.createFlatInstance(), Vec.ZERO, null, null);
         long reviveTime = 10L;
         when(reviver.getReviveTime()).thenReturn(reviveTime);
         long initialDeathTime = 20L;
@@ -87,7 +89,8 @@ public class ReviveHandlerTest {
     }
 
     @Test
-    public void testDeathSuggestsDeathState() {
+    public void testDeathSuggestsDeathState(Env env) {
+        KnockedPlayerStateContext context = new KnockedPlayerStateContext(env.createFlatInstance(), Vec.ZERO, null, null);
         long initialDeathTime = 0L;
         ReviveHandler reviveHandler =
                 new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState, ignored -> false,
@@ -100,7 +103,8 @@ public class ReviveHandlerTest {
     }
 
     @Test
-    public void testReviveSuggestsAliveState() {
+    public void testReviveSuggestsAliveState(Env env) {
+        KnockedPlayerStateContext context = new KnockedPlayerStateContext(env.createFlatInstance(), Vec.ZERO, null, null);
         long reviveTime = 0L;
         when(reviver.getReviveTime()).thenReturn(reviveTime);
         ReviveHandler reviveHandler =

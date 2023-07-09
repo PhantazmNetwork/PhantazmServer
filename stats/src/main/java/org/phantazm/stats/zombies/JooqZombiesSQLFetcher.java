@@ -41,8 +41,8 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
                 .set(field("rounds_survived"),
                         field("rounds_survived", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
                 .set(field("kills"), field("kills", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
-                .set(field("coins_gained"), field("coins_gained", SQLDataType.INTEGER).plus(mapStats.getCoinsGained()))
-                .set(field("coins_spent"), field("coins_spent", SQLDataType.INTEGER).plus(mapStats.getCoinsSpent()))
+                .set(field("coins_gained"), field("coins_gained", SQLDataType.BIGINT).plus(mapStats.getCoinsGained()))
+                .set(field("coins_spent"), field("coins_spent", SQLDataType.BIGINT).plus(mapStats.getCoinsSpent()))
                 .set(field("knocks"), field("knocks", SQLDataType.INTEGER).plus(mapStats.getKnocks()))
                 .set(field("deaths"), field("deaths", SQLDataType.INTEGER).plus(mapStats.getDeaths()))
                 .set(field("revives"), field("revives", SQLDataType.INTEGER).plus(mapStats.getRevives()))
