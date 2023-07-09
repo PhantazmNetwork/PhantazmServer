@@ -6,6 +6,7 @@ import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 
 import java.util.List;
 
@@ -23,6 +24,17 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
         super(data);
         this.successInteractors = successInteractors;
         this.failureInteractors = failureInteractors;
+    }
+
+    @Override
+    public void initialize(@NotNull Shop shop) {
+        for (ShopInteractor interactor : successInteractors) {
+            interactor.initialize(shop);
+        }
+
+        for (ShopInteractor interactor : failureInteractors) {
+            interactor.initialize(shop);
+        }
     }
 
     @Override
@@ -61,6 +73,17 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
         }
 
         return success;
+    }
+
+    @Override
+    public void tick(long time) {
+        for (ShopInteractor interactor : successInteractors) {
+            interactor.tick(time);
+        }
+
+        for (ShopInteractor interactor : failureInteractors) {
+            interactor.tick(time);
+        }
     }
 
     @DataObject

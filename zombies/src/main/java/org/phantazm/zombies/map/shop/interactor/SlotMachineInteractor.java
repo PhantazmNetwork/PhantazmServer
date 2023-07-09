@@ -17,10 +17,7 @@ import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Model("zombies.map.shop.interactor.slot_machine")
 @Cache(false)
@@ -74,11 +71,33 @@ public class SlotMachineInteractor implements ShopInteractor {
         this.random = random;
     }
 
+    private void initializeShops(Collection<ShopInteractor> interactors, Shop shop) {
+        for (ShopInteractor interactor : interactors) {
+            interactor.initialize(shop);
+        }
+    }
+
+    private void tickShops(Collection<ShopInteractor> interactors, long time) {
+        for (ShopInteractor interactor : interactors) {
+            interactor.tick(time);
+        }
+    }
+
     @Override
     public void initialize(@NotNull Shop shop) {
         this.shop = shop;
         this.hologram = new InstanceHologram(shop.center().add(0, data.hologramOffset, 0), 0);
         this.hologram.setInstance(shop.instance());
+
+        initializeShops(rollStartInteractors, shop);
+        initializeShops(mismatchedPlayerInteractors, shop);
+        initializeShops(whileRollingInteractors, shop);
+        initializeShops(timeoutExpiredInteractors, shop);
+        initializeShops(itemClaimedInteractors, shop);
+
+        for (SlotMachineFrame frame : frames) {
+            initializeShops(frame.interactors(), shop);
+        }
     }
 
     @Override
@@ -131,6 +150,16 @@ public class SlotMachineInteractor implements ShopInteractor {
 
     @Override
     public void tick(long time) {
+        tickShops(rollStartInteractors, time);
+        tickShops(mismatchedPlayerInteractors, time);
+        tickShops(whileRollingInteractors, time);
+        tickShops(timeoutExpiredInteractors, time);
+        tickShops(itemClaimedInteractors, time);
+
+        for (SlotMachineFrame frame : frames) {
+            tickShops(frame.interactors(), time);
+        }
+
         if (!rolling) {
             return;
         }
