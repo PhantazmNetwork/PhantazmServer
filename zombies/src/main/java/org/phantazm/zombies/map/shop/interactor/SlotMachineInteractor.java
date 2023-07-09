@@ -175,34 +175,36 @@ public class SlotMachineInteractor implements ShopInteractor {
             }
         }
 
-        if (currentFrameIndex == data.frameCount) {
-            if (!doneRolling) {
-                rollFinishTime = time;
-            }
-
-            doneRolling = true;
-            long ticksSinceDoneRolling = (time - rollFinishTime) / MinecraftServer.TICK_MS;
-
-            if (ticksSinceDoneRolling < data.gracePeriodTicks) {
-                String timeString = tickFormatter.format(data.gracePeriodTicks - ticksSinceDoneRolling);
-                TagResolver[] tags = getTagsForFrame(frames.get((currentFrameIndex - 1) % frames.size()),
-                        Placeholder.unparsed("time_left", timeString));
-
-                List<Component> newComponents = new ArrayList<>(data.gracePeriodFormats.size());
-                for (String formatString : data.gracePeriodFormats) {
-                    newComponents.add(MiniMessage.miniMessage().deserialize(formatString, tags));
-                }
-
-                updateHologram(newComponents);
-                return;
-            }
-
-            for (ShopInteractor interactor : timeoutExpiredInteractors) {
-                interactor.handleInteraction(rollInteraction);
-            }
-
-            reset();
+        if (currentFrameIndex < data.frameCount) {
+            return;
         }
+
+        if (!doneRolling) {
+            rollFinishTime = time;
+        }
+
+        doneRolling = true;
+        long ticksSinceDoneRolling = (time - rollFinishTime) / MinecraftServer.TICK_MS;
+
+        if (ticksSinceDoneRolling < data.gracePeriodTicks) {
+            String timeString = tickFormatter.format(data.gracePeriodTicks - ticksSinceDoneRolling);
+            TagResolver[] tags = getTagsForFrame(frames.get((currentFrameIndex - 1) % frames.size()),
+                    Placeholder.unparsed("time_left", timeString));
+
+            List<Component> newComponents = new ArrayList<>(data.gracePeriodFormats.size());
+            for (String formatString : data.gracePeriodFormats) {
+                newComponents.add(MiniMessage.miniMessage().deserialize(formatString, tags));
+            }
+
+            updateHologram(newComponents);
+            return;
+        }
+
+        for (ShopInteractor interactor : timeoutExpiredInteractors) {
+            interactor.handleInteraction(rollInteraction);
+        }
+
+        reset();
     }
 
     private void reset() {
