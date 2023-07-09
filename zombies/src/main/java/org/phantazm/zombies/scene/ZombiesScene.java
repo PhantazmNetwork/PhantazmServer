@@ -30,6 +30,7 @@ import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.NoContext;
 import org.phantazm.zombies.stage.Stage;
+import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.slf4j.Logger;
@@ -208,6 +209,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     LOGGER.warn("Failed to finish player join", throwable);
                 }
             }).join();
+
+            if (joinRequest.isImmediate()) {
+                stageTransition.setCurrentStage(StageKeys.IN_GAME);
+            }
         });
     }
 

@@ -89,7 +89,7 @@ public class ZombiesJoinCommand extends Command {
                 }
             }
 
-            joinHelper.joinGame(joiner, playerViews, targetMap);
+            joinHelper.joinGame(joiner, playerViews, targetMap, party != null);
         }, mapKeyArgument);
     }
 

@@ -5,7 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.EquipmentHandler;
-import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -121,6 +120,8 @@ public class InGameStage implements Stage {
             for (Key group : equipmentGroups) {
                 equipmentHandler.refreshGroup(group);
             }
+
+            zombiesPlayer.module().getLeaderboard().endIfActive();
         }
 
         shopHandler.initialize();

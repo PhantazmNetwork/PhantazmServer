@@ -12,6 +12,8 @@ public interface ZombiesJoinRequest extends SceneJoinRequest {
 
     @NotNull Collection<PlayerView> getPlayers();
 
+    boolean isImmediate();
+
     @Override
     default int getRequestWeight() {
         return getPlayers().size();

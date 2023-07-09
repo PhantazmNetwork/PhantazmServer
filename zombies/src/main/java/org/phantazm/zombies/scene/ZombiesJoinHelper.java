@@ -34,18 +34,29 @@ public class ZombiesJoinHelper {
         this.transferHelper = Objects.requireNonNull(transferHelper, "transferHelper");
     }
 
-    public void joinGame(@NotNull Player joiner, @NotNull Collection<PlayerView> playerViews, @NotNull Key targetMap) {
-        joinInternal(joiner, playerViews, joinRequest -> ZombiesRouteRequest.joinGame(targetMap, joinRequest));
+    public void joinGame(@NotNull Player joiner, @NotNull Collection<PlayerView> playerViews, @NotNull Key targetMap,
+            boolean immediate) {
+        joinInternal(joiner, playerViews, joinRequest -> ZombiesRouteRequest.joinGame(targetMap, joinRequest), immediate);
     }
 
     public void rejoinGame(@NotNull Player joiner, @NotNull UUID targetGame) {
         joinInternal(joiner, Collections.singleton(viewProvider.fromPlayer(joiner)),
-                joinRequest -> ZombiesRouteRequest.rejoinGame(targetGame, joinRequest));
+                joinRequest -> ZombiesRouteRequest.rejoinGame(targetGame, joinRequest), false);
     }
 
     private void joinInternal(@NotNull Player joiner, @NotNull Collection<PlayerView> playerViews,
-            @NotNull Function<ZombiesJoinRequest, ZombiesRouteRequest> routeRequestCreator) {
-        ZombiesJoinRequest joinRequest = () -> playerViews;
+            @NotNull Function<ZombiesJoinRequest, ZombiesRouteRequest> routeRequestCreator, boolean immediate) {
+        ZombiesJoinRequest joinRequest = new ZombiesJoinRequest() {
+            @Override
+            public @NotNull Collection<PlayerView> getPlayers() {
+                return playerViews;
+            }
+
+            @Override
+            public boolean isImmediate() {
+                return immediate;
+            }
+        };
         router.findScene(routeRequestCreator.apply(joinRequest)).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Exception while finding zombies scene", throwable);
