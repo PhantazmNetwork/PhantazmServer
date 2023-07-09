@@ -9,6 +9,8 @@ import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
@@ -40,7 +42,7 @@ import java.util.function.Supplier;
 @Model("zombies.map.round.action.select_bombed")
 @Cache(false)
 public class SelectBombedRoom implements Action<Round> {
-    private static final Potion NAUSEA = new Potion(PotionEffect.NAUSEA, (byte)3, 360000);
+    private static final Potion NAUSEA = new Potion(PotionEffect.NAUSEA, (byte) 3, 360000);
 
     private final Data data;
     private final Supplier<? extends MapObjects> supplier;
@@ -54,8 +56,8 @@ public class SelectBombedRoom implements Action<Round> {
 
     @FactoryMethod
     public SelectBombedRoom(@NotNull Data data, @NotNull Supplier<? extends MapObjects> supplier,
-            @NotNull Random random, @NotNull Instance instance, @NotNull @Child("particle") ParticleWrapper particle,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+                            @NotNull Random random, @NotNull Instance instance, @NotNull @Child("particle") ParticleWrapper particle,
+                            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         this.data = data;
         this.supplier = supplier;
         this.random = random;
@@ -85,9 +87,9 @@ public class SelectBombedRoom implements Action<Round> {
         }
 
         Room room = candidateRooms.get(random.nextInt(candidateRooms.size()));
-        String serialized = MiniMessage.miniMessage().serialize(room.getRoomInfo().displayName());
+        TagResolver roomPlaceholder = Placeholder.component("room", room.getRoomInfo().displayName());
         Component warningMessage =
-                MiniMessage.miniMessage().deserialize(String.format(data.warningFormatMessage, serialized));
+                MiniMessage.miniMessage().deserialize(data.warningFormatMessage, roomPlaceholder);
 
         instance.sendMessage(warningMessage);
 
@@ -124,6 +126,9 @@ public class SelectBombedRoom implements Action<Round> {
                 RoundHandler roundHandler = objects.module().roundHandlerSupplier().get();
                 int roundsElapsed = roundHandler.currentRoundIndex() - startRoundIndex;
                 if (roundsElapsed >= data.duration) {
+                    Component completionMessage = MiniMessage.miniMessage().deserialize(data.bombingCompleteFormat, roomPlaceholder);
+                    instance.sendMessage(completionMessage);
+
                     room.flags().clearFlag(Flags.BOMBED_ROOM);
                     flagSet = false;
                     finished = true;
@@ -134,16 +139,14 @@ public class SelectBombedRoom implements Action<Round> {
 
                             if (!zombiesPlayer.canDoGenericActions()) {
                                 zombiesPlayer.removeCancellable(stateId);
-                            }
-                            else {
+                            } else {
                                 Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
                                 if (roomOptional.isPresent()) {
                                     Room currentRoom = roomOptional.get();
                                     if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
                                         zombiesPlayer.removeCancellable(stateId);
                                     }
-                                }
-                                else {
+                                } else {
                                     zombiesPlayer.removeCancellable(stateId);
                                 }
                             }
@@ -186,13 +189,11 @@ public class SelectBombedRoom implements Action<Round> {
                                     if (ticksSinceEnter >= data.effectDelay) {
                                         applyModifiers(zombiesPlayer);
                                     }
-                                }
-                                else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
+                                } else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
                                     zombiesPlayer.removeCancellable(stateId);
                                     player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
                                 }
-                            }
-                            else {
+                            } else {
                                 zombiesPlayer.removeCancellable(stateId);
                                 player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
                             }
@@ -200,7 +201,7 @@ public class SelectBombedRoom implements Action<Round> {
                     }
                 }
             }
-        }, (long)data.gracePeriod * MinecraftServer.TICK_MS);
+        }, (long) data.gracePeriod * MinecraftServer.TICK_MS);
     }
 
     private void applyModifiers(ZombiesPlayer player) {
@@ -268,6 +269,7 @@ public class SelectBombedRoom implements Action<Round> {
 
     @DataObject
     public record Data(@NotNull String warningFormatMessage,
+                       @NotNull String bombingCompleteFormat,
                        @NotNull Component inAreaMessage,
                        @NotNull Component bombingDamageName,
                        float damage,
