@@ -61,14 +61,15 @@ public class PlaySongInteractor implements ShopInteractor {
                     }
                 }
             });
+
+            return true;
+        }
+
+        if (data.atLocation) {
+            playerOptional.ifPresent(player -> songPlayer.play(player, shop.center(), notes));
         }
         else {
-            if (data.atLocation) {
-                playerOptional.ifPresent(player -> songPlayer.play(player, shop.center(), notes));
-            }
-            else {
-                playerOptional.ifPresent(player -> songPlayer.play(player, Sound.Emitter.self(), notes));
-            }
+            playerOptional.ifPresent(player -> songPlayer.play(player, Sound.Emitter.self(), notes));
         }
 
         return true;
