@@ -30,12 +30,12 @@ public class BleedEntitiesSkill implements Skill {
     public void use(@NotNull PhantazmMob self) {
         selector.selectTarget(self).ifPresent(target -> {
             if (target instanceof LivingEntity livingEntity) {
-                bleeding.add(new BleedContext(livingEntity, 0L));
+                bleeding.add(new BleedContext(self, livingEntity, 0L));
             }
             else if (target instanceof Iterable<?> iterable) {
                 for (Object object : iterable) {
                     if (object instanceof LivingEntity livingEntity) {
-                        bleeding.add(new BleedContext(livingEntity, 0L));
+                        bleeding.add(new BleedContext(self, livingEntity, 0L));
                     }
                 }
             }
@@ -49,8 +49,12 @@ public class BleedEntitiesSkill implements Skill {
             return;
         }
 
-        for (BleedContext bleedContext = contextIterator.next(); contextIterator.hasNext();
-                bleedContext = contextIterator.next()) {
+        while (contextIterator.hasNext()) {
+            BleedContext bleedContext = contextIterator.next();
+            if (bleedContext.self != self) {
+                continue;
+            }
+
             LivingEntity livingEntity = bleedContext.target();
             if (livingEntity.isRemoved()) {
                 contextIterator.remove();
@@ -76,17 +80,7 @@ public class BleedEntitiesSkill implements Skill {
 
     @Override
     public void end(@NotNull PhantazmMob self) {
-        Iterator<BleedContext> contextIterator = bleeding.iterator();
-        if (!contextIterator.hasNext()) {
-            return;
-        }
-
-        while (contextIterator.hasNext()) {
-            BleedContext next = contextIterator.next();
-            if (next.target == self.entity()) {
-                contextIterator.remove();
-            }
-        }
+        bleeding.removeIf(next -> next.self == self);
     }
 
     @DataObject
@@ -103,12 +97,13 @@ public class BleedEntitiesSkill implements Skill {
     }
 
     private static final class BleedContext {
-
+        private final PhantazmMob self;
         private final LivingEntity target;
         private long ticksSinceStart;
 
 
-        public BleedContext(@NotNull LivingEntity target, long ticksSinceStart) {
+        public BleedContext(@NotNull PhantazmMob self, @NotNull LivingEntity target, long ticksSinceStart) {
+            this.self = self;
             this.target = Objects.requireNonNull(target, "target");
             this.ticksSinceStart = ticksSinceStart;
         }
