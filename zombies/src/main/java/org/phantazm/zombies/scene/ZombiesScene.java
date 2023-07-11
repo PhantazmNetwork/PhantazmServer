@@ -14,6 +14,7 @@ import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.VecUtils;
@@ -22,17 +23,15 @@ import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
-import org.phantazm.zombies.player.state.context.NoContext;
 import org.phantazm.zombies.stage.Stage;
-import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
-import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +52,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final TickTaskScheduler taskScheduler;
     private final ZombiesDatabase database;
     private final EventNode<Event> sceneNode;
+    private final UUID allowedRequestUUID;
 
     private boolean joinable = true;
 
@@ -61,7 +61,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
-            @NotNull EventNode<Event> sceneNode) {
+            @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID) {
         super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()));
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
@@ -72,6 +72,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
         this.database = Objects.requireNonNull(database, "database");
         this.sceneNode = Objects.requireNonNull(sceneNode, "sceneNode");
+        this.allowedRequestUUID = allowedRequestUUID;
     }
 
     public @NotNull EventNode<Event> getSceneNode() {
@@ -109,6 +110,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
         if (!isJoinable()) {
             return TransferResult.failure(Component.text("Game is not joinable."));
+        }
+        if (allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
+            return TransferResult.failure(Component.text("You aren't allowed to join this game."));
         }
 
         Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
@@ -209,10 +213,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     LOGGER.warn("Failed to finish player join", throwable);
                 }
             }).join();
-
-            if (joinRequest.isImmediate()) {
-                stageTransition.setCurrentStage(StageKeys.IN_GAME);
-            }
         });
     }
 

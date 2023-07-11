@@ -35,8 +35,9 @@ public class ZombiesJoinHelper {
     }
 
     public void joinGame(@NotNull Player joiner, @NotNull Collection<PlayerView> playerViews, @NotNull Key targetMap,
-            boolean immediate) {
-        joinInternal(joiner, playerViews, joinRequest -> ZombiesRouteRequest.joinGame(targetMap, joinRequest), immediate);
+            boolean isRestricted) {
+        joinInternal(joiner, playerViews, joinRequest -> ZombiesRouteRequest.joinGame(targetMap, joinRequest),
+                isRestricted);
     }
 
     public void rejoinGame(@NotNull Player joiner, @NotNull UUID targetGame) {
@@ -45,7 +46,8 @@ public class ZombiesJoinHelper {
     }
 
     private void joinInternal(@NotNull Player joiner, @NotNull Collection<PlayerView> playerViews,
-            @NotNull Function<ZombiesJoinRequest, ZombiesRouteRequest> routeRequestCreator, boolean immediate) {
+            @NotNull Function<ZombiesJoinRequest, ZombiesRouteRequest> routeRequestCreator, boolean isRestricted) {
+        UUID uuid = UUID.randomUUID();
         ZombiesJoinRequest joinRequest = new ZombiesJoinRequest() {
             @Override
             public @NotNull Collection<PlayerView> getPlayers() {
@@ -53,8 +55,13 @@ public class ZombiesJoinHelper {
             }
 
             @Override
-            public boolean isImmediate() {
-                return immediate;
+            public @NotNull UUID getUUID() {
+                return uuid;
+            }
+
+            @Override
+            public boolean isRestricted() {
+                return isRestricted;
             }
         };
         router.findScene(routeRequestCreator.apply(joinRequest)).whenComplete((result, throwable) -> {

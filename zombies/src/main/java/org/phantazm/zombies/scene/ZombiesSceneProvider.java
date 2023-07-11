@@ -131,6 +131,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     @Override
     protected @NotNull Optional<ZombiesScene> chooseScene(@NotNull ZombiesJoinRequest request) {
+        if (request.isRestricted()) {
+            return Optional.empty();
+        }
+
         sceneLoop:
         for (ZombiesScene scene : getScenes()) {
             if (scene.isComplete() || !scene.isJoinable() || scene.isShutdown()) {
@@ -240,9 +244,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                         mapObjects.module().random(), mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator);
             };
 
+            UUID allowedRequestUUID = request.isRestricted() ? request.getUUID() : null;
             ZombiesScene scene =
                     new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
-                            stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode);
+                            stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode, allowedRequestUUID);
             sceneWrapper.set(scene);
             rootNode.addChild(childNode);
 
