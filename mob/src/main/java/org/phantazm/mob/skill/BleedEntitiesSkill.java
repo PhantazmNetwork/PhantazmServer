@@ -3,7 +3,6 @@ package org.phantazm.mob.skill;
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.target.TargetSelector;
@@ -19,18 +18,28 @@ public class BleedEntitiesSkill implements Skill {
 
     private final Collection<BleedContext> bleeding = new LinkedList<>();
     private final Data data;
-    private final TargetSelector<? extends LivingEntity> selector;
+    private final TargetSelector<?> selector;
 
     @FactoryMethod
-    public BleedEntitiesSkill(@NotNull Data data,
-            @NotNull @Child("selector") TargetSelector<? extends LivingEntity> selector) {
+    public BleedEntitiesSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<?> selector) {
         this.data = Objects.requireNonNull(data, "data");
         this.selector = Objects.requireNonNull(selector, "selector");
     }
 
     @Override
     public void use(@NotNull PhantazmMob self) {
-        selector.selectTarget(self).ifPresent(livingEntity -> bleeding.add(new BleedContext(livingEntity, 0L)));
+        selector.selectTarget(self).ifPresent(target -> {
+            if (target instanceof LivingEntity livingEntity) {
+                bleeding.add(new BleedContext(livingEntity, 0L));
+            }
+            else if (target instanceof Iterable<?> iterable) {
+                for (Object object : iterable) {
+                    if (object instanceof LivingEntity livingEntity) {
+                        bleeding.add(new BleedContext(livingEntity, 0L));
+                    }
+                }
+            }
+        });
     }
 
     @Override
