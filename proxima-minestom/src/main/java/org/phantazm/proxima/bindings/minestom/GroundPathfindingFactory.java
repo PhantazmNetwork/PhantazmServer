@@ -12,7 +12,6 @@ import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import com.github.steanky.vector.Vec3IBiPredicate;
-import net.minestom.server.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -29,15 +28,14 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
 
     @Override
     public @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
-            @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler,
-            @NotNull EntityType entityType) {
+            @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler) {
         Vec3IBiPredicate predicate = data.targetDeviation <= 0
                                      ? (x1, y1, z1, x2, y2, z2) -> x1 == x2 && y1 == y2 && z1 == z2
                                      : (x1, y1, z1, x2, y2, z2) ->
                                              Vec3D.distanceSquared(x1 + 0.5, y1, z1 + 0.5, x2 + 0.5, y2, z2 + 0.5) <=
                                                      data.targetDeviation * data.targetDeviation;
 
-        return new Pathfinding(pathfinder, nodeMapLocal, spaceHandler, entityType) {
+        return new Pathfinding(pathfinder, nodeMapLocal, spaceHandler) {
             @Override
             protected float jumpHeight() {
                 return data.jumpHeight;

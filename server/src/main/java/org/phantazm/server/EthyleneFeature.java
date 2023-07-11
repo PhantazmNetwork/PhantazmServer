@@ -33,6 +33,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.permission.Permission;
+import net.minestom.server.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
@@ -64,6 +65,7 @@ public final class EthyleneFeature {
                         .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
                         .withScalarSignature(particle()).withScalarSignature(block()).withScalarSignature(permission())
                         .withScalarSignature(entityType()).withScalarSignature(material())
+                        .withScalarSignature(potionEffect())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
                         .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
                         .withStandardTypeImplementations().ignoringLengths().build();
@@ -193,6 +195,12 @@ public final class EthyleneFeature {
                         Map.entry("g", SignatureParameter.parameter(Token.INTEGER)),
                         Map.entry("b", SignatureParameter.parameter(Token.INTEGER))).matchingNames().matchingTypeHints()
                 .build();
+    }
+
+    private static ScalarSignature<PotionEffect> potionEffect() {
+        return ScalarSignature.of(Token.ofClass(PotionEffect.class),
+                effect -> PotionEffect.fromNamespaceId(effect.asString()),
+                effect -> effect == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(effect.namespace().asString()));
     }
 
     private static ScalarSignature<Permission> permission() {

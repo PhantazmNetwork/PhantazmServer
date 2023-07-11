@@ -71,11 +71,9 @@ public class ProximaEntity extends LivingEntity {
         this.removalAnimationDelay = delay;
     }
 
-    private void cancelPath() {
-        this.destination = null;
-        pathfinding.getNavigator().cancel();
+    private void resetPath() {
+        pathfinding.cancel();
 
-        targetEntity = null;
         currentPath = null;
 
         current = null;
@@ -90,10 +88,15 @@ public class ProximaEntity extends LivingEntity {
         lastZ = 0;
     }
 
+    private void destroyPath() {
+        resetPath();
+        this.destination = null;
+        this.targetEntity = null;
+    }
+
     public void setDestination(@Nullable PathTarget destination) {
         if (destination == null && this.destination != null) {
-            cancelPath();
-            this.destination = null;
+            destroyPath();
             return;
         }
 
@@ -101,6 +104,8 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
+        resetPath();
+        this.targetEntity = null;
         this.destination = destination;
     }
 
@@ -109,16 +114,13 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
-        if (targetEntity == null || !targetEntity.isRemoved()) {
-            this.targetEntity = targetEntity;
-        }
-
-        if (targetEntity == null) {
-            cancelPath();
-            this.destination = null;
+        if (targetEntity == null || targetEntity.isRemoved()) {
+            destroyPath();
             return;
         }
 
+        resetPath();
+        this.targetEntity = targetEntity;
         this.destination = PathTarget.resolving(() -> {
             if (!pathfinding.isValidTarget(targetEntity)) {
                 return null;
@@ -177,7 +179,7 @@ public class ProximaEntity extends LivingEntity {
     @Override
     public void remove() {
         super.remove();
-        cancelPath();
+        destroyPath();
     }
 
     protected boolean canNavigate() {
@@ -189,12 +191,10 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
-        Navigator navigator = pathfinding.getNavigator();
+        Navigator navigator = pathfinding.getNavigator(getBoundingBox());
 
         if (targetEntity != null && !pathfinding.isValidTarget(targetEntity)) {
-            cancelPath();
-            targetEntity = null;
-            destination = null;
+            destroyPath();
             return;
         }
 
@@ -216,7 +216,7 @@ public class ProximaEntity extends LivingEntity {
 
         if (currentPath != null && current != null) {
             if (moveAlongPath(time) == MoveResult.CANCEL) {
-                cancelPath();
+                resetPath();
             }
         }
     }
@@ -302,7 +302,7 @@ public class ProximaEntity extends LivingEntity {
         if (target == null && targetEntity != null && currentPath != null && currentPath.isSuccessful()) {
             Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(targetEntity.getPosition()));
 
-            if (!pathfinding.getSettings().successPredicate()
+            if (!pathfinding.getSettings(getBoundingBox()).successPredicate()
                     .test(synthetic.x(), synthetic.y(), synthetic.z(), current.x, current.y, current.z)) {
                 target = new Node(synthetic.x(), synthetic.y(), synthetic.z(), 0, 0,
                         (float)(targetEntity.getPosition().y() - targetEntity.getPosition().blockY()));

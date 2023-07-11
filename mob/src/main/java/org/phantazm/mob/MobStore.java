@@ -57,6 +57,12 @@ public class MobStore implements Tickable {
                     skill.use(mob);
                 }
             }
+
+            for (Collection<Skill> skills : mob.triggers().values()) {
+                for (Skill skill : skills) {
+                    skill.end(mob);
+                }
+            }
         }
 
         tickableSkills.remove(uuid);

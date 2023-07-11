@@ -36,7 +36,7 @@ public class InstanceSpawner implements Spawner {
                     "Unable to spawn entity in instance " + instance.getUniqueId() + ", " + "missing InstanceSettings");
         }
 
-        Pathfinding pathfinding = factory.make(pathfinder, settings.nodeLocal, settings.spaceHandler, entityType);
+        Pathfinding pathfinding = factory.make(pathfinder, settings.nodeLocal, settings.spaceHandler);
         ProximaEntity entity = new ProximaEntity(entityType, UUID.randomUUID(), pathfinding);
         entity.setInstance(instance, pos);
 
