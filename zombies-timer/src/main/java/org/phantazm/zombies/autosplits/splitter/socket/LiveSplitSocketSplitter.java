@@ -1,7 +1,7 @@
 package org.phantazm.zombies.autosplits.splitter.socket;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.autosplits.splitter.LiveSplitSplitter;
+import org.phantazm.zombies.autosplits.splitter.AutoSplitSplitter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public class LiveSplitSocketSplitter implements LiveSplitSplitter {
+public class LiveSplitSocketSplitter implements AutoSplitSplitter {
 
     private final Executor executor;
 

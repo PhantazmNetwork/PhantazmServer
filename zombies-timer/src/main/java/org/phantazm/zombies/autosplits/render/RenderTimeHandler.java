@@ -29,18 +29,23 @@ public class RenderTimeHandler implements HudRenderCallback {
             return;
         }
 
-        long millis = internalSplitter.getMillis();
-        long minutesPart = millis / 60000;
-        long secondsPart = (millis % 60000) / 1000;
-        long tenthSecondsPart = (millis % 1000) / 100;
-        String time = String.format("%d:%02d:%d", minutesPart, secondsPart, tenthSecondsPart);
+        String time = getTimeString();
         int width = client.textRenderer.getWidth(time);
         Window window = client.getWindow();
         int screenWidth = window.getScaledWidth();
         int screenHeight = window.getScaledHeight();
         drawContext.getMatrices().push();
-        drawContext.drawTextWithShadow(client.textRenderer, time, screenWidth - width, screenHeight - client.textRenderer.fontHeight, color);
+        drawContext.drawTextWithShadow(client.textRenderer, time, screenWidth - width,
+                screenHeight - client.textRenderer.fontHeight, color);
         drawContext.getMatrices().pop();
+    }
+
+    private String getTimeString() {
+        long millis = internalSplitter.getMillis();
+        long minutesPart = millis / 60000;
+        long secondsPart = (millis % 60000) / 1000;
+        long tenthSecondsPart = (millis % 1000) / 100;
+        return String.format("%d:%02d:%d", minutesPart, secondsPart, tenthSecondsPart);
     }
 
     public void setSplitter(@Nullable InternalSplitter internalSplitter) {

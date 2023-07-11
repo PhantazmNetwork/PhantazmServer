@@ -16,11 +16,12 @@ public class CompositeSplitter {
 
     private final Logger logger;
 
-    private final Collection<LiveSplitSplitter> splitters;
+    private final Collection<AutoSplitSplitter> splitters;
 
     private boolean enabled = true;
 
-    public CompositeSplitter(@NotNull MinecraftClient client, @NotNull Logger logger, @NotNull Collection<LiveSplitSplitter> splitters) {
+    public CompositeSplitter(@NotNull MinecraftClient client, @NotNull Logger logger,
+            @NotNull Collection<AutoSplitSplitter> splitters) {
         this.client = Objects.requireNonNull(client, "client");
         this.logger = Objects.requireNonNull(logger, "logger");
         this.splitters = Objects.requireNonNull(splitters, "splitters");
@@ -31,21 +32,20 @@ public class CompositeSplitter {
             return;
         }
 
-        for (LiveSplitSplitter splitter : splitters) {
+        for (AutoSplitSplitter splitter : splitters) {
             splitter.startOrSplit().whenComplete((ignored, throwable) -> {
-                if (throwable == null) {
-                    return;
+                if (throwable != null) {
+                    logger.warn("Failed to split", throwable);
+                    client.execute(this::warnFail);
                 }
-
-                logger.warn("Failed to split", throwable);
-                client.execute(() -> {
-                    if (client.player != null) {
-                        MutableText message = Text.literal("Failed to split!");
-                        message.formatted(Formatting.RED);
-                        client.player.sendMessage(message, false);
-                    }
-                });
             });
+        }
+    }
+
+    private void warnFail() {
+        if (client.player != null) {
+            MutableText message = Text.literal("Failed to split!").formatted(Formatting.RED);
+            client.player.sendMessage(message, false);
         }
     }
 

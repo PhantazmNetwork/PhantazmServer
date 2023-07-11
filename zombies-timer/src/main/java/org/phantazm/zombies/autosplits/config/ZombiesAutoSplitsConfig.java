@@ -14,16 +14,15 @@ public record ZombiesAutoSplitsConfig(@NotNull String host, int port, boolean us
 
     public static final boolean DEFAULT_USE_INTERNAL = true;
 
+    public static final ZombiesAutoSplitsConfig DEFAULT =
+            new ZombiesAutoSplitsConfig(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USE_LIVE_SPLITS, DEFAULT_USE_INTERNAL);
+
     public ZombiesAutoSplitsConfig {
         Objects.requireNonNull(host, "host");
     }
 
     public @NotNull Builder toBuilder() {
-        return new Builder()
-                .setHost(host)
-                .setPort(port)
-                .setUseLiveSplits(useLiveSplits)
-                .setUseInternal(useInternal);
+        return new Builder().setHost(host).setPort(port).setUseLiveSplits(useLiveSplits).setUseInternal(useInternal);
     }
 
     public static class Builder {

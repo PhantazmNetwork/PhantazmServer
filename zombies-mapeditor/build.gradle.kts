@@ -83,8 +83,6 @@ tasks.compileJava {
 
 tasks.jar {
     from("../LICENSE") {
-        rename {
-            "${it}_${base.archivesName.get()}"
-        }
+        rename { "${it}_${archiveBaseName.get()}" }
     }
 }

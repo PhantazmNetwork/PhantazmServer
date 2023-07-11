@@ -4,9 +4,12 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
+import com.github.steanky.ethylene.core.loader.ConfigLoader;
 import com.github.steanky.ethylene.core.loader.SyncFileConfigLoader;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -20,19 +23,21 @@ import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.phantazm.messaging.packet.PacketHandler;
+import org.phantazm.messaging.serialization.DataReader;
+import org.phantazm.messaging.serialization.DataWriter;
 import org.phantazm.messaging.serialization.PacketSerializer;
 import org.phantazm.messaging.serialization.PacketSerializers;
 import org.phantazm.zombies.autosplits.config.ZombiesAutoSplitsConfig;
 import org.phantazm.zombies.autosplits.config.ZombiesAutoSplitsConfigProcessor;
+import org.phantazm.zombies.autosplits.event.ClientSoundCallback;
 import org.phantazm.zombies.autosplits.messaging.PhantazmMessagingHandler;
 import org.phantazm.zombies.autosplits.packet.PacketByteBufDataReader;
 import org.phantazm.zombies.autosplits.packet.PacketByteBufDataWriter;
-import org.phantazm.zombies.autosplits.render.RenderTimeHandler;
-import org.phantazm.zombies.autosplits.event.ClientSoundCallback;
 import org.phantazm.zombies.autosplits.packet.PhantazmPacket;
+import org.phantazm.zombies.autosplits.render.RenderTimeHandler;
 import org.phantazm.zombies.autosplits.sound.AutoSplitSoundInterceptor;
 import org.phantazm.zombies.autosplits.splitter.CompositeSplitter;
-import org.phantazm.zombies.autosplits.splitter.LiveSplitSplitter;
+import org.phantazm.zombies.autosplits.splitter.AutoSplitSplitter;
 import org.phantazm.zombies.autosplits.splitter.internal.InternalSplitter;
 import org.phantazm.zombies.autosplits.splitter.socket.LiveSplitSocketSplitter;
 import org.phantazm.zombies.autosplits.tick.KeyInputHandler;
@@ -42,12 +47,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ZombiesAutoSplitsClient implements ClientModInitializer {
 
@@ -58,16 +61,16 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
     private final KeyBinding autoSplitsKeybind =
             new KeyBinding("Toggle AutoSplits", GLFW.GLFW_KEY_SEMICOLON, "Phantazm");
 
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private final Logger logger = LoggerFactory.getLogger(MODID);
 
     private final ConfigHandler configHandler = new BasicConfigHandler();
 
     private final ConfigHandler.ConfigKey<ZombiesAutoSplitsConfig> configKey =
-            new ConfigHandler.ConfigKey<>(ZombiesAutoSplitsConfig.class, "zombiesautosplits_config");
+            new ConfigHandler.ConfigKey<>(ZombiesAutoSplitsConfig.class, MODID + "_config");
 
-    private final Collection<LiveSplitSplitter> splitters = new ArrayList<>(2);
+    private final Collection<AutoSplitSplitter> splitters = new CopyOnWriteArrayList<>();
 
     private RenderTimeHandler renderTimeHandler;
 
@@ -88,7 +91,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
     }
 
     public void setConfig(@NotNull ZombiesAutoSplitsConfig config) {
-        for (LiveSplitSplitter splitter : splitters) {
+        for (AutoSplitSplitter splitter : splitters) {
             splitter.cancel();
         }
         splitters.clear();
@@ -99,7 +102,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
             splitters.add(new LiveSplitSocketSplitter(executor, config.host(), config.port()));
         }
         if (config.useInternal()) {
-            InternalSplitter internalSplitter = new InternalSplitter(executor);
+            InternalSplitter internalSplitter = new InternalSplitter();
             splitters.add(internalSplitter);
             renderTimeHandler.setSplitter(internalSplitter);
         }
@@ -133,7 +136,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
 
     private void initConfig() {
         ConfigCodec codec = new YamlCodec();
-        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("zombiesautosplits");
+        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("zombies-autosplits");
         String configFileName;
         if (codec.getPreferredExtensions().isEmpty()) {
             configFileName = "config";
@@ -149,22 +152,15 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
             logger.error("Failed to create config directory", e);
             return;
         }
-        configPath = configPath.resolve(configFileName);
 
-        ZombiesAutoSplitsConfig defaultConfig =
-                new ZombiesAutoSplitsConfig(ZombiesAutoSplitsConfig.DEFAULT_HOST, ZombiesAutoSplitsConfig.DEFAULT_PORT,
-                        ZombiesAutoSplitsConfig.DEFAULT_USE_LIVE_SPLITS, ZombiesAutoSplitsConfig.DEFAULT_USE_INTERNAL);
-        configHandler.registerLoader(configKey,
-                new SyncFileConfigLoader<>(new ZombiesAutoSplitsConfigProcessor(), defaultConfig, configPath, codec));
+        Path configFile = configPath.resolve(configFileName);
+        ZombiesAutoSplitsConfig defaultConfig = ZombiesAutoSplitsConfig.DEFAULT;
+        ConfigProcessor<ZombiesAutoSplitsConfig> configProcessor = new ZombiesAutoSplitsConfigProcessor();
+        ConfigLoader<ZombiesAutoSplitsConfig> configLoader =
+                new SyncFileConfigLoader<>(configProcessor, defaultConfig, configFile, codec);
+        configHandler.registerLoader(configKey, configLoader);
 
-        ZombiesAutoSplitsConfig loadedConfig;
-        try {
-            loadedConfig = loadConfigFromFile().get();
-        }
-        catch (InterruptedException | ExecutionException e) {
-            logger.error("Failed to load config", e);
-            return;
-        }
+        ZombiesAutoSplitsConfig loadedConfig = loadConfigFromFile().join();
         setConfig(loadedConfig);
     }
 
@@ -174,23 +170,44 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(new KeyInputHandler(autoSplitsKeybind, compositeSplitter));
         HudRenderCallback.EVENT.register(renderTimeHandler);
         ClientSoundCallback.EVENT.register(soundInterceptor);
+        ClientLifecycleEvents.CLIENT_STOPPING.register(unused -> shutdownExecutor());
+    }
 
+    private void shutdownExecutor() {
+        logger.info("Shutting down executor");
+        executor.shutdown();
+        try {
+            if (executor.awaitTermination(5L, TimeUnit.SECONDS)) {
+                return;
+            }
 
+            logger.warn("Executor did not shut down in 5 seconds. Force shutting down");
+            executor.shutdownNow();
+
+            if (!executor.awaitTermination(5L, TimeUnit.SECONDS)) {
+                logger.warn("Executor did not terminate");
+            }
+        }
+        catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void initKeyBindings() {
+        KeyBindingHelper.registerKeyBinding(autoSplitsKeybind);
     }
 
     private void initPackets() {
-        PacketSerializer packetSerializer =
-                PacketSerializers.clientToServerSerializer(() -> new PacketByteBufDataWriter(PacketByteBufs.create()),
-                        data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));
+        Supplier<DataWriter> writerCreator = () -> new PacketByteBufDataWriter(PacketByteBufs.create());
+        Function<byte[], DataReader> readerCreator =
+                data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data)));
+        PacketSerializer packetSerializer = PacketSerializers.clientToServerSerializer(writerCreator, readerCreator);
         PacketHandler<PacketSender> clientToServerHandler =
                 new PhantazmMessagingHandler(packetSerializer, PhantazmPacket.TYPE.getId(), compositeSplitter);
         ClientPlayNetworking.registerGlobalReceiver(PhantazmPacket.TYPE, (packet, player, responseSender) -> {
             clientToServerHandler.handleData(responseSender, packet.data());
         });
-    }
-
-    private void initKeyBindings() {
-        KeyBindingHelper.registerKeyBinding(autoSplitsKeybind);
     }
 
 }

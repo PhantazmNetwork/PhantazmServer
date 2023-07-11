@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface LiveSplitSplitter {
+public interface AutoSplitSplitter {
 
     @NotNull CompletableFuture<Void> startOrSplit();
 

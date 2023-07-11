@@ -9,7 +9,7 @@ plugins {
 version = "0.1.0+1.20.1"
 
 base {
-    archivesName.set("ZombiesAutoSplits")
+    archivesName.set("zombies-autosplits")
 }
 
 repositories {
@@ -53,7 +53,7 @@ tasks.processResources {
 }
 
 tasks.jar {
-    from("LICENSE") {
-        rename { "${it}_${archiveBaseName.get()}"}
+    from("../LICENSE") {
+        rename { "${it}_${archiveBaseName.get()}" }
     }
 }
