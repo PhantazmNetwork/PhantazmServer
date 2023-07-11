@@ -56,8 +56,9 @@ public class TemporalSkill implements Skill {
     public void use(@NotNull PhantazmMob self) {
         Entity entity = self.entity();
         long oldStartTime = entity.getTag(this.startTime);
+        long time = System.currentTimeMillis();
         if (oldStartTime >= 0) {
-            long elapsed = System.currentTimeMillis() - oldStartTime;
+            long elapsed = time - oldStartTime;
             if (elapsed / MinecraftServer.TICK_MS < entity.getTag(this.actualDelay)) {
                 delegate.end(self);
             }
@@ -65,7 +66,7 @@ public class TemporalSkill implements Skill {
 
         delegate.use(self);
 
-        entity.setTag(startTime, System.currentTimeMillis());
+        entity.setTag(startTime, time);
         entity.setTag(actualDelay, MathUtils.randomInterval(data.minDuration, data.maxDuration));
     }
 
