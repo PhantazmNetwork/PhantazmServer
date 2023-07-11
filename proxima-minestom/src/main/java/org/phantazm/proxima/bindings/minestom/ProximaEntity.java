@@ -104,6 +104,8 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
+        resetPath();
+        this.targetEntity = null;
         this.destination = destination;
     }
 
@@ -117,6 +119,8 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
+        resetPath();
+        this.targetEntity = targetEntity;
         this.destination = PathTarget.resolving(() -> {
             if (!pathfinding.isValidTarget(targetEntity)) {
                 return null;
