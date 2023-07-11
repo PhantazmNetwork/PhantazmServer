@@ -58,7 +58,10 @@ import org.phantazm.zombies.map.action.door.DoorPlaySoundAction;
 import org.phantazm.zombies.map.action.door.DoorSendMessageAction;
 import org.phantazm.zombies.map.action.door.DoorSendOpenedRoomsAction;
 import org.phantazm.zombies.map.action.room.SpawnMobsAction;
-import org.phantazm.zombies.map.action.round.*;
+import org.phantazm.zombies.map.action.round.AnnounceRoundAction;
+import org.phantazm.zombies.map.action.round.RevivePlayersAction;
+import org.phantazm.zombies.map.action.round.SelectBombedRoom;
+import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
 import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
 import org.phantazm.zombies.map.shop.display.*;
 import org.phantazm.zombies.map.shop.display.creator.*;
@@ -68,7 +71,6 @@ import org.phantazm.zombies.map.shop.predicate.*;
 import org.phantazm.zombies.map.shop.predicate.logic.AndPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.NotPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.OrPredicate;
-import org.phantazm.zombies.map.shop.predicate.logic.XorPredicate;
 import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
@@ -77,7 +79,6 @@ import org.phantazm.zombies.player.condition.EquipmentCondition;
 import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
 import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
-import org.phantazm.zombies.powerup.action.PlaySoundAction;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
 import org.phantazm.zombies.powerup.visual.HologramVisual;
@@ -184,10 +185,12 @@ public final class ZombiesFeature {
                                 return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
                                         dimensionType.getHeight());
                             }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
-                            ZombiesFeature.powerups(), new BasicZombiesPlayerSource(database, viewProvider,
-                            EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
-                            keyParser), mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                            .provide(mapDependencyProvider), songLoader);
+                            MessagingFeature.getClientToServerHandler(), ZombiesFeature.powerups(),
+                            new BasicZombiesPlayerSource(database, viewProvider,
+                                    EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
+                                    keyParser),
+                            mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
+                                    .provide(mapDependencyProvider), songLoader);
             providers.put(entry.getKey(), provider);
         }
 
@@ -228,7 +231,6 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(AndPredicate.class);
         contextManager.registerElementClass(OrPredicate.class);
         contextManager.registerElementClass(NotPredicate.class);
-        contextManager.registerElementClass(XorPredicate.class);
 
         contextManager.registerElementClass(EquipmentCostPredicate.class);
         contextManager.registerElementClass(EquipmentSpacePredicate.class);

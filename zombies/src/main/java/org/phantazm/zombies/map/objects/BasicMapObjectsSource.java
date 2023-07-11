@@ -14,6 +14,7 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
@@ -31,6 +32,7 @@ import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.tracker.BoundedTracker;
+import org.phantazm.messaging.packet.PacketHandler;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
@@ -70,16 +72,19 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     private final Map<Key, MobModel> mobModels;
     private final ClientBlockHandlerSource clientBlockHandlerSource;
     private final KeyParser keyParser;
+    private final PacketHandler<Player> packetHandler;
 
     public BasicMapObjectsSource(@NotNull MapInfo mapInfo, @NotNull ContextManager contextManager,
             @NotNull MobSpawnerSource mobSpawnerSource, @NotNull Map<Key, MobModel> mobModels,
-            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {
+            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser,
+            @NotNull PacketHandler<Player> packetHandler) {
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.mobSpawnerSource = Objects.requireNonNull(mobSpawnerSource, "mobSpawnerSource");
         this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
         this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource, "clientBlockHandlerSource");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        this.packetHandler = Objects.requireNonNull(packetHandler, "packetHandler");
     }
 
     @Override
@@ -264,7 +269,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             }
 
             rounds.add(new Round(roundInfo, waves, startActions, endActions, spawnDistributor, spawnpoints,
-                    zombiesPlayers.values()));
+                    zombiesPlayers.values(), packetHandler));
         }
 
         return rounds;

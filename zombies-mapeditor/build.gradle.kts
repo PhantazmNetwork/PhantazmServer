@@ -1,7 +1,7 @@
 // https://youtrack.jetbrains.com/issue/KTIJ-19369/False-positive-can-t-be-called-in-this-context-by-implicit-recei
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("phantazm.java-library-conventions")
+    id("phantazm.java-conventions")
 
     alias(libs.plugins.fabric.loom)
 }
@@ -33,8 +33,8 @@ repositories {
 }
 
 dependencies {
-    minecraft(libs.minecraft)
-    mappings(libs.yarn.mappings) {
+    minecraft(libs.minecraft.oneNineteen)
+    mappings(libs.yarn.mappings.oneNineteen) {
         artifact {
             classifier = "v2"
         }
@@ -42,7 +42,7 @@ dependencies {
 
     modImplementation(libs.fabric.loader)
     modImplementation(libs.libgui)
-    modImplementation(libs.fabric.api)
+    modImplementation(libs.fabric.api.oneNineteen)
     modImplementation(libs.renderer)
 
     implementation(projects.phantazmCommons)

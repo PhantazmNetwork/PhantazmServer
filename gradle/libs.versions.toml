@@ -28,6 +28,8 @@ examination-string = { module = "net.kyori:examination-string", version.ref = "e
 
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.1" }
 
+cloth-config = { module = "me.shedaniel.cloth:cloth-config-fabric", version  = "11.1.106" }
+
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
 
 element-core = { module = "com.github.steanky:element-core", version = "0.14.3" }
@@ -40,7 +42,8 @@ ethylene-yaml = { module = "com.github.steanky:ethylene-yaml", version.ref = "et
 ethylene-mapper = { module = "com.github.steanky:ethylene-mapper", version.ref = "ethylene" }
 
 fabric-loader = { module = "net.fabricmc:fabric-loader", version = "0.14.21" }
-fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.83.0+1.19.4" }
+fabric-api-oneNineteen = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.83.0+1.19.4" }
+fabric-api-oneTwenty = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.85.0+1.20.1" }
 
 fastutil = { module = "it.unimi.dsi:fastutil", version = "8.5.8" }
 
@@ -60,13 +63,17 @@ libgui = { module = "io.github.cottonmc:LibGui", version = "7.1.0+1.19.4" }
 
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.0.10" }
 
-minecraft = { module = "com.mojang:minecraft", version = "1.19.4" }
+minecraft-oneNineteen = { module = "com.mojang:minecraft", version = "1.19.4" }
+
+minecraft-oneTwenty = { module = "com.mojang:minecraft", version = "1.20.1" }
 
 minestom = { module = "org.phantazm.Minestom:Minestom", version.ref = "minestom" }
 
 minestom-testing = { module = "org.phantazm.Minestom:testing", version.ref = "minestom" }
 
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version = "4.7.0" }
+
+modmenu = { module = "com.terraformersmc:modmenu", version = "7.1.0" }
 
 proxima-core = { module = "com.github.steanky:proxima-core", version = "0.6.2" }
 
@@ -83,7 +90,9 @@ vector-core = { module = "com.github.steanky:vector-core", version = "0.9.2" }
 
 velocity-api = { module = "com.velocitypowered:velocity-api", version = "3.1.2-SNAPSHOT" }
 
-yarn-mappings = { module = "net.fabricmc:yarn", version = "1.19.4+build.2" }
+yarn-mappings-oneNineteen = { module = "net.fabricmc:yarn", version = "1.19.4+build.2" }
+
+yarn-mappings-oneTwenty = { module = "net.fabricmc:yarn", version = "1.20.1+build.9" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version = "1.1.9" }

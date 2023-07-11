@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.key.Key;
@@ -44,6 +45,7 @@ import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.mapeditor.client.packet.PacketByteBufDataReader;
 import org.phantazm.zombies.mapeditor.client.packet.PacketByteBufDataWriter;
+import org.phantazm.zombies.mapeditor.client.packet.PhantazmPacket;
 import org.phantazm.zombies.mapeditor.client.render.ObjectRenderer;
 import org.phantazm.zombies.mapeditor.client.ui.MainGui;
 import org.phantazm.zombies.mapeditor.client.ui.NewObjectGui;
@@ -89,7 +91,7 @@ public class MapeditorClient implements ClientModInitializer {
                         TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
         PacketSerializer clientToProxy = PacketSerializers.clientToProxySerializer(
-                () -> new PacketByteBufDataWriter(new PacketByteBuf(Unpooled.buffer())),
+                () -> new PacketByteBufDataWriter(PacketByteBufs.create()),
                 data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));
         Identifier clientToProxyIdentifier = Identifier.of(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_PROXY);
         if (clientToProxyIdentifier != null) {
@@ -125,10 +127,9 @@ public class MapeditorClient implements ClientModInitializer {
                     packetSender.sendPacket(clientToProxyIdentifier, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
                 }
             };
-            ClientPlayNetworking.registerGlobalReceiver(clientToProxyIdentifier,
-                    (client, handler, buf, responseSender) -> {
-                        clientToProxyHandler.handleData(responseSender, buf.getWrittenBytes());
-                    });
+            ClientPlayNetworking.registerGlobalReceiver(PhantazmPacket.TYPE, ((packet, player, responseSender) -> {
+                clientToProxyHandler.handleData(responseSender, packet.data());
+            }));
         }
 
         ClientTickEvents.END_CLIENT_TICK.register(new ClientTickEvents.EndTick() {

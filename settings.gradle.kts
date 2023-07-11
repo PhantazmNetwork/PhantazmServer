@@ -33,6 +33,7 @@ sequenceOf(
     "proxima-minestom",
     "server",
     "stats",
+    "zombies-timer",
     "velocity",
     "zombies",
     "zombies-mapdata",

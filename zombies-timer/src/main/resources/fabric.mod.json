@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "zombiesautosplits",
+  "version": "${version}",
+  "name": "Phantazm Timer Mod",
+  "description": "A timer mod for Phantazm.",
+  "authors": [
+    "thamid"
+  ],
+  "contact": {
+    "issues": "https://github.com/tahmid-23/ZombiesAutoSplits/issues",
+    "sources": "https://github.com/tahmid-23/ZombiesAutoSplits.git"
+  },
+  "license": "AGPL-3.0-or-later",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "org.phantazm.zombiesautosplits.ZombiesAutoSplitsClient"
+    ],
+    "modmenu": [
+      "org.phantazm.zombiesautosplits.modmenu.ZombiesAutoSplitsModMenuApiImpl"
+    ]
+  },
+  "mixins": ["zombiesautosplits.mixin.json"],
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "fabric-api": "*",
+    "minecraft": "1.20.1",
+    "java": ">=17",
+    "cloth-config": "^11.1.106",
+    "modmenu": "^7.1.0"
+  }
+}
