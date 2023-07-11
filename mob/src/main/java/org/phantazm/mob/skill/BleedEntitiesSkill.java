@@ -45,10 +45,6 @@ public class BleedEntitiesSkill implements Skill {
     @Override
     public void tick(long time, @NotNull PhantazmMob self) {
         Iterator<BleedContext> contextIterator = bleeding.iterator();
-        if (!contextIterator.hasNext()) {
-            return;
-        }
-
         while (contextIterator.hasNext()) {
             BleedContext bleedContext = contextIterator.next();
             if (bleedContext.self != self) {
@@ -65,8 +61,8 @@ public class BleedEntitiesSkill implements Skill {
             bleedContext.setTicksSinceStart(ticksSinceStart + 1);
             if (ticksSinceStart % data.bleedInterval() == 0) {
                 livingEntity.damage(Damage.fromEntity(self.entity(), data.bleedDamage()), data.bypassArmor);
-                contextIterator.remove();
             }
+
             if (ticksSinceStart >= data.bleedTime()) {
                 contextIterator.remove();
             }
