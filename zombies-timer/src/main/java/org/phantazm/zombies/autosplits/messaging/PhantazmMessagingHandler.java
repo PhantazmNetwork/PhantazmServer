@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.messaging;
+package org.phantazm.zombies.autosplits.messaging;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -9,7 +9,7 @@ import org.phantazm.messaging.packet.Packet;
 import org.phantazm.messaging.packet.PacketHandler;
 import org.phantazm.messaging.packet.c2s.RoundStartPacket;
 import org.phantazm.messaging.serialization.PacketSerializer;
-import org.phantazm.zombiesautosplits.splitter.CompositeSplitter;
+import org.phantazm.zombies.autosplits.splitter.CompositeSplitter;
 
 import java.util.Objects;
 

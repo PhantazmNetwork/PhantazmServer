@@ -1,10 +1,10 @@
-package org.phantazm.zombiesautosplits.mixin;
+package org.phantazm.zombies.autosplits.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundSystem;
-import org.phantazm.zombiesautosplits.event.ClientSoundCallback;
+import org.phantazm.zombies.autosplits.event.ClientSoundCallback;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

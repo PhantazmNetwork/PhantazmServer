@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.modmenu;
+package org.phantazm.zombies.autosplits.modmenu;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
@@ -6,8 +6,8 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.text.Text;
-import org.phantazm.zombiesautosplits.ZombiesAutoSplitsClient;
-import org.phantazm.zombiesautosplits.config.ZombiesAutoSplitsConfig;
+import org.phantazm.zombies.autosplits.ZombiesAutoSplitsClient;
+import org.phantazm.zombies.autosplits.config.ZombiesAutoSplitsConfig;
 
 public class ZombiesAutoSplitsModMenuApiImpl implements ModMenuApi {
 

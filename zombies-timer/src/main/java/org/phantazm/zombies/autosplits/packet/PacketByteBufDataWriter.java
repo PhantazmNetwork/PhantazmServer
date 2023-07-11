@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.packet;
+package org.phantazm.zombies.autosplits.packet;
 
 import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.NotNull;

@@ -1,12 +1,12 @@
-package org.phantazm.zombiesautosplits.sound;
+package org.phantazm.zombies.autosplits.sound;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombiesautosplits.event.ClientSoundCallback;
-import org.phantazm.zombiesautosplits.splitter.CompositeSplitter;
+import org.phantazm.zombies.autosplits.event.ClientSoundCallback;
+import org.phantazm.zombies.autosplits.splitter.CompositeSplitter;
 
 import java.util.Objects;
 

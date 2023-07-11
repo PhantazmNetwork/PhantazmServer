@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.packet;
+package org.phantazm.zombies.autosplits.packet;
 
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;

@@ -1,7 +1,7 @@
-package org.phantazm.zombiesautosplits.splitter.socket;
+package org.phantazm.zombies.autosplits.splitter.socket;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombiesautosplits.splitter.LiveSplitSplitter;
+import org.phantazm.zombies.autosplits.splitter.LiveSplitSplitter;
 
 import java.io.IOException;
 import java.io.OutputStream;

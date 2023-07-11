@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.splitter;
+package org.phantazm.zombies.autosplits.splitter;
 
 import org.jetbrains.annotations.NotNull;
 

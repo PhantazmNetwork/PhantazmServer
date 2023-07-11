@@ -12,14 +12,8 @@ base {
     archivesName.set("ZombiesAutoSplits")
 }
 
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
-
 repositories {
     mavenCentral()
-    maven("https://dl.cloudsmith.io/public/steanky/ethylene/maven/")
-    maven("https://dl.cloudsmith.io/public/steanky/toolkit/maven/")
     maven("https://maven.shedaniel.me/")
     maven("https://maven.terraformersmc.com/releases/")
 }
@@ -48,10 +42,6 @@ dependencies {
     include(libs.toolkit.collection)
     include(libs.toolkit.function)
     include(libs.snakeyaml)
-}
-
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
 }
 
 tasks.processResources {

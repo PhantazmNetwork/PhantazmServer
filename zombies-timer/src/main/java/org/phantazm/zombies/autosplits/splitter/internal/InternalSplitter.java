@@ -1,7 +1,7 @@
-package org.phantazm.zombiesautosplits.splitter.internal;
+package org.phantazm.zombies.autosplits.splitter.internal;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombiesautosplits.splitter.LiveSplitSplitter;
+import org.phantazm.zombies.autosplits.splitter.LiveSplitSplitter;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;

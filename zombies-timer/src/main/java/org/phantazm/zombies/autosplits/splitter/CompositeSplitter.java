@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.splitter;
+package org.phantazm.zombies.autosplits.splitter;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
@@ -27,6 +27,10 @@ public class CompositeSplitter {
     }
 
     public void split() {
+        if (!enabled) {
+            return;
+        }
+
         for (LiveSplitSplitter splitter : splitters) {
             splitter.startOrSplit().whenComplete((ignored, throwable) -> {
                 if (throwable == null) {

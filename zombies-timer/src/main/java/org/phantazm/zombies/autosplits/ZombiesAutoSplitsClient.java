@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits;
+package org.phantazm.zombies.autosplits;
 
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
@@ -22,20 +22,20 @@ import org.lwjgl.glfw.GLFW;
 import org.phantazm.messaging.packet.PacketHandler;
 import org.phantazm.messaging.serialization.PacketSerializer;
 import org.phantazm.messaging.serialization.PacketSerializers;
-import org.phantazm.zombiesautosplits.config.ZombiesAutoSplitsConfig;
-import org.phantazm.zombiesautosplits.config.ZombiesAutoSplitsConfigProcessor;
-import org.phantazm.zombiesautosplits.event.ClientSoundCallback;
-import org.phantazm.zombiesautosplits.messaging.PhantazmMessagingHandler;
-import org.phantazm.zombiesautosplits.packet.PacketByteBufDataReader;
-import org.phantazm.zombiesautosplits.packet.PacketByteBufDataWriter;
-import org.phantazm.zombiesautosplits.packet.PhantazmPacket;
-import org.phantazm.zombiesautosplits.render.RenderTimeHandler;
-import org.phantazm.zombiesautosplits.sound.AutoSplitSoundInterceptor;
-import org.phantazm.zombiesautosplits.splitter.CompositeSplitter;
-import org.phantazm.zombiesautosplits.splitter.LiveSplitSplitter;
-import org.phantazm.zombiesautosplits.splitter.internal.InternalSplitter;
-import org.phantazm.zombiesautosplits.splitter.socket.LiveSplitSocketSplitter;
-import org.phantazm.zombiesautosplits.tick.KeyInputHandler;
+import org.phantazm.zombies.autosplits.config.ZombiesAutoSplitsConfig;
+import org.phantazm.zombies.autosplits.config.ZombiesAutoSplitsConfigProcessor;
+import org.phantazm.zombies.autosplits.messaging.PhantazmMessagingHandler;
+import org.phantazm.zombies.autosplits.packet.PacketByteBufDataReader;
+import org.phantazm.zombies.autosplits.packet.PacketByteBufDataWriter;
+import org.phantazm.zombies.autosplits.render.RenderTimeHandler;
+import org.phantazm.zombies.autosplits.event.ClientSoundCallback;
+import org.phantazm.zombies.autosplits.packet.PhantazmPacket;
+import org.phantazm.zombies.autosplits.sound.AutoSplitSoundInterceptor;
+import org.phantazm.zombies.autosplits.splitter.CompositeSplitter;
+import org.phantazm.zombies.autosplits.splitter.LiveSplitSplitter;
+import org.phantazm.zombies.autosplits.splitter.internal.InternalSplitter;
+import org.phantazm.zombies.autosplits.splitter.socket.LiveSplitSocketSplitter;
+import org.phantazm.zombies.autosplits.tick.KeyInputHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class ZombiesAutoSplitsClient implements ClientModInitializer {
 
-    public static final String MODID = "zombiesautosplits";
+    public static final String MODID = "zombies-autosplits";
 
     private static ZombiesAutoSplitsClient instance = null;
 
@@ -72,6 +72,8 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
     private RenderTimeHandler renderTimeHandler;
 
     private ZombiesAutoSplitsConfig config;
+
+    private CompositeSplitter compositeSplitter;
 
     public static @NotNull ZombiesAutoSplitsClient getInstance() {
         return instance;
@@ -119,8 +121,12 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
         renderTimeHandler = new RenderTimeHandler(MinecraftClient.getInstance(), 0xFFFFFF);
 
         initConfig();
+
+        compositeSplitter = new CompositeSplitter(MinecraftClient.getInstance(), logger, splitters);
+
         initEvents();
         initKeyBindings();
+        initPackets();
 
         instance = this;
     }
@@ -163,14 +169,16 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
     }
 
     private void initEvents() {
-        CompositeSplitter compositeSplitter = new CompositeSplitter(MinecraftClient.getInstance(), logger, splitters);
-
         AutoSplitSoundInterceptor soundInterceptor =
                 new AutoSplitSoundInterceptor(MinecraftClient.getInstance(), compositeSplitter);
         ClientTickEvents.END_CLIENT_TICK.register(new KeyInputHandler(autoSplitsKeybind, compositeSplitter));
         HudRenderCallback.EVENT.register(renderTimeHandler);
         ClientSoundCallback.EVENT.register(soundInterceptor);
 
+
+    }
+
+    private void initPackets() {
         PacketSerializer packetSerializer =
                 PacketSerializers.clientToServerSerializer(() -> new PacketByteBufDataWriter(PacketByteBufs.create()),
                         data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));

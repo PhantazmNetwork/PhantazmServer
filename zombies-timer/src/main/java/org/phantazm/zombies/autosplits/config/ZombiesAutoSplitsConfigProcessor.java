@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.config;
+package org.phantazm.zombies.autosplits.config;
 
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigNode;

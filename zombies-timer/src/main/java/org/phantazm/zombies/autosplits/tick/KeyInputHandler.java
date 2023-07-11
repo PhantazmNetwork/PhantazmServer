@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.tick;
+package org.phantazm.zombies.autosplits.tick;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
@@ -7,7 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombiesautosplits.splitter.CompositeSplitter;
+import org.phantazm.zombies.autosplits.splitter.CompositeSplitter;
 
 import java.util.Objects;
 
@@ -24,29 +24,31 @@ public class KeyInputHandler implements ClientTickEvents.EndTick {
 
     @Override
     public void onEndTick(MinecraftClient client) {
-        if (keyBinding.wasPressed()) {
-            Text toggledComponent;
-            boolean toggled = compositeSplitter.toggle();
-
-            PlayerEntity player = client.player;
-            if (player == null) {
-                return;
-            }
-
-            if (toggled) {
-                toggledComponent = Text.literal("ON").formatted(Formatting.GREEN);
-            }
-            else {
-                toggledComponent = Text.literal("OFF").formatted(Formatting.RED);
-            }
-
-            Text message = Text.empty()
-                    .formatted(Formatting.YELLOW)
-                    .append("Toggled AutoSplits ")
-                    .append(toggledComponent)
-                    .append("!");
-            client.player.sendMessage(message, false);
+        if (!keyBinding.wasPressed()) {
+            return;
         }
+
+        Text toggledComponent;
+        boolean toggled = compositeSplitter.toggle();
+
+        PlayerEntity player = client.player;
+        if (player == null) {
+            return;
+        }
+
+        if (toggled) {
+            toggledComponent = Text.literal("ON").formatted(Formatting.GREEN);
+        }
+        else {
+            toggledComponent = Text.literal("OFF").formatted(Formatting.RED);
+        }
+
+        Text message = Text.empty()
+                .formatted(Formatting.YELLOW)
+                .append("Toggled AutoSplits ")
+                .append(toggledComponent)
+                .append("!");
+        client.player.sendMessage(message, false);
     }
 
 }

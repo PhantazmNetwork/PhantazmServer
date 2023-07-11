@@ -1,4 +1,4 @@
-package org.phantazm.zombiesautosplits.render;
+package org.phantazm.zombies.autosplits.render;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
@@ -6,7 +6,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.Window;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.zombiesautosplits.splitter.internal.InternalSplitter;
+import org.phantazm.zombies.autosplits.splitter.internal.InternalSplitter;
 
 import java.util.Objects;
 
