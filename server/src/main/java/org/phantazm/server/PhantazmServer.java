@@ -188,7 +188,7 @@ public final class PhantazmServer {
     public static void shutdown(@Nullable String reason) {
         LOGGER.info("Shutting down server. Reason: " + reason);
 
-        ZombiesFeature.end();
+        HikariFeature.end();
         if (loginValidator != null) {
             loginValidator.flush();
         }
@@ -216,6 +216,8 @@ public final class PhantazmServer {
 
         RouterStore routerStore = new BasicRouterStore();
         ExecutorFeature.initialize();
+        HikariFeature.initialize();
+        GeneralStatsFeature.initialize(global);
         BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
 
         SongFeature.initialize(keyParser);

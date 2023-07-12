@@ -5,8 +5,6 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -58,7 +56,10 @@ import org.phantazm.zombies.map.action.door.DoorPlaySoundAction;
 import org.phantazm.zombies.map.action.door.DoorSendMessageAction;
 import org.phantazm.zombies.map.action.door.DoorSendOpenedRoomsAction;
 import org.phantazm.zombies.map.action.room.SpawnMobsAction;
-import org.phantazm.zombies.map.action.round.*;
+import org.phantazm.zombies.map.action.round.AnnounceRoundAction;
+import org.phantazm.zombies.map.action.round.RevivePlayersAction;
+import org.phantazm.zombies.map.action.round.SelectBombedRoom;
+import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
 import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
 import org.phantazm.zombies.map.shop.display.*;
 import org.phantazm.zombies.map.shop.display.creator.*;
@@ -76,7 +77,6 @@ import org.phantazm.zombies.player.condition.EquipmentCondition;
 import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
 import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
-import org.phantazm.zombies.powerup.action.PlaySoundAction;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
 import org.phantazm.zombies.powerup.visual.HologramVisual;
@@ -114,7 +114,6 @@ public final class ZombiesFeature {
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
-    private static HikariDataSource dataSource;
     private static ZombiesDatabase database;
 
     private record PreloadedMap(@NotNull List<String> instancePath, @NotNull Point spawn, int chunkLoadRange) {
@@ -169,10 +168,8 @@ public final class ZombiesFeature {
         Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
 
-        HikariConfig config = new HikariConfig("./zombies.hikari.properties");
-        dataSource = new HikariDataSource(config);
         ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
-        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), dataSource, sqlFetcher);
+        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource(), sqlFetcher);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
@@ -406,9 +403,4 @@ public final class ZombiesFeature {
         return FeatureUtils.check(database);
     }
 
-    public static void end() {
-        if (dataSource != null) {
-            dataSource.close();
-        }
-    }
 }
