@@ -33,6 +33,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.ElementUtils;
+import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.BasicPhantazmMob;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
@@ -43,6 +44,7 @@ import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.zombies.ExtraNodeKeys;
+import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +73,7 @@ public class BasicMobSpawner implements MobSpawner {
     private final Spawner proximaSpawner;
     private final KeyParser keyParser;
     private final MobStore mobStore;
+    private final Supplier<? extends MapObjects> mapObjects;
     private final DependencyProvider mobDependencyProvider;
 
     /**
@@ -85,14 +88,31 @@ public class BasicMobSpawner implements MobSpawner {
         this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
 
         this.mobDependencyProvider =
                 new ModuleDependencyProvider(keyParser, new Module(this, mobStore, random, mapObjects));
     }
 
     @Override
-    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobModel model) {
-        ProximaEntity proximaEntity = proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory());
+    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobModel model,
+            @NotNull Consumer<? super ProximaEntity> init) {
+        ProximaEntity proximaEntity =
+                proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory(), entity -> {
+                    init.accept(entity);
+
+                    BoundedTracker<Window> windowTracker = mapObjects.get().windowTracker();
+                    entity.pathfinding().setPenalty((x, y, z, h) -> {
+                        Optional<Window> windowOptional = windowTracker.atPoint(x, y + 1, z);
+
+                        //noinspection OptionalIsPresent
+                        if (windowOptional.isEmpty()) {
+                            return h;
+                        }
+
+                        return windowOptional.get().isBlockBroken(x, y + 1, z) ? h : h * 10;
+                    });
+                });
 
         setTasks(proximaEntity, model);
         setEntityMeta(proximaEntity, model);

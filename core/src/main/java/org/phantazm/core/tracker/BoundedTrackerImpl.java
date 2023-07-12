@@ -62,11 +62,11 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
     @Override
     public @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height, double depth,
             double distance) {
-        int startX = (int)Math.floor(origin.x() - distance) >> 4;
-        int startZ = (int)Math.floor(origin.z() - distance) >> 4;
+        int startX = (int)Math.floor(origin.x() - (distance + (width / 2))) >> 4;
+        int startZ = (int)Math.floor(origin.z() - (distance + (depth / 2))) >> 4;
 
-        int endX = (int)Math.floor(origin.x() + distance - Vec.EPSILON) >> 4;
-        int endZ = (int)Math.floor(origin.z() + distance - Vec.EPSILON) >> 4;
+        int endX = (int)Math.floor(origin.x() + (distance + (width / 2)) - Vec.EPSILON) >> 4;
+        int endZ = (int)Math.floor(origin.z() + (distance + (depth / 2)) - Vec.EPSILON) >> 4;
 
         T closest = null;
         double closestDistance = Double.POSITIVE_INFINITY;

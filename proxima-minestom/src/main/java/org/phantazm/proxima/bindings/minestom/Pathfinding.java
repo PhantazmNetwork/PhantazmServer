@@ -28,6 +28,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
+    public interface Penalty {
+        Penalty NONE = (x, y, z, h) -> h;
+
+        float calculate(int x, int y, int z, float h);
+    }
+
     public static final double PLAYER_PATH_EPSILON = 0.0005;
     public static final double MOB_PATH_EPSILON = 1E-6;
     public static final double PLAYER_PATH_EPSILON_DOWNWARDS = MOB_PATH_EPSILON;
@@ -41,6 +47,7 @@ public class Pathfinding {
     protected final ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal;
     protected final InstanceSpaceHandler spaceHandler;
 
+    protected Penalty penalty;
     protected BoundingBox lastBoundingBox;
 
     protected Vec3IBiPredicate successPredicate;
@@ -59,6 +66,30 @@ public class Pathfinding {
         this.pathfinder = Objects.requireNonNull(pathfinder, "pathfinder");
         this.nodeMapLocal = Objects.requireNonNull(nodeMapLocal, "nodeMapLocal");
         this.spaceHandler = Objects.requireNonNull(spaceHandler, "spaceHandler");
+        this.penalty = Penalty.NONE;
+    }
+
+    private void clearState() {
+        this.lastBoundingBox = null;
+        this.successPredicate = null;
+        this.nodeSnapper = null;
+        this.pathLimiter = null;
+        this.explorer = null;
+        this.heuristic = null;
+        this.nodeProcessor = null;
+        this.navigator = null;
+        this.pathSettings = null;
+        this.controller = null;
+    }
+
+    public void setPenalty(@NotNull Penalty penalty) {
+        Objects.requireNonNull(penalty, "penalty");
+        if (penalty == this.penalty) {
+            return;
+        }
+
+        clearState();
+        this.penalty = penalty;
     }
 
     public void cancel() {
@@ -172,7 +203,10 @@ public class Pathfinding {
     }
 
     protected @NotNull Heuristic heuristic() {
-        return Heuristic.DISTANCE_SQUARED;
+        return (fromX, fromY, fromZ, toX, toY, toZ) -> {
+            float h = Heuristic.DISTANCE_SQUARED.heuristic(fromX, fromY, fromZ, toX, toY, toZ);
+            return penalty.calculate(fromX, fromY, fromZ, h);
+        };
     }
 
     public boolean canPathfind(@NotNull ProximaEntity proximaEntity) {

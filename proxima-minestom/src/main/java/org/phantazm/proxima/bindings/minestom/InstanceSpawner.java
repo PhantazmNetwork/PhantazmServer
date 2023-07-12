@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class InstanceSpawner implements Spawner {
@@ -29,7 +30,7 @@ public class InstanceSpawner implements Spawner {
 
     @Override
     public @NotNull ProximaEntity spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull EntityType entityType,
-            @NotNull Pathfinding.Factory factory) {
+            @NotNull Pathfinding.Factory factory, @NotNull Consumer<? super ProximaEntity> init) {
         InstanceSettings settings = settingsFunction.apply(instance);
         if (settings == null) {
             throw new IllegalStateException(
@@ -38,8 +39,9 @@ public class InstanceSpawner implements Spawner {
 
         Pathfinding pathfinding = factory.make(pathfinder, settings.nodeLocal, settings.spaceHandler);
         ProximaEntity entity = new ProximaEntity(entityType, UUID.randomUUID(), pathfinding);
-        entity.setInstance(instance, pos);
+        init.accept(entity);
 
+        entity.setInstance(instance, pos);
         return entity;
     }
 }

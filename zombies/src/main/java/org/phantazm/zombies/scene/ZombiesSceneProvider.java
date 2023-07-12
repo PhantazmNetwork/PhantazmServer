@@ -247,7 +247,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             UUID allowedRequestUUID = request.isRestricted() ? request.getUUID() : null;
             ZombiesScene scene =
                     new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
-                            stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode, allowedRequestUUID);
+                            stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode,
+                            allowedRequestUUID);
             sceneWrapper.set(scene);
             rootNode.addChild(childNode);
 

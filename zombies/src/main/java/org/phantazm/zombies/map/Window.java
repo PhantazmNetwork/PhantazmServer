@@ -224,6 +224,23 @@ public class Window extends BoundedBase {
         return Optional.ofNullable(linkedRoom);
     }
 
+    /**
+     * Checks if the block is currently broken. Accepts world coordinates. The behavior of this function is undefined
+     * if the position specified is outside of the bounds of this window.
+     *
+     * @param x the x-coordinate
+     * @param y the y-coordinate
+     * @param z the z-coordinate
+     * @return true if the block is broken, false otherwise
+     */
+    public boolean isBlockBroken(int x, int y, int z) {
+        int index = coordinateToIndex(x, y, z);
+
+        synchronized (sync) {
+            return index >= this.index;
+        }
+    }
+
     private Point indexToCoordinate(int index) {
         Bounds3I frameRegion = windowInfo.frameRegion();
 
@@ -232,5 +249,16 @@ public class Window extends BoundedBase {
         int z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
 
         return worldMin.add(x, y, z);
+    }
+
+    private int coordinateToIndex(int x, int y, int z) {
+        int frameRelativeX = x - worldMin.blockX();
+        int frameRelativeY = y - worldMin.blockY();
+        int frameRelativeZ = z - worldMin.blockZ();
+
+        Bounds3I frameRegion = windowInfo.frameRegion();
+
+        return frameRelativeX + (frameRelativeY * frameRegion.lengthX()) +
+                (frameRelativeZ * frameRegion.lengthX() * frameRegion.lengthY());
     }
 }

@@ -19,7 +19,7 @@ import java.util.*;
 
 public class BasicWindowHandler implements WindowHandler {
     private static final int POSITION_CHECK_INTERVAL = 200;
-    private static final int UNREPAIRABLE_BREAK_DELAY = 1000;
+    private static final int UNREPAIRABLE_BREAK_DELAY = 2000;
 
     private static class RepairOperation {
         private final ZombiesPlayer zombiesPlayer;

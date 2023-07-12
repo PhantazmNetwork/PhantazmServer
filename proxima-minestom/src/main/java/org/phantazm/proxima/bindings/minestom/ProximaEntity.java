@@ -209,7 +209,7 @@ public class ProximaEntity extends LivingEntity {
             }
         }
         else if (destination != null && pathfinding.canPathfind(this) && (time - lastPathfind > recalculationDelay &&
-                (destination.hasChanged() || (currentPath != null && !currentPath.isSuccessful())))) {
+                (destination.hasChanged() || (currentPath == null || !currentPath.isSuccessful())))) {
             navigator.navigate(position.x(), position.y(), position.z(), destination);
             this.lastPathfind = time;
         }
@@ -318,6 +318,8 @@ public class ProximaEntity extends LivingEntity {
             double currentY = pos.y();
             double currentZ = pos.z();
 
+            controller.advance(current, target, targetEntity);
+
             if (!controller.hasControl()) {
                 if (!(MathUtils.fuzzyEquals(currentX, lastX, Pathfinding.MOB_PATH_EPSILON) &&
                         MathUtils.fuzzyEquals(currentY, lastY, Pathfinding.MOB_PATH_EPSILON) &&
@@ -334,7 +336,6 @@ public class ProximaEntity extends LivingEntity {
                 lastMoved = time;
             }
 
-            controller.advance(current, target, targetEntity);
 
             lastX = currentX;
             lastY = currentY;
