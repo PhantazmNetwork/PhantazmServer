@@ -7,13 +7,11 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.collision.BoundingBox;
-import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -90,14 +88,12 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                         .raytraceCandidates(eyePos, targetPos, EntityTracker.Target.LIVING_ENTITIES, hit -> {
                             if (mobStore.hasMob(hit.getUuid())) {
                                 BoundingBox boundingBox = hit.getBoundingBox();
-                                Pos hitPosition = hit.getPosition();
 
-                                RayUtils.rayTrace(boundingBox, hitPosition, eyePos).ifPresent(vec -> {
+                                RayUtils.rayTrace(boundingBox, hit.getPosition(), eyePos).ifPresent(vec -> {
                                     HitResult closestHit = closest.get();
                                     if ((closestHit == null ||
                                             vec.distanceSquared(eyePos) < closestHit.pos.distanceSquared(eyePos)) &&
-                                            CollisionUtils.isLineOfSightReachingShape(instance, player.getChunk(),
-                                                    eyePos, hitPosition, boundingBox)) {
+                                            player.hasLineOfSight(hit)) {
                                         closest.set(new HitResult(hit, vec));
                                     }
                                 });
