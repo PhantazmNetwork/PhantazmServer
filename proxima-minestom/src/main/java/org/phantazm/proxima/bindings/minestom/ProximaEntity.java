@@ -222,6 +222,10 @@ public class ProximaEntity extends LivingEntity {
     }
 
     protected void aiTick(long time) {
+        if (isDead()) {
+            return;
+        }
+
         for (GoalGroup group : goalGroups) {
             group.tick(time);
         }

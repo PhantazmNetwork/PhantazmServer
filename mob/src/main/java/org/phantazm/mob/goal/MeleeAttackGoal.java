@@ -70,7 +70,7 @@ public class MeleeAttackGoal implements GoalCreator {
             if ((float)((System.currentTimeMillis() - lastAttackTime) / MinecraftServer.TICK_MS) *
                     attackSpeedMultiplier >= data.cooldown()) {
                 Entity target = self.getTargetEntity();
-                if (target == null) {
+                if (target == null || (target instanceof LivingEntity livingEntity && livingEntity.isInvulnerable())) {
                     return false;
                 }
 
