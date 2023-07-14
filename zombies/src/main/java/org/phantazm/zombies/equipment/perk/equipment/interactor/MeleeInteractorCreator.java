@@ -82,7 +82,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
                 Pos feetPos = player.getPosition();
                 Pos eyePos = feetPos.add(0, player.getEyeHeight(), 0);
-                Point targetPos = eyePos.add(feetPos.direction().mul(data.reach));
+                Point targetPos = eyePos.add(feetPos.direction().mul(data.reach + 5));
 
                 Wrapper<HitResult> closest = Wrapper.ofNull();
                 instance.getEntityTracker()
