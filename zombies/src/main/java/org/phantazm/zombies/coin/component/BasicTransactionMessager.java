@@ -76,12 +76,12 @@ public class BasicTransactionMessager implements TransactionMessager {
             children.add(lerpColorRecursive(child, progress));
         }
 
-        TextColor oldColor = component.color();
-        if (oldColor == null) {
-            oldColor = coinsInfo.gradientFrom();
+        TextColor toColor = component.color();
+        if (toColor == null) {
+            toColor = coinsInfo.gradientTo();
         }
 
-        TextColor newColor = TextColor.lerp(progress, oldColor, coinsInfo.gradientTo());
+        TextColor newColor = TextColor.lerp(progress, coinsInfo.gradientFrom(), toColor);
         return component.children(children).color(newColor);
     }
 
