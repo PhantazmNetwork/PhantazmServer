@@ -74,7 +74,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
                 players.put(player.first().getUUID(), player.first());
             }
 
-            joinRequest.handleJoin(instance, instanceConfig);
+            joinRequest.handleJoin(this, instance, instanceConfig);
         });
     }
 
@@ -122,12 +122,11 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public void shutdown() {
         for (PlayerView player : players.values()) {
-            fallback.fallback(player).whenComplete((fallbackResult,
-                    throwable) -> {
+            fallback.fallback(player).whenComplete((fallbackResult, throwable) -> {
                 if (throwable != null) {
                     LOGGER.warn("Failed to fallback {}", player.getUUID(), throwable);
                 }
-            });;
+            });
         }
 
         super.shutdown();
@@ -140,5 +139,9 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public void tick(long time) {
         this.npcHandler.tick(time);
+    }
+
+    public @NotNull @UnmodifiableView Set<UUID> ghosts() {
+        return Collections.unmodifiableSet(super.ghosts);
     }
 }

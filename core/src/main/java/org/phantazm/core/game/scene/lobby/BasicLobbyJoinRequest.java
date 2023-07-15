@@ -36,7 +36,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
     }
 
     @Override
-    public void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
+    public void handleJoin(@NotNull Lobby lobby, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
         List<CompletableFuture<?>> futures = new ArrayList<>(players.size());
         for (PlayerView view : players) {
             view.getPlayer().ifPresent(player -> {
@@ -47,7 +47,8 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
                 }
                 else {
                     Instance oldInstance = player.getInstance();
-                    player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player));
+                    player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player,
+                            newInstancePlayer -> !lobby.ghosts().contains(newInstancePlayer.getUuid())));
                     futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
                 }
             });

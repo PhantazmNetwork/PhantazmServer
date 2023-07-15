@@ -40,7 +40,7 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
     }
 
     @Override
-    public void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
+    public void handleJoin(@NotNull Lobby lobby, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig) {
         event.setSpawningInstance(instance);
         event.getPlayer().setRespawnPoint(instanceConfig.spawnPoint());
         event.getPlayer().setGameMode(GameMode.ADVENTURE);

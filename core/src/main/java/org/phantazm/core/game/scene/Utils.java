@@ -16,13 +16,16 @@ public class Utils {
      * list of other players in the instance. This method must be called <i>before</i> spawn packets are sent to players
      * in the target instance.
      *
-     * @param oldInstance   the old instance; is {@code null} if the player is logging in for the first time
-     * @param newInstance   the new instance, if this is the same object as oldInstance, this method will do nothing
-     * @param player        the player
-     * @param playersToShow a predicate to test whether a player in {@code newInstance} should receive a tablist packet
+     * @param oldInstance                        the old instance; is {@code null} if the player is logging in for the first time
+     * @param newInstance                        the new instance, if this is the same object as oldInstance, this method will do nothing
+     * @param player                             the player
+     * @param transferPlayerCanSeeInstancePlayer a predicate to test whether a player in {@code newInstance} should be
+     *                                           visible by the transferring player {@code player}
+     * @param instancePlayerCanSeeTransferPlayer a predicate to test whether a player in {@code newInstance} should receive a tablist packet
      */
     public static void handleInstanceTransfer(@Nullable Instance oldInstance, @NotNull Instance newInstance,
-            @NotNull Player player, @NotNull Predicate<? super Player> playersToShow) {
+            @NotNull Player player, @NotNull Predicate<? super Player> transferPlayerCanSeeInstancePlayer,
+            @NotNull Predicate<? super Player> instancePlayerCanSeeTransferPlayer) {
         if (newInstance == oldInstance) {
             return;
         }
@@ -47,9 +50,11 @@ public class Utils {
                 continue;
             }
 
-            player.sendPacket(newInstancePlayer.getAddPlayerToList());
+            if (transferPlayerCanSeeInstancePlayer.test(newInstancePlayer)) {
+                player.sendPacket(newInstancePlayer.getAddPlayerToList());
+            }
 
-            if (playersToShow.test(newInstancePlayer)) {
+            if (instancePlayerCanSeeTransferPlayer.test(newInstancePlayer)) {
                 newInstancePlayer.sendPacket(playerAdd);
             }
         }
@@ -59,11 +64,14 @@ public class Utils {
      * Handles player transfer between instances, sending list packets. Will also notify players in the new instance
      * (the player's current instance).
      *
-     * @param oldInstance the old instance; is {@code null} if the player is logging in for the first time
-     * @param player      the player
+     * @param oldInstance                        the old instance; is {@code null} if the player is logging in for the first time
+     * @param player                             the player
+     * @param transferPlayerCanSeeInstancePlayer a predicate to test whether a player in {@code newInstance} should be
+     *                                           visible by the transferring player {@code player}
      */
     public static void handleInstanceTransfer(@Nullable Instance oldInstance, @NotNull Instance newInstance,
-            @NotNull Player player) {
-        handleInstanceTransfer(oldInstance, newInstance, player, newInstancePlayer -> true);
+            @NotNull Player player, @NotNull Predicate<? super Player> transferPlayerCanSeeInstancePlayer) {
+        handleInstanceTransfer(oldInstance, newInstance, player, transferPlayerCanSeeInstancePlayer,
+                newInstancePlayer -> true);
     }
 }
