@@ -14,7 +14,6 @@ import org.phantazm.messaging.packet.Packet;
 import org.phantazm.messaging.packet.PacketHandler;
 import org.phantazm.messaging.serialization.PacketSerializer;
 import org.phantazm.messaging.serialization.PacketSerializers;
-import org.phantazm.server.config.server.AuthType;
 import org.phantazm.server.packet.BinaryDataReader;
 import org.phantazm.server.packet.BinaryDataWriter;
 
@@ -25,27 +24,30 @@ import java.util.Map;
  */
 public final class MessagingFeature {
 
+    private static PacketHandler<Player> clientToServerHandler;
+
     private MessagingFeature() {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> global, @NotNull AuthType authType) {
+    static void initialize(@NotNull EventNode<Event> global) {
         PacketSerializer clientToServer =
                 PacketSerializers.clientToServerSerializer(() -> new BinaryDataWriter(new BinaryWriter()),
                         data -> new BinaryDataReader(new BinaryReader(data)));
         Key clientToServerIdentifier = Key.key(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_SERVER);
+        clientToServerHandler = new PacketHandler<>(clientToServer) {
+            @Override
+            protected void handlePacket(@NotNull Player player, @NotNull Packet packet) {
+
+            }
+
+            @Override
+            protected void sendToReceiver(@NotNull Player player, byte @NotNull [] data) {
+                player.sendPluginMessage(clientToServerIdentifier.toString(), data);
+            }
+        };
         Map<String, PacketHandler<Player>> packetHandlers =
-                Map.of(MessageChannels.CLIENT_TO_SERVER, new PacketHandler<>(clientToServer) {
-                    @Override
-                    protected void handlePacket(@NotNull Player player, @NotNull Packet packet) {
-
-                    }
-
-                    @Override
-                    protected void sendToReceiver(@NotNull Player player, byte @NotNull [] data) {
-                        player.sendPluginMessage(clientToServerIdentifier.toString(), data);
-                    }
-                });
+                Map.of(MessageChannels.CLIENT_TO_SERVER, clientToServerHandler);
 
         global.addListener(PlayerPluginMessageEvent.class, event -> {
             String identifier = event.getIdentifier();
@@ -67,4 +69,7 @@ public final class MessagingFeature {
         });
     }
 
+    public static @NotNull PacketHandler<Player> getClientToServerHandler() {
+        return FeatureUtils.check(clientToServerHandler);
+    }
 }

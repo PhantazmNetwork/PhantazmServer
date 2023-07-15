@@ -180,10 +180,12 @@ public final class ZombiesFeature {
                                 return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
                                         dimensionType.getHeight());
                             }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
-                            ZombiesFeature.powerups(), new BasicZombiesPlayerSource(database, viewProvider,
-                            EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
-                            keyParser), mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                            .provide(mapDependencyProvider), songLoader);
+                            MessagingFeature.getClientToServerHandler(), ZombiesFeature.powerups(),
+                            new BasicZombiesPlayerSource(database, viewProvider,
+                                    EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
+                                    keyParser),
+                            mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
+                                    .provide(mapDependencyProvider), songLoader);
             providers.put(entry.getKey(), provider);
         }
 

@@ -50,7 +50,7 @@ public abstract class PacketHandler<TOutputReceiver> {
      * @param outputReceiver The output receiver
      * @param packet         The packet to send
      */
-    protected void output(@NotNull TOutputReceiver outputReceiver, @NotNull Packet packet) {
+    public void output(@NotNull TOutputReceiver outputReceiver, @NotNull Packet packet) {
         sendToReceiver(outputReceiver, packetSerializer.serializePacket(packet));
     }
 

@@ -9,7 +9,6 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.stage.Stage;
@@ -59,9 +58,12 @@ public class RoundCommand extends Command {
                 Stage current = transition.getCurrentStage();
                 if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
                     transition.setCurrentStage(StageKeys.IN_GAME);
+                    if (roundIndex != 0) {
+                        handler.setCurrentRound(roundIndex);
+                    }
+                } else {
+                    handler.setCurrentRound(roundIndex);
                 }
-
-                handler.setCurrentRound(roundIndex);
             });
         }, roundArgument);
     }

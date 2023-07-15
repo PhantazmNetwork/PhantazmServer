@@ -1,9 +1,12 @@
 package org.phantazm.zombies.map;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
+import org.phantazm.messaging.packet.PacketHandler;
+import org.phantazm.messaging.packet.c2s.RoundStartPacket;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -24,6 +27,7 @@ public class Round implements Tickable {
     private final List<Spawnpoint> spawnpoints;
     private final Map<UUID, PhantazmMob> spawnedMobs;
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
+    private final PacketHandler<Player> packetHandler;
 
     private boolean isActive;
     private long waveStartTime;
@@ -38,7 +42,8 @@ public class Round implements Tickable {
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
             @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-            @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+            @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull PacketHandler<Player> packetHandler) {
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.isEmpty()) {
             LOGGER.warn("Round {} has no waves", roundInfo);
@@ -53,6 +58,7 @@ public class Round implements Tickable {
         this.spawnedMobs = new HashMap<>();
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        this.packetHandler = Objects.requireNonNull(packetHandler, "packetHandler");
     }
 
     public @NotNull RoundInfo getRoundInfo() {
@@ -101,6 +107,9 @@ public class Round implements Tickable {
 
             int prevBestRound = zombiesPlayer.module().getStats().getBestRound();
             zombiesPlayer.module().getStats().setBestRound(Math.max(prevBestRound, roundInfo.round()));
+            zombiesPlayer.getPlayer().ifPresent(player -> {
+                packetHandler.output(player, new RoundStartPacket());
+            });
         }
 
         for (Action<Round> action : startActions) {
