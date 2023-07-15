@@ -25,7 +25,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -95,12 +94,6 @@ public class MapeditorClient implements ClientModInitializer {
                 data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));
         Identifier clientToProxyIdentifier = Identifier.of(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_PROXY);
         if (clientToProxyIdentifier != null) {
-            ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-                byte[] data = clientToProxy.serializePacket(new MapDataVersionQueryPacket());
-                sender.sendPacket(new CustomPayloadC2SPacket(clientToProxyIdentifier,
-                        new PacketByteBuf(Unpooled.wrappedBuffer(data))));
-            }));
-
             PacketHandler<PacketSender> clientToProxyHandler = new PacketHandler<>(clientToProxy) {
                 @Override
                 protected void handlePacket(@NotNull PacketSender packetSender, @NotNull Packet packet) {
@@ -127,6 +120,9 @@ public class MapeditorClient implements ClientModInitializer {
                     packetSender.sendPacket(clientToProxyIdentifier, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
                 }
             };
+            ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
+                clientToProxyHandler.output(sender, new MapDataVersionQueryPacket());
+            }));
             ClientPlayNetworking.registerGlobalReceiver(PhantazmPacket.TYPE, ((packet, player, responseSender) -> {
                 clientToProxyHandler.handleData(responseSender, packet.data());
             }));
