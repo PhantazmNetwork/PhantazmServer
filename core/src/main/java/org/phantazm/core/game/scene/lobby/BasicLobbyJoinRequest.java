@@ -19,8 +19,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
-    private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
-
     private final Collection<PlayerView> players;
 
     /**
@@ -48,13 +46,14 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
                     futures.add(player.teleport(instanceConfig.spawnPoint()));
                 }
                 else {
-                    Utils.handleInstanceTransfer(player.getInstance(), instance, player);
+                    Instance oldInstance = player.getInstance();
+                    player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player));
                     futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
                 }
             });
         }
 
-        CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).join();
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
     }
 
 }

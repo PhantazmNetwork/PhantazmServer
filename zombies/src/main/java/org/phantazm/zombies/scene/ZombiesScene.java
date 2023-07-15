@@ -163,7 +163,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         futures.add(player.teleport(pos));
                     }
                     else {
-                        Utils.handleInstanceTransfer(player.getInstance(), instance, player);
+                        Instance oldInstance = player.getInstance();
+                        player.setInstanceAddCallback(
+                                () -> Utils.handleInstanceTransfer(oldInstance, instance, player));
                         futures.add(player.setInstance(instance, pos));
                     }
                     runnables.add(() -> {
@@ -178,7 +180,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         futures.add(player.teleport(pos));
                     }
                     else {
-                        Utils.handleInstanceTransfer(player.getInstance(), instance, player);
+                        Instance oldInstance = player.getInstance();
+                        player.setInstanceAddCallback(
+                                () -> Utils.handleInstanceTransfer(oldInstance, instance, player));
                         futures.add(player.setInstance(instance, pos));
                     }
                     runnables.add(() -> {
