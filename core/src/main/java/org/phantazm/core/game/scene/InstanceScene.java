@@ -22,6 +22,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     protected final Instance instance;
     protected final SceneFallback fallback;
     protected final Point spawnPoint;
+    protected final Set<UUID> ghosts;
 
     private boolean shutdown = false;
 
@@ -31,6 +32,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         this.instance = Objects.requireNonNull(instance, "instance");
         this.fallback = Objects.requireNonNull(fallback, "fallback");
         this.spawnPoint = Objects.requireNonNull(spawnPoint, "spawnPoint");
+        this.ghosts = new HashSet<>();
     }
 
     @Override
@@ -86,9 +88,20 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
             return false;
         }
 
-        Utils.handleInstanceTransfer(oldInstance, instance, player, false);
-        player.setInstance(instance, spawnPoint).join();
-        player.setGameMode(GameMode.SPECTATOR);
+        synchronized (ghosts) {
+            ghosts.add(player.getUuid());
+            ghosts.removeIf(uuid -> {
+                Player ghost = MinecraftServer.getConnectionManager().getPlayer(uuid);
+                return ghost == null || ghost.getInstance() != instance;
+            });
+        }
+
+        Utils.handleInstanceTransfer(oldInstance, instance, player, ghosts);
+        player.setInstance(instance, spawnPoint).whenComplete((ignored, err) -> {
+            if (err != null) {
+                player.setGameMode(GameMode.SPECTATOR);
+            }
+        });
 
         return true;
     }

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
+import java.util.UUID;
 
 public class Utils {
     /**
@@ -15,13 +16,14 @@ public class Utils {
      * list of other players in the instance. This method should be called <i>before</i> the player is added to the new
      * instance.
      *
-     * @param oldInstance the old instance; is {@code null} if the player is logging in for the first time
-     * @param newInstance the new instance, if this is the same object as oldInstance, this method will do nothing
-     * @param player      the player
-     * @param showPlayers whether to send packets to players in the new instance (the player's current instance)
+     * @param oldInstance   the old instance; is {@code null} if the player is logging in for the first time
+     * @param newInstance   the new instance, if this is the same object as oldInstance, this method will do nothing
+     * @param player        the player
+     * @param playersToShow a set of UUIDs to send tablist packets to; if null all players in the target instance will
+     *                      receive packets
      */
     public static void handleInstanceTransfer(@Nullable Instance oldInstance, @NotNull Instance newInstance,
-            @NotNull Player player, boolean showPlayers) {
+            @NotNull Player player, @Nullable Set<UUID> playersToShow) {
         if (newInstance == oldInstance) {
             return;
         }
@@ -48,7 +50,7 @@ public class Utils {
 
             player.sendPacket(newInstancePlayer.getAddPlayerToList());
 
-            if (showPlayers) {
+            if (playersToShow == null || playersToShow.contains(newInstancePlayer.getUuid())) {
                 newInstancePlayer.sendPacket(playerAdd);
             }
         }
@@ -63,6 +65,6 @@ public class Utils {
      */
     public static void handleInstanceTransfer(@Nullable Instance oldInstance, @NotNull Instance newInstance,
             @NotNull Player player) {
-        handleInstanceTransfer(oldInstance, newInstance, player, true);
+        handleInstanceTransfer(oldInstance, newInstance, player, null);
     }
 }
