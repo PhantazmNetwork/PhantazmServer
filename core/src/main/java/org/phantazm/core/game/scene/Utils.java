@@ -8,22 +8,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
-import java.util.UUID;
+import java.util.function.Predicate;
 
 public class Utils {
     /**
      * Handles player transfer between instances, sending list packets. Will optionally add this player to the tab
-     * list of other players in the instance. This method should be called <i>before</i> the player is added to the new
-     * instance.
+     * list of other players in the instance. This method must be called <i>before</i> spawn packets are sent to players
+     * in the target instance.
      *
      * @param oldInstance   the old instance; is {@code null} if the player is logging in for the first time
      * @param newInstance   the new instance, if this is the same object as oldInstance, this method will do nothing
      * @param player        the player
-     * @param playersToShow a set of UUIDs to send tablist packets to; if null all players in the target instance will
-     *                      receive packets
+     * @param playersToShow a predicate to test whether a player in {@code newInstance} should receive a tablist packet
      */
     public static void handleInstanceTransfer(@Nullable Instance oldInstance, @NotNull Instance newInstance,
-            @NotNull Player player, @Nullable Set<UUID> playersToShow) {
+            @NotNull Player player, @NotNull Predicate<? super Player> playersToShow) {
         if (newInstance == oldInstance) {
             return;
         }
@@ -50,7 +49,7 @@ public class Utils {
 
             player.sendPacket(newInstancePlayer.getAddPlayerToList());
 
-            if (playersToShow == null || playersToShow.contains(newInstancePlayer.getUuid())) {
+            if (playersToShow.test(newInstancePlayer)) {
                 newInstancePlayer.sendPacket(playerAdd);
             }
         }
@@ -65,6 +64,6 @@ public class Utils {
      */
     public static void handleInstanceTransfer(@Nullable Instance oldInstance, @NotNull Instance newInstance,
             @NotNull Player player) {
-        handleInstanceTransfer(oldInstance, newInstance, player, null);
+        handleInstanceTransfer(oldInstance, newInstance, player, newInstancePlayer -> true);
     }
 }

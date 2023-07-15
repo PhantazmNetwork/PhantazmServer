@@ -97,7 +97,8 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         }
 
 
-        player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player, ghosts));
+        player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player,
+                newInstancePlayer -> ghosts.contains(newInstancePlayer.getUuid())));
         player.setInstance(instance, spawnPoint).whenComplete((ignored, err) -> {
             if (err != null) {
                 player.setGameMode(GameMode.SPECTATOR);
