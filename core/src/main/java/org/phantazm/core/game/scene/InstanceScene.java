@@ -24,7 +24,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     protected final Point spawnPoint;
     protected final Set<UUID> ghosts;
 
-    private boolean shutdown = false;
+    protected volatile boolean shutdown = false;
 
     public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback,
             @NotNull Point spawnPoint) {

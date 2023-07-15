@@ -328,15 +328,16 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             zombiesPlayer.end();
         }
 
-        //wait for all players to fallback before we shut down the scene
-        try {
-            CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new)).join();
-        }
-        catch (Throwable throwable) {
-            LOGGER.warn("Error when waiting on player fallback", throwable);
-        }
+        super.shutdown = true;
 
-        super.shutdown();
+        //wait for all players to fallback before we actually shut down the scene
+        CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new)).whenComplete((ignored, error) -> {
+            if (error != null) {
+                LOGGER.warn("Error when waiting on player fallback", error);
+            }
+
+            super.shutdown();
+        });
     }
 
     @Override
