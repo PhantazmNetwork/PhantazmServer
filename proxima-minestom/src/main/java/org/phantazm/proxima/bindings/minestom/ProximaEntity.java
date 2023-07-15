@@ -291,7 +291,7 @@ public class ProximaEntity extends LivingEntity {
         Point pos = getPosition();
 
         if (pos.distanceSquared(current.x + 0.5, current.y + current.blockOffset, current.z + 0.5) >
-                NODE_DEVIATION_DISTANCE_SQ && (current.parent == null || !current.equals(currentPath.head()))) {
+                NODE_DEVIATION_DISTANCE_SQ && (current.parent != null && !current.equals(currentPath.head()))) {
             return MoveResult.CANCEL;
         }
 
