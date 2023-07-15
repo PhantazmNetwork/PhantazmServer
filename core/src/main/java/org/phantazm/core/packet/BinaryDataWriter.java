@@ -1,5 +1,6 @@
-package org.phantazm.server.packet;
+package org.phantazm.core.packet;
 
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.utils.binary.BinaryWriter;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.messaging.serialization.DataReader;
@@ -21,6 +22,10 @@ public class BinaryDataWriter implements DataWriter {
      */
     public BinaryDataWriter(@NotNull BinaryWriter binaryWriter) {
         this.binaryWriter = Objects.requireNonNull(binaryWriter, "binaryWriter");
+    }
+
+    public static @NotNull BinaryDataWriter fromNetworkBuffer(@NotNull NetworkBuffer networkBuffer) {
+        return new BinaryDataWriter(new BinaryWriter(Objects.requireNonNull(networkBuffer, "networkBuffer")));
     }
 
     @Override

@@ -1,6 +1,8 @@
-package org.phantazm.messaging.packet.c2p;
+package org.phantazm.messaging.packet.player;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.messaging.packet.Packet;
 import org.phantazm.messaging.serialization.DataReader;
 import org.phantazm.messaging.serialization.DataWriter;
@@ -12,10 +14,7 @@ import java.util.Objects;
  */
 public record MapDataVersionQueryPacket() implements Packet {
 
-    /**
-     * The ID of the {@link MapDataVersionQueryPacket}.
-     */
-    public static final byte ID = 0;
+    public static final Key ID = Key.key(Namespaces.PHANTAZM, "client/mapdata_version_query");
 
     public static @NotNull MapDataVersionQueryPacket read(@NotNull DataReader reader) {
         Objects.requireNonNull(reader, "reader");
@@ -23,7 +22,7 @@ public record MapDataVersionQueryPacket() implements Packet {
     }
 
     @Override
-    public byte getId() {
+    public @NotNull Key getId() {
         return ID;
     }
 

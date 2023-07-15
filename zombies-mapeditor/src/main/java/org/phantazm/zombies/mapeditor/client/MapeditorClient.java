@@ -3,7 +3,6 @@ package org.phantazm.zombies.mapeditor.client;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
-import io.netty.buffer.Unpooled;
 import me.x150.renderer.event.RenderEvents;
 import me.x150.renderer.render.Renderer3d;
 import net.fabricmc.api.ClientModInitializer;
@@ -13,8 +12,6 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.loader.api.FabricLoader;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -24,27 +21,17 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
-import org.phantazm.commons.Namespaces;
-import org.phantazm.messaging.MessageChannels;
-import org.phantazm.messaging.packet.Packet;
-import org.phantazm.messaging.packet.PacketHandler;
-import org.phantazm.messaging.packet.c2p.MapDataVersionQueryPacket;
-import org.phantazm.messaging.packet.c2p.MapDataVersionResponsePacket;
-import org.phantazm.messaging.serialization.PacketSerializer;
-import org.phantazm.messaging.serialization.PacketSerializers;
+import org.phantazm.messaging.packet.player.MapDataVersionQueryPacket;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.MapSettingsInfo;
-import org.phantazm.zombies.mapeditor.client.packet.PacketByteBufDataReader;
-import org.phantazm.zombies.mapeditor.client.packet.PacketByteBufDataWriter;
-import org.phantazm.zombies.mapeditor.client.packet.PhantazmPacket;
+import org.phantazm.zombies.mapeditor.client.packet.FabricPacketUtils;
+import org.phantazm.zombies.mapeditor.client.packet.MapDataVersionResponsePacketWrapper;
 import org.phantazm.zombies.mapeditor.client.render.ObjectRenderer;
 import org.phantazm.zombies.mapeditor.client.ui.MainGui;
 import org.phantazm.zombies.mapeditor.client.ui.NewObjectGui;
@@ -89,45 +76,22 @@ public class MapeditorClient implements ClientModInitializer {
                 new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
                         TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
-        PacketSerializer clientToProxy = PacketSerializers.clientToProxySerializer(
-                () -> new PacketByteBufDataWriter(PacketByteBufs.create()),
-                data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data))));
-        Identifier clientToProxyIdentifier = Identifier.of(Namespaces.PHANTAZM, MessageChannels.CLIENT_TO_PROXY);
-        if (clientToProxyIdentifier != null) {
-            PacketHandler<PacketSender> clientToProxyHandler = new PacketHandler<>(clientToProxy) {
-                @Override
-                protected void handlePacket(@NotNull PacketSender packetSender, @NotNull Packet packet) {
-                    if (packet instanceof MapDataVersionResponsePacket responsePacket) {
-                        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-
-                        if (player != null) {
-                            Text message;
-                            if (responsePacket.version() == MapSettingsInfo.MAP_DATA_VERSION) {
-                                message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
-                                        .formatted(Formatting.GREEN);
-                            }
-                            else {
-                                message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
-                                        .formatted(Formatting.RED);
-                            }
-                            player.sendMessage(message);
-                        }
+        ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
+            FabricPacketUtils.sendPacket(sender, new MapDataVersionQueryPacket());
+        }));
+        ClientPlayNetworking.registerGlobalReceiver(MapDataVersionResponsePacketWrapper.TYPE,
+                (packet, player, responseSender) -> {
+                    Text message;
+                    if (packet.packet().version() == MapSettingsInfo.MAP_DATA_VERSION) {
+                        message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
+                                .formatted(Formatting.GREEN);
                     }
-                }
-
-                @Override
-                protected void sendToReceiver(@NotNull PacketSender packetSender, byte @NotNull [] data) {
-                    packetSender.sendPacket(clientToProxyIdentifier, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
-                }
-            };
-            ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-                clientToProxyHandler.output(sender, new MapDataVersionQueryPacket());
-            }));
-            ClientPlayNetworking.registerGlobalReceiver(PhantazmPacket.TYPE, ((packet, player, responseSender) -> {
-                clientToProxyHandler.handleData(responseSender, packet.data());
-            }));
-        }
-
+                    else {
+                        message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
+                                .formatted(Formatting.RED);
+                    }
+                    player.sendMessage(message);
+                });
         ClientTickEvents.END_CLIENT_TICK.register(new ClientTickEvents.EndTick() {
             private BlockHitResult lastBlockLook;
 

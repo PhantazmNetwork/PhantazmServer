@@ -1,5 +1,6 @@
 package org.phantazm.messaging.packet;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.messaging.serialization.DataWriter;
 
@@ -8,14 +9,7 @@ import org.phantazm.messaging.serialization.DataWriter;
  */
 public interface Packet {
 
-    /**
-     * Gets the ID of the packet. This should be unique for a single messaging channel.
-     * For example, all the packets in the proxy plugin messaging channel should be unique.
-     * However, they can share IDs with packets on other channels.
-     *
-     * @return The ID of the packet
-     */
-    byte getId();
+    @NotNull Key getId();
 
     /**
      * Writes the packet to a {@link DataWriter}.

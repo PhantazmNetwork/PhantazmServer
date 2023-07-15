@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     api(projects.phantazmCommons)
+    api(projects.phantazmMessaging)
     api(libs.ethylene.core)
     api(libs.ethylene.mapper)
     api(libs.commons.lang3)

@@ -244,7 +244,6 @@ public final class PhantazmServer {
         LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
         ChatFeature.initialize(global, viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
                 MinecraftServer.getCommandManager());
-        MessagingFeature.initialize(global);
         CommandFeature.initialize(MinecraftServer.getCommandManager(), routerStore, viewProvider,
                 LobbyFeature.getFallback());
 

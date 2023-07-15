@@ -1,4 +1,4 @@
-package org.phantazm.server.packet;
+package org.phantazm.core.packet;
 
 import net.minestom.server.utils.binary.BinaryReader;
 import net.minestom.server.utils.binary.BinaryWriter;

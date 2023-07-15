@@ -7,37 +7,25 @@ import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.loader.ConfigLoader;
 import com.github.steanky.ethylene.core.loader.SyncFileConfigLoader;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
-import org.phantazm.messaging.packet.PacketHandler;
-import org.phantazm.messaging.serialization.DataReader;
-import org.phantazm.messaging.serialization.DataWriter;
-import org.phantazm.messaging.serialization.PacketSerializer;
-import org.phantazm.messaging.serialization.PacketSerializers;
 import org.phantazm.zombies.autosplits.config.ZombiesAutoSplitsConfig;
 import org.phantazm.zombies.autosplits.config.ZombiesAutoSplitsConfigProcessor;
 import org.phantazm.zombies.autosplits.event.ClientSoundCallback;
-import org.phantazm.zombies.autosplits.messaging.PhantazmMessagingHandler;
-import org.phantazm.zombies.autosplits.packet.PacketByteBufDataReader;
-import org.phantazm.zombies.autosplits.packet.PacketByteBufDataWriter;
-import org.phantazm.zombies.autosplits.packet.PhantazmPacket;
+import org.phantazm.zombies.autosplits.packet.RoundStartPacketWrapper;
 import org.phantazm.zombies.autosplits.render.RenderTimeHandler;
 import org.phantazm.zombies.autosplits.sound.AutoSplitSoundInterceptor;
-import org.phantazm.zombies.autosplits.splitter.CompositeSplitter;
 import org.phantazm.zombies.autosplits.splitter.AutoSplitSplitter;
+import org.phantazm.zombies.autosplits.splitter.CompositeSplitter;
 import org.phantazm.zombies.autosplits.splitter.internal.InternalSplitter;
 import org.phantazm.zombies.autosplits.splitter.socket.LiveSplitSocketSplitter;
 import org.phantazm.zombies.autosplits.tick.KeyInputHandler;
@@ -49,8 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.concurrent.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ZombiesAutoSplitsClient implements ClientModInitializer {
 
@@ -199,14 +185,8 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
     }
 
     private void initPackets() {
-        Supplier<DataWriter> writerCreator = () -> new PacketByteBufDataWriter(PacketByteBufs.create());
-        Function<byte[], DataReader> readerCreator =
-                data -> new PacketByteBufDataReader(new PacketByteBuf(Unpooled.wrappedBuffer(data)));
-        PacketSerializer packetSerializer = PacketSerializers.clientToServerSerializer(writerCreator, readerCreator);
-        PacketHandler<PacketSender> clientToServerHandler =
-                new PhantazmMessagingHandler(packetSerializer, PhantazmPacket.TYPE.getId(), compositeSplitter);
-        ClientPlayNetworking.registerGlobalReceiver(PhantazmPacket.TYPE, (packet, player, responseSender) -> {
-            clientToServerHandler.handleData(responseSender, packet.data());
+        ClientPlayNetworking.registerGlobalReceiver(RoundStartPacketWrapper.TYPE, (packet, player, responseSender) -> {
+            compositeSplitter.split();
         });
     }
 

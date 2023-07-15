@@ -1,5 +1,6 @@
 package org.phantazm.zombies.autosplits.packet;
 
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.messaging.serialization.DataWriter;
@@ -22,6 +23,10 @@ public class PacketByteBufDataWriter implements DataWriter {
         this.packetByteBuf = Objects.requireNonNull(packetByteBuf, "packetByteBuf");
     }
 
+    public PacketByteBufDataWriter() {
+        this(PacketByteBufs.create());
+    }
+
     @Override
     public void writeByte(byte data) {
         packetByteBuf.writeByte(data);
@@ -35,5 +40,9 @@ public class PacketByteBufDataWriter implements DataWriter {
     @Override
     public byte @NotNull [] toByteArray() {
         return packetByteBuf.array();
+    }
+
+    public @NotNull PacketByteBuf getBuf() {
+        return packetByteBuf;
     }
 }

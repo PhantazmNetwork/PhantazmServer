@@ -1,6 +1,8 @@
-package org.phantazm.messaging.packet.c2p;
+package org.phantazm.messaging.packet.proxy;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.messaging.packet.Packet;
 import org.phantazm.messaging.serialization.DataReader;
 import org.phantazm.messaging.serialization.DataWriter;
@@ -14,10 +16,7 @@ import java.util.Objects;
  */
 public record MapDataVersionResponsePacket(int version) implements Packet {
 
-    /**
-     * The ID of the {@link MapDataVersionResponsePacket}.
-     */
-    public static final byte ID = 1;
+    public static final Key ID = Key.key(Namespaces.PHANTAZM, "proxy/mapdata_version_response");
 
     public static @NotNull MapDataVersionResponsePacket read(@NotNull DataReader reader) {
         Objects.requireNonNull(reader, "reader");
@@ -25,7 +24,7 @@ public record MapDataVersionResponsePacket(int version) implements Packet {
     }
 
     @Override
-    public byte getId() {
+    public @NotNull Key getId() {
         return ID;
     }
 

@@ -9,21 +9,17 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Blocks malicious plugin messages from players that go through the plugin's proxy channel.
  */
 public class MaliciousPluginMessageBlocker {
 
-    private final ChannelIdentifier proxyIdentifier;
+    private final Set<? extends ChannelIdentifier> blockedIdentifiers;
 
-    /**
-     * Creates a {@link MaliciousPluginMessageBlocker}.
-     *
-     * @param channelIdentifier The {@link ChannelIdentifier} for the plugin's proxy2server channel
-     */
-    public MaliciousPluginMessageBlocker(@NotNull ChannelIdentifier channelIdentifier) {
-        this.proxyIdentifier = Objects.requireNonNull(channelIdentifier, "channelIdentifier");
+    public MaliciousPluginMessageBlocker(@NotNull Set<? extends ChannelIdentifier> blockedIdentifiers) {
+        this.blockedIdentifiers = Objects.requireNonNull(blockedIdentifiers, "blockedIdentifiers");
     }
 
     /**
@@ -33,8 +29,7 @@ public class MaliciousPluginMessageBlocker {
      */
     @Subscribe
     public void onPlayerMessage(PluginMessageEvent event) {
-        if (event.getIdentifier().getId().equals(proxyIdentifier.getId()) &&
-                event.getSource() instanceof Player player) {
+        if (blockedIdentifiers.contains(event.getIdentifier()) && event.getSource() instanceof Player player) {
             event.setResult(PluginMessageEvent.ForwardResult.handled());
             player.disconnect(Component.text("Malicious plugin message.", NamedTextColor.RED));
         }
