@@ -23,11 +23,11 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     protected final Instance instance;
     protected final SceneFallback fallback;
     protected final Point spawnPoint;
-    protected final Set<Player> ghosts;
+
+    private final Set<Player> ghosts;
+    private final StampedLock ghostLock;
 
     protected volatile boolean shutdown = false;
-
-    private final StampedLock ghostLock;
 
     public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback,
             @NotNull Point spawnPoint) {
@@ -95,7 +95,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         long writeStamp = ghostLock.writeLock();
         try {
             ghosts.add(player);
-            ghosts.removeIf(ghost -> !ghost.isOnline() || ghost.getInstance() != instance);
+            ghosts.removeIf(this::invalidGhost);
         }
         finally {
             ghostLock.unlockWrite(writeStamp);
@@ -119,16 +119,44 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         if (ghostLock.validate(optimisticRead)) {
             boolean result = ghosts.contains(player);
             if (ghostLock.validate(optimisticRead)) {
+                if (result && invalidGhost(player)) {
+                    cleanGhosts();
+                    return false;
+                }
+
                 return result;
             }
         }
 
         long readStamp = ghostLock.readLock();
         try {
-            return ghosts.contains(player);
+            if (!ghosts.contains(player)) {
+                return false;
+            }
         }
         finally {
             ghostLock.unlockRead(readStamp);
         }
+
+        if (invalidGhost(player)) {
+            cleanGhosts();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void cleanGhosts() {
+        long writeStamp = ghostLock.writeLock();
+        try {
+            ghosts.removeIf(this::invalidGhost);
+        }
+        finally {
+            ghostLock.unlockWrite(writeStamp);
+        }
+    }
+
+    private boolean invalidGhost(Player player) {
+        return !player.isOnline() || player.getInstance() != instance;
     }
 }
