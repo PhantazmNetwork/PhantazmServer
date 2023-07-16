@@ -140,8 +140,4 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     public void tick(long time) {
         this.npcHandler.tick(time);
     }
-
-    public @NotNull @UnmodifiableView Set<UUID> ghosts() {
-        return Collections.unmodifiableSet(super.ghosts);
-    }
 }

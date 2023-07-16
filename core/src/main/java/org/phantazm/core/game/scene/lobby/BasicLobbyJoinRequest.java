@@ -48,7 +48,7 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
                 else {
                     Instance oldInstance = player.getInstance();
                     player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player,
-                            newInstancePlayer -> !lobby.ghosts().contains(newInstancePlayer.getUuid())));
+                            newInstancePlayer -> !lobby.hasGhost(newInstancePlayer)));
                     futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
                 }
             });

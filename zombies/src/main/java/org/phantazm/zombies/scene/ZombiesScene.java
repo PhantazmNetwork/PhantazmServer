@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
-    private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
     private final ZombiesMap map;
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
     private final MapSettingsInfo mapSettingsInfo;
@@ -194,7 +193,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 });
             }
 
-            CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).whenComplete((ignored, error) -> {
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).whenComplete((ignored, error) -> {
                 for (int i = 0; i < futures.size(); i++) {
                     Pair<Player, Instance> pair = teleportedPlayers.get(i);
                     Player teleportedPlayer = pair.first();

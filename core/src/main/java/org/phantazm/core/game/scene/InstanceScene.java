@@ -11,6 +11,7 @@ import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
+import java.util.concurrent.locks.StampedLock;
 
 /**
  * Basic Scene which corresponds to a single {@link Instance} and {@link SceneFallback} to route players.
@@ -22,9 +23,11 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     protected final Instance instance;
     protected final SceneFallback fallback;
     protected final Point spawnPoint;
-    protected final Set<UUID> ghosts;
+    protected final Set<Player> ghosts;
 
     protected volatile boolean shutdown = false;
+
+    private final StampedLock ghostLock;
 
     public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback,
             @NotNull Point spawnPoint) {
@@ -32,7 +35,8 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         this.instance = Objects.requireNonNull(instance, "instance");
         this.fallback = Objects.requireNonNull(fallback, "fallback");
         this.spawnPoint = Objects.requireNonNull(spawnPoint, "spawnPoint");
-        this.ghosts = new HashSet<>();
+        this.ghosts = Collections.newSetFromMap(new WeakHashMap<>());
+        this.ghostLock = new StampedLock();
     }
 
     @Override
@@ -88,17 +92,18 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
             return false;
         }
 
-        synchronized (ghosts) {
-            ghosts.add(player.getUuid());
-            ghosts.removeIf(uuid -> {
-                Player ghost = MinecraftServer.getConnectionManager().getPlayer(uuid);
-                return ghost == null || ghost.getInstance() != instance;
-            });
+        long writeStamp = ghostLock.writeLock();
+        try {
+            ghosts.add(player);
+            ghosts.removeIf(ghost -> !ghost.isOnline() || ghost.getInstance() != instance);
+        }
+        finally {
+            ghostLock.unlockWrite(writeStamp);
         }
 
         player.setInstanceAddCallback(
                 () -> Utils.handleInstanceTransfer(oldInstance, instance, player, newInstancePlayer -> true,
-                        newInstancePlayer -> ghosts.contains(newInstancePlayer.getUuid())));
+                        this::hasGhost));
         player.setInstance(instance, spawnPoint).whenComplete((ignored, err) -> {
             if (err != null) {
                 player.setGameMode(GameMode.SPECTATOR);
@@ -106,5 +111,24 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         });
 
         return true;
+    }
+
+    @Override
+    public boolean hasGhost(@NotNull Player player) {
+        long optimisticRead = ghostLock.tryOptimisticRead();
+        if (ghostLock.validate(optimisticRead)) {
+            boolean result = ghosts.contains(player);
+            if (ghostLock.validate(optimisticRead)) {
+                return result;
+            }
+        }
+
+        long readStamp = ghostLock.readLock();
+        try {
+            return ghosts.contains(player);
+        }
+        finally {
+            ghostLock.unlockRead(readStamp);
+        }
     }
 }
