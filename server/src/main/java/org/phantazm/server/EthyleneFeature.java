@@ -76,7 +76,6 @@ public final class EthyleneFeature {
     @SuppressWarnings("unchecked")
     private static Signature<ItemStack> basicItemStack() {
         return Signature.builder(Token.ofClass(ItemStack.class), (ignored, args) -> {
-
                             ItemStack.Builder builder = ItemStack.builder(args.get(0));
                             String meta = args.get(3);
                             if (meta != null) {
@@ -90,7 +89,6 @@ public final class EthyleneFeature {
                             builder.displayName(args.get(1)).lore((List<? extends Component>)args.get(2));
                             return builder.build();
                         }, itemStack -> {
-
                             List<Object> list = new ArrayList<>(3);
                             list.add(itemStack.material());
                             list.add(itemStack.getDisplayName());

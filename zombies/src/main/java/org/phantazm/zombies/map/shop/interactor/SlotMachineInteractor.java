@@ -33,6 +33,7 @@ public class SlotMachineInteractor implements ShopInteractor {
     private final List<ShopInteractor> whileRollingInteractors;
     private final List<ShopInteractor> timeoutExpiredInteractors;
     private final List<ShopInteractor> itemClaimedInteractors;
+    private final List<ShopInteractor> endInteractors;
     private final Random random;
 
     //non-null in tick and interaction methods - set in initialize(Shop)
@@ -60,7 +61,7 @@ public class SlotMachineInteractor implements ShopInteractor {
             @NotNull @Child("while_rolling_interactors") List<ShopInteractor> whileRollingInteractors,
             @NotNull @Child("timeout_expired_interactors") List<ShopInteractor> timeoutExpiredInteractors,
             @NotNull @Child("item_claimed_interactors") List<ShopInteractor> itemClaimedInteractors,
-            @NotNull Random random) {
+            @NotNull @Child("end_interactors") List<ShopInteractor> endInteractors, @NotNull Random random) {
         this.data = data;
         this.tickFormatter = tickFormatter;
         this.delayFormula = delayFormula;
@@ -70,6 +71,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         this.whileRollingInteractors = whileRollingInteractors;
         this.timeoutExpiredInteractors = timeoutExpiredInteractors;
         this.itemClaimedInteractors = itemClaimedInteractors;
+        this.endInteractors = endInteractors;
         this.random = random;
     }
 
@@ -96,6 +98,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         initializeInteractors(whileRollingInteractors, shop);
         initializeInteractors(timeoutExpiredInteractors, shop);
         initializeInteractors(itemClaimedInteractors, shop);
+        initializeInteractors(endInteractors, shop);
 
         for (SlotMachineFrame frame : frames) {
             initializeInteractors(frame.interactors(), shop);
@@ -158,6 +161,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         tickInteractors(whileRollingInteractors, time);
         tickInteractors(timeoutExpiredInteractors, time);
         tickInteractors(itemClaimedInteractors, time);
+        tickInteractors(endInteractors, time);
 
         for (SlotMachineFrame frame : frames) {
             tickInteractors(frame.interactors(), time);
@@ -212,6 +216,10 @@ public class SlotMachineInteractor implements ShopInteractor {
     }
 
     private void reset() {
+        for (ShopInteractor interactor : endInteractors) {
+            interactor.handleInteraction(rollInteraction);
+        }
+
         if (item != null) {
             item.remove();
             item = null;
@@ -242,6 +250,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         item = new Entity(EntityType.ITEM);
         ItemEntityMeta meta = (ItemEntityMeta)item.getEntityMeta();
         meta.setItem(frame.getVisual());
+        meta.setHasNoGravity(true);
 
         item.setInstance(shop.instance(), shop.center().add(0, data.itemOffset, 0));
 
@@ -402,6 +411,7 @@ public class SlotMachineInteractor implements ShopInteractor {
                        @NotNull @ChildPath("mismatched_player_interactors") List<String> mismatchedPlayerInteractors,
                        @NotNull @ChildPath("while_rolling_interactors") List<String> whileRollingInteractors,
                        @NotNull @ChildPath("timeout_expired_interactors") List<String> timeoutExpiredInteractors,
-                       @NotNull @ChildPath("item_claimed_interactors") List<String> itemClaimedInteractors) {
+                       @NotNull @ChildPath("item_claimed_interactors") List<String> itemClaimedInteractors,
+                       @NotNull @ChildPath("end_interactors") List<String> endInteractors) {
     }
 }
